@@ -1,0 +1,48 @@
+{
+  "_doc": [
+    "KAPI 73 (K-DC, 22.09.2026) — /api/data TUKETICI ENVANTERI.",
+    "/api/data PIYASA VERISI yayinidir ve XU030'u (BIST 30 ENDEKSI, hisse DEGIL)",
+    "tasir: 217 kayit, 216'si hisse. Evrenin KANONIK listesi /api/stocks/list",
+    "(app.py: BIST100 sabiti, t != 'XU030') ve /api/tarama (count=216).",
+    "Bu dosyada /api/data'yi fetch eden HER frontend dosyasi siniflandirilir.",
+    "  filtered = dosya kendi icinde endeks tickerlarini ELEMEK ZORUNDA",
+    "  keyed    = dosya ticker EVRENI URETMEZ, yalnizca ticker'a gore arama yapar",
+    "             (bu sinifta stocks -> ticker DIZISI uretmek YASAK)",
+    "Yeni bir dosya /api/data fetch etmeye baslarsa kapi FAIL verir: siniflandirma",
+    "bir insan karari olmali. Bayat girdi (artik fetch etmeyen dosya) de FAIL."
+  ],
+  "consumers": {
+    "templates/index.html": {
+      "mode": "filtered",
+      "reason": "ana sayfa vitrini tum evreni listeler (satir ~807 XU030/XU100 elenir)"
+    },
+    "templates/sektor_harita.html": {
+      "mode": "filtered",
+      "reason": "sektor dagilimi tum evreni sayar (satir ~681 XU030 elenir)"
+    },
+    "static/bp-search.js": {
+      "mode": "filtered",
+      "reason": "site geneli arama evreni — KANON kopya (satir ~168 XU030/XU100 elenir)"
+    },
+    "templates/hisse.html": {
+      "mode": "keyed",
+      "reason": "tek hisse detayi: payload'da kendi ticker'ini arar, liste uretmez"
+    },
+    "templates/portfolio.html": {
+      "mode": "keyed",
+      "reason": "kullanicinin girdigi pozisyonlar icin liveData[ticker] sozlugu kurar"
+    }
+  },
+  "route_guard_exempt": {
+    "stock_page": {
+      "ticket": "CPO-1783",
+      "reason": "/hisse/XU030 200 donuyor: endeks, tam donanimli HISSE sayfasi olarak yayinda (₺ ekli endeks puani, stop seviyesi, Portfoye ekle / Bildirim al). Route guard app.py mantigi = DEV1 alani.",
+      "measured": "22.09.2026 canli: /hisse/XU030 -> 200, self-canonical, robots noindex YOK"
+    },
+    "karsilastir": {
+      "ticket": "CPO-1783",
+      "reason": "/karsilastir?tickers=ASELS,XU030 -> 200, baslik 'ASELS, XU030 hisselerini ... karsilastirin'. noindex,follow oldugu icin SEO etkisi yok, metin yalani var.",
+      "measured": "22.09.2026 canli"
+    }
+  }
+}

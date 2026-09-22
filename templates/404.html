@@ -90,10 +90,25 @@
         if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
           opt.signal = AbortSignal.timeout(TICKER_TIMEOUT_MS);   // eski tarayicida zaman asimsiz devam
         }
-        return fetch('/api/data', opt).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-          // `loading === true` VEYA bos liste => liste HAZIR DEGIL. Bos diziyi
-          // "hazir liste" saymak "hisse bulunamadi" yalanini uretir.
-          if (!d || d.loading === true || !Array.isArray(d.stocks) || !d.stocks.length) return;
+        // 22.09 (K-DC) — KAYNAK DEGISTI: `/api/data` -> `/api/stocks/list`.
+        //  a) `/api/data` PIYASA VERISI yayinidir ve XU030'u (BIST 30 ENDEKSI,
+        //     hisse DEGIL) tasir. Bu sayfa ise "bu kod bir hisse mi?" sorusunu
+        //     yanitliyor. Olculdu (22.09 canli): /api/data 217 kayit, 216'si
+        //     hisse; kullanici 404'te "XU" yazinca "Bunu mu demek istediniz?"
+        //     kutusu ENDEKSI hisse gibi oneriyordu (-> /hisse/XU030, endeks
+        //     puanlarini "₺" ile ve stop seviyesiyle gosteren sayfa).
+        //     Ustelik ayni fonksiyon iki farkli evren donduruyordu: onbellek
+        //     yolu (bp-search.js kanonu) 216, fetch yolu 217.
+        //  b) `/api/stocks/list` evrenin KANONIK listesidir (app.py:11222,
+        //     `BIST100` sabitinden, `t != "XU030"`) -- /karsilastir
+        //     otomatik-tamamlamasi da bunu kullaniyor. Sabitten uretildigi icin
+        //     `loading` durumu YOK: soguk baslangic yarisi (yukarida 1. madde)
+        //     bir dal ile degil, YAPISAL olarak ortadan kalkiyor.
+        //  c) 289 KB -> 11,9 KB (~24x). 404, botlarin en cok vurdugu yuzey.
+        //  Asagidaki bos-liste korumasi savunma amacli duruyor (bos yanit yine
+        //  "liste YOK" demektir, "hisse bulunamadi" demek degil).
+        return fetch('/api/stocks/list', opt).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+          if (!d || !Array.isArray(d.stocks) || !d.stocks.length) return;
           var ts = d.stocks.map(function(s){ return s && s.ticker; }).filter(Boolean);
           if (ts.length) _tickers = ts;
         }).catch(function(err){ console.warn('404 ticker-list fetch failed:', err); });
