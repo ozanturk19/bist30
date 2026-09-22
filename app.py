@@ -10530,63 +10530,80 @@ def robots():
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 Disallow: /karsilastir?tickers=
 
 User-agent: Bingbot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 Disallow: /karsilastir?tickers=
 
 User-agent: Yandex
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 Disallow: /karsilastir?tickers=
 
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 Disallow: /karsilastir?tickers=
 
 User-agent: Slurp
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 Disallow: /karsilastir?tickers=
 
 # Reputation/security scanners — explicit allow
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /admin/
 
 User-agent: Twitterbot
 Allow: /
+Disallow: /admin/
 
 User-agent: LinkedInBot
 Allow: /
+Disallow: /admin/
 
 User-agent: WhatsApp
 Allow: /
+Disallow: /admin/
 
 User-agent: Applebot
 Allow: /
+Disallow: /admin/
 
 # AI crawlers — allow (we want indexing)
 User-agent: GPTBot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 # Default rule
+# NOT (K-CJ): REP (RFC 9309) bir tarayiciya YALNIZ en ozel eslesen grubu
+# uygulatir -- yukaridaki adli gruplar bu bloktan HICBIR kural miras ALMAZ.
+# Bu yuzden `Disallow: /admin/` her adli grupta AYRICA yazilidir.
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /karsilastir?tickers=
+Crawl-delay: 5
 
 # Aggressive scrapers — explicit deny
 User-agent: SemrushBot
@@ -10600,9 +10617,6 @@ Disallow: /
 
 User-agent: DotBot
 Disallow: /
-
-# Crawl-delay for politeness
-Crawl-delay: 5
 
 # Sitemaps
 Sitemap: https://borsapusula.com/sitemap.xml
@@ -10729,13 +10743,14 @@ def humans_txt():
     Language: Türkçe (TR)
     Doctype: HTML5
     Standards: HTML5, CSS3, ECMAScript 2022
-    Components: Lightweight Charts, Chart.js
+    Components: Lightweight Charts
     Software: Python (Flask), JavaScript (Vanilla), Cloudflare CDN
     Methodology: Algoritmik teknik analiz — Supertrend(10,3) + ADX(14) + EMA12/99
 
 /* MISSION */
     Türk yatırımcılarına şeffaf, ücretsiz, algoritmik BIST sinyal aracı sunmak.
-    Backtest ile her zaman doğrulanan, açık kaynaklı metodoloji.
+    Sinyal üretim kuralları /metodoloji sayfasında açıkça yayımlanır;
+    geçmiş performans gelecekteki getiriyi garanti etmez.
 """
     return Response(body, mimetype="text/plain", headers={
         "Cache-Control": "public, max-age=86400",
