@@ -8385,7 +8385,10 @@ def stock_page(ticker):
     _sector_pool = [] if sector == "Diğer" else SECTORS.get(sector, [])
 
     # Sektör karşılaştırma URL'i — aynı sektördeki ilk 2 peer ile
-    _sector_peers = [t for t in _sector_pool if t != ticker and t in BIST100][:2]
+    # CPO-1788 (b): related_stocks (aşağıda) XU030/XU100'ü zaten eliyor — burası
+    # elemiyordu (bugün zararsız, SECTORS hiçbir endeks ticker'ı içermiyor), ama
+    # aynı havuzun iki tüketicisi aynı filtreyi paylaşmalı (K-DD ailesiyle aynı sınıf).
+    _sector_peers = [t for t in _sector_pool if t != ticker and t in BIST100 and t not in INDEX_TICKERS][:2]
     compare_url = "/karsilastir?tickers=" + ",".join([ticker] + _sector_peers)
 
     # SEO: mevcut cache'ten temel sinyal verisini SSR için çek
