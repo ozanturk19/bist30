@@ -1,7 +1,7 @@
 # BorsaPusula — Ürün ve Tasarım Kanonu
 
 > **Canlı belge.** Ozan'ın onayladığı ürün kararlarının ve sitenin tasarım dilinin **tek kaynağı**.
-> Son güncelleme: **23.09.2026** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
+> Son güncelleme: **23.09.2026 17:00** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
 > Kural: yeni bir tasarım ya da ürün kararı önce taslak (mockup) olarak Ozan'a gider, onaydan sonra **önce bu belgeye**, sonra plana ve koda girer. CPO ve DEV1 ajanları dil kuralları ve tasarım dili için bu belgeyi okur.
 
 ---
@@ -59,6 +59,12 @@
   - Bugün 4 kategori: kârlılık, nakit akışı, borç durumu, değerleme ve büyüme.
   - v2'de 5 eksen: kalite, değerleme/ucuzluk, büyüme, bilanço sağlığı, temettü. Sektör şablonları banka, sigorta ve GYO için.
   - Çeşitlendirme araştırması: ops `plans/2026-09-23-denetim/temel-cesitlendirme.md`.
+- **Veri tanımları (23.09, `temel-cesitlendirme.md` ile KAP'a karşı doğrulandı):**
+  - **Yıllık seriler tek alım gücüyle gösterilir.** Yahoo her yılı farklı yılın parasıyla verir (TMS 29 "yamalı seri"). Çok yıllı tutarlar TÜFE ile son Aralık TL'sine taşınır, grafikte etiketlenir ("Ara 2025 TL'si ile"). Muhasebe esası (TMS 29 / nominal banka-sigorta / TL'ye çevrilmiş döviz / USD-EUR raporlayan) her hisse için bilinir. Yamalı seriyle çok yıllı grafik ya da büyüme **gösterilmez**.
+  - **Büyüme** = yıllık reel değişim. Yahoo'nun `revenue_growth` alanı (tek çeyreğin nominal yıllık farkı) büyüme diye kullanılmaz.
+  - **Temettü verimi** = son 12 ayın gerçek ödemeleri / fiyat, etiketi "Temettü (son 12 ay)". Ödeme yoksa "Ödeme yok" yazılır. Yahoo'nun hazır oranı kullanılmaz; THYAO'da %2,28 gösteriyordu, oysa ödeme yok.
+  - **Net borç** kiralamalar dahil hesaplanır. Oranlar (marj, ROE, borç/özkaynak) tek dönem içinde hesaplandığı için yamadan etkilenmez; tutarlar ve yıllar arası değişimler etkilenir.
+  - Çeyrek serisinden yıllık toplam (TTM) ya da çeyreklik büyüme hesaplanmaz.
 - **Veri:** Yahoo (yfinance) + KAP (O19=B: şimdilik ücretsiz). Bilinen sınırlar:
   - 4-5 yıl ve 5-7 çeyrek derinlik.
   - TMS 29 (enflasyon muhasebesi) farkları.
@@ -142,7 +148,7 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
     2. **Fiyatı makul mü?** Cevap "Ucuz tarafta / Makul / Pahalı tarafta / Karışık". F/K ve PD/DD, sektör (akran <3 ise BIST) medyanıyla. Analist hedef satırı nötr. Para birimi notu (USD raporlayan).
     3. **Trend destekliyor mu?** Cevap "Evet · N gündür / Henüz değil · Yatay / Hayır · Trend Bozuldu". Teknik hüküm cümlesi, 4 koşul listesi (✓ / –), trend dönüş seviyesi satırı.
 - **Skor halkası:** iz #26262c, yuvarlak uçlu yay, ortada sayı (Bricolage).
-- **Temel hap bilgi (başlık):** 4 küçük kutu (etiket + değer), kimlik renksiz.
+- **Temel hap bilgi (başlık):** 4 küçük kutu (etiket + değer), kimlik renksiz: Piyasa değeri · Özsermaye kârlılığı · Net kâr marjı · Temettü (son 12 ay).
 - **Alan grafiği:** 1A / 3A / 1Y. Son nokta başlık fiyatına eşit (tek fiyat kaynağı). Başlangıç kesikli çizgisi, dokununca tarih ve fiyat.
 - **BIST100 ısı haritası** (C-M5 onaylı; O16d=A, O20=A):
   - Kutu alanı = piyasa değeri (pay adedi × kapanış; sanity bandı 0,8–1,25). Hisseler KAP sektör kümelerinde (squarified treemap).
