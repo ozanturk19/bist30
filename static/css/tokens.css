@@ -608,7 +608,9 @@ body {
      Yani 21 şablon Space Grotesk'i beyan edip yüklemiyor, sessizce
      system-ui'ye düşüyor. S1b kararı bu tabloya göre verilmeli. */
   --bp-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-                  'Liberation Mono', monospace;
+                  'Liberation Mono', system-ui, monospace;
+  /* C-01 (23.09): system-ui, ₺ gibi mono fontlarda olmayan glifler için
+     Helvetica/Courier yerine sistem arayüz fontuna düşüş sağlar. */
 
 }
 
