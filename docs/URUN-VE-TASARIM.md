@@ -18,7 +18,7 @@
 ## 2. Kalıcı dil kuralları
 
 1. **AL / SAT yazılmaz.** Durumlar: **Güçlü Trend** · **Yatay** · **Trend Bozuldu**.
-2. **Teknik hedef dili yok:** TP1/TP2, "kâr al", "Hedef:" satırı, risk/ödül (R/R), "hedefe ulaştı", "prim potansiyeli".
+2. **Teknik hedef dili yok:** TP1/TP2, "kâr al", "Hedef:" satırı, risk/ödül (R/R), "hedefe ulaştı", "prim potansiyeli". **İşlem yönetimi dili de yok** (CPO 23.09, O10'un devamı): "stop bölgesi", "stop seviyesi", "ideal giriş", "giriş bölgesi" yazılmaz; her durumda betimleyici "Trend dönüş seviyesi (Supertrend): X ₺ · fiyatın %Y altında/üstünde" kullanılır (3 Soruda Q3 tarifiyle aynı).
    - **İstisna:** analist hedef fiyatı bir değerleme göstergesidir ve kalır: "Analist hedef ortalaması X ₺ · fiyatın %Y üstünde · N analist". "Potansiyel" kelimesi ve "al" yeşili kullanılmaz; başlıkta (hero) gösterilmez.
 3. **Long-only:** düşüşteki hisse "sat" demez, **sessizleşir**: soluk ton, katlanmış grup, kırmızı yok.
 4. **Şirkete yargı değil, betim** (Ozan, 23.09): şirkete "Orta / Zayıf / sağlam değil" gibi etiket yazılmaz. Alan bazında betimlenir: "Nakit akışı güçlü, kârlılık zayıf". Skorlar sayı olarak yazılır: "57 / 100".
