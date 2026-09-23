@@ -15,7 +15,19 @@ import stat
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _TOOLS_DIR = os.path.join(_REPO_ROOT, "tools")
 _SCRIPT = os.path.join(_TOOLS_DIR, "pre_deploy_visual_check.py")
-_HOOK = os.path.join(_REPO_ROOT, ".git", "hooks", "pre-push")
+def _git_common_dir():
+    """Worktree'de `.git` bir dosyadır; kancalar ortak git dizinindedir (23.09, K-03 worktree ayrımı)."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=_REPO_ROOT,
+                             capture_output=True, text=True, timeout=5).stdout.strip()
+        if out:
+            return out if os.path.isabs(out) else os.path.join(_REPO_ROOT, out)
+    except Exception:
+        pass
+    return os.path.join(_REPO_ROOT, ".git")
+
+
+_HOOK = os.path.join(_git_common_dir(), "hooks", "pre-push")
 _VENV_PYTHON = sys.executable
 
 
