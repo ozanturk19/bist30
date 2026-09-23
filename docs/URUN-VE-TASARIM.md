@@ -233,6 +233,7 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | **Temel sekmesi v2 + Keşfet listeleri** (karar bekliyor) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e + O22 bekliyor, son tarih 27.09 12:00 |
 | **Tarama v2** (karar bekliyor) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c bekliyor, son tarih 27.09 12:00 |
 | **Haberler** (karar bekliyor) | https://claude.ai/artifact/45h9DvBjYLPSEm4Ct2apLE | `plans/mockups/haberler.html` (+ `build_haberler.py`, `haberler_data.json`; iç kaynak listesi `haberler_gundem_kaynaklari_ic.md`) | O16f bekliyor, son tarih 28.09 12:00 |
+| **Takip** (karar bekliyor) | https://claude.ai/artifact/9u3m9ABRTcLiYUwVmCnnKX | `plans/mockups/takip.html` (+ `takip_data.json`, `build_takip_data.py`) | O16g bekliyor, son tarih 28.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
