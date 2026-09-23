@@ -1,7 +1,7 @@
 # BorsaPusula — Ürün ve Tasarım Kanonu
 
 > **Canlı belge.** Ozan'ın onayladığı ürün kararlarının ve sitenin tasarım dilinin **tek kaynağı**.
-> Son güncelleme: **23.09.2026 18:00** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
+> Son güncelleme: **23.09.2026 22:00** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
 > Kural: yeni bir tasarım ya da ürün kararı önce taslak (mockup) olarak Ozan'a gider, onaydan sonra **önce bu belgeye**, sonra plana ve koda girer. CPO ve DEV1 ajanları dil kuralları ve tasarım dili için bu belgeyi okur.
 
 ---
@@ -9,9 +9,9 @@
 ## 1. Ürün yönü
 
 - **Ana değer (Ozan, 23.09):** orta-uzun vadede yatırım yapılabilir şirketleri analiz etmek ve öne çıkarmak. Temel analiz ana eksendir; teknik trend **zamanlama** rolündedir.
-- **Tek cümle:** "Her akşam BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Ücretsiz."
+- **Tek cümle:** "Her akşam BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?" Ana sayfa başlığı: **"Üç soruda BIST."** (O21).
 - **Üç soru** (her hisse için): **Finansalları nasıl?** · **Fiyatı makul mü?** · **Trend destekliyor mu?** Hisse sayfasındaki özet kartının adı **"3 Soruda {HİSSE}"**.
-- **Ürün tipi:** ücretsiz, gün sonu (EOD). Gün içi canlılık yalnız makro şeritte (seansta 60 sn).
+- **Ürün tipi:** gün sonu (EOD). Sitede "ücretsiz" yazılmaz; ileride bazı analizler ücretli olabilir (Ozan). Gün içi canlılık makro şeritte (seansta 60 sn) ve ana sayfadaki "Seans içi · 15 dk gecikmeli" satırında.
 - **Kapsam:** kademeli olarak Borsa İstanbul'daki tüm paylar (BIST TÜM, 584): önce BIST100'ün tamamı, sonra Yıldız Pazar, sonra kalanı. Gözaltı, Yakın İzleme ve Piyasa Öncesi İşlem Platformu'ndaki paylar kapsam dışı. Verisi yetersiz olan hisse "Sınırlı veri" etiketiyle gösterilir, listelere girmez.
 - **Rakiplere göre konum** (23.09 incelemesi: Fintables, Midas, borsafolio, borsamix, borsacoo…): ücretsiz; Data-Art görsel kimliği; long-only ve tavsiye/hedef dili olmayan dürüst anlatım; sektör gruplu gerçek bir BIST100 ısı haritası (Türk rakiplerde yok); haberin site içinde, bizim verimizle okunması.
 
@@ -28,6 +28,8 @@
    - Gün sonu ürünü "canlı" demez.
    - Gecikmeli veri "15 dk gecikmeli" diye yazılır.
    - Bayat veri görünür uyarıyla verilir: "Son veri 11.09 · güncellenmiyor" + sade neden.
+   - **Göreli zaman yok** (Ozan, 23.09): gün sonu verisinin etiketinde "bugün / dün / günün" yazılmaz. Kesin tarih ("22 Eylül kapanışı") ya da "son seans" yazılır, çünkü veri ertesi gün de aynı görünür.
+   - **"Ücretsiz" yazılmaz** (Ozan, 23.09): amatör durur.
 8. **Kaynak etiketi yok** (Ozan, 23.09): sitede rakamların ve haberlerin yanına kaynak yazılmaz. Doğruluk içeride sağlanır: KAP doğrulama kontrolü ve kaynak izi.
 9. **Terimler:**
    - "Trend dönüş seviyesi (Supertrend)"
@@ -86,7 +88,7 @@
 
 ## 4. Bilgi mimarisi
 
-- **Menü (O17=A):** Bugün · Keşfet · Haberler · Takip · Öğren (+ arama). Masaüstü ile mobil aynı.
+- **Menü (O17=A; "Bugün" → "Piyasa", göreli zaman kuralı):** Piyasa · Keşfet · Haberler · Takip · Öğren (+ arama). Masaüstü ile mobil aynı.
 - **Hisse sayfası:** 4 sekme — Özet · Grafik · Temel · Haberler. Özet'in sırası (C-M1 v2):
   1. Başlık: kimlik (kod, ad, sektör) + fiyat + günlük değişim ve kapanış günü + **4 temel gösterge** (Piyasa değeri · Özsermaye kârlılığı · Net kâr marjı · Temettü verimi) + eylemler (Takip et · Paylaş · Karşılaştır) | 1A/3A/1Y alan grafiği. **Başlıkta teknik durum hapı yok.**
   2. Sekme şeridi (mobilde yapışkan).
@@ -96,11 +98,14 @@
   6. Tek feragat satırı.
 - **Ana sayfa blok sırası (C-M2 taslağı):**
   1. Canlı makro şerit ("BIST verisi 15 dk gecikmeli").
-  2. Kahraman: H1 önerisi **"Üç soruda BIST."** (O21 bekliyor) + tek cümle + 3 soru çipi + arama. Arkada gerçek BIST100 son 30 gün dalgası ve kapanış kutusu; sahte dalga yok.
+  2. Kahraman: H1 **"Üç soruda BIST."** (O21=A) + tek cümle + 3 soru çipi + arama.
+     - Arkada gerçek BIST100 son 30 gün dalgası: yükseliş/düşüş günleri alanda hafif yeşil/kırmızı. Kapanış kutusunda gün sonu değeri.
+     - Seans içinde kutunun altında "Seans içi · 15 dk gecikmeli: BIST100 … BIST30 …" satırı; seans dışında gizli.
+     - Sahte dalga yok.
   3. Tüm kapsamın durum şeridi (her çizgi bir hisse; yeşil / arduvaz / koyu).
   4. Güçlü Trend kartları: gün sayısı + BP halkası + "Finansallar" betimi.
   5. **BIST100 ısı haritası.**
-  6. Günün hareketlileri 5+5 (tavan/taban etiketi).
+  6. Son seansın hareketlileri 5+5 (tavan/taban etiketi).
   7. Öne çıkan şirketler: yazılı kural, 3 soru sütunu.
   8. Haberler: Günün Gündemi + şirket haberleri.
   9. Akşam Bülteni aboneliği.
@@ -247,6 +252,7 @@ Taslak kodu bu depoya girmez: taslaklar ops deposunda durur, uygulama bu belgeye
 | O16 | 23.09 | Amiral sayfalar önce taslak. O16d ısı haritası A · O20 ilk renk Değişim · O16a hisse B (notlar §4, §5.6'ya işlendi). |
 | O16a notları | 23.09 | Başlıkta teknik durum yok, yerine temel bilgi. "Şirket sağlam mı?" → "Finansalları nasıl?"; yargı değil betim. Temel veriyi çeşitlendirme araştırması (3. tura). 3 Soruda'dan önce küçük temel hap bilgi. **Teknik koşullar tak-çıkar olmalı** (D-47). |
 | O18 | 23.09 | Kapsam kademeli BIST TÜM; riskli pazarlar hariç. |
+| O21 / O16b | 23.09 | Ana sayfa başlığı "Üç soruda BIST.". Taslak değişiklikle: endeks eğrisinde hafif yön tonları; göreli zaman yok (menü "Piyasa"); seans içi BIST100/BIST30 satırı; "Ücretsiz" yazılmaz. |
 | O19 | 23.09 | Şimdilik Yahoo + KAP; lisanslı sağlayıcı teklifi ve BIST fiyat lisansı Ozan'da. |
 
 ## 8. Bu belge nasıl güncellenir
