@@ -1,6 +1,6 @@
 # BorsaPusula — Kapsamlı Proje Dokümantasyonu
 
-> Son güncelleme: Nisan 2026  
+> Son güncelleme: Nisan 2026 (altyapı bölümleri) · **Ürün yönü ve tasarım: 23.09.2026 → [`docs/URUN-VE-TASARIM.md`](docs/URUN-VE-TASARIM.md)**  
 > Canlı URL: https://borsapusula.com  
 > VPS: Hetzner — 135.181.206.109
 
@@ -8,7 +8,9 @@
 
 ## 1. Proje Özeti
 
-BorsaPusula, BIST100 hisselerini **Supertrend + ADX + EMA12/99** algoritmasıyla analiz eden, günlük güncellenen, ücretsiz bir teknik analiz sinyal panelidir. Rakip olmayan niş: Türkçe · Algoritmik · Modern UI · Ücretsiz.
+**Güncel (23.09.2026, Ozan onaylı):** BorsaPusula, BIST şirketlerini her akşam **üç soruyla** puanlayan ücretsiz bir gün sonu sitesidir: *Finansalları nasıl? · Fiyatı makul mü? · Trend destekliyor mu?* Ana değer, orta-uzun vadede yatırım yapılabilir şirketleri analiz edip öne çıkarmaktır. Temel analiz ana eksendir; teknik trend (Supertrend + ADX + EMA12/99 + DI) zamanlama rolündedir. Dil kuralları (AL/SAT ve teknik hedef yok, long-only, şirkete yargı değil betim), Data-Art tasarım dili, logo, ısı haritası ve karar kaydının tamamı **[`docs/URUN-VE-TASARIM.md`](docs/URUN-VE-TASARIM.md)** belgesindedir; bu dosyanın ürün tanımıyla çelişen eski bölümlerinde o belge esastır.
+
+*Eski tanım (Nisan 2026):* BorsaPusula, BIST100 hisselerini **Supertrend + ADX + EMA12/99** algoritmasıyla analiz eden, günlük güncellenen, ücretsiz bir teknik analiz sinyal panelidir. Rakip olmayan niş: Türkçe · Algoritmik · Modern UI · Ücretsiz.
 
 ---
 
