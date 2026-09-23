@@ -113,31 +113,15 @@
     /* On tighter screens: shrink */
     + '@media (max-width:1100px){.bp-nav-item{padding:7px 10px;letter-spacing:0.4px;gap:4px}.bp-main-nav{gap:3px}}'
     + '@media (max-width:1000px){.bp-nav-item{padding:7px 8px;font-size:10.5px;gap:3px}}'
-    /* ── Header-right uniform actions: live time + refresh + search (all pages) ── */
+    /* ── Header-right uniform actions: EOD çipi + search (all pages) ── */
     + '.bp-header-right{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}'
-    /* CPO-1666 #6: yesil nabiz + "CANLI" etiketi EOD (gun-sonu) mimariyle
-       celisiyordu -- bu sadece yerel saat, veri tazeligiyle ilgisi yok.
-       Notr gri + sabit nokta (nabiz yok) + "Yerel Saat" metnine cevrildi. */
-    + '.bp-live-time{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
-    + '.bp-live-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
-    /* K-BL: etiket KALICI — rozetin ne oldugunu soyleyen tek sey bu. */
-    + '.bp-live-time-label{opacity:.75;font-weight:600;letter-spacing:.5px;margin-right:1px}'
-    + '.bp-live-time-sec{opacity:.55}'
-    + '.bp-refresh-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #6e6e7a;color:#c7c5cd;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;text-transform:uppercase;letter-spacing:0.4px;font-family:"Space Grotesk",system-ui,sans-serif;flex-shrink:0;line-height:1}'
-    + '.bp-refresh-btn:hover{background:rgba(184,195,255,0.08);border-color:#909097;color:#e5e1e4}'
-    + '.bp-refresh-btn.spinning svg{animation:bpRefreshSpin 0.8s linear infinite}'
-    + '@keyframes bpRefreshSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}'
-    + '.bp-refresh-btn svg{width:12px;height:12px;flex-shrink:0}'
-    /* K-BL: eski kural dar ekranda SAATI gizleyip etiketi birakiyordu (rozetin
-       tek isi saatti). Artik dusen sey saniye — "BIST 21:13" her genislikte
-       tam ve etiketli kalir. */
-    + '@media (max-width:768px){.bp-live-time{font-size:10px;padding:4px 7px}.bp-live-time .bp-live-time-sec{display:none}.bp-refresh-btn .bp-refresh-label{display:none}.bp-refresh-btn{padding:5px 8px}}'
-    + '@media (max-width:480px){.bp-live-time{display:none}}';
-    /* 15.09 fresh-ground-audit #3: CPO-1192'nin "Yenile pull-to-refresh'le çözülür" varsayımı
-       yanlıştı — sitede gerçek bir touch pull-to-refresh implementasyonu hiç yoktu, mobilde
-       (özellikle PWA/standalone modda, tarayıcı chrome'u olmadığı için native PTR de çalışmaz)
-       kullanıcının manuel yenileme yolu tamamen kapanıyordu. 768px altında zaten ikon-only
-       kompakt hale geliyor (satır 104); tamamen gizleme kuralı kaldırıldı. */
+    /* C-03: EOD çipi — eski saat rozetinin nötr gri dili korunur. */
+    + '.bp-eod-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
+    + '.bp-eod-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
+    + '@media (max-width:768px){.bp-eod-chip{font-size:10px;padding:4px 7px}}'
+    + '@media (max-width:480px){.bp-eod-chip{display:none!important}}';
+    /* C-03: Yenile düğmesi kalktı — veri günde bir (EOD) değişir, sayfa içi
+       yenileme yeni veri getirmez; tarayıcı yenilemesi yeterli. */
 
   // Inject CSS
   if (!document.getElementById('bp-search-css')) {
@@ -579,7 +563,7 @@
     document.querySelectorAll('.bp-trend-strip').forEach(function(el){ el.remove(); });
   }
 
-  // ---- Header right actions: live time + refresh button (uniform across all pages) ----
+  // ---- Header right actions: EOD çipi + arama (uniform across all pages) ----
   function ensureHeaderRight() {
     var hdr = document.querySelector('header');
     if (!hdr) return;
@@ -594,44 +578,23 @@
     var wrapper = document.createElement('div');
     wrapper.className = 'bp-header-right';
 
-    // Live time
-    var liveTime = document.createElement('span');
-    liveTime.className = 'bp-live-time';
-    liveTime.id = 'bpLiveTime';
-    /* K-BL (21.09) — ETIKET ILK TICK'TE SILINIYORDU + SAAT CIHAZ SAAT DILIMINDEYDI.
-       CPO-1666 #6 bu rozeti "Yerel Saat" metnine cevirmisti ama o metin yalniz
-       ILK RENDER'IN placeholder'iydi: asagidaki tick() senkron calisip uzerine
-       "21:13:04" yaziyor, etiket kullaniciya HIC gorunmuyordu (canli olculdu,
-       21.09 21:13 — header'da ciplak "● 21:13:04"). Yani duzeltme OLUYDU.
-       Ikinci kusur: saat new Date().getHours() ile CIHAZIN saat diliminden
-       okunuyordu; site metinleri ise her yerde BIST saatini ("~18:00 TR",
-       metodoloji/hakkinda/yasal/hisse) esas aliyor. Yurt disindaki (veya saati
-       yanlis ayarli) bir kullanici kendi saatini seans saati sanardi.
-       Kanon: rozet BIST (Europe/Istanbul) saatini gosterir ve etiketi
-       KALICIDIR — saniye ayri span'da, dar ekranda o dusuyor, etiket kalmiyor
-       degil. */
-    liveTime.setAttribute('aria-label', 'Borsa Istanbul saati');
-    liveTime.innerHTML = '<span class="bp-live-dot"></span><span class="bp-live-time-label">BIST</span><span class="bp-live-time-text" id="bpLiveTimeText">--:--</span><span class="bp-live-time-sec" id="bpLiveTimeSec"></span>';
-    wrapper.appendChild(liveTime);
+    /* C-03 (24.09, EOD dürüstlüğü): burada saniyesi akan "BIST 21:13:04" saati
+       ve bir Yenile düğmesi vardı. Site gün sonu (EOD) verisiyle çalışıyor;
+       akan saniye ve Yenile, veri canlıymış izlenimi veriyordu. Yerine verinin
+       hangi günün kapanışı olduğunu söyleyen sabit çip geldi. Tarih
+       /api/data-quality `updated_at`'ten ("23.09.2026 18:14:35") okunur;
+       okunamazsa çip gizli kalır (tahmin edilmiş tarih basılmaz). */
+    var eodChip = document.createElement('span');
+    eodChip.className = 'bp-eod-chip';
+    eodChip.id = 'bpEodChip';
+    eodChip.style.display = 'none';
+    eodChip.innerHTML = '<span class="bp-eod-dot" aria-hidden="true"></span><span id="bpEodChipText"></span>';
+    wrapper.appendChild(eodChip);
 
     // Move/append search button into wrapper
     if (searchBtn) {
       wrapper.appendChild(searchBtn);
     }
-
-    // Refresh button
-    var refreshBtn = document.createElement('button');
-    refreshBtn.className = 'bp-refresh-btn';
-    refreshBtn.id = 'bpRefreshBtn';
-    refreshBtn.setAttribute('aria-label', 'Yenile');
-    refreshBtn.onclick = function() { window.bpSmartRefresh(); };
-    refreshBtn.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
-      '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>' +
-      '<path d="M21 3v5h-5"/>' +
-      '<path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>' +
-      '<path d="M8 16H3v5"/>' +
-      '</svg><span class="bp-refresh-label">Yenile</span>';
-    wrapper.appendChild(refreshBtn);
 
     // Replace existing or append
     if (existingRight) {
@@ -640,53 +603,18 @@
       hdr.appendChild(wrapper);
     }
 
-    // Tick live time every second
-    var tickEl = document.getElementById('bpLiveTimeText');
-    var secEl  = document.getElementById('bpLiveTimeSec');
-    /* BIST saati KANONU bp-format.js'tedir (bpTrClock) — ilk yazimda burada
-       ikinci bir Intl cagrisi acilmisti, K-BD kapisi onu "IKINCI-KANON" diye
-       reddetti (kapi hakliydi: ayni saat diliminin iki sahibi olamaz). Kanon
-       tasinip bp-format.js `bp-search.js` yukleyen 23 sablonun HEPSINE eklendi.
-       Kanon yuklenmemisse rozet GIZLENIR: yerel saati BIST saatiymis gibi
-       gostermek yalan olurdu. */
-    function tick() {
-      if (document.hidden) return;
-      var t = (typeof bpTrClock === 'function') ? bpTrClock() : null;
-      if (!t) { liveTime.style.display = 'none'; return; }
-      var p = t.split(':');
-      if (tickEl) tickEl.textContent = p[0] + ':' + p[1];
-      if (secEl)  secEl.textContent  = ':' + p[2];
-    }
-    tick();
-    setInterval(tick, 1000);
-    /* bughunt-12.09 (workflow bulgusu): 1sn interval hidden->visible geçişinde
-       teorik olarak kendi turuyla iyileşiyor ama tarayıcı arka-plan timer'ları
-       suspend ederse (macro bar/stale-banner'da tam da bu yüzden "sonsuza dek
-       Yükleniyor" oluyordu) bu rozet de aynı riski taşıyor — anında resume
-       garantisi için macro bar'la aynı desen eklendi. */
-    document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) tick();
-    });
+    fetch('/api/data-quality', {cache: 'no-store'})
+      .then(function(r) { return r.json(); })
+      .then(function(j) {
+        var m = /^(\d{2})\.(\d{2})\./.exec((j && j.updated_at) || '');
+        if (!m) return;
+        var label = m[1] + '.' + m[2] + ' kapanışı';
+        document.getElementById('bpEodChipText').textContent = label;
+        eodChip.setAttribute('aria-label', 'Veriler ' + label + ' ile günceldir');
+        eodChip.style.display = '';
+      })
+      .catch(function(e) { console.error('EOD cipi: data-quality okunamadi', e); });
   }
-
-  // Smart refresh — page-specific manualRefresh() if exists, else location.reload()
-  window.bpSmartRefresh = function() {
-    var btn = document.getElementById('bpRefreshBtn');
-    if (btn) btn.classList.add('spinning');
-    if (typeof window.manualRefresh === 'function') {
-      try {
-        var result = window.manualRefresh();
-        if (result && typeof result.catch === 'function') {
-          result.catch(function(e) { location.reload(); });
-        }
-      } catch (e) {
-        location.reload();
-      }
-      setTimeout(function(){ if (btn) btn.classList.remove('spinning'); }, 1500);
-    } else {
-      location.reload();
-    }
-  };
 
   // ---- Frontend error tracking — stealth bug detection ----
   function reportClientError(payload) {

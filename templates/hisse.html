@@ -2490,7 +2490,9 @@ function renderFreshness(f, dq, ageS, refreshing) {
   if (effDq === 'seans_disi_eksik') {
     color = 'var(--bp-stale)'; label = 'Veri gecikmeli';
   } else if (!f.market_open) {
-    color = 'var(--bp-text3)'; label = 'Piyasa kapalı';
+    /* C-03: hangi günün kapanışı olduğu söylenir. */
+    var _cd = (typeof bpFmtUpdateDate === 'function') ? bpFmtUpdateDate(age) : null;
+    color = 'var(--bp-text3)'; label = 'Piyasa kapalı' + (_cd ? ' · ' + _cd + ' kapanışı' : '');
   } else if (effDq === 'critical') {
     color = 'var(--bp-sat)'; label = 'Veri bayat';
   } else if (effDq === 'stale') {
@@ -4216,7 +4218,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=551896da" defer></script>
+<script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
 <script src="/static/learning-mode.js?v=aba50f5a" defer></script>

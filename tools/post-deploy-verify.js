@@ -547,41 +547,22 @@ const step = async (ad, fn) => {
      Fix oncesi rozet cihaz saatini bastigi icin NY saatini gosterirdi. */
   console.log('\n[4f] K-BL — BIST saati/gunu, cihaz saat diliminden BAGIMSIZ');
   {
-    await step('K-BL rozet: etiket kalici + BIST saati', async () => {
-      const c = await b.newContext({ locale: 'tr-TR', timezoneId: 'America/New_York',
-                                     viewport: { width: 1280, height: 900 } });
+    /* C-03 (24.09): saniyeli BIST saati + Yenile kalktı; yerine "<GG.AA> kapanışı"
+       çipi. Tarih /api/data-quality updated_at ile birebir olmalı. */
+    await step('C-03 başlık: EOD çipi, saat/Yenile yok', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
       const pg = await c.newPage();
       await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
       await pg.waitForTimeout(2500);
-      /* ⛔ Etiket/saat/saniye AYRI dugumlerdir; aralarindaki bosluk flex `gap`
-         ile cizilir, metinde YOKTUR -- `wrap.textContent` "BIST21:30:49" verir
-         ve "^BIST\b" gibi bir sinir buna TAKILMAZ. Her dugum kendi selektoru
-         ile okunur (adimin ilk yazimi tam bu yuzden sahte-negatif uretti). */
-      const m = await pg.evaluate(() => {
-        const w = document.getElementById('bpLiveTime');
-        const l = document.querySelector('.bp-live-time-label');
-        const t = document.getElementById('bpLiveTimeText');
-        const sc = document.getElementById('bpLiveTimeSec');
-        return {
-          label: l ? l.textContent.trim() : '(yok)',
-          aria: w ? w.getAttribute('aria-label') : null,
-          shown: t ? t.textContent.trim() : '(yok)',
-          sec: sc ? sc.textContent.trim() : '(yok)',
-          labelVisible: l ? getComputedStyle(l).display !== 'none' : false,
-          deviceHH: String(new Date().getHours()).padStart(2, '0'),
-          canonHH: (typeof bpTrClock === 'function' ? bpTrClock() : '??:??:??').slice(0, 2),
-        };
+      const m = await pg.evaluate(async () => {
+        const t = document.getElementById('bpEodChipText');
+        const j = await fetch('/api/data-quality').then(r => r.json()).catch(() => ({}));
+        return { chip: t ? t.textContent.trim() : '(yok)', upd: j.updated_at || '',
+                 clock: !!document.getElementById('bpLiveTime'), refresh: !!document.getElementById('bpRefreshBtn') };
       });
-      /* Etiket ILK TICK'TE SILINMEMELI (fix oncesi "Yerel Saat" placeholder'i
-         hemen uzerine yazilir, rozet etiketsiz kalirdi). */
-      if (m.label !== 'BIST' || !m.labelVisible) return bad('K-BL rozet etiketi', m.label + ' (gorunur=' + m.labelVisible + ')');
-      if (!/^\d{2}:\d{2}$/.test(m.shown)) return bad('K-BL rozet saat bicimi', m.shown);
-      if (!/^:\d{2}$/.test(m.sec)) return bad('K-BL rozet saniye bicimi', m.sec);
-      if (m.aria !== 'Borsa Istanbul saati') return bad('K-BL rozet aria-label', String(m.aria));
-      /* NY (TR-7) cihazda gosterilen saat CIHAZIN degil BIST'in olmali. */
-      if (m.shown.slice(0, 2) !== m.canonHH) return bad('K-BL rozet BIST saati degil', m.shown + ' vs kanon ' + m.canonHH);
-      if (m.shown.slice(0, 2) === m.deviceHH) return bad('K-BL ayristirici dusuk', 'cihaz saati BIST saatiyle ayni (TZ emulasyonu calismadi?)');
-      ok('K-BL rozet "BIST HH:MM" + BIST saati', 'cihaz(NY)=' + m.deviceHH + 'h, gosterilen=' + m.shown);
+      if (m.clock || m.refresh) return bad('C-03 eski saat/Yenile duruyor', JSON.stringify(m));
+      if (m.chip !== m.upd.slice(0, 5) + ' kapanışı') return bad('C-03 EOD çipi', m.chip + ' vs ' + m.upd);
+      ok('C-03 EOD çipi', m.chip);
       await c.close();
     });
 
