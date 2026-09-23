@@ -71,7 +71,13 @@
   - Muhasebe esası (TMS 29 / nominal banka-sigorta / TL'ye çevrilmiş döviz / USD-EUR raporlayan) her hisse için bilinir ve gösterilir.
   - **Temettü verimi** = son 12 ayın gerçek ödemeleri / fiyat, etiketi "Temettü (son 12 ay)". Ödeme yoksa "Ödeme yok" yazılır. Yahoo'nun hazır oranı kullanılmaz; THYAO'da %2,28 gösteriyordu, oysa ödeme yok.
   - **Net borç** kiralamalar dahil hesaplanır. Oranlar (marj, ROE, borç/özkaynak) tek dönem içinde hesaplandığı için yamadan etkilenmez; tutarlar ve yıllar arası değişimler etkilenir.
-  - Çeyrek serisinden yıllık toplam (TTM) ya da çeyreklik büyüme hesaplanmaz.
+  - Çeyrek serisinden yıllık toplam (TTM) ya da çeyreklik büyüme hesaplanmaz. **Çeyreklik değişim** yalnız o çeyreğin kendi raporundaki "3 aylık" cari/karşılaştırmalı sütunlarından okunur; dördüncü çeyrek ayrıca açıklanmadığı için yıllık rapordan türetilmez (yıllık − 9 ay iki raporun parasını karıştırır).
+  - **"Son 12 ay" kârı (O22, varsayılan B — Ozan cevabı bekleniyor, son tarih 27.09 12:00):** son yıllık rapordaki kâr + içinde bulunulan yılın son ara dönem raporunda açıklanan fark (cari dönem − geçen yılın aynı dönemi, ikisi aynı rapordan). F/K ve özsermaye kârlılığı bununla hesaplanır. Doğrulama (22.09): Tüpraş F/K son yıllık kârla 25,9, bu yöntemle 11,3 (piyasa 11,3); Garanti BBVA 5,1 → 4,7 (piyasa 4,7). O22=A seçilirse yalnız son yıllık kâr kullanılır ve yanına ara dönem değişimi yazılır.
+  - **PD/DD** = piyasa değeri ÷ son açıklanan (ara dönem dahil) ana ortaklık özkaynağı. **Değerleme bandı** = son beş yıl sonu değerleri (yıl sonu piyasa değeri ÷ o yılın raporu) + son kapanış + sektör ortancası (KAP sektörü, ≥5 şirket; banka ortancası 10 bankadan).
+  - **Değişim grafikleri** yalnız aynı muhasebe esasındaki yılları gösterir: TMS 29 uygulayan şirkette 2023 ve sonrası (2022 ve öncesi raporlar düzeltmesiz); bankada tüm yıllar nominal ("nominal TL" birim notu). Marj ve özsermaye kârlılığı gibi oranlar yıllar boyunca gösterilir; son ara dönem ayrı, kesikli bir noktadır.
+  - **Sağlamlık kontrolü:** sanayide Piotroski F-Skor'un 9 maddesi (son yıllık raporun iki sütunu); bankada 5 madde (net kâr > 0, özsermaye kârlılığı banka ortancasının üstünde, kredi/mevduat ≤ %100, özkaynak büyümesi ≥ varlık büyümesi, gider/gelir ≤ %40; takipteki kredi oranı rapor dipnotundan eklenecek). Madde "geçti / geçmedi" gösterilir, iki yılın değeriyle.
+  - **Temettü geçmişi:** hisse başına brüt ödeme, ödendiği yılın parasıyla, bugünkü pay adedine göre (bedelsiz sonrası düzeltilmiş); açıklanmış ama ödenmemiş taksit son 12 ay verimine girmez.
+  - **KAP okuma notu (23.09):** banka bilançoları 6 sütunlu (TP/YP/Toplam × cari/önceki); ilk 4 sayıyı alan basit okuyucu yanlış sütun verir. Sütun başlığına göre okuyan ayrıştırıcı: ops `plans/2026-09-23-denetim/kanit/tc/frparse.py`.
 - **Veri:** Yahoo (yfinance) + KAP (O19=B: şimdilik ücretsiz). Bilinen sınırlar:
   - 4-5 yıl ve 5-7 çeyrek derinlik.
   - TMS 29 (enflasyon muhasebesi) farkları.
@@ -223,7 +229,9 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | BIST100 ısı haritası | https://claude.ai/artifact/XgdfkJQthV1iNrCzw5fMx4 | `plans/mockups/isi-haritasi.html` (+ `heatmap_data.json`, `build_heatmap_data.py`) | O16d A, O20 A (Değişim) |
 | Logo v2 | https://claude.ai/artifact/BnQg57WyCGg7X7LtgVJmMZ | `plans/mockups/logo-v2.html` | O7b A (Yumuşak Yıldız) |
 | Hisse Özet v2 | https://claude.ai/artifact/6Rx4X5tZFouMqN2bYUc1Qp | `plans/mockups/hisse-ozet.html` (+ `hisse_data.json`, `build_hisse_data.py`) | O16a B → notlarla v2 (23.09 16:2x) |
-| Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O16b + O21 (başlık "Üç soruda BIST." önerildi) bekliyor, son tarih 26.09 12:00 |
+| Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O21 A ("Üç soruda BIST."), O16b B → notlarla v2 (23.09 21:5x), v3 "Gündem" adı |
+| **Temel sekmesi v2 + Keşfet listeleri** (karar bekliyor) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e + O22 bekliyor, son tarih 27.09 12:00 |
+| **Tarama v2** (karar bekliyor) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c bekliyor, son tarih 27.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
