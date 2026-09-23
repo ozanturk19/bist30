@@ -22,6 +22,9 @@ import logging
 import time
 
 os.environ.setdefault("REFRESH_WORKER", "1")
+# 23.09 D-01a: macro süreci bildirim/digest/Gemini liderliğine YARIŞMAZ.
+# 10.09-23.09 arası bu kilitleri tutup sinyal maillerini ve Gemini özetlerini sessizce durdurdu.
+os.environ.setdefault("BP_ROLE", "macro")
 
 logging.basicConfig(
     level=logging.INFO,

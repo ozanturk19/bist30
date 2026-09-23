@@ -2211,6 +2211,8 @@ def _is_notify_leader():
     (REFRESH_WORKER=web) bu kilidi hiçbir zaman TALEP ETMESİN — flock'a hiç
     girmeden False dönsün, sadece REFRESH_WORKER=1 (veya legacy unset fallback)
     process'i yarışsın."""
+    if os.environ.get("BP_ROLE") == "macro":
+        return False
     if os.environ.get("REFRESH_WORKER", "") == "web":
         return False
     if _WS_AVAILABLE:
@@ -2297,6 +2299,8 @@ def _is_digest_leader():
 
     `_is_digest_leader_blocking()`'i gevent hub threadpool'a offload edip 10s
     tavan koyar. Timeout'ta False (non-leader) — güvenli varsayılan."""
+    if os.environ.get("BP_ROLE") == "macro":
+        return False
     if _WS_AVAILABLE:
         try:
             return _gevent.get_hub().threadpool.spawn(_is_digest_leader_blocking).get(timeout=10)
@@ -2337,6 +2341,8 @@ def _is_gemini_leader():
     deseni kullanıyordu, bu tek eksikti. `_is_gemini_leader_blocking()`'i
     gevent hub threadpool'a offload edip 10s tavan koyar. Timeout'ta False
     (non-leader) — güvenli varsayılan."""
+    if os.environ.get("BP_ROLE") == "macro":
+        return False
     if _WS_AVAILABLE:
         try:
             return _gevent.get_hub().threadpool.spawn(_is_gemini_leader_blocking).get(timeout=10)
