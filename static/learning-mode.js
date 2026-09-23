@@ -19,11 +19,9 @@
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',
     'ema': 'Üstel hareketli ortalama — son verilere daha çok ağırlık verir. EMA12 kısa, EMA99 uzun vadeyi temsil eder.',
-    'supertrend': 'Trend yönü ve dinamik stop seviyesi veren indikatör. Renk değiştirdiğinde sinyal döner.',
+    'supertrend': 'Trend yönünü ve trend dönüş seviyesini veren indikatör. Renk değiştirdiğinde sinyal döner.',
     'di+': 'Pozitif yön göstergesi — yukarı yönlü hareketin gücü.',
     'di-': 'Negatif yön göstergesi — aşağı yönlü hareketin gücü. DI+ üstündeyse trend aşağı.',
-    'stop loss': 'Pozisyondan çıkış yapılacak fiyat seviyesi. Risk yönetiminin temel taşı.',
-    'stop bölgesi': 'Sinyalin geçersiz sayılacağı, pozisyon çıkışına işaret eden fiyat aralığı.',
     /* K-CH (22.09): 'tier_score' anahtari SILINDI -- K-CA'daki 'rr_ratio' ile ayni
        sinif (sitede `data-term="tier_score"` YOK, hicbir element ulasamiyordu) ama
        tanimi ayrica UC kanon ihlali tasiyordu: (1) "Premium" 22.08'de emekli edildi

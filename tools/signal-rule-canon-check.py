@@ -66,8 +66,23 @@ SCAN_DIRS = ['templates', 'static']
 SCAN_FILES = ['blog_content.py', 'app.py']
 SCAN_EXT = ('.html', '.js', '.py')
 
+# --- C-60 (24.09): kalici dil kurallari (Ozan 23.09, kanon §2) -------------
+# "Ucretsiz" yazilmaz, veri kaynagi adi yazilmaz, LONG/SHORT yok, islem
+# yonetimi dili yok (Stop Loss, ideal giris, giris fiyati). Yalniz
+# yayimlanan HTML/JS metni (yorumlar soyulmus); .py kod dizeleri kapsam
+# disi (LONG/SHORT mantik degeri). Hukuki metin istisnasi: yasal, gizlilik.
+RE_BANNED = re.compile(
+    r'[Üü]cretsiz|ÜCRETSİZ|Yahoo|yfinance|\bLONG\b|\bSHORT\b|Stop Loss|'
+    r'[İi]deal Giriş(?! Penceresi)|Giriş fiyatı')
+# GECICI: RSI bolge adi "İdeal Giriş Penceresi" business_rules.derive_rsi_zone'dan
+# gelir ve kapi 16/47 onu /metodoloji'de arar -- backend adi degisince (D) kalkar.
+BANNED_EXEMPT = ('templates/yasal.html', 'templates/gizlilik.html')
+# JS mantik karsilastirmasi (ornek: z.indexOf('İdeal Giriş') -- kaynak
+# dizesini ESLER, yayimlamaz) muaf.
+RE_BANNED_LOGIC = re.compile(r"indexOf\('[^']*'\)")
+
 # --- kural beyani imzasi -----------------------------------------------------
-RE_ST = re.compile(r'Supertrend|\bST\s*=\s*(?:LONG|SHORT)', re.I)
+RE_ST = re.compile(r'Supertrend|\bST\s*(?:=\s*)?(?:LONG|SHORT|yukarı|aşağı)', re.I)
 RE_ADX_THR = re.compile(r'ADX\s*(?:\(14\))?\s*(?:&[lg]?t;|[>≥<])?\s*[≥>]=?\s*25'
                         r'|ADX\s*(?:\(14\))?\s*&gt;=?\s*25'
                         r'|ADX\s*(?:\(14\))?\s*≥\s*25', re.I)
@@ -202,6 +217,12 @@ def scan_text(rel, text):
             if cm and not RE_COUNT_OK.search(cm.group(0)):
                 bad.append((rel, ln + blk.count('\n', 0, cm.start()), 'R2',
                             'kosul sayimi yanlis: "%s" -- 4 kosul var' % cm.group(0).strip()))
+    if not rel.endswith('.py') and rel.replace(os.sep, '/') not in BANNED_EXEMPT:
+        for i, line in enumerate(text.split('\n'), 1):
+            m = RE_BANNED.search(RE_BANNED_LOGIC.sub('', line))
+            if m:
+                bad.append((rel, i, 'R3',
+                            'kalici dil kurali: "%s" yazilmaz (kanon §2)' % m.group(0)))
     return bad
 
 
@@ -232,9 +253,9 @@ def scan_tree(root):
 FIX = [
     # (ad, metin, beklenen_ihlal_sayisi)
     ("tam kural (4 kosul)",
-     "<p>Supertrend LONG + ADX ≥ 25 + DI+ &gt; DI− + EMA12 &gt; EMA99</p>", 0),
+     "<p>Supertrend yukarı + ADX ≥ 25 + DI+ &gt; DI− + EMA12 &gt; EMA99</p>", 0),
     ("DI eksik",
-     "<p>Supertrend LONG + ADX ≥ 25 + EMA12 &gt; EMA99</p>", 1),
+     "<p>Supertrend yukarı + ADX ≥ 25 + EMA12 &gt; EMA99</p>", 1),
     ("DI eksik + yanlis sayim",
      "<p>3 kriter: Supertrend, ADX ≥ 25, EMA12/EMA99</p>", 2),
     ("gosterge sayimi serbest",
@@ -248,7 +269,7 @@ FIX = [
     ("Jinja yorumu muaf",
      "{# Supertrend + ADX ≥ 25 + EMA12 #}\n<p>Merhaba</p>", 0),
     ("ayri bloklar birlesmez",
-     "<p>Supertrend LONG</p>\n<p>ADX ≥ 25</p>\n<p>EMA12 &gt; EMA99</p>", 0),
+     "<p>Supertrend yukarı</p>\n<p>ADX ≥ 25</p>\n<p>EMA12 &gt; EMA99</p>", 0),
     ("Jinja dali izole",
      "{% if x %}<p>Supertrend + ADX ≥ 25 + DI+ &gt; DI− + EMA12</p>"
      "{% else %}<p>Supertrend + ADX ≥ 25 + EMA12</p>{% endif %}", 1),
@@ -285,6 +306,13 @@ FIX = [
     ("liste bloğu butun kalir",
      "<ul><li>Supertrend</li><li>ADX ≥ 25</li><li>DI+ &gt; DI−</li>"
      "<li>EMA12 &gt; EMA99</li></ul>", 0),
+    ("C-60 Ucretsiz", "<p>Tamamen Ücretsiz</p>", 1),
+    ("C-60 kaynak adi", "<div>Veri kaynağı: Yahoo Finance</div>", 1),
+    ("C-60 LONG", "<li>ST LONG trendi</li>", 1),
+    ("C-60 Stop Loss", "<small>Stop Loss: alt bant</small>", 1),
+    ("C-60 ideal giris", "<h2>İdeal Giriş Noktası</h2>", 1),
+    ("C-60 yorum muaf", "<!-- yfinance Ücretsiz LONG -->", 0),
+    ("C-60 indexOf esleme muaf", "<script>if (z.indexOf('İdeal Giriş') === 0) x=1;</script>", 0),
 ]
 
 PY_FIX = [

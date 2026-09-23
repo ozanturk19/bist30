@@ -1628,7 +1628,7 @@ if python3 tools/signal-rule-canon-check.py; then
   echo "  ✓ signal-rule-canon-check PASS"
 else
   echo "  ✗ K-DK KIRIK: sinyal kuralini anlatan bir yuzey DI kosulunu atliyor ya da kosul sayimi yanlis."
-  echo "    Self-test:       python3 tools/signal-rule-canon-check.py --self-test  # 23/23 beklenir"
+  echo "    Self-test:       python3 tools/signal-rule-canon-check.py --self-test  # 30/30 beklenir"
   echo "    Pozitif kontrol: python3 tools/signal-rule-canon-check.py --ref a2fc59e  # 30 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi

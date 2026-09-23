@@ -54,7 +54,6 @@
     "templates/hisse.html": {
       "fields": [
         "entry_quality",
-        "optimal_entry",
         "tp1",
         "tp2",
         "rr_signal"

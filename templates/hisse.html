@@ -1,16 +1,16 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
   {% set _st = ticker ~ ' Trend Bozuldu — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
 {% elif ssr_signal %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali.' %}
 {% else %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Ücretsiz, günlük güncelleme.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Gün sonu güncelleme.' %}
 {% endif %}
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
@@ -36,7 +36,7 @@
   "@context": "https://schema.org",
   "@type": "FinancialProduct",
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
-  "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Günlük güncelleme, ücretsiz.",
+  "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Gün sonu güncelleme.",
   "url": "https://borsapusula.com/hisse/{{ ticker }}",{# K-DM: "Diğer" siniflandirilamayanlarin catch-all kovasi; makine-okunur
        bir kategori/anahtar-kelime olarak "Diğer hisseleri" bilgi tasimaz. #}{% if sector and sector != 'Diğer' %}
   "category": "{{ sector }}",{% endif %}
@@ -1541,7 +1541,7 @@
          2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
          adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
          o. "Stop" kelimesi yalnız AL + band altta iken. #}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— stop seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
     </dl>
     <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
   </div>
@@ -1637,7 +1637,7 @@
 <div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(var(--bp-art-violet-rgb),.05));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
     <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
-    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
+    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">E-posta aboneliği</div>
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
     <input id="hisseSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
@@ -2720,9 +2720,6 @@ function renderSummary(s, signalData) {
         eqBadgeEl.innerHTML = `<span class="eq-badge ${isSafe ? 'eq-safe' : 'eq-risky'}">${label}</span>`;
       }
       let noteHtml = signalData.entry_note ? `<span>${signalData.entry_note}</span>` : '';
-      if (signalData.optimal_entry && !isSafe) {
-        noteHtml += `<br><span style="margin-top:6px;display:inline-block">İdeal bölge: <strong style="color:var(--bp-text);font-variant-numeric:tabular-nums">${fmt(signalData.optimal_entry)} ₺</strong></span>`;
-      }
       // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
       if (signalData.earnings_warning) {
         const ew = signalData.earnings_warning;
@@ -2900,7 +2897,7 @@ function renderSummary(s, signalData) {
   // okunmalı — s.adx chart endpoint'inden gelir, günlerce geride kalabilir.
   const adxNum = (signalData && signalData.adx != null) ? signalData.adx : s.adx;
   const _IND_TOOLTIPS = {
-    'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik banda göre LONG mu SHORT mu olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
+    'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik bandın üzerinde mi altında mı olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
     'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX ≥ 25 güçlü trend, 18-25 orta, < 18 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
     'Vade Uyumu':  'EMA12 (12 günlük) ve EMA99 (99 günlük) hareketli ortalama karşılaştırılır. EMA12 > EMA99 kısa vadenin uzun vadenin üzerinde olduğunu — yani yükseliş eğilimini — gösterir. Örnek: Her iki EMA aynı yönde ise tüm vadeler uyumlu, sinyal güvenilirliği artar. "Kararsızlık bölgesi" notu: fark %0,15\'in altındaysa iki ortalama neredeyse çakışıyor demektir, sinyal sınıflandırmasını DEĞİŞTİRMEZ — sadece şeffaflık için gösterilir.',
   };
@@ -2938,7 +2935,7 @@ function renderSummary(s, signalData) {
     {
       label: 'Trend Yönü',
       detail: stBull ? '↑ Yükseliş' : stBear ? '↓ Düşüş' : '— Net değil',
-      techDetail: 'Supertrend(10,3): ' + (stBull ? 'LONG' : stBear ? 'SHORT' : 'NEUTRAL'),
+      techDetail: 'Supertrend(10,3): ' + (stBull ? 'Yukarı' : stBear ? 'Aşağı' : 'Yatay'),
       ok: s.signal === 'SAT' ? stBear : stBull,
       blog: '/blog/supertrend-indikatoru-nedir', blogLabel: 'Supertrend'
     },
@@ -4222,7 +4219,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=551896da" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/learning-mode.js?v=5c5e1748" defer></script>
+<script src="/static/learning-mode.js?v=aba50f5a" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri

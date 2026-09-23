@@ -100,8 +100,8 @@
 </div>
 
 <div class="formula-box da-panel da-panel--accent">
-Güçlü Trend  <span role="img" aria-label="anlamına gelir">→</span>  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
-Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
+Güçlü Trend  <span role="img" aria-label="anlamına gelir">→</span>  ST yukarı  AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
+Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşağı   AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
 <h2 id="supertrend">1. Supertrend Göstergesi</h2>
@@ -110,9 +110,9 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   Parametreler: <code>period=10, multiplier=3</code>.
 </p>
 <ul>
-  <li>Fiyat Supertrend bandının <strong>üzerinde</strong> <span role="img" aria-label="anlamına gelir">→</span> LONG (yükseliş) trendi</li>
-  <li>Fiyat Supertrend bandının <strong>altında</strong> <span role="img" aria-label="anlamına gelir">→</span> SHORT (düşüş) trendi</li>
-  <li>Band aynı zamanda dinamik bir <strong>Stop Loss</strong> seviyesi olarak kullanılır</li>
+  <li>Fiyat Supertrend bandının <strong>üzerinde</strong> <span role="img" aria-label="anlamına gelir">→</span> yükseliş trendi</li>
+  <li>Fiyat Supertrend bandının <strong>altında</strong> <span role="img" aria-label="anlamına gelir">→</span> düşüş trendi</li>
+  <li>Bandın seviyesi sitede <strong>Trend dönüş seviyesi (Supertrend)</strong> olarak gösterilir</li>
 </ul>
 <p>Fiyat bandı kırdığında sinyal değişir — hisse sayfasındaki sinyal rozeti ve Supertrend Seviyesi bu geçişi <strong>bir sonraki gün sonu turunda</strong> yansıtır (gün içi değil).</p>
 
@@ -196,13 +196,13 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </p>
 
 <div class="signal-box da-panel da-panel--accent al">
-  <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 4 koşul aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
-  <small class="bp-text-muted">Giriş fiyatı: Sinyalin oluştuğu günün kapanış fiyatı. Stop Loss: Supertrend alt bandı.</small>
+  <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 4 koşul aynı anda: ST yukarı + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
+  <small class="bp-text-muted">Sinyal fiyatı: sinyalin oluştuğu günün kapanışı. Trend dönüş seviyesi (Supertrend): alt bant.</small>
 </div>
 
 <div class="signal-box da-panel da-panel--accent sat">
-  <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 4 koşul aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
-  <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyalde somut giriş/hedef/stop seviyeleri gösterilmez, sadece pozisyon kapatma değerlendirmesi için bir uyarı niteliğindedir.</small>
+  <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 4 koşul aynı anda: ST aşağı + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
+  <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyal yükseliş trendinin bozulduğunu betimler.</small>
 </div>
 
 <h2 id="sinyal-gucu">Teknik Güç Skoru</h2>
@@ -215,7 +215,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   0-100 arası <strong>Teknik Güç Skoru</strong>, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>+hacim+teyit+RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir). Sinyalin <em>yönünü</em> değil, o yönün arkasındaki teknik teyidin <em>gücünü</em> ölçer.
 </p>
 <p style="font-family:var(--bp-font-mono);font-size:0.92em">
-  ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p) · AI haber duyarlılığı bu toplama sonradan ±5p ekler/çıkarır
+  ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p)
 </p>
 <p style="font-family:var(--bp-font-mono);font-size:0.92em">
   70+ → 💎 "Yüksek Skor" · 56–69 → "Orta Skor" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
@@ -223,39 +223,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 <p>
   Düşük likidite (20 günlük ort. hacim 5 Mn ₺ altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
   Skor'un hacim bileşeni <strong>Günlük Hacim Oranı</strong>dır (bugünkü hacim / 20 günlük ort.). Sayfalarda ayrıca gösterilen <strong>RVOL</strong> ise <strong>farklı bir sayıdır</strong> (5 günlük ort. / 20 günlük ort.) — ikisini karıştırmayın, aşağıdaki terim listesinde ayrı ayrı tanımlı.
-  Bu rozet, hacim teyidini gösteren <span aria-hidden="true">⭐</span> <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: <span aria-hidden="true">💎</span> skorun bandını, <span aria-hidden="true">⭐</span> hacmin teyidini söyler — ikisi de ücretsiz, ödeme/paket ile ilgisi yok.
-</p>
-
-{# K-CA (22.09): /hisse sayfasindaki iki "R/R" jargon-linki de bu sayfaya
-   geliyordu ama sayfada "Risk", "Ödül" ya da "R/R" kelimeleri HIC gecmiyordu
-   -- yani terim, tanimini vaat eden bir baglantinin ucunda tanimsizdi (ADX
-   linki `#adx` ankrasina gidiyor, bu ikisinin ankrasi bile yoktu). #}
-<h2 id="risk-odul">Risk / Ödül (R/R)</h2>
-<p>
-  <strong>R/R</strong>, göze alınan riskin karşılığında hedeflenen kazancın kaç katı
-  olduğunu söyler. <strong>1:2</strong> şöyle okunur: 1 birim risk alınıyorsa 2 birim
-  kazanç hedefleniyor. Yön iddiası <em>değildir</em>, sinyalin tutacağı anlamına da
-  gelmez — yalnızca hedef ile stop arasındaki <strong>mesafe oranıdır</strong>.
-</p>
-<p style="font-family:var(--bp-font-mono);font-size:0.92em">
-  R/R = (TP1 &minus; sinyal fiyatı) &divide; (sinyal fiyatı &minus; Supertrend seviyesi)
-</p>
-<p>
-  Sitede <strong>tek bir</strong> R/R gösterilir: <strong>sinyal başından</strong> ölçülen oran
-  (hisse sayfasındaki çubuk ve hemen altındaki sayı, gündem kartlarındaki &laquo;R/R&raquo;).
-  Hisse sayfasındaki <strong>TP1 / TP2</strong> rakamları ise <strong>şimdiki fiyattan</strong>
-  2 ve 3 birim risk yukarıda kurulur. Bu yüzden sinyal verildikten sonra fiyat
-  Supertrend seviyesinden uzaklaştıkça sinyal başından ölçülen R/R <em>büyür</em>,
-  yaklaştıkça <em>küçülür</em>: R/R sabit bir vaat değil, pozisyon yaşlandıkça değişen
-  bir ölçüdür. Çok yükselmiş bir R/R, &laquo;ödül büyüdü&raquo; demekten çok
-  &laquo;giriş fiyatı artık çok geride kaldı&raquo; demektir.
-</p>
-<p>
-  Trend Bozuldu sinyallerinde <strong>giriş kalitesi</strong>, hedef/stop yapısı ve R/R
-  gösterilmez — BIST'te bireysel yatırımcı genellikle açığa satamaz, bu rakamlar
-  uygulanamaz bir vaat olurdu. &laquo;Giriş kalitesi&raquo; sorusu (&laquo;şu an satın alınsa giriş ne
-  kadar uygun?&raquo;) yalnızca Güçlü Trend sinyalinde anlamlıdır; diğer sinyallerde
-  tarama tablosunda da, hisse kartlarında da &laquo;—&raquo; görürsünüz.
+  Bu rozet, hacim teyidini gösteren <span aria-hidden="true">⭐</span> <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: <span aria-hidden="true">💎</span> skorun bandını, <span aria-hidden="true">⭐</span> hacmin teyidini söyler.
 </p>
 
 <h2 id="terimler">Terimler — Karıştırılmaması Gerekenler</h2>
@@ -304,7 +272,6 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <div class="term-row">
     <dt><span aria-hidden="true">⭐</span> Hacim Onaylı</dt>
     <dd>Hacim teyidi de bulunan Güçlü Trend sinyalleri (Güçlü Trend <strong>ve</strong> RVOL ≥ 1,20).
-      <strong>Ücretli paketle ilgisi yoktur</strong>, tüm veriler ücretsizdir.
       <span class="term-where">Hisse sayfası, tarama filtresi ve listesi, sektör ısı haritası, karşılaştırma, bilanço/temettü takvimi</span></dd>
   </div>
   <div class="term-row">
@@ -317,7 +284,6 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 
 <h2>Veri Kaynağı</h2>
 <p>
-  Tüm fiyat verileri <strong>Yahoo Finance (yfinance)</strong> kütüphanesi aracılığıyla alınır.
   Günlük barlar (1d interval, 2 yıl geçmiş) kullanılır. Sinyal hesaplamaları tamamen Python/NumPy ile yapılır.
   Haftalık trend için haftalık barlar (1wk, 1 yıl) kullanılır.
 </p>
@@ -343,6 +309,6 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 <script src="/static/bp-format.js?v=dd31dd69"></script>
 <script src="/static/bp-search.js?v=551896da" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/learning-mode.js?v=5c5e1748" defer></script>
+<script src="/static/learning-mode.js?v=aba50f5a" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}
