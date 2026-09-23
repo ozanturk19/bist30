@@ -1,7 +1,7 @@
 # BorsaPusula — Ürün ve Tasarım Kanonu
 
 > **Canlı belge.** Ozan'ın onayladığı ürün kararlarının ve sitenin tasarım dilinin **tek kaynağı**.
-> Son güncelleme: **23.09.2026 17:00** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
+> Son güncelleme: **23.09.2026 17:15** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
 > Kural: yeni bir tasarım ya da ürün kararı önce taslak (mockup) olarak Ozan'a gider, onaydan sonra **önce bu belgeye**, sonra plana ve koda girer. CPO ve DEV1 ajanları dil kuralları ve tasarım dili için bu belgeyi okur.
 
 ---
@@ -60,8 +60,12 @@
   - v2'de 5 eksen: kalite, değerleme/ucuzluk, büyüme, bilanço sağlığı, temettü. Sektör şablonları banka, sigorta ve GYO için.
   - Çeşitlendirme araştırması: ops `plans/2026-09-23-denetim/temel-cesitlendirme.md`.
 - **Veri tanımları (23.09, `temel-cesitlendirme.md` ile KAP'a karşı doğrulandı):**
-  - **Yıllık seriler tek alım gücüyle gösterilir.** Yahoo her yılı farklı yılın parasıyla verir (TMS 29 "yamalı seri"). Çok yıllı tutarlar TÜFE ile son Aralık TL'sine taşınır, grafikte etiketlenir ("Ara 2025 TL'si ile"). Muhasebe esası (TMS 29 / nominal banka-sigorta / TL'ye çevrilmiş döviz / USD-EUR raporlayan) her hisse için bilinir. Yamalı seriyle çok yıllı grafik ya da büyüme **gösterilmez**.
-  - **Büyüme** = yıllık reel değişim. Yahoo'nun `revenue_growth` alanı (tek çeyreğin nominal yıllık farkı) büyüme diye kullanılmaz.
+  - **Açıklanan veri ilkesi (Ozan, 23.09): temel analiz yalnız şirketin açıkladığı gerçek rakamlarla yapılır.** Kaynak KAP'taki finansal raporlardır. Her rakam hangi rapordan geldiğiyle birlikte saklanır ve gösterilir ("2025 yıllık raporu"). **Kendi enflasyon/TÜFE düzeltmemizle rakam üretilmez.**
+  - **Neden?** Enflasyon muhasebesinde (TMS 29, 2023'ten beri) şirket her yıllık raporda önceki yılı yeni yılın parasıyla yeniden yazar. Aynı yıl iki raporda iki farklı rakamla yer alır (TBORG 2023 cirosu: 2023 raporunda 17,14, 2024 raporunda 24,75 mlr TL). Yahoo her yıl için en son yazılmış rakamı alır. Sütunlar farklı raporlardan, farklı birimlerle geldiği için aralarındaki fark büyüme değildir (TBORG 2024: Yahoo farkı +%59,4, şirketin kendi raporu +%21,8).
+  - **Büyüme** = şirketin aynı rapordaki cari yıl ile karşılaştırmalı yıl farkı, yani şirketin açıkladığı değişim. Her yılın değişimi o yılın kendi raporundan alınır. Farklı raporlardan gelen tutarlar tek seride birleştirilmez. Yahoo'nun `revenue_growth` alanı (tek çeyreğin nominal yıllık farkı) büyüme diye kullanılmaz.
+  - **Çok yıllı grafik:** her yıl için "şirketin açıkladığı yıllık değişim" çubuğu. Tutar olarak yalnız son raporun iki yılı yan yana gösterilir (aynı birim, raporun kendi birim başlığıyla).
+  - **Değerleme bandı:** yıl sonu piyasa değeri ÷ o yılın raporunda açıklanan özkaynak ya da net kâr. Aynı tarih, aynı birim; düzeltme yok.
+  - Muhasebe esası (TMS 29 / nominal banka-sigorta / TL'ye çevrilmiş döviz / USD-EUR raporlayan) her hisse için bilinir ve gösterilir.
   - **Temettü verimi** = son 12 ayın gerçek ödemeleri / fiyat, etiketi "Temettü (son 12 ay)". Ödeme yoksa "Ödeme yok" yazılır. Yahoo'nun hazır oranı kullanılmaz; THYAO'da %2,28 gösteriyordu, oysa ödeme yok.
   - **Net borç** kiralamalar dahil hesaplanır. Oranlar (marj, ROE, borç/özkaynak) tek dönem içinde hesaplandığı için yamadan etkilenmez; tutarlar ve yıllar arası değişimler etkilenir.
   - Çeyrek serisinden yıllık toplam (TTM) ya da çeyreklik büyüme hesaplanmaz.
