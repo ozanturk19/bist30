@@ -243,46 +243,37 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
   {
-    "slug": "stop-loss-nedir",
-    "title": "Stop Loss Nedir? Neden Hayati Önem Taşır?",
-    "desc": "Stop loss emri nedir, nasıl belirlenir, psikolojik hatalar nasıl önlenir? Risk yönetiminin temeli.",
+    "slug": "trend-donus-seviyesi-supertrend-nedir",
+    "title": "Trend Dönüş Seviyesi (Supertrend) Nedir?",
+    "desc": "Supertrend çizgisi fiyatın altında ya da üstünde nasıl konumlanır, ATR ile nasıl genişler ve çizginin diğer tarafına geçen fiyat neyi gösterir?",
     "date": "2026-04-06",
-    "mins": 5,
-    "cat": "Risk Yönetimi",
+    "mins": 4,
+    "cat": "Teknik Analiz",
     "body": """
-<p>Stop loss (zarar durdur emri), bir hissenin belirlenen fiyat seviyesinin altına düşmesi durumunda <strong>otomatik olarak pozisyonun kapatılması</strong> emridir. "Kaybetmeden önce çık" prensibidir.</p>
+<p>Bir trendin sürüp sürmediğini anlamak için fiyatın hangi seviyenin bir tarafında kaldığına bakılır. BorsaPusula'da bu seviye <strong>Trend dönüş seviyesi (Supertrend)</strong> olarak gösterilir: fiyat bu çizginin diğer tarafına geçtiğinde trend yönü değişmiş sayılır.</p>
 
-<h2>Neden Vazgeçilmez?</h2>
-<p>Pek çok yatırımcı zarar ettiğinde "düzelir" diye bekler. Bu bekleme süreci şöyle ilerler:</p>
-<ul>
-  <li>%10 zarar: "Biraz daha bekleyeyim"</li>
-  <li>%25 zarar: "Ortalama düşüreyim"</li>
-  <li>%50 zarar: "Çıksam yarı fiyatına sattım olur"</li>
-  <li>%80 zarar: "Artık ne önemi var..."</li>
-</ul>
-<p>Stop loss bu psikolojik tuzağa düşmekten korur. Küçük kayıpları keserek büyük kayıpların önüne geçer.</p>
+<h2>Çizgi Nasıl Hesaplanır?</h2>
+<p>Supertrend, fiyatın son dönemdeki ortalama oynaklığını ölçen <strong>ATR</strong> (Average True Range) üzerine kuruludur. Çizgi, fiyatın ATR'nin belirli bir katı kadar uzağında durur. Oynaklık artarsa çizgi fiyattan uzaklaşır, azalırsa yaklaşır. Böylece çizgi, hissenin kendi hareket genişliğine uyum sağlar.</p>
 
-<h2>Stop Loss Seviyeleri Nasıl Belirlenir?</h2>
+<h2>Çizgi Fiyatın Altındayken ve Üstündeyken</h2>
 <ul>
-  <li><strong>Supertrend Stop:</strong> BorsaPusula sisteminde Supertrend bandı dinamik stop loss olarak işlev görür.</li>
-  <li><strong>ATR Tabanlı Stop:</strong> Giriş fiyatı − (2 × ATR). Volatiliteye uyarlanmış stop.</li>
-  <li><strong>Destek Tabanlı Stop:</strong> En yakın güçlü destek seviyesinin hemen altı.</li>
-  <li><strong>Yüzde Tabanlı Stop:</strong> Giriş fiyatının %5–8 altı. Basit ama mekanik.</li>
+  <li><strong>Fiyatın altında:</strong> Yükseliş eğilimi sürüyor demektir. Fiyat yükseldikçe çizgi de yukarı doğru ilerler, ancak geri çekilmelerde geri inmez.</li>
+  <li><strong>Fiyatın üstünde:</strong> Düşüş eğilimi sürüyor demektir. Fiyat düştükçe çizgi de aşağı doğru ilerler.</li>
+  <li><strong>Fiyat çizginin diğer tarafına geçtiğinde:</strong> Supertrend'in trend yönü değişir. Bu tek başına bir sonuç değil, trendin dönmüş olabileceğine dair bir işarettir.</li>
 </ul>
 
-<h2>Pozisyon Büyüklüğü ile İlişkisi</h2>
-<p>Stop loss yalnızca "nerede çıkarım" sorusunu değil, "ne kadar girerim" sorusunu da yanıtlar. Kural: <strong>Tek işlemde portföyün %1–2'sinden fazla risk alma.</strong></p>
-<pre>Pozisyon Büyüklüğü = (Portföy × Risk%) ÷ (Giriş - Stop)
-Örnek: 100.000₺ portföy, %1 risk, 10₺ giriş, 9₺ stop
-→ (100.000 × 0,01) ÷ (10 - 9) = 1.000 lot</pre>
+<h2>Neden Tek Başına Yetmez?</h2>
+<p>Yatay seyreden piyasalarda fiyat çizginin iki yanında sık sık gidip gelebilir. Bu yüzden BorsaPusula puanı yalnızca Supertrend'e bakmaz; <strong>ADX ≥ 25</strong> (trendin gücü), <strong>DI+ &gt; DI−</strong> (yönün teyidi) ve <strong>EMA12/EMA99</strong> (orta-uzun vadeli eğilim) ile birlikte okur. Dört koşulun aynı yönü göstermesi trendi daha güvenilir kılar.</p>
 
-<h2>Trailing Stop (İzleyen Stop)</h2>
-<p>Fiyat lehte yükselirken stop seviyesi de otomatik yükselir. Bu şekilde kazanç kilitlenir. BorsaPusula'nın Supertrend stop'u aslında bir trailing stop mantığıyla çalışır: Fiyat yükseldikçe Supertrend alt bandı da yükselir.</p>
+<h2>Hisse Sayfasında Nerede Görünür?</h2>
+<p>Her hisse sayfasındaki gerekçe listesinde, güncel fiyata göre yüzde kaç uzakta olduğuyla birlikte <em>"Trend dönüş seviyesi (Supertrend): X ₺"</em> satırını görürsünüz. Grafikte aynı çizgi fiyatla birlikte çizilir.</p>
+
+<p><em>Bu içerik bilgilendirme amaçlıdır; yatırım tavsiyesi değildir.</em></p>
 """,
     "faqs": [
-      {"q": "Stop loss nedir ve neden kullanılmalıdır?", "a": "Stop loss, hisse belirlenen fiyat seviyesinin altına düşünce pozisyonu otomatik kapatan emirdir. Küçük kayıpları keserek büyük felaketlerin önüne geçer ve duygusal karar vermeyi engeller."},
-      {"q": "BorsaPusula stop loss seviyesi nasıl hesaplanır?", "a": "BorsaPusula her Güçlü Trend sinyali için ATR tabanlı stop loss seviyesi hesaplar. Bu seviye Supertrend bandıyla örtüşür. Fiyat bu seviyenin altına düştüğünde sistem Trend Bozuldu sinyaline geçer."},
-      {"q": "Stop loss seviyesini ne kadar geniş tutmalıyım?", "a": "Çok dar stop erken durdurur, çok geniş stop riski artırır. BorsaPusula ATR bazlı stop volatiliteye göre otomatik ayarlanır. Swing işlemler için genellikle giriş fiyatının %5-10 altı uygundur."}
+      {"q": "Trend dönüş seviyesi (Supertrend) nedir?", "a": "Fiyatın ATR ile ölçülen oynaklığına göre hesaplanan, fiyatın altında ya da üstünde ilerleyen çizgidir. Fiyat çizginin diğer tarafına geçtiğinde Supertrend'in trend yönü değişmiş sayılır."},
+      {"q": "BorsaPusula'da bu seviye nasıl hesaplanır?", "a": "ATR tabanlı Supertrend çizgisi olarak hesaplanır ve hisse sayfasında güncel fiyata olan uzaklığıyla gösterilir. Oynaklık artınca çizgi fiyattan uzaklaşır, azalınca yaklaşır."},
+      {"q": "Supertrend tek başına yeterli mi?", "a": "Hayır. Yatay piyasada çizgi sık sık aşılabilir. BorsaPusula Supertrend'i ADX ≥ 25, DI+ > DI− ve EMA12/EMA99 ile birlikte değerlendirir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
   },

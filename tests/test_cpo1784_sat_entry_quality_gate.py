@@ -27,21 +27,12 @@ def _read():
 
 
 def test_build_signal_summary_entry_quality_gated_on_al():
-    """`risk_lvl` -- opt/eq metni yalniz `if signal == "AL":` govdesinde (8
-    bosluk girinti) olmali; fonksiyonun kendi seviyesinde (4 bosluk, yon
-    kapisi disinda) tekrar bulunmamali."""
+    """CPO-1793 (kanon §2.2): `risk_lvl` artik hicbir sinyalde "ideal giris
+    bolgesi" / "Giris kalitesi" cumlesi uretmez (CPO-1784 AL kapisinin yerini
+    tamamen kaldirma aldi)."""
     src = _read()
-    assert not re.search(r'\n    if opt:\n        risk_lvl \+= f" İdeal giriş', src), (
-        "risk_lvl opt/eq metni yon kapisi DISINDA (4 bosluk girinti) bulundu -- "
-        "CPO-1784 regresyonu"
-    )
-    assert re.search(
-        r'\n    if signal == "AL":\n(?:[^\n]*\n)*?        if opt:\n'
-        r'            risk_lvl \+= f" İdeal giriş bölgesi \{_fmt_tl\(opt\)\} civarı\."\n'
-        r'        elif isinstance\(eq, str\) and eq:\n'
-        r'            risk_lvl \+= f" Giriş kalitesi: \{ENTRY_QUALITY_LABELS\.get\(eq, eq\)\}\."',
-        src,
-    ), "risk_lvl opt/eq metni signal == \"AL\" bloguna (8 bosluk girinti) tasinmamis"
+    assert 'risk_lvl += f" İdeal giriş bölgesi' not in src, "risk_lvl ideal giris cumlesi geri gelmis"
+    assert 'risk_lvl += f" Giriş kalitesi:' not in src, "risk_lvl giris kalitesi cumlesi geri gelmis"
 
 
 def test_api_news_fallback_entry_quality_gated_on_al():

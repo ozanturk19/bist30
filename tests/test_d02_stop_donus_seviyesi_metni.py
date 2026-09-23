@@ -36,5 +36,8 @@ def test_stop_bolgesi_yalniz_al():
         assert "ideal giriş" not in blob.lower()
         assert "Trend dönüş seviyesi (Supertrend)" in blob
         assert "fiyatın %5,0 üstünde" in blob
+    # CPO-1793: AL'de de "stop bölgesi" yok; tek dil "Trend dönüş seviyesi (Supertrend)"
     out = app.build_signal_summary(dict(base, signal="AL", sl_level=95.0))
-    assert "stop bölgesi" in out["points"][-1]["text"]
+    assert "stop bölgesi" not in out["points"][-1]["text"].lower()
+    assert "Trend dönüş seviyesi (Supertrend)" in out["points"][-1]["text"]
+    assert "ideal giriş" not in out["points"][-1]["tip"].lower()

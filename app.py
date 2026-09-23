@@ -8497,7 +8497,7 @@ def build_signal_summary(stock):
         elif gain_pct >= 0:
             risk_txt = f"Giriş riski sınırlı: fiyat sinyal başlangıcına yakın (~%{gain_pct:.0f})."
         else:
-            risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında — giriş bölgesine yakın."
+            risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında — sinyal başlangıç fiyatına yakın."
     elif signal == "SAT":
         if not gain_pct_known:
             risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
@@ -8505,11 +8505,11 @@ def build_signal_summary(stock):
             risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
                         "Trend Bozuldu sinyali bu hareketle uyumlu.")
     else:
-        risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
+        risk_txt = "Net sinyal olmadığı için sinyal başlangıç fiyatı tanımlı değil."
     rsi_tip = ""
     if isinstance(rsi, (int, float)):
-        # D-02: "ideal giriş penceresi" long-only ürün gereği yalnız AL'de anlamlı
-        _rsi_mid = ("45-60 ideal giriş penceresi" if signal == "AL" else "45-60 nötr bölge")
+        # CPO-1793: 45-60 bandı AL'de "sağlıklı momentum", diğer sinyallerde nötr bölge
+        _rsi_mid = ("45-60 sağlıklı momentum" if signal == "AL" else "45-60 nötr bölge")
         rsi_tip = (f" RSI {rsi:.0f} — 30 altı aşırı satım, 30-45 dip toparlanması, {_rsi_mid}, "
                    "60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.")
     points.append({
@@ -8517,33 +8517,21 @@ def build_signal_summary(stock):
         "tip":  "Sinyal başlangıç fiyatı ile güncel fiyat arasındaki fark." + rsi_tip,
     })
 
-    # 3) Risk seviyesi maddesi
-    # D-02: "stop bölgesi" yalnız AL'de; diğer durumlarda olgu dili (Supertrend çizgisi).
-    if signal == "AL":
-        if sl:
-            risk_lvl = f"Risk seviyesi: stop bölgesi {_fmt_tl(sl)}."
-        else:
-            risk_lvl = "Risk seviyesi: bu sinyal için tanımlı stop bölgesi bulunmuyor."
-        _lvl_tip = "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir."
-    else:
+    # 3) Trend dönüş seviyesi maddesi
+    # CPO-1793 (kanon §2.2): işlem yönetimi dili yok — "stop bölgesi", "ideal giriş bölgesi",
+    # "giriş kalitesi" üretilmez; her sinyalde olgu dili (Supertrend çizgisi).
+    _rel = ""
+    try:
+        if sl and current and float(current) > 0:
+            _d = (float(sl) - float(current)) / float(current) * 100.0
+            _rel = f" (fiyatın %{abs(_d):.1f} {'üstünde' if _d >= 0 else 'altında'})".replace(".", ",")
+    except (ValueError, TypeError):
         _rel = ""
-        try:
-            if sl and current and float(current) > 0:
-                _d = (float(sl) - float(current)) / float(current) * 100.0
-                _rel = f" (fiyatın %{abs(_d):.1f} {'üstünde' if _d >= 0 else 'altında'})".replace(".", ",")
-        except (ValueError, TypeError):
-            _rel = ""
-        if sl:
-            risk_lvl = f"Trend dönüş seviyesi (Supertrend): {_fmt_tl(sl)}{_rel}."
-        else:
-            risk_lvl = "Trend dönüş seviyesi (Supertrend) şu an hesaplanamıyor."
-        _lvl_tip = "Supertrend çizgisi; fiyat bu seviyenin diğer tarafına geçerse trend yönü değişmiş sayılır."
-    if signal == "AL":
-        # CPO-1784: long-only urun -- giris kalitesi/ideal giris vaadi yalniz AL sinyalinde anlam tasir
-        if opt:
-            risk_lvl += f" İdeal giriş bölgesi {_fmt_tl(opt)} civarı."
-        elif isinstance(eq, str) and eq:
-            risk_lvl += f" Giriş kalitesi: {ENTRY_QUALITY_LABELS.get(eq, eq)}."
+    if sl:
+        risk_lvl = f"Trend dönüş seviyesi (Supertrend): {_fmt_tl(sl)}{_rel}."
+    else:
+        risk_lvl = "Trend dönüş seviyesi (Supertrend) şu an hesaplanamıyor."
+    _lvl_tip = "Supertrend çizgisi; fiyat bu seviyenin diğer tarafına geçerse trend yönü değişmiş sayılır."
     points.append({
         "text": risk_lvl,
         "tip":  _lvl_tip,
@@ -14036,6 +14024,8 @@ _BLOG_SLUG_REDIRECTS = {
     # transliterasyon hatası) — eski slug'a gelen indekslenmiş linkler/SEO için 301.
     "kaldirach-ve-marjin-riskleri":   "kaldirac-ve-marjin-riskleri",
     "bist-temettue-yatirimligi-rehberi": "bist-temettu-yatirimciligi-rehberi",
+    # CPO-1793: kanon §2.2 -- islem yonetimi dili yok; makale yeniden yazildi.
+    "stop-loss-nedir":               "trend-donus-seviyesi-supertrend-nedir",
 }
 
 def _normalize_article(a):
