@@ -191,7 +191,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {"q": "EMA ile SMA arasındaki temel fark nedir?", "a": "EMA (Üstel Hareketli Ortalama), son fiyatlara daha fazla ağırlık verirken SMA (Basit Hareketli Ortalama) tüm periyotlara eşit ağırlık verir. Bu nedenle EMA fiyat değişimlerine daha hızlı tepki verir."},
       {"q": "BorsaPusula neden EMA12 ve EMA99 kullanıyor?", "a": "EMA12 yaklaşık 2,5 haftalık kısa dönem momentumu, EMA99 ise 5 aylık uzun dönem trendi temsil eder. Bu iki ortalamanın kesişimi, kısa dönem ivmesinin uzun dönem trendi geçtiğini gösterir."},
-      {"q": "EMA kesişimi tek başına yeterli bir sinyal midir?", "a": "Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda sık sık sahte kesişim yaşanır. BorsaPusula üçüncü teyit katmanı olarak kullanır: Supertrend + ADX + EMA üçü aynı anda teyit vermelidir."}
+      {"q": "EMA kesişimi tek başına yeterli bir sinyal midir?", "a": "Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda sık sık sahte kesişim yaşanır. BorsaPusula üçüncü teyit katmanı olarak kullanır: Supertrend, ADX, DI+ > DI− ve EMA aynı anda teyit vermelidir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
   },
@@ -363,7 +363,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Sinyal sistemi bir araçtır. Kararı hâlâ siz verirsiniz.</p>
 """,
     "faqs": [
-      {"q": "Güçlü Trend sinyali ne anlama gelir?", "a": "Güçlü Trend sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her Güçlü Trend sinyali yatırım tavsiyesi değildir."},
+      {"q": "Güçlü Trend sinyali ne anlama gelir?", "a": "Güçlü Trend sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde, DI+ > DI− ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her Güçlü Trend sinyali yatırım tavsiyesi değildir."},
       {"q": "Sinyal kaç gündür devam ediyor bilgisi önemli midir?", "a": "Evet, çok önemlidir. 3+ gündür devam eden onaylı sinyal, ilk günkü ham sinyalden çok daha güvenilirdir. Onaylı sinyal trendin gerçek ve sürdürülebilir olduğunu gösterir."},
       {"q": "Yatay sinyalinde ne yapmalıyım?", "a": "Yatay sinyali ne alın ne satın demektir, trend henüz belirgin değil. Mevcut pozisyonunuz varsa tutmaya devam edebilirsiniz. Yeni pozisyon için Güçlü Trend sinyalini beklemek gereksiz risk almaktan daha akıllıcadır."}
     ],
@@ -1382,7 +1382,7 @@ Swing traderde sermayeyi korumak kritiktir:
 
 BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmıştır:
 
-- **Güçlü Trend sinyali** = Supertrend + ADX + EMA üçlü onayı → Swing giriş fırsatı
+- **Güçlü Trend sinyali** = Supertrend, ADX, DI yönü ve EMA birlikte yükselişi gösterdiğinde → Swing giriş fırsatı
 - **ADX değeri** → Trendin ne kadar güçlü olduğunu gösterir
 - **Sinyal yaşı** → Kaç gün önce girdi, henüz erken mi geç mi?
 - **Giriş/SL seviyeleri** → Stop-loss otomatik hesaplanmış
@@ -3783,7 +3783,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Kısa vadede teknik analiz, uzun vadede temel analiz mi?",
        "a": "Bu yaygın bir ezberleme formülü ama tam doğru değil. Uzun vadeli yatırımcılar da teknik sinyallerden giriş zamanlamasında faydalanabilir; kısa vadeli traderlar da temel analizden sektör seçiminde yararlanabilir. Önemli olan yaklaşımların birbirini tamamlaması."},
       {"q": "BorsaPusula hangi analiz yöntemini kullanıyor?",
-       "a": "BorsaPusula öncelikli olarak teknik analiz odaklıdır: Supertrend, ADX ve EMA12/99 üçlüsünü kullanır. Hisse sayfalarında temel analiz verileri (F/K, PD/DD, ROE vb.) de sunulur. Sistem, teknik ile temeli aynı ekranda görerek daha bilinçli karar almanızı hedefler."}
+       "a": "BorsaPusula öncelikli olarak teknik analiz odaklıdır: Supertrend, ADX, DI+/DI− ve EMA12/99 göstergelerini kullanır. Hisse sayfalarında temel analiz verileri (F/K, PD/DD, ROE vb.) de sunulur. Sistem, teknik ile temeli aynı ekranda görerek daha bilinçli karar almanızı hedefler."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },

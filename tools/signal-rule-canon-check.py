@@ -76,9 +76,9 @@ RE_ADX_THR = re.compile(r'ADX\s*(?:\(14\))?\s*(?:&[lg]?t;|[>≥<])?\s*[≥>]=?\s
 RE_ADX_ANY = re.compile(r'\bADX\b')
 # Esiksiz yolda " + " ve ok gosterge LISTESI de olabilir ("Supertrend + ADX +
 # EMA12/99 teknik analiz") -- yalniz gercek birlestirme sozcukleri sayilir.
-# .py (app.py/blog_content.py) DEV alani: esiksiz yol orada CPO-1792 ile.
+# AND buyuk harfle (kural notasyonu): .py kodundaki kucuk 'and' sayilmaz.
 RE_CONJ_STRONG = re.compile(
-    r'ayn\u0131\s+anda|\bAND\b|tamam\u0131|sa\u011fland\u0131\u011f\u0131nda'
+    r'ayn\u0131\s+anda|(?-i:\bAND\b)|tamam\u0131|sa\u011fland\u0131\u011f\u0131nda'
     r'|oybirli\u011f|kriter|ko\u015fullar', re.I | re.U)
 RE_EMA = re.compile(r'EMA\s*12', re.I)
 RE_DI = re.compile(r'DI\s*[+−\-]', re.I)
@@ -101,7 +101,6 @@ RE_SIGNAL_CTX = re.compile(
 
 # --- sayim beyani ------------------------------------------------------------
 # C-02: test/sart/onay da kosul sayimidir ("3 bagimsiz testin oybirligi").
-# .py dosyalarinda (DEV alani) genis sayim CPO-1792 kapanana kadar eski kapsamla.
 def _count_re(cnt):
     ind = r'(?:ba\u011f\u0131ms\u0131z\s*)?(?:teknik\s*)?'
     return re.compile(
@@ -109,7 +108,6 @@ def _count_re(cnt):
         r'|\b\u00fc\u00e7\s*' + ind + cnt +
         r'|\b\u00fc\u00e7l\u00fc\s*' + cnt + r')', re.I | re.U)
 RE_COUNT = _count_re(r'(?:kriter|ko\u015ful|test|\u015fart|onay)')
-RE_COUNT_PY = _count_re(r'(?:kriter|ko\u015ful)')
 # GOSTERGE sayimi 3'tur ve DOGRUdur: "3 teknik gosterge", "uclu filtre
 # sistemi", "ucunun ayni anda ayni yonu gostermesi" serbesttir -- kapi
 # yalnizca KRITER/KOSUL sozcugu ile yapilan 3'lu sayimi yasaklar (4 kosul var).
@@ -194,13 +192,13 @@ def scan_text(rel, text):
             continue                      # baslik alani: kisalik zorunlulugu
         base = bool(RE_ST.search(blk)) and bool(RE_EMA.search(blk))
         is_rule = base and ((bool(RE_ADX_THR.search(blk)) and bool(RE_CONJ.search(blk)))
-                            or (not rel.endswith('.py') and bool(RE_ADX_ANY.search(blk))
+                            or (bool(RE_ADX_ANY.search(blk))
                                 and bool(RE_CONJ_STRONG.search(blk))))
         if is_rule and not RE_DI.search(blk):
             bad.append((rel, ln, 'R1',
                         'kural beyani DI kosulunu anmiyor (kod: ai>=25 AND dip>dim)'))
         if is_rule or RE_SIGNAL_CTX.search(blk):
-            cm = (RE_COUNT_PY if rel.endswith('.py') else RE_COUNT).search(blk)
+            cm = RE_COUNT.search(blk)
             if cm and not RE_COUNT_OK.search(cm.group(0)):
                 bad.append((rel, ln + blk.count('\n', 0, cm.start()), 'R2',
                             'kosul sayimi yanlis: "%s" -- 4 kosul var' % cm.group(0).strip()))

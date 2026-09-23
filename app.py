@@ -2857,7 +2857,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td style="padding:8px 0;vertical-align:top;width:30px;font-size:18px">🟢</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#e5e1e4">Güçlü Trend sinyali</strong> oluştuğunda — algoritmamız 3 testten geçen yükseliş onayı verdiğinde
+              <strong style="color:#e5e1e4">Güçlü Trend sinyali</strong> oluştuğunda — Supertrend, ADX ≥ 25, DI yönü ve EMA12/99 aynı yönü gösterdiğinde
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">🔴</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
