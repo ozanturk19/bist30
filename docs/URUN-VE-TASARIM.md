@@ -30,7 +30,7 @@
    - Bayat veri görünür uyarıyla verilir: "Son veri 11.09 · güncellenmiyor" + sade neden.
    - **Göreli zaman yok** (Ozan, 23.09): gün sonu verisinin etiketinde "bugün / dün / günün" yazılmaz. Kesin tarih ("22 Eylül kapanışı") ya da "son seans" yazılır, çünkü veri ertesi gün de aynı görünür. Bölüm adları da buna uyar: "Günün hareketlileri" → "Son seansın hareketlileri", "Günün Gündemi" → **"Gündem"** (baskı tarihiyle: "23 Eylül · akşam baskısı"), tarama çipi "Son seansta Trend Bozuldu", takvimde "Bugün/Yarın" yerine tarih başlığı ("24 Eylül Perşembe").
    - **"Ücretsiz" yazılmaz** (Ozan, 23.09): amatör durur.
-8. **Kaynak etiketi yok** (Ozan, 23.09): sitede rakamların ve haberlerin yanına kaynak yazılmaz. Doğruluk içeride sağlanır: KAP doğrulama kontrolü ve kaynak izi.
+8. **Kaynak etiketi yok** (Ozan, 23.09): sitede rakamların ve haberlerin yanına kaynak yazılmaz; ürün sayfalarında ve altbilgide sağlayıcı adı geçmez (yalnız `/yasal` ve `/gizlilik`'teki hukuki açıklamalar kalır). Doğruluk içeride sağlanır: KAP doğrulama kontrolü ve kaynak izi.
 9. **Terimler:**
    - "Trend dönüş seviyesi (Supertrend)"
    - "BorsaPusula Skoru"
@@ -48,11 +48,14 @@
 
 ## 3. Model
 
-- **Durum:** 4 teknik koşuldan çıkar:
+- **Durum:** 5 teknik koşuldan çıkar (**24.09 düzeltmesi:** motorda 5. koşul olarak haftalık trend kapısı da vardı, kanon ve arayüz 4 gösteriyordu; O23 varsayılanı A: görünür yapılır, sinyal değişmez):
   1. Fiyat trend dönüş seviyesinin (Supertrend) üstünde.
   2. ADX ≥ 25.
   3. EMA 12 > EMA 99.
   4. DI+ > DI−.
+  5. Haftalık trend yukarı (haftalık kapanışların EMA 20'si yükseliyor).
+
+  Güçlü Trend = beşi birden. Trend Bozuldu = tersleri birden (fiyat seviyenin altında, ADX ≥ 25 ve DI− > DI+, EMA 12 < EMA 99, haftalık EMA 20 düşüyor). Diğer her durum Yatay (haftalık yön hesaplanamazsa da Yatay). Koşul listesi arayüzde 5 satırdır (✓ / –).
 
   Koşullar **tak-çıkar** bir kayıtta tutulacak (plan D-47). Yeni koşul = kayda 1 satır + 1 test. Motor, API, hisse sayfasındaki koşul listesi ve /metodoloji aynı kayıttan okur (ikinci kanon yok).
 - **BorsaPusula Skoru (yönlü, O2):** Finansallar (Temel skor) %60 + Trend %40.
@@ -171,8 +174,8 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
   - Sağda BP halkası (yeşil, "57 / 100", alt satır "Finansallar %60 · Trend %40 (yönlü)").
   - Üç sütun (mobilde alt alta):
     1. **Finansalları nasıl?** Betimleyici cevap ("Nakit akışı güçlü, kârlılık zayıf"), Temel skor halkası (camgöbeği), 4 kategori çubuğu, tek cümle açıklama.
-    2. **Fiyatı makul mü?** Cevap "Ucuz tarafta / Makul / Pahalı tarafta / Karışık". F/K ve PD/DD, sektör (akran <3 ise BIST) medyanıyla. Analist hedef satırı nötr. Para birimi notu (USD raporlayan).
-    3. **Trend destekliyor mu?** Cevap "Evet · N gündür / Henüz değil · Yatay / Hayır · Trend Bozuldu". Teknik hüküm cümlesi, 4 koşul listesi (✓ / –), trend dönüş seviyesi satırı.
+    2. **Fiyatı makul mü?** Cevap "Ucuz tarafta / Makul / Pahalı tarafta / Karışık". F/K ve PD/DD, sektör (akran <3 ise BIST) medyanıyla. **Eşik (C-M1 onaylı taslak):** oran = değer ÷ ortanca; <0,80 ucuz, >1,25 pahalı, arası makul; biri ucuz biri pahalıysa Karışık. Keşfet ve Temel sekmesi aynı eşiği kullanır. Analist hedef satırı nötr. Para birimi notu (USD raporlayan).
+    3. **Trend destekliyor mu?** Cevap "Evet · N gündür / Henüz değil · Yatay / Hayır · Trend Bozuldu". Teknik hüküm cümlesi, 5 koşul listesi (✓ / –; 5. satır "Haftalık trend yukarı"), trend dönüş seviyesi satırı.
 - **Skor halkası:** iz #26262c, yuvarlak uçlu yay, ortada sayı (Bricolage).
 - **Temel hap bilgi (başlık):** 4 küçük kutu (etiket + değer), kimlik renksiz: Piyasa değeri · Özsermaye kârlılığı · Net kâr marjı · Temettü (son 12 ay).
 - **Alan grafiği:** 1A / 3A / 1Y. Son nokta başlık fiyatına eşit (tek fiyat kaynağı). Başlangıç kesikli çizgisi, dokununca tarih ve fiyat.
