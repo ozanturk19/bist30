@@ -1708,6 +1708,74 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
 # görünür teşhis).
 _ANALYZE_FAIL_REASON = {}    # {ticker_base: (reason_code, rows)}
 
+# D-P0-2309c (23.09 EOD): 10 hissede Yahoo'nun 18:10'daki "bugün" satırı oturmamış
+# (önceki günün kopyası) geliyordu; analyze() bunu gerçek son bar sanıp fiyatı
+# %0,00 ile gösterdi ve SAHOL'u aynı gün BEKLE→SAT diye maile soktu. Eksik/oturmamış
+# son seans barı artık SESSİZCE önceki kapanışla doldurulmaz: bar atılır, 1m'den
+# sentezlenir; olmazsa ticker prev_cache fallback'e "son seans verisi gelmedi"
+# nedeniyle düşer (görünür bayat, sinyal değişimi/mail yok) ve 18:45 / 19:30'da
+# yalnız bu tickerlar yeniden denenir.
+_STALE_REASON_UNSETTLED = "son seans verisi gelmedi"
+
+
+def _expected_bar_date(now_tr=None):
+    """Şu an itibarıyla günlük seride EN AZ hangi seans günü olmalı: işlem günü
+    EOD çekim tetiğinden (18:10 TR) sonra bugün, aksi halde bir önceki işlem günü."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    _today = now_tr.date()
+    if is_trading_day(_today) and _eod_fetch_trigger_ready_after(now_tr):
+        return _today
+    return last_trading_day_on_or_before(_today - timedelta(days=1))
+
+
+def _drop_placeholder_last_bar(df, ticker_base):
+    """Son bar önceki barın OHLC kopyasıysa (Yahoo'nun oturmamış 'bugün' satırı)
+    at. High==Low (düz bar) ayırt edilemez — onu _last_bar_unsettled 1m ile doğrular."""
+    try:
+        if df is not None and len(df) >= 3:
+            _a, _b = df.iloc[-1], df.iloc[-2]
+            _same = all(float(_a[_c]) == float(_b[_c]) for _c in ("Open", "High", "Low", "Close"))
+            if _same and float(_a["High"]) != float(_a["Low"]):
+                logger.warning("UNSETTLED_LAST_BAR: %s son bar (%s) önceki barın kopyası — atıldı",
+                               ticker_base, df.index[-1].date())
+                return df.iloc[:-1]
+    except Exception as _e:
+        logger.warning("_drop_placeholder_last_bar(%s): %s", ticker_base, _e)
+    return df
+
+
+def _last_bar_unsettled(ticker_base, df, cb_skip=False, now_tr=None):
+    """True → son seans barı güvenilmez. (a) son bar tarihi beklenenden eski;
+    (b) EOD sonrası son bar önceki kapanışla AYNI (change_pct==0) ama 1m verisi
+    farklı bir son fiyat gösteriyor (oturmamış satır)."""
+    try:
+        _expected = _expected_bar_date(now_tr)
+        _last = df.index[-1].date()
+        if _last < _expected:
+            logger.warning("UNSETTLED_LAST_BAR: %s son bar %s < beklenen %s", ticker_base, _last, _expected)
+            return True
+        if cb_skip or len(df) < 2 or _last != _expected:
+            return False
+        _c, _p = float(df["Close"].iloc[-1]), float(df["Close"].iloc[-2])
+        if _c != _p:
+            return False
+        _d5 = _fetch_intraday_subprocess(ticker_base)
+        if _d5 is None or _d5.empty:
+            return False
+        if isinstance(_d5.columns, pd.MultiIndex):
+            _d5.columns = _d5.columns.get_level_values(0)
+            _d5 = _d5.loc[:, ~_d5.columns.duplicated()]
+        _bars = _d5[_d5.index.map(lambda x: x.date()) == _last].dropna()
+        if len(_bars) < 30:
+            return False
+        _m = float(_bars["Close"].iloc[-1])
+        if abs(_m - _c) >= 0.01 and abs(_m / _c - 1) >= 0.0004:
+            logger.warning("UNSETTLED_LAST_BAR: %s değişim %%0 ama 1m son fiyat %.2f != %.2f", ticker_base, _m, _c)
+            return True
+    except Exception as _e:
+        logger.warning("_last_bar_unsettled(%s): %s", ticker_base, _e)
+    return False
+
 
 def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
@@ -1749,9 +1817,13 @@ def analyze(ticker_base):
             df = df.loc[:, ~df.columns.duplicated()]
 
         df    = df.dropna()
+        df    = _drop_placeholder_last_bar(df.sort_index(), ticker_base)   # D-P0-2309c
         if not _cb_skip:
             df = _fill_intraday_gaps(df, ticker)   # yfinance gecikmeli günleri 1m'den tamamla
         df    = df.sort_index()
+        if _last_bar_unsettled(ticker_base, df, _cb_skip):   # D-P0-2309c
+            _ANALYZE_FAIL_REASON[ticker_base] = ("last_bar_unsettled", len(df))
+            return None
         close = df["Close"].squeeze()
         high  = df["High"].squeeze()
         low   = df["Low"].squeeze()
@@ -3225,6 +3297,7 @@ from lib.trading_calendar import (
     eod_data_ready_after as _eod_data_ready_after,
     eod_fetch_trigger_ready_after as _eod_fetch_trigger_ready_after,
     catchup_retry_ready_after as _catchup_retry_ready_after,
+    last_trading_day_on_or_before,
 )
 
 
@@ -4115,6 +4188,7 @@ def _refresh_data_impl():
                 _rcode, _rrows = _reason
                 _fallback["stale_reason"] = (
                     f"insufficient_history:{_rrows}<120" if _rcode == "insufficient_history"
+                    else _STALE_REASON_UNSETTLED if _rcode == "last_bar_unsettled"
                     else "no_fetch"
                 )
             else:
@@ -4300,7 +4374,26 @@ def _refresh_data_impl():
 _CATCHUP_STALE_RATIO_THRESHOLD = 0.10  # DEV-1980 §3 örneği — CPO onayı bu eşiği değiştirmedi
 
 
-def _run_catchup_retry_pass(marker_path):
+def _merge_rescued_into_cache(_rescued, notify=True):
+    """Kurtarılan (taze analyze() sonucu) tickerları cache + diske işle."""
+    if not _rescued:
+        return
+    with _lock:
+        _by_ticker = {s.get("ticker"): s for s in _cache.get("data", [])}
+        for _r in _rescued:
+            _by_ticker[_r["ticker"]] = _r
+        _merged = list(_by_ticker.values())
+        _cache["data"] = _merged
+    _keep_known_good_cache(_merged)
+    _save_cache_to_disk(_merged)
+    if notify:
+        try:
+            _notify_signal_changes(_rescued)
+        except Exception as _e:
+            logger.error("CATCHUP: _notify_signal_changes hatası: %s", _e)
+
+
+def _run_catchup_retry_pass(marker_path, only_unsettled=False):
     """Günde bir kez (marker_path varlığıyla korunur) çalışır. CB'ye (mevcut
     _yahoo_cb) bağlıdır — yeni bir sayaç/eşik icat etmez (CPO-1703 şartı).
     Sonuç TEK bir log satırından (CATCHUP: SONUC) grep'lenebilir — CPO-1703
@@ -4319,6 +4412,20 @@ def _run_catchup_retry_pass(marker_path):
     _stale_tickers = [s.get("ticker") for s in _stocks_snapshot
                        if s.get("data_quality") == "stale" and s.get("ticker")]
     _stale_ratio = (len(_stale_tickers) / len(_stocks_snapshot)) if _stocks_snapshot else 0.0
+    # D-P0-2309c: "son seans verisi gelmedi" tickerları oran eşiğine bakılmaksızın
+    # (az sayıda olsalar bile yanlış/eksik fiyat göstermemek için) yeniden denenir.
+    _unsettled = [s.get("ticker") for s in _stocks_snapshot
+                   if s.get("stale_reason") == _STALE_REASON_UNSETTLED and s.get("ticker")]
+
+    if only_unsettled:
+        if not _unsettled:
+            logger.info("CATCHUP(unsettled): tetiklendi — 0 oturmamış ticker, atlandı")
+            return
+        _stale_tickers = _unsettled
+        _stale_ratio = 1.0   # oran eşiği yalnız genel catch-up içindir
+    elif _stale_ratio <= _CATCHUP_STALE_RATIO_THRESHOLD and _unsettled:
+        _stale_tickers = _unsettled
+        _stale_ratio = 1.0
 
     if not _stale_tickers:
         logger.info("CATCHUP: tetiklendi — 0 stale ticker, atlandı")
@@ -4351,19 +4458,7 @@ def _run_catchup_retry_pass(marker_path):
             _r["last_fresh_ts"] = time.time()
             _rescued.append(_r)
 
-    if _rescued:
-        with _lock:
-            _by_ticker = {s.get("ticker"): s for s in _cache.get("data", [])}
-            for _r in _rescued:
-                _by_ticker[_r["ticker"]] = _r
-            _merged = list(_by_ticker.values())
-            _cache["data"] = _merged
-        _keep_known_good_cache(_merged)
-        _save_cache_to_disk(_merged)
-        try:
-            _notify_signal_changes(_rescued)
-        except Exception as _e:
-            logger.error("CATCHUP: _notify_signal_changes hatası: %s", _e)
+    _merge_rescued_into_cache(_rescued)
 
     logger.info("CATCHUP: SONUC — %d/%d denendi, %d kurtarıldı, %d hâlâ stale",
                 _attempted, len(_ordered_stale), len(_rescued), len(_ordered_stale) - len(_rescued))
@@ -4582,6 +4677,15 @@ def background_refresh():
                 _today_catchup_path = os.path.join(
                     _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_catchup.flag"
                 )
+                # D-P0-2309c: 18:45 TR'de yalnız "son seans verisi gelmedi" tickerları
+                # bir kez yeniden dene (19:00 digest öncesi); 19:30 genel catch-up sürer.
+                _now_tr_bg = datetime.now(_TZ_TR)
+                _today_unsettled_path = os.path.join(
+                    _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_unsettled1845.flag"
+                )
+                if (_now_tr_bg.hour * 60 + _now_tr_bg.minute >= 18 * 60 + 45
+                        and not os.path.exists(_today_unsettled_path)):
+                    _run_catchup_retry_pass(_today_unsettled_path, only_unsettled=True)
                 if not os.path.exists(_today_catchup_path) and _catchup_retry_ready_after():
                     _run_catchup_retry_pass(_today_catchup_path)
             time.sleep(_EOD_POLL_INTERVAL)
