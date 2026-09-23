@@ -621,7 +621,9 @@
       drawSpark(document.getElementById('daSpark'), d.xu100_spark);
       setHeroFromEod(d.xu100_close, d.xu100_change_pct);
       var subEl = document.getElementById('daIndexSubText');
-      if (subEl) subEl.textContent = d.updated_at ? ('Son güncelleme: ' + d.updated_at + ' · gün sonu verisiyle güncellenir') : 'gün sonu verisiyle güncellenir';
+      /* C-03: saniyeli zaman damgası yerine hangi günün kapanışı olduğu. */
+      var _um = /^(\d{2})\.(\d{2})\./.exec(d.updated_at || '');
+      if (subEl) subEl.textContent = _um ? (_um[1] + '.' + _um[2] + ' kapanışı · gün sonu verisiyle güncellenir') : 'gün sonu verisiyle güncellenir';
 
       if (!real.length) {
         /* K-BK: `loading === true` = backend onbellegi HENUZ dolmadi. Bu "veri
