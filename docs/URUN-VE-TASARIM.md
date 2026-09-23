@@ -1,7 +1,7 @@
 # BorsaPusula — Ürün ve Tasarım Kanonu
 
 > **Canlı belge.** Ozan'ın onayladığı ürün kararlarının ve sitenin tasarım dilinin **tek kaynağı**.
-> Son güncelleme: **23.09.2026 17:15** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
+> Son güncelleme: **23.09.2026 17:30** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
 > Kural: yeni bir tasarım ya da ürün kararı önce taslak (mockup) olarak Ozan'a gider, onaydan sonra **önce bu belgeye**, sonra plana ve koda girer. CPO ve DEV1 ajanları dil kuralları ve tasarım dili için bu belgeyi okur.
 
 ---
@@ -28,20 +28,21 @@
    - Gün sonu ürünü "canlı" demez.
    - Gecikmeli veri "15 dk gecikmeli" diye yazılır.
    - Bayat veri görünür uyarıyla verilir: "Son veri 11.09 · güncellenmiyor" + sade neden.
-8. **Terimler:**
+8. **Kaynak etiketi yok** (Ozan, 23.09): sitede rakamların ve haberlerin yanına kaynak yazılmaz. Doğruluk içeride sağlanır: KAP doğrulama kontrolü ve kaynak izi.
+9. **Terimler:**
    - "Trend dönüş seviyesi (Supertrend)"
    - "BorsaPusula Skoru"
    - "Temel skor"
    - "RVOL" = 5 gün / 20 gün hacim oranı; "Günlük hacim oranı" = bugün / 20 gün
    - "Piyasa değeri"
    - "Özsermaye kârlılığı"
-9. **Sayı biçimi (tr-TR):**
+10. **Sayı biçimi (tr-TR):**
    - Yüzde önek: "%2,13", "+%2,13", "−%0,88". Eksi işareti U+2212.
    - Para: "299,75 ₺".
    - Büyük tutar: "409 Mrd ₺".
    - Tarih: "22 Eylül" / "22.09.2026".
    - Sayı sütunlarında `tabular-nums`.
-10. **Türkçe büyük/küçük harf:** I↔ı ve İ↔i doğru çevrilir. Python `str.title()` / `lower()` doğrudan kullanılmaz (yoksa "ULAŞTIRMA" → "Ulaştirma" olur). JS'te `toLocaleUpperCase('tr-TR')` kullanılır.
+11. **Türkçe büyük/küçük harf:** I↔ı ve İ↔i doğru çevrilir. Python `str.title()` / `lower()` doğrudan kullanılmaz (yoksa "ULAŞTIRMA" → "Ulaştirma" olur). JS'te `toLocaleUpperCase('tr-TR')` kullanılır.
 
 ## 3. Model
 
@@ -60,7 +61,7 @@
   - v2'de 5 eksen: kalite, değerleme/ucuzluk, büyüme, bilanço sağlığı, temettü. Sektör şablonları banka, sigorta ve GYO için.
   - Çeşitlendirme araştırması: ops `plans/2026-09-23-denetim/temel-cesitlendirme.md`.
 - **Veri tanımları (23.09, `temel-cesitlendirme.md` ile KAP'a karşı doğrulandı):**
-  - **Açıklanan veri ilkesi (Ozan, 23.09): temel analiz yalnız şirketin açıkladığı gerçek rakamlarla yapılır.** Kaynak KAP'taki finansal raporlardır. Her rakam hangi rapordan geldiğiyle birlikte saklanır ve gösterilir ("2025 yıllık raporu"). **Kendi enflasyon/TÜFE düzeltmemizle rakam üretilmez.**
+  - **Açıklanan veri ilkesi (Ozan, 23.09): temel analiz yalnız şirketin açıkladığı gerçek rakamlarla yapılır.** Kaynak KAP'taki finansal raporlardır. Her rakam hangi rapordan geldiğiyle birlikte **içeride** saklanır ve doğrulanır. **Sitede kaynak yazılmaz** (Ozan, 23.09: "hiçbir yerde kaynak belirtmemize gerek yok, sadece biz doğru olduğundan emin olalım"). **Kendi enflasyon/TÜFE düzeltmemizle rakam üretilmez.**
   - **Neden?** Enflasyon muhasebesinde (TMS 29, 2023'ten beri) şirket her yıllık raporda önceki yılı yeni yılın parasıyla yeniden yazar. Aynı yıl iki raporda iki farklı rakamla yer alır (TBORG 2023 cirosu: 2023 raporunda 17,14, 2024 raporunda 24,75 mlr TL). Yahoo her yıl için en son yazılmış rakamı alır. Sütunlar farklı raporlardan, farklı birimlerle geldiği için aralarındaki fark büyüme değildir (TBORG 2024: Yahoo farkı +%59,4, şirketin kendi raporu +%21,8).
   - **Büyüme** = şirketin aynı rapordaki cari yıl ile karşılaştırmalı yıl farkı, yani şirketin açıkladığı değişim. Her yılın değişimi o yılın kendi raporundan alınır. Farklı raporlardan gelen tutarlar tek seride birleştirilmez. Yahoo'nun `revenue_growth` alanı (tek çeyreğin nominal yıllık farkı) büyüme diye kullanılmaz.
   - **Çok yıllı grafik:** her yıl için "şirketin açıkladığı yıllık değişim" çubuğu. Tutar olarak yalnız son raporun iki yılı yan yana gösterilir (aynı birim, raporun kendi birim başlığıyla).
@@ -79,8 +80,8 @@
 - **Yapay zekâ (O5b=A, "Analist Notu"):** günde bir toplu çalışır; yalnız sitenin kendi verisini ve KAP metnini okur.
   - Rakamları AI yazmaz; kod yerleştirir.
   - Yayından önce doğrulayıcı çalışır: sayı eşitliği + yasak dil (AL/SAT, teknik hedef, "tavsiye").
-  - Metnin üstünde "AI ile yazıldı · veriler BorsaPusula" etiketi olur.
-  - Web araması yalnız "Günün Gündemi"nde yapılır, kaynaklıdır.
+  - Metnin üstünde yalnız "AI ile yazıldı" etiketi olur (kaynak etiketi yok).
+  - Web araması yalnız "Günün Gündemi"nde yapılır. Kaynaklar içeride doğrulama için tutulur.
   - Önce 10 hisselik pilot yapılır; iki model yan yana okunup seçilir.
 
 ## 4. Bilgi mimarisi
@@ -95,8 +96,8 @@
   6. Tek feragat satırı.
 - **Ana sayfa blok sırası:** Hero → Güçlü Trend → **BIST100 ısı haritası** → Hareketliler (5+5) → Öne çıkan şirketler (orta-uzun vade) → Haberler özeti + abonelik.
 - **Haberler (W9):**
-  - **Günün Gündemi:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde; kaynaklı; her maddede ilgili hisse/sektör çipleri. Başka sitelerin metni kopyalanmaz.
-  - **KAP akışı:** her bildirim site içinde kalıcı bir sayfa: tek cümle özet, önem oranı ("sözleşme tutarı yıllık hasılatın %4,7'si"), orijinal metin. Rutin duyurular elenir.
+  - **Günün Gündemi:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
+  - **KAP akışı:** her bildirim site içinde kalıcı bir sayfa: tek cümle özet, önem oranı ("sözleşme tutarı yıllık hasılatın %4,7'si"), orijinal metin. Dış bağlantı ve kaynak etiketi yok. Rutin duyurular elenir.
   - **Takvim** sekmesi.
   - **Akşam Bülteni** `/bulten/<tarih>`.
 - **Keşfet:** tarama + 4 hazır liste (Kaliteli ve makul fiyatlı · İstikrarlı temettü · Borçsuz büyüyenler · Sektörüne göre ucuz) + `/sektor-harita` tam ekran ısı haritası.
