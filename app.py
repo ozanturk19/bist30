@@ -992,7 +992,7 @@ STOCK_NAMES = {
     "PARSN": "Parsan Makina Parçaları",
     "PETKM": "Petkim Petrokimya",
     "PRKAB": "Park Elektrik Üretim",
-    "RYSAS": "Reysaş Gayrimenkul",
+    "RYSAS": "Reysaş Taşımacılık ve Lojistik",
     "SARKY": "Sarkuysan Elektrolitik Bakır",
     "SELEC": "Selçuk Ecza Deposu",
     "SMRTG": "Smart Güneş Enerjisi",
@@ -7827,7 +7827,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         if st_bull and e12 > e99:
             mixed = "Supertrend ve EMA yükselen ancak ADX trend gücü henüz yetersiz."
         elif not st_bull and e12 < e99:
-            mixed = "Supertrend ve EMA düşen ancak ADX trend gücü yetersiz."
+            mixed = "Supertrend ve EMA düşüş yönünde ancak ADX trend gücü yetersiz."
         else:
             mixed = "İndikatörler birbirini teyit etmiyor, karmaşık bir görünüm var."
         return (
@@ -8404,18 +8404,36 @@ def build_signal_summary(stock):
         risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
     rsi_tip = ""
     if isinstance(rsi, (int, float)):
-        rsi_tip = (f" RSI {rsi:.0f} — 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 ideal "
-                   "giriş penceresi, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.")
+        # D-02: "ideal giriş penceresi" long-only ürün gereği yalnız AL'de anlamlı
+        _rsi_mid = ("45-60 ideal giriş penceresi" if signal == "AL" else "45-60 nötr bölge")
+        rsi_tip = (f" RSI {rsi:.0f} — 30 altı aşırı satım, 30-45 dip toparlanması, {_rsi_mid}, "
+                   "60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.")
     points.append({
         "text": risk_txt,
         "tip":  "Sinyal başlangıç fiyatı ile güncel fiyat arasındaki fark." + rsi_tip,
     })
 
     # 3) Risk seviyesi maddesi
-    if sl:
-        risk_lvl = f"Risk seviyesi: stop bölgesi {_fmt_tl(sl)}."
+    # D-02: "stop bölgesi" yalnız AL'de; diğer durumlarda olgu dili (Supertrend çizgisi).
+    if signal == "AL":
+        if sl:
+            risk_lvl = f"Risk seviyesi: stop bölgesi {_fmt_tl(sl)}."
+        else:
+            risk_lvl = "Risk seviyesi: bu sinyal için tanımlı stop bölgesi bulunmuyor."
+        _lvl_tip = "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir."
     else:
-        risk_lvl = "Risk seviyesi: bu sinyal için tanımlı stop bölgesi bulunmuyor."
+        _rel = ""
+        try:
+            if sl and current and float(current) > 0:
+                _d = (float(sl) - float(current)) / float(current) * 100.0
+                _rel = f" (fiyatın %{abs(_d):.1f} {'üstünde' if _d >= 0 else 'altında'})".replace(".", ",")
+        except (ValueError, TypeError):
+            _rel = ""
+        if sl:
+            risk_lvl = f"Trend dönüş seviyesi (Supertrend): {_fmt_tl(sl)}{_rel}."
+        else:
+            risk_lvl = "Trend dönüş seviyesi (Supertrend) şu an hesaplanamıyor."
+        _lvl_tip = "Supertrend çizgisi; fiyat bu seviyenin diğer tarafına geçerse trend yönü değişmiş sayılır."
     if signal == "AL":
         # CPO-1784: long-only urun -- giris kalitesi/ideal giris vaadi yalniz AL sinyalinde anlam tasir
         if opt:
@@ -8424,7 +8442,7 @@ def build_signal_summary(stock):
             risk_lvl += f" Giriş kalitesi: {ENTRY_QUALITY_LABELS.get(eq, eq)}."
     points.append({
         "text": risk_lvl,
-        "tip":  "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir.",
+        "tip":  _lvl_tip,
     })
 
     return {
@@ -8510,11 +8528,6 @@ def stock_page(ticker):
     price    = (ssr_signal or {}).get("price")
     chg      = (ssr_signal or {}).get("change_pct")
     rsi_val  = (ssr_signal or {}).get("rsi")
-    # CPO-1758: rr_ratio hep 2.0 sabitti (TP1=entry+risk*2 totolojisi) --
-    # bu FAQ metni JSON-LD/SEO'ya "R/R oranı 2" diye sizan, hic kimsenin
-    # denetlemedigi ikinci bir tuketiciydi (asil payload denetimi bunu
-    # kacirmisti). Hero/gundem ile ayni kaynaga (rr_signal) gecirildi.
-    rr_val   = (ssr_signal or {}).get("rr_signal")
     # SPEC-017 Faz 3 batch v2 B2: hero card signal_strength (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
     # SSS de signal_strength kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
     score = (ssr_signal or {}).get("signal_strength")
@@ -8555,13 +8568,10 @@ def stock_page(ticker):
             _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
         if score is not None:
             _parts.append(f"Teknik Güç Skoru {score}/100")
-        # CPO-1758 + 20.09 CPO notu (gundem.html): rr_signal negatif gelebiliyor
-        # (fiyat sinyale karsi hareket ettiyse) -- hero/gundem ile ayni guard
-        # (>0) ve ayni "1:N,N" kanonik yazim.
-        if isinstance(rr_val, (int, float)) and rr_val > 0:
-            _parts.append(f"R/R oranı 1:{tr_num_filter(round(rr_val, 1))}")
+        # D-02 (O8): getiri vaadi gibi duran "prim potansiyeli" sorusu kalktı; R/R oranı
+        # da hedef dili olduğu için (D-39, kalıcı kural) cevaptan çıktı.
         seo_faq.append({
-            "q": f"{ticker} hissesi prim potansiyeli nedir?",
+            "q": f"{ticker} hissesinin teknik görünümü nasıl?",
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
         })
     if company_summary:
