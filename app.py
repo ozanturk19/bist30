@@ -4690,7 +4690,10 @@ def _compute_index_ssr_context():
         "bekle": sum(1 for s in bist if s.get("signal") == "BEKLE"),
         "total": len(bist),
     }
-    with_score = [s for s in bist
+    # D-P0-2309b: donuk hisse öne çıkan/sıralama havuzuna girmez — JS'in
+    # `ranked` filtresiyle (index.html, C-P0-2309) BİREBİR aynı koşul.
+    _ranked = [s for s in bist if not s.get("stale_reason") and s.get("data_quality") != "stale"]
+    with_score = [s for s in _ranked
                   if isinstance(s.get("signal_strength"), (int, float)) and s.get("signal") == "AL"]
     top_signals = sorted(with_score, key=lambda s: s.get("signal_strength") or 0, reverse=True)[:8]
 
@@ -4701,7 +4704,7 @@ def _compute_index_ssr_context():
     # hisse gösterilip JS yüklenince top-8 dışından farklı bir hisseye "atlayabiliyordu".
     with _lock:
         _hs_snap = dict(_financial_health_cache)
-    spot_pool = [s for s in bist if s.get("signal") != "SAT"]
+    spot_pool = [s for s in _ranked if s.get("signal") != "SAT"]
     spot_with_bps = []
     for s in spot_pool:
         _hs_entry = _hs_snap.get(s.get("ticker", ""))

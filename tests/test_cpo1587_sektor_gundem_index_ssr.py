@@ -281,3 +281,26 @@ def test_index_ssr_spotlight_prefers_borsapusula_skoru_over_signal_strength():
     assert ctx["spotlight"]["ticker"] == "AEFES"
     assert ctx["spotlight"]["hs_available"] is True
     assert ctx["spotlight"]["borsapusula_skoru"] == 88
+
+
+def test_index_ssr_excludes_stale_from_spotlight_and_top_signals():
+    """D-P0-2309b: donuk hisse (data_quality=='stale' ya da stale_reason dolu)
+    JS `ranked` filtresiyle ayni sekilde SSR havuzundan cikar; sinyal sayilari
+    (izgara) etkilenmez."""
+    stocks = [
+        {"ticker": "AKBNK", "signal": "AL", "signal_strength": 60},
+        {"ticker": "MARKA", "signal": "AL", "signal_strength": 99, "data_quality": "stale"},
+        {"ticker": "TCELL", "signal": "AL", "signal_strength": 95, "stale_reason": "no_fetch"},
+    ]
+    ns = {
+        "_lock": _FakeLockCtx(),
+        "_cache": {"data": stocks, "updated_at": "x"},
+        "_load_xu100_chart_from_disk": lambda: None,
+        "_xu100_chart_cache": {"data": {"ohlc": []}},
+        "_financial_health_cache": {},
+    }
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    ctx = ns["_compute_index_ssr_context"]()
+    assert ctx["spotlight"]["ticker"] == "AKBNK"
+    assert [s["ticker"] for s in ctx["top_signals"]] == ["AKBNK"]
+    assert ctx["signal_counts"]["total"] == 3
