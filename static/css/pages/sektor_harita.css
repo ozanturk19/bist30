@@ -1,7 +1,8 @@
 /* ==== extracted from templates/sektor_harita.html (T2.5) ==== */
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
+  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
   /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
      sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank
      deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */

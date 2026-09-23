@@ -5,7 +5,6 @@
     -webkit-font-smoothing: antialiased;
     font-size: var(--bp-text-md);
     min-height: 100vh;
-    overflow-x: hidden;
   }
   /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
      sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank

@@ -12,7 +12,7 @@
    sayfanin deltasi duruyor. */
 
   * { box-sizing: border-box; }
-  html { overflow-x: hidden; }
+  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body {
     margin: 0; padding: 0;
     -webkit-font-smoothing: antialiased;

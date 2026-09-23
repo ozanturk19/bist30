@@ -156,6 +156,34 @@ textarea {
    geçişler bu katmandan ÖNCE de vardı, yeni regresyon değil.
    POZİTİF KONTROL (gerçek fare, canlı): `.da-chip` mousedown anında
    `matches(':active')=true`, computed `opacity` 1 → **0.72**. */
+/* ── K-DR / CPO-1791: YATAY-TAŞMA GUARD'I TEK KANON ───────────────────────
+   Bu kural 22.09.2026'da 15 sayfa CSS'inde ÜÇ FARKLI YAZIMLA duruyordu
+   (`html{clip}` · `html{hidden}` · `body{hidden}`), 8 sayfada ise HİÇ yoktu.
+   Üçü aynı işi yapmıyor — 320px'te canlı POZİTİF KONTROL (sayfaya
+   `right:-60px` bir öge enjekte edilip `window.scrollTo(300,0)` denendi):
+     html+body{overflow-x:clip}  -> scrollX 0   → guard TUTUYOR
+     body{overflow-x:hidden}     -> scrollX 60  → guard ETKİSİZ (5 sayfa:
+        portfolio · ozet · sektor_harita · bilanco_takvimi · temettu_takvimi)
+     html{overflow-x:hidden}     -> scrollX 60  → guard ETKİSİZ (3 sayfa:
+        404 · unsubscribe · profil); `hidden` bir KAYDIRMA KABI kurar, tekerlek/
+        dokunuşu keser ama belge programatik olarak (odak sıçraması, script)
+        hâlâ kayar; `clip` kaydırma kabı KURMAZ.
+   Yani "guard'lı" 15 sayfanın 8'inde guard yalnızca yazıyordu, ölçmüyordu.
+
+   NEDEN `clip`, `hidden` DEĞİL: `overflow-x:hidden` diğer ekseni `auto`ya
+   zorlar ve kaydırma kabı kurar → içerideki `position:sticky` çocuklar kırılır
+   (bu sayfada sticky tablo başlıkları var). `clip` yalnız kırpar.
+   Eski Safari (<16) `clip` bilmez → guard'sız kalır; bu, bugünkü 8 guard'sız
+   sayfanın durumuyla AYNI ve ölçümde hiçbir sayfanın gerçek taşması yok
+   (23 sayfa × 3 genişlik, tek istisna /hisse'nin `.score-section::before`
+   dekoratif `inset:-60px` ışıması — kasıtlı bleed, guard onu içeride tutuyor).
+
+   ⚠️ Bu guard, kırpılan içeriği GİZLEDİĞİ için KAPI 83
+   (`tools/clipped-content-check.mjs`) ile birlikte anlamlıdır: guard belge
+   kaymasını keser, kapı 83 öge düzeyinde "kırpıldı ama ulaşılamıyor"u arar.
+   Guard'ı buradan kaldıran, kapı 83'ü de gözden geçirmek zorundadır. */
+html, body { overflow-x: clip; }
+
 html { -webkit-tap-highlight-color: transparent; }
 :where(a[href], button, summary, label, input[type="submit"], input[type="button"], [role="button"], [role="tab"], [role="link"]):active { opacity: .72; }
 

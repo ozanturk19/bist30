@@ -10,7 +10,6 @@
   body {
     background:var(--bp-bg); color:var(--bp-text);
     -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh;
-    overflow-x:hidden;
   }
   header {
     background:var(--bp-surface); border-bottom:1px solid var(--bp-border);

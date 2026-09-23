@@ -1,7 +1,8 @@
 /* ==== extracted from templates/portfolio.html (T2.5) ==== */
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
+  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }

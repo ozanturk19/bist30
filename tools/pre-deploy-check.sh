@@ -1721,7 +1721,7 @@ fi
 #   R1 sablon `hdr_sub`/`hdr_sub_id` gecmemeli · R2 anti-CLS kurali yerinde
 #   durmali (gerekce cokerse kural gozden gecirilsin) · R3 JS'in yazdigi her
 #   id sablonda tanimli olmali (damgayi <main>'e tasimayi unutma senaryosu).
-echo "80/81 hidden-write-target-check (K-DO: gizli yazma hedefi)..."
+echo "80/82 hidden-write-target-check (K-DO: gizli yazma hedefi)..."
 if python3 tools/hidden-write-target-check.py; then
   echo "  ✓ hidden-write-target-check PASS"
 else
@@ -1751,12 +1751,41 @@ fi
 #   href'siz <a> onclick tasiyamaz -> <button type="button">.
 #   R(B) gercek sayfa-ici capaya sahip <a>'nin satir-ici onclick'i varsayilani
 #   IPTAL edemez (return false / preventDefault).
-echo "81/81 control-role-behavior-check (K-DP: kontrol rolu = davranisi)..."
+echo "81/82 control-role-behavior-check (K-DP: kontrol rolu = davranisi)..."
 if python3 tools/control-role-behavior-check.py; then
   echo "  ✓ control-role-behavior-check PASS"
 else
   echo "  ✗ K-DP KIRIK: bir <a> gezinmiyor ya da capasi gercekte sicramiyor."
   echo "    Pozitif kontrol: python3 tools/control-role-behavior-check.py --ref 61777f3  # 3 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+# 82. overflow-guard-canon-check (KAPI 84 -- K-DR / CPO-1791)
+#   AYNI IS ICIN UC KANON, IKISI OLCMUYOR.
+#   Belgenin yatay kaymasini kesen guard 15 sayfa CSS'inde UC FARKLI YAZIMLA
+#   duruyordu (`html{clip}` / `html{hidden}` / `body{hidden}`), 8 sayfada ise
+#   HIC yoktu. 320px'te canli POZITIF KONTROL (`right:-60px` oge enjekte +
+#   `window.scrollTo(300,0)`):
+#       html+body{overflow-x:clip} -> scrollX 0   guard TUTUYOR
+#       body{overflow-x:hidden}    -> scrollX 60  ETKISIZ (portfolio, ozet,
+#                                     sektor_harita, bilanco/temettu_takvimi)
+#       html{overflow-x:hidden}    -> scrollX 60  ETKISIZ (404, unsubscribe,
+#                                     profil) -- `hidden` KAYDIRMA KABI kurar:
+#                                     tekerlegi keser, programatik kaydirmayi
+#                                     kesmez; ayrica diger ekseni `auto`ya
+#                                     zorlayip sticky cocuklari kirar.
+#   Yani "guard'li" 15 sayfanin 8'inde guard yalnizca YAZIYORDU. Tek kanon
+#   shared.css'e (26 sablonun tamami `_base.html` -> `_head.html`) tasindi:
+#   `html, body { overflow-x: clip; }`
+#   Bu kapi guard'in VARLIGINI olcer; kirpilan icerigi KAPI 83 olcer
+#   (clipped-content-check.mjs, gunluk harness) -- 179. ders: guard eklemek
+#   onu olcen ikinci kapiyi BORCLANDIRIR.
+echo "82/82 overflow-guard-canon-check (K-DR: yatay-tasma guard kanonu)..."
+if python3 tools/overflow-guard-canon-check.py; then
+  echo "  ✓ overflow-guard-canon-check PASS"
+else
+  echo "  ✗ K-DR KIRIK: yatay-tasma guard'i yine cok kanonlu ya da kanon degeri yanlis."
+  echo "    Pozitif kontrol: sayfa CSS'ine `body{overflow-x:hidden}` ekle -> ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 
