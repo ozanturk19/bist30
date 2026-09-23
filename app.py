@@ -1447,6 +1447,46 @@ try:
 except Exception:
     _GIT_SHA = None
 
+# D-01b: /api/health tüm süreçlerin (web + macro + refresh) git sha'sını göstersin.
+# Web dışı süreçler açılışta kendi sha'sını dosyaya yazar, web okur; ölü pid elenir.
+# Dosya adı uygulama dizininden türetilir (prod/staging /tmp'yi paylaşır).
+_PROC_SHA_ROLE = ("macro" if os.environ.get("BP_ROLE") == "macro"
+                  else "refresh" if os.environ.get("REFRESH_WORKER") == "1" else "web")
+
+
+def _proc_sha_path(role):
+    import hashlib
+    _h = hashlib.md5(os.path.dirname(os.path.abspath(__file__)).encode()).hexdigest()[:8]
+    return "/tmp/bp_proc_sha_%s_%s.json" % (_h, role)
+
+
+def _register_process_sha():
+    if _PROC_SHA_ROLE == "web":
+        return
+    try:
+        with open(_proc_sha_path(_PROC_SHA_ROLE), "w") as _f:
+            json.dump({"role": _PROC_SHA_ROLE, "pid": os.getpid(),
+                       "git_sha": _GIT_SHA, "ts": time.time()}, _f)
+    except Exception:
+        pass
+
+
+def _collect_process_shas():
+    """[{role,pid,git_sha}] — web (bu süreç) + canlı macro/refresh süreçleri."""
+    out = [{"role": "web", "pid": os.getpid(), "git_sha": _GIT_SHA}]
+    for _role in ("macro", "refresh"):
+        try:
+            with open(_proc_sha_path(_role)) as _f:
+                _d = json.load(_f)
+            os.kill(int(_d["pid"]), 0)
+            out.append({"role": _role, "pid": _d["pid"], "git_sha": _d.get("git_sha")})
+        except Exception:
+            continue
+    return out
+
+
+_register_process_sha()
+
 # CPO-1227 §2: makro/varlık chart cache'i normal koşullarda başlangıç
 # yenilemesiyle birkaç dakikada dolar (_serial_chart_refresh); bu pencere
 # geçtiyse "loading:true" artık dürüst değil — bkz _chart_response_with_macro_summary.
@@ -10520,6 +10560,7 @@ def api_health():
     hesaplama döngüsü `_lock` yüzünden tıkansa BİLE bu alan tazeliğini korur."""
     resp = dict(_health_snapshot)
     resp["lock_probe"] = _lock_probe_state
+    resp["processes"] = _collect_process_shas()  # D-01b
     return safe_json(resp)
 
 

@@ -99,6 +99,7 @@ fail_rollback() {
   log "Initiating rollback to $ROLLBACK_SHA..."
   dry "cd $REPO_DIR && git reset --hard $ROLLBACK_SHA"
   dry "systemctl restart $SERVICE"
+  dry "systemctl restart bist30-macro"
   if [ "$DRY_RUN" = "0" ]; then
     sleep 5
     HTTP=$(curl -sw '%{http_code}' "$HEALTH_URL" -o /dev/null --max-time 8 2>/dev/null || echo "ERR")
@@ -377,6 +378,8 @@ fi
 # ─── 8. Reload service ───────────────────────────────────────────────────────
 log "DEPLOY 3/4: Reloading service..."
 dry "systemctl reload $SERVICE || systemctl restart $SERVICE"
+# D-01b: macro worker ayri surec (macro_worker.py) — reload'dan etkilenmez, kod ayni sha'ya gecsin
+dry "systemctl restart bist30-macro"
 if [ "$DRY_RUN" = "0" ]; then
   sleep 5
   if systemctl is-active --quiet "$SERVICE"; then

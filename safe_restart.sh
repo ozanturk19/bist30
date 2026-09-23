@@ -16,6 +16,7 @@ fi
 
 echo "🔄 bist30 restart başlıyor..."
 systemctl restart bist30
+systemctl restart bist30-macro  # D-01b: macro worker ayni sha'ya gecsin
 echo "⏳ Warmup bekleniyor (45s)..."
 sleep 45
 echo "🔍 Smoke test çalıştırılıyor..."
