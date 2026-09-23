@@ -646,8 +646,11 @@
         }
       } else {
         _daDataTries = 0;
-        daRenderSpotlight(real);
-        daRenderCurated(real);
+        /* C-P0-2309: donuk (stale) hisse öne çıkan/sıralama havuzuna girmez —
+           MARKA 11.09'dan beri aynı fiyatla Spotlight'a aday oluyordu. */
+        var ranked = real.filter(function(s){ return !s.stale_reason && s.data_quality !== 'stale'; });
+        daRenderSpotlight(ranked);
+        daRenderCurated(ranked);
         daRenderStockGrid(real);
         daRenderMarquee(real);
       }

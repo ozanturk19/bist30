@@ -219,6 +219,31 @@
 
   {% include '_stale_banner.html' %}
 
+  {#- C-P0-2309: hisseye özel donuk-veri uyarısı SSR'da (JS kapalıyken de görünür).
+      Tarih last_fresh_ts'ten TR gününe (UTC+3) Jinja içinde çevrilir (Hinnant civil_from_days). -#}
+  {%- if ssr_signal and (ssr_signal.stale_reason or ssr_signal.data_quality == 'stale') %}
+  {%- set _st_ts = ssr_signal.last_fresh_ts or 0 %}
+  {%- set _z = ((_st_ts + 10800) // 86400)|int + 719468 %}
+  {%- set _doe = _z - (_z // 146097) * 146097 %}
+  {%- set _yoe = (_doe - _doe // 1460 + _doe // 36524 - _doe // 146096) // 365 %}
+  {%- set _doy = _doe - (365 * _yoe + _yoe // 4 - _yoe // 100) %}
+  {%- set _mp = (5 * _doy + 2) // 153 %}
+  {%- set _st_d = _doy - (153 * _mp + 2) // 5 + 1 %}
+  {%- set _st_m = _mp + 3 if _mp < 10 else _mp - 9 %}
+  {%- set _sr = (ssr_signal.stale_reason or '') ~ '' %}
+  <div class="hisse-stale-box" data-stale="1" role="note"
+       style="background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-md);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-stale);line-height:1.5">
+    <span aria-hidden="true">⚠️</span>
+    <strong>{% if _st_ts %}Son veri {{ '%02d.%02d'|format(_st_d, _st_m) }} · güncellenmiyor{% else %}Bu hissenin verisi güncellenmiyor{% endif %}</strong>
+    {%- if _sr.startswith('insufficient_history:') %}
+    — Bu hissenin fiyat geçmişi kısa ({{ _sr.split(':')[1].split('<')[0] }} gün); analiz 120 gün dolunca başlar.
+    {%- elif _sr == 'no_fetch' %}
+    — Veri kaynağından bu hisse için güncel fiyat alınamıyor.
+    {%- endif %}
+    Aşağıdaki fiyat ve puanlar bu tarihe aittir.
+  </div>
+  {%- endif %}
+
   <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
     <span id="dataFreshness" data-tip="" tabindex="0" style="display:none;align-items:center;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
