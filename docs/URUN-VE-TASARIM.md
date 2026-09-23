@@ -28,7 +28,7 @@
    - Gün sonu ürünü "canlı" demez.
    - Gecikmeli veri "15 dk gecikmeli" diye yazılır.
    - Bayat veri görünür uyarıyla verilir: "Son veri 11.09 · güncellenmiyor" + sade neden.
-   - **Göreli zaman yok** (Ozan, 23.09): gün sonu verisinin etiketinde "bugün / dün / günün" yazılmaz. Kesin tarih ("22 Eylül kapanışı") ya da "son seans" yazılır, çünkü veri ertesi gün de aynı görünür.
+   - **Göreli zaman yok** (Ozan, 23.09): gün sonu verisinin etiketinde "bugün / dün / günün" yazılmaz. Kesin tarih ("22 Eylül kapanışı") ya da "son seans" yazılır, çünkü veri ertesi gün de aynı görünür. Bölüm adları da buna uyar: "Günün hareketlileri" → "Son seansın hareketlileri", "Günün Gündemi" → **"Gündem"** (baskı tarihiyle: "23 Eylül · akşam baskısı"), tarama çipi "Son seansta Trend Bozuldu", takvimde "Bugün/Yarın" yerine tarih başlığı ("24 Eylül Perşembe").
    - **"Ücretsiz" yazılmaz** (Ozan, 23.09): amatör durur.
 8. **Kaynak etiketi yok** (Ozan, 23.09): sitede rakamların ve haberlerin yanına kaynak yazılmaz. Doğruluk içeride sağlanır: KAP doğrulama kontrolü ve kaynak izi.
 9. **Terimler:**
@@ -83,7 +83,7 @@
   - Rakamları AI yazmaz; kod yerleştirir.
   - Yayından önce doğrulayıcı çalışır: sayı eşitliği + yasak dil (AL/SAT, teknik hedef, "tavsiye").
   - Metnin üstünde yalnız "AI ile yazıldı" etiketi olur (kaynak etiketi yok).
-  - Web araması yalnız "Günün Gündemi"nde yapılır. Kaynaklar içeride doğrulama için tutulur.
+  - Web araması yalnız "Gündem"de yapılır. Kaynaklar içeride doğrulama için tutulur.
   - Önce 10 hisselik pilot yapılır; iki model yan yana okunup seçilir.
 
 ## 4. Bilgi mimarisi
@@ -107,11 +107,11 @@
   5. **BIST100 ısı haritası.**
   6. Son seansın hareketlileri 5+5 (tavan/taban etiketi).
   7. Öne çıkan şirketler: yazılı kural, 3 soru sütunu.
-  8. Haberler: Günün Gündemi + şirket haberleri.
+  8. Haberler: Gündem + şirket haberleri.
   9. Akşam Bülteni aboneliği.
   10. Tek feragat.
 - **Haberler (W9):**
-  - **Günün Gündemi:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
+  - **Gündem:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
   - **KAP akışı:** her bildirim site içinde kalıcı bir sayfa: tek cümle özet, önem oranı ("sözleşme tutarı yıllık hasılatın %4,7'si"), orijinal metin. Dış bağlantı ve kaynak etiketi yok. Rutin duyurular elenir.
   - **Takvim** sekmesi.
   - **Akşam Bülteni** `/bulten/<tarih>`.
