@@ -1,7 +1,7 @@
 # BorsaPusula — Ürün ve Tasarım Kanonu
 
 > **Canlı belge.** Ozan'ın onayladığı ürün kararlarının ve sitenin tasarım dilinin **tek kaynağı**.
-> Son güncelleme: **23.09.2026 17:30** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
+> Son güncelleme: **23.09.2026 18:00** (CPO). İş kuyruğu ve uygulama sırası: ops deposu `plans/2026-09-23-MASTER-PLAN.md`.
 > Kural: yeni bir tasarım ya da ürün kararı önce taslak (mockup) olarak Ozan'a gider, onaydan sonra **önce bu belgeye**, sonra plana ve koda girer. CPO ve DEV1 ajanları dil kuralları ve tasarım dili için bu belgeyi okur.
 
 ---
@@ -94,7 +94,17 @@
   4. Son haberler (3 KAP satırı → Haberler sekmesi).
   5. Kapalı akordeonlar: Teknik ayrıntılar; Sık sorulanlar ve yöntem (SEO metni DOM'da kalır).
   6. Tek feragat satırı.
-- **Ana sayfa blok sırası:** Hero → Güçlü Trend → **BIST100 ısı haritası** → Hareketliler (5+5) → Öne çıkan şirketler (orta-uzun vade) → Haberler özeti + abonelik.
+- **Ana sayfa blok sırası (C-M2 taslağı):**
+  1. Canlı makro şerit ("BIST verisi 15 dk gecikmeli").
+  2. Kahraman: H1 önerisi **"Üç soruda BIST."** (O21 bekliyor) + tek cümle + 3 soru çipi + arama. Arkada gerçek BIST100 son 30 gün dalgası ve kapanış kutusu; sahte dalga yok.
+  3. Tüm kapsamın durum şeridi (her çizgi bir hisse; yeşil / arduvaz / koyu).
+  4. Güçlü Trend kartları: gün sayısı + BP halkası + "Finansallar" betimi.
+  5. **BIST100 ısı haritası.**
+  6. Günün hareketlileri 5+5 (tavan/taban etiketi).
+  7. Öne çıkan şirketler: yazılı kural, 3 soru sütunu.
+  8. Haberler: Günün Gündemi + şirket haberleri.
+  9. Akşam Bülteni aboneliği.
+  10. Tek feragat.
 - **Haberler (W9):**
   - **Günün Gündemi:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
   - **KAP akışı:** her bildirim site içinde kalıcı bir sayfa: tek cümle özet, önem oranı ("sözleşme tutarı yıllık hasılatın %4,7'si"), orijinal metin. Dış bağlantı ve kaynak etiketi yok. Rutin duyurular elenir.
@@ -208,6 +218,7 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | BIST100 ısı haritası | https://claude.ai/artifact/XgdfkJQthV1iNrCzw5fMx4 | `plans/mockups/isi-haritasi.html` (+ `heatmap_data.json`, `build_heatmap_data.py`) | O16d A, O20 A (Değişim) |
 | Logo v2 | https://claude.ai/artifact/BnQg57WyCGg7X7LtgVJmMZ | `plans/mockups/logo-v2.html` | O7b A (Yumuşak Yıldız) |
 | Hisse Özet v2 | https://claude.ai/artifact/6Rx4X5tZFouMqN2bYUc1Qp | `plans/mockups/hisse-ozet.html` (+ `hisse_data.json`, `build_hisse_data.py`) | O16a B → notlarla v2 (23.09 16:2x) |
+| Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O16b + O21 (başlık "Üç soruda BIST." önerildi) bekliyor, son tarih 26.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
