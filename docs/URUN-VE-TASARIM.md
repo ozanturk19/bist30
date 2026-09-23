@@ -117,7 +117,7 @@
   9. Akşam Bülteni aboneliği.
   10. Tek feragat.
 - **Haberler (W9):**
-  - **Gündem:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
+  - **Gündem:** Türkiye + Dünya; günde 2 baskı (~08:30 ve ~19:30); 5-8 madde. Her madde en az iki bağımsız kaynakla içeride doğrulanır; gün içi fiyat hareketi kapanışla karışmasın diye "gün içinde" diye yazılır (ör. "Brent gün içinde yeniden 100 doları aştı", kapanış 98,44). Her madde içeride güvenilir bir kaynakla doğrulanır; sayfada kaynak etiketi yok. Her maddede ilgili hisse/sektör çipleri var. Başka sitelerin metni kopyalanmaz.
   - **KAP akışı:** her bildirim site içinde kalıcı bir sayfa: tek cümle özet, önem oranı ("sözleşme tutarı yıllık hasılatın %4,7'si"), orijinal metin. Dış bağlantı ve kaynak etiketi yok. Rutin duyurular elenir.
   - **Takvim** sekmesi.
   - **Akşam Bülteni** `/bulten/<tarih>`.
@@ -232,6 +232,7 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O21 A ("Üç soruda BIST."), O16b B → notlarla v2 (23.09 21:5x), v3 "Gündem" adı |
 | **Temel sekmesi v2 + Keşfet listeleri** (karar bekliyor) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e + O22 bekliyor, son tarih 27.09 12:00 |
 | **Tarama v2** (karar bekliyor) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c bekliyor, son tarih 27.09 12:00 |
+| **Haberler** (karar bekliyor) | https://claude.ai/artifact/45h9DvBjYLPSEm4Ct2apLE | `plans/mockups/haberler.html` (+ `build_haberler.py`, `haberler_data.json`; iç kaynak listesi `haberler_gundem_kaynaklari_ic.md`) | O16f bekliyor, son tarih 28.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
