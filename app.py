@@ -1657,6 +1657,18 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
     return tier
 
 
+# DEV1 D-P0-2309 (23.09): analyze() None dönünce SEBEP kaybolup gidiyordu —
+# prev_cache fallback (aşağıda ~4046) hangi ticker'ın neden taze veri
+# ALAMADIĞINI bilmeden hep aynı "stale" etiketini yapıştırıyordu. MARKA vakası
+# (11.09'dan beri donuk) bunun gerçek örneği: yfinance MARKA için 2y/5y
+# istekte de yalnız 47 satır (17.07.2026'dan bu yana) döndürüyor — geçici bir
+# fetch hatası değil, sembolün Yahoo'daki geçmişi 120 günlük eşiğe henüz
+# ulaşmamış (muhtemel ticker/şirket değişimi). Bu sözlük son "None" nedenini
+# tutar; fallback bunu okuyup stale_reason alanına yazar (silent-freeze yerine
+# görünür teşhis).
+_ANALYZE_FAIL_REASON = {}    # {ticker_base: (reason_code, rows)}
+
+
 def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
 
@@ -1666,6 +1678,10 @@ def analyze(ticker_base):
         if df is None or len(df) < 120:
             logger.warning("analyze(%s): sessiz None dönüş — df=%s rows=%s (<120 eşiği)",
                             ticker_base, "None" if df is None else "var", 0 if df is None else len(df))
+            _ANALYZE_FAIL_REASON[ticker_base] = (
+                "no_fetch" if df is None else "insufficient_history",
+                0 if df is None else len(df),
+            )
             return None
 
         # CPO-1359 (i): sıralı bütçe 65s->~25-30s. weekly_trend (20s) ve
@@ -2048,6 +2064,7 @@ def analyze(ticker_base):
         # çakışması nedeniyle kaldırıldı, 3→2 katman + rozet-yok.
         tier = _derive_tier(signal, signal_strength, low_liquidity, earnings_warning)
 
+        _ANALYZE_FAIL_REASON.pop(ticker_base, None)  # D-P0-2309: iyileşti, eski nedeni taşıma
         return {
             "ticker":        ticker_base,
             "price":         round(c, 2),
@@ -4048,6 +4065,20 @@ def _refresh_data_impl():
         if _pt and _pt not in _fresh_tickers:
             _fallback = dict(_ps)
             _fallback["data_quality"] = "stale"
+            # D-P0-2309: bu cycle'da NEDEN taze veri gelmediğini işaretle —
+            # eskiden hep aynı "stale" etiketiydi, MARKA gibi kalıcı vakalarla
+            # (yfinance geçmişi 120g eşiğinin altında) geçici bir timeout
+            # ayrımı yoktu. _ANALYZE_FAIL_REASON'da kayıt yoksa (ör. ticker bu
+            # cycle'da hiç denenmedi) "unknown" yazılır.
+            _reason = _ANALYZE_FAIL_REASON.get(_pt)
+            if _reason:
+                _rcode, _rrows = _reason
+                _fallback["stale_reason"] = (
+                    f"insufficient_history:{_rrows}<120" if _rcode == "insufficient_history"
+                    else "no_fetch"
+                )
+            else:
+                _fallback["stale_reason"] = "unknown"
             # DEV-1034/CPO-1020: eski tier'ı köre kopyalama — carried-over
             # signal_strength'ten yeniden türet, yoksa badge kalıcı olarak
             # eski (tier_score bazlı veya bir önceki döngüden kalma) değerde donuyor.
