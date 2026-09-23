@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
-<meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX, EMA12/99 tabanlı teknik analiz. Ücretsiz, günlük güncelleme.{% else %}BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.{% endif %}">
+<meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX, EMA12/99 tabanlı teknik analiz. Gün sonu verisiyle güncellenir.{% else %}BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Gün sonu verisiyle güncellenir.{% endif %}">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/">
@@ -26,7 +26,7 @@
   "alternateName": "borsapusula.com",
   "url": "https://borsapusula.com",
   "logo": { "@type": "ImageObject", "url": "https://borsapusula.com/static/icon-512.png", "width": 512, "height": 512 },
-  "description": "BorsaPusula, Türk yatırımcılar için algoritmik teknik analiz sinyalleri sunan ücretsiz BIST sinyal platformudur. Supertrend, ADX ve EMA12/99 göstergelerine dayalı şeffaf, backtest doğrulanmış sinyaller.",
+  "description": "BorsaPusula, BIST şirketlerini her akşam kapanıştan sonra üç soruyla puanlar: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Temel analiz KAP'ta açıklanan rakamlarla, trend durumu Supertrend, ADX ve EMA12/99 ile hesaplanır.",
   "foundingDate": "2025",
   "areaServed": { "@type": "Country", "name": "Türkiye" },
   "knowsAbout": ["BIST", "Borsa İstanbul", "Teknik Analiz", "Algoritmik Trading", "Hisse Senedi Sinyalleri", "Supertrend", "ADX", "EMA"],
@@ -41,9 +41,9 @@
 {
   "@context": "https://schema.org", "@type": "FinancialService", "@id": "https://borsapusula.com/#service",
   "name": "BorsaPusula — BIST Sinyal Servisi", "url": "https://borsapusula.com",
-  "description": "Algoritmik BIST hisse senedi teknik analiz sinyalleri. Günlük güncellenmiş Güçlü Trend / Trend Bozuldu / Yatay sinyalleri, geriye dönük backtest doğrulamasıyla.",
+  "description": "BIST şirketleri için gün sonu verisiyle temel analiz, değerleme ve trend durumu (Güçlü Trend / Trend Bozuldu / Yatay).",
   "provider": { "@id": "https://borsapusula.com/#organization" }, "areaServed": "TR", "serviceType": "Teknik Analiz Sinyal Servisi",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY", "availability": "https://schema.org/InStock", "description": "Ücretsiz sinyal erişimi" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY", "availability": "https://schema.org/InStock", "description": "Üyeliksiz erişim" },
   "termsOfService": "https://borsapusula.com/yasal", "audience": { "@type": "Audience", "audienceType": "Bireysel Yatırımcı" }
 }
 </script>
@@ -168,7 +168,7 @@
        tek açıklama kaynağı olan /metodoloji anasayfadan hiç linklenmiyordu —
        sadece header "Daha" menüsünün 7. öğesi. Yeni bileşen değil, mevcut
        terimi ve lejantı mevcut sayfaya bağlamak yeterli. #}
-    <p class="da-hero-sub">Supertrend, ADX ve EMA12/99 — sinyal bu 3 bağımsız testin oybirliğiyle doğar, geriye dönük backtest doğrulamasıyla. Sinyalin gücünü ayrıca <a href="/metodoloji" style="color:var(--bp-text);text-decoration:underline;text-decoration-color:var(--bp-border2);text-underline-offset:2px"><strong>Teknik Güç Skoru</strong></a> (0–100) ölçer: ADX + günlük hacim oranı + RSI + Teyit.</p>
+    <p class="da-hero-sub">Her akşam kapanıştan sonra {% if ssr_signal_counts and ssr_signal_counts.total %}{{ ssr_signal_counts.total }} {% endif %}BIST şirketini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Nasıl hesapladığımız <a href="/metodoloji" style="color:var(--bp-text);text-decoration:underline;text-decoration-color:var(--bp-border2);text-underline-offset:2px"><strong>Metodoloji</strong></a> sayfasında.</p>
 
     {# bughunt-13.09 (strateji workflow, ilk-kullanım denetimi): arama
        kutusuna tıklayınca açılan overlay'de "ne arayacağını bilmeyen"

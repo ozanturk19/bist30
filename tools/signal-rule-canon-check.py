@@ -71,6 +71,15 @@ RE_ST = re.compile(r'Supertrend|\bST\s*=\s*(?:LONG|SHORT)', re.I)
 RE_ADX_THR = re.compile(r'ADX\s*(?:\(14\))?\s*(?:&[lg]?t;|[>≥<])?\s*[≥>]=?\s*25'
                         r'|ADX\s*(?:\(14\))?\s*&gt;=?\s*25'
                         r'|ADX\s*(?:\(14\))?\s*≥\s*25', re.I)
+# C-02: R1 esiksiz ADX animinda da tetiklenir -- "Supertrend, ADX ve EMA12/99:
+# sinyal bu 3 testin oybirligiyle dogar" esik yazmadan kural beyan ediyordu.
+RE_ADX_ANY = re.compile(r'\bADX\b')
+# Esiksiz yolda " + " ve ok gosterge LISTESI de olabilir ("Supertrend + ADX +
+# EMA12/99 teknik analiz") -- yalniz gercek birlestirme sozcukleri sayilir.
+# .py (app.py/blog_content.py) DEV alani: esiksiz yol orada CPO-1792 ile.
+RE_CONJ_STRONG = re.compile(
+    r'ayn\u0131\s+anda|\bAND\b|tamam\u0131|sa\u011fland\u0131\u011f\u0131nda'
+    r'|oybirli\u011f|kriter|ko\u015fullar', re.I | re.U)
 RE_EMA = re.compile(r'EMA\s*12', re.I)
 RE_DI = re.compile(r'DI\s*[+−\-]', re.I)
 
@@ -78,7 +87,7 @@ RE_DI = re.compile(r'DI\s*[+−\-]', re.I)
 # cumlesi ("... gostergelerinin nasil calistigi") kural beyani DEGILDIR.
 RE_CONJ = re.compile(
     r'ayn\u0131\s+anda|\bAND\b|tamam\u0131|birlikte|sa\u011fland\u0131\u011f\u0131nda'
-    r'|uyum\s+sa\u011fla|kriter|ko\u015ful|filtre\s+sistemi|&nbsp;\+&nbsp;'
+    r'|uyum\s+sa\u011fla|oybirli\u011f|kriter|ko\u015ful|filtre\s+sistemi|&nbsp;\+&nbsp;'
     r'|\s\+\s|\u2192|-&gt;', re.I | re.U)
 
 # Basliklar (title/og:title/twitter:title) tam kural beyani tasiyamaz -- kisalik
@@ -91,11 +100,16 @@ RE_SIGNAL_CTX = re.compile(
     r'sinyal|G\u00fc\u00e7l\u00fc\s+Trend|Trend\s+Bozuldu', re.I | re.U)
 
 # --- sayim beyani ------------------------------------------------------------
-RE_COUNT = re.compile(
-    r'(?:\b3\s*/\s*3\s*(?:kriter|ko\u015ful)'
-    r'|\b3\s*(?:teknik\s*)?(?:kriter|ko\u015ful)'
-    r'|\b\u00fc\u00e7\s*(?:teknik\s*)?(?:kriter|ko\u015ful)'
-    r'|\b\u00fc\u00e7l\u00fc\s*(?:kriter|ko\u015ful))', re.I | re.U)
+# C-02: test/sart/onay da kosul sayimidir ("3 bagimsiz testin oybirligi").
+# .py dosyalarinda (DEV alani) genis sayim CPO-1792 kapanana kadar eski kapsamla.
+def _count_re(cnt):
+    ind = r'(?:ba\u011f\u0131ms\u0131z\s*)?(?:teknik\s*)?'
+    return re.compile(
+        r'(?:\b3\s*/\s*3\s*' + cnt + r'|\b3\s*' + ind + cnt +
+        r'|\b\u00fc\u00e7\s*' + ind + cnt +
+        r'|\b\u00fc\u00e7l\u00fc\s*' + cnt + r')', re.I | re.U)
+RE_COUNT = _count_re(r'(?:kriter|ko\u015ful|test|\u015fart|onay)')
+RE_COUNT_PY = _count_re(r'(?:kriter|ko\u015ful)')
 # GOSTERGE sayimi 3'tur ve DOGRUdur: "3 teknik gosterge", "uclu filtre
 # sistemi", "ucunun ayni anda ayni yonu gostermesi" serbesttir -- kapi
 # yalnizca KRITER/KOSUL sozcugu ile yapilan 3'lu sayimi yasaklar (4 kosul var).
@@ -178,13 +192,15 @@ def scan_text(rel, text):
     for ln, blk in blocks(text):
         if RE_TITLE_FIELD.search(blk):
             continue                      # baslik alani: kisalik zorunlulugu
-        is_rule = (bool(RE_ST.search(blk)) and bool(RE_ADX_THR.search(blk))
-                   and bool(RE_EMA.search(blk)) and bool(RE_CONJ.search(blk)))
+        base = bool(RE_ST.search(blk)) and bool(RE_EMA.search(blk))
+        is_rule = base and ((bool(RE_ADX_THR.search(blk)) and bool(RE_CONJ.search(blk)))
+                            or (not rel.endswith('.py') and bool(RE_ADX_ANY.search(blk))
+                                and bool(RE_CONJ_STRONG.search(blk))))
         if is_rule and not RE_DI.search(blk):
             bad.append((rel, ln, 'R1',
                         'kural beyani DI kosulunu anmiyor (kod: ai>=25 AND dip>dim)'))
         if is_rule or RE_SIGNAL_CTX.search(blk):
-            cm = RE_COUNT.search(blk)
+            cm = (RE_COUNT_PY if rel.endswith('.py') else RE_COUNT).search(blk)
             if cm and not RE_COUNT_OK.search(cm.group(0)):
                 bad.append((rel, ln + blk.count('\n', 0, cm.start()), 'R2',
                             'kosul sayimi yanlis: "%s" -- 4 kosul var' % cm.group(0).strip()))
@@ -259,6 +275,15 @@ FIX = [
      '<script>/* SSR 3 kriter checklist sinyal */</script>', 0),
     ("JS satir yorumu muaf (URL korunur)",
      '<script>// 3 kriter sinyal rozeti\nvar u="https://x/y";</script>', 0),
+    ("C-02 eski hero: esiksiz ADX + 3 test",
+     "<p>Supertrend, ADX ve EMA12/99 \u2014 sinyal bu 3 ba\u011f\u0131ms\u0131z testin "
+     "oybirli\u011fiyle do\u011far.</p>", 2),
+    ("C-02 uc onay sayimi",
+     "<p>G\u00fc\u00e7l\u00fc Trend sinyali \u00fc\u00e7 onay ister.</p>", 1),
+    ("C-02 arti isaretli liste kural degil",
+     "<p>Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali.</p>", 0),
+    ("C-02 gosterge listesi kural degil",
+     "<p>Supertrend, ADX, EMA12/99 tabanl\u0131 teknik analiz.</p>", 0),
     ("liste bloğu butun kalir",
      "<ul><li>Supertrend</li><li>ADX ≥ 25</li><li>DI+ &gt; DI−</li>"
      "<li>EMA12 &gt; EMA99</li></ul>", 0),
