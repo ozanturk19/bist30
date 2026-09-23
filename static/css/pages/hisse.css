@@ -52,7 +52,7 @@
     color: var(--bp-text);
     letter-spacing: -0.4px;
     white-space: nowrap;
-    font-family: 'Space Grotesk', 'SF Mono', 'Fira Code', monospace;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   .hib-name {
     font-size: var(--bp-text-base);
@@ -1619,7 +1619,7 @@
     radial-gradient(ellipse 520px 420px at 78% 68%, rgba(var(--bp-accent-cyan-rgb), .06), transparent 70%);
 }
 .score-section-eyebrow { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 6px; max-width: 1180px; position: relative; z-index: 1; }
-.score-section-title { font-family: 'Bricolage Grotesque', -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 22px; color: var(--bp-text); }
+.score-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 22px; color: var(--bp-text); }
 .formula-note { font-size: 12.5px; color: var(--bp-text3); margin-top: 2px; }
 .formula-note b { color: var(--bp-text2); font-weight: 600; }
 .axis-legend { font-size: 11.5px; color: var(--bp-text3); margin: 6px 0 26px; max-width: 1180px; position: relative; z-index: 1; }
@@ -1636,8 +1636,8 @@
 .radar-grid--outer { opacity: .85; }
 .radar-axis { stroke: var(--bp-border); stroke-width: 1; opacity: .4; }
 .radar-data { stroke: var(--bp-accent-cyan); stroke-width: 2; }
-.axis-name { font-size: 10.5px; letter-spacing: .07em; fill: var(--bp-text3); text-transform: uppercase; font-family: -apple-system, sans-serif; }
-.axis-value { font-size: 17px; font-weight: 800; font-family: 'Bricolage Grotesque', sans-serif; }
+.axis-name { font-size: 10.5px; letter-spacing: .07em; fill: var(--bp-text3); text-transform: uppercase; font-family: 'Space Grotesk', system-ui, sans-serif; }
+.axis-value { font-size: 17px; font-weight: 800; font-family: 'Space Grotesk', system-ui, sans-serif; }
 .radar-partial-note {
   display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: 230px; text-align: center; font-size: 12px; color: var(--bp-text2);
@@ -1656,7 +1656,7 @@
 .gauge .ring-bg { fill: none; stroke: var(--bp-border); stroke-width: 6; }
 .gauge .ring-fg { fill: none; stroke: var(--band-color, var(--bp-brand)); stroke-width: 6; stroke-linecap: round; }
 .gauge-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.gauge-value { font-family: 'Bricolage Grotesque', -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.02em; color: var(--bp-text); line-height: 1; }
+.gauge-value { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.02em; color: var(--bp-text); line-height: 1; }
 .gauge-max { font-size: 12px; color: var(--bp-text3); margin-top: 2px; }
 .gauge-label {
   position: absolute; left: 50%; bottom: -30px; transform: translateX(-50%);

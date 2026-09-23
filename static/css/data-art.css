@@ -21,7 +21,7 @@
 
 /* ── 1. Tipografi ilkelleri ─────────────────────────────────────────────── */
 .da-display{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;}
-.da-num{font-family:'Space Grotesk',monospace,sans-serif;font-variant-numeric:tabular-nums;}
+.da-num{font-family:'Space Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;}
 
 /* ── 2. Sayfa gövdesi + bölüm ritmi ─────────────────────────────────────── */
 .da-page{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,40px);position:relative}
@@ -81,7 +81,7 @@
 .da-recap-body .down{color:var(--bp-sat);font-weight:700}
 /* K-BP (21.09): 0,00% yon RENGI almaz — yesil bir yukselis vaadidir. */
 .da-recap-body .neu{color:var(--bp-text2);font-weight:700}
-.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text3);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-pill);padding:5px 11px;position:relative}
+.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text3);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-pill);padding:5px 11px;position:relative}
 
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 
@@ -92,7 +92,7 @@
    .da-chip bir <a> üzerinde kullanılıyor, yani altı çizili kalması gerekirdi;
    ana sayfa JS'i her çipe inline `style="text-decoration:none"` basarak bunu
    farkında olmadan maskeliyordu. Şablondan kullanan ilk sayfada patlardı. */
-.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
+.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
 .da-chip:hover{border-color:var(--bp-accent-cyan);background:rgba(var(--bp-accent-cyan-rgb),.08)}
 .da-chip-badge{font-size:var(--bp-text-xs);padding:3px 8px;border-radius:var(--bp-radius-pill);font-weight:700}
 

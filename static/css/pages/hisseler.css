@@ -108,7 +108,7 @@
   }
   .hh-tk {
     font-size: var(--bp-text-15); font-weight: 800; color: var(--bp-text);
-    font-family: 'Space Grotesk', 'SF Mono', monospace;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     letter-spacing: -0.3px;
   }
   .hh-name {

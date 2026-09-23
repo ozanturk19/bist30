@@ -94,23 +94,14 @@
 </script>
 {% endif %}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- v3: font-display:block — preloaded fonts resolve at ~0ms → imperceptible FOIT → web font from first paint → no metric swap → no CLS -->
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
-<!-- CPO-06.09: yukarıdaki 4 preload'a karşılık gelen @font-face hiç bildirilmemişti —
-     dosyalar önbelleğe iniyordu ama tarayıcı bunları "Space Grotesk"/"Manrope" adına
-     bağlayan bir kural görmediği için hiç KULLANILMIYORDU, sayfa system-ui'ye
-     düşüyordu. Kanıtlanmış Google Fonts CSS linkiyle tamamlandı (diğer 20 şablonla
-     aynı desen) — preload'lar kalsın, zararsız erken-ısınma. -->
+<!-- C-01 (23.09): eski 4 gstatic preload (URL'leri Google CSS'iyle eşleşmiyordu, kullanılmıyordu) silindi; font yalnız aşağıdaki Google Fonts CSS'inden gelir. -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
-<link rel="stylesheet" href="/static/css/data-art.css?v=96623028">
+<link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=e6013645">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=cd6a26be">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1210,7 +1201,7 @@
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',system-ui,sans-serif">
       <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
       <span id="indTechContent">—</span>
     </div>
