@@ -10437,7 +10437,7 @@ def api_tarama():
         max_p    = _qfloat("max_price", 999999)
     except _BadFilterValue as e:
         return jsonify({"error": f"Gecersiz sayisal filtre degeri: {e.args[0]}"}), 400
-    sector   = request.args.get("sector",    "").strip()
+    sector   = sector_taxonomy.canonical_label(request.args.get("sector",    "").strip())  # D-23: eski sektör adı → yeni kova
     eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
     sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
     sort_dir = request.args.get("sort_dir", "")  # asc | desc | (default desc)
@@ -10478,7 +10478,7 @@ def api_tarama_temel():
     except _BadFilterValue as e:
         return jsonify({"error": f"Gecersiz sayisal filtre degeri: {e.args[0]}"}), 400
     band      = request.args.get("band",   "").strip().lower()
-    sector    = request.args.get("sector", "").strip()
+    sector    = sector_taxonomy.canonical_label(request.args.get("sector", "").strip())  # D-23
     sig       = request.args.get("signal", "").strip().upper()
     sort_by   = request.args.get("sort",   "temel_score").strip().lower()
     sort_dir  = request.args.get("sort_dir", "").strip().lower()

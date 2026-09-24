@@ -168,3 +168,18 @@ def tr_key(name):
 def sort_labels(labels):
     """Kova adları Türkçe alfabetik, 'Diğer' en sonda (/tarama filtresi, /hisseler)."""
     return sorted(labels, key=lambda s: (s == OTHER, tr_key(s)))
+
+
+# Eski (D-23 öncesi) sektör adı → yeni kova. Yalnız birebir karşılığı olanlar:
+# "Sanayi" birçok kovaya bölündü, tek karşılığı yok (eski bağlantı boş liste verir).
+LEGACY_ALIASES = {
+    "Holding": "Holding ve Yatırım", "Enerji": "Elektrik", "Perakende": "Ticaret",
+    "Teknoloji": "Bilişim", "Telekom": "İletişim", "Ulaşım": "Ulaştırma",
+    "GYO": "Gayrimenkul", "Kimya/Malzeme": "Kimya, Petrol ve Plastik",
+    "İlaç/Sağlık": "Sağlık",
+}
+
+
+def canonical_label(name):
+    """?sector= değerini güncel kova adına çevirir (bilinmeyen değer aynen döner)."""
+    return LEGACY_ALIASES.get(name, name)

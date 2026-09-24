@@ -238,3 +238,12 @@ def test_app_heatmap_serves_frozen_snapshot_with_current_groups(tmp_path, monkey
     assert {r["t"]: r["g"] for r in m["snap"]["rows"]} == {"AEFES": FOOD, "GARAN": "Bankacılık", "ENKAI": "İnşaat"}
     assert {g["g"] for g in m["groups"]} == {FOOD, "Bankacılık", "İnşaat"}
     app._heatmap_mem.update(path=None, mtime=None)
+
+
+def test_legacy_alias_eski_sektor_adi_yeni_kovaya_gider():
+    assert st.canonical_label("Enerji") == "Elektrik"
+    assert st.canonical_label("Kimya/Malzeme") == "Kimya, Petrol ve Plastik"
+    assert st.canonical_label("Bankacılık") == "Bankacılık"
+    assert st.canonical_label("") == ""
+    known = {b[0] for b in st.BUCKETS}
+    assert set(st.LEGACY_ALIASES.values()) <= known
