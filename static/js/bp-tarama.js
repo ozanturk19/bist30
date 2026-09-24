@@ -208,7 +208,7 @@
   /* ── Parçalar ── */
   function thHTML(k, label, cl, tip) {
     var s = st.sort, on = s.k === k;
-    return '<th scope="col" class="' + cl + '"' + (on ? ' aria-sort="' + (s.dir < 0 ? 'descending' : 'ascending') + '"' : '') + '><button type="button" class="thb" data-act="sort" data-k="' + k + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + label + '<span class="ar" aria-hidden="true">' + (on ? (s.dir < 0 ? '↓' : '↑') : '↕') + '</span></button></th>';
+    return '<th scope="col" class="' + cl + ' th-sortable" aria-sort="' + (on ? (s.dir < 0 ? 'descending' : 'ascending') : 'none') + '"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="' + k + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + label + '<span class="ar" aria-hidden="true">' + (on ? (s.dir < 0 ? '↓' : '↑') : '↕') + '</span></button></th>';
   }
   function emptyHTML() { return '<div class="tv-empty"><b>Bu seçimle eşleşen hisse yok</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
   function tableHTML(rows) {

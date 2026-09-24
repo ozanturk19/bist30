@@ -50,7 +50,7 @@ TH_SORTABLE_RE = re.compile(r'<th\b[^>]*class="[^"]*\bth-sortable\b[^"]*"[^>]*>.
 # 12 th-sortable). v2'de siralama basliklari static/js/bp-tarama.js thHTML()'de uretilir
 # (siralanan sutunda aria-sort + ok; yon iddiali <option> yok). Sablonlarda olculecek yuzey kalmadi.
 MIN_OPTIONS = 0
-MIN_THS     = 0
+MIN_THS     = 6  # CPO 25.09 merge: /tarama SSR thead (Genel seti 6 baslik) ayni th-sortable + th-sort-btn kalibini tasir; JS thHTML() de ayni kalip
 
 # C) yon bucket'li siralama anahtarlari — app.py `_tarama_sort_key` ile ayni
 # kume. Backend bir anahtari daha bucket'larsa buraya EKLENMELI (yoksa kapi

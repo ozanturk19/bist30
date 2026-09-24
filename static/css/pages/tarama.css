@@ -115,7 +115,7 @@
   .num .thb { justify-content: flex-end; }
   .thb .ar { font-size: 12px; letter-spacing: 0; color: var(--bp-text3); opacity: .6; }
   .thb:hover { color: var(--bp-text2); }
-  .tv-tb th[aria-sort] .thb { color: var(--bp-text); }
+  .tv-tb th[aria-sort]:not([aria-sort="none"]) .thb { color: var(--bp-text); }
   .tv-tb th[aria-sort] .ar { color: var(--bp-brand); opacity: 1; }
   .tv .thb:focus-visible { outline-offset: -2px; border-radius: var(--bp-radius-md); }
   .tv-tb td { padding: 9px 14px; border-top: 1px solid var(--bp-border); vertical-align: middle; white-space: nowrap; color: var(--bp-text2); }
