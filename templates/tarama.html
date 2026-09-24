@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=9998dee1">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=f8b2b147">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -390,6 +390,7 @@ function applyTextFilter() {
         (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)) ||
         (s.name && _trFold(s.name).includes(_searchQFold)))
     : _allRows;
+  _limit = _PAGE;
   renderResults(rows, rows.length);
   // bug-hunt r95: applyFilters() her zaman chip bar'i yeniliyordu ama bu fonksiyon
   // (arama yazma + arama temizleme yolu) hic yenilemiyordu -- chip bar arama TEK
@@ -458,25 +459,55 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
-async function loadSectors() {
-  try {
-    const r = await fetch('/api/tarama');
-    const d = await r.json();
-    _sectors = d.sectors || [];
-    // CPO-1585: Teknik VE Temel sekmesi aynı sektör listesini paylaşır —
-    // Temel tarama uç noktası kendi sektör listesini döndürmez, burada
-    // zaten yüklenmiş olan _sectors'ı iki select'e birden dağıtıyoruz.
-    ['fSector', 'fSectorTemel'].forEach(id => {
-      const sel = document.getElementById(id);
-      if (!sel) return;
-      _sectors.forEach(s => {
-        const o = document.createElement('option');
-        o.value = s; o.textContent = s;
-        sel.appendChild(o);
-      });
-    });
-  } catch(e) { console.error('loadSectors: /api/tarama sektor listesi alinamadi', e); }
+/* C-33: sektör listesi için AYRI bir /api/tarama isteği atılmaz (eskiden
+   loadSectors() tüm listeyi yalnız `sectors` için çekiyor, ardından
+   applyFilters() aynı veriyi yeniden çekiyordu). Liste ilk yanıttan bir kez
+   doldurulur; URL'den gelen sektör seçimi o ana kadar bekletilir. */
+let _pendingSector = { fSector: '', fSectorTemel: '' };
+function _sectorVal(id) {
+  return _sectors.length ? document.getElementById(id).value : (_pendingSector[id] || '');
 }
+function _fillSectors(list) {
+  if (_sectors.length || !list || !list.length) return;
+  _sectors = list;
+  // CPO-1585: Teknik VE Temel sekmesi aynı sektör listesini paylaşır.
+  ['fSector', 'fSectorTemel'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    _sectors.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+    if (_pendingSector[id]) _setFilterFieldFromUrl(id, _pendingSector[id]);
+    _pendingSector[id] = '';
+  });
+}
+
+/* C-33: tek temsil + ilk 50 satır. Aktif görünüm matchMedia ile seçilir;
+   masaüstünde yalnız tablo, dar ekranda yalnız kartlar basılır (eskiden 216
+   satır iki kez basılıyordu: ~12.600 düğüm). "Daha fazla" 50'şer ekler. */
+/* C-33: satır başına toLocaleString yeni bir biçimleyici kuruyordu (4x CPU'da 50 satır ~100 ms); tek örnek */
+const _NF2 = new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const _MQ_NARROW = window.matchMedia('(max-width: 899px)');
+const _PAGE = 50;
+let _limit = _PAGE, _limitTemel = _PAGE;
+let _lastRows = null, _lastRowsTemel = null;
+function _moreHtml(rest, which, table) {
+  if (rest <= 0) return '';
+  const btn = `<button type="button" class="btn-reset btn-more" data-more="${which}">Daha fazla göster · ${rest} hisse daha</button>`;
+  return table ? `<tr class="more-row"><td colspan="${table}">${btn}</td></tr>` : `<div class="more-wrap">${btn}</div>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.btn-more');
+  if (!b) return;
+  if (b.dataset.more === 'temel') { _limitTemel += _PAGE; if (_lastRowsTemel) renderTemelResults(_lastRowsTemel, _lastRowsTemel.length, true); }
+  else { _limit += _PAGE; if (_lastRows) renderResults(_lastRows, _lastRows.length, true); }
+});
+_MQ_NARROW.addEventListener('change', () => {
+  if (_lastRows) renderResults(_lastRows, _lastRows.length, true);
+  if (_lastRowsTemel) renderTemelResults(_lastRowsTemel, _lastRowsTemel.length, true);
+});
 
 let _filtersSeq = 0;
 
@@ -549,7 +580,7 @@ async function applyFilters() {
   const mySeq = ++_filtersSeq;
   const sig    = document.getElementById('fSignal').value;
   const minAdx = document.getElementById('fMinAdx').value || 0;
-  const sector = document.getElementById('fSector').value;
+  const sector = _sectorVal('fSector');
   const minP   = _priceParam('fMinP', 0);
   const maxP   = _priceParam('fMaxP', 999999);
   const sort   = document.getElementById('sortSel').value;
@@ -601,8 +632,10 @@ async function applyFilters() {
     const r = await fetch('/api/tarama?' + params, { signal: AbortSignal.timeout(15000) });
     const d = await r.json();
     if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+    _fillSectors(d.sectors);
     if (mySeq !== _filtersSeq) return; // bayat yanit — daha yeni bir applyFilters cagrisi var, at
     _allRows = d.results || [];
+    _limit = _PAGE;
     _hasLoadedOnce = true;
     // Apply text filter on top of server results
     const filtered = _searchQ
@@ -779,7 +812,10 @@ function _hydrateFiltersFromUrl(tab) {
     const params = new URLSearchParams(window.location.search);
     for (const [param, elId] of Object.entries(_TARAMA_URL_MAP[tab])) {
       const val = params.get(param);
-      if (val !== null && val !== '') _setFilterFieldFromUrl(elId, val);
+      if (val === null || val === '') continue;
+      // C-33: sektör seçenekleri ilk /api/tarama yanıtıyla dolar; o zamana kadar beklet
+      if (elId in _pendingSector && !_sectors.length) { _pendingSector[elId] = val; continue; }
+      _setFilterFieldFromUrl(elId, val);
     }
     // K-BA: URL makine bicimi tasir ("12.5"); alan artik metin kutusu oldugu
     // icin kullaniciya TURKCE gosterilir ("12,5"). Geri okuma ayni sayiyi verir
@@ -815,6 +851,7 @@ function _hydrateFiltersFromUrl(tab) {
 
 function renderResults(rows, count) {
   _csvData = rows;
+  _lastRows = rows;
   document.getElementById('loadingDiv').style.display = 'none';
   /* 21.09 (K-W): burada `#resultCount`in TAMAMI yeniden yaziliyordu ve
      kardes `#inlineSpinner` SILINIYORDU — sonraki her filtre degisikliginde
@@ -918,8 +955,10 @@ function renderResults(rows, count) {
      /api/tarama satırı stale_reason / data_quality taşıyınca görünür (SSR ile aynı). */
   const staleChip = s => (s.stale_reason || s.data_quality === 'stale')
     ? `<span class="stale-chip" tabindex="0" data-tip="Bu hissenin verisi güncellenmiyor; fiyat ve puan son alınan veriye aittir." style="display:inline-block;margin-top:2px;font-size:var(--bp-text-2xs);color:var(--bp-stale);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-sm);padding:0 5px">⚠ Güncellenmiyor</span>` : '';
+  const narrow = _MQ_NARROW.matches;
+  const shown = rows.slice(0, _limit);
   const tbody = document.getElementById('resultBody');
-  tbody.innerHTML = rows.map(s => {
+  tbody.innerHTML = narrow ? '' : shown.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
     return `<tr>
       <td>
@@ -933,17 +972,17 @@ function renderResults(rows, count) {
       </span></td>
       <td>${scoreCell(s.signal_strength, s.tier, s.signal)}</td>
       <td>${trendCell(s.adx, s.adx_label, s.signal)}</td>
-      <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
+      <td class="hide-mob-narrow price-val">${s.price != null ? _NF2.format(s.price) : '—'}</td>
       <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—'}</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s)}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
     </tr>`;
-  }).join('');
+  }).join('') + (narrow ? '' : _moreHtml(rows.length - shown.length, 'teknik', 9));
 
   const _mrl = document.getElementById('mobileResultCards');
   if (_mrl) {
-    _mrl.innerHTML = rows.map(s => {
+    _mrl.innerHTML = !narrow ? '' : shown.map(s => {
       const _chgCls  = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
       const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
@@ -962,11 +1001,11 @@ function renderResults(rows, count) {
         <div class="mr-bottom">
           <div class="mr-metric"><div class="mr-metric-label">Teknik Güç</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
-          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? _NF2.format(s.price) + ' ₺' : '—'}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:var(--bp-text-base);font-weight:600">${s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—'}</span></div>
         </div>
       </a>`;
-    }).join('');
+    }).join('') + (narrow ? _moreHtml(rows.length - shown.length, 'teknik', 0) : '');
   }
 
   document.getElementById('resultTable').style.display = '';
@@ -1145,6 +1184,7 @@ function applyTextFilterTemel() {
         (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQTemel)) ||
         (s.name && _trFold(s.name).includes(_searchQFoldTemel)))
     : _allRowsTemel;
+  _limitTemel = _PAGE;
   renderTemelResults(rows, rows.length);
 }
 
@@ -1152,7 +1192,7 @@ async function applyTemelFilters() {
   const mySeq = ++_filtersSeqTemel;
   const band   = document.getElementById('fBant').value;
   const minScore = document.getElementById('fMinTemel').value || 0;
-  const sector = document.getElementById('fSectorTemel').value;
+  const sector = _sectorVal('fSectorTemel');
   const minP   = _priceParam('fMinPTemel', 0);
   const maxP   = _priceParam('fMaxPTemel', 999999);
   const signal = document.getElementById('fSignalTemel').value;
@@ -1192,6 +1232,7 @@ async function applyTemelFilters() {
     if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     if (mySeq !== _filtersSeqTemel) return;
     _allRowsTemel = d.results || [];
+    _limitTemel = _PAGE;
     _temelLoadedOnce = true;
     const filtered = _searchQTemel
       ? _allRowsTemel.filter(s =>
@@ -1214,6 +1255,7 @@ async function applyTemelFilters() {
 }
 
 function renderTemelResults(rows, count) {
+  _lastRowsTemel = rows;
   document.getElementById('loadingDivTemel').style.display = 'none';
   /* 21.09 (K-W): bkz. renderResults — spinner kardesi siliniyordu. */
   document.getElementById('resultCountTextTemel').innerHTML = _searchQTemel
@@ -1250,8 +1292,10 @@ function renderTemelResults(rows, count) {
     return `<span style="color:var(${_categoryColorVar(v)})">${Math.round(v)}</span>`;
   };
 
+  const narrow = _MQ_NARROW.matches;
+  const shown = rows.slice(0, _limitTemel);
   const tbody = document.getElementById('resultBodyTemel');
-  tbody.innerHTML = rows.map(s => {
+  tbody.innerHTML = narrow ? '' : shown.map(s => {
     const cats = s.categories || {};
     return `<tr>
       <td>
@@ -1267,14 +1311,14 @@ function renderTemelResults(rows, count) {
       <td class="hide-mob hide-tablet">${categoryCell(cats.kaldirac)}</td>
       <td class="hide-mob hide-tablet">${categoryCell(cats.degerleme_buyume)}</td>
       <td><span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span></td>
-      <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
+      <td class="hide-mob-narrow price-val">${s.price != null ? _NF2.format(s.price) : '—'}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
     </tr>`;
-  }).join('');
+  }).join('') + (narrow ? '' : _moreHtml(rows.length - shown.length, 'temel', 10));
 
   const _mrl = document.getElementById('mobileResultCardsTemel');
   if (_mrl) {
-    _mrl.innerHTML = rows.map(s => {
+    _mrl.innerHTML = !narrow ? '' : shown.map(s => {
       const _score = s.temel_analiz_skoru;
       const _col = _bandColorVar(s.band);
       const _scoreHtml = _score == null
@@ -1288,10 +1332,10 @@ function renderTemelResults(rows, count) {
         <div class="mr-bottom">
           <div class="mr-metric"><div class="mr-metric-label">Temel Skor</div>${_scoreHtml}</div>
           <div class="mr-metric"><div class="mr-metric-label">BP Skoru</div><span style="color:var(--bp-text2)">${s.borsapusula_skoru != null ? s.borsapusula_skoru : '—'}</span></div>
-          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? _NF2.format(s.price) + ' ₺' : '—'}</span></div>
         </div>
       </a>`;
-    }).join('');
+    }).join('') + (narrow ? _moreHtml(rows.length - shown.length, 'temel', 0) : '');
   }
 
   document.getElementById('resultTableTemel').style.display = '';
@@ -1388,7 +1432,6 @@ window.addEventListener('popstate', () => {
 // sekme, davranış değişmiyor); Temel sadece ilk açıldığında (bkz.
 // switchTaramaTab tembel-yükleme).
 (async () => {
-  await loadSectors();
   /* K-CS: aktif sekme, hidrasyon ve ilk `applyFilters()`ten ONCE bilinmeli —
      hangi sozlugun okunacagini ve adrese kimin yazacagini o belirliyor. */
   let initialTab = 'teknik';

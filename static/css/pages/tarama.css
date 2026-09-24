@@ -742,3 +742,8 @@
     font-size:var(--bp-text-2xs); line-height:1; text-decoration:none; vertical-align:middle;
   }
   .th-help:hover, .th-help:focus-visible { opacity:1; color:var(--bp-text); border-color:var(--bp-text); }
+
+  /* C-33: ilk 50 satırdan sonra "Daha fazla göster" (tablo satırı ya da kart altı) */
+  .more-row td { text-align:center; padding:12px 14px; }
+  .more-wrap { display:flex; justify-content:center; padding:4px 0 12px; }
+  .btn-more { min-height:44px; }
