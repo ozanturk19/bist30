@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
 <meta name="description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/gundem">
@@ -56,7 +56,7 @@
   <div class="sc-footer">
     <div style="display:flex;align-items:center;gap:8px">
       {% if s.price %}<span class="sc-price">{{ s.price|tr_price }} ₺</span>{% endif %}
-      {% if s.price and s.change_pct is not none %}<span class="sc-chg {{ 'up' if s.change_pct > 0 else 'dn' if s.change_pct < 0 else 'neu' }}">{{ '+' if s.change_pct > 0 else '' }}{{ '%.2f'|format(s.change_pct)|replace('.', ',') }}%</span>{% endif %}
+      {% if s.price and s.change_pct is not none %}<span class="sc-chg {{ 'up' if s.change_pct > 0 else 'dn' if s.change_pct < 0 else 'neu' }}">{{ bpf.pct_text(s.change_pct) }}</span>{% endif %}
     </div>
     <span class="sc-arrow">Detay →</span>
   </div>
