@@ -13,7 +13,7 @@
 - **Üç soru** (her hisse için): **Finansalları nasıl?** · **Fiyatı makul mü?** · **Trend destekliyor mu?** Hisse sayfasındaki özet kartının adı **"3 Soruda {HİSSE}"**.
 - **Ürün tipi:** gün sonu (EOD). Sitede "ücretsiz" yazılmaz; ileride bazı analizler ücretli olabilir (Ozan). Gün içi canlılık makro şeritte (seansta 60 sn) ve ana sayfadaki "Seans içi · 15 dk gecikmeli" satırında.
 - **Kapsam:** kademeli olarak Borsa İstanbul'daki tüm paylar (BIST TÜM, 584): önce BIST100'ün tamamı, sonra Yıldız Pazar, sonra kalanı. Gözaltı, Yakın İzleme ve Piyasa Öncesi İşlem Platformu'ndaki paylar kapsam dışı. Verisi yetersiz olan hisse "Sınırlı veri" etiketiyle gösterilir, listelere girmez.
-- **Rakiplere göre konum** (23.09 incelemesi: Fintables, Midas, borsafolio, borsamix, borsacoo…): ücretsiz; Data-Art görsel kimliği; long-only ve tavsiye/hedef dili olmayan dürüst anlatım; sektör gruplu gerçek bir BIST100 ısı haritası (Türk rakiplerde yok); haberin site içinde, bizim verimizle okunması.
+- **Rakiplere göre konum** (23.09 incelemesi: Fintables, Midas, borsafolio, borsamix, borsacoo…): Data-Art görsel kimliği; long-only ve tavsiye/hedef dili olmayan dürüst anlatım; sektör gruplu gerçek bir BIST100 ısı haritası (Türk rakiplerde yok); haberin site içinde, bizim verimizle okunması.
 
 - **GEO kalıcı ilke (Ozan, 24.09 O16h notu: "yaptığımız tüm geliştirme GEO mantığına uygun olmalı"):** her yeni sayfa ve bileşen yapay zekâ arama motorlarının okuyup alıntılayabileceği biçimde yapılır: içerik sunucuda (SSR) hazır gelir; tek H1 ve soru biçiminde alt başlıklar; kısa, kendi başına anlamlı olgu blokları (sayı + tarih); JSON-LD (FAQPage, Article, Dataset uygun olanı); sitemap ve `llms.txt` güncel. Kaynak etiketi kuralı (§2.8) GEO için de geçerlidir.
 
