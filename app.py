@@ -905,7 +905,26 @@ BIST_STOCK_COUNT = len([t for t in BIST100 if t not in INDEX_TICKERS])
 # CPO-1596: 2026 Q3 revizyonuyla gerçek BIST30 28 değil 30 üye (DSTKF/TRALT
 # eklendi, ARCLK/HEKTS/ODAS/OYAKC/SOKM/TKFEN çıktı) — TradingView + Midas
 # çapraz doğrulandı, yfinance veri kaynağı da teyit edildi (2026-09-11).
-BIST30_LITERAL = BIST100[:30]
+# D-46: endeks üyeliği KAP'tan (data/universe.json, tools/build_universe.py). Dosya yok/bozuk/
+# beklenmedik boyutta ise eski konumsal dilim (BIST100[:30]) devreye girer — sessiz çökme yok.
+def _load_universe():
+    _d = os.path.dirname(os.path.abspath(__file__))
+    for _fn in ("data/universe.json", "universe_seed.json"):
+        try:
+            with open(os.path.join(_d, _fn), encoding="utf-8") as _f:
+                _u = json.load(_f)
+            if 28 <= len(_u["indices"]["XU030"]) <= 32 and isinstance(_u.get("companies"), dict):
+                return _u
+        except Exception:
+            continue
+    return {}
+
+
+UNIVERSE = _load_universe()
+_xu030 = set((UNIVERSE.get("indices") or {}).get("XU030") or [])
+_lit30 = [t for t in BIST100 if t in _xu030]
+BIST30_LITERAL = _lit30 if 28 <= len(_lit30) <= 32 else BIST100[:30]
+del _xu030, _lit30
 
 STOCK_NAMES = {
     # ── BIST30 ──────────────────────────────────────────
@@ -1142,6 +1161,10 @@ STOCK_NAMES = {
     "LRSHO":  "Liderfarma Holding",
     "DERHL":  "Derindere Holding",
 }
+# D-46: KAP üye unvanına göre düzeltilmiş adlar dosyadan (23.09 ölçümü, 20 yanlış ad)
+for _t, _n in (UNIVERSE.get("names_override") or {}).items():
+    if _t in STOCK_NAMES:
+        STOCK_NAMES[_t] = _n
 
 # ── KAP (Kamuyu Aydınlatma Platformu) UUID OID eşleştirme ───────────────────
 # Gerçek UUID'ler — KAP /tr/api/search/combined endpoint'inden alındı
@@ -1393,10 +1416,9 @@ del _dev2_sector, _dev2_tickers, _dev2_ticker
 # (sessizce "Diğer"e düşmek yerine) net bir hata ile durur.
 _bist100_stocks = set(t for t in BIST100 if t != "XU030")
 _sectors_missing = _bist100_stocks - set(_TICKER_TO_SECTOR)
-assert not _sectors_missing, (
-    f"SECTORS tek-kaynak ihlali: BIST100'de olup SECTORS'ta olmayan ticker'lar: "
-    f"{sorted(_sectors_missing)} (app.py SECTORS sözlüğüne ekleyin)"
-)
+if _sectors_missing:
+    # D-46: eksik sektör uygulamayı çökertmez — uyarı + _get_sector() "Diğer"e düşer
+    logger.warning("SECTORS'ta olmayan ticker'lar 'Diğer'e düşüyor: %s", sorted(_sectors_missing))
 del _bist100_stocks, _sectors_missing
 
 

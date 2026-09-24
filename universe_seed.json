@@ -1,0 +1,6796 @@
+{
+ "companies": {
+  "A1CAP": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a1416e696301416f37201c5f2e",
+   "sector": null,
+   "title": "A1 CAPİTAL YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "A1YEN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c5794d3d66017a62a693be689d",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "A1 YENİLENEBİLİR ENERJİ ÜRETİM A.Ş."
+  },
+  "AAGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c49c81f743019d2dfb40633db8",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AĞAOĞLU AVRASYA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ACSEL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2420327a4014209c55161144d",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ACISELSAN ACIPAYAM SELÜLOZ SANAYİ VE TİCARET A.Ş."
+  },
+  "ADEL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240e8d16e0140e8f159dc0033",
+   "sector": "DİĞER İMALAT SANAYİİ",
+   "title": "ADEL KALEMCİLİK TİCARET VE SANAYİ A.Ş."
+  },
+  "ADESE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "GAYRİMENKUL FAALİYETLERİ",
+   "mkk": "4028e4a140f2ed720141164431b905a5",
+   "sector": "GAYRİMENKUL FAALİYETLERİ",
+   "title": "ADESE GAYRİMENKUL YATIRIM A.Ş."
+  },
+  "ADGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c586d22c53018a737800f804ae",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ADRA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AEFES": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95bea0140ed2fde10009d",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ANADOLU EFES BİRACILIK VE MALT SANAYİİ A.Ş."
+  },
+  "AFYON": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24158e42401415af83d607fd3",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "AFYON ÇİMENTO SANAYİ T.A.Ş."
+  },
+  "AGESA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95bea0140edeb7a54015d",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "AGESA HAYAT VE EMEKLİLİK A.Ş."
+  },
+  "AGHOL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c014101b18dc000f7",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "AG ANADOLU GRUBU HOLDİNG A.Ş."
+  },
+  "AGROT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TARIM, ORMANCILIK VE BALIKÇILIK",
+   "mkk": "8acae2c48b2fa259018bb9e449415e84",
+   "sector": "TARIM VE HAYVANCILIK AVCILIK VE İLGİLİ HİZMET FAALİYETLERİ",
+   "title": "AGROTECH YÜKSEK TEKNOLOJİ VE YATIRIM A.Ş."
+  },
+  "AGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c0141164a06d8043a",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ATAKULE GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AHGAZ": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a14203278a0142095715f914d0",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AHLATCI DOĞAL GAZ DAĞITIM ENERJİ VE YATIRIM A.Ş."
+  },
+  "AHSGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59145e00a01915a44a01d1179",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AHES GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AKBNK": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240e8d1830140e905edcd0006",
+   "sector": "BANKALAR",
+   "title": "AKBANK T.A.Ş."
+  },
+  "AKCNS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e8cfa00140e92b0c380016",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "AKÇANSA ÇİMENTO SANAYİ VE TİCARET A.Ş."
+  },
+  "AKENR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a14184e9cf01419bffce0b5a69",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AKENERJİ ELEKTRİK ÜRETİM A.Ş."
+  },
+  "AKFGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141733b56014183c1c6ed426e",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AKFEN GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AKFIS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "8acae2c59145e00a0192aedf5db86688",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "AKFEN İNŞAAT TURİZM VE TİCARET A.Ş."
+  },
+  "AKFYE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c48304fe9e0186a66e7a9568ea",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AKFEN YENİLENEBİLİR ENERJİ A.Ş."
+  },
+  "AKGRT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95be70140ed12e1f4002c",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "AKSİGORTA A.Ş."
+  },
+  "AKHAN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49b85f8ce019beef9720d5cc5",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "AKHAN UN FABRİKASI VE TARIM ÜRÜNLERİ GIDA SANAYİ TİCARET A.Ş."
+  },
+  "AKMGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240e95dc30140ecc218b30032",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AKMERKEZ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AKSA": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef470141175e189f0453",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "AKSA AKRİLİK KİMYA SANAYİİ A.Ş."
+  },
+  "AKSEN": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a241733d42014179341a147ddb",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AKSA ENERJİ ÜRETİM A.Ş."
+  },
+  "AKSGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a14158e41f01415a865c0e4d13",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AKİŞ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AKSUE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a140f2ed7201413a20480e0851",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AKSU ENERJİ VE TİCARET A.Ş."
+  },
+  "AKYHO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9901416dc64bd161cb",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "AKDENİZ YATIRIM HOLDİNG A.Ş."
+  },
+  "ALARK": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241462fd80141500c738e36be",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "ALARKO HOLDİNG A.Ş."
+  },
+  "ALBRK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a240f2ef4c014106a1c5ef016d",
+   "sector": null,
+   "title": "ALBARAKA TÜRK KATILIM BANKASI A.Ş."
+  },
+  "ALBTN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49f52d9d8019f6edc29f30cc2",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "ALBAYRAK HAZIR BETON SANAYİ VE TİCARET A.Ş."
+  },
+  "ALCAR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241558bd9014155e085e305fd",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ALARKO CARRIER SANAYİ VE TİCARET A.Ş."
+  },
+  "ALCTL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a140f2ed71014110e38acb01b5",
+   "sector": "BİLİŞİM",
+   "title": "ALCATEL LUCENT TELETAŞ TELEKOMÜNİKASYON A.Ş."
+  },
+  "ALFAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c5830502c30183559e2336223e",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ALFA SOLAR ENERJİ SANAYİ VE TİCARET A.Ş."
+  },
+  "ALGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241462fd801415005df1c3612",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ALARKO GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ALKA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e697d01416f39965a5eb5",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "ALKİM KAĞIT SANAYİ VE TİCARET A.Ş."
+  },
+  "ALKIM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95be70140ed147846003c",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ALKİM ALKALİ KİMYA A.Ş."
+  },
+  "ALKLC": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efac0018fabe7ce965048",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ALTINKILIÇ GIDA VE SÜT SANAYİ TİCARET A.Ş."
+  },
+  "ALTNY": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c58b2fa64e018f3d2d712476e2",
+   "sector": "SAVUNMA",
+   "title": "ALTINAY SAVUNMA TEKNOLOJİLERİ A.Ş."
+  },
+  "ANELE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a1416e696301416ecd11a12b86",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "ANEL ELEKTRİK PROJE TAAHHÜT VE TİCARET A.Ş."
+  },
+  "ANGEN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47afb298b017bed9f037a7185",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ANATOLİA TANI VE BİYOTEKNOLOJİ ÜRÜNLERİ ARAŞTIRMA GELİŞTİRME SANAYİ VE TİCARET A.Ş."
+  },
+  "ANHYT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95be70140ed40cb930098",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "ANADOLU HAYAT EMEKLİLİK A.Ş."
+  },
+  "ANSGR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95bea0140ed21b5c10078",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "ANADOLU ANONİM TÜRK SİGORTA ŞİRKETİ"
+  },
+  "ARASE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c47afb298b017ccb97632144e5",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "DOĞU ARAS ENERJİ YATIRIMLARI A.Ş."
+  },
+  "ARCLK": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240e95dc90140ed55b43900cf",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ARÇELİK A.Ş."
+  },
+  "ARDYZ": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c46d7599a6016dde9d93aa2b52",
+   "sector": "BİLİŞİM",
+   "title": "ARD GRUP BİLİŞİM TEKNOLOJİLERİ A.Ş."
+  },
+  "ARENA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a140e95bea0140ed5af3a000da",
+   "sector": "BİLİŞİM",
+   "title": "ARENA BİLGİSAYAR SANAYİ VE TİCARET A.Ş."
+  },
+  "ARFYE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c4998f24d8019b3576c66b77ad",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ARF BİO YENİLENEBİLİR ENERJİ ÜRETİM A.Ş."
+  },
+  "ARMGD": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59145e00e0193f29ce775161c",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ARMADA GIDA TİCARET SANAYİ A.Ş."
+  },
+  "ARSAN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a14158e41f01415b1862696142",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "ARSAN HOLDİNG A.Ş."
+  },
+  "ARTMS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efac0018dd4c742665c88",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "ARTEMİS HALI A.Ş."
+  },
+  "ARZUM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a1415f4d990141600875c531b9",
+   "sector": "TOPTAN TİCARET",
+   "title": "ARZUM ELEKTRİKLİ EV ALETLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "ASELS": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a1413b7ef401413bc2251e0047",
+   "sector": "SAVUNMA",
+   "title": "ASELSAN ELEKTRONİK SANAYİ VE TİCARET A.Ş."
+  },
+  "ASGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c562329bd1016464c3796e08a0",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ASCE GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ASTOR": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c562329bd10164405fe6c17996",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ASTOR ENERJİ A.Ş."
+  },
+  "ASUZU": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95be70140ed43c4fe00a9",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ANADOLU ISUZU OTOMOTİV SANAYİ VE TİCARET A.Ş."
+  },
+  "ATAGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95bea0140eddf432a0115",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ATA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ATAKP": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c586d22c53018953500b004578",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ATAKEY PATATES GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "ATATP": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c4794d364801798f781baf0fad",
+   "sector": "BİLİŞİM",
+   "title": "ATP YAZILIM VE TEKNOLOJİ A.Ş."
+  },
+  "ATATR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "8acae2c59b85fa06019c31d76d8707fb",
+   "sector": "KONAKLAMA",
+   "title": "ATA TURİZM İŞLETMECİLİK TAŞIMACILIK MADENCİLİK KUYUMCULUK SANAYİ VE DIŞ TİCARET A.Ş."
+  },
+  "AVGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c0141029cf7680164",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AVRASYA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AVHOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "1DE05DAA81E9073AE0530A4A622A2EBD",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "AVRUPA YATIRIM HOLDİNG A.Ş."
+  },
+  "AVOD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed72014107916fed023d",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "A.V.O.D. KURUTULMUŞ GIDA VE TARIM ÜRÜNLERİ SANAYİ TİCARET A.Ş."
+  },
+  "AVPGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48c3efabf018c4824da4a0623",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "AVRUPAKENT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "AVTUR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a241733d42014182b942a247e4",
+   "sector": "KONAKLAMA",
+   "title": "AVRASYA PETROL VE TURİSTİK TESİSLER YATIRIMLAR A.Ş."
+  },
+  "AYCES": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a240e95dc90140ed1bc88e0071",
+   "sector": "KONAKLAMA",
+   "title": "ALTIN YUNUS ÇEŞME TURİSTİK TESİSLER A.Ş."
+  },
+  "AYDEM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c4782a4d580178b56e7c5c4404",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AYDEM YENİLENEBİLİR ENERJİ A.Ş."
+  },
+  "AYEN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a240e95dc90140edf072ef0165",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "AYEN ENERJİ A.Ş."
+  },
+  "AYGAZ": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95be70140ee03bd6000e0",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "AYGAZ A.Ş."
+  },
+  "AZTEK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c4819d0efe01826e96dd896e0e",
+   "sector": "BİLİŞİM",
+   "title": "AZTEK TEKNOLOJİ ÜRÜNLERİ TİCARET A.Ş."
+  },
+  "BAGFS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4701410810f53601c4",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "BAGFAŞ BANDIRMA GÜBRE FABRİKALARI A.Ş."
+  },
+  "BAHKM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efabf0191137b972152e7",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "BAHADIR KİMYA SANAYİ VE TİCARET A.Ş."
+  },
+  "BAKAB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9b01415fdc75f12f64",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "BAK AMBALAJ SANAYİ VE TİCARET A.Ş."
+  },
+  "BALSU": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c580e9103101811f4715cc1821",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "BALSU GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "BANVT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d990141601902e33250",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "BANVİT BANDIRMA VİTAMİNLİ YEM SANAYİ A.Ş."
+  },
+  "BASGZ": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4701413a3410a605ce",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "BAŞKENT DOĞALGAZ DAĞITIM GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "BAYRK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c56faf888c0170a0e2d88d77c3",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "BAYRAK EBT TABAN SANAYİ VE TİCARET A.Ş."
+  },
+  "BEGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48b2fa25a018c01ae7c3973de",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "BATI EGE GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "BERA": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241733d42014174023cb0192b",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "BERA HOLDİNG A.Ş."
+  },
+  "BESLR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1416e696301416ec5743e289d",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "BESLER GIDA VE KİMYA SANAYİ VE TİCARET A.Ş."
+  },
+  "BESTE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c49b85f8ce019c0d9c2cc26b56",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "BEST BRANDS GRUP ENERJİ YATIRIM A.Ş."
+  },
+  "BETAE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5794d3d6a01797a0d1ebd088c",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "BETA ENERJİ VE TEKNOLOJİ A.Ş."
+  },
+  "BEYAZ": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a141558bdd01415619e62c0577",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "BEYAZ FİLO OTO KİRALAMA A.Ş."
+  },
+  "BFREN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95bea0140ee30fb6001b9",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "BOSCH FREN SİSTEMLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "BIENY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24a5df6e7014ba1e60b464173",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "BİEN YAPI ÜRÜNLERİ SANAYİ TURİZM VE TİCARET A.Ş."
+  },
+  "BIGCH": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "8acae2c486d22a3a0187c6822e7324e6",
+   "sector": "YİYECEK VE İÇECEK HİZMETLERİ",
+   "title": "BÜYÜK ŞEFLER GIDA TURİZM TEKSTİL DANIŞMANLIK ORGANİZASYON EĞİTİM SANAYİ VE TİCARET A.Ş."
+  },
+  "BIGEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c49145e00b01949842f70b1a46",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "BİRLEŞİM GRUP ENERJİ YATIRIMLARI A.Ş."
+  },
+  "BIGTK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "4028e4a240ee866c0140f2066a0400b8",
+   "sector": "YAYIMCILIK",
+   "title": "BİG MEDYA TEKNOLOJİ A.Ş."
+  },
+  "BIMAS": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a140e95be70140ee1b7b030119",
+   "sector": "PERAKENDE TİCARET",
+   "title": "BİM BİRLEŞİK MAĞAZALAR A.Ş."
+  },
+  "BINBN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c49145e00b01922d34585110b6",
+   "sector": "BİLİŞİM",
+   "title": "BİN ULAŞIM VE AKILLI ŞEHİR TEKNOLOJİLERİ A.Ş."
+  },
+  "BINHO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48b2fa25a018bba0a5034596d",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "1000 YATIRIMLAR HOLDİNG A.Ş."
+  },
+  "BIOEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c4780814e2017826e1e07318d8",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "BİOTREND ÇEVRE VE ENERJİ YATIRIMLARI A.Ş."
+  },
+  "BIZIM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a1416e696301416ec4471d280d",
+   "sector": "PERAKENDE TİCARET",
+   "title": "BİZİM TOPTAN SATIŞ MAĞAZALARI A.Ş."
+  },
+  "BJKAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a241a25fcb0141a276cda10189",
+   "sector": "SPOR FAALİYETLERİ EĞLENCE VE OYUN FAALİYETLERİ",
+   "title": "BEŞİKTAŞ FUTBOL YATIRIMLARI SANAYİ VE TİCARET A.Ş."
+  },
+  "BKRGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59f52dae901a02330241164cb",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "BAKIRCI GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "BLCYT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2413b80d1014144caf7b90037",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "BİLİCİ YATIRIM SANAYİ VE TİCARET A.Ş."
+  },
+  "BLUME": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c0140f2f8fdcd0002",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BLUME METAL KİMYA A.Ş."
+  },
+  "BMSCH": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c56eccfc0c016f18f5b1e21747",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BMS ÇELİK HASIR SANAYİ VE TİCARET A.Ş."
+  },
+  "BMSTL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47f7cb49201802bda6cbf6b77",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BMS BİRLEŞİK METAL SANAYİ VE TİCARET A.Ş."
+  },
+  "BNTAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "402821824da3aa9b014ef2c4cda22947",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "BANTAŞ BANDIRMA AMBALAJ SANAYİ VE TİCARET A.Ş."
+  },
+  "BOBET": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c4782a4d560178d45481dc5948",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "BOĞAZİÇİ BETON SANAYİ VE TİCARET A.Ş."
+  },
+  "BORLS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "8acae2c486d22a3a018b03b5cfbe29b8",
+   "sector": "KİRALAMA VE LEASING FAALİYETLERİ",
+   "title": "BORLEASE OTOMOTİV A.Ş."
+  },
+  "BORSK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c58b2fa64e018d63bcd2684e71",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "BOR ŞEKER A.Ş."
+  },
+  "BOSSA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9b014160053ed13d39",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "BOSSA TİCARET VE SANAYİ İŞLETMELERİ T.A.Ş."
+  },
+  "BRISA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95bea0140ee33bff201cd",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "BRİSA BRİDGESTONE SABANCI LASTİK SANAYİ VE TİCARET A.Ş."
+  },
+  "BRKSN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1413b7ef4014144cf3f7b0075",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "BERKOSAN YALITIM VE TECRİT MADDELERİ ÜRETİM VE TİCARET A.Ş."
+  },
+  "BRKVY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c562329bd10162b9ff7a6b53d6",
+   "sector": "VARLIK YÖNETİM ŞİRKETLERİ",
+   "title": "BİRİKİM VARLIK YÖNETİM A.Ş."
+  },
+  "BRLSM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "8acae2c4794d3648017aa01a43690c1f",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "BİRLEŞİM MÜHENDİSLİK ISITMA SOĞUTMA HAVALANDIRMA SANAYİ VE TİCARET A.Ş."
+  },
+  "BRSAN": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7201412ac9ca5d06e6",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BORUSAN BİRLEŞİK BORU FABRİKALARI SANAYİ VE TİCARET A.Ş."
+  },
+  "BRYAT": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9b0141603cd3904103",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "BORUSAN YATIRIM VE PAZARLAMA A.Ş."
+  },
+  "BSOKE": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24158e42401415920fc3308c5",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "BATIÇİM ÇİMENTO SANAYİ A.Ş."
+  },
+  "BTCIM": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95be70140ee07044700eb",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "BATIÇİM BATI ANADOLU SANAYİ VE TİCARET A.Ş."
+  },
+  "BUCIM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee35c00140ee41a5e4000f",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "BURSA ÇİMENTO FABRİKASI A.Ş."
+  },
+  "BULGS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c47afb298b017ceaa8534b5036",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "BULLS GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "BURCE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14158e41e01415b2636586ca7",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BURÇELİK BURSA ÇELİK DÖKÜM SANAYİİ A.Ş."
+  },
+  "BURVA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14158e41e01415b2789266cb6",
+   "sector": "ANA METAL SANAYİ",
+   "title": "BURÇELİK VANA SANAYİ VE TİCARET A.Ş."
+  },
+  "BVSAN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5830502c30185dea8694c5722",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "BÜLBÜLOĞLU VİNÇ SANAYİ VE TİCARET A.Ş."
+  },
+  "BYDNR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "8acae2c586d22c510189de64baa92725",
+   "sector": "YİYECEK VE İÇECEK HİZMETLERİ",
+   "title": "BAYDÖNER RESTORANLARI A.Ş."
+  },
+  "CANTE": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c578080f31017811f4dca6032d",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ÇAN2 TERMİK A.Ş."
+  },
+  "CATES": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c58b2fa64e018bfaefef6b6fcd",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ÇATES ELEKTRİK ÜRETİM A.Ş."
+  },
+  "CCOLA": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee35c00140ee586bdd0034",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "COCA-COLA İÇECEK A.Ş."
+  },
+  "CELHA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c0141164dd92d044c",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ÇELİK HALAT VE TEL SANAYİİ A.Ş."
+  },
+  "CEMAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7201413b14392508fb",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ÇEMAŞ DÖKÜM SANAYİ A.Ş."
+  },
+  "CEMTS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee84900140f1f334ce0025",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ÇEMTAŞ ÇELİK MAKİNA SANAYİ VE TİCARET A.Ş."
+  },
+  "CEMZY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49145e00b01918463cdec27bb",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "CEM ZEYTİN A.Ş."
+  },
+  "CEOEM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "8acae2c469cee2a20169ed8afa9112ee",
+   "sector": "BÜRO YÖNETİMİ, BÜRO DESTEĞİ VE DİĞER ŞİRKET DESTEK FAALİYETLERİ",
+   "title": "CEO EVENT MEDYA A.Ş."
+  },
+  "CGCAM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59145e00e01939c2384406d96",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "ÇAĞDAŞ CAM SANAYİ VE TİCARET A.Ş."
+  },
+  "CIMSA": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f1f64bdb0014",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "ÇİMSA ÇİMENTO SANAYİ VE TİCARET A.Ş."
+  },
+  "CITAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c59f52dae5019fd6174d1d4f31",
+   "sector": "PERAKENDE TİCARET",
+   "title": "ÇİTLEKÇİ MAĞAZACILIK GIDA A.Ş."
+  },
+  "CLEBI": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a140ee84900140f1f1584c0015",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "ÇELEBİ HAVA SERVİSİ A.Ş."
+  },
+  "CMBTN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24158e42401415ad0dece7d3a",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "ÇİMBETON HAZIRBETON VE PREFABRİK YAPI ELEMANLARI SANAYİ VE TİCARET A.Ş."
+  },
+  "CONSE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c57f7cbb48018007c3ad6154d4",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "CONSUS ENERJİ İŞLETMECİLİĞİ VE HİZMETLERİ A.Ş."
+  },
+  "COSMO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a24158e42401415ada104f7e44",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "COSMOS YATIRIM HOLDİNG A.Ş."
+  },
+  "CRDFA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141558bdd0141561c84700589",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "CREDITWEST FAKTORİNG A.Ş."
+  },
+  "CRFSA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a140ee35c00140ee56930f0024",
+   "sector": "PERAKENDE TİCARET",
+   "title": "CARREFOURSA CARREFOUR SABANCI TİCARET MERKEZİ A.Ş."
+  },
+  "CUSAN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c552495f6401529d6a45d10598",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ÇUHADAROĞLU METAL SANAYİ VE PAZARLAMA A.Ş."
+  },
+  "CVKMD": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "8acae2c586d22c510187381ba299429a",
+   "sector": "METAL CEVHERİ MADENCİLİĞİ",
+   "title": "CVK MADEN İŞLETMELERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "CWENE": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c56faf888c016fd6c2036e0a5d",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "CW ENERJİ MÜHENDİSLİK TİCARET VE SANAYİ A.Ş."
+  },
+  "DAGI": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a140f2ed7101411160c8c6020f",
+   "sector": "PERAKENDE TİCARET",
+   "title": "DAGİ GİYİM SANAYİ VE TİCARET A.Ş."
+  },
+  "DAPGM": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "8acae2c47d3bee4e017ea0492b6a0595",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "DAP GAYRİMENKUL GELİŞTİRME A.Ş."
+  },
+  "DARDL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a144a0804e014521a6ca1c0705",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "DARDANEL ÖNENTAŞ GIDA SANAYİ A.Ş."
+  },
+  "DCTTR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c48c3efac00190dade5a963277",
+   "sector": "TOPTAN TİCARET",
+   "title": "DCT TRADİNG DIŞ TİCARET A.Ş."
+  },
+  "DENGE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee866c0140f1f80b55002b",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "DENGE YATIRIM HOLDİNG A.Ş."
+  },
+  "DERHL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c469cee2a4016a5492160c43c3",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "DERLÜKS YATIRIM HOLDİNG A.Ş."
+  },
+  "DERIM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed710141116818390237",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "DERİMOD KONFEKSİYON AYAKKABI DERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "DESA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f1fe48fa0070",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "DESA DERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "DESPC": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a2416e697d01416ea9d5741424",
+   "sector": "BİLİŞİM",
+   "title": "DESPEC BİLGİSAYAR PAZARLAMA VE TİCARET A.Ş."
+  },
+  "DEVA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed710141116ab1d60241",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "DEVA HOLDİNG A.Ş."
+  },
+  "DGATE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a2416e697d01416eabc02d14f8",
+   "sector": "BİLİŞİM",
+   "title": "DATAGATE BİLGİSAYAR MALZEMELERİ TİCARET A.Ş."
+  },
+  "DGGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e8cfa00140e9497d32002f",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "DOĞUŞ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "DGNMO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f27df70140f2eae68c0032",
+   "sector": "ORMAN ÜRÜNLERİ VE MOBİLYA",
+   "title": "DOĞANLAR MOBİLYA GRUBU İMALAT SANAYİ VE TİCARET A.Ş."
+  },
+  "DITAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed710141179798bb02ed",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "DİTAŞ BDY YEDEK PARÇA İMALAT VE TEKNİK A.Ş."
+  },
+  "DMRGD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c486d22a3b018a97c880c913d6",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "DMR UNLU MAMULLER ÜRETİM GIDA TOPTAN PERAKENDE İHRACAT A.Ş."
+  },
+  "DMSAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c0140f326817e0041",
+   "sector": "ANA METAL SANAYİ",
+   "title": "DEMİSAŞ DÖKÜM EMAYE MAMÜLLERİ SANAYİ A.Ş."
+  },
+  "DNISI": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c473646c5e017410b3f4b16fae",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "DİNAMİK ISI MAKİNA YALITIM MALZEMELERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "DOAS": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a240e8d16e0140e951bf04007b",
+   "sector": "TOPTAN TİCARET",
+   "title": "DOĞUŞ OTOMOTİV SERVİS VE TİCARET A.Ş."
+  },
+  "DOCO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "1DE05DAA82B4073AE0530A4A622A2EBD",
+   "sector": "YİYECEK VE İÇECEK HİZMETLERİ",
+   "title": "DO & CO AKTIENGESELLSCHAFT"
+  },
+  "DOFER": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c486d22a3a018b03b62cd429bd",
+   "sector": "ANA METAL SANAYİ",
+   "title": "DOFER YAPI MALZEMELERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "DOFRB": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c494bafc930198f4d3cccb4dbb",
+   "sector": "BİLİŞİM",
+   "title": "DOF ROBOTİK SANAYİ A.Ş."
+  },
+  "DOGUB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141e536460141ee618a972cf0",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "DOĞUSAN BORU SANAYİ VE TİCARET A.Ş."
+  },
+  "DOHOL": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141462df201414ff732983087",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "DOĞAN ŞİRKETLER GRUBU HOLDİNG A.Ş."
+  },
+  "DOKTA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241558bd9014155c9b19e03b7",
+   "sector": "ANA METAL SANAYİ",
+   "title": "DÖKTAŞ DÖKÜMCÜLÜK TİCARET VE SANAYİ A.Ş."
+  },
+  "DSTKF": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9b01415fe0caa830df",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "DESTEK FİNANS FAKTORİNG A.Ş."
+  },
+  "DUNYH": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141733b51014173e7419c13f1",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "DÜNYA HOLDİNG A.Ş."
+  },
+  "DURDO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141effedc0141fe14e2b41807",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "DURAN DOĞAN BASIM VE AMBALAJ SANAYİ A.Ş."
+  },
+  "DURKN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49145e00d0191c6164e8e4aca",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "DURUKAN ŞEKERLEME SANAYİ VE TİCARET A.Ş."
+  },
+  "DYOBY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e8cf9d0140e95835a30033",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "DYO BOYA FABRİKALARI SANAYİ VE TİCARET A.Ş."
+  },
+  "DZGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee866c0140f1fad94e0047",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "DENİZ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "EBEBK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c586d22c51018a2b6c8f5963cd",
+   "sector": "PERAKENDE TİCARET",
+   "title": "EBEBEK MAĞAZACILIK A.Ş."
+  },
+  "ECILC": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d99014160034b683108",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "EİS ECZACIBAŞI İLAÇ SINAİ VE FİNANSAL YATIRIMLAR SANAYİ VE TİCARET A.Ş."
+  },
+  "ECOGR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c5991b90af019975bc2a6c244d",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ECOGREEN ENERJİ HOLDİNG A.Ş."
+  },
+  "ECZYT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9901416012a278321f",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "ECZACIBAŞI YATIRIM HOLDİNG ORTAKLIĞI A.Ş."
+  },
+  "EDATA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c47902e75101792325d43f2419",
+   "sector": "BİLİŞİM",
+   "title": "E-DATA TEKNOLOJİ PAZARLAMA A.Ş."
+  },
+  "EDIP": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a240e95dc90140ecc568850014",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "EDİP GAYRİMENKUL YATIRIM SANAYİ VE TİCARET A.Ş."
+  },
+  "EFOR": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5819d0efb0182923c4c307fbf",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "EFOR YATIRIM SANAYİ TİCARET A.Ş."
+  },
+  "EGEEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "1DE05DAA8254073AE0530A4A622A2EBD",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "EGE ENDÜSTRİ VE TİCARET A.Ş."
+  },
+  "EGEGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59145e00e019406e89bc4222c",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "EGEYAPI AVRUPA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "EGEPO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "8acae2c4794d3648017a9fceecca0bad",
+   "sector": "İNSAN SAĞLIĞI VE SOSYAL HİZMETLER",
+   "title": "NASMED ÖZEL SAĞLIK HİZMETLERİ TİCARET A.Ş."
+  },
+  "EGGUB": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2422d9a78014304d729e3673d",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "EGE GÜBRE SANAYİİ A.Ş."
+  },
+  "EGPRO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4701413a5c97b805ea",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "EGE PROFİL TİCARET VE SANAYİ A.Ş."
+  },
+  "EGSER": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9b01415ff0ece83aa8",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "EGE SERAMİK SANAYİ VE TİCARET A.Ş."
+  },
+  "EKDMR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241558bd9014155d8e91505c8",
+   "sector": "ANA METAL SANAYİ",
+   "title": "EKİNCİLER DEMİR VE ÇELİK SANAYİ A.Ş."
+  },
+  "EKGYO": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2422d9a780142513cda5b232e",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "EMLAK KONUT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "EKIM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "4028e4a141da49e50141dad016780396",
+   "sector": "KİRALAMA VE LEASING FAALİYETLERİ",
+   "title": "EKİM TURİZM TİCARET VE SANAYİ A.Ş."
+  },
+  "EKOS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48b2fa25a018bb9a255865895",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "EKOS TEKNOLOJİ VE ELEKTRİK A.Ş."
+  },
+  "EKSUN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48304fe9c0186ca8287b67657",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "EKSUN GIDA TARIM SANAYİ VE TİCARET A.Ş."
+  },
+  "ELITE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c4794d364a017aa049a089099f",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ELİTE NATUREL ORGANİK GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "EMKEL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241a25fcb0141a289218b0302",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "EMEK ELEKTRİK ENDÜSTRİSİ A.Ş."
+  },
+  "EMPAE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c562329bd101626c30f98c1590",
+   "sector": "BİLİŞİM",
+   "title": "EMPA ELEKTRONİK SANAYİ VE TİCARET A.Ş."
+  },
+  "ENDAE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c49145e00b01949751383218b4",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ENDA ENERJİ HOLDİNG A.Ş."
+  },
+  "ENERY": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a241733d4201417937d4337e22",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ENERYA ENERJİ A.Ş."
+  },
+  "ENJSA": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a1422d98690142bceaa31957cf",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ENERJİSA ENERJİ A.Ş."
+  },
+  "ENKAI": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a240e95dc90140ed3883fe0093",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "ENKA İNŞAAT VE SANAYİ A.Ş."
+  },
+  "ENSRI": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47d3bee50017f77c935000e69",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "ENSARİ SINAİ YATIRIMLAR A.Ş."
+  },
+  "ENTRA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c48c3efabf018e64e77b5d3e77",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "IC ENTERRA YENİLENEBİLİR ENERJİ A.Ş."
+  },
+  "EPLAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14158e41e01415aa30e206011",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "EGEPLAST EGE PLASTİK TİCARET VE SANAYİ A.Ş."
+  },
+  "ERBOS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14184e9cf01419c006da45a78",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ERBOSAN ERCİYAS BORU SANAYİ VE TİCARET A.Ş."
+  },
+  "ERCB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "2af53003ee3c4464b0b653225816518d",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ERCİYAS ÇELİK BORU SANAYİ A.Ş."
+  },
+  "EREGL": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240e95dc90140ede4c12a0133",
+   "sector": "ANA METAL SANAYİ",
+   "title": "EREĞLİ DEMİR VE ÇELİK FABRİKALARI T.A.Ş."
+  },
+  "ERSU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7201411160fbeb057e",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ERSU MEYVE VE GIDA SANAYİ A.Ş."
+  },
+  "ESCAR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "8acae2c4782a4d560178f8929f486aed",
+   "sector": "KİRALAMA VE LEASING FAALİYETLERİ",
+   "title": "ESCAR FİLO KİRALAMA HİZMETLERİ A.Ş."
+  },
+  "ESCOM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a142140a8d01421437e3fb036a",
+   "sector": "BİLİŞİM",
+   "title": "ESCORT TEKNOLOJİ YATIRIM A.Ş."
+  },
+  "ESEN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c57436079f0174486159f4072f",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ESENBOĞA ELEKTRİK ÜRETİM A.Ş."
+  },
+  "ETILR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a240f2ef4701413b24736d0655",
+   "sector": "YİYECEK VE İÇECEK HİZMETLERİ",
+   "title": "ETİLER GIDA VE TİCARİ YATIRIMLAR SANAYİ VE TİCARET A.Ş."
+  },
+  "EUPWR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c486d22a3b01875b5644ea61c4",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "EUROPOWER ENERJİ VE OTOMASYON TEKNOLOJİLERİ SANAYİ TİCARET A.Ş."
+  },
+  "EUREN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c580e91030018105632b470bcd",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "EUROPEN ENDÜSTRİ İNŞAAT SANAYİ VE TİCARET A.Ş."
+  },
+  "EYGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48304fe9c01843d2398a50797",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "EYG GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "FADE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c46e7fdc6d016f85a87ec9674e",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "FADE GIDA YATIRIM SANAYİ TİCARET A.Ş."
+  },
+  "FENER": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a240e95dc90140ede7351a013d",
+   "sector": "SPOR FAALİYETLERİ EĞLENCE VE OYUN FAALİYETLERİ",
+   "title": "FENERBAHÇE FUTBOL A.Ş."
+  },
+  "FLAP": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "4028e4a141558bdd01415620c00705ad",
+   "sector": "BÜRO YÖNETİMİ, BÜRO DESTEĞİ VE DİĞER ŞİRKET DESTEK FAALİYETLERİ",
+   "title": "FLAP KONGRE TOPLANTI HİZMETLERİ OTOMOTİV VE TURİZM A.Ş."
+  },
+  "FMIZP": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4701410bb5cdab01cf",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "FEDERAL MOGUL İZMİT PİSTON VE PİM ÜRETİM TESİSLERİ A.Ş."
+  },
+  "FONET": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c55a980119015b435875566776",
+   "sector": "BİLİŞİM",
+   "title": "FONET BİLGİ TEKNOLOJİLERİ A.Ş."
+  },
+  "FORMT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c562329bd101633953d02b0477",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "FORMET METAL VE CAM SANAYİ A.Ş."
+  },
+  "FORTE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c47f7cb492018094784f6f309a",
+   "sector": "BİLİŞİM",
+   "title": "FORTE BİLGİ İLETİŞİM TEKNOLOJİLERİ VE SAVUNMA SANAYİ A.Ş."
+  },
+  "FRIGO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9b01415fee1db939f4",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "FRİGO-PAK GIDA MADDELERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "FRMPL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5998f25d7019b732d9c623a64",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "FORMÜL PLASTİK VE METAL SANAYİ A.Ş."
+  },
+  "FROTO": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed71014106890fae0138",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "FORD OTOMOTİV SANAYİ A.Ş."
+  },
+  "FZLGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c586d22c530189534dc2624568",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "FUZUL GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "GARAN": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed720140f37cb2a601b7",
+   "sector": null,
+   "title": "TÜRKİYE GARANTİ BANKASI A.Ş."
+  },
+  "GARFA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240e95dc90140ee1ab24b0189",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "GARANTİ FAKTORİNG A.Ş."
+  },
+  "GEDIK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95bea0140ee1edd700174",
+   "sector": "ARACI KURUMLAR",
+   "title": "GEDİK YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "GEDZA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14158e41e01415b2a655f6cca",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "GEDİZ AMBALAJ SANAYİ VE TİCARET A.Ş."
+  },
+  "GENIL": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c5794d3d6a017a89f2678a1118",
+   "sector": "TOPTAN TİCARET",
+   "title": "GEN İLAÇ VE SAĞLIK ÜRÜNLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "GENKM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49c81f746019c9a20ca2419a9",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "GENTAŞ KİMYA SANAYİ VE TİCARET PAZARLAMA A.Ş."
+  },
+  "GENTS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e696c01416f1e03364c9d",
+   "sector": "ORMAN ÜRÜNLERİ VE MOBİLYA",
+   "title": "GENTAŞ DEKORATİF YÜZEYLER SANAYİ VE TİCARET A.Ş."
+  },
+  "GEREL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14158e41e01415aaad2ae618b",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "GERSAN ELEKTRİK TİCARET VE SANAYİ A.Ş."
+  },
+  "GESAN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "8acae2c4794d364a017af66863e41bae",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "GİRİŞİM ELEKTRİK SANAYİ TAAHHÜT VE TİCARET A.Ş."
+  },
+  "GIPTA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c486d22a3a018a5106156c5c3d",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "GIPTA OFİS KIRTASİYE VE PROMOSYON ÜRÜNLERİ İMALAT SANAYİ A.Ş."
+  },
+  "GLBMD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140e95bea0140ee21b10d0188",
+   "sector": null,
+   "title": "GLOBAL MENKUL DEĞERLER A.Ş."
+  },
+  "GLCVY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c465a51c3801683c2840c516cb",
+   "sector": "VARLIK YÖNETİM ŞİRKETLERİ",
+   "title": "GELECEK VARLIK YÖNETİMİ A.Ş."
+  },
+  "GLRMK": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a1416e696301416f392897603f",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "GÜLERMAK AĞIR SANAYİ İNŞAAT VE TAAHHÜT A.Ş."
+  },
+  "GLRYH": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c01410cf733f303d9",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "GÜLER YATIRIM HOLDİNG A.Ş."
+  },
+  "GLYHO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95bea0140ee24416e0197",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "GLOBAL YATIRIM HOLDİNG A.Ş."
+  },
+  "GMTAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "a3ff494df37b408aa9088106fe98f59e",
+   "sector": "PERAKENDE TİCARET",
+   "title": "GİMAT MAĞAZACILIK SANAYİ VE TİCARET A.Ş."
+  },
+  "GOKNR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1462cc5dd0146673d70055928",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "GÖKNUR GIDA MADDELERİ ENERJİ İMALAT İTHALAT İHRACAT TİCARET VE SANAYİ A.Ş."
+  },
+  "GOLDA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a244a081800145b2cb692413b4",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "GOLDA GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "GOLTS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140e95be70140ee27ccd40129",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "GÖLTAŞ GÖLLER BÖLGESİ ÇİMENTO SANAYİ VE TİCARET A.Ş."
+  },
+  "GOODY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7101412bfc6f340359",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "GOODYEAR LASTİKLERİ T.A.Ş."
+  },
+  "GOZDE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a24158e42201415b0210ba60ef",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "GÖZDE GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "GRSEL": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "8acae2c47d3bee50017f2c2fc65150e6",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "GÜR-SEL TURİZM TAŞIMACILIK VE SERVİS TİCARET A.Ş."
+  },
+  "GRTHO": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48304fe9c018466742a3b2960",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "GRAINTURK HOLDİNG A.Ş."
+  },
+  "GSDDE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a140e95be70140ee2a7f39013b",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "GSD DENİZCİLİK GAYRİMENKUL İNŞAAT SANAYİ VE TİCARET A.Ş."
+  },
+  "GSDHO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95be70140ee2be54b014a",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "GSD HOLDİNG A.Ş."
+  },
+  "GSRAY": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a14203278a0142095598f114ba",
+   "sector": "SPOR FAALİYETLERİ EĞLENCE VE OYUN FAALİYETLERİ",
+   "title": "GALATASARAY SPORTİF SINAİ VE TİCARİ YATIRIMLAR A.Ş."
+  },
+  "GUBRF": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241733d4a01417989f3760a4d",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "GÜBRE FABRİKALARI T.A.Ş."
+  },
+  "GUNDG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59145e00a019146a7cde301bc",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "GÜNDOĞDU GIDA SÜT ÜRÜNLERİ SANAYİ VE DIŞ TİCARET A.Ş."
+  },
+  "GWIND": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c46d7599a6016dee0b5aec36b2",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "GALATA WIND ENERJİ A.Ş."
+  },
+  "GZNMI": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "8acae2c47d3bee50017e3445b465578f",
+   "sector": "SEYAHAT ACENTESİ, TUR OPERATÖRÜ VE DİĞER REZERVASYON HİZMETLERİ İLE İLGİLİ FAALİYETLER",
+   "title": "GEZİNOMİ SEYAHAT TURİZM TİCARET A.Ş."
+  },
+  "HALKB": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "1DE05DAA82C3073AE0530A4A622A2EBD",
+   "sector": null,
+   "title": "TÜRKİYE HALK BANKASI A.Ş."
+  },
+  "HATEK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141e536460141e5859f40059b",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "HATEKS HATAY TEKSTİL İŞLETMELERİ A.Ş."
+  },
+  "HATSN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c586d22c51018a739bad647f5a",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "HAT-SAN GEMİ İNŞAA BAKIM ONARIM DENİZ NAKLİYAT SANAYİ VE TİCARET A.Ş."
+  },
+  "HDFGS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a242140a9601422820b6da43f8",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "HEDEF GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "HEDEF": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c4794d3648017a8bd7bc0103df",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "HEDEF HOLDİNG A.Ş."
+  },
+  "HEKTS": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee35c00140ee5d194a0055",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "HEKTAŞ TİCARET T.A.Ş."
+  },
+  "HKTM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5812b84a401816252165513b1",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "HİDROPAR HAREKET KONTROL TEKNOLOJİLERİ MERKEZİ SANAYİ VE TİCARET A.Ş."
+  },
+  "HLGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee37a30140ee53e47c0057",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "HALK GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "HOROZ": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "8acae2c58b2fa64e018fabc0441664a1",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "HOROZ LOJİSTİK KARGO HİZMETLERİ VE TİCARET A.Ş."
+  },
+  "HRKET": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "8acae2c48c3efabf018f632d8d082913",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "HAREKET PROJE TAŞIMACILIĞI VE YÜK MÜHENDİSLİĞİ A.Ş."
+  },
+  "HTTBT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c57d3bf002017e016f30e442c6",
+   "sector": "BİLİŞİM",
+   "title": "HİTİT BİLGİSAYAR HİZMETLERİ A.Ş."
+  },
+  "HUBVC": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c01413b59d12c0749",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "HUB GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "HUNER": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c47d3bee4e017e347a3f5a5b1a",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "HUN YENİLENEBİLİR ENERJİ ÜRETİM A.Ş."
+  },
+  "HURGZ": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "4028e4a140ee35c70140ee6408650041",
+   "sector": "YAYIMCILIK",
+   "title": "HÜRRİYET GAZETECİLİK VE MATBAACILIK A.Ş."
+  },
+  "ICBCT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a24158e42401415a700e104f3f",
+   "sector": null,
+   "title": "ICBC TURKEY BANK A.Ş."
+  },
+  "ICUGS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141e536460141e53ba7790052",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "ICU GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "IDGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a14184e9c901419d6d716e6b19",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "İDEALİST GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "IEYHO": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7201410d315d200314",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "IŞIKLAR ENERJİ VE YAPI HOLDİNG A.Ş."
+  },
+  "IHAAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "8acae2c57afb2d70017bdf2f5af067ed",
+   "sector": "BİLGİ HİZMET FAALİYETLERİ",
+   "title": "İHLAS HABER AJANSI A.Ş."
+  },
+  "IHEVA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee37a30140ee7a98160079",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "İHLAS EV ALETLERİ İMALAT SANAYİ VE TİCARET A.Ş."
+  },
+  "IHGZT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "4028e4a140ee84900140f1f8d5bc003c",
+   "sector": "YAYIMCILIK",
+   "title": "İHLAS GAZETECİLİK A.Ş."
+  },
+  "IHLAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140ee84900140f1fbc6b1004f",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "İHLAS HOLDİNG A.Ş."
+  },
+  "IHLGM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "GAYRİMENKUL FAALİYETLERİ",
+   "mkk": "4028e4a141a25dcb0141a2a7a0060471",
+   "sector": "GAYRİMENKUL FAALİYETLERİ",
+   "title": "İHLAS GAYRİMENKUL PROJE GELİŞTİRME VE TİCARET A.Ş."
+  },
+  "IHYAY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140ee847b0140f205c4270035",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "İHLAS YAYIN HOLDİNG A.Ş."
+  },
+  "IMASM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47f7cb49201802cedfbb46d26",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "İMAŞ MAKİNA SANAYİ A.Ş."
+  },
+  "INDES": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a2416e697d01416ead8a0615a7",
+   "sector": "BİLİŞİM",
+   "title": "İNDEKS BİLGİSAYAR SİSTEMLERİ MÜHENDİSLİK SANAYİ VE TİCARET A.Ş."
+  },
+  "INFO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a2416e696c01416edd30ca3148",
+   "sector": null,
+   "title": "İNFO YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "INGRM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a241462fd80141556f6a9308a2",
+   "sector": "BİLİŞİM",
+   "title": "INGRAM MİCRO BİLİŞİM SİSTEMLERİ A.Ş."
+  },
+  "INTEM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a241e538b40141e572868704e7",
+   "sector": "TOPTAN TİCARET",
+   "title": "İNTEMA İNŞAAT VE TESİSAT MALZEMELERİ YATIRIM VE PAZARLAMA A.Ş."
+  },
+  "INTET": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c59f52dae501a0248c0eae29aa",
+   "sector": "BİLİŞİM",
+   "title": "İNTETRA TEKNOLOJİ VE BİLİŞİM HİZMETLERİ A.Ş."
+  },
+  "INVEO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7201413b67b22f0929",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "INVEO YATIRIM HOLDİNG A.Ş."
+  },
+  "INVES": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c47d3bee50017f0bbbbbfa3c0e",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "INVESTCO HOLDİNG A.Ş."
+  },
+  "ISATR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201411682b0cb05c6",
+   "sector": null,
+   "title": "TÜRKİYE İŞ BANKASI A.Ş."
+  },
+  "ISBTR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201411682b0cb05c6",
+   "sector": null,
+   "title": "TÜRKİYE İŞ BANKASI A.Ş."
+  },
+  "ISCTR": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201411682b0cb05c6",
+   "sector": null,
+   "title": "TÜRKİYE İŞ BANKASI A.Ş."
+  },
+  "ISDMR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e696c01416ee8eb7b3770",
+   "sector": "ANA METAL SANAYİ",
+   "title": "İSKENDERUN DEMİR VE ÇELİK A.Ş."
+  },
+  "ISFIN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7101410d272d690188",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "İŞ FİNANSAL KİRALAMA A.Ş."
+  },
+  "ISGSY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee866c0140f273ea66014d",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "İŞ GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ISGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7201412acbeb8b06f7",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "İŞ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ISKPL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c575a1b5b601770603623b7c43",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "IŞIK PLASTİK SANAYİ VE DIŞ TİCARET PAZARLAMA A.Ş."
+  },
+  "ISMEN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f275530140f277aa100008",
+   "sector": null,
+   "title": "İŞ YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "ISSEN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c452495e0b0152ef57ae190f85",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "İŞBİR SENTETİK DOKUMA SANAYİ A.Ş."
+  },
+  "ISVEA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59ee1b2d8019eff2b840a0df8",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "İSVEA SERAMİK VE BANYO ÜRÜNLERİ SANAYİ A.Ş."
+  },
+  "IZENR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c5534651ff0153612ea22a02ec",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "İZDEMİR ENERJİ ELEKTRİK ÜRETİM A.Ş."
+  },
+  "IZFAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a146b4c41301485f8c72095698",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "İZMİR FIRÇA SANAYİ VE TİCARET A.Ş."
+  },
+  "IZINV": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TARIM, ORMANCILIK VE BALIKÇILIK",
+   "mkk": "1DE05DAA82FC073AE0530A4A622A2EBD",
+   "sector": "TARIM VE HAYVANCILIK AVCILIK VE İLGİLİ HİZMET FAALİYETLERİ",
+   "title": "İZ YATIRIM HOLDİNG A.Ş."
+  },
+  "IZMDC": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f275550140f27e319401ca",
+   "sector": "ANA METAL SANAYİ",
+   "title": "İZMİR DEMİR ÇELİK SANAYİ A.Ş."
+  },
+  "JANTS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c01413b1b57300719",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "JANTSA JANT SANAYİ VE TİCARET A.Ş."
+  },
+  "KAPLM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1416e696501416f314a3960dc",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "KAPLAMİN AMBALAJ SANAYİ VE TİCARET A.Ş."
+  },
+  "KARCL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1422d986901426b87f6a905e5",
+   "sector": "ANA METAL SANAYİ",
+   "title": "KARDEMİR ÇELİK SANAYİ A.Ş."
+  },
+  "KAREL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a246b4c5a90147d42c754a6bba",
+   "sector": "BİLİŞİM",
+   "title": "KAREL ELEKTRONİK SANAYİ VE TİCARET A.Ş."
+  },
+  "KARSN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f275530140f2e357a501f7",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "KARSAN OTOMOTİV SANAYİİ VE TİCARET A.Ş."
+  },
+  "KARTN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e697d01416e969af50d2e",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "KARTONSAN KARTON SANAYİ VE TİCARET A.Ş."
+  },
+  "KATMR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14184e9cf01419c001e945a74",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "KATMERCİLER ARAÇ ÜSTÜ EKİPMAN SANAYİ VE TİCARET A.Ş."
+  },
+  "KAYSE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a144a0804f0145a837a7ad0a66",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "KAYSERİ ŞEKER FABRİKASI A.Ş."
+  },
+  "KBORU": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48b2fa259018c33b3ca910ba8",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "KUZEY BORU A.Ş."
+  },
+  "KCAER": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416f888d01416f9ea04a058f",
+   "sector": "ANA METAL SANAYİ",
+   "title": "KOCAER ÇELİK SANAYİ VE TİCARET A.Ş."
+  },
+  "KCHOL": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed710140f2f4d6c70039",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "KOÇ HOLDİNG A.Ş."
+  },
+  "KFEIN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c55835f84c015848477328085a",
+   "sector": "BİLİŞİM",
+   "title": "KAFEİN YAZILIM HİZMETLERİ TİCARET A.Ş."
+  },
+  "KGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c0141176f57ca04a5",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "KORAY GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "KIMMR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c5794d3d6a01795f597b820707",
+   "sector": "PERAKENDE TİCARET",
+   "title": "ERSAN ALIŞVERİŞ HİZMETLERİ VE GIDA SANAYİ TİCARET A.Ş."
+  },
+  "KLGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2415f4f8101415f7009a809a2",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "KİLER GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "KLKIM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a144a0804f01452d35e88a3208",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "KALEKİM KİMYEVİ MADDELER SANAYİ VE TİCARET A.Ş."
+  },
+  "KLMSN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e696c01416f7763e874db",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "KLİMASAN KLİMA SANAYİ VE TİCARET A.Ş."
+  },
+  "KLRHO": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d990141600b4b5331e2",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "KİLER HOLDİNG A.Ş."
+  },
+  "KLSER": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f275550140f285f6cf0246",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "KALESERAMİK ÇANAKKALE KALEBODUR SERAMİK SANAYİ A.Ş."
+  },
+  "KLSYN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "402821814da3a99c014f3b4e25ff608e",
+   "sector": "ORMAN ÜRÜNLERİ VE MOBİLYA",
+   "title": "KOLEKSİYON MOBİLYA SANAYİ A.Ş."
+  },
+  "KLYPV": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c494bafc930194bb236113010e",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "KALYON GÜNEŞ TEKNOLOJİLERİ ÜRETİM A.Ş."
+  },
+  "KMPUR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47d3bee4e017da32a238f235f",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "KİMTEKS POLİÜRETAN SANAYİ VE TİCARET A.Ş."
+  },
+  "KNFRT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TARIM, ORMANCILIK VE BALIKÇILIK",
+   "mkk": "4028e4a140f2ed710140f2fc30bc006e",
+   "sector": "TARIM VE HAYVANCILIK AVCILIK VE İLGİLİ HİZMET FAALİYETLERİ",
+   "title": "KONFRUT TARIM A.Ş."
+  },
+  "KOCMT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2416e696c01416f734ce273ad",
+   "sector": "ANA METAL SANAYİ",
+   "title": "KOÇ METALURJİ A.Ş."
+  },
+  "KONKA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a244a08180014619dea2160482",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "KONYA KAĞIT SANAYİ VE TİCARET A.Ş."
+  },
+  "KONYA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f3014c9400cf",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "KONYA ÇİMENTO SANAYİİ A.Ş."
+  },
+  "KOPOL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c486d22a3b01873668ecf84494",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "KOZA POLYESTER SANAYİ VE TİCARET A.Ş."
+  },
+  "KORDS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f30606a700ec",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "KORDSA TEKNİK TEKSTİL A.Ş."
+  },
+  "KOTON": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a2422d9a7801429a4cc3d64f41",
+   "sector": "PERAKENDE TİCARET",
+   "title": "KOTON MAĞAZACILIK TEKSTİL SANAYİ VE TİCARET A.Ş."
+  },
+  "KPEKS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59f52dae5019fd616134d4f1e",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "KAPEKS KİMYA SANAYİ A.Ş."
+  },
+  "KRDMA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201412ace3ada0707",
+   "sector": null,
+   "title": "KARDEMİR KARABÜK DEMİR ÇELİK SANAYİ VE TİCARET A.Ş."
+  },
+  "KRDMB": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201412ace3ada0707",
+   "sector": null,
+   "title": "KARDEMİR KARABÜK DEMİR ÇELİK SANAYİ VE TİCARET A.Ş."
+  },
+  "KRDMD": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed7201412ace3ada0707",
+   "sector": null,
+   "title": "KARDEMİR KARABÜK DEMİR ÇELİK SANAYİ VE TİCARET A.Ş."
+  },
+  "KRGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a244a081810146002d6e0c555f",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "KÖRFEZ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "KRONT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a2415f4f8401415ffc858834e3",
+   "sector": "BİLİŞİM",
+   "title": "KRON TEKNOLOJİ A.Ş."
+  },
+  "KRPLS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47f7cb49101803bbfecdb76dd",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "KOROPLAST TEMİZLİK AMBALAJ ÜRÜNLERİ SANAYİ VE DIŞ TİCARET A.Ş."
+  },
+  "KRSTL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c0140f3180014001a",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "KRİSTAL KOLA VE MEŞRUBAT SANAYİ TİCARET A.Ş."
+  },
+  "KRTEK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef47014106bb724601b1",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "KARSU TEKSTİL SANAYİİ VE TİCARET A.Ş."
+  },
+  "KRVGD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a246b4c5a90148127e32eb47e9",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "KERVAN GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "KTLEV": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c5830502c20185a9e2e5ac488b",
+   "sector": "FİNANSMAN ŞİRKETLERİ",
+   "title": "KATILIMEVİM TASARRUF FİNANSMAN A.Ş."
+  },
+  "KTSKR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5794d3d66017a1e5a8bfb4e07",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "KÜTAHYA ŞEKER FABRİKASI A.Ş."
+  },
+  "KUTPO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c014111cff01d0420",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "KÜTAHYA PORSELEN SANAYİ A.Ş."
+  },
+  "KUVVA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a2422d9a6e01424699b9d061ec",
+   "sector": "TOPTAN TİCARET",
+   "title": "KUVVA GIDA TİCARET VE SANAYİ YATIRIMLARI A.Ş."
+  },
+  "KUYAS": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a241a25fd60141a2bf974c04e8",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "KUYAŞ YATIRIM A.Ş."
+  },
+  "KZBGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c5794d3d66017aadf2b6b719cb",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "KIZILBÜK GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "KZGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c586d22c53018a02754e924a33",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "KUZUGRUP GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "LIDER": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "8acae2c5570aaa2b0157be3a3ef749af",
+   "sector": "KİRALAMA VE LEASING FAALİYETLERİ",
+   "title": "LDR TURİZM A.Ş."
+  },
+  "LIDFA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141da49ea0141dfe0d2732d48",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "LİDER FAKTORİNG A.Ş."
+  },
+  "LILAK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efac0018f193ab573372b",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "LİLA KAĞIT SANAYİ VE TİCARET A.Ş."
+  },
+  "LINK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a2422d9a6e01428f2d3d020b61",
+   "sector": "BİLİŞİM",
+   "title": "LİNK BİLGİSAYAR SİSTEMLERİ YAZILIMI VE DONANIMI SANAYİ VE TİCARET A.Ş."
+  },
+  "LKMNH": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a24158e42401415f1d4417412e",
+   "sector": "İNSAN SAĞLIĞI VE SOSYAL HİZMETLER",
+   "title": "LOKMAN HEKİM ENGÜRÜSAĞ SAĞLIK TURİZM EĞİTİM HİZMETLERİ VE İNŞAAT TAAHHÜT A.Ş."
+  },
+  "LMKDC": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c58b2fa64e018d8cfe461558d3",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "LİMAK DOĞU ANADOLU ÇİMENTO SANAYİ VE TİCARET A.Ş."
+  },
+  "LOGO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a14158e41e01415b41210a6e8c",
+   "sector": "BİLİŞİM",
+   "title": "LOGO YAZILIM SANAYİ VE TİCARET A.Ş."
+  },
+  "LRSHO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7101411799cb9b02fc",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "LORAS HOLDİNG A.Ş."
+  },
+  "LUKSK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f31ed775014f",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "LÜKS KADİFE TİCARET VE SANAYİİ A.Ş."
+  },
+  "LXGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59b85fa03019c74a891e94f5d",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "LUXERA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "LYDHO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4701411763ed38047c",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "LYDİA HOLDİNG A.Ş."
+  },
+  "LYDYE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a241a25fcb0141a7c3f3302405",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "LYDİA YEŞİL ENERJİ KAYNAKLARI A.Ş."
+  },
+  "MAALT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a140f2ed710141179bf0630308",
+   "sector": "KONAKLAMA",
+   "title": "MARMARİS ALTINYUNUS TURİSTİK TESİSLER A.Ş."
+  },
+  "MACKO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "8acae2c48304fe9e0183694124c82d0a",
+   "sector": "SPOR EĞLENCE BOŞ ZAMANLARI DEĞERLENDİRME HİZMETLERİ",
+   "title": "MACKOLİK İNTERNET HİZMETLERİ TİCARET A.Ş."
+  },
+  "MAGEN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c47afb298a017bf270b76b78f1",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "MARGÜN ENERJİ ÜRETİM SANAYİ VE TİCARET A.Ş."
+  },
+  "MAKIM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c57f7cbb49017f977f7f190949",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "MAKİM MAKİNA TEKNOLOJİLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "MAKTK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24158e42201415ad40fca5dd0",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "MAKİNA TAKIM ENDÜSTRİSİ A.Ş."
+  },
+  "MANAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c5794d3d660179f09f7061388a",
+   "sector": "BİLİŞİM",
+   "title": "MANAS ENERJİ YÖNETİMİ SANAYİ VE TİCARET A.Ş."
+  },
+  "MARBL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c45835eb6501593a986e7e57f7",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "TUREKS TURUNÇ MADENCİLİK İÇ VE DIŞ TİCARET A.Ş."
+  },
+  "MARMR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5991b90b001993ca6c1951026",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "MARMARA HOLDİNG A.Ş."
+  },
+  "MARTI": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a1415f4d9b0141603d6cec410f",
+   "sector": "KONAKLAMA",
+   "title": "MARTI OTEL İŞLETMELERİ A.Ş."
+  },
+  "MASFN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c49f52d9d8019f708c67a5106a",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "MASFEN ENERJİ A.Ş."
+  },
+  "MAVI": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a141733b5101417ea9aae11fec",
+   "sector": "PERAKENDE TİCARET",
+   "title": "MAVİ GİYİM SANAYİ VE TİCARET A.Ş."
+  },
+  "MCARD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c59c81f7f7019c98b19b8c0af5",
+   "sector": "BİLİŞİM",
+   "title": "METROPAL KURUMSAL HİZMETLER A.Ş."
+  },
+  "MEDTR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5794d3d6a017a1de13bf04ff2",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "MEDİTERA TIBBİ MALZEME SANAYİ VE TİCARET A.Ş."
+  },
+  "MEGMT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5594ca644015964a5bef50e57",
+   "sector": "ANA METAL SANAYİ",
+   "title": "MEGA METAL SANAYİ VE TİCARET A.Ş."
+  },
+  "MEKAG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c586d22c51018adff79d0f2d15",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "MEKA GLOBAL MAKİNE İMALAT SANAYİ VE TİCARET A.Ş."
+  },
+  "MEPET": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a1416e696301416ea253f418ae",
+   "sector": "PERAKENDE TİCARET",
+   "title": "MEPET METRO PETROL VE TESİSLERİ SANAYİ TİCARET A.Ş."
+  },
+  "MERCN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c4782a4d580178ee32b32864d5",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "MERCAN KİMYA SANAYİ VE TİCARET A.Ş."
+  },
+  "MERIT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a140f2ed7101412b9f84390347",
+   "sector": "KONAKLAMA",
+   "title": "MERİT TURİZM YATIRIM VE İŞLETME A.Ş."
+  },
+  "MERKO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4701412bf3fc980553",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "MERKO GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "METEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c49b85f8cf019c0470c53c6a68",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "METGÜN ENERJİ YATIRIMLARI A.Ş."
+  },
+  "METRO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1416e696301416e9a320e1649",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "METRO TİCARİ VE MALİ YATIRIMLAR HOLDİNG A.Ş."
+  },
+  "MEYSU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5998f25d7019b59665bd030f1",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "MEYSU GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "MGROS": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a141462df2014150162e1c3424",
+   "sector": "PERAKENDE TİCARET",
+   "title": "MİGROS TİCARET A.Ş."
+  },
+  "MHRGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c486d22a3a018b03ad439129a9",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "MHR GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "MIATK": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c47afb298a017cbcef284245ba",
+   "sector": "BİLİŞİM",
+   "title": "MİA TEKNOLOJİ A.Ş."
+  },
+  "MNDRS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1422d986e01425bfb19b05165",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "MENDERES TEKSTİL SANAYİ VE TİCARET A.Ş."
+  },
+  "MNDTR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24158e42201415ae7c0875fab",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "MONDİ TURKEY OLUKLU MUKAVVA KAĞIT VE AMBALAJ SANAYİ A.Ş."
+  },
+  "MOBTL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c57afb2d70017d12c6d335669c",
+   "sector": "BİLİŞİM",
+   "title": "MOBİLTEL İLETİŞİM HİZMETLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "MOGAN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c473646c5e0173e77f33b35138",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "MOGAN ENERJİ YATIRIM HOLDİNG A.Ş."
+  },
+  "MOPAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c49145e00d0194730c9f3e6d30",
+   "sector": "PERAKENDE TİCARET",
+   "title": "MOPAŞ MARKETÇİLİK GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "MPARK": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a1462cc5dd01465c9550782baa",
+   "sector": "İNSAN SAĞLIĞI VE SOSYAL HİZMETLER",
+   "title": "MLP SAĞLIK HİZMETLERİ A.Ş."
+  },
+  "MRGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9b0141603d2b414108",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "MARTI GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "MRSHL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f325b12e0172",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "MARSHALL BOYA VE VERNİK SANAYİİ A.Ş."
+  },
+  "MSGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c4540d444501545d374f8d070a",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "MİSTRAL GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "MTRKS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c575a1b5b60177de29c7177130",
+   "sector": "BİLİŞİM",
+   "title": "MATRİKS FİNANSAL TEKNOLOJİLER A.Ş."
+  },
+  "MZHLD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a24158e42401415adbb0917e5e",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "MAZHAR ZORLU HOLDİNG A.Ş."
+  },
+  "NATEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c469cee2a2016bb6c259155c47",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "NATUREL YENİLENEBİLİR ENERJİ TİCARET A.Ş."
+  },
+  "NETAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a240f2ef47014111d7df220232",
+   "sector": "BİLİŞİM",
+   "title": "NETAŞ TELEKOMÜNİKASYON A.Ş."
+  },
+  "NETCD": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c47f7cb492017fd60a82802767",
+   "sector": "BİLİŞİM",
+   "title": "NETCAD YAZILIM A.Ş."
+  },
+  "NETGL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49f52d9d801a06b28f4a1696a",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "NET GLOBAL ENDÜSTRİYEL YATIRIMLAR A.Ş."
+  },
+  "NIBAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1413b7ef501413bc24123002f",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "NİĞBAŞ NİĞDE BETON SANAYİ VE TİCARET A.Ş."
+  },
+  "NTGAZ": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c4782a4d580178492e12820f4f",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "NATURELGAZ SANAYİ VE TİCARET A.Ş."
+  },
+  "NTHOL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7101412ba0829f034d",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "NET HOLDİNG A.Ş."
+  },
+  "NUGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1416e696301416f6100e76fb9",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "NUROL GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "NUHCM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141558bdd014156053d9f04b2",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "NUH ÇİMENTO SANAYİ A.Ş."
+  },
+  "OBAMS": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c58b2fa64e018dc01d63686b27",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "OBA MAKARNACILIK SANAYİ VE TİCARET A.Ş."
+  },
+  "OBASE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c57f7cbb49018050e4303b068b",
+   "sector": "BİLİŞİM",
+   "title": "OBASE BİLGİSAYAR VE DANIŞMANLIK HİZMETLERİ TİCARET A.Ş."
+  },
+  "ODAS": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a2416e696c01416edd70713183",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ODAŞ ELEKTRİK ÜRETİM SANAYİ TİCARET A.Ş."
+  },
+  "ODINE": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c58b2fa64e018e1cbdc7e02623",
+   "sector": "BİLİŞİM",
+   "title": "ODİNE SOLUTİONS TEKNOLOJİ TİCARET VE SANAYİ A.Ş."
+  },
+  "OFSYM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c586d22c510189bf5dfc710286",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "OFİS YEM GIDA SANAYİ TİCARET A.Ş."
+  },
+  "ONCSM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c4812b870c018161f7cdde10f3",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ONCOSEM ONKOLOJİK SİSTEMLER SANAYİ VE TİCARET A.Ş."
+  },
+  "ONRYT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c58b2fa64e018f8540ca5f57d4",
+   "sector": "SAVUNMA",
+   "title": "ONUR YÜKSEK TEKNOLOJİ A.Ş."
+  },
+  "ORCAY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47afb298b017b5ea1d5ee3d78",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ORÇAY ORTAKÖY ÇAY SANAYİ VE TİCARET A.Ş."
+  },
+  "ORGE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a140ee35c00140ee3971130009",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "ORGE ENERJİ ELEKTRİK TAAHHÜT A.Ş."
+  },
+  "ORZAX": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59ee1b2d8019eff10c40c0dd5",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ORZAKS İLAÇ VE KİMYA SANAYİ TİCARET A.Ş."
+  },
+  "OSMEN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a240ee37a30140ee408ef80002",
+   "sector": null,
+   "title": "OSMANLI YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "OSTIM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241462fd8014149e82fb004c5",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "OSTİM ENDÜSTRİYEL YATIRIMLAR VE İŞLETME A.Ş."
+  },
+  "OTKAR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee35c70140ee4316b3001d",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "OTOKAR OTOMOTİV VE SAVUNMA SANAYİ A.Ş."
+  },
+  "OTTO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a14203278a01420955fc5d14bd",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "OTTO HOLDİNG A.Ş."
+  },
+  "OYAKC": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f32377aa016c",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "OYAK ÇİMENTO FABRİKALARI A.Ş."
+  },
+  "OYLUM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14184e9cf0141919d8abd1552",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "OYLUM SINAİ YATIRIMLAR A.Ş."
+  },
+  "OYYAT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a14158e41f01415a5e854d4441",
+   "sector": null,
+   "title": "OYAK YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "OZATD": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49145e00d019180a20f28221c",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ÖZATA DENİZCİLİK SANAYİ VE TİCARET A.Ş."
+  },
+  "OZGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140ee35c70140ee582a75003c",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ÖZDERİCİ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "OZKGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed720141079632d0024f",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ÖZAK GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "OZRDN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "1DE05DAA82D2073AE0530A4A622A2EBD",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "ÖZERDEN AMBALAJ SANAYİ A.Ş."
+  },
+  "OZSUB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TARIM, ORMANCILIK VE BALIKÇILIK",
+   "mkk": "8acae2c465a51c380166776d73784fba",
+   "sector": "BALIKÇILIK VE SU ÜRÜNLERİ",
+   "title": "ÖZSU BALIK ÜRETİM A.Ş."
+  },
+  "OZYSR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c58b2fa64e018f853cd37d57cf",
+   "sector": "ANA METAL SANAYİ",
+   "title": "ÖZYAŞAR TEL VE GALVANİZLEME SANAYİ A.Ş."
+  },
+  "PAGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c014134d6641f062a",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "PANORA GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "PAHOL": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c4998f24d8019a5ffde32b0e5a",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "PASİFİK HOLDİNG A.Ş."
+  },
+  "PAMEL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a246b4c5a90147f8ed32b0722f",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "PAMEL YENİLENEBİLİR ELEKTRİK ÜRETİM A.Ş."
+  },
+  "PAPIL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c46e7fdc6a016e93286c5304b5",
+   "sector": "BİLİŞİM",
+   "title": "PAPİLON SAVUNMA TEKNOLOJİ VE TİCARET A.Ş."
+  },
+  "PARSN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140ee84900140f1ecef250011",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "PARSAN MAKİNA PARÇALARI SANAYİİ A.Ş."
+  },
+  "PASEU": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "8acae2c586d22c5101887ae575873835",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "PASİFİK EURASİA LOJİSTİK DIŞ TİCARET A.Ş."
+  },
+  "PATEK": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c58b2fa64e018d63b9afbd4e6c",
+   "sector": "BİLİŞİM",
+   "title": "PASİFİK TEKNOLOJİ A.Ş."
+  },
+  "PCILT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MESLEKİ, BİLİMSEL VE TEKNİK FAALİYETLER",
+   "mkk": "8acae2c5782a4e6d017844c378070abd",
+   "sector": "REKLAMCILIK VE PAZAR ARAŞTIRMASI",
+   "title": "PC İLETİŞİM VE MEDYA HİZMETLERİ SANAYİ TİCARET A.Ş."
+  },
+  "PEKGY": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c55fc6011001617acbeb1b48da",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "PEKER GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "PENGD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a246b4c5a9014836bd56174fe9",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "PENGUEN GIDA SANAYİ A.Ş."
+  },
+  "PENTA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a14184e9c9014198033c094251",
+   "sector": "BİLİŞİM",
+   "title": "PENTA TEKNOLOJİ ÜRÜNLERİ DAĞITIM TİCARET A.Ş."
+  },
+  "PETKM": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef470141165c566a03e4",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "PETKİM PETROKİMYA HOLDİNG A.Ş."
+  },
+  "PETUN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f1f7b3990027",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "PINAR ENTEGRE ET VE UN SANAYİİ A.Ş."
+  },
+  "PGSUS": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a2422d9a78014232e751bc22a4",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "PEGASUS HAVA TAŞIMACILIĞI A.Ş."
+  },
+  "PINSU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f1f8c01a003e",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "PINAR SU VE İÇECEK SANAYİ VE TİCARET A.Ş."
+  },
+  "PKART": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "4028e4a24184e9e501419d8dd26e7538",
+   "sector": "BİLİŞİM",
+   "title": "PLASTİKKART AKILLI KART İLETİŞİM SİSTEMLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "PKENT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a140f2ed72014106c1df9a021f",
+   "sector": "KONAKLAMA",
+   "title": "PETROKENT TURİZM A.Ş."
+  },
+  "PLTUR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İDARİ VE DESTEK HİZMET FAALİYETLERİ",
+   "mkk": "4028e4a2422d9a7801427038d3fc1e11",
+   "sector": "KİRALAMA VE LEASING FAALİYETLERİ",
+   "title": "PLATFORM TURİZM TAŞIMACILIK GIDA İNŞAAT TEMİZLİK HİZMETLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "PNLSN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47d3bee50017db95876e6220e",
+   "sector": "ANA METAL SANAYİ",
+   "title": "PANELSAN ÇATI CEPHE SİSTEMLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "PNSUT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f1f97e530042",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "PINAR SÜT MAMÜLLERİ SANAYİİ A.Ş."
+  },
+  "POLHO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241733d4a01417414a27127d7",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "POLİSAN HOLDİNG A.Ş."
+  },
+  "POLTK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a246b4c5a90147fcd473d37f85",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "POLİTEKNİK METAL SANAYİ VE TİCARET A.Ş."
+  },
+  "PRDGS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c57afb2d71017bceb97170639d",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "PARDUS GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "PRKAB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef470141167b777b0437",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "TÜRK PRYSMİAN KABLO VE SİSTEMLERİ A.Ş."
+  },
+  "PRKME": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "4028e4a141da49ea0141e45622e54843",
+   "sector": "KÖMÜR VE LİNYİT MADENCİLİĞİ",
+   "title": "PARK ELEKTRİK ÜRETİM MADENCİLİK SANAYİ VE TİCARET A.Ş."
+  },
+  "PRZMA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2415f4f8401415ff644c5341c",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "PRİZMA PRES MATBAACILIK YAYINCILIK SANAYİ VE TİCARET A.Ş."
+  },
+  "PSDTC": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "1DE05DAA8399073AE0530A4A622A2EBD",
+   "sector": "TOPTAN TİCARET",
+   "title": "PERGAMON STATUS DIŞ TİCARET A.Ş."
+  },
+  "PSGYO": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c4794d364a017a51e9e5d256c9",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "PASİFİK GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "QUAGR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c469cee2a4016b1c1dc11f2b03",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "QUA GRANITE HAYAL YAPI VE ÜRÜNLERİ SANAYİ TİCARET A.Ş."
+  },
+  "QUICK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59f52dae5019f931868361e7e",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "QUİCK SİGORTA A.Ş."
+  },
+  "RALYH": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef4c0141029be169015f",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "RAL YATIRIM HOLDİNG A.Ş."
+  },
+  "RAYSG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241733d4201417ddf67f8288c",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "RAY SİGORTA A.Ş."
+  },
+  "REEDR": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c586d22c53018a73739d9104a8",
+   "sector": "BİLİŞİM",
+   "title": "REEDER TEKNOLOJİ SANAYİ VE TİCARET A.Ş."
+  },
+  "RGYAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "GAYRİMENKUL FAALİYETLERİ",
+   "mkk": "4028e4a241b612d80141d9a52e2a2727",
+   "sector": "GAYRİMENKUL FAALİYETLERİ",
+   "title": "RÖNESANS GAYRİMENKUL YATIRIM A.Ş."
+  },
+  "RNPOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47afb298b017bcfa8c4e96550",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "RAİNBOW POLİKARBONAT SANAYİ TİCARET A.Ş."
+  },
+  "RODRG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a241e538ab0141ef77414543c5",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "RODRİGO TEKSTİL SANAYİ VE TİCARET A.Ş."
+  },
+  "RTALB": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2486ec9ba0148c19eb7eb1933",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "RTA LABORATUVARLARI BİYOLOJİK ÜRÜNLER İLAÇ VE MAKİNE SANAYİ TİCARET A.Ş."
+  },
+  "RUBNS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47d3bee50017d8f777c171313",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "RUBENİS TEKSTİL SANAYİ TİCARET A.Ş."
+  },
+  "RUZYE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "4028e4a14158e41f01415a8ea74c4fbe",
+   "sector": "KÖMÜR VE LİNYİT MADENCİLİĞİ",
+   "title": "RUZY MADENCİLİK VE ENERJİ YATIRIMLARI SANAYİ VE TİCARET A.Ş."
+  },
+  "RYGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140ee847b0140f20278c00023",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "REYSAŞ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "RYSAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a140ee847b0140f203980d0030",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "REYSAŞ TAŞIMACILIK VE LOJİSTİK TİCARET A.Ş."
+  },
+  "SAFKR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c55fc6011101602fcafb57255a",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "SAFKAR EGE SOĞUTMACILIK KLİMA SOĞUK HAVA TESİSLERİ İHRACAT İTHALAT SANAYİ VE TİCARET A.Ş."
+  },
+  "SAHOL": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee37a90140ee50087e000b",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "HACI ÖMER SABANCI HOLDİNG A.Ş."
+  },
+  "SAMAT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9b01415fde1bcc2fce",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "SARAY MATBAACILIK KAĞITÇILIK KIRTASİYECİLİK TİCARET VE SANAYİ A.Ş."
+  },
+  "SANEL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a143371eea0143532e82ac510b",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "SAN-EL MÜHENDİSLİK ELEKTRİK TAAHHÜT SANAYİ VE TİCARET A.Ş."
+  },
+  "SANFM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141733b560141741ee61b25bd",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "SANİFOAM ENDÜSTRİ VE TÜKETİM ÜRÜNLERİ SANAYİ TİCARET A.Ş."
+  },
+  "SANKO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a242140a92014223b5b91333e8",
+   "sector": "TOPTAN TİCARET",
+   "title": "SANKO PAZARLAMA İTHALAT İHRACAT A.Ş."
+  },
+  "SARAE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59ee1b2d8019f2860baca2f2e",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ŞA-RA ENERJİ İNŞAAT TİCARET VE SANAYİ A.Ş."
+  },
+  "SARKY": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7101410294f924012d",
+   "sector": "ANA METAL SANAYİ",
+   "title": "SARKUYSAN ELEKTROLİTİK BAKIR SANAYİ VE TİCARET A.Ş."
+  },
+  "SASA": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240ee866c0140f20abd9500cc",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "SASA POLYESTER SANAYİ A.Ş."
+  },
+  "SAYAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1415f4d9901416000c2de30f0",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "SAY YENİLENEBİLİR ENERJİ EKİPMANLARI SANAYİ VE TİCARET A.Ş."
+  },
+  "SDTTR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c48304fe9e0183ac70038e4941",
+   "sector": "SAVUNMA",
+   "title": "SDT UZAY VE SAVUNMA TEKNOLOJİLERİ A.Ş."
+  },
+  "SEGMN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efabf019017378c962a6d",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "SEĞMEN KARDEŞLER GIDA ÜRETİM VE AMBALAJ SANAYİ A.Ş."
+  },
+  "SEGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c56faf888c01718864329b7097",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ŞEKER GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "SEKFK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a141e536460141e92af0291568",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "ŞEKER FİNANSAL KİRALAMA A.Ş."
+  },
+  "SEKUR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "1DE05DAA83C4073AE0530A4A622A2EBD",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "SEKURO PLASTİK AMBALAJ SANAYİ A.Ş."
+  },
+  "SELEC": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a2416e697d01416ec00e101dce",
+   "sector": "TOPTAN TİCARET",
+   "title": "SELÇUK ECZA DEPOSU TİCARET VE SANAYİ A.Ş."
+  },
+  "SELVA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5794d3d6a0179fb3f31d744cd",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "SELVA GIDA SANAYİ A.Ş."
+  },
+  "SERNT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49145e00b019497929176199a",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "SERANİT GRANİT SERAMİK SANAYİ VE TİCARET A.Ş."
+  },
+  "SEYKM": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "402821824da3aa97014f16c428d14bcf",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "SEYİTLER KİMYA SANAYİ A.Ş."
+  },
+  "SILVR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a243dd5e8f01440734fd5613db",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "SİLVERLİNE ENDÜSTRİ VE TİCARET A.Ş."
+  },
+  "SISE": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed710140f385d5690102",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TÜRKİYE ŞİŞE VE CAM FABRİKALARI A.Ş."
+  },
+  "SKBNK": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a240f2ef4c01412adc8fba04ee",
+   "sector": null,
+   "title": "ŞEKERBANK T.A.Ş."
+  },
+  "SKTAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f275530140f27bc043017d",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "SÖKTAŞ TEKSTİL SANAYİ VE TİCARET A.Ş."
+  },
+  "SKYLP": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MESLEKİ, BİLİMSEL VE TEKNİK FAALİYETLER",
+   "mkk": "4028e4a1415f4d9b01415ff295793adc",
+   "sector": "HUKUK VE MUHASEBE FAALİYETLERİ",
+   "title": "SKYALP FİNANSAL TEKNOLOJİLER VE DANIŞMANLIK A.Ş."
+  },
+  "SKYMD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a241a25fcb0141a7c4a064241c",
+   "sector": null,
+   "title": "ŞEKER YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "SMART": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c569cee403016a6d8db5035804",
+   "sector": "BİLİŞİM",
+   "title": "SMARTİKS YAZILIM A.Ş."
+  },
+  "SMRTG": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c47d3bee4e017f49ce882e7b01",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "SMART GÜNEŞ ENERJİSİ TEKNOLOJİLERİ ARAŞTIRMA GELİŞTİRME ÜRETİM SANAYİ VE TİCARET A.Ş."
+  },
+  "SMRVA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "402821814da3a99c014eb57bdd604a6f",
+   "sector": "VARLIK YÖNETİM ŞİRKETLERİ",
+   "title": "SÜMER VARLIK YÖNETİM A.Ş."
+  },
+  "SNGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a14184e9cf01419c0168dd5a87",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "SİNPAŞ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "SNICA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c5830502c20183cb8491655a67",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "SANİCA ISI SANAYİ A.Ş."
+  },
+  "SOHOE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c49ee1b0ec019efd886aee0cc5",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "SOHO GİYİM VE ENERJİ A.Ş."
+  },
+  "SOKE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c552495f640152d616d67a0b95",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "SÖKE DEĞİRMENCİLİK SANAYİ VE TİCARET A.Ş."
+  },
+  "SOKM": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a14184e9c9014198095f4442bf",
+   "sector": "PERAKENDE TİCARET",
+   "title": "ŞOK MARKETLER TİCARET A.Ş."
+  },
+  "SONME": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "GAYRİMENKUL FAALİYETLERİ",
+   "mkk": "4028e4a240f2ef4c01412ad6196104d2",
+   "sector": "GAYRİMENKUL FAALİYETLERİ",
+   "title": "SÖNMEZ FİLAMENT SENTETİK İPLİK VE ELYAF SANAYİ A.Ş."
+  },
+  "SRVGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1416e696501416f80a3377c4b",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "SERVET GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "SSAAT": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c4508ff7260151d47a54641b19",
+   "sector": "PERAKENDE TİCARET",
+   "title": "SAAT VE SAAT SANAYİ VE TİCARET A.Ş."
+  },
+  "SUNTK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c47f7cb4920180234f4d1064b4",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "SUN TEKSTİL SANAYİ VE TİCARET A.Ş."
+  },
+  "SURGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c48b2fa25a018c33a0808a03b0",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "SUR TATİL EVLERİ GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "SUWEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "8acae2c47902e75601792308abd41e4a",
+   "sector": "PERAKENDE TİCARET",
+   "title": "SUWEN TEKSTİL SANAYİ PAZARLAMA A.Ş."
+  },
+  "SVGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c59b85fa03019c74a8cf6a4f62",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "SAVUR GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "TABGD": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a141e536460141e5aa84740938",
+   "sector": "YİYECEK VE İÇECEK HİZMETLERİ",
+   "title": "TAB GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "TARKM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c56eccfc0c016fae44264f6323",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "TARKİM BİTKİ KORUMA SANAYİ VE TİCARET A.Ş."
+  },
+  "TATEN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c586d22c510189bf5827490281",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "TATLIPINAR ENERJİ ÜRETİM A.Ş."
+  },
+  "TATGD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f31089aa010a",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "TAT GIDA SANAYİ A.Ş."
+  },
+  "TAVHL": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed720140f31195ef010e",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TAV HAVALİMANLARI HOLDİNG A.Ş."
+  },
+  "TBORG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f37b033601b2",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "TÜRK TUBORG BİRA VE MALT SANAYİİ A.Ş."
+  },
+  "TCELL": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "4028e4a1486ec80a0148c55510d71d31",
+   "sector": "TELEKOMÜNİKASYON",
+   "title": "TURKCELL İLETİŞİM HİZMETLERİ A.Ş."
+  },
+  "TCKRC": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efac0019137973fd07e5e",
+   "sector": "ANA METAL SANAYİ",
+   "title": "KIRAÇ GALVANİZ TELEKOMİNİKASYON METAL MAKİNE İNŞAAT ELEKTRİK SANAYİ VE TİCARET A.Ş."
+  },
+  "TDGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c45fc5ff9d01613299f17a2065",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "TREND GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "TEHOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240ee866c0140f1f6699e0018",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TERA YATIRIM TEKNOLOJİ HOLDİNG A.Ş."
+  },
+  "TEKTU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a1416e696301416effc1a04330",
+   "sector": "KONAKLAMA",
+   "title": "TEK-ART İNŞAAT TİCARET TURİZM SANAYİ VE YATIRIMLAR A.Ş."
+  },
+  "TERA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a141733b56014178115f7e51e7",
+   "sector": null,
+   "title": "TERA YATIRIM MENKUL DEĞERLER A.Ş."
+  },
+  "TEZOL": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c468aeffb7016949376d695d6c",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "EUROPAP TEZOL KAĞIT SANAYİ VE TİCARET A.Ş."
+  },
+  "TGSAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a140f2ed710140f3255bea009c",
+   "sector": "TOPTAN TİCARET",
+   "title": "TGS DIŞ TİCARET A.Ş."
+  },
+  "THYAO": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "4028e4a140f2ed720140f376bebb01a7",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "TÜRK HAVA YOLLARI A.O."
+  },
+  "TKFEN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed720140f31367840112",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TEKFEN HOLDİNG A.Ş."
+  },
+  "TKNKA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c59f52dae5019fd616ffab4f28",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "TEKNİKA PLAST TEKNİK KALIP PLASTİK SANAYİ VE TİCARET A.Ş."
+  },
+  "TKNSA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a240f2ef470140f31ac6aa006f",
+   "sector": "PERAKENDE TİCARET",
+   "title": "TEKNOSA İÇ VE DIŞ TİCARET A.Ş."
+  },
+  "TLMAN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "8acae2c45fc5ff9d0160e9391f3b05a4",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "TRABZON LİMAN İŞLETMECİLİĞİ A.Ş."
+  },
+  "TMPOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a246b4c5ad0148319a4a87518f",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "TEMAPOL POLİMER PLASTİK VE İNŞAAT SANAYİ TİCARET A.Ş."
+  },
+  "TMSN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a141e536460141e53904b50025",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "TÜMOSAN MOTOR VE TRAKTÖR SANAYİ A.Ş."
+  },
+  "TNZTP": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "8acae2c575a1b5b601773e8cc29d0b24",
+   "sector": "İNSAN SAĞLIĞI VE SOSYAL HİZMETLER",
+   "title": "TAPDİ OKSİJEN ÖZEL SAĞLIK VE EĞİTİM HİZMETLERİ SANAYİ TİCARET A.Ş."
+  },
+  "TOASO": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed710140f328bed700a5",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "TOFAŞ TÜRK OTOMOBİL FABRİKASI A.Ş."
+  },
+  "TRALT": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "4028e4a2422d9a6e0142bd91d3687a69",
+   "sector": "METAL CEVHERİ MADENCİLİĞİ",
+   "title": "TÜRK ALTIN İŞLETMELERİ A.Ş."
+  },
+  "TRCAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1415f4d9b01416005c65d3d53",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TURCAS HOLDİNG A.Ş."
+  },
+  "TRENJ": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "4028e4a2422d9a6e0142bd9255a37a70",
+   "sector": "HAM PETROL VE DOĞAL GAZ ÇIKARTILMASI",
+   "title": "TR DOĞAL ENERJİ KAYNAKLARI ARAŞTIRMA VE ÜRETİM A.Ş."
+  },
+  "TRGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1413b7ef5014144f83882011f",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "TORUNLAR GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "TRHOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed7101411163985a021e",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "TERA FİNANSAL YATIRIMLAR HOLDİNG A.Ş."
+  },
+  "TRMET": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "4028e4a2422d9a6e0142bd921d307a6d",
+   "sector": "METAL CEVHERİ MADENCİLİĞİ",
+   "title": "TR ANADOLU METAL MADENCİLİK İŞLETMELERİ A.Ş."
+  },
+  "TSGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a240f2ef470140f37174c600a7",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "TSKB GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "TSKB": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a140f2ed710140f3831c6300fd",
+   "sector": null,
+   "title": "TÜRKİYE SINAİ KALKINMA BANKASI A.Ş."
+  },
+  "TSPOR": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "EĞİTİM SAĞLIK SPOR VE EĞLENCE HİZMETLERİ",
+   "mkk": "4028e4a141da49e50141e0852f272b80",
+   "sector": "SPOR FAALİYETLERİ EĞLENCE VE OYUN FAALİYETLERİ",
+   "title": "TRABZONSPOR SPORTİF YATIRIM VE FUTBOL İŞLETMECİLİĞİ TİCARET A.Ş."
+  },
+  "TTKOM": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "BİLGİ VE İLETİŞİM",
+   "mkk": "4028e4a241e538ab0141ea9c96912c8b",
+   "sector": "TELEKOMÜNİKASYON",
+   "title": "TÜRK TELEKOMÜNİKASYON A.Ş."
+  },
+  "TTRAK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f3790d6a01ad",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "TÜRK TRAKTÖR VE ZİRAAT MAKİNELERİ A.Ş."
+  },
+  "TUCLK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a146b4c4110147f3bb4e795ce5",
+   "sector": "ANA METAL SANAYİ",
+   "title": "TUĞÇELİK ALÜMİNYUM VE METAL MAMÜLLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "TUKAS": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef470140f373b77f00ac",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "TUKAŞ GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "TUPRS": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed720140f37f139c01bc",
+   "sector": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
+   "title": "TÜPRAŞ-TÜRKİYE PETROL RAFİNERİLERİ A.Ş."
+  },
+  "TUREX": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ULAŞTIRMA VE DEPOLAMA",
+   "mkk": "402821824bf524dd014d7babc2134829",
+   "sector": "ULAŞTIRMA VE DEPOLAMA",
+   "title": "TUREKS TURİZM TAŞIMACILIK A.Ş."
+  },
+  "TURGG": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a140f2ed720140f3440383018e",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "TÜRKER PROJE GAYRİMENKUL VE YATIRIM GELİŞTİRME A.Ş."
+  },
+  "TURSG": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140e95be70140ee2f466d0159",
+   "sector": "SİGORTA ŞİRKETLERİ",
+   "title": "TÜRKİYE SİGORTA A.Ş."
+  },
+  "UCAYM": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "8acae2c49b85f8ce019ba3efeb403292",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "ÜÇAY MÜHENDİSLİK ENERJİ VE İKLİMLENDİRME TEKNOLOJİLERİ A.Ş."
+  },
+  "UFUK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a24158e42201415afe28e760a4",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "UFUK YATIRIM YÖNETİM VE GAYRİMENKUL A.Ş."
+  },
+  "ULAS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "OTELLER VE LOKANTALAR",
+   "mkk": "4028e4a240f2ef4c0140f38adfa1008d",
+   "sector": "KONAKLAMA",
+   "title": "ULAŞLAR TURİZM ENERJİ TARIM GIDA VE İNŞAAT YATIRIMLARI A.Ş."
+  },
+  "ULKER": {
+   "indices": [
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14184e9c901419801438a422b",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ÜLKER BİSKÜVİ SANAYİ A.Ş."
+  },
+  "ULUFA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a1416e696301416f321c3d5ca7",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "ULUSAL FAKTORİNG A.Ş."
+  },
+  "ULUSE": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a24a069620014a341cfac83419",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "ULUSOY ELEKTRİK İMALAT TAAHHÜT VE TİCARET A.Ş."
+  },
+  "ULUUN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a14371e09d0143c4d925022442",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "ULUSOY UN SANAYİ VE TİCARET A.Ş."
+  },
+  "UNLU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a24bcf2bca014be9def2a47203",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "ÜNLÜ YATIRIM HOLDİNG A.Ş."
+  },
+  "USAK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "1DE05DAA843E073AE0530A4A622A2EBD",
+   "sector": "TAŞ VE TOPRAĞA DAYALI",
+   "title": "UŞAK SERAMİK SANAYİ A.Ş."
+  },
+  "USHOL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed720141080991640264",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "US YATIRIM HOLDİNG A.Ş."
+  },
+  "VAKBN": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a1415f4d9b01415fe3340f36e4",
+   "sector": null,
+   "title": "TÜRKİYE VAKIFLAR BANKASI T.A.O."
+  },
+  "VAKFA": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2422d9a7801426b0fb4db037d",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "VAKIF FAKTORİNG A.Ş."
+  },
+  "VAKFN": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241462fd801414fa81cce2e75",
+   "sector": "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ",
+   "title": "VAKIF FİNANSAL KİRALAMA A.Ş."
+  },
+  "VAKKO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "TOPTAN VE PERAKENDE TİCARET",
+   "mkk": "4028e4a2422d9a6e014251b075f0227f",
+   "sector": "PERAKENDE TİCARET",
+   "title": "VAKKO TEKSTİL VE HAZIR GİYİM SANAYİ İŞLETMELERİ A.Ş."
+  },
+  "VANGD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a1416e696301416ecfa3fb2ca4",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "VANET GIDA SANAYİ İÇ VE DIŞ TİCARET A.Ş."
+  },
+  "VBTYZ": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TEKNOLOJİ",
+   "mkk": "8acae2c4794d3648017a420bdd4c4fa3",
+   "sector": "BİLİŞİM",
+   "title": "VBT YAZILIM A.Ş."
+  },
+  "VERTU": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2420327a4014209c59cc91457",
+   "sector": "GİRİŞİM SERMAYESİ YATIRIM ORTAKLIKLARI",
+   "title": "VERUSATURK GİRİŞİM SERMAYESİ YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "VERUS": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2422d9a78014275ba7f133b05",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "VERUSA HOLDİNG A.Ş."
+  },
+  "VESBE": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7201412c223c9707e6",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "VESTEL BEYAZ EŞYA SANAYİ VE TİCARET A.Ş."
+  },
+  "VESTL": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed7201412c2000c507db",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "VESTEL ELEKTRONİK SANAYİ VE TİCARET A.Ş."
+  },
+  "VEYAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "8acae2c59f52dae5019fd616713f4f23",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "TÜRKER VANGÖLÜ ENERJİ YATIRIM A.Ş."
+  },
+  "VKGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a140f2ed72014101a0d3b501f7",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "VAKIF GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "VKING": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed72014101a2d00a01fe",
+   "sector": "KAĞIT VE KAĞIT ÜRÜNLERİ BASIM",
+   "title": "VİKİNG KAĞIT VE SELÜLOZ A.Ş."
+  },
+  "VRGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c486d22a3a018b27e15c37493e",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "VERA KONSEPT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "VSNMD": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "mkk": "8acae2c59145e00e01949893374b244d",
+   "sector": "DİĞER MADENCİLİK VE TAŞ OCAKÇILIĞI",
+   "title": "VİŞNE MADENCİLİK ÜRETİM SANAYİ VE TİCARET A.Ş."
+  },
+  "YAPRK": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "TARIM, ORMANCILIK VE BALIKÇILIK",
+   "mkk": "4028e4a1416e696501416eec8e443d62",
+   "sector": "TARIM VE HAYVANCILIK AVCILIK VE İLGİLİ HİZMET FAALİYETLERİ",
+   "title": "YAPRAK SÜT VE BESİ ÇİFTLİKLERİ SANAYİ VE TİCARET A.Ş."
+  },
+  "YATAS": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a140f2ed72014106c48768022e",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "YATAŞ YATAK VE YORGAN SANAYİ TİCARET A.Ş."
+  },
+  "YAYLA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İNŞAAT VE BAYINDIRLIK",
+   "mkk": "4028e4a1486ec80b0148c539d6721829",
+   "sector": "İNŞAAT VE BAYINDIRLIK İŞLERİ",
+   "title": "YAYLA ENERJİ ÜRETİM TURİZM VE İNŞAAT TİCARET A.Ş."
+  },
+  "YEOTK": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MESLEKİ, BİLİMSEL VE TEKNİK FAALİYETLER",
+   "mkk": "4028e4a140f2ed7101413af3da8c0440",
+   "sector": "MİMARLIK VE MÜHENDİSLİK FAALİYETLERİ; TEKNİK MUAYENE VE ANALİZ",
+   "title": "YEO TEKNOLOJİ ENERJİ VE ENDÜSTRİ A.Ş."
+  },
+  "YESIL": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a2416e696c01416edc458b30f0",
+   "sector": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
+   "title": "YEŞİL YATIRIM HOLDİNG A.Ş."
+  },
+  "YGGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "4028e4a241733d4201417cda3f421321",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "YENİ GİMAT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "YIGIT": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c48c3efac0018fabe5e40b5043",
+   "sector": "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI",
+   "title": "YİĞİT AKÜ MALZEMELERİ NAKLİYAT TURİZM İNŞAAT SANAYİ VE TİCARET A.Ş."
+  },
+  "YKBNK": {
+   "indices": [
+    "XU030",
+    "XU050",
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": null,
+   "mkk": "4028e4a240f2ef4c01412ae6d6630538",
+   "sector": null,
+   "title": "YAPI VE KREDİ BANKASI A.Ş."
+  },
+  "YKSLN": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "8acae2c569cee403016a6e925a8b5bd8",
+   "sector": "ANA METAL SANAYİ",
+   "title": "YÜKSELEN ÇELİK A.Ş."
+  },
+  "YUNSA": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a240f2ef4c014101b726fa011d",
+   "sector": "TEKSTİL, GİYİM EŞYASI VE DERİ",
+   "title": "YÜNSA YÜNLÜ SANAYİ VE TİCARET A.Ş."
+  },
+  "YYLGD": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "İMALAT",
+   "mkk": "4028e4a2420a2daf014213d4625d3edc",
+   "sector": "GIDA, İÇECEK VE TÜTÜN",
+   "title": "YAYLA AGRO GIDA SANAYİ VE TİCARET A.Ş."
+  },
+  "ZEDUR": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a240f2ef470141164fd5f803a1",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ZEDUR ENERJİ ELEKTRİK ÜRETİM A.Ş."
+  },
+  "ZERGY": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c5998f25d7019aed48b7597a50",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ZERAY GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ZGYO": {
+   "indices": [
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c5998f25d7019b732d4d683a5c",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "Z GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  },
+  "ZOREN": {
+   "indices": [
+    "XU100",
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "ELEKTRİK GAZ VE SU",
+   "mkk": "4028e4a140f2ed7201412c19687407a7",
+   "sector": "ELEKTRİK GAZ VE BUHAR",
+   "title": "ZORLU ENERJİ ELEKTRİK ÜRETİM A.Ş."
+  },
+  "ZRGYO": {
+   "indices": [
+    "XYLDZ",
+    "XUTUM"
+   ],
+   "main_sector": "MALİ KURULUŞLAR",
+   "mkk": "8acae2c45835eb660158bfedd32d3332",
+   "sector": "GAYRİMENKUL YATIRIM ORTAKLIKLARI",
+   "title": "ZİRAAT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş."
+  }
+ },
+ "generated_at": "2026-09-24T07:55:21+0300",
+ "indices": {
+  "XU030": [
+   "AKBNK",
+   "AEFES",
+   "ASELS",
+   "ASTOR",
+   "BIMAS",
+   "DSTKF",
+   "EKGYO",
+   "ENKAI",
+   "EREGL",
+   "FROTO",
+   "GUBRF",
+   "SAHOL",
+   "KRDMD",
+   "KCHOL",
+   "MGROS",
+   "PGSUS",
+   "PETKM",
+   "SASA",
+   "TAVHL",
+   "TOASO",
+   "TCELL",
+   "TUPRS",
+   "TRALT",
+   "THYAO",
+   "GARAN",
+   "ISCTR",
+   "SISE",
+   "VAKBN",
+   "TTKOM",
+   "YKBNK"
+  ],
+  "XU050": [
+   "AKBNK",
+   "AKSEN",
+   "ALARK",
+   "AEFES",
+   "ASELS",
+   "ASTOR",
+   "BTCIM",
+   "BIMAS",
+   "BRSAN",
+   "CCOLA",
+   "CANTE",
+   "CIMSA",
+   "DSTKF",
+   "EFOR",
+   "ECILC",
+   "EKGYO",
+   "ENKAI",
+   "EREGL",
+   "FROTO",
+   "GUBRF",
+   "GLRMK",
+   "SAHOL",
+   "HEKTS",
+   "KRDMD",
+   "KTLEV",
+   "KCHOL",
+   "KUYAS",
+   "MIATK",
+   "MGROS",
+   "OYAKC",
+   "PASEU",
+   "PGSUS",
+   "PETKM",
+   "SASA",
+   "TAVHL",
+   "TOASO",
+   "TRMET",
+   "TCELL",
+   "TUPRS",
+   "TRALT",
+   "THYAO",
+   "GARAN",
+   "HALKB",
+   "ISCTR",
+   "TURSG",
+   "SISE",
+   "VAKBN",
+   "TTKOM",
+   "ULKER",
+   "YKBNK"
+  ],
+  "XU100": [
+   "AKBNK",
+   "AKSA",
+   "AKSEN",
+   "ALARK",
+   "ALTNY",
+   "ANSGR",
+   "AEFES",
+   "ARCLK",
+   "ASELS",
+   "ASTOR",
+   "BALSU",
+   "BTCIM",
+   "BSOKE",
+   "BERA",
+   "BIMAS",
+   "BRSAN",
+   "BRYAT",
+   "CCOLA",
+   "CVKMD",
+   "CWENE",
+   "CANTE",
+   "CIMSA",
+   "DAPGM",
+   "DSTKF",
+   "DOHOL",
+   "DOAS",
+   "EFOR",
+   "ECILC",
+   "EKGYO",
+   "ENJSA",
+   "ENERY",
+   "ENKAI",
+   "EREGL",
+   "ESEN",
+   "EUREN",
+   "EUPWR",
+   "FENER",
+   "FROTO",
+   "GSRAY",
+   "GENIL",
+   "GESAN",
+   "GRTHO",
+   "GUBRF",
+   "GLRMK",
+   "GRSEL",
+   "SAHOL",
+   "HEKTS",
+   "IEYHO",
+   "ISMEN",
+   "IZENR",
+   "KRDMD",
+   "KTLEV",
+   "KLRHO",
+   "KCHOL",
+   "KUYAS",
+   "MAGEN",
+   "MAVI",
+   "MIATK",
+   "MGROS",
+   "MPARK",
+   "OBAMS",
+   "ODAS",
+   "ODINE",
+   "OTKAR",
+   "OYAKC",
+   "PASEU",
+   "PSGYO",
+   "PAHOL",
+   "PATEK",
+   "PGSUS",
+   "PETKM",
+   "QUAGR",
+   "RALYH",
+   "REEDR",
+   "SARKY",
+   "SASA",
+   "SKBNK",
+   "SOKM",
+   "TAVHL",
+   "TKFEN",
+   "TOASO",
+   "TRMET",
+   "TRENJ",
+   "TUKAS",
+   "TCELL",
+   "TUPRS",
+   "TRALT",
+   "THYAO",
+   "GARAN",
+   "HALKB",
+   "ISCTR",
+   "TSKB",
+   "TURSG",
+   "SISE",
+   "VAKBN",
+   "TTKOM",
+   "ULKER",
+   "VESTL",
+   "YKBNK",
+   "ZOREN"
+  ],
+  "XUTUM": [
+   "BINHO",
+   "AVOD",
+   "A1CAP",
+   "A1YEN",
+   "ACSEL",
+   "ADEL",
+   "ADESE",
+   "ADGYO",
+   "AFYON",
+   "AGHOL",
+   "AGESA",
+   "AGROT",
+   "AAGYO",
+   "AHSGY",
+   "AHGAZ",
+   "AKBNK",
+   "AKCNS",
+   "AKYHO",
+   "AKENR",
+   "AKFGY",
+   "AKFIS",
+   "AKFYE",
+   "AKHAN",
+   "AKSGY",
+   "AKMGY",
+   "AKSA",
+   "AKSEN",
+   "AKGRT",
+   "AKSUE",
+   "ALCAR",
+   "ALGYO",
+   "ALARK",
+   "ALBRK",
+   "ALBTN",
+   "ALCTL",
+   "ALFAS",
+   "ALKIM",
+   "ALKA",
+   "ALTNY",
+   "ALKLC",
+   "AYCES",
+   "ANSGR",
+   "AEFES",
+   "ANHYT",
+   "ASUZU",
+   "ANGEN",
+   "ANELE",
+   "ARCLK",
+   "ARDYZ",
+   "ARENA",
+   "ARFYE",
+   "ARMGD",
+   "ARSAN",
+   "ARTMS",
+   "ARZUM",
+   "ASGYO",
+   "ASELS",
+   "ASTOR",
+   "ATAGY",
+   "ATAKP",
+   "AGYO",
+   "ATATR",
+   "ATATP",
+   "AVGYO",
+   "AVTUR",
+   "AVPGY",
+   "AVHOL",
+   "AYDEM",
+   "AYEN",
+   "AYGAZ",
+   "AZTEK",
+   "BAGFS",
+   "BAHKM",
+   "BAKAB",
+   "BKRGY",
+   "BALSU",
+   "BNTAS",
+   "BANVT",
+   "BASGZ",
+   "BTCIM",
+   "BSOKE",
+   "BEGYO",
+   "BYDNR",
+   "BAYRK",
+   "BERA",
+   "BRKSN",
+   "BESLR",
+   "BESTE",
+   "BJKAS",
+   "BETAE",
+   "BEYAZ",
+   "BIENY",
+   "BIGTK",
+   "BLCYT",
+   "BIMAS",
+   "BINBN",
+   "BIOEN",
+   "BRKVY",
+   "BIGEN",
+   "BRLSM",
+   "BIZIM",
+   "BLUME",
+   "BMSTL",
+   "BMSCH",
+   "BOBET",
+   "BORLS",
+   "BORSK",
+   "BRSAN",
+   "BRYAT",
+   "BFREN",
+   "BOSSA",
+   "BRISA",
+   "BULGS",
+   "BURCE",
+   "BURVA",
+   "BUCIM",
+   "BVSAN",
+   "BIGCH",
+   "CRFSA",
+   "CEMZY",
+   "CEOEM",
+   "CCOLA",
+   "CONSE",
+   "COSMO",
+   "CRDFA",
+   "CVKMD",
+   "CWENE",
+   "CGCAM",
+   "CANTE",
+   "CATES",
+   "CLEBI",
+   "CELHA",
+   "CEMAS",
+   "CEMTS",
+   "CMBTN",
+   "CIMSA",
+   "CITAS",
+   "CUSAN",
+   "DAGI",
+   "DAPGM",
+   "DARDL",
+   "DGATE",
+   "DCTTR",
+   "DMSAS",
+   "DENGE",
+   "DZGYO",
+   "DERIM",
+   "DERHL",
+   "DESA",
+   "DESPC",
+   "DSTKF",
+   "DEVA",
+   "DNISI",
+   "DITAS",
+   "DMRGD",
+   "DOCO",
+   "DOFER",
+   "DOFRB",
+   "DGNMO",
+   "DOHOL",
+   "ARASE",
+   "DOGUB",
+   "DGGYO",
+   "DOAS",
+   "DOKTA",
+   "DURDO",
+   "DURKN",
+   "DUNYH",
+   "DYOBY",
+   "EBEBK",
+   "ECOGR",
+   "ECZYT",
+   "EDATA",
+   "EDIP",
+   "EFOR",
+   "EGEEN",
+   "EGGUB",
+   "EPLAS",
+   "EGPRO",
+   "EGSER",
+   "EGEGY",
+   "ECILC",
+   "EKIM",
+   "EKDMR",
+   "EKOS",
+   "EKSUN",
+   "ELITE",
+   "EMKEL",
+   "EKGYO",
+   "EMPAE",
+   "ENDAE",
+   "ENJSA",
+   "ENERY",
+   "ENKAI",
+   "ENSRI",
+   "ERBOS",
+   "ERCB",
+   "EREGL",
+   "KIMMR",
+   "ERSU",
+   "ESCAR",
+   "ESCOM",
+   "ESEN",
+   "ETILR",
+   "TEZOL",
+   "EUREN",
+   "EUPWR",
+   "EYGYO",
+   "FADE",
+   "FMIZP",
+   "FENER",
+   "FLAP",
+   "FONET",
+   "FROTO",
+   "FORMT",
+   "FRMPL",
+   "FORTE",
+   "FRIGO",
+   "FZLGY",
+   "GSRAY",
+   "GWIND",
+   "GARFA",
+   "GEDIK",
+   "GEDZA",
+   "GLCVY",
+   "GENIL",
+   "GENTS",
+   "GENKM",
+   "GEREL",
+   "GZNMI",
+   "GIPTA",
+   "GMTAS",
+   "GESAN",
+   "GLBMD",
+   "GLYHO",
+   "GOLDA",
+   "GOODY",
+   "GOKNR",
+   "GOLTS",
+   "GOZDE",
+   "GRTHO",
+   "GSDDE",
+   "GSDHO",
+   "GUBRF",
+   "GLRMK",
+   "GLRYH",
+   "GUNDG",
+   "GRSEL",
+   "SAHOL",
+   "HLGYO",
+   "HRKET",
+   "HATEK",
+   "HATSN",
+   "HDFGS",
+   "HEDEF",
+   "HEKTS",
+   "HKTM",
+   "HTTBT",
+   "HOROZ",
+   "HUBVC",
+   "HUNER",
+   "HURGZ",
+   "ICBCT",
+   "ENTRA",
+   "ICUGS",
+   "INGRM",
+   "INVEO",
+   "INVES",
+   "IEYHO",
+   "ISKPL",
+   "IDGYO",
+   "IHEVA",
+   "IHLGM",
+   "IHGZT",
+   "IHAAS",
+   "IHLAS",
+   "IHYAY",
+   "IMASM",
+   "INDES",
+   "INFO",
+   "INTEM",
+   "INTET",
+   "ISDMR",
+   "ISVEA",
+   "ISSEN",
+   "ISFIN",
+   "ISGYO",
+   "ISGSY",
+   "ISMEN",
+   "IZENR",
+   "IZMDC",
+   "IZFAS",
+   "IZINV",
+   "JANTS",
+   "KFEIN",
+   "KLKIM",
+   "KLSER",
+   "KLYPV",
+   "KPEKS",
+   "KAPLM",
+   "KARCL",
+   "KRDMA",
+   "KRDMB",
+   "KRDMD",
+   "KAREL",
+   "KARSN",
+   "KRTEK",
+   "KARTN",
+   "KTLEV",
+   "KATMR",
+   "KAYSE",
+   "KRVGD",
+   "TCKRC",
+   "KZBGY",
+   "KLGYO",
+   "KLRHO",
+   "KMPUR",
+   "KLMSN",
+   "KCAER",
+   "KCHOL",
+   "KOCMT",
+   "KLSYN",
+   "KNFRT",
+   "KONYA",
+   "KONKA",
+   "KGYO",
+   "KORDS",
+   "KRPLS",
+   "KOTON",
+   "KOPOL",
+   "KRGYO",
+   "KRSTL",
+   "KRONT",
+   "KUVVA",
+   "KUYAS",
+   "KBORU",
+   "KZGYO",
+   "KUTPO",
+   "KTSKR",
+   "LIDER",
+   "LIDFA",
+   "LILAK",
+   "LMKDC",
+   "LINK",
+   "LOGO",
+   "LKMNH",
+   "LRSHO",
+   "LXGYO",
+   "LUKSK",
+   "LYDHO",
+   "LYDYE",
+   "MACKO",
+   "MAKIM",
+   "MAKTK",
+   "MANAS",
+   "MAGEN",
+   "MARMR",
+   "MAALT",
+   "MRSHL",
+   "MRGYO",
+   "MARTI",
+   "MASFN",
+   "MTRKS",
+   "MAVI",
+   "MZHLD",
+   "MEDTR",
+   "MEGMT",
+   "MEKAG",
+   "MNDRS",
+   "MEPET",
+   "MERCN",
+   "MERIT",
+   "MERKO",
+   "METEN",
+   "MCARD",
+   "METRO",
+   "MEYSU",
+   "MHRGY",
+   "MIATK",
+   "MGROS",
+   "MSGYO",
+   "MPARK",
+   "MOBTL",
+   "MOGAN",
+   "MNDTR",
+   "MOPAS",
+   "EGEPO",
+   "NTGAZ",
+   "NATEN",
+   "NETAS",
+   "NETCD",
+   "NETGL",
+   "NTHOL",
+   "NIBAS",
+   "NUHCM",
+   "NUGYO",
+   "OBAMS",
+   "OBASE",
+   "ODAS",
+   "ODINE",
+   "OFSYM",
+   "ONCSM",
+   "ONRYT",
+   "ORCAY",
+   "ORGE",
+   "ORZAX",
+   "OSMEN",
+   "OSTIM",
+   "OTKAR",
+   "OTTO",
+   "OYAKC",
+   "OYYAT",
+   "OYLUM",
+   "OZKGY",
+   "OZATD",
+   "OZGYO",
+   "OZRDN",
+   "OZSUB",
+   "OZYSR",
+   "PAMEL",
+   "PNLSN",
+   "PAGYO",
+   "PAPIL",
+   "PRDGS",
+   "PRKME",
+   "PARSN",
+   "PASEU",
+   "PSGYO",
+   "PAHOL",
+   "PATEK",
+   "PCILT",
+   "PGSUS",
+   "PEKGY",
+   "PENGD",
+   "PENTA",
+   "PSDTC",
+   "PETKM",
+   "PKENT",
+   "PETUN",
+   "PINSU",
+   "PNSUT",
+   "PKART",
+   "PLTUR",
+   "POLHO",
+   "POLTK",
+   "PRZMA",
+   "QUAGR",
+   "QUICK",
+   "RNPOL",
+   "RALYH",
+   "RAYSG",
+   "REEDR",
+   "RYGYO",
+   "RYSAS",
+   "RODRG",
+   "RGYAS",
+   "RTALB",
+   "RUBNS",
+   "RUZYE",
+   "SSAAT",
+   "SAFKR",
+   "SANEL",
+   "SNICA",
+   "SANFM",
+   "SANKO",
+   "SAMAT",
+   "SARKY",
+   "SASA",
+   "SVGYO",
+   "SAYAS",
+   "SDTTR",
+   "SEGMN",
+   "SEKUR",
+   "SELEC",
+   "SELVA",
+   "SERNT",
+   "SRVGY",
+   "SEYKM",
+   "SILVR",
+   "SNGYO",
+   "SKYLP",
+   "SMRTG",
+   "SMART",
+   "SOHOE",
+   "SOKE",
+   "SKTAS",
+   "SONME",
+   "SUNTK",
+   "SURGY",
+   "SUWEN",
+   "SMRVA",
+   "SARAE",
+   "SKBNK",
+   "SEKFK",
+   "SEGYO",
+   "SKYMD",
+   "SOKM",
+   "TABGD",
+   "TNZTP",
+   "TARKM",
+   "TATGD",
+   "TATEN",
+   "TAVHL",
+   "TEKTU",
+   "TKFEN",
+   "TKNKA",
+   "TKNSA",
+   "TMPOL",
+   "TRHOL",
+   "TERA",
+   "TEHOL",
+   "TGSAS",
+   "TOASO",
+   "TRGYO",
+   "TLMAN",
+   "TSPOR",
+   "TRMET",
+   "TRENJ",
+   "TDGYO",
+   "TSGYO",
+   "TUCLK",
+   "TUKAS",
+   "TRCAS",
+   "TUREX",
+   "MARBL",
+   "TCELL",
+   "TMSN",
+   "TUPRS",
+   "TRALT",
+   "TURGG",
+   "VEYAS",
+   "THYAO",
+   "GARAN",
+   "HALKB",
+   "ISATR",
+   "ISBTR",
+   "ISCTR",
+   "TSKB",
+   "TURSG",
+   "SISE",
+   "VAKBN",
+   "PRKAB",
+   "TTKOM",
+   "TTRAK",
+   "TBORG",
+   "UFUK",
+   "ULAS",
+   "ULUFA",
+   "ULUSE",
+   "ULUUN",
+   "USHOL",
+   "USAK",
+   "UCAYM",
+   "ULKER",
+   "UNLU",
+   "VAKFA",
+   "VAKFN",
+   "VKGYO",
+   "VAKKO",
+   "VANGD",
+   "VBTYZ",
+   "VRGYO",
+   "VERUS",
+   "VERTU",
+   "VESBE",
+   "VESTL",
+   "VKING",
+   "VSNMD",
+   "YKBNK",
+   "YAPRK",
+   "YATAS",
+   "YYLGD",
+   "YAYLA",
+   "YGGYO",
+   "YEOTK",
+   "YESIL",
+   "YIGIT",
+   "YKSLN",
+   "YUNSA",
+   "ZEDUR",
+   "ZERGY",
+   "ZGYO",
+   "ZRGYO",
+   "ZOREN"
+  ],
+  "XYLDZ": [
+   "BINHO",
+   "A1CAP",
+   "ADGYO",
+   "AGHOL",
+   "AGESA",
+   "AGROT",
+   "AAGYO",
+   "AHGAZ",
+   "AKBNK",
+   "AKCNS",
+   "AKFGY",
+   "AKFIS",
+   "AKFYE",
+   "AKSGY",
+   "AKSA",
+   "AKSEN",
+   "AKGRT",
+   "ALGYO",
+   "ALARK",
+   "ALBRK",
+   "ALBTN",
+   "ALFAS",
+   "ALTNY",
+   "ANSGR",
+   "AEFES",
+   "ANHYT",
+   "ASUZU",
+   "ARCLK",
+   "ARDYZ",
+   "ARMGD",
+   "ASGYO",
+   "ASELS",
+   "ASTOR",
+   "ATAKP",
+   "ATATR",
+   "ATATP",
+   "AVPGY",
+   "AYDEM",
+   "AYGAZ",
+   "BKRGY",
+   "BALSU",
+   "BASGZ",
+   "BTCIM",
+   "BSOKE",
+   "BERA",
+   "BESLR",
+   "BJKAS",
+   "BETAE",
+   "BIENY",
+   "BIMAS",
+   "BINBN",
+   "BIOEN",
+   "BIGEN",
+   "BOBET",
+   "BORLS",
+   "BRSAN",
+   "BRYAT",
+   "BFREN",
+   "BRISA",
+   "BUCIM",
+   "CEMZY",
+   "CCOLA",
+   "CVKMD",
+   "CWENE",
+   "CGCAM",
+   "CANTE",
+   "CLEBI",
+   "CIMSA",
+   "CITAS",
+   "DAPGM",
+   "DSTKF",
+   "DEVA",
+   "DOFRB",
+   "DOHOL",
+   "ARASE",
+   "DOAS",
+   "EBEBK",
+   "ECOGR",
+   "ECZYT",
+   "EFOR",
+   "EGEEN",
+   "EGGUB",
+   "EGPRO",
+   "ECILC",
+   "EKIM",
+   "EKDMR",
+   "EKGYO",
+   "ENDAE",
+   "ENJSA",
+   "ENERY",
+   "ENKAI",
+   "EREGL",
+   "ESCAR",
+   "ESEN",
+   "TEZOL",
+   "EUREN",
+   "EUPWR",
+   "FENER",
+   "FROTO",
+   "FZLGY",
+   "GSRAY",
+   "GWIND",
+   "GEDIK",
+   "GLCVY",
+   "GENIL",
+   "GENTS",
+   "GIPTA",
+   "GMTAS",
+   "GESAN",
+   "GLYHO",
+   "GOKNR",
+   "GOLTS",
+   "GOZDE",
+   "GRTHO",
+   "GUBRF",
+   "GLRMK",
+   "GRSEL",
+   "SAHOL",
+   "HLGYO",
+   "HRKET",
+   "HATSN",
+   "HEKTS",
+   "HTTBT",
+   "ENTRA",
+   "INVEO",
+   "INVES",
+   "IEYHO",
+   "ISKPL",
+   "IHLAS",
+   "INDES",
+   "INTET",
+   "ISDMR",
+   "ISFIN",
+   "ISGYO",
+   "ISMEN",
+   "IZENR",
+   "KLKIM",
+   "KLSER",
+   "KLYPV",
+   "KPEKS",
+   "KARCL",
+   "KRDMA",
+   "KRDMB",
+   "KRDMD",
+   "KAREL",
+   "KARSN",
+   "KTLEV",
+   "KATMR",
+   "KAYSE",
+   "TCKRC",
+   "KZBGY",
+   "KLGYO",
+   "KLRHO",
+   "KMPUR",
+   "KCAER",
+   "KCHOL",
+   "KOCMT",
+   "KONYA",
+   "KORDS",
+   "KOTON",
+   "KOPOL",
+   "KUYAS",
+   "KBORU",
+   "LIDER",
+   "LILAK",
+   "LMKDC",
+   "LINK",
+   "LOGO",
+   "LRSHO",
+   "LYDHO",
+   "MAGEN",
+   "MASFN",
+   "MAVI",
+   "MEGMT",
+   "MERIT",
+   "METEN",
+   "MIATK",
+   "MGROS",
+   "MPARK",
+   "MOBTL",
+   "MOGAN",
+   "MOPAS",
+   "NTGAZ",
+   "NATEN",
+   "NETCD",
+   "NETGL",
+   "NTHOL",
+   "NUHCM",
+   "OBAMS",
+   "ODAS",
+   "ODINE",
+   "ORGE",
+   "ORZAX",
+   "OTKAR",
+   "OYAKC",
+   "OYYAT",
+   "OZKGY",
+   "OZATD",
+   "PAGYO",
+   "PAPIL",
+   "PARSN",
+   "PASEU",
+   "PSGYO",
+   "PAHOL",
+   "PATEK",
+   "PGSUS",
+   "PETKM",
+   "POLHO",
+   "POLTK",
+   "QUAGR",
+   "QUICK",
+   "RALYH",
+   "REEDR",
+   "RYGYO",
+   "RYSAS",
+   "RGYAS",
+   "SSAAT",
+   "SAFKR",
+   "SARKY",
+   "SASA",
+   "SDTTR",
+   "SELEC",
+   "SRVGY",
+   "SNGYO",
+   "SMRTG",
+   "SUNTK",
+   "SURGY",
+   "SUWEN",
+   "SARAE",
+   "SKBNK",
+   "SOKM",
+   "TABGD",
+   "TNZTP",
+   "TARKM",
+   "TATEN",
+   "TAVHL",
+   "TKFEN",
+   "TKNKA",
+   "TOASO",
+   "TRGYO",
+   "TSPOR",
+   "TRMET",
+   "TRENJ",
+   "TUKAS",
+   "TRCAS",
+   "TUREX",
+   "TCELL",
+   "TMSN",
+   "TUPRS",
+   "TRALT",
+   "VEYAS",
+   "THYAO",
+   "GARAN",
+   "HALKB",
+   "ISCTR",
+   "TSKB",
+   "TURSG",
+   "SISE",
+   "VAKBN",
+   "TTKOM",
+   "TTRAK",
+   "USAK",
+   "UCAYM",
+   "ULKER",
+   "VAKFA",
+   "VAKFN",
+   "VKGYO",
+   "VAKKO",
+   "VESBE",
+   "VESTL",
+   "YKBNK",
+   "YATAS",
+   "YYLGD",
+   "YGGYO",
+   "YEOTK",
+   "ZERGY",
+   "ZRGYO",
+   "ZOREN"
+  ]
+ },
+ "names_override": {
+  "AKSEN": "Aksa Enerji",
+  "ALKLC": "Altınkılıç Gıda ve Süt",
+  "BINHO": "1000 Yatırımlar Holding",
+  "DERHL": "Derlüks Yatırım Holding",
+  "EMKEL": "Emek Elektrik Endüstrisi",
+  "EUREN": "Europen Endüstri",
+  "GENTS": "Gentaş Dekoratif Yüzeyler",
+  "GESAN": "Girişim Elektrik",
+  "GMTAS": "Gimat Mağazacılık",
+  "HATSN": "Hat-San Gemi İnşaa",
+  "IEYHO": "Işıklar Enerji ve Yapı Holding",
+  "LRSHO": "Loras Holding",
+  "MPARK": "MLP Sağlık Hizmetleri",
+  "MRGYO": "Martı GYO",
+  "PASEU": "Pasifik Eurasia Lojistik",
+  "PRKAB": "Türk Prysmian Kablo",
+  "PSGYO": "Pasifik GYO",
+  "TABGD": "TAB Gıda",
+  "TCKRC": "Kıraç Galvaniz",
+  "TUREX": "Tureks Turizm"
+ },
+ "source": "kap.org.tr Endeksler + Sektorler"
+}
