@@ -67,33 +67,6 @@ def test_prefetch_thread_starts_unconditionally():
     )
 
 
-# ── gemini-company-summary ───────────────────────────────────────────────
-
-def test_company_summary_worker_checks_leader_inside_loop():
-    src = _read_app()
-    body = _extract_function_body(src, "_company_summary_prefetch_worker")
-    assert body, "_company_summary_prefetch_worker() bulunamadı"
-    while_idx = body.index("while True:")
-    guard_window = body[while_idx: while_idx + 300]
-    assert "_is_gemini_leader()" in guard_window, (
-        "_company_summary_prefetch_worker döngüsü leader durumunu her turda "
-        "kontrol etmiyor"
-    )
-
-
-def test_company_summary_thread_starts_unconditionally():
-    src = _read_app()
-    idx = src.index("_company_summary_thread = threading.Thread(")
-    window = src[idx: idx + 400]
-    assert "_company_summary_thread.start()" in window
-    start_idx = window.index("_company_summary_thread.start()")
-    before_start = window[:start_idx]
-    assert "if _is_gemini_leader():" not in before_start, (
-        "gemini-company-summary thread'i hâlâ module-load-time leader "
-        "kapısının arkasında başlıyor"
-    )
-
-
 # ── Freshness monitor ────────────────────────────────────────────────────
 
 def test_freshness_monitor_checks_leader_inside_loop():

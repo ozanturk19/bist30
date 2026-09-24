@@ -1166,6 +1166,23 @@ for _t, _n in (UNIVERSE.get("names_override") or {}).items():
     if _t in STOCK_NAMES:
         STOCK_NAMES[_t] = _n
 
+# D-46b: görünen ad ve şirket açıklaması KAP'tan (kap_sirket_bilgileri.json, tools/fetch_kap_faaliyet.py).
+# Elle tahmin edilmiş STOCK_NAMES 216 hissede KAP kısa adıyla ezilir; AI olgu yazmaz (kanon §3).
+def _load_kap_info():
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "kap_sirket_bilgileri.json"), encoding="utf-8") as _f:
+            _k = json.load(_f)
+        return _k if isinstance(_k, dict) else {}
+    except Exception:
+        return {}
+
+
+KAP_INFO = _load_kap_info()
+for _t, _k in KAP_INFO.items():
+    if _k.get("kisa_ad") and _t in STOCK_NAMES:
+        STOCK_NAMES[_t] = _k["kisa_ad"]
+
 # ── KAP (Kamuyu Aydınlatma Platformu) UUID OID eşleştirme ───────────────────
 # Gerçek UUID'ler — KAP /tr/api/search/combined endpoint'inden alındı
 KAP_UUID_OIDS = {
@@ -6285,101 +6302,15 @@ def _load_news_cache_from_disk():
     except Exception as e:
         logger.warning("_load_news_cache_from_disk hatası: %s", e)
 
-# ── SPEC-011 L4 / SPEC-013 — Şirket AI özeti (LLM referral + bounce reduction) ──
-# Hisse detay sayfasına özgün metin: Gemini ile 2 paragraf şirket özeti.
-# TTL 30 gün (şirket profili nadiren değişir) → ayda ~215 çağrı, marjinal maliyet.
-# Üretim leader-only bg prefetch'te (#30 maliyet pattern); request path'te asla.
-_company_summary_cache = {}              # {ticker: {"text": str, "ts": float}}
-_COMPANY_SUMMARY_TTL   = 30 * 86400      # 30 gün
-_COMPANY_SUMMARY_PATH  = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "last_company_summary.json")
-
-_COMPANY_SUMMARY_PROMPT = (
-    "Sen finansal yazılım için içerik üreticisin. Türkçe BIST hissesi {ticker} "
-    "({name}) hakkında 2 paragraf özet yaz.\n\n"
-    "KURAL:\n"
-    "1. İlk paragraf 2-3 cümle: Şirket ne yapıyor, ana iş kolu.\n"
-    "2. İkinci paragraf 2-3 cümle: Pazardaki konumu, yatırımcı için önemli faktörler.\n"
-    "3. Sektörden bahsedirken MUTLAKA şu ismi kullan: \"{sector}\". Başka bir sektör "
-    "adı uydurma veya bu isimden sapma.\n"
-    "4. Yatırım tavsiyesi YOK, sadece bilgi.\n"
-    "5. Maksimum 150 kelime toplam. Net, kısa cümleler.\n"
-    "6. Sadece düz metin — başlık yok, markdown yok, madde işareti yok.\n\n"
-    "Çıktı: sadece 2 paragraf."
-)
-
-def _save_company_summary_to_disk():
-    """Şirket özeti cache'i diske yazar (atomic). _lock DIŞINDA çağrılmalı."""
-    try:
-        with _lock:
-            snapshot = dict(_company_summary_cache)
-        if not snapshot:
-            return   # empty-overwrite guard — restart sonrası 30g cache'i koru
-        # DEV-1570/CPO-992-DEV-983 pattern: bkz _save_macro_ai_to_disk üstteki not.
-        _tp_write_json(_COMPANY_SUMMARY_PATH, snapshot, atomic=True, ensure_ascii=False)
-    except Exception as e:
-        logger.warning("_save_company_summary_to_disk hatası: %s", e)
-
-def _load_company_summary_from_disk():
-    """Diskten şirket özeti merge — ticker başına en taze kazanır. _lock DIŞINDA."""
-    try:
-        if not os.path.exists(_COMPANY_SUMMARY_PATH):
-            return
-        disk = _tp_read_json(_COMPANY_SUMMARY_PATH)
-        if not isinstance(disk, dict):
-            return
-        with _lock:
-            for tk, dentry in disk.items():
-                if not isinstance(dentry, dict):
-                    continue
-                mem = _company_summary_cache.get(tk)
-                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
-                    _company_summary_cache[tk] = dentry
-    except Exception as e:
-        logger.warning("_load_company_summary_from_disk hatası: %s", e)
-
-# CPO-1464 #3: "A.Ş."/"T.A.Ş." gibi unvan kısaltmalarındaki nokta cümle sonu
-# sanılıp metin ortasında kesiliyordu (GENIL "...Ticaret A." -> yarım cümle;
-# canlı cache taramasında 214 tickerdan 110'u etkileniyordu). Bilinen kısaltmalar
-# once placeholder'a cevrilip split sonrasi geri konur -- uzun->kisa sirali
-# (T.A.Ş. iceriginde A.Ş. de gectigi icin once o degistirilmeli).
-_SEO_ABBREVIATIONS = ["T.A.Ş.", "A.Ş.", "Ltd. Şti.", "San. Tic.", "Ltd.Şti."]
-
-def _first_sentence(text):
-    """Metnin ilk CÜMLESİNİ döndürür (bilinen TR unvan kısaltmalarındaki
-    noktayı cümle sonu saymadan). Boşsa ''."""
-    protected = text
-    for abbr in _SEO_ABBREVIATIONS:
-        protected = protected.replace(abbr, abbr.replace(".", "\x00"))
-    first = protected.split(".")[0].strip()
-    if not first:
-        return ""
-    return first.replace("\x00", ".") + "."
-
+# ── D-46b — Şirket açıklaması: KAP "Şirketin Faaliyet Konusu" (AI üretimi kalktı) ──
+# Faaliyet konusu yoksa None → "Hakkında" bölümü ve SSS sorusu hiç çizilmez (yanlış metin yerine boşluk).
 def get_company_summary(ticker):
-    """Şirket AI özeti — in-memory cache okur; yoksa/bayatsa None (graceful)."""
-    now = time.time()
-    with _lock:
-        cached = _company_summary_cache.get(ticker)
-    if cached and (now - cached.get("ts", 0)) < _COMPANY_SUMMARY_TTL:
-        return cached.get("text") or None
-    return None
-
-def _generate_company_summary(ticker):
-    """Gemini ile şirket özeti üretir + cache'ler. Yalnız bg thread'den çağrılmalı."""
-    if not GEMINI_API_KEY:
+    """KAP unvanı + faaliyet konusu ("Hakkında" metni). Faaliyet konusu yoksa None."""
+    k = KAP_INFO.get(ticker) or {}
+    faaliyet = (k.get("faaliyet_konusu") or "").strip()
+    if not faaliyet:
         return None
-    name = STOCK_NAMES.get(ticker, ticker)
-    sector = _TICKER_TO_SECTOR.get(ticker, "Diğer")
-    prompt = _COMPANY_SUMMARY_PROMPT.format(ticker=ticker, name=name, sector=sector)
-    model, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS,
-                               timeout=20, max_tokens=400, temperature=0.4)
-    if text:
-        with _lock:
-            _company_summary_cache[ticker] = {"text": text.strip(), "ts": time.time()}
-        logger.info("company-summary [%s]: OK [model=%s]", ticker, model)
-        return text.strip()
-    return None
+    return f"{k.get('kisa_ad') or STOCK_NAMES.get(ticker, ticker)} — KAP faaliyet konusu: {faaliyet}"
 
 
 def _news_ttl_for(ticker: str) -> int:
@@ -7869,60 +7800,6 @@ _prefetch_thread.start()
 logger.info("gemini-prefetch: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
-def _company_summary_prefetch_worker():
-    """SPEC-011 L4 — Şirket AI özetlerini yavaşça doldurur (leader-only).
-    Eksik/bayat özetleri 35s arayla üretir → Gemini rate-limit dostu.
-    Tur sonunda 12h uyur (TTL 30 gün, acele yok).
-
-    CPO-1207 §1: leader kontrolü döngü içinde her turda — bkz.
-    _prefetch_news_worker (aynı sınıf/aynı gerekçe)."""
-    time.sleep(_PREFETCH_STARTUP_GRACE_S)   # SPEC-016 K1 — restart-grace (soğuk-start storm fix)
-    while True:
-        if not _is_gemini_leader():
-            # 12h'lik tur-sonu uykusu burada UYGULANMAZ — non-leader kısa
-            # aralıkla (_PREFETCH_POLL_S) yeniden dener, kilit boşalınca
-            # 12h'e kadar bekletmez.
-            time.sleep(_PREFETCH_POLL_S)
-            continue
-        try:
-            now = time.time()
-            with _lock:
-                have = set(_company_summary_cache.keys())
-            to_gen = [t for t in BIST100
-                      if t != "XU030" and t not in have]
-            # Bayatları da yenile
-            with _lock:
-                for tk, e in list(_company_summary_cache.items()):
-                    if (now - e.get("ts", 0)) > _COMPANY_SUMMARY_TTL:
-                        to_gen.append(tk)
-            if to_gen:
-                logger.info("company-summary prefetch: %d hisse üretilecek", len(to_gen))
-            done = 0
-            for tk in to_gen:
-                try:
-                    if _generate_company_summary(tk):
-                        done += 1
-                except Exception as e:
-                    logger.error("company-summary prefetch hatası [%s]: %s", tk, e)
-                time.sleep(35)   # rate-limit koruması
-            if to_gen:
-                logger.info("company-summary prefetch tamamlandı: %d/%d", done, len(to_gen))
-        except Exception as e:
-            logger.error("company-summary prefetch worker hatası: %s", e)
-        time.sleep(12 * 3600)   # 12h sonra yeni tur (eksik/bayat kontrolü)
-
-
-_company_summary_thread = threading.Thread(
-    target=_company_summary_prefetch_worker,
-    daemon=True,
-    name="gemini-company-summary"
-)
-# #30 maliyet multiplier fix (4 worker yerine 1) — CPO-1207 §1: thread artık
-# KOŞULSUZ başlar, leader kontrolü döngü içinde her turda.
-_company_summary_thread.start()
-logger.info("gemini-company-summary: thread başlatıldı (leader durumu döngü içinde her turda)")
-
-
 # SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
 # #38: disk I/O request/hot-path'te YAPILMAZ (gevent hub kilitler). Bunun yerine
 # 90s'lik bg timer thread — background_refresh non-leader pattern'i birebir.
@@ -7933,7 +7810,6 @@ def _gemini_cache_sync_loop():
     # diski hiç görmeden Gemini'ye 8 hissenin tamamını yeniden soruyordu.
     _load_news_cache_from_disk()
     _load_macro_ai_from_disk()
-    _load_company_summary_from_disk()
     # CPO-1207 §1 (aynı sınıf, bu thread'de bulundu): eskiden is_leader thread
     # başlangıcında BİR KEZ okunup döngü boyunca sabit kalıyordu — kilit
     # sonradan boşalıp bu worker leader olsa (veya leaderliğini kaybetse) bile
@@ -7950,11 +7826,9 @@ def _gemini_cache_sync_loop():
             if is_leader:
                 _save_news_cache_to_disk()
                 _save_macro_ai_to_disk()
-                _save_company_summary_to_disk()
             else:
                 _load_news_cache_from_disk()
                 _load_macro_ai_from_disk()
-                _load_company_summary_from_disk()
         except Exception as e:
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
@@ -8867,12 +8741,10 @@ def stock_page(ticker):
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
         })
     if company_summary:
-        _first = _first_sentence(company_summary)
-        if _first:
-            seo_faq.append({
-                "q": f"{ticker} ne yapan şirket?",
-                "a": _first,
-            })
+        seo_faq.append({
+            "q": f"{ticker} ne yapan şirket?",
+            "a": company_summary,
+        })
 
     # SPEC-014 A1 — Sinyal Özeti (deterministik konsolide kutu)
     signal_summary = build_signal_summary(ssr_signal)
@@ -10947,7 +10819,6 @@ def api_cache_inventory():
     _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir",
            content_ts_field="ts")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
-    _check("company_summary", _COMPANY_SUMMARY_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
     _check("sentiment", _SENTIMENT_DISK_PATH, "CPO-1781: bg worker kasıtlı durduruldu, STALE beklenir (donmuş cache)")
     _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
     _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
@@ -14315,11 +14186,6 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
-    # SPEC-011 L4 — şirket özeti cache'i diskten yükle (restart sonrası anında dolu)
-    try:
-        _load_company_summary_from_disk()
-    except Exception as e:
-        logger.warning("Şirket özeti disk yükleme hatası: %s", e)
     # F5 — AI Sentiment cache'i diskten yükle
     try:
         _load_sentiment_cache_from_disk()
