@@ -46,6 +46,7 @@ import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmele
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
+import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -5517,33 +5518,14 @@ threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").star
 
 
 # ── Ekonomik Takvim ───────────────────────────────────────────────────────────
-ECONOMIC_CALENDAR_2026 = [
-    # TCMB Para Politikası Kurulu Toplantıları
-    {"date": "2026-05-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-06-26", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-07-23", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-09-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-10-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-12-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    # TUIK Enflasyon Verileri
-    {"date": "2026-05-05", "event": "TÜFE Nisan 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    {"date": "2026-06-03", "event": "TÜFE Mayıs 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    {"date": "2026-07-03", "event": "TÜFE Haziran 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    # Fed Faiz Kararları
-    {"date": "2026-05-07", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-06-18", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-07-30", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-09-16", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-10-28", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-12-09", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    # Bilanço Dönemleri
-    {"date": "2026-05-15", "event": "1Ç 2026 Bilanço Son Günü (ilk açıklamalar)", "importance": "MED", "source": "KAP", "icon": "📋"},
-    {"date": "2026-08-14", "event": "2Ç 2026 Bilanço Son Günü", "importance": "MED", "source": "KAP", "icon": "📋"},
-    # Türkiye büyüme verisi
-    {"date": "2026-05-30", "event": "1Ç 2026 GSYH Büyüme", "importance": "HIGH", "source": "TUIK", "icon": "📈"},
-    # BIST genel
-    {"date": "2026-06-01", "event": "BIST Aylık İşlem İstatistikleri", "importance": "LOW", "source": "BIST", "icon": "📉"},
-]
+# D-24: tek kaynak takvim.MAKRO (resmi takvimlerden doğrulanmış tarihler; eski
+# ECONOMIC_CALENDAR_2026 elle listesi kalktı). Bu uç eski biçimi korur (gundem.html).
+def _economic_calendar_rows():
+    return [{"date": d, "event": (baslik + (" (" + donem + ")" if donem else "")) if bolge == "TR"
+             else "ABD " + baslik + (" (" + donem + ")" if donem else ""),
+             "time": saat, "region": bolge, "source": "Türkiye" if bolge == "TR" else "ABD",
+             "importance": "HIGH"}
+            for d, saat, bolge, baslik, donem, _alt in _takvim.MAKRO]
 
 @app.route("/api/economic-calendar")
 @limiter.limit("60 per minute")
@@ -5551,7 +5533,7 @@ def api_economic_calendar():
     """Ekonomik takvim — yaklaşan ve son 7 günün önemli olayları."""
     today = datetime.now(_TZ_TR).date()
     all_events = []
-    for e in ECONOMIC_CALENDAR_2026:
+    for e in _economic_calendar_rows():
         try:
             ev_date = datetime.strptime(e["date"], "%Y-%m-%d").date()
             delta   = (ev_date - today).days
@@ -5568,9 +5550,8 @@ def api_economic_calendar():
     recent   = sorted([e for e in all_events if e["is_past"] and e["days_until"] >= -7],
                        key=lambda x: x["days_until"], reverse=True)
     if not upcoming:
-        # DEV2 bug-hunt r29: ECONOMIC_CALENDAR_2026 hardcoded liste tukendiginde
-        # sessizce bos donmesin - erken uyari icin logla (P0-CONTENT sinifinda degil ama takip edilsin)
-        logger.warning("ECONOMIC_CALENDAR_2026 tukendi: yaklasan olay kalmadi, listeye yeni tarih eklenmeli")
+        # DEV2 bug-hunt r29: sabit liste tukendiginde sessizce bos donmesin (takvim.MAKRO'ya yeni tarih)
+        logger.warning("takvim.MAKRO tukendi: yaklasan olay kalmadi, listeye dogrulanmis yeni tarih eklenmeli")
     return safe_json({
         "upcoming": upcoming[:6],
         "recent":   recent[:3],
@@ -11179,8 +11160,7 @@ def sitemap():
             pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
-    pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "daily"})
-    pages.append({"loc": "/temettu-takvimi",    "priority": "0.8", "changefreq": "daily"})
+    pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
                   "lastmod": _tpl_lastmod("karsilastir.html", today)})
@@ -11326,8 +11306,7 @@ def llms_txt():
 - [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
 - [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
-- [Bilanço Takvimi](https://borsapusula.com/bilanco-takvimi): yaklaşan finansal sonuç tarihleri
-- [Temettü Takvimi](https://borsapusula.com/temettu-takvimi): BIST30 şirketlerinin yaklaşan ex-temettü tarihleri
+- [Takvim](https://borsapusula.com/takvim): şirketlerin temettü ve finansal rapor tarihleri, Türkiye ve ABD veri günleri
 - [Blog](https://borsapusula.com/blog): teknik analiz eğitim içerikleri (okumalar)
 
 ## Hisse Sayfaları
@@ -11894,27 +11873,9 @@ def _compute_gundem_data():
         key=_adx_val, reverse=True
     )[:8]
 
-    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (date.today() sunucu/UTC günüdür)
-    today_dt  = datetime.now(_TZ_TR).date()
-    today_iso = today_dt.isoformat()
-    bilanco_upcoming = []
-    for qlabel, start, end, desc in _BILANCO_PERIODS:
-        if end < today_iso:
-            continue
-        start_dt      = date.fromisoformat(start)
-        end_dt        = date.fromisoformat(end)
-        days_to_end   = (end_dt   - today_dt).days
-        days_to_start = (start_dt - today_dt).days
-        bilanco_upcoming.append({
-            "label":      qlabel,
-            "desc":       desc,
-            "start":      start,
-            "end":        end,
-            "status":     "active" if today_dt >= start_dt else "upcoming",
-            "days_label": f"{days_to_end} gün kaldı" if today_dt >= start_dt else f"{days_to_start} gün sonra",
-        })
-        if len(bilanco_upcoming) >= 2:
-            break
+    # Yaklaşan bilanço dönemi (gündem için) — D-24: doğrulanmış yasal son günlerden
+    # (takvim.DONEMLER); elle kalibre _BILANCO_PERIODS tahmin tablosu kalktı.
+    bilanco_upcoming = _takvim.donem_ozeti(datetime.now(_TZ_TR).date())[:2]
 
     # D-06: boş-liste metni göreli zaman (bugün/yarın) yerine son EOD gününün
     # tarihini taşır; liste o güne bağlı olduğundan seans durumundan bağımsızdır.
@@ -12954,7 +12915,9 @@ def _load_earnings_cache_from_disk():
             return
         with open(_EARNINGS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
-        if not isinstance(data, dict) or "periods" not in data:
+        if isinstance(data, dict) and "periods" in data and "estimates" not in data:
+            data = _earnings_flat_from_periods(data)   # D-24 öncesi disk biçimi (tek seferlik)
+        if not isinstance(data, dict) or "estimates" not in data:
             return
         _earnings_cache["data"] = data
         _earnings_cache["ts"]   = current_mtime
@@ -12962,32 +12925,16 @@ def _load_earnings_cache_from_disk():
     except Exception as e:
         logger.warning("_load_earnings_cache_from_disk hatası: %s", e)
 
-# BIST'te finansal sonuçlar genellikle şu dönemlerde açıklanır:
-# Q4 (Ekim-Aralık bilanços): Mart-Nisan
-# Q1 (Ocak-Mart bilanços):   Mayıs ortası
-# Q2/H1 (Nisan-Haziran):     Ağustos-Eylül
-# Q3 (Temmuz-Eylül):         Ekim-Kasım
-#
-# CPO-DEV2-048 (21.08): aralıklar çakışmasız + bitişik olacak şekilde düzeltildi
-# (eski hâlde Q4 2025/Q1 2026 arası 47 gün çakışıyordu, Q1→Q2 ve Q2→Q3 arası
-# haftalarca boşluk vardı — bir ticker'ın yfinance tarihi 2 döneme birden
-# girebiliyor ya da hiçbirine girmeyip kayboluyordu). Q3 2026 → Q4 2026 (Yıllık)
-# arasındaki boşluk (Aralık-Şubat) kasıtlı bırakıldı — bu dönemde BIST'te
-# tipik olarak bilanço açıklaması olmuyor (bkz. yukarıdaki sezon notu); bu
-# boşluğa denk gelen kesin bir yfinance tarihi olursa _earnings_refresh_impl
-# onu en yakın gelecek döneme (Q4 2026 Yıllık) düşürür, kaybolmaz.
-# CPO-1678: bu tarihler SPK II-14.1 teblig gün-sayısından TÜRETİLMİYOR — geçmiş
-# KAP bildirim emsaline göre elle kalibre edilmiş TAHMİNdir (Q1/Q4-yıllık lag
-# deseninden enterpole edildi). İleride KAP'tan gerçek bildirim tarihi
-# çekilebilirse bu tablo tamamen emekli olmalı.
-_BILANCO_PERIODS = [
-    # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
-    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-08", "2025 yıl sonu bilanço açıklamaları (tahmini)"),
-    ("Q1 2026",          "2026-05-09", "2026-07-08", "2026 1. çeyrek sonuçları (tahmini)"),
-    ("Q2 2026 (H1)",     "2026-08-08", "2026-10-07", "2026 ilk yarıyıl sonuçları (tahmini)"),
-    ("Q3 2026",          "2026-11-08", "2027-01-07", "2026 3. çeyrek sonuçları (tahmini)"),
-    ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları (tahmini)"),
-]
+def _earnings_flat_from_periods(data):
+    """D-24 öncesi `last_earnings_cache.json` ({"periods":[{stocks:[{ticker,date}]}]}) ->
+    düz {"estimates": {T: tarih}}; "yaklaşık" satırları tarih değildir, taşınmaz."""
+    est = {}
+    for p in data.get("periods") or []:
+        for s in p.get("stocks") or []:
+            d = s.get("date")
+            if s.get("ticker") and d and re.match(r"^\d{4}-\d{2}-\d{2}$", d):
+                est[s["ticker"]] = d
+    return {"estimates": est, "updated_at": data.get("updated_at")}
 
 def _do_earnings_refresh():
     """Bilanço takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
@@ -13006,11 +12953,6 @@ def _do_earnings_refresh():
 def _earnings_refresh_impl():
     """Gerçek yfinance çağrılarını yapar, cache'i günceller."""
     now = time.time()
-
-    # Mevcut sinyal datasını al
-    with _lock:
-        stocks = list(_cache["data"])
-    sig_map = {s["ticker"]: s for s in stocks}
 
     # Her hisse için yfinance calendar dene (bazı hisseler için gerçek tarih döner)
     yf_dates = {}   # ticker → date_str
@@ -13036,84 +12978,11 @@ def _earnings_refresh_impl():
             pass
         time.sleep(0.1)
 
-    # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
-    today_str = datetime.now(_TZ_TR).date().isoformat()
-
-    # CPO-DEV2-048: ticker-merkezli TEK-atama modeli — eski dönem-merkezli döngü
-    # her ticker'ı bağımsız her döneme karşı test ediyordu; aralıklar çakışıyor/
-    # boşluk bırakıyordu ve "yaklaşık" tickerlar HER aktif dönemde tekrar
-    # ediyordu (186 ticker'ın 3 dönemde birebir aynı kümeyle görünmesinin nedeni
-    # buydu). Artık her ticker'a önce tek bir period index atanıyor, sonra
-    # dönemler bu atamaya göre dolduruluyor — bir ticker asla 2 dönemde aynı
-    # anda görünmüyor, "Toplam" sayacı kart sayısıyla birebir eşleşiyor.
-    active_periods = [p for p in _BILANCO_PERIODS if p[2] >= today_str]  # p=(qlabel,start,end,desc)
-
-    def _nearest_future_period_idx():
-        future = [(i, p[1]) for i, p in enumerate(active_periods) if p[1] >= today_str]
-        if future:
-            return min(future, key=lambda x: x[1])[0]
-        return len(active_periods) - 1 if active_periods else None
-
-    # assigned[ticker] = (period_idx, date_label)
-    assigned = {}
-    for t in BIST100:
-        if t == "XU030":
-            continue
-        yf_date = yf_dates.get(t)
-        if yf_date:
-            # Kesin tarih: bu aralığa giren TEK dönemi bul (artık çakışmasız → en fazla 1 eşleşme)
-            match_idx = next((i for i, p in enumerate(active_periods) if p[1] <= yf_date <= p[2]), None)
-            if match_idx is None:
-                # Hiçbir aktif döneme girmiyor (geçmişte kaldı ya da sezon-dışı
-                # boşluğa denk geldi) → en yakın GELECEK döneme düş, kaybolmasın
-                match_idx = _nearest_future_period_idx()
-            if match_idx is not None:
-                assigned[t] = (match_idx, yf_date)
-        else:
-            # Yaklaşık: TEK bir varsayılan dönem — güncel dönem varsa o, yoksa en yakın gelecek
-            cur_idx = next((i for i, p in enumerate(active_periods) if p[1] <= today_str <= p[2]), None)
-            if cur_idx is None:
-                cur_idx = _nearest_future_period_idx()
-            if cur_idx is not None:
-                assigned[t] = (cur_idx, "yaklaşık")
-
-    result_periods = []
-    for i, (qlabel, start, end, desc) in enumerate(active_periods):
-        stocks_in_period = []
-        for t, (pidx, date_label) in assigned.items():
-            if pidx != i:
-                continue
-            # CPO-1647: sig_map'te yoksa (ör. DSTKF/TRALT — <120 gün geçmişi
-            # olan yeni BIST30 üyeleri, analyze() 120 bar eşiğinin altında
-            # sessizce None döner) eski kod {} default'u üzerinden uydurma
-            # "BEKLE"/Yatay basıyordu. Artık dürüstçe None — frontend "Veri
-            # bekleniyor" gösteriyor, sahte bir sinyal iddia etmiyor.
-            sig_data = sig_map.get(t)
-            stocks_in_period.append({
-                "ticker":      t,
-                "name":        STOCK_NAMES.get(t, t),
-                "signal":      sig_data.get("signal") if sig_data else None,
-                "price":       sig_data.get("price") if sig_data else None,
-                "is_premium":  sig_data.get("is_premium", False) if sig_data else False,
-                "date":        date_label,
-                "kap_url":     kap_url_for(t),
-            })
-        # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
-        stocks_in_period.sort(key=lambda x: (
-            0 if x["signal"] == "AL" else 1 if x["signal"] == "SAT" else 2,
-            x["ticker"]
-        ))
-        result_periods.append({
-            "label":       qlabel,
-            "start":       start,
-            "end":         end,
-            "description": desc,
-            "stocks":      stocks_in_period,
-            "is_current":  start <= today_str <= end,
-        })
-
+    # D-24: dönem kovalaması (_BILANCO_PERIODS) kalktı. Dış veri tarihi düz tutulur;
+    # /api/takvim onu her zaman date_kind="tahmini" gösterir, geçmişte kalanı ve şirketin
+    # raporu zaten açıklanmışsa takvim.bilanco() eler.
     data = {
-        "periods":    result_periods,
+        "estimates":  yf_dates,
         "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
     }
     with _lock:
@@ -13123,7 +12992,7 @@ def _earnings_refresh_impl():
     _rebuild_earnings_warning_lookup()
     # CPO-1180 K2: web worker'ların disk-reload ile okuyabilmesi için diske yaz
     _save_earnings_cache_to_disk()
-    logger.info("_earnings_refresh_impl: tamamlandi (%d donem)", len(result_periods))
+    logger.info("_earnings_refresh_impl: tamamlandi (%d tahmini tarih)", len(yf_dates))
 
 
 # Faz 1 #5: ticker → upcoming earnings flat lookup (O(1) erişim)
@@ -13140,19 +13009,13 @@ def _rebuild_earnings_warning_lookup():
             return
         today = datetime.now(_TZ_TR).date()
         new_lookup = {}
-        for period in cached.get("periods", []):
-            for s in period.get("stocks", []):
-                d = s.get("date")
-                t = s.get("ticker")
-                if not t or not d or d == "yaklaşık":
-                    continue
-                try:
-                    e_date = datetime.strptime(d, "%Y-%m-%d").date()
-                    delta = (e_date - today).days
-                    if 0 <= delta <= 7:
-                        new_lookup[t] = {"date": d, "days_ahead": delta}
-                except Exception:
-                    continue
+        for t, d in (cached.get("estimates") or {}).items():
+            try:
+                delta = (datetime.strptime(d, "%Y-%m-%d").date() - today).days
+            except (TypeError, ValueError):
+                continue
+            if 0 <= delta <= 7:
+                new_lookup[t] = {"date": d, "days_ahead": delta}
         with _earnings_warning_lock:
             _earnings_warning_lookup.clear()
             _earnings_warning_lookup.update(new_lookup)
@@ -13193,246 +13056,131 @@ def get_earnings_data():
     # Stale cache varsa onu dön; yoksa boş döndür (loading state)
     if cached:
         return cached
-    return {"periods": [], "updated_at": "—"}
-
-
-@app.route("/bilanco-takvimi")
-def bilanco_takvimi():
-    return render_template("bilanco_takvimi.html")
+    return {"estimates": {}, "updated_at": "—"}
 
 
 @app.route("/api/bilanco-takvimi")
-@limiter.limit("60 per minute")  # r37 bug-hunt: kardeş /api/bilanco-mini ile aynı limit, eksikti
+@limiter.limit("60 per minute")
 def api_bilanco_takvimi():
-    data = get_earnings_data()
-    if data.get("periods"):
-        data = dict(data)
-        data["periods"] = [
-            {**p, "stocks": _overlay_live_prices(p.get("stocks", []))}
-            for p in data["periods"]
-        ]
-    return safe_json(data)
+    """D-24: dönem kovalamalı eski uç kalktı; tek kaynak /api/takvim."""
+    return redirect("/api/takvim", code=301)
 
 
 @app.route("/api/bilanco-mini")
 @limiter.limit("60 per minute")
 def api_bilanco_mini():
-    """Ana sayfa mini bilanço widget — yfinance çağrısı yok, sadece dönem bilgisi."""
-    today_dt  = datetime.now(_TZ_TR).date()
-    today_str = today_dt.isoformat()
-    items     = []
-    for qlabel, start, end, desc in _BILANCO_PERIODS:
-        if end < today_str:
-            continue
-        start_dt      = date.fromisoformat(start)
-        end_dt        = date.fromisoformat(end)
-        days_to_end   = (end_dt   - today_dt).days
-        days_to_start = (start_dt - today_dt).days
-        if today_dt >= start_dt:
-            status     = "active"
-            days_label = f"{days_to_end} gün kaldı"
-        else:
-            status     = "upcoming"
-            days_label = f"{days_to_start} gün sonra"
-        items.append({
-            "label":      qlabel,
-            "start":      start,
-            "end":        end,
-            "desc":       desc,
-            "status":     status,
-            "days_label": days_label,
-        })
-        if len(items) >= 3:
-            break
-    return safe_json({"periods": items})
+    """Ana sayfa mini bilanço widget'ı — D-24: doğrulanmış yasal son günlerden (takvim.DONEMLER)."""
+    return safe_json({"periods": _takvim.donem_ozeti(datetime.now(_TZ_TR).date())[:3]})
 
 
-# ── Temettü Takvimi ───────────────────────────────────────────────────────────
-# CPO-1457 madde 3: bilanco-takvimi'ndeki disk-cache köprü deseni (CPO-1180 K2)
-# birebir tekrarlanıyor — REFRESH_WORKER=1 (bist30-refresh.service) hesaplar ve
-# diske yazar, REFRESH_WORKER=web worker'lar yfinance'e hiç gitmeden diskten okur.
-_dividend_cache       = {"data": None, "ts": 0}
-_DIVIDEND_TTL         = 3600 * 12   # 12 saat
-_dividend_refreshing  = False         # arka plan yenileme kilidi
-
-_DIVIDEND_CACHE_DISK_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "last_dividend_cache.json")
+# ── Takvim (D-24) ─────────────────────────────────────────────────────────────
+# Tek kaynak takvim.build(): bilanço (dış veri tahmini "tahmini" + açıklanan rapor tarihi),
+# temettü (kâr payı dağıtım bildirimleri — D-40a0 kaydı data/kap_fin/<T>.json), makro ve
+# yasal son günler (resmi takvim). Eski yfinance temettü döngüsü (_dividend_refresh_impl:
+# yalnız BIST30, tutar = son ödeme, EREGL 15.12 "en geç başlama" tarihi) kalktı; D-40a0
+# kayıtları yoksa temettü boş kalır (uydurma yok).
+_TAKVIM_TTL = 300
+_takvim_cache = {"ts": 0.0, "day": None, "data": None}
 
 
-def _save_dividend_cache_to_disk():
-    """Temettü takvimi cache'ini diske yazar (hesaplayan process). _lock DIŞINDA çağrılmalı."""
-    try:
-        data = _dividend_cache.get("data")
-        if not data:
-            return   # empty-overwrite guard — restart sonrası diskteki geçerli veriyi silme
-        _atomic_write_json(_DIVIDEND_CACHE_DISK_PATH, data)
-    except Exception as e:
-        logger.warning("_save_dividend_cache_to_disk hatası: %s", e)
-
-
-def _load_dividend_cache_from_disk():
-    """Diskten temettü takvimi cache'ini yükler (web worker — yfinance yasak, CPO-558F)."""
-    try:
-        if not os.path.exists(_DIVIDEND_CACHE_DISK_PATH):
-            return
-        current_mtime = os.path.getmtime(_DIVIDEND_CACHE_DISK_PATH)
-        if _dividend_cache.get("ts") == current_mtime and _dividend_cache.get("data"):
-            return
-        with open(_DIVIDEND_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if not isinstance(data, dict) or "stocks" not in data:
-            return
-        _dividend_cache["data"] = data
-        _dividend_cache["ts"]   = current_mtime
-    except Exception as e:
-        logger.warning("_load_dividend_cache_from_disk hatası: %s", e)
-
-
-def _unwrap_yf_scalar(val):
-    """yfinance calendar alanları farklı tiplerde dönebilir (list[date], pandas Series/Index,
-    çıplak datetime.date) — CPO-1447'de aynı hata sınıfı yaşandı: tip kontrolsüz str()
-    ham repr üretip API'den kullanıcıya sızdı. Aynı unwrap zincirini burada da uyguluyoruz."""
-    if val is None:
-        return None
-    if hasattr(val, "iloc"):
-        val = val.iloc[0] if len(val) > 0 else None
-    elif isinstance(val, (list, tuple)):
-        val = val[0] if len(val) > 0 else None
-    if val is None:
-        return None
-    return str(val)[:10]
-
-
-def _do_dividend_refresh():
-    """Temettü takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
-    global _dividend_refreshing
-    if _dividend_refreshing:
-        return
-    _dividend_refreshing = True
-    try:
-        _dividend_refresh_impl()
-    except Exception as e:
-        logger.warning("_do_dividend_refresh: hata — %s", e)
-    finally:
-        _dividend_refreshing = False
-
-
-def _dividend_refresh_impl():
-    """Gerçek yfinance çağrılarını yapar, temettü cache'ini günceller.
-
-    yfinance'in "Ex-Dividend Date" calendar alanı ileri-projeksiyon garantisi
-    vermiyor (canlı doğrulandı: THYAO/GARAN'da bugünden ESKİ bir tarih dönebiliyor,
-    son gerçekleşmiş ex-div tarihini yansıtıyor) — bu yüzden sadece bugünden
-    SONRAKİ tarihler "yaklaşan" (next_ex_date) sayılır; geçmişte kalan tarih atılır,
-    gerçek geçmiş bilgi zaten `Ticker.dividends` serisinden (last_div_date) geliyor.
-    """
-    now = time.time()
-    today_str = datetime.now(_TZ_TR).date().isoformat()
-
+def _takvim_stocks():
     with _lock:
         stocks = list(_cache["data"])
-    sig_map = {s["ticker"]: s for s in stocks}
-
-    # KALICI ÜRÜN KARARI (CPO-1789, DEV-2043): temettü takvimi BIST30 ile
-    # sınırlı kalır. 217 hisseye genişletmek 2 yfinance çağrısı x 217 =
-    # ~7-8dk tek turda + ciddi rate-limit riski demek (bkz. DEV-1409 /
-    # bulk_refresh_also_yahoo_blocked emsali) — kapsam sabit, sayfa UI'si
-    # (title/h1/banner/"Takvimdeki Hisse" cipi) bu kararla tutarlı yazıldı.
-    sample_tickers = BIST30_LITERAL   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
-    result_stocks = []
-    for t in sample_tickers:
-        try:
-            tk  = yf.Ticker(t + ".IS")
-            cal = tk.calendar
-            next_ex = None
-            if cal is not None and isinstance(cal, dict):
-                next_ex = _unwrap_yf_scalar(cal.get("Ex-Dividend Date"))
-                if next_ex and next_ex <= today_str:
-                    next_ex = None
-
-            last_div_date   = None
-            last_div_amount = None
-            divs = tk.dividends
-            if divs is not None and len(divs) > 0:
-                last_amt = divs.iloc[-1]
-                if pd.notna(last_amt):
-                    last_div_date   = divs.index[-1].strftime("%Y-%m-%d")
-                    last_div_amount = round(float(last_amt), 4)
-
-            if next_ex or last_div_date:
-                # CPO-1647 ile aynı desen (bilanco-takvimi) — sig_map'te yoksa
-                # dürüstçe None, uydurma "BEKLE" yok.
-                sig_data = sig_map.get(t)
-                result_stocks.append({
-                    "ticker":          t,
-                    "name":            STOCK_NAMES.get(t, t),
-                    "signal":          sig_data.get("signal") if sig_data else None,
-                    "price":           sig_data.get("price") if sig_data else None,
-                    "is_premium":      sig_data.get("is_premium", False) if sig_data else False,
-                    "next_ex_date":    next_ex,
-                    "last_div_date":   last_div_date,
-                    "last_div_amount": last_div_amount,
-                    "kap_url":         kap_url_for(t),
-                })
-        except Exception:
-            pass
-        time.sleep(0.1)
-
-    # Sıralama: yaklaşan ex-div tarihi olanlar önce (en yakın ilk),
-    # sonra sadece geçmiş temettü verisi olanlar (en yeni ilk)
-    with_next    = sorted((s for s in result_stocks if s["next_ex_date"]),
-                          key=lambda s: s["next_ex_date"])
-    without_next = sorted((s for s in result_stocks if not s["next_ex_date"]),
-                          key=lambda s: s["last_div_date"] or "", reverse=True)
-    result_stocks = with_next + without_next
-
-    data = {
-        "stocks":     result_stocks,
-        "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
-    }
-    with _lock:
-        _dividend_cache["data"] = data
-        _dividend_cache["ts"]   = now
-    _save_dividend_cache_to_disk()
-    logger.info("_dividend_refresh_impl: tamamlandi (%d hisse)", len(result_stocks))
+    return [s for s in stocks if s.get("ticker") and s["ticker"] not in INDEX_TICKERS]
 
 
-def get_dividend_data():
-    """Temettü takvimi verisi — cache'den döner, stale ise arka planda yeniler."""
-    now = time.time()
-    cached = _dividend_cache.get("data")
-    ts     = _dividend_cache.get("ts", 0)
+def _takvim_payload():
+    today = datetime.now(_TZ_TR).date()
+    c = _takvim_cache
+    if c["data"] is not None and c["day"] == today and time.time() - c["ts"] < _TAKVIM_TTL:
+        return c["data"]
+    stocks = _takvim_stocks()
+    uni = [s["ticker"] for s in stocks]
+    fiyat_tarihi = None
+    try:   # verim paydası: gösterilen kapanışın tarihi (bulunamazsa sayfa tarih yazmaz)
+        upd = _data_quality_snapshot(stocks).get("updated_at") if stocks else None
+        if upd:
+            fiyat_tarihi = datetime.strptime(upd[:10], "%d.%m.%Y").date().isoformat()
+    except Exception as e:
+        logger.debug("_takvim_payload: fiyat tarihi okunamadi: %s", e)
+    data = _takvim.build(
+        uni, STOCK_NAMES, _takvim.load_kap_records(uni),
+        (get_earnings_data().get("estimates") or {}),
+        {s["ticker"]: s.get("price") for s in stocks}, today,
+        fiyat_tarihi=fiyat_tarihi, updated_at=datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"))
+    c.update(ts=time.time(), day=today, data=data)
+    return data
 
-    if cached and (now - ts) < _DIVIDEND_TTL:
-        return cached
 
-    if os.environ.get("REFRESH_WORKER") == "web":
-        _load_dividend_cache_from_disk()
-        cached = _dividend_cache.get("data")
-        if cached:
-            return cached
-    elif not _dividend_refreshing:
-        threading.Thread(target=_do_dividend_refresh, daemon=True,
-                         name="dividend-refresh").start()
+@app.route("/api/takvim")
+@limiter.limit("60 per minute")
+def api_takvim():
+    return safe_json(_takvim_payload())
 
-    if cached:
-        return cached
-    return {"stocks": [], "updated_at": "—"}
+
+def _takvim_page_ready():
+    """takvim.html (C-36) yayında mı? Arka uç önce deploy edilirse eski sayfalar
+    301 yerine kendi şablonlarıyla kalır, /takvim 404 döner (500 yok)."""
+    try:
+        app.jinja_env.get_template("takvim.html")
+        return True
+    except Exception:
+        return False
+
+
+@app.route("/takvim")
+def takvim_page():
+    if not _takvim_page_ready():
+        abort(404)
+    today = datetime.now(_TZ_TR).date()
+    try:
+        payload = _takvim_payload()
+        ctx = _takvim.ssr_context(payload, {s["ticker"]: s for s in _takvim_stocks()}, today)
+    except Exception as e:   # veri katmanı düşerse sayfa boş durumla açılır (JS /api/takvim'i dener)
+        logger.warning("takvim_page: SSR bağlamı kurulamadı: %s", e)
+        ctx = None
+    return render_template("takvim.html", takvim=ctx)
+
+
+@app.route("/bilanco-takvimi")
+def bilanco_takvimi():
+    if _takvim_page_ready():
+        return redirect("/takvim?tur=bilanco", code=301)
+    return render_template("bilanco_takvimi.html")
 
 
 @app.route("/temettu-takvimi")
 def temettu_takvimi():
+    if _takvim_page_ready():
+        return redirect("/takvim?tur=temettu", code=301)
     return render_template("temettu_takvimi.html")
 
 
 @app.route("/api/temettu-takvimi")
 @limiter.limit("60 per minute")
 def api_temettu_takvimi():
-    data = get_dividend_data()
-    if data.get("stocks"):
-        data = dict(data)
-        data["stocks"] = _overlay_live_prices(data["stocks"])
-    return safe_json(data)
+    """Eski biçim (hisse sayfası Temel sekmesi temettü kartı okur), D-24'ten beri
+    aynı kaynaktan: siradaki açıklanmış ödeme + son 24 ayda yapılmış son ödeme, tüm evren."""
+    stocks = _takvim_stocks()
+    by_t = {s["ticker"]: s for s in stocks}
+    today = datetime.now(_TZ_TR).date()
+    oz = _takvim.temettu_ozeti(_takvim.load_kap_records(list(by_t)), today)
+    rows = []
+    for t, o in oz.items():
+        nx, last, s = o["next"], o["last"], by_t.get(t) or {}
+        rows.append({
+            "ticker": t, "name": STOCK_NAMES.get(t, t),
+            "signal": s.get("signal"), "price": s.get("price"), "is_premium": s.get("is_premium", False),
+            "next_ex_date": nx["ex"] if nx else None,
+            "next_pay_date": nx["pay"] if nx else None,
+            "next_div_amount": nx["brut"] if nx else None,
+            "last_div_date": last["pay"] if last else None,
+            "last_div_amount": last["brut"] if last else None,
+            "kap_url": kap_url_for(t),
+        })
+    rows.sort(key=lambda r: (r["next_ex_date"] is None, r["next_ex_date"] or "",
+                             "" if r["next_ex_date"] else r["last_div_date"] or ""))
+    return safe_json({"stocks": rows, "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M")})
 
 
 @app.route("/api/market-news")
@@ -14634,31 +14382,7 @@ def _startup():
             logger.warning("_warm_earnings: %s", e)
     threading.Thread(target=_warm_earnings_2, daemon=True).start()
 
-    # Temettü takvimi ilk yüklemesini arka planda hazırla (bilanço takvimiyle aynı
-    # desen — bu warm-up olmadan _dividend_cache hiç dolmaz: get_dividend_data()'nın
-    # lazy-TTL dalı sadece web-dışı bir process'e /api/temettu-takvimi isteği
-    # geldiğinde tetiklenir, ama refresh service'e böyle bir istek hiç gelmiyor).
-    #
-    # CPO-1666 #5: bu fonksiyon TEK SEFER çalışıp çıkıyordu — bist30-refresh.service
-    # Type=simple/Restart=always (systemd timer YOK, kalıcı süreç), yani "yenileme
-    # döngüsü" fiilen crash olmadıkça bir daha hiç tetiklenmiyordu (TTL=12 saat
-    # hedefine rağmen). while True + _DIVIDEND_TTL periyoduyla gerçek bir döngüye çevrildi —
-    # get_dividend_data() zaten kendi TTL/lock kontrolünü yapıyor, burada sadece
-    # düzenli aralıklarla çağrılması gerekiyordu.
-    def _warm_dividend():
-        # CPO-558B ile aynı guard: web worker'da yfinance yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_dividend: REFRESH_WORKER=web — yfinance atlandı")
-            return
-        time.sleep(90)    # bilanço/macro warm-up'lardan sonra başla, yfinance rate-limit'i paylaş
-        while True:
-            try:
-                get_dividend_data()
-                logger.info("_warm_dividend: temettü takvimi ön yüklendi")
-            except Exception as e:
-                logger.warning("_warm_dividend: %s", e)
-            time.sleep(_DIVIDEND_TTL)
-    threading.Thread(target=_warm_dividend, daemon=True).start()
+    # D-24: yfinance temettü ısınma döngüsü (_warm_dividend) kalktı; temettü D-40a0 kaydından.
 
     def _slow_chart_refresh_daemon():
         # CPO-565 Bug 1: Per-ticker chart dosyalarını diske yazar.

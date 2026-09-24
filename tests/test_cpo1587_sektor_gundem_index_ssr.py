@@ -17,6 +17,10 @@ import os
 import re
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import takvim as _takvim_mod  # noqa: E402  D-24
 
 import business_rules as _br
 
@@ -111,7 +115,7 @@ def _fresh_gundem():
         "_TZ_TR": _TZ_TR_STUB,
         "datetime": datetime,
         "date": date,
-        "_BILANCO_PERIODS": [],
+        "_takvim": _takvim_mod,   # D-24: bilanço bandı takvim.donem_ozeti()'nden
         "is_trading_day": lambda d: True,
         "_market_open": lambda now: True,
         "_data_quality_snapshot": lambda stocks: {"updated_at": "12.09.2026 09:00"},

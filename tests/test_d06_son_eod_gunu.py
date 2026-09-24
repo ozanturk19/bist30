@@ -15,6 +15,7 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 import business_rules as br
+import takvim
 
 _APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 with open(_APP_PY, encoding="utf-8") as _f:
@@ -98,7 +99,7 @@ def _ns(**extra):
 
 def test_gundem_new_signals_tied_to_last_eod_day_qa_2409():
     ns = _ns(_lock=_FakeLock(), _cache={"data": _qa_2409_stocks()}, INDEX_TICKERS={"XU030", "XU100"},
-             _BILANCO_PERIODS=[], _market_open=lambda now: True,
+             _takvim=takvim, _market_open=lambda now: True,
              _data_quality_snapshot=lambda stocks: {"updated_at": "23.09.2026 18:14:35"})
     exec(_extract("_compute_gundem_data"), ns)
     g = ns["_compute_gundem_data"]()
