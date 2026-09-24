@@ -41,6 +41,7 @@ from email.mime.text      import MIMEText
 import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
+import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -2309,6 +2310,11 @@ def analyze(ticker_base):
             "change_pct":    round(change_pct, 2),
             "close_status":  "resmi" if _official_applied else "gecici",   # D-04
             "close_source":  official_close.SOURCE_LABEL if _official_applied else None,
+            # D-42: son barın tarihi (ısı haritası "bayat" = bar_date ≠ son EOD günü) ve dönem
+            # getirileri (1h/1a/YBB/1y) — fiyat/değişimle AYNI resmi-kapanış serisinden.
+            "bar_date":      close.index[-1].strftime("%Y-%m-%d"),
+            "period_ret":    heatmap.period_returns(
+                [(_ts.strftime("%Y-%m-%d"), float(_c)) for _ts, _c in close.iloc[-300:].items()]),
             "signal":        signal,
             "signal_date":   signal_date,
             "signal_bars":   signal_bars,
@@ -3582,8 +3588,8 @@ def _data_quality_snapshot(stocks):
 def build_data_freshness(stocks=None):
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
-    /api/data ve /api/health response'larına eklenir (T4.1: /api/heatmap
-    yetim sayfayla birlikte kaldırıldı, artık tüketici değil).
+    /api/data ve /api/health response'larına eklenir (T4.1: eski /api/heatmap
+    yetim sayfayla birlikte kaldırıldı; D-42'nin /api/heatmap'i bu alanı taşımaz).
 
     CPO-1508/1512 (EOD-only pivot, Faz 0): is_stale artık SAAT-bazlı sabit eşik
     (eski: mkt_day AND stocks_age>1800s) DEĞİL, TRADING-DAY-bazlı — çünkü cadence
@@ -4754,7 +4760,90 @@ def _run_official_close_pass(day=None, notify=True):
                 "yön dönen %d %s, uygulanamayan %s",
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
                 _flipped[:15], _failed[:15])
+    # D-42: BIST100 ısı haritası bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
+    try:
+        _build_heatmap_snapshot(day)
+    except Exception as _e:
+        logger.warning("HEATMAP: görüntü üretilemedi: %s", _e)
     return True
+
+
+# ── D-42: BIST100 ısı haritası (gün sonu görüntüsü, data/heatmap/<gün>.json, dondurulur) ──
+_HEATMAP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "heatmap")
+
+
+def _read_json_quiet(path):
+    try:
+        with open(path, encoding="utf-8") as _f:
+            _d = json.load(_f)
+        return _d if isinstance(_d, dict) else {}
+    except Exception:
+        return {}
+
+
+def _build_heatmap_snapshot(day):
+    """Resmi kapanış turundan sonra (refresh süreci ya da tools/official_close_run.py) çağrılır.
+    Girdiler: resmi arşiv (fiyat/d1/endeks), analiz cache'i (bar_date/period_ret/sinyal), diskteki
+    temel veri (pay adedi/PD) ve BorsaPusula skoru, evren dosyası (üyelik + KAP sektörü), XU100
+    grafik serisi. Kalite kapısı geçmezse yazılmaz; o gün zaten donmuşsa dokunulmaz."""
+    rec = official_close.load_archive(day)
+    if not rec:
+        logger.warning("HEATMAP: %s resmi arşiv yok — görüntü üretilmedi", day)
+        return None
+    with _lock:
+        rows = {s.get("ticker"): s for s in _cache.get("data") or []}
+    fund = {t: (v.get("data") or {}) for t, v in _read_json_quiet(_FUNDAMENTALS_CACHE_DISK_PATH).items()
+            if isinstance(v, dict)}
+    scores = {t: (v.get("data") or {}).get("borsapusula_skoru")
+              for t, v in _read_json_quiet(_HEALTH_SCORES_DISK_PATH).items() if isinstance(v, dict)}
+    comp = UNIVERSE.get("companies") or {}
+    members = sorted(BIST100_MEMBERS)
+    sectors = {t: (comp.get(t) or {}).get("sector") or (KAP_INFO.get(t) or {}).get("kap_alt_sektor")
+               for t in members}
+    _load_xu100_chart_from_disk()
+    with _lock:
+        _ohlc = (_xu100_chart_cache.get("data") or {}).get("ohlc") or []
+    xs = [(str(p.get("time"))[:10], p.get("close")) for p in _ohlc if p.get("close")]
+    snap = heatmap.build(day.isoformat(), members, rec, rows, fund, scores, sectors, STOCK_NAMES, xs,
+                         datetime.now(_TZ_TR).isoformat(timespec="seconds"))
+    ok, why = heatmap.quality(snap)
+    if not ok:
+        logger.warning("HEATMAP: %s kalite kapısı geçilemedi (%s) — dondurulmadı; notlar: %s",
+                       day, why, snap["notes"][:20])
+        return None
+    path = heatmap.save_frozen(snap, _HEATMAP_DIR)
+    logger.info("HEATMAP: %s %s — n=%d, sayım %s, bayat %d, not %d", day,
+                "donduruldu " + path if path else "zaten donmuş, dokunulmadı", snap["n"], snap["counts"],
+                sum(1 for r in snap["rows"] if r["stale"]), len(snap["notes"]))
+    return snap
+
+
+_heatmap_mem = {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []}
+
+
+def _heatmap_latest():
+    """Son donmuş görüntü + treemap geometrisi (dosya mtime'ına göre bellekte) ya da None."""
+    path = heatmap.latest_path(_HEATMAP_DIR)
+    if not path:
+        return None
+    try:
+        mt = os.path.getmtime(path)
+        if _heatmap_mem["path"] != path or _heatmap_mem["mtime"] != mt:
+            with open(path, encoding="utf-8") as _f:
+                snap = json.load(_f)
+            groups, tiles = heatmap.layout(snap.get("rows") or [])
+            _heatmap_mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
+    except Exception as _e:
+        logger.warning("HEATMAP: %s okunamadı: %s", path, _e)
+        return None
+    return _heatmap_mem
+
+
+def _heatmap_ssr_context():
+    m = _heatmap_latest()
+    if not m:
+        return {"heatmap": None, "heatmap_groups": [], "heatmap_tiles": []}
+    return {"heatmap": m["snap"], "heatmap_groups": m["groups"], "heatmap_tiles": m["tiles"]}
 
 
 def _purge_stale_chart_caches():
@@ -5206,6 +5295,7 @@ def index():
         ssr_signal_counts=_ssr["signal_counts"],
         ssr_top_signals=_ssr["top_signals"],
         ssr_spotlight=_ssr["spotlight"],
+        **_heatmap_ssr_context(),   # D-42: heatmap / heatmap_groups / heatmap_tiles (yoksa None/[]/[])
     ))
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
@@ -5393,6 +5483,24 @@ def api_hisse_lite(ticker):
 @app.route("/heatmap")
 def heatmap_page():
     return redirect("/sektor-harita", code=301)
+
+
+@app.route("/api/heatmap")
+def api_heatmap():
+    """D-42: BIST100 gün sonu ısı haritası (resmi kapanıştan sonra dondurulmuş görüntü).
+    Sözleşme: heatmap.py modül docstring'i. Görüntü yoksa 503."""
+    if (request.args.get("universe") or "bist100").lower() != "bist100":
+        return safe_json({"error": "Yalnız universe=bist100 destekleniyor"}), 400
+    m = _heatmap_latest()
+    if not m:
+        return safe_json({"error": "heatmap_unavailable"}), 503
+    _resp = safe_json(m["snap"])
+    _etag = hashlib.md5(_resp.get_data()).hexdigest()
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = _etag
+    if request.headers.get("If-None-Match") == _etag:
+        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
+    return _resp
 
 
 
