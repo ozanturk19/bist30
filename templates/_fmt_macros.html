@@ -62,3 +62,25 @@
 {%- else -%}{{ a }} gün
 {%- endif -%}
 {%- endmacro -%}
+
+{# C-62 QA (24.09): hisse sayfasında tek başına duran sinyal yaşı ("72 gün
+   önce oluştu") gün sonu verisinde göreli zaman sayıldı (kanon §2.7) → takvim
+   tarihi. `signal_date_text` → "14 Temmuz" (içinde bulunulan yıl değilse
+   "14 Temmuz 2025"); `signal_date_phrase` → "14 Temmuz'da oluştu" /
+   "14 Temmuz 2025 tarihinde oluştu". Bilinmiyor → "—". #}
+{%- macro signal_date_text(sd) -%}
+{%- set p = (sd or '').strip().split(' ')[0].split('.') -%}
+{%- if p|length != 3 or not (1 <= (p[1]|int) <= 12) or (sd|signal_age_days) == -1000000 -%}—
+{%- else -%}
+{{- p[0]|int }} {{ ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][(p[1]|int) - 1] -}}
+{{- (' ' ~ p[2]) if (('01.01.' ~ p[2])|signal_age_days < 0 or ('01.01.' ~ ((p[2]|int) + 1))|signal_age_days >= 0) else '' -}}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro signal_date_phrase(sd) -%}
+{%- set t = signal_date_text(sd)|string -%}
+{%- if t == '—' -%}—
+{%- elif t.split(' ')|length > 2 -%}{{ t }} tarihinde oluştu
+{%- else -%}{{ t }}'{{ {'Ocak':'ta','Şubat':'ta','Mart':'ta','Nisan':'da','Mayıs':'ta','Haziran':'da','Temmuz':'da','Ağustos':'ta','Eylül':'de','Ekim':'de','Kasım':'ta','Aralık':'ta'}[t.split(' ')[1]] }} oluştu
+{%- endif -%}
+{%- endmacro -%}

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
@@ -330,9 +330,9 @@
           </div>
           {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
              sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date).
-             CPO-1595: nötr, tam cümle ("N gün önce oluştu") — kalite/yargı
-             çağrışımı yok. #}
-          <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_phrase }}</span>
+             CPO-1595: nötr, tam cümle — kalite/yargı çağrışımı yok.
+             C-62 QA: göreli yaş değil takvim tarihi ("14 Temmuz'da oluştu"). #}
+          <span class="bp-hero-meta">{{ bpf.signal_date_phrase(ssr_signal.signal_date) }}</span>
         </div>
         {# bughunt-13.09 (Ozan, 2. kez: "yine teknik analiz güçlü trend önde
            duruyor, tasarım değişecek mi?"): BorsaPusula Skoru artık hero'nun
@@ -1499,7 +1499,7 @@
       <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
       <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
       <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
-      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ ssr_signal.signal_date|signal_age_phrase }}</dd></div>
+      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
       <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
       <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
       {% if hs_available and hs.borsapusula_skoru is not none %}
