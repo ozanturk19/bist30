@@ -42,6 +42,7 @@ import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
+import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 from flask_limiter import Limiter
@@ -10274,6 +10275,32 @@ def api_stock_chart(ticker):
 
 
 # ── Strateji Tarayıcısı ──────────────────────────────────────────────────────
+def _tarama_d51_fields(s, health_snap, fund_snap, val_medians):
+    """D-51: /api/tarama satirina temel skorlar + taslak sutunlari. Temel alanlar
+    /api/tarama/temel ile ayni kaynaktan (_financial_health_cache); skoru bastirilmis
+    (None) kayitta hepsi None -- /api/tarama/temel o satiri listelemiyordu, UI ayni
+    sekilde 'Sinirli veri' basar. Oranlar (pe/pb/roe) _fundamentals_cache'ten."""
+    tk = s.get("ticker", "")
+    entry = ((health_snap.get(tk) or {}).get("data")) or {}
+    has = entry.get("temel_analiz_skoru") is not None
+    fund = fund_snap.get(tk) or {}
+    pe, pb = fund.get("pe_ratio"), fund.get("pb_ratio")
+    return {
+        "temel_analiz_skoru": entry.get("temel_analiz_skoru") if has else None,
+        "borsapusula_skoru":  entry.get("borsapusula_skoru") if has else None,
+        "data_completeness":  entry.get("data_completeness") if has else None,
+        "categories":         (entry.get("categories") or {}) if has else None,
+        "categories_na":      (entry.get("categories_na") or []) if has else [],
+        "va":       tarama_fields.derive_valuation_band(pe, pb, _get_sector(tk), val_medians),
+        "pe":       pe,
+        "pb":       pb,
+        "roe":      fund.get("roe"),
+        "ema_diff": tarama_fields.ema_diff_pct(s.get("indicators")),
+        "lim":      (None if s.get("stale_reason") or s.get("data_quality") == "stale"
+                     else tarama_fields.limit_flag_from_change(s.get("price"), s.get("change_pct"))),
+    }
+
+
 def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
                              eq="", sort_by="signal_strength", sort_dir="",
                              only_premium=False):
@@ -10283,6 +10310,10 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
     with _lock:
         stocks = list(_cache["data"])
         upd    = _cache.get("updated_at", "")
+        _health_snap = dict(_financial_health_cache)
+        _fund_snap   = {tk: (w.get("data") or {}) for tk, w in _fundamentals_cache.items()}
+    # D-51: sektor/BIST ortancalari istek basina bir kez (yalniz pozitif F/K, PD/DD)
+    _val_medians = tarama_fields.valuation_medians(_fund_snap, _get_sector)
 
     def _parse_adx(s):
         """Ham ADX değeri — top-level `adx` alanı (analyze() bunu her zaman yazar).
@@ -10342,6 +10373,7 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
             "stale_reason":  s.get("stale_reason"),
             "data_quality":  s.get("data_quality"),
             "last_fresh_ts": s.get("last_fresh_ts"),
+            **_tarama_d51_fields(s, _health_snap, _fund_snap, _val_medians),
         })
 
     # sort_dir: "" | asc | desc — cagiran taraf (api_tarama) request.args'tan cozer

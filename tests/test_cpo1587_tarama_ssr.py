@@ -11,9 +11,14 @@ icin fonksiyon kaynaktan izole exec edilir (bkz. test_cpo1137_canonical_freshnes
 """
 import os
 import re
+import sys
 from datetime import datetime
 
-_APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_APP_PY = os.path.join(_ROOT, "app.py")
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+import tarama_fields  # noqa: E402
 
 _SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
 
@@ -47,12 +52,14 @@ class _FakeLockCtx:
         return False
 
 
-def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00"):
+def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00", health=None, fund=None):
     """Her cagrida kaynaktan yeniden exec eder — testler arasi mutasyona kapali."""
     with open(_APP_PY, encoding="utf-8") as f:
         src = f.read()
     m = re.search(r"def _compute_tarama_results\(.*?\n\n\n", src, re.DOTALL)
     assert m
+    m_d51 = re.search(r"def _tarama_d51_fields\(.*?\n\n\n", src, re.DOTALL)
+    assert m_d51
     cache = {"data": _STOCKS if stocks is None else stocks, "updated_at": updated_at}
     ns = {
         "_lock": _FakeLockCtx(),
@@ -64,7 +71,12 @@ def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00"):
         # CPO-1783: _compute_tarama_results artık INDEX_TICKERS kanonuna
         # bağlı (önceden inline `("XU030", "XU100")` idi).
         "INDEX_TICKERS": {"XU030", "XU100"},
+        # D-51: temel skor / oran kaynaklari (varsayilan bos) + turetme modulu
+        "_financial_health_cache": health if health is not None else {},
+        "_fundamentals_cache": fund if fund is not None else {},
+        "tarama_fields": tarama_fields,
     }
+    exec(m_d51.group(0), ns)
     exec(m.group(0), ns)
     return ns["_compute_tarama_results"]
 
@@ -174,3 +186,93 @@ def test_cpo1794_stale_fields_passthrough():
     assert by["AKBNK"]["stale_reason"] is None
     assert by["AKBNK"]["data_quality"] is None
     assert by["AKBNK"]["last_fresh_ts"] is None
+
+
+# ── D-51: satir alanlari ─────────────────────────────────────────────────────
+_HEALTH = {
+    "AKBNK": {"data": {"temel_analiz_skoru": 72, "borsapusula_skoru": 68, "data_completeness": 0.95,
+                       "categories": {"karlilik": 80, "nakit_akisi": 60, "kaldirac": 70, "degerleme_buyume": 75},
+                       "categories_na": []}},
+    "THYAO": {"data": {"temel_analiz_skoru": None, "borsapusula_skoru": 40}},
+}
+_FUND = {
+    "AKBNK": {"data": {"pe_ratio": 4.0, "pb_ratio": 0.9, "roe": 30.5}},
+    "THYAO": {"data": {"pe_ratio": 8.0, "pb_ratio": 1.0, "roe": 12.0}},
+}
+
+
+def test_d51_fields_present_on_every_row_even_without_sources():
+    fn = _fresh_compute()
+    results, _, _ = fn()
+    for r in results:
+        for k in ("temel_analiz_skoru", "borsapusula_skoru", "data_completeness", "categories",
+                  "categories_na", "va", "pe", "pb", "roe", "ema_diff", "lim"):
+            assert k in r
+        assert r["temel_analiz_skoru"] is None and r["categories"] is None and r["categories_na"] == []
+
+
+def test_d51_health_and_ratios_join():
+    fn = _fresh_compute(health=_HEALTH, fund=_FUND)
+    by = {r["ticker"]: r for r in fn()[0]}
+    a = by["AKBNK"]
+    assert a["temel_analiz_skoru"] == 72 and a["borsapusula_skoru"] == 68
+    assert a["categories"]["karlilik"] == 80 and a["data_completeness"] == 0.95
+    assert (a["pe"], a["pb"], a["roe"]) == (4.0, 0.9, 30.5)
+    # skoru bastirilmis kayit: hicbir temel alan yok (BP dahil) -- /api/tarama/temel ile ayni
+    t = by["THYAO"]
+    assert t["temel_analiz_skoru"] is None and t["borsapusula_skoru"] is None and t["categories"] is None
+    assert by["ASELS"]["pe"] is None and by["ASELS"]["va"] is None
+
+
+def test_d51_valuation_band_thresholds_and_mixed():
+    med = {"sector": {"S": {"pe": (10.0, 5), "pb": (2.0, 5)}}, "market": {"pe": 12.0, "pb": 1.5}}
+    f = tarama_fields.derive_valuation_band
+    assert f(7.9, 1.5, "S", med) == "u"        # 0,79 ucuz + 0,75 ucuz
+    assert f(8.0, 2.0, "S", med) == "m"        # 0,80 makul sinir
+    assert f(12.5, 2.5, "S", med) == "m"       # 1,25 makul sinir
+    assert f(12.6, 2.6, "S", med) == "p"
+    assert f(5.0, 3.0, "S", med) == "k"        # biri ucuz biri pahali
+    assert f(5.0, 2.0, "S", med) == "u"        # ucuz + makul -> ucuz tarafta
+    assert f(-3.0, None, "S", med) is None     # zarar: F/K tanimsiz, PD/DD yok
+    assert f(None, 1.0, "S", med) == "u"       # yalniz PD/DD 0,5
+
+
+def test_d51_valuation_uses_market_median_when_peers_lt_3():
+    med = {"sector": {"S": {"pe": (10.0, 2), "pb": (None, 0)}}, "market": {"pe": 20.0, "pb": 2.0}}
+    assert tarama_fields.derive_valuation_band(12.0, None, "S", med) == "u"   # 12/20 = 0,6 (sektor n=2 sayilmaz)
+    assert tarama_fields.derive_valuation_band(12.0, None, "YOK", med) == "u"
+
+
+def test_d51_valuation_medians_positive_only():
+    fund = {"A": {"pe_ratio": 5.0, "pb_ratio": 1.0}, "B": {"pe_ratio": -4.0, "pb_ratio": 2.0},
+            "C": {"pe_ratio": 15.0, "pb_ratio": None}, "D": {"pe_ratio": 25.0, "pb_ratio": 3.0}}
+    m = tarama_fields.valuation_medians(fund, lambda tk: "S")
+    assert m["sector"]["S"]["pe"] == (15.0, 3)   # 5, 15, 25 (negatif atildi)
+    assert m["sector"]["S"]["pb"] == (2.0, 3)
+    assert m["market"]["pe"] == 15.0
+
+
+def test_d51_ema_diff_signed():
+    f = tarama_fields.ema_diff_pct
+    assert f({"ema1299": {"diff_pct": 3.456, "bull": True, "bear": False}}) == 3.46
+    assert f({"ema1299": {"diff_pct": 3.456, "bull": False, "bear": True}}) == -3.46
+    assert f({"ema1299": {"diff_pct": None}}) is None
+    assert f({}) is None and f(None) is None
+
+
+def test_d51_limit_flag_from_change():
+    f = tarama_fields.limit_flag_from_change
+    assert f(110.0, 10.0) == "tavan"                 # prev 100 -> tavan 110
+    assert f(90.0, -10.0) == "taban"
+    assert f(109.9, 9.9) is None
+    assert f(None, 10.0) is None and f(50.0, None) is None and f(50.0, 3.0) is None
+    # fiyat adimi: prev 13,50 (tick 0,01) -> tavan 14,85
+    assert f(14.85, 10.0) == "tavan"
+
+
+def test_d51_lim_blank_for_stale_row():
+    stale = [{"ticker": "AKBNK", "signal": "AL", "price": 110.0, "change_pct": 10.0, "adx": 20.0,
+              "stale_reason": "son seans verisi gelmedi"}]
+    fresh = [dict(stale[0], stale_reason=None)]
+    assert _fresh_compute(stocks=stale)()[0][0]["lim"] is None
+    assert _fresh_compute(stocks=fresh)()[0][0]["lim"] == "tavan"
