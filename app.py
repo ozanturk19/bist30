@@ -40,6 +40,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text      import MIMEText
 import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
+import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -845,7 +846,7 @@ BIST100 = [
     "EGEEN", "ENJSA", "EUPWR", "FENER", "GENIL",
     "GLYHO", "HALKB", "INDES", "ISDMR", "ISGYO",
     "ISMEN", "IZMDC", "JANTS", "KARTN", "KCAER",
-    "KLNMA", "KONTR", "KORDS", "LOGO", "MAVI",
+    "KORDS", "LOGO", "MAVI",   # D-43a (O18=A): KLNMA/KONTR evrenden çıktı → kapsam.OUT_OF_SCOPE
     "NETAS", "NTHOL", "OTKAR", "PARSN", "PRKAB",
     "RYSAS", "SARKY", "SELEC", "SMRTG", "TATGD",
     "TTRAK", "TURSG", "ULKER", "VESBE", "VESTL",
@@ -861,7 +862,7 @@ BIST100 = [
     "GOKNR", "HDFGS", "HLGYO", "HTTBT", "IEYHO",
     "ISKPL", "ISFIN", "KAPLM", "KATMR", "KMPUR",
     "KONYA", "KRSTL", "LKMNH", "LUKSK", "MAKTK",
-    "MPARK", "MEDTR", "MEGAP", "MTRKS", "NATEN",
+    "MPARK", "MEDTR", "MTRKS", "NATEN",   # D-43a (O18=A): MEGAP evrenden çıktı
     "NIBAS", "NUHCM", "ORGE",
     # ── Faz 2: Yıldız Pazar genişlemesi (>=200M TL/gün, 2026-05-07) ─
     "PEKGY", "PASEU", "MIATK", "CANTE", "KLRHO",
@@ -879,6 +880,14 @@ BIST100 = [
     "POLHO", "TABGD", "GENTS", "ANELE", "HATSN",
     "SMART", "PKART", "AYEN", "EDATA", "TMSN",
     "AYDEM", "SNGYO", "YESIL", "LRSHO", "DERHL",
+    # ── D-43a: BIST100 tam kapsam (KAP XU100 01.07-30.09 dönemi + 01.10 dönemi girenler) ──
+    # 01.10 listesinden eksik 11: CVKMD ENTRA GLRMK GRSEL GWIND OBAMS PAHOL RGYAS TRENJ TRGYO TRMET;
+    # KAP güncel XU100'ünden eksik 10 (01.10'da endeksten çıkanlar, Yıldız'da kalır).
+    "CVKMD", "ENTRA", "GLRMK", "GRSEL", "GWIND",
+    "OBAMS", "PAHOL", "RGYAS", "TRENJ", "TRGYO",
+    "TRMET", "BALSU", "BSOKE", "DAPGM", "EFOR",
+    "GRTHO", "KTLEV", "KUYAS", "ODINE", "PATEK",
+    "RALYH",
     # ── Endeks ──────────────────────────────────────────
     "XU030",
 ]
@@ -921,6 +930,13 @@ _xu030 = set((UNIVERSE.get("indices") or {}).get("XU030") or [])
 _lit30 = [t for t in BIST100 if t in _xu030]
 BIST30_LITERAL = _lit30 if 28 <= len(_lit30) <= 32 else BIST100[:30]
 del _xu030, _lit30
+# D-43a: gerçek BIST100 üyeliği (KAP XU100, evren dosyası). `BIST100` listesi analiz evrenidir
+# (adı tarihsel); /api/data `bist100` bayrağı ve ısı haritası bu kümeyi okur. Dönem geçişinde
+# (01.10) dosyada olup evrende olmayan üye → uyarı: literal'e eklenmeli (harita 100/100 kalsın).
+BIST100_MEMBERS = frozenset((UNIVERSE.get("indices") or {}).get("XU100") or [])
+if BIST100_MEMBERS - set(BIST100):
+    logger.warning("D-43a: KAP XU100 üyesi olup analiz evreninde olmayan pay(lar): %s — BIST100 literal'ine ekle",
+                   sorted(BIST100_MEMBERS - set(BIST100)))
 
 STOCK_NAMES = {
     # ── BIST30 ──────────────────────────────────────────
@@ -1155,6 +1171,28 @@ STOCK_NAMES = {
     "YESIL":  "Yeşil GMYO",
     "LRSHO":  "Liderfarma Holding",
     "DERHL":  "Derindere Holding",
+    # ── D-43a: BIST100 tam kapsam (ad = KAP üye unvanının kısa hali) ──
+    "CVKMD":  "CVK Maden İşletmeleri",
+    "ENTRA":  "IC Enterra Yenilenebilir Enerji",
+    "GLRMK":  "Gülermak Ağır Sanayi",
+    "GRSEL":  "Gür-Sel Turizm Taşımacılık",
+    "GWIND":  "Galata Wind Enerji",
+    "OBAMS":  "Oba Makarnacılık",
+    "PAHOL":  "Pasifik Holding",
+    "RGYAS":  "Rönesans Gayrimenkul Yatırım",
+    "TRENJ":  "TR Doğal Enerji Kaynakları",
+    "TRGYO":  "Torunlar GYO",
+    "TRMET":  "TR Anadolu Metal Madencilik",
+    "BALSU":  "Balsu Gıda",
+    "BSOKE":  "Batıçim Çimento",
+    "DAPGM":  "DAP Gayrimenkul Geliştirme",
+    "EFOR":   "Efor Yatırım",
+    "GRTHO":  "Grainturk Holding",
+    "KTLEV":  "Katılımevim Tasarruf Finansman",
+    "KUYAS":  "Kuyaş Yatırım",
+    "ODINE":  "Odine Solutions Teknoloji",
+    "PATEK":  "Pasifik Teknoloji",
+    "RALYH":  "Ral Yatırım Holding",
 }
 # D-46: KAP üye unvanına göre düzeltilmiş adlar dosyadan (23.09 ölçümü, 20 yanlış ad)
 for _t, _n in (UNIVERSE.get("names_override") or {}).items():
@@ -1248,6 +1286,10 @@ KAP_UUID_OIDS = {
     "NUHCM": "4028e4a141558bdd014156053d9f04b2",
     "ECILC": "4028e4a1415f4d99014160034b683108",
 }
+# D-43a: sabit tabloda olmayan evren hissesinin KAP üye kimliği evren dosyasından (mkk = aynı OID).
+for _t, _c in (UNIVERSE.get("companies") or {}).items():
+    if _t in BIST100 and isinstance(_c, dict) and _c.get("mkk"):
+        KAP_UUID_OIDS.setdefault(_t, _c["mkk"])
 
 # Runtime'da API'den çekilen UUID'ler için cache (disk'e yazılmaz)
 _kap_uuid_runtime: dict = {}
@@ -1370,10 +1412,11 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
 SECTORS = {
     "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
                       "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB",
-                      "DSTKF"],
+                      "DSTKF", "KTLEV"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
                       "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
-                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "BERA", "POLHO", "LRSHO", "DERHL"],
+                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "BERA", "POLHO", "LRSHO", "DERHL",
+                      "PAHOL", "GRTHO", "RALYH"],
     "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
                       "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
                       "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
@@ -1381,23 +1424,25 @@ SECTORS = {
                       "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
                       "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
                       "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN",
-                      "AYCES", "TRALT"],
+                      "AYCES", "TRALT", "CVKMD", "TRMET", "GLRMK"],
     "Enerji":        ["AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
                       "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
-                      "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM"],
+                      "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM",
+                      "ENTRA", "GWIND", "TRENJ"],
     "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER",
                       "KRSTL", "TUKAS", "TUREX", "PENGD", "TCKRC", "MERKO", "TABGD",
-                      "ADESE"],
+                      "ADESE", "OBAMS", "BALSU", "EFOR"],
     "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR", "ESCOM", "MTRKS",
-                      "HTTBT", "MPARK", "MIATK", "YEOTK", "REEDR", "FONET", "FORTE", "ARENA", "LINK", "ARDYZ", "KAREL", "EDATA"],
+                      "HTTBT", "MPARK", "MIATK", "YEOTK", "REEDR", "FONET", "FORTE", "ARENA", "LINK", "ARDYZ", "KAREL", "EDATA", "ODINE", "PATEK"],
     "Telekom":       ["TCELL", "TTKOM"],
-    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI"],
-    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL"],
+    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI", "GRSEL"],
+    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL",
+                      "RGYAS", "TRGYO", "DAPGM", "KUYAS"],
     "Kimya/Malzeme": ["AKSA", "ALKIM", "ISKPL", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
                       "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
                       "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
                       "MEGAP", "NUHCM", "MERCN",
-                      "GOKNR"],
+                      "GOKNR", "BSOKE"],
     "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
     # CPO-1464 #3: GENIL/ECILC/MEDTR "Diğer" catch-all'a dusup spor kulubu/
     # kagit/basim sirketleriyle "ayni sektor" gosteriliyordu (/hisse/GENIL,
@@ -1450,6 +1495,8 @@ def _enrich_stock(s: dict) -> dict:
     # zaten çözülmüştü (aşağıda ~30 satır sonra), sector de aynı yaklaşımı
     # izlemeli: ucuz saf fonksiyon, cache'lemeye değmez.
     s["sector"] = _get_sector(s.get("ticker", ""))
+    # D-43a: gerçek BIST100 üyeliği (KAP XU100) — HER YÜKLEMEDE dosyadan (dönem geçişi restart ile gelir)
+    s["bist100"] = s.get("ticker", "") in BIST100_MEMBERS
     # D-46: ad de HER YÜKLEMEDE STOCK_NAMES'ten (disk cache'teki eski ad düzeltmeyi gölgelemesin);
     # STOCK_NAMES'te olmayan ticker'da cache'teki ad korunur.
     _nm = STOCK_NAMES.get(s.get("ticker", ""))
@@ -5168,7 +5215,8 @@ def index():
 @app.route("/api/data")
 def api_data():
     with _lock:
-        stocks = list(_cache["data"])
+        # D-43a (D-46 notu): endeks satırı (XU030) hisse listesinde yer almaz — 217 ≠ 216+endeks.
+        stocks = [s for s in _cache["data"] if s.get("ticker") not in INDEX_TICKERS]
         _ac_snap = dict(_anomaly_cache)
     # Annotate stocks with anomaly badge data (F2)
     _default_anomaly = {"score": 0.0, "flag": False, "reason": ""}
@@ -8730,13 +8778,26 @@ def stock_page(ticker):
     # /hisse/XU030 tam donanımlı hisse şablonuyla 200 dönüyordu (₺ fiyat,
     # stop bölgesi, portföy/bildirim düğmeleri — hiçbiri bir endeks için
     # anlamlı değil). Endeks ticker'ları hiç var olmamış sayılır (404, 410 değil).
-    if ticker in INDEX_TICKERS or ticker not in BIST100:
+    _kapsam_disi = kapsam.note(ticker)   # D-43a (O18=A): evren dışı ama sayfası 200
+    if ticker in INDEX_TICKERS or (ticker not in BIST100 and not _kapsam_disi):
         if ticker in DELISTED_TICKERS:
             # CPO-1653 P1: eskiden ham hardcoded HTML string (marka kimliğinin
             # tamamen dışında) — 404/500 ile aynı markalı _base.html desenine taşındı.
             return render_template("410.html", ticker=ticker), 410
         return render_template("404.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
+    if _kapsam_disi:
+        # Sinyal/skor/teknik SSS yok; tek SSS "neden yok?" + KAP faaliyet konusu (olgu). Sayfa
+        # sitemap'te değil (BIST100 dışı). Şablon `kapsam_disi` varsa notu gösterir, API çağırmaz.
+        _cs = get_company_summary(ticker)
+        _faq = [kapsam.faq(ticker)] + ([{"q": f"{ticker} ne yapan şirket?", "a": _cs}] if _cs else [])
+        # sector="" → şablondaki sektör rozeti ve Karşılaştır düğmesi ({% if sector %}) çizilmez.
+        return render_template("hisse.html", ticker=ticker, name=name, sector="",
+                               signal_summary=None, ssr_signal=None, hs=None, hs_available=False,
+                               kap_url=kap_url_for(ticker), related_blog=[], compare_url="",
+                               company_summary=_cs, related_stocks=[], seo_faq=_faq,
+                               seo_signal=None, seo_score=None, seo_adx=None, seo_rsi=None,
+                               kapsam_disi=_kapsam_disi)
     sector = _get_sector(ticker)
     # CPO-1464 #3: "Diğer" gercek bir sektor degil, siniflandirilamayan
     # ticker'lar icin catch-all bucket (spor kulubu + kagit + basim gibi
@@ -12052,6 +12113,8 @@ _PF_MAX_BYTES    = 65536   # 64KB — saldırı hafifletme
 _PF_LOCK         = threading.Lock()
 # CPO-DEV2-069: bilinmeyen semboller portföye kalıcı ölü ağırlık pozisyon olarak eklenmesin
 _PF_VALID_TICKERS = {t for t in BIST100 if t != "XU030"}
+# D-43a (O18=A): evrenden çıkan pay portföyde KALIR (kayıtta sessizce silinmesin); yeni alarm kurulamaz.
+_PF_VALID_TICKERS |= set(kapsam.OUT_OF_SCOPE)
 
 
 def _pf_path(token: str) -> str | None:
@@ -12086,6 +12149,8 @@ def api_portfolio_get(token):
             data = _tp_read_json(path)
         if isinstance(data, dict):
             data = {"ok": True, **data}
+            # D-43a: kapsam dışı pozisyon bayrağı {ticker: {etiket, metin}} (boş = yok)
+            data["kapsam_disi"] = kapsam.portfolio_flags(data.get("positions"))
         return _private_json(data)
     except Exception as e:
         logger.error("Portfolio get [%s]: %s", token, e)
@@ -13794,7 +13859,7 @@ def api_user_alerts_set(ticker):
     # DEV2-bughunt-r100: CPO-DEV2-069'daki portfolio whitelist korumasıyla aynı desen —
     # uydurma ticker için oluşan alert _check_user_alerts()'te asla tetiklenmez,
     # kotayı (_ALERT_MAX_ENTRIES) tüketen kalıcı ölü kayıt olur.
-    if ticker not in _PF_VALID_TICKERS:
+    if ticker not in _PF_VALID_TICKERS or ticker in kapsam.OUT_OF_SCOPE:   # D-43a: kapsam dışına alarm yok
         return safe_json({"ok": False, "error": "Bilinmeyen hisse sembolü"}), 400
     email, _ = _get_sub_by_cookie()
     if not email:
