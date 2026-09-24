@@ -1,0 +1,152 @@
+{
+ "GARAN": [
+  {
+   "disclosureIndex": 1639061,
+   "publishDate": "30.07.2026 08:00:49",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 2,
+   "ruleType": "6 Aylık",
+   "stockCodes": "GARAN, TGB"
+  },
+  {
+   "disclosureIndex": 1639060,
+   "publishDate": "30.07.2026 08:00:37",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 2,
+   "ruleType": "6 Aylık",
+   "stockCodes": "GARAN, TGB"
+  },
+  {
+   "disclosureIndex": 1598816,
+   "publishDate": "29.04.2026 18:10:25",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 1,
+   "ruleType": "3 Aylık",
+   "stockCodes": "GARAN, TGB"
+  },
+  {
+   "disclosureIndex": 1598813,
+   "publishDate": "29.04.2026 18:10:07",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 1,
+   "ruleType": "3 Aylık",
+   "stockCodes": "GARAN, TGB"
+  },
+  {
+   "disclosureIndex": 1552589,
+   "publishDate": "04.02.2026 18:10:23",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 4,
+   "ruleType": "Yıllık",
+   "stockCodes": "GARAN, TGB"
+  },
+  {
+   "disclosureIndex": 1552588,
+   "publishDate": "04.02.2026 18:10:07",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 4,
+   "ruleType": "Yıllık",
+   "stockCodes": "GARAN, TGB"
+  }
+ ],
+ "TBORG": [
+  {
+   "disclosureIndex": 1513474,
+   "publishDate": "07.11.2025 19:21:58",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 3,
+   "ruleType": "9 Aylık",
+   "stockCodes": "TBORG"
+  },
+  {
+   "disclosureIndex": 1480081,
+   "publishDate": "18.08.2025 18:50:06",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 2,
+   "ruleType": "6 Aylık",
+   "stockCodes": "TBORG"
+  },
+  {
+   "disclosureIndex": 1437991,
+   "publishDate": "12.05.2025 19:53:08",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 1,
+   "ruleType": "3 Aylık",
+   "stockCodes": "TBORG"
+  },
+  {
+   "disclosureIndex": 1401749,
+   "publishDate": "06.03.2025 19:36:50",
+   "subject": "Finansal Rapor",
+   "year": 2024,
+   "period": 4,
+   "ruleType": "Yıllık",
+   "stockCodes": "TBORG"
+  }
+ ],
+ "THYAO": [
+  {
+   "disclosureIndex": 1643238,
+   "publishDate": "05.08.2026 08:00:21",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 2,
+   "ruleType": "6 Aylık",
+   "stockCodes": "THYAO"
+  },
+  {
+   "disclosureIndex": 1598897,
+   "publishDate": "29.04.2026 18:20:52",
+   "subject": "Finansal Rapor",
+   "year": 2026,
+   "period": 1,
+   "ruleType": "3 Aylık",
+   "stockCodes": "THYAO"
+  },
+  {
+   "disclosureIndex": 1565996,
+   "publishDate": "04.03.2026 18:55:17",
+   "subject": "Finansal Rapor",
+   "year": 2025,
+   "period": 4,
+   "ruleType": "Yıllık",
+   "stockCodes": "THYAO"
+  },
+  {
+   "disclosureIndex": 1440796,
+   "publishDate": "21.05.2025 18:34:12",
+   "subject": "Kar Payı Dağıtım İşlemlerine İlişkin Bildirim",
+   "year": null,
+   "period": null,
+   "ruleType": "-",
+   "stockCodes": "THYAO"
+  },
+  {
+   "disclosureIndex": 1396944,
+   "publishDate": "28.02.2025 08:01:05",
+   "subject": "Kar Payı Dağıtım İşlemlerine İlişkin Bildirim",
+   "year": null,
+   "period": null,
+   "ruleType": "-",
+   "stockCodes": "THYAO"
+  },
+  {
+   "disclosureIndex": 1590365,
+   "publishDate": "09.04.2026 19:11:04",
+   "subject": "Kar Payı Dağıtım İşlemlerine İlişkin Bildirim",
+   "year": null,
+   "period": null,
+   "ruleType": "-",
+   "stockCodes": "THYAO"
+  }
+ ]
+}
