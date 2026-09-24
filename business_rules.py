@@ -360,6 +360,30 @@ def is_signal_from_today(signal_date, today=None):
     return signal_date_age_days(signal_date, today) == 0
 
 
+def last_eod_day(stocks, today=None):
+    """D-06: verideki en yeni seans (EOD) günü — takvimden DEĞİL veriden.
+
+    QA 24.09: /gundem listesi seans içinde takvim gününe (24.09) bakıp boş
+    kalıyordu, oysa veri 23.09 kapanışına aitti ve 13 hisse o gün durum
+    değiştirmişti. Referans gün artık verinin kendisi: her hissenin son bar
+    günü (`bar_date`), yoksa `signal_date` (sinyalin başladığı bar; son bardan
+    yeni olamaz, alt sınır). En yenisi alınır. Barlar yalnız işlem günlerinde
+    oluştuğu için hafta sonu/tatil güvenlidir. Gelecek tarihli (bozuk) değer
+    yok sayılır. Veri yoksa None — çağıran "bugün"e düşmemeli.
+    """
+    ref = today if today is not None else _today_tr()
+    if isinstance(ref, datetime):
+        ref = ref.date()
+    best = None
+    for s in stocks or ():
+        if not isinstance(s, dict):
+            continue
+        d = parse_signal_date(s.get("bar_date")) or parse_signal_date(s.get("signal_date"))
+        if d is not None and d <= ref and (best is None or d > best):
+            best = d
+    return best
+
+
 def derive_signal_date_label(signal_date, today=None):
     """Kanonik görünen tarih etiketi: her yaşta "23 Eylül" (yıl yalnız içinde
     bulunulan yıldan farklıysa eklenir: "31 Aralık 2025").

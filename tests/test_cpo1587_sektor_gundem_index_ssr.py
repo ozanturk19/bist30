@@ -18,6 +18,8 @@ import re
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
 
+import business_rules as _br
+
 _APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
 with open(_APP_PY, encoding="utf-8") as _f:
@@ -117,7 +119,13 @@ def _fresh_gundem():
         # (önceden inline `!= "XU030"` idi) — exec izole namespace'te bu
         # modül seviyesi sabiti görmez, testin kendisi sağlamalı.
         "INDEX_TICKERS": {"XU030", "XU100"},
+        # D-06: yeni sinyal referans günü verideki son EOD günü (business_rules)
+        "last_eod_day": _br.last_eod_day,
+        "is_signal_from_today": _br.is_signal_from_today,
+        "_TR_MONTHS": {9: "Eylül"},
     }
+    exec(_extract("_tr_month"), ns)
+    exec(_extract("_tr_day_month"), ns)
     exec(_extract("_compute_gundem_data"), ns)
     return ns["_compute_gundem_data"]
 
@@ -147,11 +155,14 @@ def test_gundem_strong_al_sorted_by_adx_desc():
     assert [s["ticker"] for s in g["strong_al"]] == ["AKBNK"]  # tek AL hisse (XU030 haric)
 
 
-def test_gundem_closed_message_none_when_market_open():
+def test_gundem_closed_message_dated_regardless_of_market_state():
+    # D-06: boş-liste metni seans durumundan bağımsız, göreli zaman yerine son
+    # EOD gününün tarihini taşır (eski: seans açıkken None, kapalıyken "Bugün…/yarınki…").
     fn = _fresh_gundem()
     g = fn()
     assert g["market_open"] is True
-    assert g["closed_message"] is None
+    assert g["eod_date"] == "2026-09-12" and g["eod_label"] == "12 Eylül"
+    assert g["closed_message"] == "12 Eylül kapanışında trend durumu değişen hisse yok."
 
 
 # ── _get_xu100_level / _compute_index_ssr_context ────────────────────────────

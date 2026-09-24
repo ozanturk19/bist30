@@ -62,6 +62,11 @@ def _tr_month(dt):
     return _TR_MONTHS[dt.month]
 
 
+def _tr_day_month(d):
+    """D-06: göreli zaman (bugün/dün/yarın) yerine kesin tarih: "23 Eylül". None -> None."""
+    return f"{d.day} {_tr_month(d)}" if d else None
+
+
 # ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
 from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
 from _health_extras import _extend_health_payload, _check_health_loop_stall
@@ -88,6 +93,7 @@ try:
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
+    from business_rules   import last_eod_day, parse_signal_date  # D-06: son EOD günü veriden
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -138,6 +144,8 @@ except ImportError as _dqv_import_err:
     def is_signal_from_today(signal_date, today=None):     return False
     def derive_signal_date_label(signal_date, today=None): return None
     def signal_date_age_days(signal_date, today=None):     return None
+    def last_eod_day(stocks, today=None):                   return None
+    def parse_signal_date(signal_date):                     return None
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
     ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Kovalama'}
@@ -739,8 +747,8 @@ def signal_age_text_filter(signal_date, today=None):
 @app.template_filter('signal_age_phrase')
 def signal_age_phrase_filter(signal_date, today=None):
     """CPO-1595: hisse.html'de MUTLAK tarih olmadan tek başına gösterilen
-    yerler için tam, nötr cümle: "Son seansta oluştu" / "N gün önce
-    oluştu". signal_age_text ile aynı yaş hesabını kullanır ama ozet/
+    yerler için tam, nötr cümle: "23 Eylül kapanışında oluştu" (son iki takvim
+    günü, D-06) / "N gün önce oluştu". signal_age_text ile aynı yaş hesabını kullanır ama ozet/
     karsilastir/gundem gibi mutlak tarihin YANINDA kısa "N gün" biçiminde
     göründüğü yerlerdeki sözdizimini bozmamak için ayrı filtre olarak
     tutulur (bkz. signal_age_text docstring).
@@ -756,8 +764,9 @@ def signal_age_phrase_filter(signal_date, today=None):
     age = signal_date_age_days(signal_date, today=today or None)
     if age is None:
         return "—"
-    if age == 0:
-        return "Son seansta oluştu"
+    if age in (0, 1):
+        # D-06: göreli zaman (bugün/dün) yok — gün sonu verisi ertesi gün de aynı görünür.
+        return f"{_tr_day_month(parse_signal_date(signal_date))} kapanışında oluştu"
     if age < 0:
         label = derive_signal_date_label(signal_date, today=today)
         return label or "—"
@@ -2023,6 +2032,12 @@ def analyze(ticker_base):
                 signal_bars = n - max(n - 120, 0)
         except Exception:
             pass
+        # D-06: "son EOD günü" takvimden değil verideki son bardan türer
+        # (business_rules.last_eod_day) — hafta sonu/tatilde bar oluşmaz.
+        try:
+            _bar_date = close.index[-1].strftime("%d.%m.%Y")
+        except Exception:
+            _bar_date = None
 
         # Sinyal başındaki kapanış fiyatı
         signal_start = max(0, (n - 1) - (signal_bars - 1))
@@ -2267,6 +2282,7 @@ def analyze(ticker_base):
                 [(_ts.strftime("%Y-%m-%d"), float(_c)) for _ts, _c in close.iloc[-300:].items()]),
             "signal":        signal,
             "signal_date":   signal_date,
+            "bar_date":      _bar_date,   # D-06: verinin ait olduğu seans (son bar) günü
             "signal_bars":   signal_bars,
             "signal_price":  signal_price,
             "sl_level":      sl_val,
@@ -6072,12 +6088,13 @@ def api_market_summary():
     # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
     # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
     # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
-    # DEV2-r4-perf: "bugun" istek boyunca sabit, N+1 yerine bir kez hesapla.
-    _today_ms = datetime.now(_TZ_TR).date()
+    # DEV2-r4-perf: referans gün istek boyunca sabit, N+1 yerine bir kez hesapla.
+    # D-06: referans gün takvim değil verideki son EOD günü (/gundem ile aynı).
+    _eod_ms = last_eod_day(bist)
     new_bull = [s for s in bist
-                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "AL"]
+                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "AL"]
     new_bear = [s for s in bist
-                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "SAT"]
+                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "SAT"]
     all_bull = [s for s in bist if s.get("signal") == "AL"]
 
     # Top tickers (en taze 4 AL)
@@ -6123,20 +6140,19 @@ def api_market_summary():
 
     # Market status (TR saatine göre) — kanonik trading_calendar (hafta sonu + resmi tatil)
     now_tr = datetime.now(_TZ_TR)
-    weekday = now_tr.weekday()  # 0=Pzt, 6=Pzr
-    hour = now_tr.hour
-    is_weekend = weekday >= 5
     market_open_hours = _market_open(now_tr)
     market_status = "open" if market_open_hours else "closed"
 
+    # D-06: "Yarın"/"Pazartesi" yerine sonraki işlem gününün tarihi (tatil güvenli).
     closed_msg = None
     if not market_open_hours:
-        if is_weekend:
-            closed_msg = "Borsa hafta sonu kapalı. Pazartesi 10:00'da tekrar görüşelim."
-        elif hour < 10:
+        if is_trading_day(now_tr.date()) and now_tr.hour < 10:
             closed_msg = "BIST henüz açılmadı. 10:00'da seans başlar."
         else:
-            closed_msg = "BIST seansı kapandı. Yarın 10:00'da tekrar görüşelim."
+            _next_session = now_tr.date() + timedelta(days=1)
+            while not is_trading_day(_next_session):
+                _next_session += timedelta(days=1)
+            closed_msg = f"BIST kapalı. Sonraki seans {_tr_day_month(_next_session)} 10:00'da."
 
     # CPO-1344 §A ikincil: asOfTime duvar saatiydi (now_tr), veri ne zaman
     # üretildiğini değil "şu an ne zaman" olduğunu söylüyordu. Kanonik veri
@@ -8149,6 +8165,21 @@ def _tr1(value):
     return f"{value:.1f}".replace(".", ",")
 
 
+def _signal_dur_text(signal_date, signal_bars, label):
+    """Yorum metninde sinyalin yaşı. D-06: göreli zaman (bugün/dün) yok — son iki
+    takvim günündeki sinyal kesin tarihle ("23 Eylül kapanışında … oluştu").
+    CPO-1668 #3: "gündür" TAKVİM yaşıdır (signal_bars bar sayacı, hafta sonunu atlar)."""
+    _d = parse_signal_date(signal_date)
+    _age = signal_date_age_days(signal_date)
+    if _d is not None and (_age is None or _age <= 1):
+        return f"{_tr_day_month(_d)} kapanışında {label} sinyali oluştu"
+    if _d is not None:
+        return f"Son {_age} gündür {label} sinyali aktif ({signal_date} tarihinden itibaren)"
+    if (signal_bars or 0) > 1:
+        return f"Son {signal_bars} gündür {label} sinyali aktif"
+    return f"Son seansta {label} sinyali oluştu"
+
+
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
     """Algoritmik teknik yorum metni üretir (SEO + kullanıcı için)."""
     _varlik_names = {
@@ -8168,20 +8199,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "yükseliş yönünde"
         ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) üzerinde seyrediyor"
         di_text    = f"DI+ {_tr1(di_p)} DI- {_tr1(di_m)}'i geçmiş durumda"
-        if signal_date and not is_signal_from_today(signal_date):
-            dur_label = derive_signal_date_label(signal_date) or signal_date
-            # CPO-1668 #3: signal_bars bir BAR sayacı (hafta sonu/tazelenmeyen
-            # günleri atlar, bkz. CPO-1335), "gündür" TAKVİM birimiyle sunulunca
-            # yanlıştı (ör. ISDMR: signal_date 4 takvim günü önceydi ama metin
-            # "18 gündür" diyordu — signal_bars burada 18'di). signal_age_text
-            # filtresiyle AYNI takvim-yaşı hesabı kullanılıyor.
-            _age = signal_date_age_days(signal_date)
-            dur_text = (f"{dur_label} tarihinde Güçlü Trend sinyali oluştu" if not _age or _age <= 1
-                        else f"Son {_age} gündür Güçlü Trend sinyali aktif ({signal_date} tarihinden itibaren)")
-        elif signal_bars > 1:
-            dur_text = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif"
-        else:
-            dur_text = "Son seansta Güçlü Trend sinyali oluştu"
+        dur_text   = _signal_dur_text(signal_date, signal_bars, "Güçlü Trend")
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
@@ -8192,16 +8210,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "düşüş yönünde"
         ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) altında seyrediyor"
         di_text    = f"DI- {_tr1(di_m)} DI+ {_tr1(di_p)}'ün üzerinde"
-        if signal_date and not is_signal_from_today(signal_date):
-            dur_label = derive_signal_date_label(signal_date) or signal_date
-            # CPO-1668 #3: bkz. AL dalındaki aynı açıklama (signal_bars≠takvim günü).
-            _age = signal_date_age_days(signal_date)
-            dur_text = (f"{dur_label} tarihinde Trend Bozuldu sinyali oluştu" if not _age or _age <= 1
-                        else f"Son {_age} gündür Trend Bozuldu sinyali aktif ({signal_date} tarihinden itibaren)")
-        elif signal_bars > 1:
-            dur_text = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif"
-        else:
-            dur_text = "Son seansta Trend Bozuldu sinyali oluştu"
+        dur_text   = _signal_dur_text(signal_date, signal_bars, "Trend Bozuldu")
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
@@ -10192,16 +10201,21 @@ def api_stock_chart(ticker):
         # bilgisinden üretiliyordu — yukarıdaki override sadece summary alanlarını
         # yamıyordu, commentary string'i hiç yeniden üretilmiyordu (ör. main=BEKLE
         # iken commentary hâlâ eski "SAT sinyali aktif" anlatısını gösteriyordu).
-        # Uyuşmazlık varsa commentary'yi ana cache'in otoritelif sinyaline göre
-        # aynı üreteçle (_generate_commentary) yeniden hesapla.
-        if chart_sig != main_sig:
-            s = data["summary"]
+        # D-06: artık HER istekte ana cache'in signal_date'inden yeniden üretilir —
+        # diskteki grafik yorumu (worker'ın son hesabı) eski kodun "Bugün/Dün"
+        # metnini ve bayat "Son N gündür" yaşını taşıyabiliyordu. EMA'lar ana
+        # cache'in 2 ondalıklı alanından (summary'de 1 ondalığa yuvarlı, CPO-1741).
+        s = data["summary"]
+        try:
             data["commentary"] = _generate_commentary(
                 ticker, s.get("signal"), s.get("signal_bars", 1),
                 main_stock.get("signal_date"),
                 s.get("adx", 0), s.get("di_plus", 0), s.get("di_minus", 0),
-                s.get("e12", 0), s.get("e99", 0), s.get("st_bull", False),
+                main_stock.get("e12") or s.get("e12", 0), main_stock.get("e99") or s.get("e99", 0),
+                s.get("st_bull", False),
             )
+        except Exception as _e:   # yorum üretilemezse diskteki metin kalır, grafik düşmez
+            logger.warning("chart yorumu yeniden üretilemedi (%s): %s", ticker, _e)
 
     _resp_chart = {"chart": data, "updated_at": upd, "loading": False}
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
@@ -10696,8 +10710,8 @@ def _compute_health():
             # bakiye fallback'idir, "şu an donmuş/devam eden bir tur" DEĞİL.
             # Mesaj bunu ayırt etmediği için CPO-1563'te yanlış alarma yol açmıştı.
             msg_parts.append(
-                f"{bad_ticker_count} ticker dünkü EOD turundan kalan stale fallback "
-                f"(bugünün turu ~18:00 TR'de)"
+                f"{bad_ticker_count} ticker önceki EOD turundan kalan stale fallback "
+                f"(sonraki tur ~18:10 TR'de)"
             )
         else:
             msg_parts.append(f"stocks {stocks_age_s}s stale")
@@ -11295,7 +11309,7 @@ def llms_txt():
 - [Sinyal Paneli](https://borsapusula.com/): BIST100 güncel Güçlü Trend/Trend Bozuldu sinyalleri, BIST100 endeks durumu
 - [Hisse Tarayıcı](https://borsapusula.com/tarama): sinyal/sektör/fiyat/ADX filtreli tarama, Teknik ve Temel Analiz modları
 - [Sektör Haritası](https://borsapusula.com/sektor-harita): sektör bazlı sinyal yoğunluğu
-- [Piyasa Gündemi](https://borsapusula.com/gundem): bugün sinyal değiştiren hisseler
+- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta sinyal değiştiren hisseler
 - [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
 - [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
@@ -11839,7 +11853,7 @@ def api_stocks_list():
 
 # ── Piyasa Gündem Merkezi ────────────────────────────────────────────────────
 def _compute_gundem_data():
-    """Piyasa Gündem verisi — bugün değişen sinyaller, güçlü trendler, sinyal
+    """Piyasa Gündem verisi — son seansta değişen sinyaller, güçlü trendler, sinyal
     özeti, bilanço takvimi. /gundem (SSR) ve /api/gundem (canlı JS) tarafından
     ortak kullanılır (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
     with _lock:
@@ -11848,14 +11862,13 @@ def _compute_gundem_data():
     # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
     stocks = [s for s in stocks if s.get("ticker") not in INDEX_TICKERS]
 
-    # CPO-1335: eksen zaten signal_date (doğru) — yalnız gün sınırı TR'ye
-    # sabitlendi; date.today() sunucu (UTC) günüydü, 00:00-03:00 TR arasında
-    # bir gün geriden geliyordu.
-    today = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
-
-    # Bugün sinyal alan hisseler
+    # D-06: "Son seansta değişenler" takvim gününe değil verideki son EOD
+    # gününe bağlı (QA 24.09: seans içinde 24.09'a bakıp boş kalıyordu, veri
+    # 23.09 kapanışınındı). BEKLE'ye dönüş listelenmez (CPO-1666 #3, /ozet ile aynı).
+    eod_day = last_eod_day(stocks)
     new_signals = [s for s in stocks
-                   if s.get("signal_date") == today and s.get("signal") != "BEKLE"]
+                   if eod_day and is_signal_from_today(s.get("signal_date"), today=eod_day)
+                   and s.get("signal") != "BEKLE"]
 
     # ADX sıralamalı en güçlü AL hisseler
     # CPO-1668 #1: eskiden indicators.adx.label ("ADX 40" — zaten int'e
@@ -11873,7 +11886,7 @@ def _compute_gundem_data():
         key=_adx_val, reverse=True
     )[:8]
 
-    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (bkz. yukarıdaki new_signals notu)
+    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (date.today() sunucu/UTC günüdür)
     today_dt  = datetime.now(_TZ_TR).date()
     today_iso = today_dt.isoformat()
     bilanco_upcoming = []
@@ -11895,23 +11908,17 @@ def _compute_gundem_data():
         if len(bilanco_upcoming) >= 2:
             break
 
-    # CPO-DEV2-072 r97(b): "Bugün henüz sinyal yok" boş-durum metni hafta
-    # sonu/resmi tatilde yanıltıcıydı (piyasa zaten kapalıyken "gün içinde
-    # güncellenir" vaadi veriyordu) — kanonik trading_calendar ile ayırt et.
-    _now_tr    = datetime.now(_TZ_TR)
-    _is_td     = is_trading_day(_now_tr.date())
-    _mkt_open  = _market_open(_now_tr)
-    gundem_closed_msg = None
-    if not _mkt_open:
-        if not _is_td:
-            gundem_closed_msg = "Şu an BIST işlem günü değil (hafta sonu/resmi tatil) — yeni sinyal beklenmiyor."
-        elif _now_tr.hour < 10:
-            gundem_closed_msg = "BIST henüz açılmadı, seans 10:00'da başlıyor."
-        else:
-            gundem_closed_msg = "BIST seansı kapandı — yarınki seansta yeni sinyaller görünecek."
+    # D-06: boş-liste metni göreli zaman (bugün/yarın) yerine son EOD gününün
+    # tarihini taşır; liste o güne bağlı olduğundan seans durumundan bağımsızdır.
+    _mkt_open  = _market_open(datetime.now(_TZ_TR))
+    eod_label  = _tr_day_month(eod_day)
+    gundem_closed_msg = (f"{eod_label} kapanışında trend durumu değişen hisse yok."
+                         if eod_label else "Son seansta trend durumu değişen hisse yok.")
 
     return {
         "new_signals": new_signals,
+        "eod_date":    eod_day.isoformat() if eod_day else None,   # D-06: "2026-09-23"
+        "eod_label":   eod_label,                                  # D-06: "23 Eylül"
         "strong_al":   strong_al,
         "updated_at":  _data_quality_snapshot(stocks).get("updated_at"),
         "signal_summary": {
@@ -11939,6 +11946,7 @@ def gundem_page():
         ssr_bilanco_upcoming=_g["bilanco_upcoming"],
         ssr_market_open=_g["market_open"],
         ssr_closed_message=_g["closed_message"],
+        ssr_eod_label=_g["eod_label"],        # D-06: "Son seansta değişenler · 23 Eylül"
         ssr_updated_at=_g["updated_at"],
     )
 
@@ -11946,7 +11954,7 @@ def gundem_page():
 @app.route("/api/gundem")
 @limiter.limit("30 per minute")
 def api_gundem():
-    """Piyasa Gündem API — bugün değişen sinyaller, güçlü trendler, sinyal özeti."""
+    """Piyasa Gündem API — son seansta (son EOD günü) değişen sinyaller, güçlü trendler, sinyal özeti."""
     return safe_json(_compute_gundem_data())
 
 
@@ -12092,10 +12100,14 @@ def ozet_page():
     # filtresi burada eksikti — bir hisse BEKLE'ye dönüp signal_date bugüne
     # sıfırlandığında "Sinyal Değişenler"de sanki yeni AL/SAT sinyaliymiş gibi
     # görünüyordu.
+    # D-06: referans gün takvim değil verideki son EOD günü (/gundem ile aynı);
+    # seans içinde liste önceki kapanışın değişimlerini gösterir, tarih de onun.
+    _eod_day = last_eod_day(stocks)
     new_signals = [s for s in stocks
-                   if is_signal_from_today(s.get("signal_date")) and s.get("signal") != "BEKLE"]
+                   if _eod_day and is_signal_from_today(s.get("signal_date"), today=_eod_day)
+                   and s.get("signal") != "BEKLE"]
 
-    today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
+    today_str = (_eod_day or datetime.now(_TZ_TR).date()).strftime("%d.%m.%Y")
     return render_template("ozet.html",
         stocks=stocks, loading=loading,
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
@@ -13440,6 +13452,10 @@ def api_market_news():
         price  = s.get("price", 0) or 0
         chg    = s.get("change_pct", 0) or 0
         bars   = s.get("signal_bars", 1) or 1
+        # D-06: göreli zaman ("bugün") yok — son bar sinyali kesin tarihle.
+        _sd    = parse_signal_date(s.get("signal_date"))
+        dur    = (f"son {bars} gündür" if bars > 1 else
+                  f"{_tr_day_month(_sd)} kapanışından beri" if _sd else "son seanstan beri")
 
         # ── Metin kaynağı önceliği: kap_cache > haber_cache > sinyal_açıklama > algoritma ──
         with _lock:
@@ -13484,7 +13500,6 @@ def api_market_news():
                 _news_queue_stats["total_added"] += 1
 
             # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
-            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             if sig == "AL":
                 text = (f"{name} hissesinde {dur} Güçlü Trend sinyali aktif. "
                         "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
@@ -13536,13 +13551,12 @@ def api_market_news():
         )
         if source == "news" and len(snippet) < 160 and \
                 any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
-            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
             entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
-                f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
+                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
                 f"SL: {tr_price_filter(sl_val)}₺"
                 f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
@@ -13551,13 +13565,12 @@ def api_market_news():
 
         # Guard: _skip_prefixes tüm satırları silmişse (ör. "kayda değer" yanıtı) → algoritmik fallback
         if not snippet.strip():
-            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
             entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
-                f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
+                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
                 f"SL: {tr_price_filter(sl_val)}₺"
                 f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
