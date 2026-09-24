@@ -460,10 +460,11 @@ def group_by_day(items):
 
 
 def day_counts(items, day):
-    """Bir gunun toplam / rutin sayisi (sayfadaki 'N bildirim · M rutin gizli' satiri)."""
+    """Bir gunun toplam / rutin sayisi (sayfadaki 'N bildirim · M rutin gizli' satiri).
+    Borsa/kurum duyurulari (DUY/DKB: devre kesici, Takasbank, MKK) sirket bildirimi sayilmaz."""
     total = rut = 0
     for it in items:
-        if it["ts"][:10] == day:
+        if it["ts"][:10] == day and it.get("kap_class") in COMPANY_CLASSES:
             total += 1
             rut += 1 if it.get("rutin") else 0
     return {"total": total, "routine": rut}
@@ -926,6 +927,41 @@ def poll_once(store, client, oids, universe, names, now=None, max_docs=15, days_
     store.save_meta(meta)
     stats["requests"] = client.count
     return stats
+
+
+def month_windows(months, today):
+    """Bu ay + onceki `months` ay: [(ilk gun, son gun)] eskiden yeniye (KAP en fazla 1 yillik aralik alir)."""
+    out, first = [], today.replace(day=1)
+    for _ in range(months + 1):
+        last = min(today, (first + timedelta(days=32)).replace(day=1) - timedelta(days=1))
+        out.append((first.isoformat(), last.isoformat()))
+        first = (first - timedelta(days=1)).replace(day=1)
+    return list(reversed(out))
+
+
+def backfill_months(store, client, oids, universe, months=12, today=None, classes=("ODA", "FR", "DG")):
+    """Aylik pencerelerle geri besleme; tamamlanan ay meta'ya yazilir (KapStop'ta kaldigi yerden devam).
+    Bu ayin penceresi her seferinde yeniden cekilir. Donus: eklenen kayit sayisi."""
+    today = today or date.today()
+    meta = store.meta()
+    done = set(meta.get("backfilled") or [])
+    n = 0
+    for frm, to in month_windows(months, today):
+        closed = to < today.isoformat()
+        if closed and frm[:7] in done:
+            continue
+        got = fetch_list(client, oids, universe, frm, to, classes)
+        store.merge(got, today)
+        n += len(got)
+        if closed:
+            done.add(frm[:7])
+            meta = store.meta()
+            meta["backfilled"] = sorted(done)
+            store.save_meta(meta)
+    meta = store.meta()
+    meta.update({"backfilled": sorted(done), "backfill_done": True, "schema_version": SCHEMA_VERSION})
+    store.save_meta(meta)
+    return n
 
 
 def backfill_docs(store, client, names, limit=30, days=90, fx_getter=None, kap_fin_dir=None, today=None):

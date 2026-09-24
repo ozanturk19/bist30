@@ -244,6 +244,14 @@ def test_for_ticker_one_year_and_legacy_shape(tmp_path):
     assert all(x["kap_class"] in ("ODA", "FR") for x in kf.for_ticker(st.all_items(), "LINK"))
 
 
+def test_day_counts_company_classes_only(tmp_path):
+    st, _ = _store(tmp_path)
+    c = kf.day_counts(st.all_items(), "2026-09-24")
+    raw = [x for x in st.all_items() if x["ts"][:10] == "2026-09-24"]
+    assert c["total"] == len([x for x in raw if x["kap_class"] in kf.COMPANY_CLASSES]) < len(raw)
+    assert c["routine"] == len([x for x in raw if x["kap_class"] in kf.COMPANY_CLASSES and x["rutin"]])
+
+
 def test_day_labels_absolute_dates():
     assert kf.day_label("2026-09-24") == "24 Eylül Perşembe"
     assert kf.date_long("2026-09-23T09:15:00") == "23 Eylül 2026"
@@ -285,6 +293,24 @@ def test_poll_once_enriches_new_nonroutine_with_docs(tmp_path):
     assert st.doc(1666965)["fields"] and st.meta()["updated_at"] == "2026-09-24T12:00:00"
     kf.poll_once(st, cl, ["oid"], UNIVERSE, {}, now=datetime(2026, 9, 24, 12, 10), kap_fin_dir=KAP_FIN)
     assert cl.count == 4 + 2 + 4                                   # ikinci turda metin yeniden cekilmez
+
+
+def test_backfill_months_resumes_after_stop(tmp_path):
+    wins = kf.month_windows(12, date(2026, 9, 25))
+    assert len(wins) == 13 and wins[0] == ("2025-09-01", "2025-09-30") and wins[-1] == ("2026-09-01", "2026-09-25")
+
+    class Stopper(_FakeClient):
+        def disclosures(self, oids, frm, to, cls):
+            if frm == "2026-03-01":
+                raise kf.KapStop("KAP HTTP 429")
+            return super().disclosures(oids, frm, to, cls)
+    st = kf.Store(str(tmp_path / "kap_feed"))
+    with pytest.raises(kf.KapStop):
+        kf.backfill_months(st, Stopper(_rows(), None), ["oid"], UNIVERSE, months=12, today=date(2026, 9, 25))
+    assert st.meta()["backfilled"][-1] == "2026-02" and not st.meta().get("backfill_done")
+    cl = _FakeClient(_rows(), None)
+    kf.backfill_months(st, cl, ["oid"], UNIVERSE, months=12, today=date(2026, 9, 25))
+    assert cl.count == 7 * 3 and st.meta()["backfill_done"]            # yalniz kalan 6 kapali ay + bu ay
 
 
 # ----------------------------------------------------------------------------- Gundem
@@ -356,6 +382,9 @@ def test_gundem_print_own_data_no_sources_no_relative_time(tmp_path):
     assert not FORBIDDEN.search(text)
     assert not re.search(r"\b(AA|Anadolu Ajansı|TRT|Bloomberg|Reuters|KAP|Yahoo|kaynak)\b", text, re.I)
     assert "http" not in text                                  # dis baglanti yok; cipler site ici
+    assert doc["next_label"] == "24 Eylül Perşembe 08:30"
+    assert hg.next_print_label(datetime(2026, 9, 25, 19, 30), "aksam") == "28 Eylül Pazartesi 08:30"
+    assert hg.next_print_label(datetime(2026, 9, 25, 8, 30), "sabah") == "25 Eylül Cuma 19:30"
     hg.save_print(doc, str(tmp_path))
     assert hg.load_latest(str(tmp_path))["edition"] == "aksam"
     assert hg.printed_keys(str(tmp_path)) == {"2026-09-23-aksam"}

@@ -405,7 +405,19 @@ def build_print(stocks, macro, xu100, feed_items, names, calendar, now, close_da
         "close_day": close_day.isoformat(),
         "groups": [{"name": "Türkiye", "items": tr}, {"name": "Dünya", "items": world}],
         "printed_at": now.strftime("%Y-%m-%dT%H:%M:%S"),
+        "next_label": next_print_label(now, edition),
     }
+
+
+def next_print_label(now, edition):
+    """Sonraki baski: sabah -> ayni gun 19:30; aksam -> sonraki hafta ici 08:30 ('25 Eylül Cuma 08:30')."""
+    d = now.date()
+    if edition == "sabah":
+        return "%s 19:30" % day_label(d)
+    d += timedelta(days=1)
+    while d.weekday() >= 5:
+        d += timedelta(days=1)
+    return "%s 08:30" % day_label(d)
 
 
 def due_slot(now, printed):

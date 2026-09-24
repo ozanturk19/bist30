@@ -1387,7 +1387,7 @@ def fetch_kap_disclosures(ticker: str, days: int = 365) -> list:
     sondaki \\n) ve 1 yıllık derinlik (eskiden ~90 gün). Depo yoksa (ilk kurulum, geri
     besleme bitmeden) eski canlı sorgu aynı normalize() süzgecinden geçer."""
     try:
-        if _KAP_STORE.available():
+        if _KAP_STORE.available() and _KAP_STORE.meta().get("backfill_done"):
             return kap_feed.legacy_rows(kap_feed.for_ticker(_KAP_STORE.all_items(), ticker, days=days))
     except Exception as e:  # depo okunamazsa canlı sorguya düş (sayfa boş kalmasın)
         logger.warning("fetch_kap_disclosures(%s): depo okunamadı: %s", ticker, e)
@@ -10062,6 +10062,16 @@ def _haber_mini(ticker, smap):
             "st": code if s else None, "stn": label if s else None}
 
 
+def _haber_close_label():
+    """Mini kartlardaki fiyatın günü: '24 Eylül' (göreli zaman yok)."""
+    with _lock:
+        upd = _cache.get("updated_at") or ""
+    try:
+        return kap_feed.date_long(datetime.strptime(upd[:10], "%d.%m.%Y").strftime("%Y-%m-%d"))[:-5]
+    except ValueError:
+        return None
+
+
 def _haber_page_int(v, default=1, lo=1, hi=10000):
     try:
         return max(lo, min(int(v), hi))
@@ -10099,9 +10109,11 @@ def _bildirim_payload(idx):
     same = [x for x in kap_feed.for_ticker(_KAP_STORE.all_items(), it["ticker"], days=365, classes=None)
             if not x.get("rutin") and x["id"] != it["id"]][:4]
     pub = kap_feed.public_item(it, STOCK_NAMES)
-    pub["summary"] = it.get("ozet") or kap_feed.summary_sentence(it, STOCK_NAMES.get(it["ticker"], it["ticker"]),
-                                                                 it.get("onem"))
-    return {"item": pub, "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
+    company = STOCK_NAMES.get(it["ticker"], it["ticker"])
+    pub["summary"] = it.get("ozet") or kap_feed.summary_sentence(it, company, it.get("onem"))
+    same_as_class = kap_feed._lower_tr(it["title"]) in (kap_feed._lower_tr(it["class"]), kap_feed._lower_tr(it["subject"]))
+    return {"item": pub, "headline": "%s: %s" % (company, it["class"] if same_as_class else it["title"]),
+            "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
             "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
                      "lines": doc.get("lines") or [], "resp": doc.get("resp")},
             "has_text": bool(doc),
@@ -10141,22 +10153,24 @@ def haberler_page():
         abort(404)
     tur = request.args.get("tur")
     tur = tur if tur in ("bilanco", "temettu", "ozel") else None
+    hisse = (request.args.get("hisse") or "").upper()
+    hisse = hisse if re.match(r"^[A-Z0-9]{3,6}$", hisse) else None
     page = _haber_page_int(request.args.get("sayfa"))
     smap = _haber_stock_map()
     items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
-    res = kap_feed.query(items, page=page, per_page=60, filt=tur)
+    res = kap_feed.query(items, page=page, per_page=60, filt=tur, tickers=[hisse] if hisse else None)
     days = []
+    counts = {"all": 0, "bilanco": 0, "temettu": 0, "ozel": 0}   # görünen sayfanın satırları (filtre çipleri)
     for d in kap_feed.group_by_day(res["items"]):
         cnt = kap_feed.day_counts(items, d["day"])
         days.append({"day": d["day"], "label": d["label"], "total": cnt["total"], "routine": cnt["routine"],
                      "rows": [dict(kap_feed.public_item(x, STOCK_NAMES), mc=_haber_mini(x["ticker"], smap))
                               for x in d["items"]]})
-    counts = {"all": 0, "bilanco": 0, "temettu": 0, "ozel": 0}
-    recent = [x for x in items if not x.get("rutin")][:600]
-    for x in recent:
-        counts["all"] += 1
-        if x.get("filter") in counts:
-            counts[x["filter"]] += 1
+        for x in d["items"]:
+            counts["all"] += 1
+            if x.get("filter") in counts:
+                counts[x["filter"]] += 1
+    close_label = _haber_close_label()
     gundem = haber_gundem.load_latest()
     for g in (gundem or {}).get("groups") or []:
         for it in g.get("items") or []:
@@ -10165,9 +10179,9 @@ def haberler_page():
                     c["ch"] = smap[c["t"]].get("change_pct")
     return render_template("haberler.html", gundem=gundem, feed_days=days, feed_page=res["page"],
                            feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
-                           feed_counts=counts, feed_available=bool(items),
+                           feed_ticker=hisse, feed_counts=counts, feed_available=bool(items),
                            feed_updated=_KAP_STORE.meta().get("updated_at"),
-                           coverage=len(smap))
+                           coverage=len(smap), close_label=close_label)
 
 
 @app.route("/hisse/<ticker>/bildirim/<int:idx>")
@@ -10185,7 +10199,7 @@ def bildirim_page(ticker, idx):
         return redirect(it["href"], code=301)
     smap = _haber_stock_map()
     return render_template("bildirim.html", b=p, mc=_haber_mini(it["ticker"], smap),
-                           canonical="https://borsapusula.com" + it["href"])
+                           canonical="https://borsapusula.com" + it["href"], close_label=_haber_close_label())
 
 
 def _kap_feed_universe():
@@ -10230,15 +10244,8 @@ def _kap_feed_loop():
         night = now.hour < 7
         try:
             uni, oids = _kap_feed_universe()
-            if not _KAP_STORE.available():
-                n = 0
-                for m in range(12, -1, -1):
-                    first = (now.date().replace(day=1) - timedelta(days=31 * m)).replace(day=1)
-                    last = min(now.date(), (first + timedelta(days=32)).replace(day=1) - timedelta(days=1))
-                    got = kap_feed.fetch_list(client, oids, uni, first.isoformat(), last.isoformat(),
-                                              classes=("ODA", "FR", "DG"))
-                    _KAP_STORE.merge(got, now.date())
-                    n += len(got)
+            if not _KAP_STORE.meta().get("backfill_done"):
+                n = kap_feed.backfill_months(_KAP_STORE, client, oids, uni, months=12, today=now.date())
                 logger.info("kap-feed: geri besleme bitti, %d kayıt, %d istek", n, client.count)
             classes = kap_feed.POLL_CLASSES if (now.minute < 10 or night) else ("ODA", "FR")
             st = kap_feed.poll_once(_KAP_STORE, client, oids, uni, STOCK_NAMES, now=now, max_docs=8,

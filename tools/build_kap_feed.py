@@ -17,7 +17,7 @@ import json
 import os
 import sys
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -35,15 +35,6 @@ def universe():
     oids = sorted(set(comp[t]["mkk"] for t in tickers if (comp.get(t) or {}).get("mkk")))
     missing = [t for t in tickers if not (comp.get(t) or {}).get("mkk")]
     return set(tickers), oids, names, missing
-
-
-def month_windows(n, today):
-    out, first = [], today.replace(day=1)
-    for _ in range(n + 1):
-        last = min(today, (first + timedelta(days=32)).replace(day=1) - timedelta(days=1))
-        out.append((first.isoformat(), last.isoformat()))
-        first = (first - timedelta(days=1)).replace(day=1)
-    return list(reversed(out))
 
 
 def tcmb(day, cur, _cache={}):
@@ -82,10 +73,8 @@ def main(argv):
     client = kap_feed.KapClient()
     try:
         if a.months:
-            for frm, to in month_windows(a.months, date.today()):
-                got = kap_feed.fetch_list(client, oids, uni, frm, to, ("ODA", "FR", "DG"))
-                store.merge(got)
-                print("  %s..%s kayit=%d istek=%d" % (frm, to, len(got), client.count), flush=True)
+            n = kap_feed.backfill_months(store, client, oids, uni, months=a.months)
+            print("  geri besleme: %d kayit, %d istek, aylar: %s" % (n, client.count, store.meta().get("backfilled")))
         if a.poll:
             st = kap_feed.poll_once(store, client, oids, uni, names, max_docs=15, fx_getter=tcmb)
             print("  tur:", st)

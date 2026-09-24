@@ -27,6 +27,7 @@ def client(tmp_path, monkeypatch):
     uni = {"AHGAZ", "ASTOR", "EKGYO", "FORTE", "THYAO", "ULKER", "AKCNS", "LINK", "GARAN", "ESCOM", "MIATK", "ORGE"}
     st = kf.Store(str(tmp_path / "kap_feed"))
     st.merge([x for x in (kf.normalize(r, uni) for r in rows) if x])
+    st.save_meta({"schema_version": 1, "backfill_done": True, "updated_at": "2026-09-24T23:50:00"})
     monkeypatch.setattr(appmod, "_KAP_STORE", st)
     # canli last_kap_cache.json'a dokunulmaz (VPS'te kosarken uretim onbellegi ezilmesin)
     monkeypatch.setattr(appmod, "_load_kap_cache_from_disk", lambda: None)
