@@ -379,7 +379,7 @@ function goToDate(date) {
       } else if (start <= now && now <= end) {
         // Şu anda aktif sezon
         document.getElementById('bilancoBannerTitle').textContent =
-          `📊 ${p.label} Bilanço Sezonu Aktif`;
+          `${p.label} Bilanço Sezonu Aktif`;
         document.getElementById('bilancoBannerDesc').textContent =
           `${p.description} · ${trDate(p.end).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})} tarihine kadar`;
         banner.style.display = 'flex';

@@ -54,9 +54,6 @@
   </div>
 
   <div class="summary-row">
-    <div class="sum-chip da-panel"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-chip da-panel"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
-    <div class="sum-chip da-panel"><div class="sum-num bp-text-muted" id="sumBkl">—</div><div class="sum-lbl">Yatay</div></div>
     <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumTotal">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
 
@@ -133,21 +130,15 @@ function formatEarningsDate(s, periodLabel) {
 function render(data) {
   const periods = data.periods;
 
-  // Toplam sayaçlar (filtreden bağımsız — tüm dönemler)
-  let totalAl = 0, totalSat = 0, totalBkl = 0, totalAll = 0;
+  // Toplam sayaç (filtreden bağımsız — tüm dönemler). C-10: sinyal KPI
+  // çipleri kalktı — hisse sayfasındaki sayılarla çelişiyordu (87≠86).
+  let totalAll = 0;
   const seen = new Set();
   periods.forEach(p => p.stocks.forEach(s => {
     if (seen.has(s.ticker)) return;
     seen.add(s.ticker);
-    if (s.signal === 'AL')   totalAl++;
-    else if (s.signal === 'SAT') totalSat++;
-    else if (s.signal === 'BEKLE') totalBkl++;
-    // CPO-1647: s.signal null ise (veri henüz yok) hiçbir sayaca dahil edilmez
     totalAll++;
   }));
-  document.getElementById('sumAl').textContent    = totalAl;
-  document.getElementById('sumSat').textContent   = totalSat;
-  document.getElementById('sumBkl').textContent   = totalBkl;
   document.getElementById('sumTotal').textContent = totalAll;
 
   const container = document.getElementById('periodsContainer');

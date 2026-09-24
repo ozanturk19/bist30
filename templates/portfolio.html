@@ -213,7 +213,7 @@
           <th scope="col">K/Z</th>
           <th scope="col">K/Z %</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="hm">Trend (30g)</th>
+          <th scope="col" class="hm">Trend (30 seans)</th>
           <th scope="col"><span class="sr-only">İşlemler</span></th>
         </tr>
       </thead>
@@ -409,7 +409,6 @@ function svgSparkline(prices) {
     const y = H - ((p - min) / rng) * (H - 2) - 1;
     return x.toFixed(1) + ',' + y.toFixed(1);
   }).join(' ');
-  const col = 'var(--bp-text3)';
   // K-AI (SC 1.1.1): eğri BİLGİ TAŞIYOR ve o bilgi satırın hiçbir yerinde yok —
   // satırdaki K/Z maliyete göredir, bu eğri SON 30 GÜNÜ anlatır. Bu yüzden
   // dekoratif sayılıp gizlenemez; metin eşdeğeri veriliyor.
@@ -419,6 +418,7 @@ function svgSparkline(prices) {
      endpoint'in AYNI dilimi /hisse'de "Son 30 seans" diye etiketleniyordu:
      tek veri, iki birim. Bu etiket egrinin TEK metin esdegeri oldugu icin
      (bkz. K-AI notu) hata dogrudan ekran okuyucuya gidiyordu. */
+  const col = bpDirColor(_chg, 1, 'var(--bp-text3)');   /* C-10: yön rengi, etiketle aynı ondalık */
   const _lbl = 'Son ' + prices.length + ' seans: ' + bpFormatPct(_chg, 1);   /* K-BP: tek kanon */
   return '<svg role="img" aria-label="' + _lbl + '" width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
     '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +

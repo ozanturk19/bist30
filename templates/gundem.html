@@ -137,7 +137,7 @@
         <span class="dot dot-str"></span>
         En Güçlü Trendler
       </h2>
-      <span class="section-sub">ADX sıralamalı — Top 8</span>
+      <span class="section-sub" id="strongAlSub">ADX sıralamalı</span>
     </div>
     <div id="strongAlGrid" class="stock-grid">
       {% if ssr_strong_al %}{% for s in ssr_strong_al %}{{ gundem_card(s, false) }}{% endfor %}
@@ -374,6 +374,7 @@ async function loadGundem() {
         '<div class="da-panel da-empty">Güçlü trend verisi bekleniyor…</div>';
     } else {
       document.getElementById('strongAlGrid').innerHTML = strong.map(s => renderCard(s, false)).join('');
+      document.getElementById('strongAlSub').textContent = 'ADX sıralamalı — ' + strong.length + ' hisse';  /* C-10: sabit "Top 8" yerine gerçek sayı */
     }
 
     // Bilanço takvimi

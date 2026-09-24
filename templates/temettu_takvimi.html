@@ -63,8 +63,6 @@
 
   <div class="summary-row">
     <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumUpcoming">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
-    <div class="sum-chip da-panel"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-chip da-panel"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
     <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumTotal">—</div><div class="sum-lbl">Takvimdeki Hisse</div></div>
   </div>
 
@@ -142,11 +140,7 @@ function render(data) {
   const stocks = data.stocks || [];
 
   const totalUpcoming = stocks.filter(s => s.next_ex_date).length;
-  const totalAl    = stocks.filter(s => s.signal === 'AL').length;
-  const totalSat   = stocks.filter(s => s.signal === 'SAT').length;
   document.getElementById('sumUpcoming').textContent = totalUpcoming;
-  document.getElementById('sumAl').textContent        = totalAl;
-  document.getElementById('sumSat').textContent       = totalSat;
   document.getElementById('sumTotal').textContent     = stocks.length;
 
   const container = document.getElementById('stocksContainer');
