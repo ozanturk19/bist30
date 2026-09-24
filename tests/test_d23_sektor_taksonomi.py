@@ -191,16 +191,18 @@ def test_app_wiring_api_data_and_pages():
     assert app._get_sector("AEFES") == FOOD and app._get_sector("ISMEN") == "Finansal Hizmetler"
     assert app._get_sector("XU030") == st.OTHER
     c = app.app.test_client()
+    # sayfalar gerçek önbellekle (boş ya da diskten dolu; şablon ikisini de çizer)
+    pages = {t: c.get("/hisse/%s" % t) for t in ("AEFES", "ISMEN")}
+    assert all(r.status_code == 200 for r in pages.values())
+    body, ismen = (pages[t].get_data(as_text=True) for t in ("AEFES", "ISMEN"))
+    hub = c.get("/hisseler").get_data(as_text=True)
     with app._lock:
         _old = list(app._cache["data"])
         app._cache["data"] = [app._enrich_stock({"ticker": t, "price": 1.0, "change_pct": 0.0,
                                                   "signal": "BEKLE"}) for t in app.BIST100]
     try:
         d = c.get("/api/data").get_json()
-        tr = c.get("/api/tarama?sector=" + FOOD).get_json()
-        body = c.get("/hisse/AEFES").get_data(as_text=True)
-        ismen = c.get("/hisse/ISMEN").get_data(as_text=True)
-        hub = c.get("/hisseler").get_data(as_text=True)
+        tr = c.get("/api/tarama", query_string={"sector": FOOD}).get_json()
     finally:
         with app._lock:
             app._cache["data"] = _old
