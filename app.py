@@ -43,6 +43,7 @@ import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
+from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -824,6 +825,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("bist30")
+# D-48 (KVKK): e-posta taşıyan log çağrıları _mask_email ile sarılı; bu filtre
+# kalan her adresi (ör. SMTP hata metnindeki alıcı) "a***@alanadi"ya indirir.
+logger.addFilter(_EmailMaskFilter())
 
 # Delisted/merged BIST hisseleri - 410 Gone
 DELISTED_TICKERS = {
@@ -2920,10 +2924,10 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
             srv.starttls()
             srv.login(SMTP_USER, SMTP_PASS)
             srv.sendmail(SMTP_USER, [to_email], msg.as_string())
-        logger.info("E-posta gönderildi: %s (konu: %s)", to_email, subject)
+        logger.info("E-posta gönderildi: %s (konu: %s)", _mask_email(to_email), subject)
         return True
     except Exception as e:
-        logger.error("E-posta gönderilemedi (%s): %s", to_email, e)
+        logger.error("E-posta gönderilemedi (%s): %s", _mask_email(to_email), e)
         return False
 
 
@@ -12193,10 +12197,10 @@ def api_contact():
         f"<p style='white-space:pre-wrap'>{_html.escape(message)}</p>"
     )
     if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html, reply_to=email):
-        logger.error("Contact mail gonderilemedi: %s <%s>", name, email)
+        logger.error("Contact mail gonderilemedi: %s <%s>", name, _mask_email(email))
         return jsonify({"ok": False, "error": "Mail gönderilemedi"}), 500
 
-    logger.info("Contact mail gonderildi: %s <%s>", name, email)
+    logger.info("Contact mail gonderildi: %s <%s>", name, _mask_email(email))
     return jsonify({"ok": True})
 
 
@@ -13655,7 +13659,7 @@ def api_recognize():
             def _send_login_mail():
                 if not send_email(email, "🔑 BorsaPusula — Giriş Bağlantın",
                                    _build_login_email(email, login_url, unsub_url, name=name), unsub_url):
-                    logger.error("Magic-link login maili gonderilemedi: %s", email)
+                    logger.error("Magic-link login maili gonderilemedi: %s", _mask_email(email))
             threading.Thread(target=_send_login_mail, daemon=True).start()
 
     return safe_json(generic_resp)
@@ -13738,7 +13742,7 @@ def api_subscribe():
                 unsub
             )
             if not email_sent:
-                logger.error("Abonelik yenileme maili gonderilemedi: %s", email)
+                logger.error("Abonelik yenileme maili gonderilemedi: %s", _mask_email(email))
             react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email, "email_sent": email_sent})
             react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
@@ -13765,9 +13769,9 @@ def api_subscribe():
         unsub
     )
     if not email_sent:
-        logger.error("Abonelik onay maili gonderilemedi: %s", email)
+        logger.error("Abonelik onay maili gonderilemedi: %s", _mask_email(email))
 
-    logger.info("Yeni e-posta abonesi: %s", email)
+    logger.info("Yeni e-posta abonesi: %s", _mask_email(email))
     resp = safe_json({
         "ok":      True,
         "message": "Abonelik başarılı! Onay e-postası gönderildi." if email_sent else "Abonelik başarılı! Onay e-postası şu an gönderilemedi, kaydınız aktif.",
@@ -13899,7 +13903,7 @@ def api_profile():
         subs[target]["profile_updated_at"] = datetime.now(_TZ_TR).isoformat()
         _save_subscribers(subs)
 
-    logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", target, level, freq, mail_pref)
+    logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", _mask_email(target), level, freq, mail_pref)
     # r35 bug-hunt: "Sinyaller artık size özel" yanlıştı — level/freq/segments/size
     # sadece bu formu tekrar render ederken geri gösteriliyor, mail dağıtımını
     # mail_pref dışında hiçbir alan filtrelemiyor. Mesaj gerçekte ne değiştiğini
@@ -14020,7 +14024,7 @@ def api_user_alerts_set(ticker):
             "rvol_threshold": rvol_threshold,
         }
         _save_subscribers(subs)
-    logger.info("F4 alert set: %s → %s", email, ticker)
+    logger.info("F4 alert set: %s → %s", _mask_email(email), ticker)
     return safe_json({"ok": True})
 
 
@@ -14149,11 +14153,11 @@ def _check_user_alerts(stocks):
                             subs2[email]["alerts_last_sent"][tkr] = now_ts
                             subs2[email]["_alert_prev_signals"][tkr] = s.get("signal")
                         _save_subscribers(subs2)
-                logger.info("F4 alert email sent: %s → %d tickers", email, len(triggered))
+                logger.info("F4 alert email sent: %s → %d tickers", _mask_email(email), len(triggered))
             else:
-                logger.error("F4 alert email FAILED (no cooldown written, will retry): %s → %d tickers", email, len(triggered))
+                logger.error("F4 alert email FAILED (no cooldown written, will retry): %s → %d tickers", _mask_email(email), len(triggered))
         except Exception as e:
-            logger.error("_check_user_alerts send error (%s): %s", email, e)
+            logger.error("_check_user_alerts send error (%s): %s", _mask_email(email), e)
 
     # Signal tracking for all alert users even if not triggered
     # r37 bug-hunt (2026-08-22): cooldown'daki bir ticker için bu döngü koşulsuz
@@ -14280,7 +14284,7 @@ def unsubscribe_page(token):
             if match_email in _ls_data:
                 del _ls_data[match_email]
                 _tp_write_json(_LOGIN_SENDS_PATH, _ls_data, atomic=True, ensure_ascii=False)
-        logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
+        logger.info("E-posta abonelik iptal (kayit silindi): %s", _mask_email(match_email))
         resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
         # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
         # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
