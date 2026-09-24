@@ -233,11 +233,12 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | Logo v2 | https://claude.ai/artifact/BnQg57WyCGg7X7LtgVJmMZ | `plans/mockups/logo-v2.html` | O7b A (Yumuşak Yıldız) |
 | Hisse Özet v2 | https://claude.ai/artifact/6Rx4X5tZFouMqN2bYUc1Qp | `plans/mockups/hisse-ozet.html` (+ `hisse_data.json`, `build_hisse_data.py`) | O16a B → notlarla v2 (23.09 16:2x) |
 | Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O21 A ("Üç soruda BIST."), O16b B → notlarla v2 (23.09 21:5x), v3 "Gündem" adı |
-| **Temel sekmesi v2 + Keşfet listeleri** (karar bekliyor) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e + O22 bekliyor, son tarih 27.09 12:00 |
+| **Temel sekmesi v2 + Keşfet listeleri** (O16e=B → v3, O22=B) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e B (hizalama notu → v3, 24.09), O22 B |
 | **Tarama v2** (karar bekliyor) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c bekliyor, son tarih 27.09 12:00 |
 | **Haberler** (karar bekliyor) | https://claude.ai/artifact/45h9DvBjYLPSEm4Ct2apLE | `plans/mockups/haberler.html` (+ `build_haberler.py`, `haberler_data.json`; iç kaynak listesi `haberler_gundem_kaynaklari_ic.md`) | O16f bekliyor, son tarih 28.09 12:00 |
 | **Takip** (karar bekliyor) | https://claude.ai/artifact/9u3m9ABRTcLiYUwVmCnnKX | `plans/mockups/takip.html` (+ `takip_data.json`, `build_takip_data.py`) | O16g bekliyor, son tarih 28.09 12:00 |
 | **Metodoloji v2** (karar bekliyor) | https://claude.ai/artifact/KKvDJRKb6YmxAfvVhWc7NV | `plans/mockups/metodoloji.html` (+ `build_metodoloji.py`) | O16h + O23 (haftalık trend şartı) bekliyor, son tarih 28.09 12:00 |
+| **Hisse Grafik + Haberler sekmeleri** (karar bekliyor) | https://claude.ai/artifact/VDogboJLPEUmXxFXcC528g | `plans/mockups/hisse-sekmeler.html` | O16i bekliyor, son tarih 28.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
