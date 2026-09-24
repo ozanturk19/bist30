@@ -1136,105 +1136,46 @@
 
 
 
-  /* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada UCUNCU bir yapiskan bant var —
-     .bp-segments (asagida, top:92px, canli olcum 92..149 = 57px). shared.css'teki
-     kanonik --bp-sticky-top yalniz makro serit + header'i sayar; burada odak
-     sekme seridinin ALTINDA kayboluyordu. Kural degil OLCU degisir. */
-  :root { --bp-chrome-extra: 57px; }   /* K-AY: kanonik --bp-sticky-top artık bunu kendisi toplar */
+  /* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada UCUNCU bir yapiskan bant var --
+     C-19'dan beri .da-tabs sekme seridi (44px + 1px cizgi). Kanonik
+     --bp-sticky-top bunu --bp-chrome-extra ile toplar (odak seridin altinda kalmaz). */
+  :root { --bp-chrome-extra: 45px; }   /* K-AY */
 
-    .bp-segments {
-      /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
-         CPO: makro bar artık header'ın ÜSTÜNDE sticky (top:0, 32px yükseklik), header top:32px'e indi —
-         bu yüzden bp-segments top:60px'den top:92px'e (60+32) taşındı, header'ın hemen altında sabit kalmaya devam eder. */
-      /* K-AY: `top:92px` header'ın KENDİ safe-area payını saymıyordu —
-         çentikli bir telefonda (PWA) bu şerit header'ın ALTINDA kalıyor,
-         50-55px örtülüyordu (ölçüldü: örtüşme = şeridin TAMAMI). Kanonik
-         çapaya geçti; ölçü shared.css'te tek yerde. */
-      position: sticky; top: var(--bp-anchor-header); left: 0; right: 0;
-      z-index: var(--bp-z-sticky-subheader);
-      background: var(--bp-bg);
-      border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
-      padding: 6px 16px;
-      margin: 0;
-      display: flex; gap: 12px;
-      align-items: center;
-      width: 100%;
-    }
-    .bp-symbol-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 12px;
-      font-size: var(--bp-text-sm); font-weight: 700;
-      color: var(--bp-text); background: rgba(255,255,255,0.04);
-      border-radius:var(--bp-radius); white-space: nowrap;
-      letter-spacing: 0.3px; flex-shrink: 0;
-    }
-    @media (max-width: 480px) {
-      .bp-symbol-pill { font-size: var(--bp-text-xs); padding: 5px 8px; gap: 4px; }
-    }
-    /* SPEC-UX-BATCH-2026-06-03 Madde 1A + 2 (CPO-463/464/465):
-       segmented-control, aktif=marka rengi (var(--bp-brand)) pill (r170: eski ham
-       #1f6feb'ten kanonik token'a geçirildi, tarama.css'teki aynı sınıf drift'iyle
-       aynı turda). Sinyal renkleri (yeşil/kırmızı) NÖTR sekme barında YOK — marka
-       rengi rezerve. AI tab "AI Analiz" + sparkle simge (SAFETY-CRITICAL: "AI"→"AL" karışıklık riski). */
-    .bp-segments-inner {
-      display: flex; gap: 4px;
-      max-width: 1400px;
-      width: 100%;
-      background: rgba(255,255,255,0.025);
-      border-radius:var(--bp-radius-lg);
-      padding: 4px;
-    }
-    .bp-segments-inner a {
-      flex: 1; text-align: center;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 9px 12px;
-      border-radius: var(--bp-radius-7);
-      border: none;
-      font-family: 'Manrope', system-ui, sans-serif;
-      font-size: var(--bp-text-base); font-weight: 600;
-      color: var(--bp-text3); text-decoration: none;
-      transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-      cursor: pointer;
-      letter-spacing: 0.3px;
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .bp-segments-inner a:hover {
-        color: var(--bp-text);
-        background: rgba(255,255,255,0.04);
-      }
-    }
-    .bp-segments-inner a.active {
-      color: var(--bp-bg);
-      background: var(--bp-brand);
-      box-shadow: 0 1px 2px rgba(var(--bp-brand-rgb),0.35), 0 0 0 1px rgba(var(--bp-brand-rgb),0.5) inset;
-    }
-    .bp-segments-inner a.active:hover {
-      background: var(--bp-brand);
-    }
-    .bp-seg-icon {
-      display: inline-block; flex-shrink: 0;
-      vertical-align: middle;
-      opacity: 0.92;
-    }
-    @media (max-width: 480px) {
-      .bp-segments-inner {
-        gap: 2px; padding: 3px;
-        overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-      }
-      .bp-segments-inner::-webkit-scrollbar { display: none; }
-      /* CPO-07.09: scrollbar gizli, sekme şeridi (ör. "Haberler") kesik görünüp
-         kaydırılabilir olduğu belli olmuyordu — sağ kenara sabit bir solma
-         ipucu ekleniyor. .bp-segments zaten sticky (position context var). */
-      .bp-segments::after {
-        content: ''; position: absolute; top: 6px; bottom: 6px; right: 16px;
-        width: 28px; pointer-events: none;
-        background: linear-gradient(to right, transparent, var(--bp-bg));
-      }
-      .bp-segments-inner a { flex: 0 0 auto; font-size: var(--bp-text-sm); padding: 8px 10px; letter-spacing: 0.2px; gap: 4px; }
-      .bp-seg-icon { width: 11px; height: 11px; }
-    }
+  /* ── C-19 (25.09): .da-tabs — 4 sekme, ARIA tabs deseni (C-M10 taslagi, O16i=A).
+     Eski .bp-segments hap seridi + sembol hapi + AI sekmesi kalkti. Aktif sekme
+     marka rengi alt cizgi; yapiskan (header'in hemen alti). Tek kaynak bu blok. ── */
+  .da-tabs{
+    position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader);
+    display:flex; gap:4px; margin:0 0 18px; background:var(--bp-bg);
+    border-bottom:1px solid var(--bp-border);
+  }
+  .da-tab{
+    position:relative; min-height:44px; padding:0 14px; border:0; background:none; cursor:pointer;
+    font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-md); font-weight:600;
+    color:var(--bp-text3); white-space:nowrap; -webkit-tap-highlight-color:transparent;
+  }
+  @media (hover:hover) and (pointer:fine){ .da-tab:hover{ color:var(--bp-text2); } }
+  .da-tab[aria-selected="true"]{ color:var(--bp-text); }
+  .da-tab[aria-selected="true"]::after{
+    content:''; position:absolute; left:10px; right:10px; bottom:-1px; height:2px;
+    background:var(--bp-brand); border-radius:var(--bp-radius-xs);
+  }
+  .da-tab:focus-visible{ outline:2px solid var(--bp-accent-cyan); outline-offset:-2px; border-radius:var(--bp-radius-md); }
+  @media (max-width:768px){
+    .da-tabs{ margin:0 -12px 14px; padding:0 4px; overflow-x:auto; scrollbar-width:none; }
+    .da-tabs::-webkit-scrollbar{ display:none; }
+    .da-tab{ flex:1 0 auto; padding:0 10px; }
+  }
+
+  /* C-19: "Ne anlama geliyor? · Kural tabanli" karti (eski AI sekmesinin icerigi). */
+  .hx-mean{ padding:16px 18px; margin-bottom:16px; }
+  .hx-mean-h{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .hx-mean-t{ margin:0; font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); }
+  .hx-mean-p{ margin:6px 0 0; font-size:var(--bp-text-md); line-height:1.6; color:var(--bp-text2); }
+  .hx-mean-p b{ color:var(--bp-text); }
+  /* C-19: Ozet dibindeki tek <details> (Hap Bilgi / SSS / Metodoloji). */
+  .hx-more > .bp-detail-toggle-body > *{ margin-bottom:14px; }
+
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
       position: fixed; bottom: 24px; right: 16px; z-index: var(--bp-z-fab-up);

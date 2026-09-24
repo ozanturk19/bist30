@@ -101,7 +101,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=c1c2339d">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=e15855fb">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -122,32 +122,6 @@
 
 {% include '_header.html' %}
 
-{# SPEC-STICKY-HEADER-v3 fix5: bp-segments header DIŞINDA (header'a bp-search.js !important 60px max-height zorluyor — çocuk overflow ediyordu). Sticky top:60 = header altında sabit. #}
-<nav class="bp-segments" aria-label="Hisse detay segmentleri">
-  {% if ssr_signal %}
-  <span class="bp-symbol-pill">
-    <strong>{{ ticker }}</strong>
-    {#- K-BW (22.09): SAT dali `#ff7875` yaziyordu -- bu renk tokens.css'te YOK
-        (--bp-sat #f85149). Ayni sayfadaki diger her SAT yuzeyi token'dan
-        geliyordu; 72/217 hisse sayfasi bu tek rozette BASKA bir kirmizi
-        gosteriyordu. Ucu de artik tek yazim: token sinifi. -#}
-    {%- if ssr_signal.signal == 'AL' %} <span class="bp-al-text">▲ Güçlü</span>
-    {%- elif ssr_signal.signal == 'SAT' %} <span class="bp-sat-text">▼ Bozuldu</span>
-    {%- else %} <span class="bp-bkl-text">● Yatay</span>{% endif -%}
-  </span>
-  {% endif %}
-  <div class="bp-segments-inner" role="tablist" aria-label="Hisse detay segmentleri">
-    <a class="bp-seg-item active" data-segment="ozet" id="tab-ozet" role="tab" aria-selected="true" aria-controls="heroPanel panel-ozet" tabindex="0">Özet</a>
-    <a class="bp-seg-item" data-segment="grafik" id="tab-grafik" role="tab" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</a>
-    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" id="tab-ai" role="tab" aria-selected="false" aria-controls="sigExplainSection aiFundSection" tabindex="-1">
-      <svg class="bp-seg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false">
-        <path d="M12 2.5l1.4 4.1 4.1 1.4-4.1 1.4-1.4 4.1-1.4-4.1-4.1-1.4 4.1-1.4L12 2.5zm6.5 11l.95 2.55 2.55.95-2.55.95-.95 2.55-.95-2.55-2.55-.95 2.55-.95.95-2.55z"/>
-      </svg>
-      AI Analiz
-    </a>
-    <a class="bp-seg-item" data-segment="haberler" id="tab-haberler" role="tab" aria-selected="false" aria-controls="storySection panel-haberler-main" tabindex="-1">Haberler</a>
-  </div>
-</nav>
 
 <!-- Hisse Kimlik Çubuğu -->
 <div class="hisse-id-bar">
@@ -157,7 +131,7 @@
     <span class="header-price" id="hpPrice">{{ ssr_signal.price|tr_price if ssr_signal and ssr_signal.price is not none else '—' }}</span>
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal">⋯</span>
-    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
+    {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><span aria-hidden="true">⚠</span> Anomal</span>{% endif %}
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
@@ -235,12 +209,17 @@
   </div>
   {%- endif %}
 
-  <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
-  <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-    <span id="dataFreshness" data-tip="" tabindex="0" style="display:none;align-items:center;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
-      <span id="freshnessDot" style="width:7px;height:7px;border-radius:50%;background:var(--bp-bkl);display:inline-block;flex-shrink:0"></span>
-      <span id="freshnessText">—</span>
-    </span>
+
+  {#- C-19 (25.09): 4 sekme -- Ozet · Grafik · Temel · Haberler. AI sekmesi kalkti
+      (icerigi Ozet'te "Ne anlama geliyor? · Kural tabanli" karti). ARIA tabs deseni:
+      role=tablist/tab, aria-selected + dolasan tabindex; ok tuslari/Home/End odagi
+      tasir, Enter/Bosluk etkinlestirir (elle etkinlestirme: sekme acilisi fetch
+      baslatir). Gorunurluk tek kanondan: applyTab + data-tab-content (K-CP). -#}
+  <div class="da-tabs" role="tablist" aria-label="{{ ticker }} sekmeleri">
+    <button type="button" class="da-tab" role="tab" id="tab-ozet" data-segment="ozet" aria-selected="true" aria-controls="panel-ozet" tabindex="0">Özet</button>
+    <button type="button" class="da-tab" role="tab" id="tab-grafik" data-segment="grafik" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</button>
+    <button type="button" class="da-tab" role="tab" id="tab-temel" data-segment="temel" aria-selected="false" aria-controls="panel-temel" tabindex="-1">Temel</button>
+    <button type="button" class="da-tab" role="tab" id="tab-haberler" data-segment="haberler" aria-selected="false" aria-controls="panel-haberler" tabindex="-1">Haberler</button>
   </div>
 
   <!-- SPEC-017 v2 — Tab-Switch + Fixed Sticky (28 May 2026 gece, Ozan direktifi)
@@ -752,6 +731,36 @@
   </div>
   {% endif %}
 
+  {#- C-19: eski AI sekmesinin icerigi (kural tabanli sinyal aciklamasi + temel gorunum)
+      tek kart. Metin SSR ve deterministik: trend durumu motorun kosul kanonundan
+      (kanon §3), finansal cumle financial_health_score.build_rationale ile ayni
+      esiklerden (>=70 guclu, >=50 ortalama, <50 zayif). Yapay zeka degil -> rozet
+      "Kural tabanli". O5=B olursa AI metni ayni karta girer (plan C-19). -#}
+  {% if ssr_signal %}
+  {%- set _ms = ssr_signal.signal -%}
+  <section class="da-panel hx-mean" id="meaningCard" aria-labelledby="meaningTitle">
+    <div class="hx-mean-h">
+      <h2 class="hx-mean-t" id="meaningTitle">Ne anlama geliyor?</h2>
+      <span class="da-ai-badge da-ai-badge--rule" data-tip="Trend motorunun koşul kontrolünden ve temel skor kategorilerinden türetildi; yapay zekâ değil." tabindex="0">Kural tabanlı</span>
+    </div>
+    <p class="hx-mean-p"><b>Trend.</b>
+    {%- if _ms == 'AL' %} Güçlü Trend: beş koşulun beşi de aynı anda sağlanıyor (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı). Kapanış trend dönüş seviyesinin altına inerse bu durum sona erer.
+    {%- elif _ms == 'SAT' %} Trend Bozuldu: koşullar tersine dönmüş durumda (fiyat trend dönüş seviyesinin altında, ADX ≥ 25 ve DI− &gt; DI+, EMA 12 &lt; EMA 99, haftalık trend aşağı). Kapanış trend dönüş seviyesinin üstüne çıkmadan trend desteklemiyor.
+    {%- else %} Yatay: beş koşul aynı anda sağlanmıyor, trend yönü belirgin değil. Güçlü Trend için beşinin birlikte sağlanması gerekir (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı).
+    {%- endif %}</p>
+    {%- if hs_available and hs.categories %}
+    {%- set _mn = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
+    {%- set _mc = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
+    <p class="hx-mean-p"><b>Finansallar.</b>
+      {%- if _mc|length > 1 %} En güçlü alan {{ _mn.get(_mc[0][0], _mc[0][0]) }} ({{ 'güçlü' if _mc[0][1] >= 70 else ('ortalama' if _mc[0][1] >= 50 else 'zayıf') }}, {{ '%.0f'|format(_mc[0][1]) }} / 100), en zayıf alan {{ _mn.get(_mc[-1][0], _mc[-1][0]) }} ({{ 'güçlü' if _mc[-1][1] >= 70 else ('ortalama' if _mc[-1][1] >= 50 else 'zayıf') }}, {{ '%.0f'|format(_mc[-1][1]) }} / 100).
+      {%- else %} {{ _mn.get(_mc[0][0], _mc[0][0])|capitalize }} {{ 'güçlü' if _mc[0][1] >= 70 else ('ortalama' if _mc[0][1] >= 50 else 'zayıf') }} ({{ '%.0f'|format(_mc[0][1]) }} / 100).
+      {%- endif %}
+      {%- if hs.categories_na and 'kaldirac' in hs.categories_na %} Borç durumu bu şirketin bilanço yapısında hesaplanmıyor.{% endif %}</p>
+    {%- endif %}
+  </section>
+  {% endif %}
+
+
   <!-- Özet kartlar -->
   <div class="info-grid" id="infoGrid" data-tab-content="ozet">
     <div class="info-card">
@@ -1242,13 +1251,148 @@
     </div>
   </details>
 
+  <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (C-19: AI yerine Temel) -->
+  <div data-tab-content="ozet" class="bp-detail-cta-wrap">
+    <div class="bp-detail-cta-label">Detay için</div>
+    <div class="bp-detail-cta-grid">
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.bpScrollTop()">
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
+        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
+      </button>
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('temel');else{var s=document.querySelector('[data-segment=temel]');if(s)s.click();}window.bpScrollTop()">
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📋</span></span>
+        <span class="bp-detail-cta-text">Temel <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
+      </button>
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.bpScrollTop()">
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
+        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
+      </button>
+    </div>
+  </div>
+
+  {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir
+      (GEO: tarayici ve AI arama motoru okur), ama yalniz Ozet dibinde tek
+      <details> icinde. JSON-LD (FAQPage/FinancialProduct) <head>'de degismedi. -#}
+  <details class="bp-detail-toggle hx-more" id="ozetMore">
+    <summary class="bp-detail-toggle-summary">
+      <span class="bp-detail-toggle-label">Sık sorulanlar ve yöntem</span>
+      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="bp-detail-toggle-body">
+  {% if company_summary %}
+  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): Gemini'nin
+     ürettiği ~500+ karakterlik nesir artık İLK paragraf hemen görünür, kalanı
+     mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
+     prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
+     aynı davranışı template tarafında elde ediyoruz. #}
+  {% set _cs_paras = [] %}
+  {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
+  <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
+  <section class="da-panel content-card" aria-labelledby="company-summary-heading">
+    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
+    {% if _cs_paras %}
+    <p class="content-para">{{ _cs_paras[0] }}</p>
+    {% if _cs_paras|length > 1 %}
+    <details class="bp-detail-toggle" style="margin-bottom:0">
+      <summary class="bp-detail-toggle-summary">
+        <span class="bp-detail-toggle-label">Devamını oku</span>
+        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="bp-detail-toggle-body">
+        {% for para in _cs_paras[1:] %}<p class="content-para">{{ para }}</p>{% endfor %}
+      </div>
+    </details>
+    {% endif %}
+    {% endif %}
+    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
+  </section>
+  {% endif %}
+
+  {% if ssr_signal %}
+  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): bu blok
+     sinyal/ADX/stop gibi verileri hemen altındaki "Hap Bilgi" kapsülüyle
+     birebir tekrar ediyordu (GEO agent'ı doğruladı: aynı sayfada aynı ADX
+     değeri hem nesir hem dt/dd'de). O tekrar silindi — kalan tek cümle,
+     dt/dd'nin ASLA taşımadığı tek şeyi (3 kriterin AYNI ANDA sağlanması
+     kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
+     bilinçli uyularak. #}
+  <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
+  <div class="da-panel da-techsum-panel">
+    <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
+      Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong>, <strong>DI yönü (DI+/DI−)</strong> ve <strong>EMA12/EMA99</strong> kriterlerinin AYNI ANDA uyum sağlamasıyla oluşur.
+    </p>
+  </div>
+
+  <!-- GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
+       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
+       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
+       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
+       context'inden — yeni hesaplama yok, uydurma sayı yok. -->
+  <div class="quickfacts-card">
+    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
+    <dl class="quickfacts-list">
+      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
+      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
+      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
+      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
+      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
+      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
+      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
+      {% if hs_available and hs.borsapusula_skoru is not none %}
+      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
+      {% endif %}
+      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
+      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
+      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
+         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
+         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
+         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
+         o. "Stop" kelimesi yalnız AL + band altta iken. #}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
+    </dl>
+    <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
+  </div>
+  {% endif %}
+
+  {% if seo_faq %}
+  <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
+  <section class="da-panel content-card faq-card" aria-labelledby="faq-heading">
+    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <dl class="faq-list">
+      {% for item in seo_faq %}
+      <dt class="faq-q">{{ item.q }}</dt>
+      <dd class="faq-a">{{ item.a }}</dd>
+      {% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  <!-- Metodoloji -->
+  <div class="methodology">
+    <strong>Sinyal Metodolojisi:</strong>
+    Trend sinyali 4 kriterin tamamının karşılanmasıyla oluşur:
+    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
+    <strong>DI+ / DI−</strong> yönü + <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
+    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
+    <br><br>
+    <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
+  </div>
+    </div>
+  </details>
+  </div><!-- /panel-ozet -->
+
+  {#- C-19: Temel sekmesi. Icerik simdilik eski Ozet'teki Temel Analiz paneli
+      (C-22/C-22b Temel v2 bu panelin yerine gelir). /fundamentals yalniz bu
+      sekme (ve Ozet) acilinca istenir. -#}
+  <div id="panel-temel" data-tab-content="temel" role="tabpanel" aria-labelledby="tab-temel" tabindex="0">
   <!-- Temel Analiz — CPO-1651: Ozan 14.09 akşam "temel analiz sayfada ön planda
        değil, uzun scroll boyunca hiç görünmüyor" geri bildirimi. Kök neden:
        bu blok önceden #ozetDetailToggle'ın (varsayılan KAPALI "Detaylı Analiz"
        accordion'u) İÇİNDEYDİ — Onaylar/Çoklu Zaman Dilimi/Sinyal Geçmişi/Sinyal
        Performansı ile aynı genel etikette gizliydi, kullanıcı ayırt edemiyordu.
        Artık kendi başına, her zaman görünür, adı geçen accordion'un DIŞINDA. -->
-  <div data-tab-content="ozet" class="da-panel da-fund-panel" id="fundSection">
+  <div class="da-panel da-fund-panel" id="fundSection">
     <div class="da-fund-head">
       <h2 class="section-title"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span class="da-fund-note">4 saatte bir güncellenir</span>
@@ -1294,26 +1438,7 @@
       <div id="fundOwnership" style="display:none;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-text3)"></div>
     </div>
   </div>
-
-  <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
-  <div data-tab-content="ozet" class="bp-detail-cta-wrap">
-    <div class="bp-detail-cta-label">Detay için</div>
-    <div class="bp-detail-cta-grid">
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
-        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">🤖</span></span>
-        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
-        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-    </div>
-  </div>
-  </div><!-- /panel-ozet -->
+  </div><!-- /panel-temel -->
   
 
   <!-- Sosyal Paylaşım -->
@@ -1340,8 +1465,10 @@
     </div>
   </div>
 
+  {#- C-19: Haberler sekmesi tek tabpanel (eskiden iki: storySection + panel-haberler-main). -#}
+<div id="panel-haberler" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0" style="display:none" class="da-panel da-panel--accent da-story-panel">
+  <div id="storySection" hidden class="da-panel da-panel--accent da-story-panel">
     <div class="da-story-head">
       <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> Sinyal Dönemi</span>
       <span id="storyWindow" style="font-size:var(--bp-text-xs);color:var(--bp-text3)"></span>
@@ -1353,93 +1480,9 @@
     </p>
     <div id="storyList" style="position:relative"></div>
   </div>
-
-  <!-- AI Sinyal Açıklaması -->
-  <div id="ai-section"></div>
-  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-panel da-panel--accent da-ai-panel">
-    <div class="da-ai-head">
-      <span class="da-util-eyebrow"><span aria-hidden="true">✨</span> Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" class="da-ai-badge da-ai-badge--rule" title="Sinyal motorunun 4 kriter kontrolünden türetildi — yapay zeka değil">Kural tabanlı</span>
-    </div>
-    {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
-    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:var(--bp-sat-on-tint);line-height:1.6"></div>
-    <div id="sigExplainLoading" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
-      {# bughunt-13.09 (finansal-analist workflow §2.3): metodoloji nesri yerine
-         ✓ checklist — AL/SAT'ta 4 kriter sinyalin ÜRETİLME koşulu olduğu için
-         (motor mantığı gereği) her zaman DOĞRU, EMA12/EMA99'un gerçek ₺ değeri
-         ssr_signal'da yok (fabrике edilmedi) — sadece yön etiketi gösterilir.
-         K-BR (22.09): ADX burada `|int` ile ASAGI KESILIYORDU — ISDMR 25,9
-         "ADX 25 — Güçlü trend (eşik: 25)" diye basılıyor, "kıl payı geçti"
-         diye okunuyordu; aynı sayfanın Hap Bilgi'si `|round|int` ile 26
-         diyordu. Site kanonu 1 ondalık (/tarama, /karsilastir).
-         Yatay'da hangi kriterin başarısız olduğu bilinmediği için checklist
-         DEĞİL, dürüst tek cümle kullanılır. #}
-      <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
-        {% if ssr_signal.signal == 'AL' %}
-        <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
-          <li><span class="bp-al-text" aria-hidden="true">✓</span> Supertrend — Yükseliş yönü</li>
-          <li><span class="bp-al-text" aria-hidden="true">✓</span> ADX {{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
-          <li><span class="bp-al-text" aria-hidden="true">✓</span> DI+ &gt; DI− — Alıcılar baskın</li>
-          <li><span class="bp-al-text" aria-hidden="true">✓</span> EMA12 &gt; EMA99 — Yükseliş hizalaması</li>
-        </ul>
-        <strong class="bp-al-text">4/4 kriter uyumlu → Güçlü Trend.</strong>
-        {% elif ssr_signal.signal == 'SAT' %}
-        <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
-          <li><span class="bp-sat-text" aria-hidden="true">✓</span> Supertrend — Düşüş yönü</li>
-          <li><span class="bp-sat-text" aria-hidden="true">✓</span> ADX {{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
-          <li><span class="bp-sat-text" aria-hidden="true">✓</span> DI− &gt; DI+ — Satıcılar baskın</li>
-          <li><span class="bp-sat-text" aria-hidden="true">✓</span> EMA12 &lt; EMA99 — Düşüş hizalaması</li>
-        </ul>
-        <strong class="bp-sat-text">4/4 kriter uyumlu → Trend Bozuldu.</strong>
-        {% else %}
-        Supertrend, ADX ≥ 25, DI yönü (DI+/DI−) ve EMA12/EMA99 kriterleri şu an aynı anda sağlanmıyor — net bir trend sinyali yok.
-        {% endif %}
-        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet')" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
-      </div>
-      <div id="sigExplainStatus" style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
-        <div class="da-spin da-spin--sm"></div>
-        AI yorumu hazırlanıyor…
-      </div>
-    </div>
-    <p id="sigExplainText" role="status" aria-live="polite" class="da-ai-body" style="display:none"></p>
-    <div id="sigExplainFooter" class="da-ai-note" style="display:none;margin-top:8px">
-      <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir
-    </div>
-  </div>
-
-  <!-- Temel Görünüm AI Yorumu — CPO-1651: AI Analiz sekmesi sadece Teknik sinyali
-       açıklıyordu, Temel Analiz için paralel bir kart hiç yoktu. hs.temel_analiz_aciklamasi
-       Skor Analizi'ndeki (Özet sekmesi) "AI Yorumu" kartıyla AYNI kaynak — backend
-       zaten hesaplıyor, burada yeni bir çağrı/hesaplama yok, sadece ikinci bir
-       görünüm. BIST30 dışı ~186 hisse için bu metin deterministik şablon cümlesi
-       (Gemini'siz), BIST30 için Gemini'yle üslup cilası görmüş olabilir — bu yüzden
-       Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
-       "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
-  {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
-  <!-- K-BE/K-BF (21.09): AI sekmesinin IKINCI paneli. Haberler sekmesi bu kanonu
-       zaten uyguluyordu (tab-haberler -> "storySection panel-haberler-main", iki
-       tabpanel token listesiyle bildirilir); AI sekmesi MIRAS ALMAMISTI: bu panel
-       tab-ai`nin aria-controls`unda YOKTU ve role=tabpanel tasimiyordu, yani ekran
-       okuyucuya sekmenin parcasi olarak hic baglanmiyordu. -->
-  <div id="aiFundSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-panel da-panel--accent da-ai-panel da-ai-panel--fund">
-    <div class="da-ai-head">
-      <span class="da-util-eyebrow"><span aria-hidden="true">📋</span> Temel Görünüm Ne Anlama Geliyor?</span>
-    </div>
-    {% if _temel_ready %}
-    <p class="da-ai-body" style="margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
-    <div class="da-ai-note">
-      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet')" class="da-link">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
-    </div>
-    {% else %}
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hisse için son EOD (gün-sonu) turu Temel Analiz Skorunu üretmedi.</p>
-    {% endif %}
-  </div>
-
   <!-- AI Haberler -->
   <div id="news-section"></div>
-  {# K-CP: ayni duzeltme -- icindeki newsSection/kapSection ikisi de "haberler". #}
-<div id="panel-haberler-main" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
-  <div class="da-panel da-panel--accent news-section" id="newsSection" data-tab-content="haberler">
+  <div class="da-panel da-panel--accent news-section" id="newsSection">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="da-loading news-loading" id="newsLoading" role="status" aria-live="polite">
       <div class="da-spin"></div> Haberler yükleniyor…
@@ -1452,7 +1495,7 @@
   </div>
 
   <!-- KAP Bildirimleri -->
-  <div class="da-panel da-panel--accent kap-section" id="kapSection" data-tab-content="haberler">
+  <div class="da-panel da-panel--accent kap-section" id="kapSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
@@ -1469,107 +1512,7 @@
     </div>
     <div id="kapList" style="display:none"></div>
   </div>
-  </div><!-- /panel-haberler-main -->
-
-  {% if ssr_signal %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): bu blok
-     sinyal/ADX/stop gibi verileri hemen altındaki "Hap Bilgi" kapsülüyle
-     birebir tekrar ediyordu (GEO agent'ı doğruladı: aynı sayfada aynı ADX
-     değeri hem nesir hem dt/dd'de). O tekrar silindi — kalan tek cümle,
-     dt/dd'nin ASLA taşımadığı tek şeyi (3 kriterin AYNI ANDA sağlanması
-     kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
-     bilinçli uyularak. #}
-  <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div data-tab-content="always" class="da-panel da-techsum-panel">
-    <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
-      Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong>, <strong>DI yönü (DI+/DI−)</strong> ve <strong>EMA12/EMA99</strong> kriterlerinin AYNI ANDA uyum sağlamasıyla oluşur.
-    </p>
-  </div>
-
-  <!-- GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
-       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
-       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
-       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
-       context'inden — yeni hesaplama yok, uydurma sayı yok. -->
-  <div class="quickfacts-card" data-tab-content="always">
-    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
-    <dl class="quickfacts-list">
-      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
-      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
-      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
-      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
-      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
-      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
-      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
-      {% if hs_available and hs.borsapusula_skoru is not none %}
-      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
-      {% endif %}
-      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
-      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
-      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
-         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
-         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
-         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
-         o. "Stop" kelimesi yalnız AL + band altta iken. #}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
-    </dl>
-    <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
-  </div>
-  {% endif %}
-
-  {% if company_summary %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): Gemini'nin
-     ürettiği ~500+ karakterlik nesir artık İLK paragraf hemen görünür, kalanı
-     mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
-     prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
-     aynı davranışı template tarafında elde ediyoruz. #}
-  {% set _cs_paras = [] %}
-  {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
-  <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
-  <section class="da-panel content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
-    {% if _cs_paras %}
-    <p class="content-para">{{ _cs_paras[0] }}</p>
-    {% if _cs_paras|length > 1 %}
-    <details class="bp-detail-toggle" style="margin-bottom:0">
-      <summary class="bp-detail-toggle-summary">
-        <span class="bp-detail-toggle-label">Devamını oku</span>
-        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-      </summary>
-      <div class="bp-detail-toggle-body">
-        {% for para in _cs_paras[1:] %}<p class="content-para">{{ para }}</p>{% endfor %}
-      </div>
-    </details>
-    {% endif %}
-    {% endif %}
-    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
-  </section>
-  {% endif %}
-
-  <!-- Metodoloji -->
-  <div class="methodology" data-tab-content="always">
-    <strong>Sinyal Metodolojisi:</strong>
-    Trend sinyali 4 kriterin tamamının karşılanmasıyla oluşur:
-    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
-    <strong>DI+ / DI−</strong> yönü + <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
-    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
-    <br><br>
-    <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
-  </div>
-
-  {% if seo_faq %}
-  <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
-  <section class="da-panel content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
-    <dl class="faq-list">
-      {% for item in seo_faq %}
-      <dt class="faq-q">{{ item.q }}</dt>
-      <dd class="faq-a">{{ item.a }}</dd>
-      {% endfor %}
-    </dl>
-  </section>
-  {% endif %}
+</div><!-- /panel-haberler -->
 
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
@@ -1714,6 +1657,11 @@ const TICKER  = "{{ ticker }}";
 const _trNum = (v) => (v == null || v === '') ? '\u2014' : String(v).replace('.', ',');
 
 const HISSE_NAME = "{{ name }}";
+/* C-19 (25.09): sayfanin kendi SSR kaydi (/api/data satirinin aynisi, app.py stock_page
+   ssr_signal). Eskiden grafik yuklenince /api/data (~290 KB, 216 hisse) indirilip bu
+   kayit client'ta aranirdi; artik istek yok, ayni veri sunucudan gelir. */
+const BP_SSR = {{ (ssr_signal or {})|tojson }};
+window._bpLastSignalData = BP_SSR.ticker ? BP_SSR : null;
 
 /* ── Sosyal Paylaşım ─────────────────────────────────── */
 let _shareData = {};
@@ -2434,69 +2382,8 @@ function buildChart(d) {
 
 /* ── 52-hafta + commentary render ──────────────────── */
 /* ── SPEC-014 B2/B3 + CPO-551 A5 — Veri yaşı göstergesi + stale banner ──── */
-function renderFreshness(f, dq, ageS, refreshing) {
-  if (!f) return;
-  const wrap   = document.getElementById('dataFreshness');
-  const dot    = document.getElementById('freshnessDot');
-  const txt    = document.getElementById('freshnessText');
-  if (!wrap || !dot || !txt) return;
-
-  const age = f.stocks_age_seconds;
-  if (age == null) { wrap.style.display = 'none'; return; }
-
-  /* CPO-1125 İş Kolu B: kanonik banner (static/stale-banner.js), sayfa-özel
-     fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
-  const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
-  const effAge = (ageS != null && !isNaN(ageS)) ? ageS : age;
-
-  /* T7.2 — çift bildirim: bu chip ile staleBanner aynı cümleyi ("Veri X dk
-     önce güncellendi") aynı ekranda iki kez basıyordu. Banner tetiklendiğinde
-     (effDq stale/critical) burada kısa durum kalır, ayrıntı banner'da. */
-  let color, label;
-  /* CPO-1680 FRONTEND YARISI (21.09, K-AB) — İKİNCİ KÖR NOKTA.
-     `!f.market_open` dalı EN ÖNDEydi ve `seans_disi_eksik`i YUTUYORDU: canlı
-     ölçümde (21.09 Pzt 07:30) veri 85.1 saat eskiyken bu çip nötr gri
-     "Piyasa kapalı" diyordu — kullanıcıya hiçbir arıza sinyali yok. Gerçek
-     gecikme artık "Piyasa kapalı"dan ÖNCE değerlendirilir. Çipin kendisi
-     kısa kalır (T7.2 çift-bildirim kuralı), ayrıntı banner'da. */
-  if (effDq === 'seans_disi_eksik') {
-    color = 'var(--bp-stale)'; label = 'Veri gecikmeli';
-  } else if (!f.market_open) {
-    /* C-03: hangi günün kapanışı olduğu söylenir. */
-    var _cd = (typeof bpFmtUpdateDate === 'function') ? bpFmtUpdateDate(age) : null;
-    color = 'var(--bp-text3)'; label = 'Piyasa kapalı' + (_cd ? ' · ' + _cd + ' kapanışı' : '');
-  } else if (effDq === 'critical') {
-    color = 'var(--bp-sat)'; label = 'Veri bayat';
-  } else if (effDq === 'stale') {
-    color = 'var(--bp-stale)'; label = 'Veri gecikmeli';
-  } else {
-    /* K-BN (21.09): burada bir `age < 300` dali vardi ve 'BIST ~15dk gecikmeli'
-       yaziyordu. IKI AYRI KUSUR:
-       (1) ULASILAMAZ: `market_open()` 10:00-17:59 TR (lib/trading_calendar.py),
-           EOD turu ise 18:10+ TR'de kosuyor (app.py background_refresh,
-           CPO-1508/1512 "900s canli dongu kaldirildi"). Yani market_open
-           TRUE iken `age` hic 300s'in altina inemez -- en az ~15.6 saat.
-       (2) RENDER EDILSEYDI YALAN OLURDU: EOD-only mimaride gosterilen fiyat
-           hicbir zaman "15 dakika gecikmeli" degildir; seans icinde bir
-           ONCEKI kapanistir (21.09 Pzt 09:07 TR canli olcum: updated_at
-           18.09 18:14 = ~63 saat).
-       Dal silindi, durum asagidaki durust "<tarih> gun sonu verileri"
-       etiketine dusuyor. */
-    /* CPO-1555: goreli "X once guncellendi" yerine mutlak tarih — EOD
-       mimarisiyle tutarli (Ozan notu). */
-    color = 'var(--bp-stale)';
-    label = (typeof bpFmtUpdateDate === 'function' ? bpFmtUpdateDate(age) + ' gün sonu verileri' : 'Gün sonu verileri');
-  }
-  dot.style.background = color;
-  txt.textContent = label;
-  txt.style.color = color;
-  if (f.stocks_updated_at) {
-    wrap.setAttribute('data-tip', 'Son güncelleme: ' + f.stocks_updated_at);
-  }
-  wrap.style.display = 'inline-flex';
-
-  bpUpdateStaleBanner(effDq, effAge, refreshing);
-}
+/* C-19: renderFreshness kalkti -- tek girdisi /api/data idi (artik istenmiyor). Bayat
+   veri uyarisi stale-banner.js /api/data-quality yoklamasinda; kapanis gunu hero'da SSR. */
 
 function renderCommentary(commentary) {
   if (!commentary) return;
@@ -3079,33 +2966,64 @@ function _showChartStatus(msg, withRetryBtn) {
   }
 }
 
-/* CPO-1558: "Sinyal aktif — giriş analizi yükleniyor…" placeholder'ı /api/data
-   enrichment'i (aşağıda) ticker'ı bulamazsa ya da hiç yanıt vermezse sonsuza
-   kadar asılı kalıyordu (Fable denetimi: 88s+ sonra hâlâ "yükleniyor" — canlı
-   ölçümle doğrulandı, /hisse). renderSummary(sd=null) SADECE ilk "yükleniyor"
-   metnini yazar, onu asla temizlemez — bu fonksiyon /api/data turu ne şekilde
-   biterse bitsin (ticker bulunamadı ya da fetch hata) çağrılır ve metin hâlâ
-   "yükleniyor" ise dürüst bir son-durum mesajına çevirir. */
-/* 21.09 (K-BK): `warming = true` ile cagrildiginda "veri yetersiz" KESIN HUKMU
-   verilmez. `/api/data` soguk baslangicta (her `systemctl restart` sonrasi)
-   `{"stocks": [], "loading": true}` doner; bu hisse icin kayit BULUNAMAZ ama
-   sebep "veri yetersiz" DEGIL "onbellek henuz dolmadi"dir (canli olculdu:
-   route fulfill ile cold payload -> "giris analizi su an hesaplanamadi, veri
-   yetersiz"). Ayni kok neden index.html / 404.html / portfolio.html'de de
-   vardi; kanon static/bp-search.js:151. */
-function _resolveStuckEntryAnalysis(warming) {
-  const grid = document.getElementById('entryAnalysisGrid');
-  if (grid && grid.textContent.indexOf('yükleniyor') !== -1) {
-    const msg = warming
-      ? 'Trend durumu hazırlanıyor, birkaç saniye içinde yüklenecek.'
-      : 'Bu sinyal için trend durumu şu an hesaplanamadı, veri yetersiz.';
-    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">' + msg + '</div>';
+let _chartSeq = 0;
+/* C-19 (25.09): /api/hisse/<T>/chart TEK istek -- Ozet (alan grafigi, gecmis, gostergeler)
+   ve Grafik (mum grafigi) ayni promise'i paylasir. Basarisizlikta promise sifirlanir,
+   "Tekrar dene" yeniden ister. Eskiden sayfa acilir acilmaz her sekmede istenirdi ve
+   ardindan /api/data (~290 KB) gelirdi; ikisi de artik yalniz ihtiyac duyan sekmede. */
+let _bpChartP = null;
+function _bpChartJSON() {
+  if (_bpChartP) return _bpChartP;
+  const attempt = async (retry) => {
+    const res = await fetch('/api/hisse/' + TICKER + '/chart', { signal: AbortSignal.timeout(15000) });
+    const json = await res.json();
+    if (json.integrity_error) console.warn('[chart] integrity_error:', json.integrity_error);
+    /* CPO-1653 P1: yapisal "yeterli gecmisi yok" -- retry ise yaramaz. */
+    if (json.unavailable) return { unavailable: true };
+    if (!res.ok || json.loading || json.integrity_error || !json.chart) {
+      if (retry < _MAX_CHART_RETRY) {
+        await new Promise(r => setTimeout(r, 3000));
+        return attempt(retry + 1);
+      }
+      throw new Error('chart unavailable');
+    }
+    return json;
+  };
+  _bpChartP = attempt(0).catch(err => { _bpChartP = null; throw err; });
+  return _bpChartP;
+}
+
+/* Ozet'in grafik verisinden beslenen parcalari (gecmis tablosu, gostergeler, paylasim). */
+let _bpOzetChartDone = false;
+function _bpRenderOzetFromChart(ch) {
+  if (_bpOzetChartDone || !ch) return;
+  _bpOzetChartDone = true;
+  try { if (window.bpDrawSparkline) window.bpDrawSparkline(ch.ohlc); } catch (e) { console.warn('spark', e); }
+  renderHistory(ch.signal_history, ch.summary?.price, ch.summary?.signal);
+  renderCommentary(ch.commentary);
+  if (ch.summary) renderSummary(ch.summary, BP_SSR.ticker ? BP_SSR : null);
+  const sum = ch.summary;
+  if (sum) {
+    _shareData = {
+      signal: sum.signal || '',
+      price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
+      sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
+    };
   }
 }
 
-let _chartSeq = 0;
+function loadOzetChart() {
+  return _bpChartJSON().then(json => {
+    if (json && json.chart) _bpRenderOzetFromChart(json.chart);
+  }).catch(err => {
+    console.warn('[ozet] grafik verisi alinamadi', err);
+    const historyBody = document.getElementById('historyBody');
+    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="_bpOzetChartDone=false;loadOzetChart()">Tekrar dene</button></div></td></tr>';
+  });
+}
+
+/* Grafik sekmesi: kutuphane (lightweight-charts) + ayni /chart verisi. */
 async function loadChart(retry) {
-  retry = retry || 0;
   const _mySeq = ++_chartSeq;   /* bug-hunt r54: hizli "Tekrar dene" tiklamalarinda bayat yanit atlanir */
   try {
     await _loadChartLib();
@@ -3114,103 +3032,19 @@ async function loadChart(retry) {
     _showChartStatus('Grafik kütüphanesi yüklenemedi, sayfayı yenileyin.', true);
     return;
   }
-  // CPO-434 chart-fix: /api/hisse/X/chart ve /api/data DECOUPLE — Promise.all KALDIRILDI.
-  // /api/data churn'de timeout olsa bile chart kendi healthy endpoint'inden render olur.
-  // Önce chart fetch + render, sonra /api/data ayrı non-blocking (fail-silent).
   try {
-    /* 1) Chart endpoint — kritik path, hemen render */
-    const res = await fetch('/api/hisse/' + TICKER + '/chart', { signal: AbortSignal.timeout(15000) });
-    const json = await res.json();
-    if (_mySeq !== _chartSeq) return;   /* bayat yanit, yeni bir loadChart cagrisi baslamis */
-
-    if (json.integrity_error) {
-      console.warn('[chart] integrity_error:', json.integrity_error);
-    }
+    const json = await _bpChartJSON();
+    if (_mySeq !== _chartSeq) return;
     if (json.unavailable) {
-      /* CPO-1653 P1: yapısal "yeterli geçmişi yok" — retry hiçbir zaman işe
-         yaramayacak (bkz. app.py _compute_chart_data WARMUP_MIN), yanlış
-         "geçici" mesajı yerine dürüst kalıcı mesaj göster, RETRY YOK. */
       _showChartStatus('Bu hisse için grafik verisi henüz yeterli değil.', false);
       return;
     }
-    if (!res.ok || json.loading || json.integrity_error || !json.chart) {
-      if (retry < _MAX_CHART_RETRY) {
-        _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
-        setTimeout(() => loadChart(retry + 1), 3000);
-      } else {
-        _showChartStatus('Geçici veri problemi — grafik şu an gösterilemiyor.', true);
-      }
-      return;
-    }
-
-    /* Chart hemen render — /api/data'ya BAĞLI DEĞİL */
     buildChart(json.chart);
-    renderHistory(json.chart.signal_history, json.chart.summary?.price, json.chart.summary?.signal);
-    renderCommentary(json.chart.commentary);
-    renderSummary(json.chart.summary, null);  /* sd=null, /api/data sonra enrich edecek */
-
-    /* Paylaşım verilerini doldur ve bölümü göster (chart summary yeterli) */
-    const sum = json.chart.summary;
-    if (sum) {
-      _shareData = {
-        signal: sum.signal || '',
-        price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
-        sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
-      };
-      const shareSec = document.getElementById('shareSection');
-      if (shareSec) shareSec.style.display = 'flex';
-    }
-
-    /* 2) /api/data ayrı non-blocking fetch — fail/timeout → sessiz (chart zaten render) */
-    const _enrich = (warmTries) => fetch('/api/data').then(r => r.json()).then(data2 => {
-      renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
-
-      /* Summary enrichment — signal_bars/date /api/data'dan */
-      const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
-      /* K-BK: kayit yoksa SEBEP onemli — `loading === true` ise onbellek henuz
-         dolmamistir, "veri yetersiz" demek yalan olur; sinirli sayida tekrar
-         denenir ve o sirada "hazirlaniyor" denir. */
-      const _warming = !sd && data2.loading === true;
-      if (_warming && warmTries < 6) {
-        _resolveStuckEntryAnalysis(true);
-        setTimeout(() => { if (_mySeq === _chartSeq) _enrich(warmTries + 1); }, 5000);
-        return;
-      }
-      if (sd) {
-        renderSummary(json.chart.summary, sd);  /* re-render with sd */
-        /* F2 — Anomali rozet */
-        const _ab = document.getElementById('hpAnomalyBadge');
-        if (_ab && sd.anomaly && sd.anomaly.flag) {
-          /* K-CX: rozet "⚠ Anomal" diyor, NEDENI yalniz title'daydi ->
-             dokunmatikte ve klavyede ulasilmazdi (canli evrende flag bugun
-             0/217, yani K-AH'nin canli DOM kapisi bu dali HIC goremedi). */
-          var _areason = sd.anomaly.reason || '';
-          _bpTip(_ab, _areason || 'Fiyat/hacim normal daginimin disinda');
-          _ab.setAttribute('aria-label', 'Anomali' + (_areason ? ': ' + _areason : ''));
-          _ab.style.display = '';
-        }
-      } else {
-        _resolveStuckEntryAnalysis(_warming);
-      }
-
-    }).catch(err => {
-      /* /api/data fail → chart yine görünür, sadece enrichment yok. Sessiz fail. */
-      console.warn('[chart] /api/data enrichment fail (chart already rendered):', err);
-      _resolveStuckEntryAnalysis(false);
-    });
-    _enrich(0);
   } catch (e) {
     if (_mySeq !== _chartSeq) return;
-    if (retry < _MAX_CHART_RETRY) {
-      _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
-      setTimeout(() => loadChart(retry + 1), 3000);
-    } else {
-      _showChartStatus('Bağlantı sorunu — grafik yüklenemedi.', true);
-    }
+    _showChartStatus('Bağlantı sorunu — grafik yüklenemedi.', true);
   }
 }
-
-loadChart();
 
 /* ── AI Haberler ────────────────────────────────────── */
 function mdToHtml(text) {
@@ -3321,105 +3155,6 @@ async function loadNews(retryCount) {
     _newsActive = false;
   }
 }
-loadNews(0);
-
-/* ── Sinyal Açıklaması ─────────────────────────────── */
-let _sigExplainActive = false;  /* AI tab'a hizli gecis-gecis tekrar tekrar loadSignalExplanation(0) tetikleyip paralel retry zinciri birikmesin (bug-hunt) */
-async function loadSignalExplanation(retryCount) {
-  retryCount = retryCount || 0;
-  if (retryCount === 0) {
-    if (_sigExplainActive) return;
-    _sigExplainActive = true;
-  }
-  const sigLoadEl   = document.getElementById('sigExplainLoading');
-  const statusEl = document.getElementById('sigExplainStatus') || sigLoadEl;
-  const textEl   = document.getElementById('sigExplainText');
-  const footerEl = document.getElementById('sigExplainFooter');
-  const badgeEl  = document.getElementById('sigExplainBadge');
-
-  /* K-BZ (22.09): rozet ALTINDAKI ICERIGIN KOKENINI soyler.
-     Yukleme/hata/veri-yok durumlarinda ekranda duran sey SSR'in kural-tabanli
-     3-kriter checklist'i; rozet orada "Gemini AI" diyordu. Rozet artik yalnizca
-     gercek yanit geldiginde kaynak etiketine gecer, her yeni denemede kural
-     durumuna geri doner. */
-  function sigBadge(kind, label, tip) {
-    if (!badgeEl) return;
-    badgeEl.classList.toggle('da-ai-badge--rule', kind === 'rule');
-    badgeEl.textContent = label;
-    /* K-CX: bu rozet bir GUVEN beyani ("yapay zeka degil") ve gizli sekmede
-       duruyor -- K-AH kosusu /hisse/<t> adresini ?tab=ai olmadan ziyaret
-       ettigi icin display:none goruyor ve muaf sayiyordu. */
-    _bpTip(badgeEl, tip);
-    badgeEl.setAttribute('aria-label', label + ' — ' + tip);
-  }
-  sigBadge('rule', 'Kural tabanlı', 'Sinyal motorunun 4 kriter kontrolünden türetildi — yapay zeka değil');
-
-  sigLoadEl.style.display = 'flex';
-  textEl.style.display = 'none';
-  footerEl.style.display = 'none';
-
-  try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation', { signal: AbortSignal.timeout(15000) });
-    let data = null;
-    try { data = await res.json(); } catch(parseErr) { console.warn('signal-explanation JSON parse hatasi:', parseErr); }
-    /* CPO-DEV2-083: backend artik gecerli-ama-veri-eksik durumda 503 donuyor (once 200'du).
-       reason==='no_data' govdesi varsa mevcut ozel retry akisini koru, aksi halde eskisi gibi at. */
-    if (!res.ok && !(data && data.reason === 'no_data')) throw new Error('HTTP ' + res.status);
-    sigLoadEl.style.display = 'none';
-
-    if (data && data.explanation) {
-      textEl.textContent = data.explanation;
-      textEl.style.display = '';
-      footerEl.style.display = '';
-
-      // GA4: sinyal açıklaması görüntülendi
-      if (typeof gtag === 'function') {
-        gtag('event', 'signal_view', { ticker: TICKER, source: data.source || 'unknown' });
-      }
-
-      // Badge ve footer'ı kaynağa göre ayarla
-      const isAI = data.source === 'gemini';
-      sigBadge(isAI ? 'ai' : 'rule',
-               isAI ? 'Yapay zekâ' : 'Algoritmik',
-               isAI ? 'Yapay zekâ tarafından oluşturuldu'
-                    : 'Algoritmik sinyal motorundan türetildi');
-      footerEl.innerHTML = isAI
-        ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir'
-        : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
-      _sigExplainActive = false;
-
-    } else if (data && data.reason === 'no_data') {
-      // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
-      if (retryCount < 3) {
-        statusEl.innerHTML = '<div class="da-spin da-spin--sm"></div> Sinyal verisi yükleniyor…';
-        sigLoadEl.style.display = 'flex';
-        setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
-      } else {
-        statusEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:var(--bp-text-sm);margin-left:6px">Tekrar dene</button>';
-        sigLoadEl.style.display = 'flex';
-        _sigExplainActive = false;
-      }
-    } else {
-      /* K-BZ: bu dal (200 + explanation bos + reason yok) sigLoadEl'i gizleyip
-         yerine HICBIR SEY koymuyordu -> "Bu Sinyal Ne Anlama Geliyor?" basligi
-         ve rozet duruyor, govde bombos kaliyordu (K-V: bos != hata).
-         SSR checklist'i birakip yalnizca durum satirini duzelt. */
-      statusEl.innerHTML = 'AI yorumu şu an üretilemedi — yukarıdaki kural tabanlı özet geçerlidir. <button type="button" class="da-retry" onclick="loadSignalExplanation(0)">Tekrar dene</button>';
-      sigLoadEl.style.display = 'flex';
-      _sigExplainActive = false;
-    }
-
-  } catch(e) {
-    if (retryCount < 2) {
-      setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
-    } else {
-      statusEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Açıklama yüklenemedi.</span><button type="button" class="da-retry" onclick="loadSignalExplanation(0)">Tekrar dene</button></div>';
-      sigLoadEl.style.display = 'flex';
-      _sigExplainActive = false;
-    }
-  }
-}
-loadSignalExplanation(0);
 
 /* ── Sinyalin Hikayesi ──────────────────────────────── */
 async function loadSignalStory() {
@@ -3460,14 +3195,11 @@ async function loadSignalStory() {
     }).join('');
 
     list.querySelector('div:last-child')?.style?.setProperty('border-bottom', 'none');
-    /* CPO-DEV2-098: sec.style.display='' BURADA KALDIRILDI - applyTab()'in
-       data-tab-content="haberler" gorunurluk yonetimini eziyordu (Özet
-       sekmesindeyken bile async yuklenince storySection aciliyordu). Veri DOM'a
-       yazildi, gorunurluk applyTab()'e birakiliyor. */
+    /* C-19: storySection artik #panel-haberler'in ICINDE ve kendi data-tab-content'i
+       yok (sekme gorunurlugu tek kanon: panel). Bos degilse gosterilir. */
+    sec.hidden = false;
   } catch(e) { /* sessiz hata */ }
 }
-
-loadSignalStory();
 
 /* ── KAP Bildirimleri ───────────────────────────────── */
 async function loadKapDisclosures() {
@@ -3555,8 +3287,6 @@ function escHtml(s) {
    Yani hangi surumun kazandigina `defer` zamanlamasi karar veriyordu — iki
    uygulama bugun ayni davransa da, birini degistiren bir sonraki tur icin
    sessiz bir tuzakti. Kanon: bp-vocab.js (tools/global-collision-check.py). */
-
-loadKapDisclosures();
 
 /* ── Temel Analiz ──────────────────────────────────── */
 function _fundCard(lbl, val, color, sub) {
@@ -3943,8 +3673,6 @@ async function loadFundamentals() {
     document.getElementById('fundSection').classList.add('da-fund-empty');
   }
 }
-loadFundamentals();
-
 /* ── Çoklu Zaman Dilimi ───────────────────────────── */
 async function loadMTF() {
   try {
@@ -4018,8 +3746,6 @@ async function loadMTF() {
     if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm)">Yüklenemedi</div>';
   }
 }
-loadMTF();
-
 /* CPO-DEV2-072 r98: Page Visibility — sekme görünür olunca makro bandı tazele. */
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro();
@@ -4088,7 +3814,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
  * Grafik/AI/Haberler: sadece o panel görünür.
  */
 (function(){
-  var segments = document.querySelectorAll('.bp-segments-inner a');
+  var segments = document.querySelectorAll('.da-tabs [role="tab"]');
   if (!segments.length) return;
 
   // SPEC-017 v2 Faz A P1-5: FAB sadece scrollY > 2×viewport (önceki 400px abluka yarattı)
@@ -4117,11 +3843,33 @@ window._bpApplyTooltips = _applyTooltipVisibility;
      birincinin yazdigini eziyordu, yani liste hem eksik hem etkisizdi. Bir
      panel eklendiginde guncellenmeyi bekleyen ikinci bir yer birakmamak icin
      kaldirildi. Sekme adlari artik tek yerde. */
-  var VALID_TABS = ['ozet', 'grafik', 'ai', 'haberler'];
+  var VALID_TABS = ['ozet', 'grafik', 'temel', 'haberler'];
+  /* C-19: eski sekme adlari. AI sekmesinin icerigi Ozet'te ("Ne anlama geliyor?"). */
+  var TAB_ALIAS = { ai: 'ozet' };
+  function _normTab(t) { t = TAB_ALIAS[t] || t; return VALID_TABS.indexOf(t) === -1 ? 'ozet' : t; }
+
+  /* C-19: sekme basina tembel veri. Her sekme ilk acildiginda bir kez yukler;
+     Grafik /kap, /news, /fundamentals istemez. MTF (Coklu Zaman Dilimi) Ozet'teki
+     "Teknik" akordeonu acilinca istenir. */
+  var _tabLoaded = {};
+  function _loadTabData(tab) {
+    if (_tabLoaded[tab]) return;
+    _tabLoaded[tab] = true;
+    try {
+      if (tab === 'ozet') { loadOzetChart(); }
+      else if (tab === 'grafik') { loadChart(); }
+      else if (tab === 'temel') { loadFundamentals(); }
+      else if (tab === 'haberler') { loadKapDisclosures(); loadNews(0); loadSignalStory(); }
+    } catch (e) { console.warn('sekme verisi yuklenemedi: ' + tab, e); }
+  }
+  var _odt = document.getElementById('ozetDetailToggle');
+  if (_odt) _odt.addEventListener('toggle', function once() {
+    if (_odt.open) { _odt.removeEventListener('toggle', once); loadMTF(); }
+  });
 
   function applyTab(tab, opts) {
     opts = opts || {};
-    if (VALID_TABS.indexOf(tab) === -1) tab = 'ozet';
+    tab = _normTab(tab);
     // SPEC-017 v2 Faz A — data-tab-content attribute (true tab-switch)
     var panes = document.querySelectorAll('[data-tab-content]');
     panes.forEach(function(p){
@@ -4159,17 +3907,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     }
     // GA4
     try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e) { /* gtag best-effort analitik - ad-blocker/consent durumunda tanimsiz olabilir, sekme gecisini bozmamali */ }
-    // SPEC-017 Faz C K10: AI tab açıldığında otomatik fetch + cached değilse retry
-    if (tab === 'ai') {
-      try {
-        var explainText = document.getElementById('sigExplainText');
-        var explainLoad = document.getElementById('sigExplainLoading');
-        var alreadyLoaded = explainText && explainText.style.display !== 'none' && (explainText.textContent || '').trim().length > 20;
-        if (!alreadyLoaded && typeof loadSignalExplanation === 'function') {
-          loadSignalExplanation(0);
-        }
-      } catch(e) { console.warn('AI sekmesi otomatik yukleme (loadSignalExplanation) basarisiz', e); }
-    }
+    _loadTabData(tab);
     // SPEC-017 Faz F Bug 3: Grafik tab açıldığında chart resize (display:none→block sonrası width sync)
     if (tab === 'grafik') {
       try { if (typeof window.bpChartResize === 'function') window.bpChartResize(); } catch(e) { console.warn('bpChartResize cagrisi basarisiz (grafik sekmesi acilirken)', e); }
@@ -4212,9 +3950,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
   window.addEventListener('popstate', function(ev){
     try {
       var url = new URL(window.location.href);
-      var t = url.searchParams.get('tab') || 'ozet';
-      if (VALID_TABS.indexOf(t) === -1) t = 'ozet';
-      applyTab(t, {skipUrl: true});
+      applyTab(_normTab(url.searchParams.get('tab') || 'ozet'), {skipUrl: true});
     } catch(e) { console.warn('popstate sekme geri yukleme basarisiz', e); }
   });
 
@@ -4222,14 +3958,9 @@ window._bpApplyTooltips = _applyTooltipVisibility;
   var initial = 'ozet';
   try {
     var urlTab = new URL(window.location.href).searchParams.get('tab');
-    if (urlTab && VALID_TABS.indexOf(urlTab) !== -1) {
-      initial = urlTab;
-    } else {
-      initial = localStorage.getItem('bp_hisse_tab') || 'ozet';
-    }
+    initial = urlTab ? _normTab(urlTab) : _normTab(localStorage.getItem('bp_hisse_tab') || 'ozet');
   } catch(e) { console.warn('baslangic sekme tespiti basarisiz, ozet varsayilanina donuluyor', e); }
-  if (VALID_TABS.indexOf(initial) === -1) initial = 'ozet';
-  applyTab(initial, {skipUrl: false});
+  applyTab(_normTab(initial), {skipUrl: false});
 })();
 </script>
 

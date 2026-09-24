@@ -24,10 +24,6 @@
       "mode": "filtered",
       "reason": "site geneli arama evreni — KANON kopya (satir ~168 XU030/XU100 elenir)"
     },
-    "templates/hisse.html": {
-      "mode": "keyed",
-      "reason": "tek hisse detayi: payload'da kendi ticker'ini arar, liste uretmez"
-    },
     "templates/portfolio.html": {
       "mode": "keyed",
       "reason": "kullanicinin girdigi pozisyonlar icin liveData[ticker] sozlugu kurar"
