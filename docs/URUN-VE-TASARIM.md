@@ -92,6 +92,7 @@
   Sitede "derin / 10 yıllık" iddiası yazılmaz. Lisanslı sağlayıcı teklifi ve BIST fiyat yayın lisansı konusu Ozan'dadır.
 - **Yapay zekâ (O5b=A, "Analist Notu"):** günde bir toplu çalışır; yalnız sitenin kendi verisini ve KAP metnini okur.
   - Rakamları AI yazmaz; kod yerleştirir.
+  - **Şirket hakkında olgu (ne iş yaptığı, adı, sektörü) AI ile yazılmaz** (24.09: Gemini'nin addan ürettiği "Hakkında" metinlerinin 208'de 44'ü yanlış şirketi/işi anlatıyordu). Kaynak KAP "faaliyet konusu" ve evren dosyası; yoksa açıklama gösterilmez.
   - Yayından önce doğrulayıcı çalışır: sayı eşitliği + yasak dil (AL/SAT, teknik hedef, "tavsiye").
   - Metnin üstünde yalnız "AI ile yazıldı" etiketi olur (kaynak etiketi yok).
   - Web araması yalnız "Gündem"de yapılır. Kaynaklar içeride doğrulama için tutulur.
