@@ -16,6 +16,8 @@ from datetime import date, datetime
 _HERE = os.path.dirname(os.path.abspath(__file__))
 ARCHIVE_DIR = os.path.join(_HERE, "resmi_kapanis")
 BULLETIN_URL = "https://www.borsaistanbul.com/data/thb/{y}/{m}/thb{y}{m}{d}1.zip"
+INDEX_URL = "https://www.borsaistanbul.com/datum/PayEndeksleri.zip"
+INDEX_CODES = ("XU100", "XU030")
 MIN_EQUITY_ROWS = 600        # bülten ~631 pay satırı içerir
 MIN_UNIVERSE_COVERAGE = 0.98  # evrenin en az %98'i bültende olmalı
 SOURCE_LABEL = "BIST bülteni"
@@ -86,6 +88,42 @@ def parse_bulletin(zip_bytes):
     return {"date": dates.pop(), "stocks": stocks}
 
 
+def parse_indices(zip_bytes):
+    """PayEndeksleri.zip → {"date": "YYYY-MM-DD", "indices": {"XU100": {close, open, low, high}, ...}}.
+    Dosyada yalnız son gün var (her akşam üzerine yazılır). Satır biçimi:
+    id;kod;ad_tr;ad_en;para;GG/AA/YYYY;kapanış;açılış;en düşük;en yüksek. Bozuk dosyada ValueError."""
+    with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+        names = [n for n in zf.namelist() if n.lower().startswith("fiyatendeksleri")]
+        if not names:
+            raise ValueError("endeks ZIP'inde FiyatEndeksleri csv yok")
+        text = zf.read(names[0]).decode("utf-8-sig", errors="replace")
+    out, dates = {}, set()
+    for r in csv.reader(io.StringIO(text), delimiter=";"):
+        if len(r) < 10 or _norm(r[1]) not in INDEX_CODES:
+            continue
+        close, o, l, h = (_num(r[6]), _num(r[7]), _num(r[8]), _num(r[9]))
+        if not close or close <= 0:
+            continue
+        try:
+            d = datetime.strptime(_norm(r[5]), "%d/%m/%Y").date().isoformat()
+        except ValueError:
+            raise ValueError("endeks tarihi okunamadı: %r" % r[5])
+        dates.add(d)
+        out[_norm(r[1])] = {"close": close, "open": o or close, "low": l or close, "high": h or close}
+    if not out or len(dates) != 1:
+        raise ValueError("endeks dosyasında tek tarihli XU100/XU030 beklenirdi: %s %s" % (sorted(out), sorted(dates)))
+    return {"date": dates.pop(), "indices": out}
+
+
+def fetch_indices(timeout=30):
+    """Endeks dosyasını indirir (yok → None). Ağ hatası fırlatır."""
+    import requests
+    r = requests.get(INDEX_URL, timeout=timeout, headers={"User-Agent": "Mozilla/5.0"})
+    if r.status_code != 200 or not r.content:
+        return None
+    return {"raw": r.content, "last_modified": r.headers.get("Last-Modified")}
+
+
 def check_gates(parsed, want_date, universe):
     """(ok, neden). Kapılar: tarih o gün mü; ≥600 pay; evrenin ≥%98'i bültende."""
     if parsed.get("date") != want_date.isoformat():
@@ -114,11 +152,45 @@ def archive_path(d):
     return os.path.join(ARCHIVE_DIR, "%s.json" % d.isoformat())
 
 
-def save_archive(parsed, last_modified=None, source=SOURCE_LABEL):
+def previous_archive(d):
+    """d gününden ÖNCEKİ en yakın arşiv kaydı (endeks önceki kapanışı için) ya da None."""
+    try:
+        days = sorted(n[:-5] for n in os.listdir(ARCHIVE_DIR)
+                      if n.endswith(".json") and len(n) == 15 and n[:-5] < d.isoformat())
+    except OSError:
+        return None
+    for day in reversed(days):
+        try:
+            with open(os.path.join(ARCHIVE_DIR, day + ".json"), encoding="utf-8") as f:
+                rec = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if rec.get("indices"):
+            return rec
+    return None
+
+
+def _with_index_prev(idx_parsed, d):
+    """Endeks kayıtlarına önceki resmi kapanışı (varsa) yazar; dosyada önceki kapanış alanı yok."""
+    prev = previous_archive(d)
+    out = {}
+    for code, v in (idx_parsed or {}).get("indices", {}).items():
+        v = dict(v)
+        pc = ((prev or {}).get("indices") or {}).get(code, {}).get("close")
+        if pc:
+            v["prev_close"] = pc
+        out[code] = v
+    return out
+
+
+def save_archive(parsed, last_modified=None, source=SOURCE_LABEL, indices=None):
     os.makedirs(ARCHIVE_DIR, exist_ok=True)
+    d = date.fromisoformat(parsed["date"])
     payload = {"date": parsed["date"], "source": source, "last_modified": last_modified,
                "saved_at": datetime.now().isoformat(timespec="seconds"), "stocks": parsed["stocks"]}
-    p = archive_path(date.fromisoformat(parsed["date"]))
+    if indices and indices.get("date") == parsed["date"]:
+        payload["indices"] = _with_index_prev(indices, d)
+    p = archive_path(d)
     tmp = p + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
@@ -155,7 +227,7 @@ def overlay_official_bar(df, rec, ticker_base):
     dokunmaz. Bülten önceki kapanışı seriyle %12'den fazla ayrışıyorsa
     (bölünme/bedelsiz) hiçbir şey yazılmaz."""
     import pandas as pd
-    t = (rec or {}).get("stocks", {}).get(ticker_base)
+    t = (rec or {}).get("stocks", {}).get(ticker_base) or (rec or {}).get("indices", {}).get(ticker_base)
     if not t or df is None or len(df) < 2:
         return df, False
     want = pd.Timestamp(rec["date"])
@@ -165,6 +237,8 @@ def overlay_official_bar(df, rec, ticker_base):
         return df, False
     prev_pos = -2 if last_day == want else -1
     prev_series_close = float(df["Close"].iloc[prev_pos])
+    # Endeks kaydında önceki resmi kapanış yoksa (arşivin ilk günü) seri önceki barı kalır.
+    t = dict(t, prev_close=t.get("prev_close") or prev_series_close)
     if prev_series_close > 0 and abs(t["prev_close"] / prev_series_close - 1) > 0.12:
         return df, False   # bölünme/bedelsiz benzeri seri kırılması: resmi bar seriye yazılmaz
     row = {"Open": t["open"], "High": t["high"], "Low": t["low"], "Close": t["close"]}
@@ -183,3 +257,59 @@ def overlay_official_bar(df, rec, ticker_base):
         add = pd.DataFrame([row], index=[new_idx], columns=out.columns).astype(out.dtypes.to_dict(), errors="ignore")
         out = pd.concat([out, add])
     return out, True
+
+
+def patch_chart_last_bar(data, rec, ticker_base):
+    """Grafik yanıtının (derin kopya) son mumunu resmi OHLC ile eşitler; resmi tarih
+    seride yoksa sona ekler. Grafik önbelleği günde bir/oturmamış çekilir; sunum anında
+    yama yapmak `summary.close == ohlc[-1].close` sözünü önbellek tazeliğinden bağımsız
+    tutar. Uygulandıysa True. Resmi tarihten sonraki mumlar ve %12'den büyük kırılmalar
+    (bölünme/bedelsiz) için dokunmaz."""
+    t = (rec or {}).get("stocks", {}).get(ticker_base) or (rec or {}).get("indices", {}).get(ticker_base)
+    ohlc = (data or {}).get("ohlc")
+    if not t or not ohlc:
+        return False
+    day = rec["date"]
+    last = ohlc[-1]
+    if last.get("time", "") > day:
+        return False
+    ref = ohlc[-2]["close"] if last.get("time") == day and len(ohlc) >= 2 else last.get("close")
+    if ref and abs(t["close"] / ref - 1) > 0.12 and abs((t.get("prev_close") or ref) / ref - 1) > 0.12:
+        return False
+    bar = {"time": day, "open": round(t["open"], 2), "high": round(t["high"], 2),
+           "low": round(t["low"], 2), "close": round(t["close"], 2)}
+    if last.get("time") == day:
+        ohlc[-1] = bar
+    else:
+        ohlc.append(bar)
+    s = data.setdefault("summary", {})
+    s["close"] = bar["close"]
+    s["close_status"] = "resmi"
+    return True
+
+
+def collapse_pending(entries, day_iso, tickers=None):
+    """Digest bufferindeki (bir günün) aynı hisse değişim zincirini tek girdiye indirir.
+    18:10 geçici sinyali X→Y, resmi bar Y→X'e döndürürse ikisi de silinir (digest'te
+    "değişim" görünmez); X→Y→Z ise tek X→Z girdisi kalır. Yalnız `ts` tarihi day_iso
+    olan girdiler ve (verildiyse) `tickers` içindeki hisseler etkilenir; sıra korunur.
+    (yeni_liste, silinen_sayısı) döner."""
+    groups = {}
+    for i, e in enumerate(entries):
+        if str(e.get("ts", ""))[:10] != day_iso or (tickers is not None and e.get("ticker") not in tickers):
+            continue
+        groups.setdefault(e.get("ticker"), []).append(i)
+    drop, repl = set(), {}
+    for tk, idxs in groups.items():
+        first, last = entries[idxs[0]], entries[idxs[-1]]
+        if len(idxs) < 2:
+            continue
+        if first.get("old") == last.get("new"):
+            drop.update(idxs)
+        else:
+            merged = dict(last)
+            merged["old"] = first.get("old")
+            repl[idxs[0]] = merged
+            drop.update(idxs[1:])
+    out = [repl.get(i, e) for i, e in enumerate(entries) if i not in drop or i in repl]
+    return out, len(entries) - len(out)

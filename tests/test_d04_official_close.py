@@ -129,3 +129,92 @@ def test_official_pass_window():
     assert app._official_pass_window(datetime(2026, 9, 24, 18, 35, tzinfo=tr))
     assert not app._official_pass_window(datetime(2026, 9, 24, 19, 30, tzinfo=tr))
     assert not app._official_pass_window(datetime(2026, 9, 26, 18, 40, tzinfo=tr))   # Cumartesi
+
+
+# ── D-04b: endeks resmi kapanışı + grafik ucu ────────────────────────────────
+IDX_CSV = ("1;XU100;BIST 100;BIST 100;TRY;23/09/2026;13251.85;13152.37;13152.37;13357.33\n"
+           "7;XU030;BIST 30;BIST 30;TRY;23/09/2026;16370.07;16214.13;16214.13;16506.25\n"
+           "9;XBANK;BIST BANKA;BIST BANKING;TRY;23/09/2026;1;1;1;1\n")
+
+
+def _idx_zip(csv_text=IDX_CSV):
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("FiyatEndeksleri_PriceIndices.csv", csv_text)
+        zf.writestr("GetiriEndeksleri_ReturnIndices.csv", "x;y")
+    return buf.getvalue()
+
+
+def test_parse_indices_reads_xu100_xu030_only():
+    p = oc.parse_indices(_idx_zip())
+    assert p["date"] == "2026-09-23"
+    assert sorted(p["indices"]) == ["XU030", "XU100"]
+    assert p["indices"]["XU100"] == {"close": 13251.85, "open": 13152.37, "low": 13152.37, "high": 13357.33}
+
+
+def test_parse_indices_rejects_missing_and_mixed_dates():
+    with pytest.raises(ValueError):
+        oc.parse_indices(_idx_zip("9;XBANK;A;B;TRY;23/09/2026;1;1;1;1\n"))
+    with pytest.raises(ValueError):
+        oc.parse_indices(_idx_zip(IDX_CSV.replace("23/09/2026;16370", "22/09/2026;16370")))
+
+
+def test_index_prev_close_comes_from_previous_archive(tmp_path, monkeypatch):
+    monkeypatch.setattr(oc, "ARCHIVE_DIR", str(tmp_path))
+    oc.reset_memory()
+    day1 = {"date": "2026-09-23", "stocks": {}}
+    oc.save_archive(day1, indices=oc.parse_indices(_idx_zip()))
+    assert "prev_close" not in oc.load_archive(date(2026, 9, 23))["indices"]["XU100"]   # arşivin ilk günü
+    csv2 = IDX_CSV.replace("23/09/2026", "24/09/2026").replace("13251.85", "13300.00")
+    oc.save_archive({"date": "2026-09-24", "stocks": {}}, indices=oc.parse_indices(_idx_zip(csv2)))
+    oc.reset_memory()
+    r = oc.load_archive(date(2026, 9, 24))["indices"]
+    assert r["XU100"]["close"] == 13300.0 and r["XU100"]["prev_close"] == 13251.85
+    assert r["XU030"]["prev_close"] == 16370.07
+
+
+def test_index_date_mismatch_is_not_archived(tmp_path, monkeypatch):
+    monkeypatch.setattr(oc, "ARCHIVE_DIR", str(tmp_path))
+    oc.save_archive({"date": "2026-09-24", "stocks": {}}, indices=oc.parse_indices(_idx_zip()))
+    oc.reset_memory()
+    assert "indices" not in oc.load_archive(date(2026, 9, 24))
+
+
+def test_overlay_index_uses_series_prev_close_when_no_archive_prev():
+    idx = pd.to_datetime(["2026-09-21", "2026-09-22", "2026-09-23"])
+    df = pd.DataFrame({"Open": [16000.0, 16100.0, 16000.0], "High": [16100.0, 16200.0, 16100.0],
+                       "Low": [15900.0, 16000.0, 15900.0], "Close": [16000.0, 16050.0, 16100.0]}, index=idx)
+    rec = {"date": "2026-09-23", "stocks": {}, "indices": {"XU030": {"close": 16370.07, "open": 16214.13, "high": 16506.25, "low": 16214.13}}}
+    out, ok = oc.overlay_official_bar(df, rec, "XU030")
+    assert ok and out["Close"].iloc[-1] == 16370.07 and out["Close"].iloc[-2] == 16050.0
+
+
+def test_patch_chart_last_bar_replaces_or_appends():
+    rec = {"date": "2026-09-23", "stocks": {"THYAO": {"close": 298.5, "prev_close": 298.0, "open": 298.75,
+                                                       "high": 302.25, "low": 297.25}}}
+    d = {"ohlc": [{"time": "2026-09-22", "open": 300, "high": 301, "low": 297, "close": 298.0},
+                  {"time": "2026-09-23", "open": 298, "high": 300, "low": 297, "close": 299.0}], "summary": {"price": 298.5}}
+    assert oc.patch_chart_last_bar(d, rec, "THYAO")
+    assert d["ohlc"][-1] == {"time": "2026-09-23", "open": 298.75, "high": 302.25, "low": 297.25, "close": 298.5}
+    assert d["summary"]["close"] == 298.5 and d["summary"]["close_status"] == "resmi"
+    d2 = {"ohlc": d["ohlc"][:1], "summary": {}}
+    assert oc.patch_chart_last_bar(d2, rec, "THYAO") and len(d2["ohlc"]) == 2 and d2["ohlc"][-1]["close"] == 298.5
+    d3 = {"ohlc": d["ohlc"] + [{"time": "2026-09-24", "open": 1, "high": 1, "low": 1, "close": 1}], "summary": {}}
+    assert not oc.patch_chart_last_bar(d3, rec, "THYAO")          # resmi tarihten sonraki mum
+    assert not oc.patch_chart_last_bar({"ohlc": d["ohlc"][:1], "summary": {}}, rec, "YOKTUR")
+
+
+def _e(tk, old, new, ts="2026-09-24T18:11:00+03:00"):
+    return {"ticker": tk, "old": old, "new": new, "stock": {}, "ts": ts}
+
+
+def test_collapse_pending_round_trip_and_chain():
+    buf = [_e("A", "BEKLE", "SAT"), _e("B", "AL", "BEKLE"), _e("A", "SAT", "BEKLE", "2026-09-24T18:36:00+03:00"),
+           _e("C", "AL", "BEKLE"), _e("C", "BEKLE", "SAT", "2026-09-24T18:40:00+03:00"),
+           _e("D", "AL", "SAT", "2026-09-23T18:11:00+03:00")]
+    out, n = oc.collapse_pending(buf, "2026-09-24")
+    assert n == 3
+    assert [(x["ticker"], x["old"], x["new"]) for x in out] == [("B", "AL", "BEKLE"), ("C", "AL", "SAT"), ("D", "AL", "SAT")]
+    out2, n2 = oc.collapse_pending(buf, "2026-09-24", tickers={"C"})
+    assert n2 == 1 and len(out2) == 5
+    assert oc.collapse_pending([], "2026-09-24") == ([], 0)

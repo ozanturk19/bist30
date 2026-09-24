@@ -877,7 +877,7 @@ BIST100 = [
     "FONET", "AGROT", "MRGYO", "TUREX", "LILAK",
     "TCKRC", "PENGD", "PAPIL", "AYGAZ", "TSKB",
     "FORTE", "AKFYE", "TEKTU", "LMKDC", "ECZYT",
-    "ARENA", "USAK", "MARKA", "BERA", "LINK",
+    "ARENA", "USAK", "BERA", "LINK",   # D-04b: MARKA işlem görmüyor (bültende yok) → evrenden çıktı
     "MERCN", "ARDYZ", "KZBGY", "GMTAS", "AHGAZ",
     # ── 125M cutoff genişleme (2026-05-07) ──
     "KAREL", "ARZUM", "AKCNS", "MERKO", "KARSN",
@@ -1132,7 +1132,6 @@ STOCK_NAMES = {
     "ECZYT":  "Eczacıbaşı Yatırım",
     "ARENA":  "Arena Bilgisayar",
     "USAK":  "Uşak Seramik",
-    "MARKA":  "Marka Yatırım",
     "BERA":  "Bera Holding",
     "LINK":  "Link Bilgisayar",
     "MERCN":  "Mercan Kimya",
@@ -1362,7 +1361,7 @@ SECTORS = {
                       "DSTKF"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
                       "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
-                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "MARKA", "BERA", "POLHO", "LRSHO", "DERHL"],
+                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "BERA", "POLHO", "LRSHO", "DERHL"],
     "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
                       "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
                       "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
@@ -4573,7 +4572,20 @@ def _run_official_close_pass(day=None, notify=True):
     if not ok:
         logger.warning("OFFICIAL_CLOSE: kapı geçilemedi — %s", why)
         return False
-    official_close.save_archive(parsed, got.get("last_modified"))
+    # D-04b: BIST100/BIST30 resmi kapanışı (PayEndeksleri.zip; dosya her akşam üzerine yazılır →
+    # arşive kendimiz yazarız). Endeks dosyası bulunamaz/eski tarihliyse hisse turu yine sürer.
+    _idx_parsed = None
+    try:
+        _idx_got = official_close.fetch_indices()
+        _idx_parsed = official_close.parse_indices(_idx_got["raw"]) if _idx_got else None
+        if _idx_parsed and _idx_parsed["date"] != day.isoformat():
+            logger.warning("OFFICIAL_CLOSE: endeks dosyası %s tarihli, beklenen %s — endeks resmi kapanışı atlandı",
+                           _idx_parsed["date"], day)
+            _idx_parsed = None
+    except Exception as _e:
+        logger.warning("OFFICIAL_CLOSE: endeks dosyası alınamadı: %s", _e)
+        _idx_parsed = None
+    official_close.save_archive(parsed, got.get("last_modified"), indices=_idx_parsed)
     official_close.reset_memory()
     _before = {s.get("ticker"): s for s in _stocks_now}
     _rescued, _failed = [], []
@@ -4590,6 +4602,32 @@ def _run_official_close_pass(day=None, notify=True):
     _flipped = [r["ticker"] for r in _rescued
                 if ((_before.get(r["ticker"]) or {}).get("change_pct") or 0) * (r.get("change_pct") or 0) < 0]
     _merge_rescued_into_cache(_rescued, notify=notify)
+    # D-04b: 18:10 geçici sinyali resmi barla geri dönen değişimler digest'e girmez.
+    try:
+        _rt = {r["ticker"] for r in _rescued}
+        with _pending_changes_lock:
+            _d, _w = _load_pending_changes(), _load_pending_changes_weekly()
+            _d2, _nd = official_close.collapse_pending(_d, day.isoformat(), _rt)
+            _w2, _nw = official_close.collapse_pending(_w, day.isoformat(), _rt)
+            if _nd:
+                _save_pending_changes(_d2)
+            if _nw:
+                _save_pending_changes_weekly(_w2)
+        logger.info("OFFICIAL_CLOSE: digest buffer'dan %d günlük / %d haftalık girdi elendi (geri dönen geçici sinyal)", _nd, _nw)
+    except Exception as _e:
+        logger.warning("OFFICIAL_CLOSE: pending buffer sadeleştirilemedi: %s", _e)
+    # Endeksler: sinyal maili yok (notify=False); resmi bar uygulanmazsa cache'te eski değer kalır.
+    _idx_rescued = []
+    if _idx_parsed:
+        for _t in (t for t in official_close.INDEX_CODES if t in _before):
+            _r = _analyze_with_timeout(_t)
+            if _r and _r.get("close_status") == "resmi":
+                _enrich_stock(_r)
+                _r["last_fresh_ts"] = time.time()
+                _idx_rescued.append(_r)
+        _merge_rescued_into_cache(_idx_rescued, notify=False)
+    logger.info("OFFICIAL_CLOSE: endeks resmi kapanışı — %s",
+                {r["ticker"]: (r.get("price"), r.get("change_pct")) for r in _idx_rescued} or "uygulanmadı")
     logger.info("OFFICIAL_CLOSE: SONUC — %s bülten %d pay, %d/%d resmi bara çevrildi, %d fiyat düzeldi, "
                 "yön dönen %d %s, uygulanamayan %s",
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
@@ -10049,6 +10087,14 @@ def api_stock_chart(ticker):
         if main_price > 0:
             data["summary"]["price"]      = main_price
             data["summary"]["change_pct"] = main_stock.get("change_pct", data["summary"].get("change_pct"))
+        # D-04b: resmi kapanış varsa grafik ucu da bülten barıdır (başlık fiyatı ile aynı sayı).
+        if main_stock.get("close_status") == "resmi":
+            try:
+                _off_rec = official_close.load_archive(_expected_bar_date())
+                if _off_rec:
+                    official_close.patch_chart_last_bar(data, _off_rec, ticker)
+            except Exception as _e:
+                logger.warning("official_close chart yaması(%s): %s", ticker, _e)
 
         # CPO-1665 P1: commentary metni chart'ın KENDİ (senkron olmayan) signal/tarih
         # bilgisinden üretiliyordu — yukarıdaki override sadece summary alanlarını
