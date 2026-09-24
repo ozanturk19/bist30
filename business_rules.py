@@ -6,6 +6,7 @@ giriş-kalitesi etiketleri ve sinyal-tarihi türetme fonksiyonlarının tek kayn
 
 import math
 import logging
+import re
 from datetime import date, datetime
 
 logger = logging.getLogger(__name__)
@@ -275,6 +276,21 @@ ENTRY_QUALITY_LABELS = {
     "DIKKATLI": "Dikkatli",
     "UZAK": "Kovalama",
 }
+
+# ── D-39 (Ozan O10, kanon §2.2) — teknik hedef / işlem yönetimi dili ────────
+# API'lerden kalkan alanlar: analyze() artık üretmez; disk cache'ten gelen eski
+# kayıtlardan app._enrich_stock düşürür. Analist hedef fiyatı (temel analiz)
+# bu listede DEĞİL — değerleme göstergesi olarak kalır.
+RETIRED_TRADE_KEYS = ("tp1", "tp2", "tp_level", "rr_signal", "rr_ratio", "rr_now",
+                      "entry_note", "optimal_entry")
+
+# Üretilen teknik metinde (sinyal açıklaması, e-posta, yorum) olmaması gereken
+# dil; varyant ve büyük/küçük harf duyarsız. Haber/analist metnine UYGULANMAZ
+# (analist hedef fiyatı meşru).
+TRADE_LANG_RE = re.compile(
+    r"(?i)\btp[12]\b|\br/r\b|risk/ödül|k[aâ]r al|hedefe ulaş|hedef (seviye|fiyat)|stop[- ]?loss|"
+    r"stop (bölge|seviye)|zarar durdur|\bSL\b|ideal giriş|giriş (fiyat|kalite|bölge|pencere)|"
+    r"\b(long|short)\b|kazanma oran")
 
 # ── CPO-1335 — göreli tarih etiketi kanonik türetimi ────────────────────────
 # KUSUR: "Bugün"/"Dün" etiketi iki DONMUŞ eksenden türetiliyordu:

@@ -94,8 +94,10 @@ def test_templates_no_short_position_language():
 
 
 def test_sat_entry_note_ideal_branch_is_informational():
-    """CPO-1330 kabul ölçütü: SAT/IDEAL entry_note artık R/R diliyle, pozisyon
-    tavsiyesi değil — regresyonu önlemek için tam metni sabitliyoruz."""
+    """CPO-1330 kabul ölçütü: SAT/IDEAL entry_note pozisyon tavsiyesi değil.
+    D-39 (O10, 24.09): entry_note tamamen kalktı — "SL yakın — R/R" metni de
+    artık üretilmiyor (teknik hedef / işlem yönetimi dili yok, kanon §2.2)."""
     src = _read(_APP_PY)
-    assert "SL yakın — R/R en avantajlı bölge" in src
+    assert "SL yakın — R/R en avantajlı bölge" not in src
+    assert '"entry_note":' not in src
     assert "kısa pozisyon için avantajlı bölge" not in src

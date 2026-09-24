@@ -94,6 +94,7 @@ try:
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
     from business_rules   import last_eod_day, parse_signal_date  # D-06: son EOD günü veriden
+    from business_rules   import RETIRED_TRADE_KEYS as _RETIRED_TRADE_KEYS, TRADE_LANG_RE as _TRADE_LANG_RE  # D-39
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -146,6 +147,8 @@ except ImportError as _dqv_import_err:
     def signal_date_age_days(signal_date, today=None):     return None
     def last_eod_day(stocks, today=None):                   return None
     def parse_signal_date(signal_date):                     return None
+    _RETIRED_TRADE_KEYS = ()                 # D-39: analyze() zaten üretmiyor; yalnız eski disk cache temizliği kaybolur
+    _TRADE_LANG_RE      = re.compile(r"(?!)")   # hiçbir şeyle eşleşmez
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
     ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Kovalama'}
@@ -1464,6 +1467,13 @@ def _enrich_stock(s: dict) -> dict:
         s["name"] = _nm
     elif "name" not in s:
         s["name"] = ""
+    # D-39 (O10): teknik hedef/işlem yönetimi alanları artık üretilmiyor; disk
+    # cache'ten (restart analyze() çalıştırmaz) gelen eski kayıtlardan da düşer.
+    for _k in _RETIRED_TRADE_KEYS:
+        s.pop(_k, None)
+    _st = (s.get("indicators") or {}).get("supertrend")
+    if isinstance(_st, dict) and _st.get("value") in ("LONG", "SHORT"):
+        _st["value"] = "Yukarı" if _st["value"] == "LONG" else "Aşağı"
     return s
 
 
@@ -2065,92 +2075,28 @@ def analyze(ticker_base):
             signal_vol_ratio = round(svol / svol_avg, 2) if svol_avg > 0 else 1.0
             vol_confirmed    = signal_vol_ratio >= 1.7
 
-        # ── Giriş Optimizasyonu (Entry Quality) ───────────────────────────────
+        # ── Sinyal fiyatına uzaklık (entry_quality) ───────────────────────────
         # Ölçüt: Fiyat sinyal gününden bu yana kaç ATR hareket etti?
         # < 1 ATR → IDEAL  |  1-2 ATR → IYI  |  2-3.5 ATR → DIKKATLI  |  >3.5 → UZAK
+        # Ters yönde hareket (CPO-1666 #2) → UZAK. Kod değeri korunur (tarama/
+        # karsilastir/gundem/hisse tüketiyor); metin tarafı şablonda.
+        # D-39 (O10, kanon §2.2): entry_note ("SL yakın — R/R"), optimal_entry,
+        # tp1/tp2 ve rr_signal artık üretilmez — teknik hedef/işlem yönetimi dili yok.
         entry_quality = None
-        entry_note    = None
-        optimal_entry = None
-        tp1 = tp2     = None
-
-        if signal == "AL" and signal_price and sl_val and c > sl_val and atr_now > 0:
-            risk         = c - sl_val                            # mevcut fiyattan SL'ye mesafe
-            sl_dist_pct  = round(risk / c * 100, 1)             # SL uzaklığı %
-            pct_moved    = (c - signal_price) / signal_price * 100  # sinyalden bu yana %
-            atr_pct      = atr_now / c * 100                    # ATR = fiyatın kaç %'i
-            atrs_moved   = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
-
-            tp1      = round(c + risk * 2, 2)    # 2R hedef
-            tp2      = round(c + risk * 3, 2)    # 3R hedef
-
-            # CPO-1666 #2: pct_moved negatifken (fiyat sinyale KARŞI hareket etti,
-            # AL sinyalinden sonra düştü) atrs_moved da negatif olup < 1.0 testini
-            # geçiyor ve "IDEAL" basıyordu — SL'ye yaklaşmış, kaybeden bir pozisyon
-            # "taze/en avantajlı" diye etiketleniyordu (NETAS canlı örneği: -%9.7,
-            # SL'ye 0.7% kaldı, yine de IDEAL). Ters yönde hareket ayrı ele alınmalı.
-            if pct_moved < 0:
+        if signal in ("AL", "SAT") and signal_price and sl_val and atr_now > 0 \
+                and (c > sl_val if signal == "AL" else c < sl_val):
+            _dir       = 1 if signal == "AL" else -1
+            pct_moved  = _dir * (c - signal_price) / signal_price * 100   # sinyal yönünde %
+            atr_pct    = atr_now / c * 100
+            atrs_moved = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
+            if pct_moved < 0 or atrs_moved >= 3.5:
                 entry_quality = "UZAK"
-                entry_note    = (f"UZAK · Fiyat sinyalden bu yana %{abs(pct_moved):.1f} düştü "
-                                 f"({abs(atrs_moved):.1f} ATR) — sinyal SL'ye yaklaştı, riskli bölge")
             elif atrs_moved < 1.0:
                 entry_quality = "IDEAL"
-                entry_note    = (f"Sinyal taze ({signal_bars} bar), "
-                                 f"fiyat SL'ye yakın — R/R en avantajlı bölge")
             elif atrs_moved < 2.0:
                 entry_quality = "IYI"
-                entry_note    = (f"Trend onaylandı ({signal_bars} bar, "
-                                 f"+{pct_moved:.1f}%), makul giriş bölgesi")
-            elif atrs_moved < 3.5:
-                entry_quality = "DIKKATLI"
-                entry_note    = (f"Fiyat +{pct_moved:.1f}% yükseldi "
-                                 f"({atrs_moved:.1f} ATR) — küçük pullback beklenmesi daha sağlıklı")
-                # Optimal giriş: SL + 0.8 ATR veya mevcut -3%, hangisi yüksekse
-                optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.97), 2)
             else:
-                entry_quality = "UZAK"
-                entry_note    = f"UZAK · +{pct_moved:.1f}% ({atrs_moved:.1f} ATR) · Kovalama riski"
-                optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.95), 2)
-
-        elif signal == "SAT" and signal_price and sl_val and c < sl_val and atr_now > 0:
-            risk        = sl_val - c
-            sl_dist_pct = round(risk / c * 100, 1)
-            pct_moved   = (signal_price - c) / signal_price * 100
-            atr_pct     = atr_now / c * 100
-            atrs_moved  = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
-
-            # CPO-1740 (22.09): tp1/tp2 = entry - risk*N, asagi yonde kelepceli
-            # degildi -- dusuk fiyatli/genis stoplu hisselerde (PASEU, MIATK...)
-            # NEGATIF hedef fiyat uretiyordu. Urun SAT icin bu sayilari hicbir
-            # yuzeyde göstermiyor (/metodoloji: "Trend Bozuldu sinyalinde somut
-            # giris/hedef/stop seviyeleri gösterilmez") -- BEKLE ile tutarli
-            # olarak None birakiliyor (asagida rr_signal/rr_now da otomatik None kalir).
-            tp1      = None
-            tp2      = None
-
-            # CPO-1666 #2: AL taraftaki aynı fix, SAT için simetrik (yukarıdaki
-            # yorum bkz.) — fiyat SAT sinyaline karşı (yukarı) hareket ettiyse
-            # negatif pct_moved yine "IDEAL" olarak sızmasın.
-            if pct_moved < 0:
-                entry_quality = "UZAK"
-                entry_note    = (f"UZAK · Fiyat sinyalden bu yana %{abs(pct_moved):.1f} yükseldi "
-                                 f"({abs(atrs_moved):.1f} ATR) — sinyal SL'ye yaklaştı, riskli bölge")
-            elif atrs_moved < 1.0:
-                entry_quality = "IDEAL"
-                entry_note    = (f"Trend Bozuldu taze ({signal_bars} bar), "
-                                 f"SL yakın — R/R en avantajlı bölge")
-            elif atrs_moved < 2.0:
-                entry_quality = "IYI"
-                entry_note    = (f"Düşüş trendi onaylandı "
-                                 f"({signal_bars} bar, -{pct_moved:.1f}%)")
-            elif atrs_moved < 3.5:
                 entry_quality = "DIKKATLI"
-                entry_note    = (f"Fiyat -{pct_moved:.1f}% düştü "
-                                 f"({atrs_moved:.1f} ATR) — kısa dönem teknik geri tepme riski")
-                optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.03), 2)
-            else:
-                entry_quality = "UZAK"
-                entry_note    = f"UZAK · -{pct_moved:.1f}% ({atrs_moved:.1f} ATR) · Aşırı satım riski"
-                optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.05), 2)
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
@@ -2200,25 +2146,6 @@ def analyze(ticker_base):
         # CPO-1745: signal iletiliyor — "İdeal Giriş Penceresi" artık yalnız
         # AL'da, AL olmayanda "Nötr Bölge (RSI 45-60)" (kaynakta dogru, vaat yok).
         rsi_zone = derive_rsi_zone(rsi_val, signal)
-
-        # ── R/R (Faz 1 #2) — bug fix ────────────────────────────────────────
-        # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
-        # rr_signal: sinyal başından (entry=signal_price) gerçek R/R.
-        # CPO-1762: rr_now (entry=current) kaldırıldı — tp1 = c + risk*2
-        # totolojisi yüzünden AL'da HER ZAMAN tam 2.0 (matematiksel garanti,
-        # 79/79 canlı ölçümde doğrulandı), sıfır tüketicisi vardı (CPO-DEV2-045
-        # ile frontend'den zaten kaldırılmıştı). rr_ratio'nun aynı totolojiyle
-        # kaldırılmasıyla (CPO-1758) birebir aynı sınıf.
-        rr_signal = None
-        if tp1 is not None and signal_price is not None and sl_val is not None:
-            if signal == "AL":
-                _risk_sig = signal_price - sl_val
-                if _risk_sig > 0:
-                    rr_signal = round((tp1 - signal_price) / _risk_sig, 2)
-            elif signal == "SAT":
-                _risk_sig = sl_val - signal_price
-                if _risk_sig > 0:
-                    rr_signal = round((signal_price - tp1) / _risk_sig, 2)
 
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
@@ -2311,7 +2238,7 @@ def analyze(ticker_base):
             "indicators": {
                 "supertrend": {
                     "label": "ST",
-                    "value": "LONG" if st_bull else "SHORT",
+                    "value": "Yukarı" if st_bull else "Aşağı",   # D-39: LONG/SHORT dili yok
                     "bull":  st_bull,  "bear": st_bear,
                 },
                 "adx": {
@@ -2335,14 +2262,8 @@ def analyze(ticker_base):
             "signal_vol_ratio": signal_vol_ratio,
             "atr14":           round(atr_now, 2) if atr_now else None,
             "entry_quality":   entry_quality,
-            "entry_note":      entry_note,
-            "optimal_entry":   optimal_entry,
-            "tp1":             tp1,
-            "tp2":             tp2,
-            # CPO-1758: rr_ratio (hep 2.0 -- TP1=entry+risk*2 totolojisi) kaldirildi.
-            # CPO-1762: rr_now (aynı totoloji, farklı ad) de kaldırıldı -- rr_signal
-            # tek R/R kaynağı.
-            "rr_signal":       rr_signal,  # Faz 1 #2: sinyal başından R/R
+            # D-39 (O10): tp1/tp2/rr_signal/entry_note/optimal_entry üretilmez
+            # (CPO-1758 rr_ratio ve CPO-1762 rr_now zaten kalkmıştı).
         }
     except Exception as e:
         logger.error("analyze(%s): %s", ticker_base, e, exc_info=True)
@@ -3152,7 +3073,8 @@ def _build_signal_email(changes, unsubscribe_url):
         if is_prem:
             prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">⭐ HACİM ONAYLI</span>'''
 
-        sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{tr_price_filter(sl_level)}₺</strong></span>' if sl_level else ''
+        # D-39 (kanon §2.2): "SL" (stop) dili yok — betimleyici trend dönüş seviyesi.
+        sl_html = f'<span style="color:#909097">Trend dönüş seviyesi (Supertrend): <strong style="color:#c7c5cd">{tr_price_filter(sl_level)} ₺</strong></span>' if sl_level else ''
         rvol_html = f'<span style="color:#909097">·  RVOL <strong style="color:{"#ffc850" if is_prem else "#c7c5cd"}">{rvol:.2f}×</strong></span>' if rvol is not None else ''
 
         cards += f'''
@@ -7208,7 +7130,7 @@ Teknik göstergeleri sıradan yatırımcı diline çevir:
   - ADX → trend gücü
   - EMA → hareketli ortalama
   - DI+ / DI- → yön göstergeleri
-  - Stop-Loss → zarar durdurma seviyesi
+  - Trend dönüş seviyesi (Supertrend) → fiyat bu çizginin öbür yanına geçerse trend yönü değişmiş sayılır
   - RSI → momentum göstergesi
   - Hacim oranı → işlem hacmi karşılaştırması
 
@@ -7229,10 +7151,11 @@ KURAL 6 — YASAKLI İFADELER:
      3. tekil / nesnel kullan ("görünüyor", "durumunda", "seviyesinde",
      "olarak hesaplanmış"). Mesafeli + bilgilendirici ton (SPEC-014 polish #1).
 - ❌ "Bu durumda yatırımcılar..." → genel tavsiye yok.
+- ❌ Hedef fiyat, kâr al, stop/zarar durdurma, giriş bölgesi, risk/ödül → işlem yönetimi dili yok.
 
 ═══ İYİ ÖRNEK ═══
 
-"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu dört koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; zarar durdurma seviyesi 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
+"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu dört koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; trend dönüş seviyesi (Supertrend) 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
 
 ═══ KÖTÜ ÖRNEKLER ═══
 
@@ -7758,8 +7681,8 @@ def _enrich_signal_explanation(ticker, signal_data):
         direction_tr   = "belirsiz"
         opposite_words = []
 
-    # ── Stop-loss satırı ─────────────────────────────────────────────────────
-    sl_line = f"\n- Stop-Loss seviyesi: {tr_price_filter(sl)} ₺ (Supertrend alt/üst bandı)" if sl else ""
+    # ── Trend dönüş seviyesi satırı (D-39: "Stop-Loss" dili yok, kanon §2.2) ──
+    sl_line = f"\n- Trend dönüş seviyesi (Supertrend): {tr_price_filter(sl)} ₺" if sl else ""
 
     # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
     prompt = _SYS_EXPLAIN + (
@@ -7789,6 +7712,11 @@ def _enrich_signal_explanation(ticker, signal_data):
                 ticker, sig, text[:60]
             )
             text = None
+
+    if text and _TRADE_LANG_RE.search(text):   # D-39: hedef/işlem yönetimi dili → commentary
+        logger.warning("_enrich_signal_explanation(%s): AI işlem yönetimi dili üretti, commentary kullanılıyor",
+                       ticker)
+        text = None
 
     final_text = text if text else (commentary + " Yatırım tavsiyesi değildir.")
 
@@ -8687,7 +8615,6 @@ def build_signal_summary(stock):
     sl      = stock.get("sl_level")
     weekly  = stock.get("weekly_trend")   # int: 1 = haftalık yukarı, -1 = aşağı
     eq      = stock.get("entry_quality")
-    opt     = stock.get("optimal_entry")
 
     try:
         if entry and current:
@@ -8713,9 +8640,8 @@ def build_signal_summary(stock):
                        "başlangıcına göre ciddi yükseldiği için yeni girişte kovalamak "
                        "yerine geri çekilme beklemek daha sağlıklı görünüyor.")
         elif gain_pct > 50:
-            verdict = ("Trend güçlü; fiyat sinyal başından bu yana belirgin yükseldi — "
-                       "mevcut pozisyon için trend korunuyor, yeni giriş için ideal bölge "
-                       "takibi önerilir.")
+            verdict = ("Trend güçlü; fiyat sinyal başından bu yana belirgin yükseldi ve "
+                       "trend korunuyor.")   # D-39: "ideal bölge"/pozisyon dili yok
         elif gain_pct > 20 and rsi_hot:
             verdict = ("Trend yukarı yönlü ama fiyat kısa vadede ısınmış; yeni girişte "
                        "acele etmeden geri çekilmeyi beklemek daha mantıklı görünüyor.")
@@ -11799,12 +11725,8 @@ def api_karsilastir():
             "entry_quality":  s.get("entry_quality"),
             "is_premium":     s.get("is_premium", False),
             "sl_level":       s.get("sl_level"),
-            "tp1":            s.get("tp1"),
-            "tp2":            s.get("tp2"),
-            # CPO-1758: rr_ratio (hep 2.0, sifir tuketici) kaldirildi -- rr_signal
-            # zaten _cache["data"]'da (analyze() Faz 1 #2) dolu geliyor, ekstra
-            # hesap/gate gerekmiyor. /hisse ve /gundem ile ayni kaynak.
-            "rr_signal":      s.get("rr_signal"),
+            # D-39 (O10): tp1/tp2/rr_signal kalktı (karsilastir.html tüketmiyor;
+            # CPO-1758 rr_ratio'yu zaten kaldırmıştı).
             "bull_score":     s.get("bull_score"),
             "bear_score":     s.get("bear_score"),
             # CPO-DEV2-043: kanonik puan (compose_score, /hisse ve /tarama'nin kaynagi) —
@@ -13549,31 +13471,15 @@ def api_market_news():
             "herhangi bir haber bulunamadı",
             "son 7 günde kayda değer",
         )
-        if source == "news" and len(snippet) < 160 and \
-                any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
-            # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
-            entry_q = s.get("entry_quality", "") if sig == "AL" else ""
-            sl_val  = s.get("sl_level") or 0
-            tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
+        # "Kayda değer gelişme yok" yanıtı ya da _skip_prefixes tüm satırları sildiyse
+        # → algoritmik yedek. D-39 (kanon §2.2): giriş bölgesi / SL / Hedef dili yok,
+        # tek betimleyici satır trend dönüş seviyesi (Supertrend).
+        if (source == "news" and len(snippet) < 160 and
+                any(pat in snippet.lower() for pat in _EMPTY_PATTERNS)) or not snippet.strip():
+            sl_val  = s.get("sl_level")
             snippet = (
-                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
-                f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {tr_price_filter(sl_val)}₺"
-                f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
-            )
-            source = "algorithmic"
-
-        # Guard: _skip_prefixes tüm satırları silmişse (ör. "kayda değer" yanıtı) → algoritmik fallback
-        if not snippet.strip():
-            # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
-            entry_q = s.get("entry_quality", "") if sig == "AL" else ""
-            sl_val  = s.get("sl_level") or 0
-            tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
-            snippet = (
-                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
-                f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {tr_price_filter(sl_val)}₺"
-                f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
+                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif."
+                f"{' Trend dönüş seviyesi (Supertrend): ' + tr_price_filter(sl_val) + ' ₺.' if sl_val else ''}"
             )
             source = "algorithmic"
 
