@@ -51,12 +51,7 @@ GET_BY_ID = re.compile(r"getElementById\(\s*['\"]([A-Za-z0-9_-]+)['\"]\s*\)")
 # eklenen her bileseni yakalar. Satir numarasi ASLA anahtar olamaz (K-BF).
 # Her muafiyet kosumda BASILIR; tetiklenmeyeni BAYAT sayilir ve kapi kirilir.
 EXEMPT_REASON = {
-    ('templates/hisse.html', 'entryAnalysisGrid'):
-        'Giris analizinin KENDI cocuklari. Placeholder dallari grid`i eziyor; '
-        'basari dali `_pristineEntryGridHtml`den geri yukluyor (~2437). BEKLE`de '
-        'geri yukleme HIC olmaz ama bu dort id`yi dolduran kod da ayni erken '
-        'return`un arkasinda kaldigi icin gorunur bir kayip yok -- SINYALDEN '
-        'BAGIMSIZ bir bilesen bu kaba KONULAMAZ (K-BT`nin ta kendisi).',
+    # C-20 (25.09): #entryAnalysisGrid (Trend Durumu) kalkti -> muafiyeti de.
     ('templates/index.html', 'heroSubForm'):
         'Abonelik formu: kap YALNIZCA basari dalinda "tesekkurler" mesajiyla '
         'degistirilir, o noktada input/kvkk/msg bir daha okunmaz. Hata dallari '
@@ -66,9 +61,6 @@ EXEMPT_REASON = {
     ('templates/hisse.html', 'hisseSubCta'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
 }
 EXEMPT = set([
-    ('templates/hisse.html', 'entryAnalysisGrid', 'eqBadge'),
-    ('templates/hisse.html', 'entryAnalysisGrid', 'eqNote'),
-    ('templates/hisse.html', 'entryAnalysisGrid', 'rrLevels'),
     ('templates/hisse.html', 'hisseSubCta', 'hisseSubEmail'),
     ('templates/hisse.html', 'hisseSubCta', 'hisseSubKvkk'),
     ('templates/index.html', 'heroSubForm', 'heroSubEmail'),

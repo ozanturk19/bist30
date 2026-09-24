@@ -94,14 +94,14 @@
 </script>
 {% endif %}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- C-01 (23.09): eski 4 gstatic preload (URL'leri Google CSS'iyle eşleşmiyordu, kullanılmıyordu) silindi; font yalnız aşağıdaki Google Fonts CSS'inden gelir. -->
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<!-- C-01 (23.09): eski 4 gstatic preload (URL'leri Google CSS'iyle eşleşmiyordu, kullanılmıyordu) silindi; font yalnız aşağıdaki Google Fonts CSS'inden gelir. C-20 (25.09): Bricolage Grotesque yalnız fiyat ve "3 Soruda" başlığında (index.html ile aynı tarif). -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=e15855fb">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=58cd8a88">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -121,60 +121,6 @@
 </div>
 
 {% include '_header.html' %}
-
-
-<!-- Hisse Kimlik Çubuğu -->
-<div class="hisse-id-bar">
-  <h1 class="hib-ticker">{{ ticker }}</h1>
-  <span class="hib-name" title="{{ name }}">{{ name }}</span>
-  <div class="header-price-group">
-    <span class="header-price" id="hpPrice">{{ ssr_signal.price|tr_price if ssr_signal and ssr_signal.price is not none else '—' }}</span>
-    <span class="header-chg neu" id="hpChg">—</span>
-    <span class="signal-badge signal-BEKLE" id="hpSignal">⋯</span>
-    {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><span aria-hidden="true">⚠</span> Anomal</span>{% endif %}
-  </div>
-  {% if sector %}
-  <span class="hib-sector">{{ sector }}</span>
-  {# K-DM: "Diğer" gercek bir sektor DEGIL -- app.py (CPO-1464 #3) o ticker'lar
-     icin _sector_pool'u BOSALTIYOR. related_stocks bu bosalmayi dalliyordu
-     ({% if related_stocks %}), hero'daki Karsilastir dugmesi DALLANMIYORDU:
-     compare_url akransiz kaliyor ("/karsilastir?tickers=BJKAS"), dugme
-     "Sektordeki diger hisselerle karsilastir" diye vaat ediyor ama sayfa
-     "en az 2 hisse" bos durumuna dusuyordu -- 11 hisse (ADEL AGROT BJKAS
-     DURDO FENER FMIZP FORMT GSRAY IEYHO KARTN MARTI). Vaat artik akranin
-     VARLIGINA bagli; dugme kalir (tek ticker input'a on-dolduruluyor,
-     kullanici ikinciyi kendisi secer) ama sektor iddiasi etmez. #}
-  {% set _has_peers = ',' in compare_url %}
-  <a href="{{ compare_url }}" class="hib-compare" data-tip="{% if _has_peers %}Sektördeki diğer hisselerle karşılaştır{% else %}Başka bir hisseyle karşılaştır{% endif %}" aria-label="{% if _has_peers %}Karşılaştır: {{ sector }} sektöründeki benzer hisselerle{% else %}Karşılaştır: {{ ticker }} ile başka bir hisseyi yan yana koy{% endif %}">
-    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-    Karşılaştır
-  </a>
-  {% endif %}
-  <span class="hib-action-bar">
-    <button class="hib-action-btn" id="hibStarBtn" type="button" onclick="togglePortfolio()" data-tip="Portföye ekle / çıkar" aria-label="Portföye ekle" aria-pressed="false">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
-      <span class="hib-action-lbl">Portföye ekle</span>
-    </button>
-    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" data-tip="Sinyal değişiminde bildirim al" aria-label="Bildirim al" aria-pressed="false">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
-      <span class="hib-action-lbl">Bildirim al</span>
-    </button>
-    <button class="hib-action-btn" type="button" aria-label="Paylaş"
-            onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';window.bpScrollIntoView(s,{block:'center'});}">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-      </svg>
-      <span class="hib-action-lbl">Paylaş</span>
-    </button>
-  </span>
-</div>
 
 <!-- Toast feedback -->
 <div class="hib-toast" id="hibToast" role="status" aria-live="polite"></div>
@@ -210,13 +156,99 @@
   {%- endif %}
 
 
+  {#- C-20 (25.09): Ozet hero v2 -- C-M1 v2 taslagina sadik (O16a=B notlari): kimlik, fiyat
+      (Bricolage 64/40px) ve altinda "<gun> kapanisi"; baslikta teknik durum hapi YOK; fiyatin
+      altinda 4 temel gosterge (Ozet'e ozel, /fundamentals ile dolar); eylemler; sagda (mobilde
+      altta) 260px alan grafigi. Kimlik + fiyat + eylemler her sekmede ortak (#hpPrice tek fiyat). -#}
+  {%- set _px = ssr_signal.price if ssr_signal else none -%}
+  {%- set _ch = ssr_signal.change_pct if ssr_signal else none -%}
+  {#- Kapanis gunu. D-18b closes_30 gelince onun son tarihi; yoksa last_fresh_ts (TR, UTC+3):
+      18:00 oncesi yenileme (sabah kontrolu) onceki is gununun kapanisidir, hafta sonu Cuma'ya duser.
+      Resmi tatil sonrasi sabah yenilemesi bir gun sapabilir -> DEV1 onkosulu: SSR asof_label. -#}
+  {%- set _asof_d = none -%}{%- set _asof_m = none -%}
+  {%- if closes_30 is defined and closes_30 -%}
+    {%- set _cp = (closes_30[-1][0] ~ '').split('-') -%}
+    {%- set _asof_d = _cp[2]|int -%}{%- set _asof_m = _cp[1]|int -%}
+  {%- elif ssr_signal and ssr_signal.last_fresh_ts -%}
+    {%- set _tl = (ssr_signal.last_fresh_ts|int) + 10800 -%}
+    {%- set _z0 = _tl // 86400 -%}
+    {%- set _bk = 1 if ((_tl % 86400) // 3600) < 18 else 0 -%}
+    {%- set _wd = (_z0 - _bk + 3) % 7 -%}
+    {%- set _bk = _bk + (1 if _wd == 5 else (2 if _wd == 6 else 0)) -%}
+    {%- set _z = _z0 - _bk + 719468 -%}
+    {%- set _doe = _z - (_z // 146097) * 146097 -%}
+    {%- set _yoe = (_doe - _doe // 1460 + _doe // 36524 - _doe // 146096) // 365 -%}
+    {%- set _doy = _doe - (365 * _yoe + _yoe // 4 - _yoe // 100) -%}
+    {%- set _mp = (5 * _doy + 2) // 153 -%}
+    {%- set _asof_d = _doy - (153 * _mp + 2) // 5 + 1 -%}
+    {%- set _asof_m = _mp + 3 if _mp < 10 else _mp - 9 -%}
+  {%- endif -%}
+  {%- set _AYLAR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
+  {%- set _has_peers = ',' in (compare_url or '') %}
+  <section class="hx-top" aria-label="{{ ticker }} fiyat özeti">
+    <div class="hx-head">
+      <div class="hx-id">
+        <h1 class="hx-tk">{{ ticker }}</h1>
+        <span class="hx-nm" title="{{ name }}">{{ name }}</span>
+        {% if sector %}<span class="hx-chip">{{ sector }}</span>{% endif %}
+        {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><span aria-hidden="true">⚠</span> Anomal</span>{% endif %}
+      </div>
+      <div class="hx-price da-display" id="hpPrice">{{ _px|tr_price if _px is not none else '—' }}<small>₺</small></div>
+      <div class="hx-chg">
+        <span id="hpChg" class="hx-pct {{ bpf.dir_class(_ch, 2, 'up,down,neu') }}">{{ bpf.pct_text(_ch, 2) }}</span>
+        {%- if _asof_d %} <span class="hx-dt">{{ _asof_d }} {{ _AYLAR[_asof_m - 1] }} kapanışı</span>{% endif %}
+      </div>
+      <dl class="hx-facts" id="hxFacts" data-tab-content="ozet" aria-label="Temel göstergeler">
+        <div><dt>Piyasa değeri</dt><dd id="hxfMcap">—</dd></div>
+        <div><dt>Özsermaye kârlılığı</dt><dd id="hxfRoe">—</dd></div>
+        <div><dt>Net kâr marjı</dt><dd id="hxfMargin">—</dd></div>
+        <div><dt>Temettü (son 12 ay)</dt><dd id="hxfDiv">—</dd></div>
+      </dl>
+      <div class="hx-acts">
+        <button class="hib-action-btn hx-act hx-act--pri" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" data-tip="Durum değişince e-postayla haber al" aria-label="Takip et" aria-pressed="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="hib-action-lbl">Takip et</span>
+        </button>
+        <button class="hib-action-btn hx-act" type="button" aria-label="Paylaş"
+                onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';window.bpScrollIntoView(s,{block:'center'});}">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>
+          <span class="hib-action-lbl">Paylaş</span>
+        </button>
+        {% if sector %}
+        <a href="{{ compare_url }}" class="hib-action-btn hx-act" data-tip="{% if _has_peers %}Sektördeki diğer hisselerle karşılaştır{% else %}Başka bir hisseyle karşılaştır{% endif %}" aria-label="{% if _has_peers %}Karşılaştır: {{ sector }} sektöründeki benzer hisselerle{% else %}Karşılaştır: {{ ticker }} ile başka bir hisseyi yan yana koy{% endif %}">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v18M16 3v18M3 8h5M16 16h5"/></svg>
+          <span class="hib-action-lbl">Karşılaştır</span>
+        </a>
+        {% endif %}
+        <button class="hib-action-btn hx-act hx-act--ico" id="hibStarBtn" type="button" onclick="togglePortfolio()" data-tip="Portföye ekle / çıkar" aria-label="Portföye ekle" aria-pressed="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="hib-action-lbl">Portföye ekle</span>
+        </button>
+      </div>
+    </div>
+    {#- C-20: 260px alan grafigi (1A/3A/1Y = son 30/90/365 takvim gunu). Nötr periwinkle cizgi +
+        gradyan; baslangic kesikli cizgisi; son nokta = baslik fiyati (#hpPrice). Ilk cizim D-18b
+        closes_30 varsa fetch beklemeden (asagidaki JSON), yoksa Ozet'in /chart verisinden. -#}
+    <div class="hx-chart" id="hxChart" data-tab-content="ozet">
+      <div class="hx-chart-top">
+        <span class="hx-chart-pc" id="hxChartPc"></span>
+        <span class="hx-chips" role="group" aria-label="Grafik dönemi">
+          <button type="button" data-days="30" aria-pressed="true">1A</button><button type="button" data-days="90" aria-pressed="false">3A</button><button type="button" data-days="365" aria-pressed="false">1Y</button>
+        </span>
+      </div>
+      <div class="hx-chart-cv" id="hxChartCv" role="img" aria-label="{{ ticker }} kapanış grafiği"><div class="da-skel hx-chart-sk"></div></div>
+      <div class="hx-chart-tip" id="hxChartTip" hidden></div>
+      {% if closes_30 is defined and closes_30 %}<script type="application/json" id="hxCloses30">{{ closes_30|tojson }}</script>{% endif %}
+    </div>
+  </section>
+
   {#- C-19 (25.09): 4 sekme -- Ozet · Grafik · Temel · Haberler. AI sekmesi kalkti
       (icerigi Ozet'te "Ne anlama geliyor? · Kural tabanli" karti). ARIA tabs deseni:
       role=tablist/tab, aria-selected + dolasan tabindex; ok tuslari/Home/End odagi
       tasir, Enter/Bosluk etkinlestirir (elle etkinlestirme: sekme acilisi fetch
       baslatir). Gorunurluk tek kanondan: applyTab + data-tab-content (K-CP). -#}
   <div class="da-tabs" role="tablist" aria-label="{{ ticker }} sekmeleri">
-    <button type="button" class="da-tab" role="tab" id="tab-ozet" data-segment="ozet" aria-selected="true" aria-controls="panel-ozet" tabindex="0">Özet</button>
+    <button type="button" class="da-tab" role="tab" id="tab-ozet" data-segment="ozet" aria-selected="true" aria-controls="panel-ozet hxChart" tabindex="0">Özet</button>
     <button type="button" class="da-tab" role="tab" id="tab-grafik" data-segment="grafik" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</button>
     <button type="button" class="da-tab" role="tab" id="tab-temel" data-segment="temel" aria-selected="false" aria-controls="panel-temel" tabindex="-1">Temel</button>
     <button type="button" class="da-tab" role="tab" id="tab-haberler" data-segment="haberler" aria-selected="false" aria-controls="panel-haberler" tabindex="-1">Haberler</button>
@@ -238,338 +270,6 @@
       el.scrollIntoView(Object.assign({}, opts, {behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'}));
     };
   </script>
-  {# SPEC-017 v2 — Sinyal Hero Card (28 May 2026 gece) #}
-  {% if ssr_signal %}
-  
-  {%- set _sig = ssr_signal.signal -%}
-  {# CPO-535 #36 / SPEC-018 W2: signal_strength (compose_score) tek kaynak — tier_score emekli #}
-  {%- set _score = ssr_signal.signal_strength | default(0) -%}
-  {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Trend Bozuldu" (K3) #}
-  {#- K-BY (22.09): BU BLOK DOKUZ HAM HEX YAZIYORDU ve dokuzunun HICBIRI
-      tokens.css'te YOKTU (#16a34a/#15803d/#22c55e/#86efac/#4ade80 ve
-      #dc2626/#991b1b/#ef4444/#fca5a5 -- yabanci bir paletin yesil/kirmizi
-      merdiveni). Canli olcum: 217 hissenin 79'u hero'sunu bu renklerle
-      basiyordu; ayni sayfadaki her diger AL/SAT yuzeyi --bp-al (#00e290) /
-      --bp-sat (#f85149) kullanirken.
-      NEDEN KAPILARDAN GECTI: renk burada `style=` icinde DEGIL, once bir
-      Jinja {% set %} degiskenine yaziliyor, sonra asagida
-      `style="--hero-accent:{{ _hc }}"` ile enterpole ediliyor. Kapi 42
-      (inline-style-hex-check) satir-ici `style=` metnine bakar, orada hex
-      GORMEZ. K-BW ayni kartin ROZETINI (#ff7875, satir ~139) duzeltmisti;
-      iki satir yukaridaki bu degisken AYNI turda hayatta kaldi -- cunku
-      kapi hatanin kendisini degil, hatanin O ANKI YAZIMINI ariyordu.
-      IKINCI KANON: renk yon DEGIL yon x GUC kodluyordu; ayni "SAT" uc ayri
-      kirmiziya boyaniyor, oysa rozet metni her ucunde de ayni. Gucun kendi
-      gostergesi zaten var (.bp-hero-power-bar dolgusu + sayisal etiket).
-      K-BO/K-BP kanonu: YON TEK RENKTIR. Renk yone, guc bara birakildi. -#}
-  {%- if _sig == 'AL' -%}
-    {% set _hc='var(--bp-al)' %}{% set _hc2='rgba(var(--bp-al-rgb), 0.45)' %}
-    {% set _lbl='GÜÇLÜ TREND' %}{% set _icon='▲' %}
-  {%- elif _sig == 'SAT' -%}
-    {% set _hc='var(--bp-sat)' %}{% set _hc2='rgba(var(--bp-sat-rgb), 0.45)' %}
-    {% set _lbl='TREND BOZULDU' %}{% set _icon='▼' %}
-  {%- else -%}
-    {% set _hc='var(--bp-text3)' %}{% set _hc2='var(--bp-bkl)' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
-  {%- endif -%}
-  {# bughunt-13.09 (Ozan, ikinci kez: "yine teknik analiz güçlü trend önde
-     duruyor, bu tasarım değişecek mi?"): _bpc/_bps artık hero'nun EN ÜSTÜNDE,
-     tek bir yerde hesaplanıyor — hem büyük ring hem (varsa) fallback teaser
-     bunu kullanıyor, iki kez hesaplama yok. #}
-  {%- if hs_available and hs.borsapusula_skoru is not none -%}
-    {%- set _bps = hs.borsapusula_skoru -%}
-    {%- if _bps >= 70 %}{% set _bpc = 'var(--bp-al)' %}
-    {%- elif _bps >= 50 %}{% set _bpc = 'var(--bp-volume)' %}
-    {%- else %}{% set _bpc = 'var(--bp-sat)' %}{% endif -%}
-  {%- endif -%}
-  {# 18.09 Ozan (üçüncü kez, bkz. bughunt-13.09 yorumu üstte): "teknik analiz/
-     büyük hero kartı her sekmede önde duruyor, her sekmenin kendi bütünlüğü
-     olmalı, çok scroll gerekmeden bilgiye ulaşılmalı" — bu büyük kart (rozet+
-     gauge+Son 30 Gün sparkline) artık SADECE Özet sekmesinde gösteriliyor.
-     Kompakt bağlam (fiyat/sinyal/ticker) header'daki hpPrice/hpChg/hpSignal
-     ile (bu bloğun DIŞINDA, satır ~222) zaten her sekmede görünür kalıyor. #}
-  <!-- K-BF (21.09): hero kart Ozet sekmesiyle birlikte gizlenip gosterilir ama
-       `panel-ozet` sarmalayicisinin DISINDA (sekme seridinin hemen altinda)
-       duruyor; bu yuzden tab-ozet`in aria-controls`unda YOKTU. Sayfanin kendi
-       kanonu (tab-haberler -> iki tabpanel token listesi) burada da uygulandi. -->
-  <div id="heroPanel" class="bp-hero-card da-hero-card" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
-    <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
-      <circle cx="60" cy="40" r="1.6" fill="{{ _hc }}" opacity=".55"/>
-      <circle cx="340" cy="60" r="1.6" fill="{{ _hc }}" opacity=".4"/>
-      <circle cx="300" cy="210" r="1.6" fill="{{ _hc }}" opacity=".5"/>
-      <circle cx="40" cy="200" r="1.6" fill="{{ _hc }}" opacity=".35"/>
-      <line x1="60" y1="40" x2="300" y2="210" stroke="{{ _hc }}" stroke-width=".5" opacity=".12"/>
-      <line x1="340" y1="60" x2="40" y2="200" stroke="{{ _hc }}" stroke-width=".5" opacity=".1"/>
-    </svg>
-    <div class="da-hero-grid">
-      <div class="da-hero-left">
-        <div class="bp-hero-header">
-          <div class="bp-hero-badge">
-            <span class="bp-hero-icon">{{ _icon }}</span>
-            <span>{{ _lbl }}</span>
-          </div>
-          {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
-             sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date).
-             CPO-1595: nötr, tam cümle — kalite/yargı çağrışımı yok.
-             C-62 QA: göreli yaş değil takvim tarihi ("14 Temmuz'da oluştu"). #}
-          <span class="bp-hero-meta">{{ bpf.signal_date_phrase(ssr_signal.signal_date) }}</span>
-        </div>
-        {# bughunt-13.09 (Ozan, 2. kez: "yine teknik analiz güçlü trend önde
-           duruyor, tasarım değişecek mi?"): BorsaPusula Skoru artık hero'nun
-           TEK büyük/dominant görseli (sağdaki ring) — Skor Analizi bölümündeki
-           260px hero-gauge/172px teknik-gauge oranıyla AYNI hiyerarşi burada
-           da kuruldu. Teknik Güç Skoru ayrı bir bar olarak İKİNCİL kaldı,
-           sadece aktif sinyalde (giriş/stop'a doğrudan bağlı olduğu için hâlâ
-           faydalı) — artık kendi büyük ring'i yok, ring BorsaPusula'ya ait. #}
-        {% if _sig in ('AL', 'SAT') %}
-        <div class="bp-hero-power-wrap">
-          <div class="bp-hero-power-label">
-            <span>Teknik Güç Skoru</span>
-            <strong>{{ _score|int }}/100</strong>
-          </div>
-          <div class="bp-hero-power-bar">
-            <div class="bp-hero-power-fill" style="width:{{ _score|int }}%"></div>
-          </div>
-        </div>
-        {% endif %}
-        {# K-BQ (21.09): SAT dalı kaldırıldı — /metodoloji "Trend Bozuldu sinyalinde
-           somut giriş/hedef/stop seviyeleri gösterilmez" diye YAZILI vaat ediyor ve bu
-           sayfanın kendi R/R kutusu (satır ~2432) aynı cümleyi kuruyordu; hero ise
-           72/72 SAT hissesinde "Stop: X ₺" basıyordu. Canlı: SAT'ta sl_level HER ZAMAN
-           fiyatın üstünde (72/72) — long-only üründe bu sayı stop değildir. #}
-        {# C-52 (24.09, kanon §2.2): Hedef/Stop/Giriş satırı kalktı — tek betimleyici satır. #}
-        {% if _sig == 'AL' and ssr_signal.sl_level %}
-        <div class="bp-hero-levels">
-          <span><strong>Trend dönüş seviyesi (Supertrend):</strong>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% set _stdist = '%.1f'|format(((ssr_signal.price - ssr_signal.sl_level)|abs) / ssr_signal.price * 100)|replace('.', ',') %} · fiyatın %{{ _stdist }} {{ 'altında' if ssr_signal.sl_level < ssr_signal.price else 'üstünde' }}{% endif %}</span>
-        </div>
-        {% endif %}
-      </div>
-      {% if hs_available and hs.borsapusula_skoru is not none %}
-      <div class="da-hero-ring-wrap">
-        <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="BorsaPusula Skoru {{ _bps }} / 100">
-          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
-          <circle cx="80" cy="80" r="68" fill="none" stroke="{{ _bpc }}" stroke-width="10"
-                  stroke-linecap="round" stroke-dasharray="427.3"
-                  stroke-dashoffset="{{ ((427.3 * (100 - _bps)) / 100)|round(2) }}"
-                  transform="rotate(-90 80 80)"/>
-        </svg>
-        <div class="da-hero-ring-center">
-          <span class="da-hero-ring-num">{{ _bps }}</span>
-          <span class="da-hero-ring-lbl">/ 100</span>
-        </div>
-        <div class="da-hero-ring-caption">BorsaPusula Skoru</div>
-      </div>
-      {% elif _sig in ('AL', 'SAT') %}
-      {# Temel veri henüz hazır değilse (hs_available=false) eski davranış
-         korunuyor — büyük ring boş kalmasın diye Teknik geçici olarak
-         gösteriliyor, ama bu artık İSTİSNA, kural değil. #}
-      <div class="da-hero-ring-wrap">
-        <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="Teknik Güç Skoru {{ _score|int }} / 100">
-          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
-          <circle cx="80" cy="80" r="68" fill="none" stroke="{{ _hc }}" stroke-width="10"
-                  stroke-linecap="round" stroke-dasharray="427.3"
-                  stroke-dashoffset="{{ ((427.3 * (100 - _score|int)) / 100)|round(2) }}"
-                  transform="rotate(-90 80 80)"/>
-        </svg>
-        <div class="da-hero-ring-center">
-          <span class="da-hero-ring-num">{{ _score|int }}</span>
-          <span class="da-hero-ring-lbl">/ 100</span>
-        </div>
-        <div class="da-hero-ring-caption">Teknik Güç Skoru</div>
-      </div>
-      <div class="da-hero-fundamental-teaser">BorsaPusula Skoru: veri bekleniyor</div>
-      {% else %}
-      <div class="da-hero-fundamental-teaser">BorsaPusula Skoru: veri bekleniyor</div>
-      {% endif %}
-    </div>
-    {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
-    <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
-      <div class="bp-spark-label">
-        {#- K-BW olcum notu: once "Son 30 islem gunu" yazilmisti. @320px CANLI
-            olculdu: 16.391,39 ₺'lik fiyatla (evrendeki en yuksek) etiket IKI
-            SATIRA sariyordu (satir 15px -> 30px); eski kisa etiket sarmiyordu.
-            "seans" sitenin ZATEN kullandigi kelime (_stale_banner, /gundem,
-            _footer) ve ayni olcumde eski etiketle BIREBIR ayni yukseklik. -#}
-        {#- K-CB (22.09): "30" SABITTI; veri `ohlc.slice(-30)` yani 30'dan AZ da
-            olabilir (kisa gecmisli hisse). Ayni sayfadaki buyuk grafik etiketi
-            bar sayisindan DINAMIK turetiliyordu — sayfa kendi icinde iki
-            kanondu. Sayi artik cizilen nokta sayisindan geliyor. -#}
-        <span id="bpSparkWin"></span>
-        <span id="bpSparkVal" class="bp-spark-val">—</span>
-      </div>
-      {#- Pencere iddiasi SSR'da BOS birakilir (#chartPeriod ile ayni gerekce):
-          sayi cizilen veriden gelir, yanlis bir "30" hicbir an ekranda /
-          erisilebilirlik agacinda durmaz. -#}
-      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Kapanış fiyatı grafiği"></canvas>
-    </div>
-    {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
-  </div>
-
-  <script>
-  (function(){
-    window.bpDrawSparkline = function(ohlc, accent) {
-      var wrap = document.getElementById('bpSparkWrap');
-      var cv   = document.getElementById('bpSpark');
-      var val  = document.getElementById('bpSparkVal');
-      if (!cv || !ohlc || !ohlc.length) return;
-      var data = ohlc.slice(-30).map(function(b){
-        return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
-      }).filter(function(x){ return isFinite(x.c) && x.c > 0; });
-      if (data.length < 2) return;
-      /* K-CB: pencere beyani cizilen veriden turer (yukaridaki nota bak). */
-      var winTxt = 'Son ' + data.length + ' seans';
-      var winEl = document.getElementById('bpSparkWin');
-      if (winEl) winEl.textContent = winTxt;
-      cv.setAttribute('aria-label', winTxt + ' kapanış fiyatı grafiği');
-      cv._bpSparkLastOhlc = ohlc;
-      cv._bpSparkLastAccent = accent;
-      wrap.style.display = 'block';
-      var dpr = window.devicePixelRatio || 1;
-      var W = cv.clientWidth || wrap.clientWidth || 280;
-      var H = 52;
-      cv.width = W * dpr; cv.height = H * dpr;
-      var ctx = cv.getContext('2d');
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      var first = data[0].c, last = data[data.length-1].c;
-      /* K-BW (22.09): burada IKI hata birlikteydi.
-         1) `last >= first` -- degisim SIFIRSA cizgi YESIL oluyordu (K-BP'nin
-            tam olarak yasakladigi sey). K-BP kapisi bunu goremedi: kapi
-            `x >= 0` yazimini arar, buradaki karsilastirma `a >= b`.
-            AYNI HATANIN IKINCI YAZIMI.
-         2) Renk ham hex'ti; `#ff7875` tokens.css'te HIC YOK (--bp-sat
-            #f85149). Ayni 52px'lik pencerede cizgi bir kirmizi, hemen
-            ustundeki yuzde metni (K-BP'de token'a gecmisti) BASKA bir
-            kirmizi idi.
-         Yon artik METNIN yuvarlamasiyla ayni kanondan (bpDir, 1 ondalik)
-         geliyor -- ekranda "0,0%" yazan hisse cizgide de notr. */
-      var _sparkPct = (first ? (last - first) / first * 100 : null);
-      var _sparkDir = (typeof bpDir === 'function') ? bpDir(_sparkPct, 1)
-                    : (last > first ? 1 : (last < first ? -1 : 0));
-      var _tok = (window.BPChart && BPChart.tok)
-                ? BPChart.tok
-                : function(v, fb){
-                    try {
-                      var r = getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-                      return r || fb;
-                    } catch (e) { return fb; }
-                  };
-      var color = accent || (_sparkDir === 1 ? _tok('--bp-al', '#00e290')
-                          : (_sparkDir === -1 ? _tok('--bp-sat', '#f85149')
-                                              : _tok('--bp-text2', '#c7c5cd')));
-      var min = Infinity, max = -Infinity;
-      data.forEach(function(x){ if(x.c<min)min=x.c; if(x.c>max)max=x.c; });
-      var pad = 4, range = (max - min) || 1;
-      var xs = data.map(function(_,i){ return pad + (W - 2*pad) * i / (data.length-1); });
-      var ys = data.map(function(x){ return pad + (H - 2*pad) * (1 - (x.c - min)/range); });
-      function paint(hi){
-        ctx.clearRect(0,0,W,H);
-        // area fill
-        var grad = ctx.createLinearGradient(0,0,0,H);
-        grad.addColorStop(0, color + '55');
-        grad.addColorStop(1, color + '00');
-        ctx.beginPath(); ctx.moveTo(xs[0], H-pad);
-        for (var i=0;i<xs.length;i++) ctx.lineTo(xs[i], ys[i]);
-        ctx.lineTo(xs[xs.length-1], H-pad); ctx.closePath();
-        ctx.fillStyle = grad; ctx.fill();
-        // line
-        ctx.beginPath();
-        ctx.moveTo(xs[0], ys[0]);
-        for (var j=1;j<xs.length;j++) ctx.lineTo(xs[j], ys[j]);
-        ctx.lineWidth = 1.6; ctx.strokeStyle = color; ctx.stroke();
-        // start + end dots
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(xs[xs.length-1], ys[ys.length-1], 2.6, 0, Math.PI*2); ctx.fill();
-        // crosshair
-        if (hi != null) {
-          var idx = Math.max(0, Math.min(data.length-1, hi));
-          /* K-BY: ayni renk (--bp-text) burada IKI ayri notasyonla ELLE
-             yazilmisti -- `rgba(229,225,228,…)` ve `#e5e1e4`. Ikisi de token
-             okumuyordu; dosyanin kendi kalibi (_tok, satir ~430) kullanildi. */
-          ctx.strokeStyle = 'rgba(' + _tok('--bp-text-rgb', '229, 225, 228') + ', 0.35)';
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(xs[idx], pad); ctx.lineTo(xs[idx], H-pad); ctx.stroke();
-          ctx.fillStyle = _tok('--bp-text', '#e5e1e4');
-          ctx.beginPath(); ctx.arc(xs[idx], ys[idx], 3.2, 0, Math.PI*2); ctx.fill();
-          var v = data[idx].c.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2});
-          val.textContent = v + ' ₺';
-        } else {
-          var pct = ((last-first)/first*100);
-          /* K-BP: isaret+renk tek kanon (bp-format.js). Eskiden `pct >= 0`
-             0,0%'i "+" ile yaziyor, renk de ham hex'ti (#ff7875 tokens.css'te
-             YOK — --bp-sat #f85149). */
-          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + bpFormatPct(pct, 1) + ')';
-          val.style.color = bpDirColor(pct, 1);
-        }
-      }
-      paint(null);
-      var pressing = false, pressTimer = null;
-      function xToIdx(clientX){
-        var rect = cv.getBoundingClientRect();
-        var rel = (clientX - rect.left) / rect.width * W;
-        var nearest = 0, best = Infinity;
-        for (var i=0;i<xs.length;i++){
-          var dx = Math.abs(xs[i] - rel);
-          if (dx < best) { best = dx; nearest = i; }
-        }
-        return nearest;
-      }
-      if (!cv._bpSparkBound) {
-        cv.addEventListener('pointerdown', function(ev){
-          clearTimeout(pressTimer);
-          pressTimer = setTimeout(function(){
-            pressing = true;
-            paint(xToIdx(ev.clientX));
-          }, 220);
-        });
-        cv.addEventListener('pointermove', function(ev){
-          if (pressing) paint(xToIdx(ev.clientX));
-        });
-        function release(){
-          clearTimeout(pressTimer); pressTimer = null;
-          if (pressing) { pressing = false; paint(null); }
-        }
-        cv.addEventListener('pointerup', release);
-        cv.addEventListener('pointercancel', release);
-        cv.addEventListener('pointerleave', release);
-        cv._bpSparkBound = true;
-      }
-    };
-    // Auto-hook into buildChart: wrap when defined
-    function tryHook(){
-      if (typeof buildChart === 'function' && !buildChart.__bpHooked) {
-        var orig = buildChart;
-        window.buildChart = function(d){
-          var r = orig(d);
-          try { if (d && d.ohlc) window.bpDrawSparkline(d.ohlc); } catch(e){ console.warn('spark', e); }
-          return r;
-        };
-        window.buildChart.__bpHooked = true;
-      } else if (typeof buildChart !== 'function') {
-        setTimeout(tryHook, 200);
-      }
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', tryHook);
-    } else {
-      tryHook();
-    }
-
-    var _sparkResizeTimer = null;
-    function _bpSparkRedraw(){
-      var cv2 = document.getElementById('bpSpark');
-      if (!cv2 || !cv2._bpSparkLastOhlc) return;
-      window.bpDrawSparkline(cv2._bpSparkLastOhlc, cv2._bpSparkLastAccent);
-    }
-    window.addEventListener('resize', function(){
-      clearTimeout(_sparkResizeTimer);
-      _sparkResizeTimer = setTimeout(_bpSparkRedraw, 150);
-    });
-    window.addEventListener('orientationchange', function(){
-      clearTimeout(_sparkResizeTimer);
-      _sparkResizeTimer = setTimeout(_bpSparkRedraw, 150);
-    });
-  })();
-  </script>
-  {% endif %}
 
   <button class="bp-fab-up" id="bpFabUp" aria-label="Üste çık" type="button">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"/></svg>
@@ -630,105 +330,110 @@
    panelin HEPSI zaten data-tab-content="ozet"; sarmalayici ayni degeri alinca
    ikinci bir gorunurluk kanonu dogmaz, yalniz mevcut kanon tam uygulanir. #}
 <div id="panel-ozet" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
-  <!-- SPEC-014 A1 — Sinyal Özeti (konsolide karar kutusu) -->
-  {% if signal_summary %}
-  <div id="signalSummarySection"
-       data-tab-content="ozet"
-       tabindex="-1"
-       class="da-panel da-summary-panel">
-    <div class="da-summary-head">
-      <div style="flex:1;min-width:0">
-        <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> 2 Saniyede Karar Yardımcısı</span>
-        <h2 class="da-summary-title"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
-      </div>
-      {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
-      {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
-      {% if ssr_signal and _ts > 0 %}
-      {# CPO-985/986 #8.1+#7 / SPEC-018 W2: tier etiketi kanonik `ssr_signal.tier` alanından (Güçlü Sinyal/Standart),
-         signal_strength'ten türetilir (AUDIT-004 tier_score emekli edildi, CPO-1004).
-         Halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ tier alanı — tek vocabulary. #}
-      {# CPO-1107 Faz 0 #1 — tier adı skor rozetinden kaldırıldı, SADECE paywall bağlamında
-         gösterilir. Halka rengi (_tc) skor bandını nötr biçimde korur, tier ismi metin olarak
-         artık render edilmiyor. CPO-DEV2-053/055: 3→2 katman, "Premium" adı kaldırıldı. #}
-      {%- set _tier = ssr_signal.tier -%}
-      {%- if   _tier == "guclu_sinyal" %}{% set _tc = "var(--bp-premium)" %}
-      {%- elif _tier == "standart"     %}{% set _tc = "var(--bp-brand)" %}
-      {%- else                         %}{% set _tc = "var(--bp-text3)" %}{% endif %}
-      <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
-           data-tip="Teknik Güç Skoru (0–100). ADX, hacim, teyit ve RSI bileşenlerine dayalı." tabindex="0">
-        <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Teknik Güç Skoru {{ _ts }} / 100">
-          <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bp-border)" stroke-width="6"/>
-          <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
-                  stroke-linecap="round" stroke-dasharray="175.93"
-                  stroke-dashoffset="{{ ((175.93 * (100 - _ts)) / 100)|round(2) }}"
-                  transform="rotate(-90 32 32)"/>
-          <text x="32" y="34" text-anchor="middle" dominant-baseline="middle"
-                fill="var(--bp-text)" style="font-weight:700;font-size:var(--bp-text-xl);font-family:inherit">{{ _ts }}</text>
-        </svg>
-        <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
-          {%- if ssr_signal.is_premium %}
-          <span style="font-size:var(--bp-text-2xs);color:var(--bp-volume);margin-top:3px;letter-spacing:.2px"><span aria-hidden="true">⭐</span> Hacim Onaylı</span>
-          {%- else %}
-          <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);margin-top:2px">Teknik Güç Skoru</span>
-          {%- endif %}
+  {#- C-20 (25.09): "3 Soruda {HISSE}" (O11b=A) -- eski "2 Saniyede Karar Yardimcisi / Sinyal
+      Ozeti" kutusunun yerine. C-M1 v2 + O16a=B notlari: tek halka (BP, "N / 100", bant kelimesi
+      yok; Yatay'da BP yalniz Temel'den -> "Kismi · yalniz Temel", D-21'e kadar); Q1 betimleyici
+      cevap (sirkete yargi yok, alan betimi); Q2 degerleme (/fundamentals, JS); Q3 durum + gun +
+      hukum cumlesi + 5 kosul (kanon §3, O23) + trend donus seviyesi. DI+/DI- sayilari SSR'da yok
+      (yalniz etiket metninde; K-BU) -> Ozet'in /chart ozetinden JS doldurur (DEV1: D-18b/D-07). -#}
+  {% if ssr_signal %}
+  {%- set _q = ssr_signal -%}
+  {%- set _qs = _q.signal -%}
+  {%- set _bp = hs.borsapusula_skoru if (hs_available and hs.borsapusula_skoru is not none) else none -%}
+  <section class="hx-q3" id="q3Card" aria-labelledby="q3Title">
+    <div class="hx-q3-h">
+      <h2 class="hx-q3-t" id="q3Title">3 Soruda {{ ticker }}</h2>
+      {% if _bp is not none %}
+      <div class="hx-bp">
+        <div class="hx-ring" role="img" aria-label="BorsaPusula Skoru {{ _bp }} / 100">
+          <svg viewBox="0 0 74 74" aria-hidden="true" focusable="false">
+            <circle class="hx-ring-bg" cx="37" cy="37" r="33.5"/>
+            <circle class="hx-ring-fg hx-ring-fg--bp" cx="37" cy="37" r="33.5" stroke-dasharray="{{ '%.1f'|format(210.49 * _bp / 100) }} 210.49" transform="rotate(-90 37 37)"/>
+          </svg>
+          <b class="da-display" aria-hidden="true">{{ _bp }}</b>
+        </div>
+        <div class="hx-bp-tx">
+          <div class="hx-bp-l">BorsaPusula Skoru</div>
+          <div class="hx-bp-v">{{ _bp }} / 100</div>
+          <div class="hx-bp-f">{% if hs.partial %}Kısmi · yalnız Temel{% else %}Finansallar %60 · Trend %40{% endif %}</div>
         </div>
       </div>
       {% endif %}
     </div>
-
-    <!-- Katman A — tek cümle -->
-    <p style="font-size:var(--bp-text-15);line-height:1.65;color:var(--bp-text);margin:0 0 14px;font-weight:500">
-      {{ signal_summary.verdict }}
-    </p>
-
-    <!-- Katman B — 3 madde -->
-    <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:8px">
-      {% for p in signal_summary.points %}
-      <li data-tip="{{ p.tip }}" tabindex="0"
-          style="display:flex;align-items:flex-start;gap:8px;font-size:var(--bp-text-base);line-height:1.55;color:var(--bp-text2);cursor:help">
-        <span style="color:{% if signal_summary.signal == 'AL' %}var(--bp-al){% elif signal_summary.signal == 'SAT' %}var(--bp-sat){% else %}var(--bp-bkl){% endif %};flex-shrink:0;margin-top:1px">▸</span>
-        <span>{{ p.text }}</span>
-      </li>
-      {% endfor %}
-    </ul>
-
-    <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
-    {# 21.09 (K-W) TEK KAYNAK: bu dördüncü akordeon şablonun diğer üçü
-       `.bp-detail-toggle` kanoniğini kullanırken el yazımı inline stille
-       kalmıştı (21.09'da yalnız min-height'i yamanmıştı). Kart reçetesi
-       burada iç içe panel yapardı — bu yüzden kanoniğin satır-içi varyantı
-       (`--inline`, data-art.css §7) eklendi ve buraya uygulandı.
-       Dokunma hedefi min-height:24 varyantın içinde korunuyor. #}
-    <details class="bp-detail-toggle bp-detail-toggle--inline" id="signalSummaryDetails" style="margin-top:10px;padding-top:10px">
-      <summary class="bp-detail-toggle-summary"
-               data-tip="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
-        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-        <span class="bp-detail-toggle-label">Detaylı teknik göstergeler <span class="bp-detail-toggle-hint">— aç/kapat</span></span>
-      </summary>
-      <div class="bp-detail-toggle-body">
-        <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
-        <div class="commentary-section" id="commentarySection" style="display:none;margin-bottom:6px">
-          <h3 class="section-title" style="margin-bottom:6px;font-size:var(--bp-text-base)"><span aria-hidden="true">📊</span> Teknik Görünüm</h3>
-          <p class="commentary-text" id="commentaryText"></p>
-        </div>
-        <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
-          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — ADX">ADX<span class="sr-only"> (yeni sekmede açılır)</span></a>,
-          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" data-tip="Metodoloji — RSI">RSI<span class="sr-only"> (yeni sekmede açılır)</span></a>,
-          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" data-tip="Metodoloji — EMA">EMA<span class="sr-only"> (yeni sekmede açılır)</span></a>,
-          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±<span class="sr-only"> (yeni sekmede açılır)</span></a>,
-          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>)
-          algoritmik sinyalin temelidir.
-          Sinyal kartları ve trend durumu aşağıda detaylandırılmıştır.
-        </p>
+    <div class="hx-qs">
+      {#- Q1 -- Finansallari nasil? (kategori skorlari; >=70 guclu, <50 zayif: financial_health_score esikleri) -#}
+      <div class="hx-q">
+        <h3 class="hx-qq">Finansalları nasıl?</h3>
+        {% if hs_available and hs.categories %}
+        {%- set _N = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
+        {%- set _ord = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
+        {%- set _st = _ord|selectattr('1', 'ge', 70)|list -%}
+        {%- set _wk = _ord|selectattr('1', 'lt', 50)|list -%}
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>
+          {%- if _st and _wk %}{{ _N[_st[0][0]]|capitalize }} güçlü, {{ _N[_wk[-1][0]] }} zayıf
+          {%- elif _st|length >= 2 %}{{ _N[_st[0][0]]|capitalize }} ve {{ _N[_st[1][0]] }} güçlü
+          {%- elif _st %}{{ _N[_st[0][0]]|capitalize }} öne çıkıyor
+          {%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
+          {%- else %}Dengeli; belirgin zayıf alan yok{% endif %}</p>
+        {% if hs.temel_analiz_skoru is not none %}<p class="hx-ts">Temel skor <b>{{ hs.temel_analiz_skoru }} / 100</b></p>{% endif %}
+        {%- set _na = hs.categories_na if (hs.categories_na is defined and hs.categories_na) else [] %}
+        <ul class="hx-bars">
+          {%- for _k, _lb in [('karlilik', 'Kârlılık'), ('nakit_akisi', 'Nakit akışı'), ('kaldirac', 'Borç durumu'), ('degerleme_buyume', 'Değerleme ve büyüme')] %}
+          {%- if _k in hs.categories %}
+          <li><span>{{ _lb }}</span><svg class="hx-tr" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="hx-tr-bg" width="100" height="6" rx="3"/><rect class="hx-tr-fg" width="{{ '%.1f'|format(hs.categories[_k]) }}" height="6" rx="3"/></svg><b>{{ '%.0f'|format(hs.categories[_k]) }}</b></li>
+          {%- elif _k in _na %}
+          <li class="hx-na"><span>{{ _lb }}</span><span class="hx-tr-na">bu bilanço yapısında hesaplanmaz</span><b>—</b></li>
+          {%- endif %}
+          {%- endfor %}
+        </ul>
+        <p class="hx-qp">{% if 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
+        {% else %}
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Veri bekleniyor</p>
+        <p class="hx-qp">Bu hisse için son gün sonu turu temel skoru üretmedi.</p>
+        {% endif %}
       </div>
-    </details>
-  </div>
-  {% else %}
-  <!-- Teknik Yorum (signal_summary yoksa fallback) -->
-  <div class="commentary-section" id="commentarySectionFallback" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title" style="margin-bottom:8px"><span aria-hidden="true">📊</span> Teknik Görünüm</h2>
-    <p class="commentary-text" id="commentaryTextFallback"></p>
-  </div>
+      {#- Q2 -- Fiyati makul mu? /fundamentals (Ozet'te bir kez) ile dolar; F/K ve PD/DD sitenin
+          bugunku olcegiyle (Temel sekmesindeki Ucuz/Makul/Pahali etiketleriyle ayni esik: F/K 12/25,
+          PD/DD 1/3). Sektor ortancasi alani gelince (DEV1) C-M1 esigine (0,8 / 1,25) gecer. -#}
+      <div class="hx-q" id="q2">
+        <h3 class="hx-qq">Fiyatı makul mü?</h3>
+        <p class="hx-ans"><span class="hx-dot hx-dot--val" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">—</span></p>
+        <dl class="hx-kv" id="q2Kv"><div><dt>F/K ve PD/DD</dt><dd>Temel sekmesinde</dd></div></dl>
+        <p class="hx-an" id="q2An" hidden></p>
+        <p class="hx-qp" id="q2Note" hidden></p>
+      </div>
+      {#- Q3 -- Trend destekliyor mu? (durum + gun + hukum + 5 kosul + trend donus seviyesi) -#}
+      {%- set _pr = _q.price -%}{%- set _sl = _q.sl_level -%}
+      {%- set _gap = (((_sl - _pr)|abs) / _pr * 100) if (_pr and _sl) else none -%}
+      {%- set _gaps = ('%.1f'|format(_gap))|replace('.', ',') if _gap is not none else '' -%}
+      {%- set _adi = _q.indicators.adx if (_q.indicators and _q.indicators.adx) else none -%}
+      <div class="hx-q">
+        <h3 class="hx-qq">Trend destekliyor mu?</h3>
+        <p class="hx-ans"><span class="hx-dot hx-dot--{{ 'g' if _qs == 'AL' else ('b' if _qs == 'SAT' else 'y') }}" aria-hidden="true"></span>
+          {%- if _qs == 'AL' %}Evet · {{ _q.signal_bars }} gündür{% elif _qs == 'SAT' %}Hayır · Trend Bozuldu{% else %}Henüz değil · Yatay{% endif %}</p>
+        <p class="hx-why">
+          {%- if _qs == 'AL' %}Güçlü Trend {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ altına inerse (fiyatın %{{ _gaps }} altı) trend bozulur.{% endif %}
+          {%- elif _qs == 'SAT' %}Trend Bozuldu {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ üstüne çıkmadan (fiyatın %{{ _gaps }} üstü) trend desteklemiyor.{% endif %}
+          {%- else %}Yatay durum {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %}{% if _sl > _pr %} Kapanış {{ _sl|tr_price }} ₺ üstüne çıkar ve diğer koşullar da sağlanırsa Güçlü Trend başlar.{% else %} Fiyat trend dönüş seviyesinin üstünde; Güçlü Trend için diğer koşulların da sağlanması gerekiyor.{% endif %}{% endif %}
+          {%- endif %}</p>
+        {%- set _c1 = (_pr is not none and _sl is not none and _pr > _sl) -%}
+        {%- set _c2 = (_q.adx is not none and _q.adx >= 25) -%}
+        {%- set _c3 = (_q.e12 is not none and _q.e99 is not none and _q.e12 > _q.e99) -%}
+        {%- set _c5 = (_q.weekly_trend == 1) -%}
+        {#- DI: ADX >= 25 iken motorun adx.bull/bear bayragi DI yonunu verir; ADX < 25'te bilinmez -> JS. -#}
+        {%- set _c4 = none -%}
+        {%- if _c2 and _adi -%}{%- set _c4 = true if _adi.bull else (false if _adi.bear else none) -%}{%- endif %}
+        <ul class="hx-conds" aria-label="Trend koşulları">
+          <li class="{{ 'ok' if _c1 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c1 else '–' }}</i><span>Fiyat trend dönüş seviyesinin üstünde<span class="sr-only">{{ ': sağlanıyor' if _c1 else ': sağlanmıyor' }}</span></span><b>{{ _sl|tr_price }} ₺</b></li>
+          <li class="{{ 'ok' if _c2 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c2 else '–' }}</i><span>Trend gücü yeterli (ADX ≥ 25)<span class="sr-only">{{ ': sağlanıyor' if _c2 else ': sağlanmıyor' }}</span></span><b>{{ ('%.1f'|format(_q.adx))|replace('.', ',') if _q.adx is not none else '—' }}</b></li>
+          <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _q.e12|tr_price }} / {{ _q.e99|tr_price }}</b></li>
+          <li class="{{ 'ok' if _c4 else ('no' if _c4 is sameas false else 'unk') }}" id="q3Di"><i aria-hidden="true">{{ '✓' if _c4 else ('–' if _c4 is sameas false else '·') }}</i><span>Yön alıcılardan yana (DI+ &gt; DI−)<span class="sr-only" id="q3DiSr">{{ ': sağlanıyor' if _c4 else (': sağlanmıyor' if _c4 is sameas false else '') }}</span></span><b id="q3DiV">—</b></li>
+          <li class="{{ 'ok' if _c5 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c5 else '–' }}</i><span>Haftalık trend yukarı<span class="sr-only">{{ ': sağlanıyor' if _c5 else ': sağlanmıyor' }}</span></span><b>{{ 'yukarı' if _q.weekly_trend == 1 else ('aşağı' if _q.weekly_trend == -1 else 'belirsiz') }}</b></li>
+        </ul>
+        {% if _sl %}<p class="hx-lvl">Trend dönüş seviyesi (Supertrend): <b>{{ _sl|tr_price }} ₺</b>{% if _gap is not none %} · fiyatın %{{ _gaps }} {{ 'altında' if _sl < _pr else 'üstünde' }}{% endif %}</p>{% endif %}
+      </div>
+    </div>
+  </section>
   {% endif %}
 
   {#- C-19: eski AI sekmesinin icerigi (kural tabanli sinyal aciklamasi + temel gorunum)
@@ -760,30 +465,256 @@
   </section>
   {% endif %}
 
+  {#- C-20: Son haberler (3 bildirim, C-M1) -> Haberler sekmesi. /kap Ozet acilinca bir kez istenir
+      (Haberler sekmesi ayni yaniti kullanir). Satirlar dis baglanti tasimaz (kanon §2.8). -#}
+  <section class="da-panel hx-news" id="hxNews" aria-labelledby="hxNewsT">
+    <div class="hx-news-h">
+      <h2 class="hx-news-t" id="hxNewsT">Son haberler</h2>
+      <button type="button" class="hx-link" onclick="if(window.applyTab){applyTab('haberler');window.bpScrollTop();}">Haberler sekmesi <span aria-hidden="true">→</span></button>
+    </div>
+    <ul class="hx-news-l" id="hxNewsL"><li class="hx-news-e">Bildirimler yükleniyor…</li></ul>
+  </section>
 
-  <!-- Özet kartlar -->
-  <div class="info-grid" id="infoGrid" data-tab-content="ozet">
-    <div class="info-card">
-      <div class="info-card-label">Güncel Sinyal</div>
-      <div id="icSignal" class="info-card-value">—</div>
-      <div class="info-card-sub" id="icDate">—</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-label">Supertrend Seviyesi</div>
-      <div class="info-card-value" id="icSl">—</div>
-      <div class="info-card-sub" id="icSlPct">—</div>
-    </div>
-    <div class="info-card">
-      <!-- 17.09 bughunt: "bar (gün)" alt-etiketi signal_bars'ı (hafta sonu atlayan
-           işlem-günü sayacı) takvim günüymüş gibi gösteriyordu — hemen üstteki
-           icDate/bpSignalAgeText (satır ~2239) AYNI sinyal için farklı bir takvim-
-           günü sayısı gösteriyordu (ör. 7 bar vs 9 takvim günü, aynı ekranda). -->
-      <div class="info-card-label">Süre</div>
-      <div class="info-card-value" id="icBars">—</div>
-      <div class="info-card-sub">bar sayısı</div>
+
+
+<details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
+    <summary class="bp-detail-toggle-summary">
+      <span class="bp-detail-toggle-label">Teknik ayrıntılar</span>
+      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="bp-detail-toggle-body">
+    <p class="hx-glos">Göstergelerin ne anlama geldiği Metodoloji'de:
+      <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — ADX">ADX<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+      <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" data-tip="Metodoloji — RSI">RSI<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+      <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" data-tip="Metodoloji — EMA">EMA<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+      <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+      <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>.</p>
+  <!-- Hacim Profili — K-BT (22.09): bu panel 21.09'a kadar `#entryAnalysisGrid`in
+       UCUNCU COCUGUYDU. `renderEntryAnalysis()`in "aktif sinyal yok" dali
+       `grid.innerHTML = '<placeholder>'` yaziyor -> panelin BUTUN DOM'unu
+       (hpRvolRow/hpSvolRow/hpSummary dahil) siliyordu. Canli olcum 22.09:
+       BEKLE olan 138/217 hissede panel Ozet sekmesinde DOM'da bile yoktu,
+       oysa `rvol` ve `signal_vol_ratio` 217/217 hissede DOLU geliyor. Hacim
+       YON-BAGIMSIZ bir buyukluktur (K-BO) — sinyali olmayan hissede en anlamli
+       oldugu yer: "sinyal yok ama hacim olagandisi". Panel artik girise
+       bagimli degil, kendi bolumu; `data-tab-content="ozet"` ile applyTab
+       zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
+       kardes bir bileseni yok etmemeli). -->
+  <div class="entry-analysis-section" id="volumeProfileSection">
+    <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
+    <div class="hacim-profili">
+      <div class="hp-row-line" id="hpRvolRow" style="display:none">
+        <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
+        <span class="hp-row-text">Haftalık hacim ivmesi:</span>
+        <span class="hp-row-val" id="hpRvolVal">—</span>
+      </div>
+      <div class="hp-row-line" id="hpSvolRow" style="display:none">
+        <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
+        <span class="hp-row-text">Sinyal günü hacim:</span>
+        <span class="hp-row-val" id="hpSvolVal">—</span>
+      </div>
+      <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
 
+  <!-- İndikatörler -->
+  <div class="indicators-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
+      <div style="display:flex;gap:6px;align-items:center">
+        <!-- K-AO (21.09): iki durumlu bir acma/kapama dugmesi; durumu YALNIZCA
+             goruneN metinden ("? Acikla" / "? Kapat") ve renkten okunuyordu.
+             Kanonik oznitelik aria-pressed — asagida _applyTooltipVisibility
+             her uygulamada guncelliyor. -->
+        <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
+                aria-pressed="true"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
+                data-tip="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
+        <!-- K-AO (21.09): bu dugme gizli bir bolge acip kapatiyordu ama ekran
+             okuyucuya bunu SOYLEMIYORDU — aria-expanded/aria-controls yoktu,
+             sira­dan bir buton gibi duyuruluyordu. (Kusur K-AN sayi-bicimi
+             taramasinda ORTAYA CIKTI: dedektorun "acilir olani ac" adimi bu
+             dugmeyi taniyamadi, cunku taniyacagi oznitelik yoktu; icerideki
+             "EMA12: 130.4" hatasi bu yuzden bir tur gizli kaldi.) -->
+        <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
+                aria-expanded="false" aria-controls="indTechDetails"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
+          Detaylı göster ▾
+        </button>
+      </div>
+    </div>
+    <div class="ind-row" id="indRow">
+      <span class="ind-badge ind-neutral">Yükleniyor…</span>
+    </div>
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',system-ui,sans-serif">
+      <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
+      <span id="indTechContent">—</span>
+    </div>
+  </div>
+
+  <!-- Çoklu Zaman Dilimi -->
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
+    <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
+      <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
+    </div>
+  </div>
+
+  <!-- Sinyal Mini İstatistik Satırı -->
+  <div class="sig-stats-row" id="sigMiniStats">
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
+  </div>
+
+  <!-- Sinyal Geçmişi -->
+  <div class="history-section">
+    <h2 class="section-title">Sinyal Geçmişi
+      <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
+    </h2>
+    <table class="history-table">
+      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, kapanış fiyatı ve getiri</caption>
+      <thead>
+        <tr>
+          <th scope="col">Tarih</th>
+          <th scope="col">Sinyal</th>
+          <th scope="col">Kapanış</th>
+          <th scope="col">Getiri</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Yükleniyor…</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
+  </div>
+
+
+    </div>
+  </details>
+
+
+  {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir
+      (GEO: tarayici ve AI arama motoru okur), ama yalniz Ozet dibinde tek
+      <details> icinde. JSON-LD (FAQPage/FinancialProduct) <head>'de degismedi. -#}
+  <details class="bp-detail-toggle hx-more" id="ozetMore">
+    <summary class="bp-detail-toggle-summary">
+      <span class="bp-detail-toggle-label">Sık sorulanlar ve yöntem</span>
+      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="bp-detail-toggle-body">
+  {% if company_summary %}
+  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): Gemini'nin
+     ürettiği ~500+ karakterlik nesir artık İLK paragraf hemen görünür, kalanı
+     mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
+     prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
+     aynı davranışı template tarafında elde ediyoruz. #}
+  {% set _cs_paras = [] %}
+  {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
+  <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
+  <section class="da-panel content-card" aria-labelledby="company-summary-heading">
+    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
+    {% if _cs_paras %}
+    <p class="content-para">{{ _cs_paras[0] }}</p>
+    {% if _cs_paras|length > 1 %}
+    <details class="bp-detail-toggle" style="margin-bottom:0">
+      <summary class="bp-detail-toggle-summary">
+        <span class="bp-detail-toggle-label">Devamını oku</span>
+        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="bp-detail-toggle-body">
+        {% for para in _cs_paras[1:] %}<p class="content-para">{{ para }}</p>{% endfor %}
+      </div>
+    </details>
+    {% endif %}
+    {% endif %}
+    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
+  </section>
+  {% endif %}
+
+  {% if ssr_signal %}
+  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): bu blok
+     sinyal/ADX/stop gibi verileri hemen altındaki "Hap Bilgi" kapsülüyle
+     birebir tekrar ediyordu (GEO agent'ı doğruladı: aynı sayfada aynı ADX
+     değeri hem nesir hem dt/dd'de). O tekrar silindi — kalan tek cümle,
+     dt/dd'nin ASLA taşımadığı tek şeyi (3 kriterin AYNI ANDA sağlanması
+     kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
+     bilinçli uyularak. #}
+  <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
+  <div class="da-panel da-techsum-panel">
+    <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
+      Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong>, <strong>DI yönü (DI+/DI−)</strong> ve <strong>EMA12/EMA99</strong> kriterlerinin AYNI ANDA uyum sağlamasıyla oluşur.
+    </p>
+  </div>
+
+  <!-- GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
+       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
+       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
+       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
+       context'inden — yeni hesaplama yok, uydurma sayı yok. -->
+  <div class="quickfacts-card">
+    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
+    <dl class="quickfacts-list">
+      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
+      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
+      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
+      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
+      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
+      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
+      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
+      {% if hs_available and hs.borsapusula_skoru is not none %}
+      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
+      {% endif %}
+      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
+      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
+      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
+         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
+         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
+         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
+         o. "Stop" kelimesi yalnız AL + band altta iken. #}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
+    </dl>
+  </div>
+  {% endif %}
+
+  {% if seo_faq %}
+  <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
+  <section class="da-panel content-card faq-card" aria-labelledby="faq-heading">
+    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <dl class="faq-list">
+      {% for item in seo_faq %}
+      <dt class="faq-q">{{ item.q }}</dt>
+      <dd class="faq-a">{{ item.a }}</dd>
+      {% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  <!-- Metodoloji -->
+  <div class="methodology">
+    <strong>Sinyal Metodolojisi:</strong>
+    Trend sinyali 4 kriterin tamamının karşılanmasıyla oluşur:
+    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
+    <strong>DI+ / DI−</strong> yönü + <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
+    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
+  </div>
+    </div>
+  </details>
+  <p class="hx-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+  </div><!-- /panel-ozet -->
+
+  {#- C-19: Temel sekmesi. Icerik simdilik eski Ozet'teki Temel Analiz paneli
+      (C-22/C-22b Temel v2 bu panelin yerine gelir). /fundamentals yalniz bu
+      sekme (ve Ozet) acilinca istenir. -#}
+  <div id="panel-temel" data-tab-content="temel" role="tabpanel" aria-labelledby="tab-temel" tabindex="0">
+  {#- C-20: Skor Analizi (BP + Teknik + Temel halkalari, radar) Ozet'ten buraya tasindi --
+      Ozet'te tek halka (plan C-20; C-21b ile ayni yon). -#}
   <!-- CPO-1554 Faz 4 — Üç Skor Analizi (BorsaPusula / Teknik / Temel + radar).
        Organik/Asimetrik konsept (judge-panel 8.4/10), Kokpit+Kart Yığını'ndan
        aşılandı. hs_available=False iken (EOD turu bu ticker için hiç çalışmadı)
@@ -871,7 +802,7 @@
     {% endif %}
   {% endif %}
 
-  <section class="score-section" id="threeScoreSection" data-tab-content="ozet" data-state="{{ 'full' if hs_available else 'partial' }}">
+  <section class="score-section" id="threeScoreSection" data-state="{{ 'full' if hs_available else 'partial' }}">
     <div class="score-section-eyebrow">
       <div>
         <div class="score-section-title"><span aria-hidden="true">🧭</span> Skor Analizi</div>
@@ -1096,7 +1027,6 @@
         {% if temel_missing %}
         <p class="rc-note">Not: sadece Teknik Analiz verisine dayanır.</p>
         {% endif %}
-        <div class="rc-disclaimer">Yatırım tavsiyesi değildir.</div>
       </div>
       {% else %}
       <!-- kompakt dürüst bekleme — Temel/BorsaPusula bu hisse için bugünkü EOD turunu bekliyor -->
@@ -1113,279 +1043,6 @@
     </div>
   </section>
   {% endif %}
-
-  <!-- Trend Durumu (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir; C-52: eski "Giriş Analizi") -->
-  <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title"><span aria-hidden="true">🧭</span> Trend Durumu</h2>
-    <div class="entry-analysis-grid" id="entryAnalysisGrid">
-
-      <!-- Trend yönü (C-63: entry_quality rozeti kalktı, yön s.signal'dan) -->
-      <div>
-        <div class="vol-status-lbl">Trend yönü</div>
-        <div id="eqBadge"></div>
-        <div class="eq-note" id="eqNote"></div>
-      </div>
-
-      <!-- C-52: Risk/Ödül kartı kalktı (kanon §2) — yerine trend dönüş seviyesi -->
-      <div>
-        <div class="vol-status-lbl">Trend dönüş seviyesi (<a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>)</div>
-        <div id="rrLevels"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Hacim Profili — K-BT (22.09): bu panel 21.09'a kadar `#entryAnalysisGrid`in
-       UCUNCU COCUGUYDU. `renderEntryAnalysis()`in "aktif sinyal yok" dali
-       `grid.innerHTML = '<placeholder>'` yaziyor -> panelin BUTUN DOM'unu
-       (hpRvolRow/hpSvolRow/hpSummary dahil) siliyordu. Canli olcum 22.09:
-       BEKLE olan 138/217 hissede panel Ozet sekmesinde DOM'da bile yoktu,
-       oysa `rvol` ve `signal_vol_ratio` 217/217 hissede DOLU geliyor. Hacim
-       YON-BAGIMSIZ bir buyukluktur (K-BO) — sinyali olmayan hissede en anlamli
-       oldugu yer: "sinyal yok ama hacim olagandisi". Panel artik girise
-       bagimli degil, kendi bolumu; `data-tab-content="ozet"` ile applyTab
-       zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
-       kardes bir bileseni yok etmemeli). -->
-  <div class="entry-analysis-section" id="volumeProfileSection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
-    <div class="hacim-profili">
-      <div class="hp-row-line" id="hpRvolRow" style="display:none">
-        <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
-        <span class="hp-row-text">Haftalık hacim ivmesi:</span>
-        <span class="hp-row-val" id="hpRvolVal">—</span>
-      </div>
-      <div class="hp-row-line" id="hpSvolRow" style="display:none">
-        <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
-        <span class="hp-row-text">Sinyal günü hacim:</span>
-        <span class="hp-row-val" id="hpSvolVal">—</span>
-      </div>
-      <div class="hp-row-summary" id="hpSummary"></div>
-    </div>
-  </div>
-
-  <details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
-    <summary class="bp-detail-toggle-summary">
-      <span class="bp-detail-toggle-label"><span aria-hidden="true">📊</span> Teknik Detaylar</span>
-      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-    </summary>
-    <div class="bp-detail-toggle-body">
-
-  <!-- İndikatörler -->
-  <div class="indicators-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
-      <div style="display:flex;gap:6px;align-items:center">
-        <!-- K-AO (21.09): iki durumlu bir acma/kapama dugmesi; durumu YALNIZCA
-             goruneN metinden ("? Acikla" / "? Kapat") ve renkten okunuyordu.
-             Kanonik oznitelik aria-pressed — asagida _applyTooltipVisibility
-             her uygulamada guncelliyor. -->
-        <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                aria-pressed="true"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
-                data-tip="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
-        <!-- K-AO (21.09): bu dugme gizli bir bolge acip kapatiyordu ama ekran
-             okuyucuya bunu SOYLEMIYORDU — aria-expanded/aria-controls yoktu,
-             sira­dan bir buton gibi duyuruluyordu. (Kusur K-AN sayi-bicimi
-             taramasinda ORTAYA CIKTI: dedektorun "acilir olani ac" adimi bu
-             dugmeyi taniyamadi, cunku taniyacagi oznitelik yoktu; icerideki
-             "EMA12: 130.4" hatasi bu yuzden bir tur gizli kaldi.) -->
-        <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                aria-expanded="false" aria-controls="indTechDetails"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
-          Detaylı göster ▾
-        </button>
-      </div>
-    </div>
-    <div class="ind-row" id="indRow">
-      <span class="ind-badge ind-neutral">Yükleniyor…</span>
-    </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',system-ui,sans-serif">
-      <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
-      <span id="indTechContent">—</span>
-    </div>
-  </div>
-
-  <!-- Çoklu Zaman Dilimi -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
-    <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
-      <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
-    </div>
-  </div>
-
-  <!-- Sinyal Mini İstatistik Satırı -->
-  <div class="sig-stats-row" id="sigMiniStats">
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
-  </div>
-
-  <!-- Sinyal Geçmişi -->
-  <div class="history-section">
-    <h2 class="section-title">Sinyal Geçmişi
-      <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
-    </h2>
-    <table class="history-table">
-      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, kapanış fiyatı ve getiri</caption>
-      <thead>
-        <tr>
-          <th scope="col">Tarih</th>
-          <th scope="col">Sinyal</th>
-          <th scope="col">Kapanış</th>
-          <th scope="col">Getiri</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody">
-        <tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Yükleniyor…</td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
-  </div>
-
-
-    </div>
-  </details>
-
-  <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (C-19: AI yerine Temel) -->
-  <div data-tab-content="ozet" class="bp-detail-cta-wrap">
-    <div class="bp-detail-cta-label">Detay için</div>
-    <div class="bp-detail-cta-grid">
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
-        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('temel');else{var s=document.querySelector('[data-segment=temel]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">📋</span></span>
-        <span class="bp-detail-cta-text">Temel <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.bpScrollTop()">
-        <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
-        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
-      </button>
-    </div>
-  </div>
-
-  {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir
-      (GEO: tarayici ve AI arama motoru okur), ama yalniz Ozet dibinde tek
-      <details> icinde. JSON-LD (FAQPage/FinancialProduct) <head>'de degismedi. -#}
-  <details class="bp-detail-toggle hx-more" id="ozetMore">
-    <summary class="bp-detail-toggle-summary">
-      <span class="bp-detail-toggle-label">Sık sorulanlar ve yöntem</span>
-      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-    </summary>
-    <div class="bp-detail-toggle-body">
-  {% if company_summary %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): Gemini'nin
-     ürettiği ~500+ karakterlik nesir artık İLK paragraf hemen görünür, kalanı
-     mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
-     prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
-     aynı davranışı template tarafında elde ediyoruz. #}
-  {% set _cs_paras = [] %}
-  {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
-  <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
-  <section class="da-panel content-card" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
-    {% if _cs_paras %}
-    <p class="content-para">{{ _cs_paras[0] }}</p>
-    {% if _cs_paras|length > 1 %}
-    <details class="bp-detail-toggle" style="margin-bottom:0">
-      <summary class="bp-detail-toggle-summary">
-        <span class="bp-detail-toggle-label">Devamını oku</span>
-        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-      </summary>
-      <div class="bp-detail-toggle-body">
-        {% for para in _cs_paras[1:] %}<p class="content-para">{{ para }}</p>{% endfor %}
-      </div>
-    </details>
-    {% endif %}
-    {% endif %}
-    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
-  </section>
-  {% endif %}
-
-  {% if ssr_signal %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): bu blok
-     sinyal/ADX/stop gibi verileri hemen altındaki "Hap Bilgi" kapsülüyle
-     birebir tekrar ediyordu (GEO agent'ı doğruladı: aynı sayfada aynı ADX
-     değeri hem nesir hem dt/dd'de). O tekrar silindi — kalan tek cümle,
-     dt/dd'nin ASLA taşımadığı tek şeyi (3 kriterin AYNI ANDA sağlanması
-     kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
-     bilinçli uyularak. #}
-  <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div class="da-panel da-techsum-panel">
-    <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
-      Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong>, <strong>DI yönü (DI+/DI−)</strong> ve <strong>EMA12/EMA99</strong> kriterlerinin AYNI ANDA uyum sağlamasıyla oluşur.
-    </p>
-  </div>
-
-  <!-- GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
-       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
-       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
-       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
-       context'inden — yeni hesaplama yok, uydurma sayı yok. -->
-  <div class="quickfacts-card">
-    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
-    <dl class="quickfacts-list">
-      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
-      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
-      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
-      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
-      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
-      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
-      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
-      {% if hs_available and hs.borsapusula_skoru is not none %}
-      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
-      {% endif %}
-      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
-      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
-      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
-         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
-         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
-         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
-         o. "Stop" kelimesi yalnız AL + band altta iken. #}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
-    </dl>
-    <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
-  </div>
-  {% endif %}
-
-  {% if seo_faq %}
-  <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
-  <section class="da-panel content-card faq-card" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
-    <dl class="faq-list">
-      {% for item in seo_faq %}
-      <dt class="faq-q">{{ item.q }}</dt>
-      <dd class="faq-a">{{ item.a }}</dd>
-      {% endfor %}
-    </dl>
-  </section>
-  {% endif %}
-
-  <!-- Metodoloji -->
-  <div class="methodology">
-    <strong>Sinyal Metodolojisi:</strong>
-    Trend sinyali 4 kriterin tamamının karşılanmasıyla oluşur:
-    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
-    <strong>DI+ / DI−</strong> yönü + <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
-    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
-    <br><br>
-    <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
-  </div>
-    </div>
-  </details>
-  </div><!-- /panel-ozet -->
-
-  {#- C-19: Temel sekmesi. Icerik simdilik eski Ozet'teki Temel Analiz paneli
-      (C-22/C-22b Temel v2 bu panelin yerine gelir). /fundamentals yalniz bu
-      sekme (ve Ozet) acilinca istenir. -#}
-  <div id="panel-temel" data-tab-content="temel" role="tabpanel" aria-labelledby="tab-temel" tabindex="0">
   <!-- Temel Analiz — CPO-1651: Ozan 14.09 akşam "temel analiz sayfada ön planda
        değil, uzun scroll boyunca hiç görünmüyor" geri bildirimi. Kök neden:
        bu blok önceden #ozetDetailToggle'ın (varsayılan KAPALI "Detaylı Analiz"
@@ -2076,11 +1733,11 @@ function updateHibBellBtn() {
       if (lbl) lbl.textContent = 'Takipte ✓';
     } else {
       btn.classList.remove('active-bell');
-      _bpTip(btn, 'Sinyal değişiminde bildirim al');
-      if (lbl) lbl.textContent = 'Bildirim al';
+      _bpTip(btn, 'Durum değişince e-postayla haber al');
+      if (lbl) lbl.textContent = 'Takip et';
     }
     btn.setAttribute('aria-pressed', String(inW));
-    btn.setAttribute('aria-label', inW ? 'Takipte' : 'Bildirim al');
+    btn.setAttribute('aria-label', inW ? 'Takipte' : 'Takip et');
   }
 }
 
@@ -2409,170 +2066,8 @@ function renderCommentary(commentary) {
 let _pristineEntryGridHtml = null;
 function renderSummary(s, signalData) {
   window._bpLastSignalData = signalData || null;   // _hibCurrentPrice() icin
-  /* Header */
-  const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-  // sd.price (/api/data, her zaman güncel) > chart summary.price (lagged monthly close)
-  const _dispPrice = (signalData && signalData.price != null) ? signalData.price : s.price;
-  document.getElementById('hpPrice').textContent = fmt(_dispPrice);
-  const chgEl = document.getElementById('hpChg');
-  const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : s.change_pct;
-  if (_dispChg != null) {
-    const sign  = _dispChg > 0 ? '+' : '';
-    chgEl.textContent = bpFormatPct(_dispChg, 2);
-    chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
-  } else {
-    chgEl.textContent = '—';
-    chgEl.className   = 'header-chg neu';
-  }
-
-  const sigEl  = document.getElementById('hpSignal');
-  const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon;  // icon only — bp-hero-card full label gosteriyor
-  sigEl.className   = 'signal-badge signal-' + s.signal;
-
-  /* Sinyal kartı */
-  document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
-    /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
-    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:var(--bp-text-xs);color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
-  /* Sinyal date/bars — signalData'dan */
-  if (signalData) {
-    /* CPO-1335: `|| 1` fallback kaldırıldı — bilinmeyen bar sayısı sessizce
-       1 olup "Bugün" bastırıyordu. Göreli etiket artık signal_date'ten. */
-    const bars = signalData.signal_bars;
-    const date = signalData.signal_date || '—';
-    // "⚡ Bugün" yalnızca AL/SAT için — Yatay+Bugün çelişkili görünür
-    const isNew = bpIsSignalFromToday(signalData.signal_date) && signalData.signal !== 'BEKLE';
-    // CPO-1595: eski "Taze/Gelişiyor/Olgunlaşıyor/Olgun" renkli rozeti (Faz 1 #4)
-    // kaldırıldı — 11.09 bağımsız değerlendirme bu rozeti "kalite çağrışımlı
-    // isimlendirme, örtük AL/SAT nüdge'i riski" gerekçesiyle reddetti (rozet
-    // yeşil→kırmızı renk geçişiyle "iyi→geç" ima ediyordu). Nötr yaş bilgisi
-    // zaten date + bpSignalAgeText ile veriliyor.
-    document.getElementById('icDate').innerHTML =
-      (isNew ? '<span style="color:var(--bp-accent-yellow)">⚡ ' + (bpSignalDateLabel(signalData.signal_date) || date) + '</span>'
-             : date + ' · ' + bpSignalAgeText(signalData.signal_date));
-    document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
-
-    /* C-61 (24.09): "Giriş Fiyatı" kartı kalktı — kanon §2.2 işlem dili yok. */
-  }
-
-  /* SL */
-  if (s.sl_level && _dispPrice) {
-    /* K-BQ: etiket sinyale bakıyordu, FİYATA bakmıyordu — band fiyatın üstündeyken
-       (SAT 72/72, BEKLE 125/138) "Riske uzaklık"/"ST desteği" diyordu. Fiyatın
-       ÜSTÜNDEKİ bir seviye destek değil dirençtir ve long-only üründe stop değildir. */
-    const _slRole = bpStLevelRole(s.sl_level, _dispPrice, s.signal);
-    document.getElementById('icSl').textContent = fmt(s.sl_level);
-    document.getElementById('icSlPct').textContent = _slRole
-      ? _slRole.label + ': ' + _slRole.pct.toFixed(1).replace('.', ',') + '%'
-      : '—';
-  }
-
-  /* ── Giriş Analizi ── */
-  (function renderEntryAnalysis() {
-    const section = document.getElementById('entryAnalysisSection');
-    /* K-CP (22.09): GORUNURLUK ARTIK BU FONKSIYONUN ISI DEGIL.
-       Onceki hali (CPO r-fix 05.09) sizintiyi "aktif sekme ozet degilse DOKUNMA ve
-       RETURN" diye kapatiyordu. Ama bu IIFE sayfa omrunde en fazla iki kez calisir
-       (renderSummary ~3165 sd=null, ~3196 sd dolu) ve IKISI DE applyTab(initial)'den
-       SONRA gelir. Yani ?tab=ai / ?tab=grafik / ?tab=haberler ile -- ya da
-       localStorage'daki `bp_hisse_tab` yuzunden, ki bir kez AI sekmesine bakan
-       kullanicinin SONRAKI her hisse sayfasi oyle acilir -- acilan sayfada grid HIC
-       doldurulmuyordu; kullanici Ozet'e tiklayinca applyTab bolumu goruntuye aliyor
-       ama icerigi bos kaliyordu. Canli olcum 22.09 (BIMAS, AL + entry_quality dolu):
-       ?tab=ozet -> eqBadge 45 / rrBar 228 / rrLevels 1632 karakter (SL 400,06 ·
-       Simdi 432,25 · TP1 496,63 · TP2 528,82 · R/R 1:2,0); ?tab=ai -> Ozet'e gecince
-       UCU DE 0 karakter, ekranda yalniz "DEGERLENDIRME" ve "RISK / ODUL" etiketleri.
-       Sinyalsiz hissede de ayni: "aktif sinyal yok" aciklamasi hic basilmiyordu.
-       Kok neden sekme kontrolu degil, asagidaki `section.style.display='block'`
-       yazimlariydi -- onlar kalkinca sizinti da biter. Gorunurlugun TEK kanonu
-       applyTab'in `data-tab-content` kanonu (K-BT'de Hacim Profili icin verilen
-       ayni karar). Render kosulsuz yapilir, bolum gizliyse kullanici gormez. */
-    const grid = document.getElementById('entryAnalysisGrid');
-    if (grid && _pristineEntryGridHtml === null) _pristineEntryGridHtml = grid.innerHTML;
-    // CPO-1107 Faz0 #2 (TUPRS-sınıfı çelişki): "aktif sinyal yok" kararı header
-    // rozetiyle (s.signal) AYNI kanonik kaynaktan gelmeli — signalData ayrı bir
-    // async fetch'ten (/api/data) geliyor ve ilk çizimde null / gecikmeli olabilir,
-    // bu da üstte "sinyal aktif" alttaki bölümde "aktif sinyal yok" çelişkisine yol açıyordu.
-    const hasActiveSignal = s.signal === 'AL' || s.signal === 'SAT';
-
-    if (!hasActiveSignal) {
-      /* CPO-983 Opsiyon B: boş kutular yerine anlamlı placeholder — aktif sinyal yok */
-      if (section) {
-        /* K-CP: display yazimi yok -- gorunurluk applyTab'in kanonu */
-        const grid = document.getElementById('entryAnalysisGrid');
-        if (grid) {
-          grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
-        }
-      }
-      return;
-    }
-
-    /* C-63 (24.09): `entry_quality` kapısı kalktı. Bölüm yalnız s (grafik özeti)
-       ile çizilir: yön s.signal'dan, seviye s.sl_level'dan. signalData yalnız
-       bilanço notu için okunur, /api/data gelince ikinci çizim onu ekler. */
-
-    /* K-CP: gorunurluk applyTab'in `data-tab-content` kanonunda */
-    // CPO-1558: bir önceki çağrı bu grid'i bir placeholder mesajıyla değiştirmiş
-    // olabilir (yükleniyor/veri yok/sinyal yok dalları) — bu, aşağıdaki başarı
-    // dalının getElementById ile aradığı #eqBadge/#eqNote/#rrBarContainer/
-    // #rrLevels'ı yok etmiş olur. Gerçek veriyle doldurmadan önce orijinal
-    // (bozulmamış) yapıyı geri yükle.
-    if (grid && _pristineEntryGridHtml !== null && grid.innerHTML !== _pristineEntryGridHtml) {
-      grid.innerHTML = _pristineEntryGridHtml;
-    }
-
-    // CPO-DEV2-052 #1 (Ozan kararı): SAT sinyalinde AL'daki gibi somut bir "trade
-    // yapısı" (giriş kalitesi rozeti, ideal giriş bölgesi, SL/TP1/TP2 rakamları,
-    // rr_signal) gösterilmiyor — BIST'te bireysel yatırımcı genelde açığa satamıyor
-    // (bu rakamlar uygulanamaz bir vaat) ve backtest SAT'ı AL kadar güvenilir
-    // bulmuyor. Sinyal üretim mantığına (compose_score/gate) dokunulmadı, sadece
-    // SAT için bu bölümün gösterimi nötr/bilgilendirici bir tona çevrildi.
-    // r35 bug-hunt: hasActiveSignal/header rozeti hep s.signal'a bakiyor (chart
-    // endpoint'inden, hemen render edilir) ama bu dal signalData.signal'a bakiyordu
-    // (ayri, non-blocking /api/data fetch'inden, chart'tan SONRA gelir) - arka plan
-    // refresh sinyali degistirirse aradaki dar pencerede header ile bu blok
-    // celisebiliyordu (SAT sinyalinde AL rakamlari gorunmesi riski dahil). s.signal
-    // ile hizalandi - fonksiyonun geri kalani zaten s.signal'i kanonik kaynak
-    // olarak kullaniyor.
-    /* C-52 (24.09, kanon §2.2): giriş kalitesi rozeti, backend entry_note'u
-       ("SL'ye yakın — R/R", "giriş bölgesi"), R/R çubuğu ve SL/TP1/TP2 satırı
-       kalktı. Tek betimleyici satır: trend dönüş seviyesi + fiyata uzaklık. */
-    const eqBadgeEl = document.getElementById('eqBadge');
-    const eqNoteEl = document.getElementById('eqNote');
-    if (s.signal === 'SAT') {
-      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Trend aşağı yönlü</span>`;
-      if (eqNoteEl) eqNoteEl.innerHTML = '';
-    } else {
-      /* C-63 (24.09, CPO kararı): "sinyal fiyatına yakın / uzaklaştı" rozeti
-         entry_quality'den (İdeal/İyi/Dikkatli/Kovalama) türüyordu — işlem
-         zamanlama dili (kanon §2.2). Yerine SAT dalıyla simetrik yön betimi. */
-      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-safe">📈 Trend yukarı yönlü</span>`;
-      // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
-      const ew = signalData && signalData.earnings_warning;
-      if (eqNoteEl) eqNoteEl.innerHTML = ew ? `<span style="margin-top:8px;display:inline-block;background:rgba(var(--bp-warn-rgb),0.12);border:1px solid rgba(var(--bp-warn-rgb),0.4);border-radius:6px;padding:5px 10px;color:var(--bp-warn);font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta oynaklık yaratabilir" tabindex="0">⚠️ ${ew.message}</span>` : '';
-    }
-    const rrLevelsEl = document.getElementById('rrLevels');
-    if (rrLevelsEl) {
-      const lvl = s.sl_level;
-      const cur = _dispPrice;
-      if (lvl && cur) {
-        const dist = Math.abs(cur - lvl) / cur * 100;
-        rrLevelsEl.innerHTML = `<div style="font-variant-numeric:tabular-nums"><strong style="font-size:var(--bp-text-lg)">${fmt(lvl)} ₺</strong> <span style="color:var(--bp-text3);font-size:var(--bp-text-sm)">· fiyatın ${bpPctLevel(dist, 1)} ${lvl < cur ? 'altında' : 'üstünde'}</span></div>`;
-      } else {
-        rrLevelsEl.innerHTML = '';
-      }
-    }
-
-  })();
-
-  /* Hacim Profili — K-BT (22.09): BU BLOK `renderEntryAnalysis()`IN ICINDEYDI,
-     yani UC erken-return'un (aktif sekme != ozet · aktif sinyal yok ·
-     entry_quality yok) ARKASINDA kaliyordu. Hacim, girisle ilgisiz ve
-     YON-BAGIMSIZ bir buyukluk (K-BO): sinyali olmayan hissede de -- hatta
-     ozellikle orada -- anlamli. Canli olcum 22.09: BEKLE olan 138/217 hissede
-     panel hic dolmuyordu (ustelik markup'i da siliniyordu, bkz. ~1046 notu),
-     oysa rvol/signal_vol_ratio 217/217 hissede DOLU. Artik kendi IIFE'sinde,
-     gorunurlugu applyTab'in `data-tab-content` kanonuna birakiliyor. */
+  /* C-20: baslik fiyati/degisimi SSR (hero, tek fiyat); durum hapi, info-grid ve
+     Trend Durumu kalkti -- ayni bilgi 3 Soruda'nin Q3'unde (SSR). */
   (function renderVolumeProfile() {
     if (!signalData) return;   /* ilk cizim: /api/data henuz gelmedi, satirlar gizli kalir */
     const vr = signalData.signal_vol_ratio;
@@ -2808,22 +2303,7 @@ function renderSummary(s, signalData) {
   document.getElementById('indRow').innerHTML = indHtml;
   window._bpApplyTooltips && window._bpApplyTooltips();
 
-  /* ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı */
-  const conflictEl = document.getElementById('sigConflictNote');
-  if (conflictEl) {
-    if (signalData && signalData.signal === 'AL' && _dispChg < -3) {
-      /* CPO-1335: `|| 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı */
-      /* CPO-DEV2-059 r50: 'Dün'/gelecek-tarih dallarında 'X dür aktif' eki dilbilgisel olarak bozuk metin üretiyordu */
-      /* C-62: göreli gün adı yok, takvim tarihi */
-      const _sigLbl = bpSignalDateLabel(signalData.signal_date);
-      conflictEl.textContent = (_sigLbl ? _sigLbl + ' tarihinde oluşan' : 'Süren') +
-        ' Güçlü Trend sinyali devam ediyor, ancak son seanstaki %' +
-        Math.abs(_dispChg).toFixed(1).replace('.', ',') + ' düşüş fiyatı trend dönüş seviyesine (Supertrend) yaklaştırıyor olabilir.';
-      conflictEl.style.display = '';
-    } else {
-      conflictEl.style.display = 'none';
-    }
-  }
+  /* C-20: AI sekmesiyle birlikte cakisma notu (#sigConflictNote) kalkti. */
 }
 
 /* ── Sinyal mini istatistik satırı ─────────────────── */
@@ -2944,19 +2424,9 @@ function _showChartStatus(msg, withRetryBtn) {
     ? '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> ' +
       msg + '</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div>'
     : '<div class="da-spin"></div> ' + msg;
-  // CPO-DEV2-045 #3: nihai hata (retry tükendi) — hpSignal placeholder'ı
-  // gerçek bir sinyalmiş gibi ("● Yatay") kalmasın diye görünür "veri yok" işaretine çevir.
+  // C-20: baslikta durum hapi (#hpSignal) yok; nihai hatada yalniz gecmis/gostergeler isaretlenir.
   if (withRetryBtn) {
     if (window.showToast) showToast(msg, 'error');
-    const sigEl = document.getElementById('hpSignal');
-    if (sigEl) {
-      sigEl.textContent = '?';
-      /* K-CX: gorunen metin yalniz "?" -- anlami SADECE fare-only title'da
-         durursa dokunmatik/klavye/ekran okuyucu hicbiri ulasamaz. */
-      _bpTip(sigEl, 'Sinyal verisi yüklenemedi');
-      sigEl.setAttribute('aria-label', 'Sinyal verisi yüklenemedi');
-      sigEl.className = 'signal-badge signal-BEKLE';
-    }
     const historyBody = document.getElementById('historyBody');
     if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div></td></tr>';
     const indRow = document.getElementById('indRow');
@@ -2971,6 +2441,20 @@ let _chartSeq = 0;
    ve Grafik (mum grafigi) ayni promise'i paylasir. Basarisizlikta promise sifirlanir,
    "Tekrar dene" yeniden ister. Eskiden sayfa acilir acilmaz her sekmede istenirdi ve
    ardindan /api/data (~290 KB) gelirdi; ikisi de artik yalniz ihtiyac duyan sekmede. */
+/* C-20: Ozet ile Temel/Haberler ayni uclari kullanir -> tek istek, paylasilan promise. */
+const _bpOnce = {};
+function _bpGetJSON(key, url, ms) {
+  if (!_bpOnce[key]) {
+    _bpOnce[key] = fetch(url, { signal: AbortSignal.timeout(ms || 15000) })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .catch(err => { delete _bpOnce[key]; throw err; });
+  }
+  return _bpOnce[key];
+}
+const _bpFundJSON = () => _bpGetJSON('fund', '/api/hisse/' + TICKER + '/fundamentals');
+const _bpDivJSON  = () => _bpGetJSON('div', '/api/temettu-takvimi', 8000);
+const _bpKapJSON  = () => _bpGetJSON('kap', '/api/hisse/' + TICKER + '/kap');
+
 let _bpChartP = null;
 function _bpChartJSON() {
   if (_bpChartP) return _bpChartP;
@@ -2998,7 +2482,8 @@ let _bpOzetChartDone = false;
 function _bpRenderOzetFromChart(ch) {
   if (_bpOzetChartDone || !ch) return;
   _bpOzetChartDone = true;
-  try { if (window.bpDrawSparkline) window.bpDrawSparkline(ch.ohlc); } catch (e) { console.warn('spark', e); }
+  try { hxChartSetData((ch.ohlc || []).map(b => [b.time, +b.close])); } catch (e) { console.warn('hx chart', e); }
+  try { hxFillDI(ch.summary); } catch (e) { console.warn('hx di', e); }
   renderHistory(ch.signal_history, ch.summary?.price, ch.summary?.signal);
   renderCommentary(ch.commentary);
   if (ch.summary) renderSummary(ch.summary, BP_SSR.ticker ? BP_SSR : null);
@@ -3010,6 +2495,176 @@ function _bpRenderOzetFromChart(ch) {
       sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
     };
   }
+}
+
+/* ══ C-20 (25.09) — Ozet hero v2 ═══════════════════════════════════════════════
+   Alan grafigi (SVG, kutuphane yok), 4 temel gosterge, Q2 degerleme, DI satiri,
+   Son haberler. Veri: Ozet'in /chart, /fundamentals, /temettu-takvimi, /kap
+   yanitlari (hepsi paylasilan tek istek). Baslik fiyati SSR (#hpPrice) tek kaynak. */
+const HX_PRICE = (BP_SSR && BP_SSR.price != null && isFinite(+BP_SSR.price)) ? +BP_SSR.price : null;
+const _hxNF2 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const _hxNF1 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const _HX_AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function _hxDate(iso) { const p = String(iso || '').split('-'); return p.length === 3 ? (+p[2]) + ' ' + _HX_AY[+p[1] - 1] + ' ' + p[0] : iso; }
+let _hxSeries = null, _hxDays = 30;
+function hxChartSetData(rows) {
+  rows = (rows || []).filter(r => r && r[0] && isFinite(r[1]) && r[1] > 0);
+  if (rows.length < 2) return;
+  /* Tek fiyat: son nokta = baslik fiyati. Grafik ucu ayni gunun resmi kapanisindan
+     sapmissa (D-04 oncesi 17:59 fiyati) baslik esas alinir; %2'den buyuk fark
+     (bayat grafik) duzeltilmez. */
+  if (HX_PRICE != null) {
+    const last = rows[rows.length - 1];
+    if (Math.abs(last[1] - HX_PRICE) / HX_PRICE < 0.02) last[1] = HX_PRICE;
+  }
+  _hxSeries = rows;
+  hxChartDraw();
+}
+function _hxWindow() {
+  if (!_hxSeries) return [];
+  const end = new Date(_hxSeries[_hxSeries.length - 1][0] + 'T00:00:00Z').getTime();
+  const from = end - _hxDays * 864e5;
+  const w = _hxSeries.filter(r => new Date(r[0] + 'T00:00:00Z').getTime() > from);
+  return w.length >= 2 ? w : _hxSeries.slice(-2);
+}
+function hxChartDraw() {
+  const cv = document.getElementById('hxChartCv'), pc = document.getElementById('hxChartPc');
+  if (!cv || !_hxSeries) return;
+  const W = Math.round(cv.clientWidth), H = Math.round(cv.clientHeight);
+  if (!W || !H) return;                       /* gizli sekmede olculemez; applyTab('ozet') yeniden cizer */
+  const c = _hxWindow(), vals = c.map(r => r[1]);
+  let mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+  const pad = (mx - mn) * 0.12 || mx * 0.01 || 1; mn -= pad; mx += pad;
+  const X = i => (i / (c.length - 1)) * W, Y = v => H - ((v - mn) / (mx - mn)) * H;
+  const d = c.map((r, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(r[1]).toFixed(1)).join(' ');
+  const base = Y(c[0][1]).toFixed(1), last = c[c.length - 1];
+  cv.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true" focusable="false">' +
+    '<defs><linearGradient id="hxGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="hx-g0"/><stop offset="1" class="hx-g1"/></linearGradient></defs>' +
+    '<line class="hx-base" x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '"/>' +
+    '<path class="hx-area" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/>' +
+    '<path class="hx-line" d="' + d + '"/>' +
+    '<circle class="hx-end" cx="' + X(c.length - 1).toFixed(1) + '" cy="' + Y(last[1]).toFixed(1) + '" r="4"/></svg>';
+  const chg = (last[1] / c[0][1] - 1) * 100;
+  /* K-CB: pencere beyani cizilen veriden (ilk-son tarih + seans sayisi). */
+  const lbl = _hxDays === 30 ? 'Son 1 ay' : (_hxDays === 90 ? 'Son 3 ay' : 'Son 1 yıl');
+  if (pc) pc.innerHTML = lbl + ': <b class="' + bpDirClass(chg, 1, 'up,down,neu') + '">' + bpFormatPct(chg, 1) + '</b>';
+  cv.setAttribute('aria-label', TICKER + ' kapanış grafiği, ' + _hxDate(c[0][0]) + ' – ' + _hxDate(last[0]) + ', ' + c.length + ' seans, dönem değişimi ' + bpFormatPct(chg, 1));
+}
+(function hxChartWire() {
+  const box = document.getElementById('hxChart');
+  if (!box) return;
+  box.querySelector('.hx-chips').addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-days]'); if (!b) return;
+    _hxDays = +b.dataset.days;
+    box.querySelectorAll('.hx-chips button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    hxChartDraw();
+  });
+  const cv = document.getElementById('hxChartCv'), tip = document.getElementById('hxChartTip');
+  const move = ev => {
+    if (!_hxSeries) return;
+    const c = _hxWindow(), r = cv.getBoundingClientRect();
+    const i = Math.max(0, Math.min(c.length - 1, Math.round((ev.clientX - r.left) / r.width * (c.length - 1))));
+    tip.hidden = false;
+    tip.textContent = _hxDate(c[i][0]) + ' · ' + _hxNF2.format(c[i][1]) + ' ₺';
+    const bx = box.getBoundingClientRect();
+    tip.style.left = Math.max(6, Math.min(bx.width - tip.offsetWidth - 6, ev.clientX - bx.left - tip.offsetWidth / 2)) + 'px';
+  };
+  cv.addEventListener('pointermove', move);
+  cv.addEventListener('pointerdown', move);
+  cv.addEventListener('pointerleave', () => { tip.hidden = true; });
+  let t = null;
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => { clearTimeout(t); t = setTimeout(hxChartDraw, 60); }).observe(cv);
+  /* D-18b: closes_30 SSR'da varsa ilk cizim fetch beklemez. */
+  const j = document.getElementById('hxCloses30');
+  if (j) { try { hxChartSetData(JSON.parse(j.textContent)); } catch (e) { console.warn('closes_30', e); } }
+})();
+
+/* Q3'un DI satiri: SSR'da sayi yok (yalniz etiket metninde), /chart ozetinden. */
+function hxFillDI(sum) {
+  const li = document.getElementById('q3Di'), v = document.getElementById('q3DiV'), sr = document.getElementById('q3DiSr');
+  if (!li || !sum || sum.di_plus == null || sum.di_minus == null) return;
+  const ok = +sum.di_plus > +sum.di_minus;
+  li.className = ok ? 'ok' : 'no';
+  li.querySelector('i').textContent = ok ? '✓' : '–';
+  if (sr) sr.textContent = ok ? ': sağlanıyor' : ': sağlanmıyor';
+  v.textContent = _hxNF1.format(+sum.di_plus) + ' / ' + _hxNF1.format(+sum.di_minus);
+}
+
+/* 4 temel gosterge + Q2 (Fiyati makul mu?) */
+function _hxVal(v, lo, hi) { return (v == null || !(v > 0)) ? null : (v < lo ? -1 : (v > hi ? 1 : 0)); }
+function hxFillFund(f, divRow) {
+  const set = (id, txt, dim) => { const el = document.getElementById(id); if (el) { el.textContent = txt; el.classList.toggle('hx-dim', !!dim); } };
+  if (f) {
+    set('hxfMcap', f.market_cap && f.market_cap.value != null ? (_fmtMoneyObj(f.market_cap) || '—') : '—');
+    set('hxfRoe', f.roe != null ? bpPctLevel(f.roe, 1) : '—');
+    set('hxfMargin', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : '—');
+  }
+  /* Temettu (son 12 ay) = son 12 ayda odenen / fiyat. Takvimde yalniz son odeme var
+     (DEV1: 12 ay toplami); takvimde olmayan hisse "Veri yok". */
+  if (divRow === undefined) { /* takvim alinamadi: dokunma */ }
+  else if (!divRow) set('hxfDiv', 'Veri yok', true);
+  else {
+    const last = divRow.last_div_date ? new Date(divRow.last_div_date + 'T00:00:00') : null;
+    const asof = _hxSeries ? new Date(_hxSeries[_hxSeries.length - 1][0] + 'T00:00:00') : new Date();
+    const recent = last && (asof - last) <= 365 * 864e5 && divRow.last_div_amount != null;
+    set('hxfDiv', recent && HX_PRICE ? bpPctLevel(divRow.last_div_amount / HX_PRICE * 100, 2) : 'Ödeme yok', !recent);
+  }
+  if (!f) return;
+  const kv = document.getElementById('q2Kv'), ans = document.getElementById('q2Ans'), dot = document.getElementById('q2Dot');
+  const parts = [['F/K', f.pe_ratio, 12, 25, 1], ['PD/DD', f.pb_ratio, 1, 3, 2]]
+    .map(p => ({ l: p[0], v: p[1], t: _hxVal(p[1], p[2], p[3]), lo: p[2], hi: p[3], fr: p[4] }))
+    .filter(p => p.t !== null);
+  const W = { '-1': 'ucuz', '0': 'makul', '1': 'pahalı' };
+  if (kv) kv.innerHTML = parts.length
+    ? parts.map(p => '<div><dt>' + p.l + '</dt><dd>' + p.v.toLocaleString('tr-TR', { minimumFractionDigits: p.fr, maximumFractionDigits: p.fr }) +
+        ' <small>· ' + W[p.t] + ' (' + p.lo + ' altı ucuz, ' + p.hi + ' üstü pahalı)</small></dd></div>').join('')
+    : '<div><dt>F/K ve PD/DD</dt><dd>hesaplanamıyor</dd></div>';
+  let a = 'Veri yok', cls = 'hx-dot--na';
+  if (parts.length) {
+    const sum = parts.reduce((x, p) => x + p.t, 0);
+    const mixed = parts.length === 2 && parts[0].t * parts[1].t === -1;
+    a = mixed ? 'Karışık' : (sum < 0 ? 'Ucuz tarafta' : (sum > 0 ? 'Pahalı tarafta' : 'Makul'));
+    cls = mixed || sum > 0 ? 'hx-dot--warn' : (sum < 0 ? 'hx-dot--val' : 'hx-dot--brand');
+  }
+  if (ans) ans.textContent = a;
+  if (dot) dot.className = 'hx-dot ' + cls;
+  const an = document.getElementById('q2An');
+  if (an && f.analyst_target != null && f.analyst_count && HX_PRICE) {
+    const up = (f.analyst_target / HX_PRICE - 1) * 100;
+    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b> · fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' + (up >= 0 ? 'üstünde' : 'altında') + ' · ' + f.analyst_count + ' analist';
+    an.hidden = false;
+  }
+  const note = document.getElementById('q2Note');
+  const cur = f.financial_currency || 'TRY';
+  if (note && cur !== 'TRY') {
+    note.textContent = 'Şirket finansallarını ' + cur + ' cinsinden raporluyor' + (parts.length ? '.' : '; F/K ve PD/DD bu yüzden hesaplanmıyor.');
+    note.hidden = false;
+  }
+}
+
+/* Son haberler: /kap'in ilk 3 bildirimi (dis baglanti yok; satir -> Haberler sekmesi) */
+function hxFillNews(data) {
+  const ul = document.getElementById('hxNewsL');
+  if (!ul) return;
+  const items = (data && data.disclosures) || [];
+  if (!items.length) { ul.innerHTML = '<li class="hx-news-e">Son 90 günde bildirim yok.</li>'; return; }
+  const fmtD = s => { const p = String(s || '').split(' ')[0].split('.'); return p.length === 3 ? (+p[0]) + ' ' + _HX_AY[+p[1] - 1] : ''; };
+  ul.innerHTML = items.slice(0, 3).map(d =>
+    '<li><time>' + escHtml(fmtD(d.date)) + '</time><div><b>' + escHtml((d.summary || d.subject || '').trim()) + '</b>' +
+    (d.subject && d.summary ? '<span>' + escHtml(d.subject.trim()) + '</span>' : '') + '</div></li>').join('');
+}
+
+function loadOzetExtras() {
+  Promise.all([_bpFundJSON().catch(() => null), _bpDivJSON().catch(() => undefined)]).then(([fj, dj]) => {
+    const f = fj && fj.fundamentals && Object.keys(fj.fundamentals).length ? fj.fundamentals : null;
+    const row = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
+    hxFillFund(f, row);
+    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Veri yok'; }
+  });
+  _bpKapJSON().then(hxFillNews).catch(() => {
+    const ul = document.getElementById('hxNewsL');
+    if (ul) ul.innerHTML = '<li class="hx-news-e">Bildirimler yüklenemedi.</li>';
+  });
 }
 
 function loadOzetChart() {
@@ -3208,9 +2863,7 @@ async function loadKapDisclosures() {
   if (!loadEl || !listEl) return;
 
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/kap', { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    const data = await _bpKapJSON();
 
     loadEl.style.display = 'none';
     const items = data.disclosures || [];
@@ -3502,9 +3155,7 @@ window.fundTrendSetPeriod = function(period) {
 
 async function loadFundamentals() {
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals', { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
+    const json = await _bpFundJSON();
     document.getElementById('fundLoading').style.display = 'none';
     const f = json.fundamentals;
     if (!f || Object.keys(f).length === 0) {
@@ -3568,7 +3219,7 @@ async function loadFundamentals() {
        açıklanan son ödemesini okur; takvimde olmayan hissede kart çıkmaz. */
     let _divCard = '';
     try {
-      const dj = await (await fetch('/api/temettu-takvimi', { signal: AbortSignal.timeout(8000) })).json();
+      const dj = await _bpDivJSON();
       const d = (dj.stocks || []).find(x => x.ticker === TICKER);
       if (d) {
         const last = d.last_div_date ? new Date(d.last_div_date + 'T00:00:00') : null;
@@ -3856,7 +3507,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     if (_tabLoaded[tab]) return;
     _tabLoaded[tab] = true;
     try {
-      if (tab === 'ozet') { loadOzetChart(); }
+      if (tab === 'ozet') { loadOzetChart(); loadOzetExtras(); }
       else if (tab === 'grafik') { loadChart(); }
       else if (tab === 'temel') { loadFundamentals(); }
       else if (tab === 'haberler') { loadKapDisclosures(); loadNews(0); loadSignalStory(); }
@@ -3908,6 +3559,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     // GA4
     try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e) { /* gtag best-effort analitik - ad-blocker/consent durumunda tanimsiz olabilir, sekme gecisini bozmamali */ }
     _loadTabData(tab);
+    if (tab === 'ozet' && typeof hxChartDraw === 'function') { try { hxChartDraw(); } catch (e) { /* olculemezse ResizeObserver cizer */ } }
     // SPEC-017 Faz F Bug 3: Grafik tab açıldığında chart resize (display:none→block sonrası width sync)
     if (tab === 'grafik') {
       try { if (typeof window.bpChartResize === 'function') window.bpChartResize(); } catch(e) { console.warn('bpChartResize cagrisi basarisiz (grafik sekmesi acilirken)', e); }
