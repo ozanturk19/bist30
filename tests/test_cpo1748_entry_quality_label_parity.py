@@ -31,13 +31,6 @@ def _extract_py_dict(src, var_name):
     return dict(re.findall(r"['\"](\w+)['\"]\s*:\s*['\"]([^'\"]+)['\"]", body))
 
 
-def _extract_js_dict(src):
-    m = re.search(r"BP_EQ_LABELS\s*=\s*\{([^}]*)\}", src)
-    assert m, "BP_EQ_LABELS bulunamadi"
-    body = m.group(1)
-    return dict(re.findall(r"(\w+)\s*:\s*'([^']+)'", body))
-
-
 def test_business_rules_and_app_fallback_match():
     br = _extract_py_dict(_read(_BUSINESS_RULES_PY), "ENTRY_QUALITY_LABELS")
     app_fallback = _extract_py_dict(_read(_APP_PY), "ENTRY_QUALITY_LABELS")
@@ -47,19 +40,16 @@ def test_business_rules_and_app_fallback_match():
     )
 
 
-def test_business_rules_matches_frontend_vocab():
-    br = _extract_py_dict(_read(_BUSINESS_RULES_PY), "ENTRY_QUALITY_LABELS")
-    js = _extract_js_dict(_read(_BP_VOCAB_JS))
-    assert br == js, (
-        f"business_rules.ENTRY_QUALITY_LABELS ve bp-vocab.js BP_EQ_LABELS "
-        f"uyusmuyor: {br} != {js}"
-    )
+def test_frontend_has_no_entry_quality_vocab():
+    """C-61 (24.09, kanon §2.2): giris kalitesi rozetleri (Ideal/Kovalama)
+    islem zamanlama dili -- frontend'den kalkti. bp-vocab.js'e geri donerse
+    FAIL. Python tarafi D-39 ile alani uretmeyi birakana kadar kendi icinde
+    tutarli kalir (yukaridaki test)."""
+    assert "BP_EQ_LABELS" not in _read(_BP_VOCAB_JS)
 
 
 def test_uzak_label_is_kovalama_everywhere():
     br = _extract_py_dict(_read(_BUSINESS_RULES_PY), "ENTRY_QUALITY_LABELS")
     app_fallback = _extract_py_dict(_read(_APP_PY), "ENTRY_QUALITY_LABELS")
-    js = _extract_js_dict(_read(_BP_VOCAB_JS))
     assert br.get("UZAK") == "Kovalama"
     assert app_fallback.get("UZAK") == "Kovalama"
-    assert js.get("UZAK") == "Kovalama"
