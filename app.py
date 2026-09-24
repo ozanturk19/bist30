@@ -584,7 +584,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
         _extra_keys = (
             "quick_ratio", "gross_margin", "ebitda_margin", "fcf_to_sales",
             "net_debt_to_ebitda", "ev_to_ebitda", "ocf_positive_quarters",
-            "ocf_quarters_used", "ocf_stability_cv",
+            "ocf_quarters_used", "ocf_stability_cv", "ebitda_abs", "net_debt_abs",
         )
         extra = {k: data.get(k) for k in _extra_keys if k in data}
         return {
@@ -8886,6 +8886,16 @@ def _get_fx_rate_to_try(currency):
     return None
 
 
+def _ev_to_ebitda_try(market_cap_try, fx_rate, ebitda_abs, net_debt_abs):
+    """D-03: yabancı para raporlayan hissede FD/FAVÖK = (TRY piyasa değeri + net borç×kur)
+    / (FAVÖK×kur). FAVÖK ≤ 0, kur ya da ham tutar yoksa None."""
+    if not market_cap_try or not fx_rate or net_debt_abs is None:
+        return None
+    if ebitda_abs is None or ebitda_abs <= 0:
+        return None
+    return round((market_cap_try + net_debt_abs * fx_rate) / (ebitda_abs * fx_rate), 2)
+
+
 def _resolve_statement_currency(financial_currency, market_cap_raw, revenue_raw, fx_rate):
     """market_cap her zaman TRY (fiyat × hisse adedi) — revenue'nun etiketlenen
     para biriminde mi yoksa (TAVHL gibi) fiilen TRY mi olduğunu, ima edilen F/S
@@ -9079,11 +9089,13 @@ def _get_fundamentals(ticker_base):
         # CPO-1528 Faz 2: Faz 1/CPO-1527 çapraz-tablo oranları — financial_health_score.py
         # girdisi. _FUND_SANITY zaten bu alanlar için sınır tanımlıyor (ocf_* hariç, bkz. yorum orada).
         raw.update(_fetched.get("extra") or {})
+        _ebitda_abs = raw.pop("ebitda_abs", None)
+        _net_debt_abs = raw.pop("net_debt_abs", None)
         if raw.get("ev_to_ebitda") is not None and _stmt_cur != "TRY":
-            # CPO-1674: enterpriseValue'nun kendisi TRY piyasa değeri + yabancı para
-            # borç/nakit karışımı olabilir, EBITDA gibi tek bir fx_rate'e bölerek
-            # güvenle düzeltilemez (price_to_sales'ten farklı) — yanlış sayı yerine None.
-            raw["ev_to_ebitda"] = None
+            # CPO-1674: Yahoo'nun enterpriseValue'su TRY piyasa değeri + yabancı para
+            # borç/nakit karışımı — bölünemez. D-03: bunun yerine EV, TRY market_cap +
+            # net borç × kur olarak yeniden kurulur; ham tutarlar yoksa yanlış sayı yerine None.
+            raw["ev_to_ebitda"] = _ev_to_ebitda_try(_market_cap_raw, _fx_rate, _ebitda_abs, _net_debt_abs)
         data = _clean_fundamentals(raw)
         if data.get("beta") is None:
             # _clean_fundamentals sanity dışı beta'yı None'a çekmiş olabilir —

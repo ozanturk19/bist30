@@ -255,6 +255,10 @@ def _merge_cross_statement_ratios(info_subset: dict, income: dict, balance: dict
         "fcf_to_sales": fcf_to_sales,
         "net_debt_to_ebitda": net_debt_to_ebitda,
         "ev_to_ebitda": ev_to_ebitda,
+        # D-03: yabanci para raporlayanlarda (THYAO/ENKAI) EV/FAVOK TRY'ye cevrilerek
+        # hesaplanir — app.py bu iki ham tutari payload'a koymadan tuketir.
+        "ebitda_abs": ebitda,
+        "net_debt_abs": net_debt,
     }
 
 
