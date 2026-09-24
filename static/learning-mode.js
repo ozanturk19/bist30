@@ -15,7 +15,7 @@
        RSI 45-60 bandinda 46 hisse var, 45'i Guclu Trend DEGIL -- yani Ogrenme
        Modu'nu acan kullanici ekranda "Notr Bolge" yazarken sozlukten "ideal
        giris penceresi" okuyordu. Vaat iceren ad, onu doguran kosulla yazilir. */
-    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde İdeal Giriş Penceresi — diğer tüm sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
+    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde Sağlıklı Momentum — diğer tüm sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',
     'ema': 'Üstel hareketli ortalama — son verilere daha çok ağırlık verir. EMA12 kısa, EMA99 uzun vadeyi temsil eder.',

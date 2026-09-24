@@ -242,8 +242,12 @@ def axis_c(root, bad):
         bad.append((CANON_FILE, 0, 'C', "RSI bolge adi ureten kaynak bulunamadi."))
         return
     doc_names = {PAREN_TAIL.sub('', d).strip() for d in doc}
+    # C-60 (24.09): eski ad bpRsiZoneText'te "Sağlıklı Momentum"a iner;
+    # kaynak DEV-CPO-1793 (3) ile degisene kadar gecis eslemesi.
+    RENAMED = {'İdeal Giriş Penceresi': 'Sağlıklı Momentum'}
     for name, files in sorted(prod.items()):
         bare = PAREN_TAIL.sub('', name).strip()
+        bare = RENAMED.get(bare, bare)
         if bare in doc_names:
             continue
         bad.append((sorted(files)[0], 0, 'C',

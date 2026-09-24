@@ -1661,7 +1661,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=dd31dd69"></script>
+<script src="/static/bp-format.js?v=b501a830"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -3022,7 +3022,7 @@ function renderSummary(s, signalData) {
                     rsi < 30 ? '🔵' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${bpIndNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi. 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde İdeal Giriş Penceresi — diğer sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım." aria-label="RSI açıklamasını göster">?</button>`;
+      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi. 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde Sağlıklı Momentum — diğer sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
@@ -3065,7 +3065,7 @@ function renderSummary(s, signalData) {
         : (_sigAge !== null && _sigAge < 0) ? bpSignalAgeText(signalData.signal_date)
         : 'Son ' + bpSignalAgeText(signalData.signal_date) + 'dür aktif';
       conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
-        Math.abs(_dispChg).toFixed(1).replace('.', ',') + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';
+        Math.abs(_dispChg).toFixed(1).replace('.', ',') + ' düşüş fiyatı trend dönüş seviyesine (Supertrend) yaklaştırıyor olabilir.';
       conflictEl.style.display = '';
     } else {
       conflictEl.style.display = 'none';
@@ -4221,7 +4221,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/learning-mode.js?v=aba50f5a" defer></script>
+<script src="/static/learning-mode.js?v=bae3d984" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri

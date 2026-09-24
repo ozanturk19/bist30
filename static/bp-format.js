@@ -412,7 +412,11 @@ function bpRsiZoneText(zone, signal) {
      (kardes bolge adlari gibi Baslik Bicimi, parantezli aralik YOK -- RSI
      sayisi rozetin hemen yaninda zaten basili). */
   if (z.indexOf('Nötr') === 0) return 'Nötr Bölge';
-  if (z.indexOf('İdeal Giriş') === 0 && signal !== 'AL') return 'Nötr Bölge';
+  /* C-60 (24.09, kanon §2.2): islem yonetimi dili yok -- bant adi "Sağlıklı
+     Momentum". Kaynak (derive_rsi_zone) eski adi DEV-CPO-1793'e kadar
+     dondurebilir; iki ad da ayni kanona iner. */
+  if (z.indexOf('İdeal Giriş') === 0 || z.indexOf('Sağlıklı Momentum') === 0)
+    return signal === 'AL' ? 'Sağlıklı Momentum' : 'Nötr Bölge';
   return z;
 }
 

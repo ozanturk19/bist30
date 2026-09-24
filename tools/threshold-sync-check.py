@@ -35,10 +35,24 @@ LADDERS = {
     "RSI (bolge etiketi)": {
         "canon_fn": "derive_rsi_zone",
         "labels": ["Aşırı Satım", "Dip Toparlanması", "İdeal Giriş Penceresi",
-                   "Trend Güçleniyor", "Dikkatli", "Aşırı Alım"],
+                   "Sağlıklı Momentum", "Trend Güçleniyor", "Dikkatli", "Aşırı Alım"],
         "var": r"^(r|rsi|_?rsi\w*|\w*\.rsi\w*)$",
     },
 }
+
+# C-60 (24.09, kanon §2.2): RSI 45-60 bandinin yeni adi "Sağlıklı Momentum".
+# derive_rsi_zone eski adi DEV-CPO-1793 (3) inene kadar dondurebilir;
+# bp-format.js bpRsiZoneText iki adi ayni kanona indirir. Yeni ad eski adin
+# araligini/esigini miras alir. Kaynak degisince bu satir kendiliginden bosa duser.
+ALIAS = {"Sağlıklı Momentum": "İdeal Giriş Penceresi"}
+
+
+def _alias(d):
+    for yeni, eski in ALIAS.items():
+        if eski in d and yeni not in d:
+            d[yeni] = d[eski]
+    return d
+
 
 def kanonik(fn_name):
     """business_rules.py'deki fonksiyon govdesinden etiket->esik haritasi."""
@@ -193,7 +207,7 @@ def main():
     for ad, cfg in LADDERS.items():
         sirali, taban = kanonik(cfg["canon_fn"])
         var_re = re.compile(cfg["var"])
-        canon_num = {etiket: esik for _, esik, etiket in sirali}
+        canon_num = _alias({etiket: esik for _, esik, etiket in sirali})
         print(f"  {ad}: kanonik {cfg['canon_fn']}() -> " +
               " · ".join(f"{e}{op}{v:g}" for op, v, e in sirali))
         for f in hedefler:
@@ -211,7 +225,7 @@ def main():
     nesir_toplam = 0
     for ad, cfg in LADDERS.items():
         sirali, taban = kanonik(cfg["canon_fn"])
-        nb, ns = nesir_kontrol(cfg["labels"], araliklar(sirali, taban))
+        nb, ns = nesir_kontrol(cfg["labels"], _alias(araliklar(sirali, taban)))
         nesir_toplam += ns
         for yer, etiket, bulunan, beklenen, ham in nb:
             bulgular.append((yer, ad + " [nesir]", etiket, bulunan, beklenen))
