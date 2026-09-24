@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=3d9d77d4">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -51,9 +51,6 @@
     {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
-    {# K-DE: "Kalite" bir ALIM girisi degerlendirmesidir (bp-vocab.js eqApplies /
-       /metodoloji long-only kanonu) — Trend Bozuldu kartinda gosterilmez. #}
-    {% if s.entry_quality and s.signal == 'AL' %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
     {# C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). #}
   </div>
   <div class="sc-footer">
@@ -281,10 +278,6 @@ function renderCard(s, isNew) {
      ile birebir aynı Bugün/Dün/N-gün mantığını uyguluyor (bkz. bp-format.js). */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
-  /* K-DE: SSR makrosuyla birebir long-only kapisi — kanon bp-vocab.js eqApplies.
-     Kapi ile yayin AYNI ifadede tutulur: kapi 73 komsu satirdaki bir yon
-     kontrolunu (orn. `isAl`) kapi saymaz, cunku o baska bir hucreyi boyuyordu. */
-  if (eqApplies(s.signal) && s.entry_quality) metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
   /* C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). */
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';

@@ -31,7 +31,6 @@
        skorun UCUNCU adiydi, kanon "Teknik Guc Skoru" (metodoloji.html:215) ve bu
        dosyanin kendi 'sinyal' tanimi zaten dogru adi kullaniyor. `tier_score` alani
        app.py:1563'e gore de emekli (AUDIT-004 yerine gecti). */
-    'kovalama': 'Fiyat sinyal başlangıcına göre belirgin yükselmişken alım yapma riski. Genelde geri çekilme beklemek daha güvenli.',
     /* K-CA: `data-term="sinyal"` sitedeki EN YAYGIN jargon-linki (bp-vocab.js
        her sinyal cipini bununla sariyor) ama sozlukte karsiligi YOKTU -- yani
        Ogrenme Modu acikken bu terimde "?" dugmesi HIC cikmiyordu. Ustelik

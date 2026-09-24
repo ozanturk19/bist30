@@ -51,7 +51,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
 <link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=1d3c20b5">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -235,13 +235,6 @@ function _valuationCell(txt, band) {
        + (lbl ? ` <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>` : '');
 }
 
-function renderQuality(v) {
-  if (!v) return '<span class="muted">—</span>';
-  const map = { 'IDEAL':'q-ideal', 'IYI':'q-iyi', 'DIKKATLI':'q-dikkat', 'UZAK':'q-uzak' };
-  const cls = map[v] || 'q-none';
-  return `<span class="quality-badge ${cls}">${eqLabel(v)}</span>`;
-}
-
 // CPO-DEV2-052 #1 (Ozan karari): SAT sinyalinde somut giris/hedef/stop rakami
 // gosterilmiyor — BIST'te bireysel yatirimci aciga satamiyor (uygulanamaz vaat)
 // ve backtest SAT'i AL kadar guvenilir bulmuyor. Sinyal uretim mantigina
@@ -277,7 +270,6 @@ function renderCell(key, s) {
     /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
     case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${v}</span>` : '<span class="muted">—</span>';
-    case 'entry_quality': return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez') : renderQuality(v);
     /* K-BQ (21.09): iki kusur birden. (1) Satirin KENDI yardim metni "sinyal yonu ne
        olursa olsun her zaman hesaplanir" derken deger SAT'ta gizleniyordu — sayfa kendi
        aciklamasiyla celisiyordu; ad zaten "Supertrend Seviyesi", yani gizlenmesi gereken

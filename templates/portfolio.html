@@ -32,7 +32,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
 <link rel="stylesheet" href="/static/css/pages/portfolio.css?v=42d4f1aa">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -836,7 +836,7 @@ function render() {
       ? `<span class="${bpDirClass(pnlPct, 1, ['pos-pnl','neg-pnl','neu-pnl'])}">${bpFormatPct(pnlPct, 1)}</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
-      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" data-tip="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
+      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" data-tip="Sinyal başladığındaki kapanış: ${fmt(live.signal_price)} ₺">Sinyal ${fmt(live.signal_price)}₺</button>`
       : '';
     const sigBadge = sig !== '—'
       ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>${entryBtn}`

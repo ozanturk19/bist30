@@ -98,7 +98,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
                +  EMA12 &lt; EMA99
   </div>
   <p style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-top:8px;margin-bottom:0">
-    Haftalık trend yönü ek filtre olarak kullanılır; stop-loss, Supertrend alt/üst bandına göre otomatik hesaplanır.
+    Haftalık trend yönü ek filtre olarak kullanılır; trend dönüş seviyesi Supertrend alt/üst bandından hesaplanır.
     Detaylı metodoloji için <a href="/metodoloji" class="da-link">Metodoloji sayfasına</a> bakın.
   </p>
 </div>
@@ -124,7 +124,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
     <div class="feature-icon"><span aria-hidden="true">📊</span></div>
     <div>
       <div class="feature-title">Sinyal Paneli</div>
-      <div class="feature-desc">{{ bist_count }} BIST hissesinin güncel trend sinyali, giriş fiyatı ve stop-loss seviyeleri tek sayfada.</div>
+      <div class="feature-desc">{{ bist_count }} BIST hissesinin güncel trend durumu ve trend dönüş seviyeleri tek sayfada.</div>
     </div>
   </div>
   <div class="feature-card da-panel">
@@ -169,7 +169,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
       {# K-CE (22.09): "anlık değer" AYNI SAYFANIN 228. satiriyla celisiyordu
    ("Fiyatlar gerçek zamanlı değildir: ... son kapanış"). 62 satir arayla
    iki zit beyan. Site kanonu "son kapanış/güncel". #}
-      <div class="feature-desc">Yerel tarayıcıda (localStorage) portföy oluştur; giriş fiyatı, güncel değer, kâr/zarar ve sinyal durumunu takip et.</div>
+      <div class="feature-desc">Yerel tarayıcıda (localStorage) portföy oluştur; maliyet, güncel değer, kâr/zarar ve sinyal durumunu takip et.</div>
     </div>
   </div>
   <div class="feature-card da-panel">
@@ -282,7 +282,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=b501a830"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 {% include '_mobile_nav_partial.html' %}

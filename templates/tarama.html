@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
 <link rel="stylesheet" href="/static/css/pages/tarama.css?v=9998dee1">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -158,7 +158,7 @@
       <caption class="sr-only">Tarama sonuçları — hisse, sinyal, teknik güç skoru, trend gücü ve teknik göstergeler</caption>
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
-           Yeni sıra: Hisse / Sinyal / Teknik Güç (T3.5, skor — sıralamanın kaynağı; CPO-1682 kanonik ad) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / Hacim Oranı× / Tazelik / Sektör.
+           Yeni sıra: Hisse / Sinyal / Teknik Güç (T3.5, skor — sıralamanın kaynağı; CPO-1682 kanonik ad) / Trend Gücü (eski ADX) / Fiyat / Değişim / Hacim Oranı× / Tazelik / Sektör.
            ≤899px: table gizlenir, #mobileResultCards devreye girer (bkz. aşağıda kart render'ı).
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
@@ -166,7 +166,6 @@
           <th scope="col">Sinyal <a class="th-help" href="/metodoloji#sinyal-onayi" data-tip="Güçlü Trend / Yatay / Trend Bozuldu nasıl belirlenir? (Metodoloji)" aria-label="Sinyal nedir? Metodoloji">?</a></th>
           <th scope="col" class="th-sortable" id="th-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir — yalnız Güçlü Trend sinyalinde (Trend Bozuldu rozet almaz). Varsayılan sıralama: önce sinyal yönü (Güçlü Trend → Yatay → Trend Bozuldu), sonra her grubun içinde skor. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." onclick="sortBy('signal_strength')">Teknik Güç</button></th>
           <th scope="col" class="th-sortable" id="th-adx" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." onclick="sortBy('adx')">Trend Gücü</button></th>
-          <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
           <th scope="col" class="hide-mob th-sortable" id="th-vol" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Sitenin başka sayfalarındaki RVOL&#39;dan FARKLI bir sayıdır (o 5 günlük ortalamayı kullanır)." onclick="sortBy('vol_ratio')">Hacim Oranı ×</button></th>
@@ -174,15 +173,11 @@
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
-      <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'} %}<tr>
-        <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','') }}</div></a></td>
+      <tbody id="resultBody">{% for s in ssr_rows %}<tr>
+        <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','') }}</div>{% if s.stale_reason or s.data_quality == 'stale' %}<span class="stale-chip" tabindex="0" data-tip="Bu hissenin verisi güncellenmiyor; fiyat ve puan son alınan veriye aittir." style="display:inline-block;margin-top:2px;font-size:var(--bp-text-2xs);color:var(--bp-stale);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-sm);padding:0 5px">⚠ Güncellenmiyor</span>{% endif %}</a></td>
         <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
         <td>{{ s.signal_strength if s.signal_strength is not none and s.signal != 'SAT' else '—' }}</td>
         <td>{{ s.adx_label }}</td>
-        {# K-DE: giris kalitesi = ALIM girisi degerlendirmesi (bp-vocab.js eqApplies).
-           SSR JS cagiramaz, kural burada `s.signal == 'AL'` yazimiyla tekrar edilir —
-           kapi 73 iki yazimi birbirine bagli tutar. #}
-        <td>{% if s.signal == 'AL' %}{{ _eq.get(s.entry_quality, '—') }}{% elif s.signal == 'SAT' %}<span style="color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez" tabindex="0">—</span>{% else %}—{% endif %}</td>
         <td class="hide-mob-narrow price-val">{{ s.price|tr_price }}</td>
         {# K-CC: `%+.2f` DEGISMEYEN hisseye de "+" basiyordu ("+0,00%" — kazanc imasi).
            Jinja yon kanonu (_fmt_macros.html) bp-format.js ile ayni yuvarlamayi kullanir. #}
@@ -434,7 +429,7 @@ function exportCSV() {
    AYRI iki metrik olarak ayrilmisti -- kisaltilmis baslik tam o ayrimi
    CSV okuyucusu icin geri siliyordu. K-BZ CSV<->ekran SAYI paritesini
    kapatmisti, BASLIKLARI degil. */
-  const hdr = ['Hisse','İsim','Sektör','Sinyal','Trend Gücü (ADX)','Fiyat','Değişim%','Günlük Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
+  const hdr = ['Hisse','İsim','Sektör','Sinyal','Trend Gücü (ADX)','Fiyat','Değişim%','Günlük Hacim Oranı','Sinyal Yaşı (gün)'];
   const rows = _csvData.map(s => [
     csvSafe(s.ticker),
     csvSafe(s.name||''),
@@ -446,20 +441,13 @@ function exportCSV() {
          ("1,5×") — 22.09 canli olcum: 217 hissenin 195'inde sayi FARKLI, 14'u
          sayfanin kendi bandini (>=1,5 "Yuksek hacim") karsi tarafa geciyordu.
        - `s.vol_ratio ?` FALSY: vol_ratio TAM 0 olan 5 hissede hucre BOS
-         kaliyordu, ekran ise "0,00× / Dusuk hacim" diyordu.
-       - Giris Kalitesi: ham kod (IDEAL/IYI/DIKKATLI/UZAK) basiliyordu; ekranda
-         eqLabel() ile "Ideal/Iyi/Dikkatli/Kovalama". UZAK->Kovalama esleme
-         CSV okuyucusu icin tamamen kayipti. Tek kanon: bp-vocab.js eqLabel. */
+         kaliyordu, ekran ise "0,00× / Dusuk hacim" diyordu. C-61: Giris Kalitesi kolonu kalkti. */
     s.adx != null ? s.adx.toFixed(1).replace('.', ',') : '',
     s.price != null ? s.price.toFixed(2).replace('.', ',') : '',
     /* csvSafe: bpFormatPct '+'/'-' ile baslar; Excel bunlari FORMUL sanar. */
     s.change_pct != null ? csvSafe(bpFormatPct(s.change_pct, 2)) : '',
     s.vol_ratio != null ? s.vol_ratio.toFixed(2).replace('.', ',')+'×' : '',
-    bpSignalAgeCsv(s.signal_date),
-    /* K-DE: CSV ekranin kopyasidir (K-CC) — ekran SAT'ta "—" basiyorsa
-       disa aktarim da bos birakir, yoksa dosya sayfanin soylemedigi bir
-       giris degerlendirmesi vaat eder. */
-    csvSafe(eqApplies(s.signal) && s.entry_quality ? eqLabel(s.entry_quality) : '')
+    bpSignalAgeCsv(s.signal_date)
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
   const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
@@ -926,24 +914,19 @@ function renderResults(rows, count) {
     return `<span class="fresh-badge ${cls}"><span class="fresh-dot">●</span>${bpSignalDateLabel(sd)}</span>`;
   };
 
+  /* C-61 (24.09): donuk veri (C-P0-2309 hisse kutusunun tarama karşılığı) —
+     /api/tarama satırı stale_reason / data_quality taşıyınca görünür (SSR ile aynı). */
+  const staleChip = s => (s.stale_reason || s.data_quality === 'stale')
+    ? `<span class="stale-chip" tabindex="0" data-tip="Bu hissenin verisi güncellenmiyor; fiyat ve puan son alınan veriye aittir." style="display:inline-block;margin-top:2px;font-size:var(--bp-text-2xs);color:var(--bp-stale);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-sm);padding:0 5px">⚠ Güncellenmiyor</span>` : '';
   const tbody = document.getElementById('resultBody');
   tbody.innerHTML = rows.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
     const chgSign = s.change_pct > 0 ? '+' : '';
-    /* K-DE: SAT satirinda "Ideal"/"Iyi" rozeti AL YESILIYLE basiliyordu (canli
-       22.09: 72 SAT satirinin 35'i) — /hisse ayni hissede "somut giris/hedef
-       seviyesi bu sinyal tipinde gosterilmez" derken. Kanon: eqApplies(). */
-    const eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
-    const eqHtml  = (eqApplies(s.signal) && s.entry_quality)
-      ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
-      : (s.signal === 'SAT'
-          ? `<span style="color:var(--bp-text3)" data-tip="${BP_EQ_NA_TIP}" tabindex="0">—</span>`
-          : '—');
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
           <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
-          <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>
+          <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>${staleChip(s)}
         </a>
       </td>
       <td><span class="sig-badge sig-${s.signal}">
@@ -951,7 +934,6 @@ function renderResults(rows, count) {
       </span></td>
       <td>${scoreCell(s.signal_strength, s.tier, s.signal)}</td>
       <td>${trendCell(s.adx, s.adx_label, s.signal)}</td>
-      <td>${eqHtml}</td>
       <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
       <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
@@ -965,11 +947,6 @@ function renderResults(rows, count) {
     _mrl.innerHTML = rows.map(s => {
       const _chgCls  = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
       const _chgSign = s.change_pct > 0 ? '+' : '';
-      /* K-DE: masaustu satiriyla ayni long-only kapisi (eqApplies). */
-      const _eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
-      const _eqH     = (eqApplies(s.signal) && s.entry_quality)
-        ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
-        : `<span style="color:var(--bp-text3)"${s.signal === 'SAT' ? ` data-tip="${BP_EQ_NA_TIP}" tabindex="0"` : ''}>—</span>`;
       const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
@@ -981,13 +958,12 @@ function renderResults(rows, count) {
       const _sccls = _scv == null ? 'weak' : s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
       return `<a href="/hisse/${escapeHtml(s.ticker)}" class="mr-card">
         <div class="mr-top">
-          <div><div class="mr-ticker">${escapeHtml(s.ticker)}${_prm}</div><div class="mr-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div></div>
+          <div><div class="mr-ticker">${escapeHtml(s.ticker)}${_prm}</div><div class="mr-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>${staleChip(s)}</div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">
           <div class="mr-metric"><div class="mr-metric-label">Teknik Güç</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
-          <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:var(--bp-text-base);font-weight:600">${s.change_pct != null ? _chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</span></div>
         </div>
@@ -1439,6 +1415,6 @@ bpStartDataQualityPolling();
 </script>
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/learning-mode.js?v=4c5490be" defer></script>
+<script src="/static/learning-mode.js?v=628d83c1" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

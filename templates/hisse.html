@@ -14,7 +14,7 @@
 {% endif %}
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
-<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} stop loss, {{ ticker }} RSI ADX">
+<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} trend dönüş seviyesi, {{ ticker }} RSI ADX">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 <!-- Open Graph -->
@@ -100,8 +100,8 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=a97a628c">
+<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=c1c2339d">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -760,11 +760,6 @@
       <div class="info-card-sub" id="icDate">—</div>
     </div>
     <div class="info-card">
-      <div class="info-card-label">Giriş Fiyatı</div>
-      <div class="info-card-value" id="icEntry">—</div>
-      <div class="info-card-sub" id="icEntryLbl">Sinyal başladığındaki kapanış</div>
-    </div>
-    <div class="info-card">
       <div class="info-card-label">Supertrend Seviyesi</div>
       <div class="info-card-value" id="icSl">—</div>
       <div class="info-card-sub" id="icSlPct">—</div>
@@ -1227,12 +1222,12 @@
       <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
     </h2>
     <table class="history-table">
-      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, giriş fiyatı ve getiri</caption>
+      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, kapanış fiyatı ve getiri</caption>
       <thead>
         <tr>
           <th scope="col">Tarih</th>
           <th scope="col">Sinyal</th>
-          <th scope="col">Giriş Fiyatı</th>
+          <th scope="col">Kapanış</th>
           <th scope="col">Getiri</th>
         </tr>
       </thead>
@@ -1243,29 +1238,6 @@
     <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
   </div>
 
-  <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
-       listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
-       kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
-  <div id="sigPerfBox" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
-    <div style="margin-bottom:10px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
-    </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfWinRate" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
-      </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfAvg" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
-      </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfCount" style="font-size:var(--bp-text-3xl);font-weight:800;color:var(--bp-text3)"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
-      </div>
-    </div>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve Trend Bozuldu sinyalleri hariç, yalnızca Güçlü Trend sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
-  </div>
 
     </div>
   </details>
@@ -2592,22 +2564,7 @@ function renderSummary(s, signalData) {
              : date + ' · ' + bpSignalAgeText(signalData.signal_date));
     document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
 
-    if (signalData.signal_price && s.signal !== 'BEKLE' && !isNew) {
-      const ep = signalData.signal_price;
-      // bughunt-r120 number-rounding-display-mismatch: header _dispPrice (guncel
-      // fiyat) kullanirken bu hesap ham s.price (bayat chart-summary fiyati)
-      // kullaniyordu - ayni ekranda iki tutarsiz fiyat kaynagi.
-      const ret = ((_dispPrice - ep) / ep * 100);
-      /* K-BP: yon tek kanon — fiyat giris fiyatina esitse "+0,0%" YESIL degil. */
-      const retColor = bpDirColor(ret, 1);
-      document.getElementById('icEntry').innerHTML =
-        fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${bpFormatPct(ret, 1)})</span>`;
-    } else if (s.signal !== 'BEKLE' && isNew) {
-      document.getElementById('icEntry').innerHTML = '<span style="color:var(--bp-accent-yellow);font-size:var(--bp-text-sm)">⚡ Bugün oluştu</span>';
-    } else {
-      document.getElementById('icEntry').textContent = '—';
-      document.getElementById('icEntryLbl').textContent = 'Aktif sinyal yok';
-    }
+    /* C-61 (24.09): "Giriş Fiyatı" kartı kalktı — kanon §2.2 işlem dili yok. */
   }
 
   /* SL */
@@ -3093,58 +3050,6 @@ function renderHistory(history, currentPrice, liveSignal) {
   }).join('');
 }
 
-/* ── Geçmiş Sinyal Performansı — CPO-1107 madde 3 ─────
-   Aynı `history` dizisinden (Sinyal Geçmişi tablosunu besleyen
-   signal_history) hesaplar; ayrı bir backtest cache'i KULLANMAZ.
-   idx=0 (en yeni) her zaman aktif/açık sinyaldir, kazanma/kayıp henüz
-   belirlenmemiştir → sayıma dahil edilmez. Kapanış fiyatı mantığı
-   renderHistory'deki getiri hesabıyla birebir aynıdır.
-   CPO-DEV2-080(2): SAT sinyalleri kazanma/getiri sayımına dahil edilmez —
-   T3.7'de backtest özetine uygulanan aynı long-only ilkesi (SAT'ı ayrı yön-
-   düzeltmesiyle "kazanç" gibi göstermek yanıltıcı). Bu ayrıca eski winRate
-   (yön-düzeltmeli) / avgRet (ham ret) iç tutarsızlığını da kökten kapatır:
-   AL için yön düzeltmesi zaten ret>0 ile özdeş.
-   CPO-1637 Seçenek 2: backend artık BEKLE'ye dönüşü işaretleyen kaydın
-   üzerine `closed_at_price` koyuyor — bu alan varsa idx=0 dahi olsa
-   sinyal GERÇEKTEN kapanmış demektir, örnekleme dahil edilir (gerçek
-   kapanış fiyatıyla). closed_at_price yoksa (hâlâ aktif VEYA doğrudan
-   karşı yöne flip) eski davranış: idx=0 hariç, idx>0 için history[idx-1]. */
-function renderSigPerf(history) {
-  const box = document.getElementById('sigPerfBox');
-  if (!box) return;
-  const closed = [];
-  for (let idx = 0; idx < (history || []).length; idx++) {
-    const h = history[idx];
-    if (h.signal !== 'AL') continue;
-    let exitPrice = null;
-    if (h.closed_at_price != null) {
-      exitPrice = h.closed_at_price;
-    } else if (idx > 0) {
-      const exitH = history[idx - 1];
-      exitPrice = exitH ? exitH.price : null;
-    }
-    if (exitPrice == null || !h.price) continue;
-    const ret = (exitPrice - h.price) / h.price * 100;
-    closed.push({ ret, isGain: ret > 0 });
-  }
-  if (closed.length === 0) { box.style.display = 'none'; return; }
-
-  const wins    = closed.filter(c => c.isGain).length;
-  const winRate = Math.round(wins / closed.length * 100);
-  const avgRet  = closed.reduce((a, c) => a + c.ret, 0) / closed.length;
-
-  const wrEl = document.getElementById('sigPerfWinRate');
-  wrEl.textContent = '%' + winRate;
-  wrEl.style.color = winRate > 60 ? 'var(--bp-al)' : (winRate < 40 ? 'var(--bp-sat)' : 'var(--bp-text3)');
-
-  const avgEl = document.getElementById('sigPerfAvg');
-  avgEl.textContent = (avgRet > 0 ? '+' : '') + avgRet.toFixed(1).replace('.', ',') + '%';
-  avgEl.style.color = avgRet > 0 ? 'var(--bp-al)' : (avgRet < 0 ? 'var(--bp-sat)' : 'var(--bp-text3)');
-
-  document.getElementById('sigPerfCount').textContent = closed.length;
-  box.style.display = '';
-}
-
 /* ── Veri yükle — chart + /api/data paralel ─────────── */
 /* SPEC-008 L2 — Frontend Fail-Safe: bozuk/eksik chart ASLA render edilmez,
    sınırlı retry + kullanıcıya görünür durum mesajı. */
@@ -3255,7 +3160,6 @@ async function loadChart(retry) {
     /* Chart hemen render — /api/data'ya BAĞLI DEĞİL */
     buildChart(json.chart);
     renderHistory(json.chart.signal_history, json.chart.summary?.price, json.chart.summary?.signal);
-    renderSigPerf(json.chart.signal_history);
     renderCommentary(json.chart.commentary);
     renderSummary(json.chart.summary, null);  /* sd=null, /api/data sonra enrich edecek */
 
@@ -4160,7 +4064,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/learning-mode.js?v=4c5490be" defer></script>
+<script src="/static/learning-mode.js?v=628d83c1" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri

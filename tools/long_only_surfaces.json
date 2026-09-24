@@ -19,7 +19,8 @@
     "TAKMA AD olarak izlenir (const tp1 = signalData.tp1 -> ${fmt(tp1)}), ama",
     "iki adim otesi (obje icine koyup baska dosyada basmak) gorulmez -- o yuzden",
     "R1 kanal envanteri asil emniyet kemeridir.",
-    "C-52 (24.09): rr_signal/tp1/tp2 hicbir yuzeyde basilmiyor (kanon §2 hedef dili yok); yasak kapi 76 R3."
+    "C-52 (24.09): rr_signal/tp1/tp2 hicbir yuzeyde basilmiyor (kanon §2 hedef dili yok); yasak kapi 76 R3.",
+    "C-61 (24.09): tarama/gundem/karsilastir giris kalitesi yuzeyleri KALKTI (kanon §2.2 islem dili yok); geri eklenirse R1 yakalar."
   ],
   "fields": [
     "entry_quality",
@@ -29,28 +30,6 @@
     "tp2"
   ],
   "surfaces": {
-    "templates/tarama.html": {
-      "fields": [
-        "entry_quality"
-      ],
-      "dialects": [
-        "jinja",
-        "js"
-      ],
-      "status": "guarded",
-      "note": "SSR satiri + masaustu satiri + mobil kart + CSV disa aktarimi (4 yazar)."
-    },
-    "templates/gundem.html": {
-      "fields": [
-        "entry_quality"
-      ],
-      "dialects": [
-        "jinja",
-        "js"
-      ],
-      "status": "guarded",
-      "note": "Kart makrosu (SSR) ve renderCard (JS) ayni metrik listesini kuruyor."
-    },
     "templates/hisse.html": {
       "fields": [
         "entry_quality"
@@ -60,16 +39,6 @@
       ],
       "status": "guarded",
       "note": "CPO-DEV2-052 #1 (Ozan karari): SAT dalinda somut giris/hedef yapisi yok."
-    },
-    "templates/karsilastir.html": {
-      "fields": [
-        "entry_quality"
-      ],
-      "dialects": [
-        "js"
-      ],
-      "status": "guarded",
-      "note": "_naForSat() — SAT hucresi tooltipli '—'."
     }
   }
 }

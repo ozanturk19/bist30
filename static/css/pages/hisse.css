@@ -1081,6 +1081,7 @@
     .week52-bar   { padding: 12px 14px 14px; }
     #chartLoading { height: 280px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; } /* C-61: 3 kart */
     .chart-section { overflow: hidden; }
   }
   @media (max-width: 480px) {

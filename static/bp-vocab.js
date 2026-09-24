@@ -138,20 +138,7 @@ function sigLabel(sig) {
   return BP_SIG_LABELS[sig] || sig;
 }
 
-/* Giris kalitesi etiketi — kanonik harita, 3 sablonda (gundem/karsilastir/
-   tarama) ayri ayri kopyalanmisti (105. bagimsiz bug-hunt turu bulgusu).
-   index.html'in kendi ikon-onekli varyanti KASITLI bir tasarim farki
-   (r41, commit fd4d9f5, tooltip baglaminda) — buraya TASINMADI, dokunulmadi.
-   Global 'eqLabel' adiyla expose ediyoruz ki cagiran sablonlarin mevcut
-   kullanimlari degismesin. */
-/* bughunt-13.09 (finansal-analist workflow §B): "Uzak" tek basina
-   anlasilmiyordu (tooltip'i olmayan yuzeylerde, orn. tarama.html) —
-   "Kovalama" karsilastir.html'in mevcut tooltip metninde zaten kullanilan
-   kelime, tek basina daha aciklayici. */
-var BP_EQ_LABELS = { IDEAL: 'İdeal', IYI: 'İyi', DIKKATLI: 'Dikkatli', UZAK: 'Kovalama' };
-function eqLabel(code) {
-  return BP_EQ_LABELS[code] || code;
-}
+/* C-61 (24.09): giris kalitesi etiketi (eqLabel) kalkti — kanon §2.2. */
 
 /* K-DE (22.09.2026) — LONG-ONLY SUNUM KAPISI, TEK KANON.
 

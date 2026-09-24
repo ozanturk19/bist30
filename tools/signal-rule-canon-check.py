@@ -79,6 +79,13 @@ RE_BANNED = re.compile(
     r'\bTP[12]\b|\bR/R\b|[Rr]isk ?/ ?[Öö]dül|[Ss]top (?:bölgesi|seviyesi)|'
     r'[İi]deal giriş|[Gg]iriş bölgesi|[Pp]rim potansiyel|hedefe ulaştı|'
     r'>\s*Hedef\s*(?:\d\s*)?:|Hedef:</')
+# C-61 (24.09): C-60 tam yazim aradigi icin "Giriş Fiyatı", "stop-loss",
+# "Kovalama", "Kazanma Oranı" kaldi. Buyuk/kucuk harf + tire/bosluk duyarsiz
+# (Python re.I Turkce İ/ı'yi katlamaz -> sinif ile). "Penceresi" C-60 kalan
+# (RSI bolge adi gecis eslemesi) silinince eklenir.
+RE_BANNED_CI = re.compile(
+    r'g[iİI]r[iİI][şŞ][ \-](?:f[iİI]yat[ıI]|kal[iİI]tes[iİI]|b[öÖ]lges[iİI]|anal[iİI]z[iİI])|'
+    r'stop[ \-]?loss|kovalama|kazanma oran[ıI]', re.I)
 # GECICI: RSI bolge adi "İdeal Giriş Penceresi" business_rules.derive_rsi_zone'dan
 # gelir ve kapi 16/47 onu /metodoloji'de arar -- backend adi degisince (D) kalkar.
 BANNED_EXEMPT = ('templates/yasal.html', 'templates/gizlilik.html')
@@ -224,7 +231,8 @@ def scan_text(rel, text):
                             'kosul sayimi yanlis: "%s" -- 4 kosul var' % cm.group(0).strip()))
     if not rel.endswith('.py') and rel.replace(os.sep, '/') not in BANNED_EXEMPT:
         for i, line in enumerate(text.split('\n'), 1):
-            m = RE_BANNED.search(RE_BANNED_LOGIC.sub('', line))
+            _ln = RE_BANNED_LOGIC.sub('', line)
+            m = RE_BANNED.search(_ln) or RE_BANNED_CI.search(_ln)
             if m:
                 bad.append((rel, i, 'R3',
                             'kalici dil kurali: "%s" yazilmaz (kanon §2)' % m.group(0)))
@@ -321,6 +329,11 @@ FIX = [
     ("C-52 R/R", "<span>R/R </span><strong>1:2,0</strong>", 1),
     ("C-52 stop bolgesi", "<p>Fiyat stop bölgesine yakın</p>", 1),
     ("C-52 analist hedef kalir", "<span>Analist Hedef Fiyatı</span>", 0),
+    ("C-61 Giriş Fiyatı buyuk harf", "<div>Giriş Fiyatı</div>", 1),
+    ("C-61 stop-loss tireli", "<p>stop-loss seviyeleri</p>", 1),
+    ("C-61 GİRİŞ KALİTESİ", "<th>GİRİŞ KALİTESİ</th>", 1),
+    ("C-61 Kovalama", "<span>Kovalama</span>", 1),
+    ("C-61 Kazanma Oranı", "<div>Sinyal Kazanma Oranı</div>", 1),
     ("C-60 yorum muaf", "<!-- yfinance Ücretsiz LONG -->", 0),
     ("C-60 indexOf esleme muaf", "<script>if (z.indexOf('İdeal Giriş') === 0) x=1;</script>", 0),
 ]
