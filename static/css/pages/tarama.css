@@ -294,8 +294,9 @@
      iOS odak-yakinlastirmasi. Ortak receteyi artik `.da-select` veriyor
      (data-art.css); burada yalniz yuzey/kenarlik ve ok payi kaliyor.
      `font-size` BILEREK yazilmiyor: .da-select'in 16px'i gecerli olmali. */
+  .sort-wrap { min-width:0; max-width:100%; }
   .sort-select {
-    max-width:100%; min-width:0;   /* C-04: 320/390'da .result-header'dan tasmasin */
+    max-width:100%; min-width:0;   /* C-04: 320/390'da .result-header'dan tasmasin (kap: .sort-wrap) */
     background-color:var(--surface2); border:1px solid var(--bp-field-border);   /* K-Q */
     color:var(--text2); border-radius:var(--bp-radius); padding:5px 28px 5px 10px;
     outline:none; cursor:pointer;

@@ -369,4 +369,9 @@
      1.000.000,00 ₺ kesiliyordu -> tek satir + kart genisligine gore yazi boyu. */
   .pf-table:not(.pf-fits) thead th { position: static; }
   .sum-card { container-type: inline-size; }
-  .sum-num { white-space: nowrap; font-size: min(var(--bp-text-28), 10.5cqi); }
+  .sum-num { white-space: nowrap; font-size: min(var(--bp-text-28), 11cqi); }
+  /* 6 kart masaustunde 7 kolonluk auto-fit'te ~130px'e iniyordu (tutar 14px):
+     >=600px iki satir x 3 kart. Hucre yatay dolgusu 14->10: 13 sutunluk tablo
+     1280/1440'ta kabina sigar (sil dugmesi kabin icinde). */
+  @media (min-width: 600px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+  .pf-table thead th, .pf-table td { padding-left: 10px; padding-right: 10px; }

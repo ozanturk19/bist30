@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=cfed1383">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=df616688">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -114,7 +114,7 @@
   <div class="result-header">
     <div class="result-count" id="resultCount" role="status" aria-live="polite">{# 21.09 (K-W): sayac metni KENDI kabinda. Once dogrudan bu div'in
      innerHTML'i yazildigi icin #inlineSpinner ILK RENDER'DA YOK EDILIYORDU. #}<span id="resultCountText"><strong>—</strong> sonuç</span><span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="sort-wrap" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
       {# 21.09 (K-AV): option metinleri YON IDDIA EDIYOR ("Yuksek -> Dusuk") ama yonu
          sutun basligi da degistirebiliyor (sortBy toggle). Sabit metin yalan soyluyordu;
@@ -269,7 +269,7 @@
     <!-- Sonuç başlık — Temel -->
     <div class="result-header">
       <div class="result-count" id="resultCountTemel" role="status" aria-live="polite"><span id="resultCountTextTemel"><strong>—</strong> sonuç</span><span id="inlineSpinnerTemel" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="sort-wrap" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
         <select class="sort-select da-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
           <option value="temel_score" data-label="Temel Skor" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Temel Skor (Yüksek → Düşük)</option>
