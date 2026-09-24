@@ -1298,7 +1298,7 @@
       </div>
       <!-- Kârlılık & Büyüme -->
       <div id="fundProfitability" style="margin-bottom:16px">
-        <div class="da-fund-group-label"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
+        <div class="da-fund-group-label"><span aria-hidden="true">📈</span> Kârlılık</div>
         <div class="da-fund-grid" id="fundGridProfit"></div>
       </div>
       <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi) + CPO-1667 (19.09, ceyreklik toggle) -->
@@ -1312,6 +1312,7 @@
         </div>
         <div id="fundTrendChart" style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
       </div>
+      <div id="fundTrendNote" style="display:none;margin-bottom:16px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Çok yıllı karşılaştırma, enflasyon düzeltmesi tamamlanınca gösterilecek.</div>
       <!-- Getiri & Risk -->
       <div id="fundReturn">
         <div class="da-fund-group-label"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
@@ -3932,9 +3933,10 @@ async function loadFundamentals() {
       _fundCard('Net Kâr', _fmtMoneyObj(f.net_income), 'var(--bp-text)'),
       _fundCard('Net Kâr Marjı', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : f.profit_margin === 0 ? 'Başabaş' : 'Negatif'),
       _fundCard('Faaliyet Marjı', f.operating_margin != null ? bpPctLevel(f.operating_margin, 1) : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : f.operating_margin === 0 ? 'Başabaş' : 'Negatif'),
-      _fundCard('Kazanç Büyümesi', f.earnings_growth != null ? bpPctLevel(f.earnings_growth, 1) : null, _growthColor(f.earnings_growth), f.earnings_growth > 10 ? 'Güçlü' : f.earnings_growth > 0 ? 'Ilımlı' : f.earnings_growth === 0 ? 'Yatay' : 'Daralma'),
-      _fundCard('Gelir Büyümesi', f.revenue_growth != null ? bpPctLevel(f.revenue_growth, 1) : null, _growthColor(f.revenue_growth), f.revenue_growth > 10 ? 'Güçlü' : f.revenue_growth > 0 ? 'Ilımlı' : f.revenue_growth === 0 ? 'Yatay' : 'Daralma'),
     ].filter(Boolean).join('');
+    /* C-P1-2309 (24.09): "Kazanç/Gelir Büyümesi" kartları kalktı — yfinance
+       yıllar arası oranı TMS 29 dönemlerini karıştırıyordu. Açıklanan veri
+       ilkesiyle (şirketin kendi raporundaki karşılaştırma) D-40a0 sonrası döner. */
 
     /* ── Getiri & Risk kartları ───────────────────────────────────────────
        K-BX (22.09) — yfinance `debtToEquity` alanı YÜZDE döner, kat (x)
@@ -3946,9 +3948,24 @@ async function loadFundamentals() {
        etiketliydi, doğru çevrimde 80'i yeşil "Düşük" çıkıyor. Yani kart
        borçsuz şirketleri aşırı borçlu ilan ediyordu. Tek kanon: burada
        BİR KEZ orana çevrilir, aşağıdaki renk ve etiket aynı değişkeni okur. */
+    /* C-P1-2309 (24.09): Yahoo "dividendYield" bayattı (THYAO son ödeme
+       02.09.2025 iken %2,28 gösteriyordu). Kart artık temettü takviminin
+       açıklanan son ödemesini okur; takvimde olmayan hissede kart çıkmaz. */
+    let _divCard = '';
+    try {
+      const dj = await (await fetch('/api/temettu-takvimi', { signal: AbortSignal.timeout(8000) })).json();
+      const d = (dj.stocks || []).find(x => x.ticker === TICKER);
+      if (d) {
+        const last = d.last_div_date ? new Date(d.last_div_date + 'T00:00:00') : null;
+        const recent = last && (Date.now() - last.getTime()) <= 365 * 864e5;
+        _divCard = recent && d.last_div_amount != null
+          ? _fundCard('Temettü (son 12 ay)', d.last_div_amount.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺', 'var(--bp-text)', 'Son ödeme ' + last.toLocaleDateString('tr-TR'))
+          : _fundCard('Temettü (son 12 ay)', 'Son 12 ayda ödeme yok', 'var(--bp-text3)');
+      }
+    } catch (_) { _divCard = ''; /* takvim yoksa kart çıkmaz */ }
     const _deRatio = f.debt_to_equity != null ? f.debt_to_equity / 100 : null;
     const retCards = [
-      _fundCard('Temettü Verimi', f.dividend_yield != null ? bpPctLevel(f.dividend_yield, 2) : null, f.dividend_yield >= 4 ? 'var(--bp-al)' : f.dividend_yield > 0 ? 'var(--bp-gold)' : 'var(--bp-text3)', f.dividend_yield >= 4 ? 'Yüksek' : f.dividend_yield > 0 ? 'Standart' : 'Yok'),
+      _divCard,
       _fundCard('ROE (Öz Ser. Get.)', f.roe != null ? bpPctLevel(f.roe, 1) : null, _roeColor(f.roe), f.roe > 20 ? 'Güçlü' : f.roe > 10 ? 'Orta' : f.roe > 0 ? 'Zayıf' : f.roe === 0 ? 'Başabaş' : 'Negatif'),
       /* ── K-DL (22.09): BETA KARTI KALDIRILDI ────────────────────────────
          Kart `f.beta`yı (app.py `safe_num("beta")` → yfinance `beta`) "Piyasa
@@ -4020,11 +4037,11 @@ async function loadFundamentals() {
     const trendQ = f.statement_trend_quarterly || [];
     _fundTrendData.y = trendY;
     _fundTrendData.q = trendQ;
+    /* C-P1-2309 (24.09): çok yıllı çubuklar yanıltıcıydı (TMS 29 öncesi ve
+       sonrası yıllar yan yana). D-40a0 canlı olana kadar grafik yerine not;
+       son yıl değerleri yukarıdaki Kârlılık kartlarında. */
     if (trendY.length >= 2) {
-      const toggle = document.getElementById('fundTrendToggle');
-      if (toggle) toggle.style.display = trendQ.length >= 2 ? 'flex' : 'none';
-      fundTrendSetPeriod('y');
-      document.getElementById('fundTrend').style.display = '';
+      document.getElementById('fundTrendNote').style.display = '';
     }
 
     /* Sahiplik — r174 */
