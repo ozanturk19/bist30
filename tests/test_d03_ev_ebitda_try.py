@@ -35,3 +35,24 @@ def test_fetcher_ham_tutarlari_tasir():
                                       {"net_debt": 2.0}, {})
     assert r["ebitda_abs"] == 4.0 and r["net_debt_abs"] == 2.0
     assert r["net_debt_to_ebitda"] == 0.5
+
+
+def _bilanco(satirlar):
+    import pandas as pd
+    return type("T", (), {"balance_sheet": pd.DataFrame({"2025": satirlar})})()
+
+
+def test_net_borc_satiri_yoksa_toplam_borc_eksi_nakitten_turer():
+    from yf_fundamentals_fetch import _fetch_balance_sheet_trend
+    out = _fetch_balance_sheet_trend(_bilanco({
+        "Total Debt": 160.0,
+        "Cash Cash Equivalents And Short Term Investments": 5120.0,
+    }))
+    assert out["net_debt"] == 160.0 - 5120.0
+
+
+def test_net_borc_satiri_varsa_ona_dokunulmaz():
+    from yf_fundamentals_fetch import _fetch_balance_sheet_trend
+    out = _fetch_balance_sheet_trend(_bilanco({"Net Debt": 42.0, "Total Debt": 100.0,
+                                            "Cash And Cash Equivalents": 10.0}))
+    assert out["net_debt"] == 42.0

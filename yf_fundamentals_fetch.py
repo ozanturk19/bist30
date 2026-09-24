@@ -138,10 +138,21 @@ def _fetch_balance_sheet_trend(ticker) -> dict:
     if current_assets is not None and current_liabilities:
         quick_ratio = (current_assets - (inventory or 0.0)) / current_liabilities
 
+    total_debt = _latest_col_value(df, "Total Debt", col)
+    net_debt = _latest_col_value(df, "Net Debt", col)
+    if net_debt is None and total_debt is not None:
+        # D-03: ENKAI'da Yahoo "Net Debt" satirini vermiyor (Total Debt + nakit var);
+        # net borc = toplam borc - nakit ve kisa vadeli yatirimlar (yoksa yalniz nakit).
+        cash = _latest_col_value(df, "Cash Cash Equivalents And Short Term Investments", col)
+        if cash is None:
+            cash = _latest_col_value(df, "Cash And Cash Equivalents", col)
+        if cash is not None:
+            net_debt = total_debt - cash
+
     return {
         "quick_ratio": quick_ratio,
-        "net_debt": _latest_col_value(df, "Net Debt", col),
-        "total_debt": _latest_col_value(df, "Total Debt", col),
+        "net_debt": net_debt,
+        "total_debt": total_debt,
         "stockholders_equity": _latest_col_value(df, "Stockholders Equity", col),
     }
 
