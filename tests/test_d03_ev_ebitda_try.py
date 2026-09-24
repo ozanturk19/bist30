@@ -2,6 +2,11 @@
 import os
 import sys
 
+import pytest
+
+if sys.version_info < (3, 10):
+    pytest.skip("app.py 3.10+ ister — VPS venv'de çalıştır", allow_module_level=True)
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import _ev_to_ebitda_try
