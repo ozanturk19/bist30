@@ -40,6 +40,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text      import MIMEText
 import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
+import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -6664,13 +6665,14 @@ def _load_explain_cache_from_disk():
 
 # Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
 # (use_search=False olan denemeler grounding olmadan gider → daha stabil)
+# D-P0-2409 (maliyet): grounding kapalı, önce ucuz model (flash-lite $0,10/$0,40 · flash $0,30/$2,50).
 _GEMINI_NEWS_ATTEMPTS = [
-    ("gemini-2.5-flash",      True),   # 1. tercih: Flash 2.5 + Google Search grounding
-    ("gemini-2.5-flash-lite", False),  # fallback: Flash 2.5 Lite, stabil, grounding yok
+    ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite, grounding yok
+    ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
 ]
 _GEMINI_EXPLAIN_ATTEMPTS = [
-    ("gemini-2.5-flash",      False),  # 1. tercih: Flash 2.5
-    ("gemini-2.5-flash-lite", False),  # fallback: Flash 2.5 Lite, stabil
+    ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite
+    ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
 ]
 
 # ─── Gemini timeout-guard + circuit breaker (SPEC-009 Faz D, 18 May 2026) ───
@@ -7184,6 +7186,17 @@ Yatırımcılar için en önemli KAP bildirim kategorileri (sadeleştirilmiş a�
 ═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
 """
 
+def _gemini_cap_alert_mail():
+    """D-P0-2409: aylık harcama tavanı dolduğunda tek uyarı e-postası (ay başına bir kez)."""
+    try:
+        send_email(os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com"),
+                   "[BorsaPusula] Gemini aylık harcama tavanı doldu",
+                   f"<p>Gemini aylık tavan (${gemini_budget.MONTHLY_USD:g}) doldu; ay sonuna kadar AI özellikleri "
+                   f"(haber özeti, sinyal açıklaması) kapalı. {gemini_budget.summary_line()}</p>")
+    except Exception as e:
+        logger.warning("_gemini_cap_alert_mail: %s", e)
+
+
 def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     """Model fallback zinciri ile Gemini API çağrısı yapar.
 
@@ -7224,6 +7237,17 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
 
     for model_id, use_search in attempts:
+        # D-P0-2409: günlük çağrı + aylık USD tavanı — dolmuşsa HTTP isteği atılmaz.
+        _ok, _why = gemini_budget.reserve()
+        if not _ok:
+            if _why == "monthly_cap_new":
+                logger.warning("_gemini_call: AYLIK HARCAMA TAVANI doldu ($%s) — ay sonuna kadar Gemini kapalı",
+                               gemini_budget.MONTHLY_USD)
+                threading.Thread(target=_gemini_cap_alert_mail, daemon=True, name="gemini-cap-mail").start()
+            else:
+                logger.debug("_gemini_call: bütçe tavanı (%s) — çağrı yapılmadı", _why)
+            return None, None
+        use_search = use_search and gemini_budget.GROUNDING
         body = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -7242,10 +7266,18 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         try:
             r = requests.post(url, json=body, timeout=eff_timeout)
             r.raise_for_status()
-            text = (r.json().get("candidates", [{}])[0]
-                            .get("content", {})
-                            .get("parts", [{}])[0]
-                            .get("text", "")).strip()
+            _j = r.json()
+            text = (_j.get("candidates", [{}])[0]
+                        .get("content", {})
+                        .get("parts", [{}])[0]
+                        .get("text", "")).strip()
+            _um = _j.get("usageMetadata") or {}
+            gemini_budget.record(
+                model_id,
+                int(_um.get("promptTokenCount") or max(1, len(prompt) // 3)),
+                int(_um.get("candidatesTokenCount") or 0) + int(_um.get("thoughtsTokenCount") or 0)
+                or int(max_tokens))
+            logger.info("%s", gemini_budget.summary_line())
             if text:
                 _gemini_cb["fails"] = 0   # başarı → circuit breaker sayacı sıfırla
                 _gemini_quota_cb["consecutive_429"] = 0   # başarı → kota devresi de sıfırlanır
@@ -7336,6 +7368,14 @@ def get_ai_news(ticker, source="user", ua_class=None):
             # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
             logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
             return cached.get("text")   # başarısız cache → None döner
+    if not gemini_budget.GROUNDING:
+        # D-P0-2409: haber özeti "gerçek KAP bildirimi" ister; Google Search grounding olmadan
+        # model bildirim UYDURUR. Grounding maliyet gerekçesiyle kapalıyken çağrı atılmaz,
+        # mevcut başarısızlık yolu (negatif cache → dürüst "kullanılamıyor") kullanılır.
+        logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=no (grounding kapalı)", ticker, ua_class)
+        with _lock:
+            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
+        return None
     logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
 
     name       = STOCK_NAMES.get(ticker, ticker)
@@ -10760,6 +10800,11 @@ def api_health():
     resp = dict(_health_snapshot)
     resp["lock_probe"] = _lock_probe_state
     resp["processes"] = _collect_process_shas()  # D-01b
+    _gb = gemini_budget.status()   # D-P0-2409
+    resp["gemini_calls_today"] = _gb["calls_today"]
+    resp["gemini_usd_month"] = _gb["usd_month"]
+    resp["gemini_caps"] = {"daily_calls": _gb["daily_cap"], "monthly_usd": _gb["monthly_cap_usd"],
+                           "enabled": _gb["enabled"]}
     return safe_json(resp)
 
 

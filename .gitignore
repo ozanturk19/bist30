@@ -84,3 +84,4 @@ tests/mobile-overflow/
 node_modules/
 package-lock.json
 resmi_kapanis/
+gemini_usage.json
