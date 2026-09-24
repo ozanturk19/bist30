@@ -213,7 +213,7 @@ def test_app_wiring_api_data_and_pages():
     assert {r["ticker"] for r in tr["results"]} == set(app.SECTORS[FOOD])
     assert tr["sectors"] == st.sort_labels(app.SECTORS)
     # hero rozeti, JSON-LD category, ilgili hisseler başlığı ve listesi KAP kovasından
-    assert 'class="hib-sector">%s<' % FOOD in body
+    assert ">%s<" % FOOD in body and "hx-chip" in body   # C-20: hero rozeti .hx-chip
     assert '"category": "%s"' % FOOD in body
     assert "%s Sektöründen Diğer Hisseler" % FOOD in body
     related_html = body.split("Sektöründen Diğer Hisseler", 1)[1].split("</aside>", 1)[0]
