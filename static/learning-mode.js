@@ -32,12 +32,6 @@
        dosyanin kendi 'sinyal' tanimi zaten dogru adi kullaniyor. `tier_score` alani
        app.py:1563'e gore de emekli (AUDIT-004 yerine gecti). */
     'kovalama': 'Fiyat sinyal başlangıcına göre belirgin yükselmişken alım yapma riski. Genelde geri çekilme beklemek daha güvenli.',
-    /* K-CA (22.09): bu iki anahtar AYNI terimi IKI FARKLI capadan tanimliyordu
-       ('r/r' hedefe uzaklik, 'rr_ratio' pozisyondan uzaklik) ve 'rr_ratio'ya
-       hicbir element ulasamiyordu -- sitede `data-term="rr_ratio"` yok, o adda
-       bir gorunur metin de yok. Olu anahtar silindi, kalan tanim /metodoloji
-       #risk-odul bolumundeki capayla (sinyal fiyati) birlestirildi. */
-    'r/r': 'Risk/Ödül oranı — sinyal fiyatından ölçülür: (TP1 − sinyal fiyatı) ÷ (sinyal fiyatı − Supertrend seviyesi). 1:2 ve üstü genellikle anlamlı bulunur. Sabit bir vaat değildir; fiyat stop seviyesinden uzaklaştıkça büyür.',
     /* K-CA: `data-term="sinyal"` sitedeki EN YAYGIN jargon-linki (bp-vocab.js
        her sinyal cipini bununla sariyor) ama sozlukte karsiligi YOKTU -- yani
        Ogrenme Modu acikken bu terimde "?" dugmesi HIC cikmiyordu. Ustelik

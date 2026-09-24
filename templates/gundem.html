@@ -54,13 +54,7 @@
     {# K-DE: "Kalite" bir ALIM girisi degerlendirmesidir (bp-vocab.js eqApplies /
        /metodoloji long-only kanonu) — Trend Bozuldu kartinda gosterilmez. #}
     {% if s.entry_quality and s.signal == 'AL' %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
-    {# 20.09 CPO: rr_signal NEGATIF gelebiliyor (NETAS canlida -0,74: TP1 90,85 -> 85,67,
-       yani hedef girisin ALTINDA). "1:N" oran notasyonu negatif sayiyi ifade EDEMEZ —
-       canlida "R/R 1:-0,7" diye anlamsiz bir metin basiliyordu. Kok neden backend'de
-       (CPO-1676, DEV1), burada malformed sayi basmiyoruz: yanlis sayi eksik sayidan kotu. #}
-    {# K-DE: /metodoloji «Trend Bozuldu sinyallerinde hedef/stop yapisi ve R/R
-       gosterilmez» diyor, /hisse de oyle davraniyor — bu kart istisna kalmisti. #}
-    {% if s.rr_signal and s.rr_signal > 0 and s.signal == 'AL' %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
+    {# C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). #}
   </div>
   <div class="sc-footer">
     <div style="display:flex;align-items:center;gap:8px">
@@ -291,10 +285,7 @@ function renderCard(s, isNew) {
      Kapi ile yayin AYNI ifadede tutulur: kapi 73 komsu satirdaki bir yon
      kontrolunu (orn. `isAl`) kapi saymaz, cunku o baska bir hucreyi boyuyordu. */
   if (eqApplies(s.signal) && s.entry_quality) metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
-  /* DEV-1763: sabit rr_ratio(=2.0) yerine sinyal başından gerçek R/R (rr_signal) */
-  /* 20.09 CPO: SSR daliyla ayni guard — negatif rr_signal "1:-0,7" diye basiliyordu. */
-  /* K-DE: SAT kartinda R/R gosterilmez (bkz. SSR makrosu + /metodoloji). */
-  if (eqApplies(s.signal) && s.rr_signal > 0) metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
+  /* C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). */
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 

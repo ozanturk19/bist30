@@ -357,11 +357,10 @@
            sayfanın kendi R/R kutusu (satır ~2432) aynı cümleyi kuruyordu; hero ise
            72/72 SAT hissesinde "Stop: X ₺" basıyordu. Canlı: SAT'ta sl_level HER ZAMAN
            fiyatın üstünde (72/72) — long-only üründe bu sayı stop değildir. #}
-        {% if _sig == 'AL' and (ssr_signal.tp_level or ssr_signal.sl_level) %}
+        {# C-52 (24.09, kanon §2.2): Hedef/Stop/Giriş satırı kalktı — tek betimleyici satır. #}
+        {% if _sig == 'AL' and ssr_signal.sl_level %}
         <div class="bp-hero-levels">
-          {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
-          {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
-          {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ ssr_signal.entry|tr_price }} ₺</span>{% endif %}
+          <span><strong>Trend dönüş seviyesi (Supertrend):</strong>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% set _stdist = '%.1f'|format(((ssr_signal.price - ssr_signal.sl_level)|abs) / ssr_signal.price * 100)|replace('.', ',') %} · fiyatın %{{ _stdist }} {{ 'altında' if ssr_signal.sl_level < ssr_signal.price else 'üstünde' }}{% endif %}</span>
         </div>
         {% endif %}
       </div>
@@ -740,7 +739,7 @@
           <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±<span class="sr-only"> (yeni sekmede açılır)</span></a>,
           <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>)
           algoritmik sinyalin temelidir.
-          Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
+          Sinyal kartları ve trend durumu aşağıda detaylandırılmıştır.
         </p>
       </div>
     </details>
@@ -1111,22 +1110,21 @@
   </section>
   {% endif %}
 
-  <!-- Giriş Analizi (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir) -->
+  <!-- Trend Durumu (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir; C-52: eski "Giriş Analizi") -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title"><span aria-hidden="true">🎯</span> Giriş Analizi</h2>
+    <h2 class="section-title"><span aria-hidden="true">🧭</span> Trend Durumu</h2>
     <div class="entry-analysis-grid" id="entryAnalysisGrid">
 
       <!-- Giriş Değerlendirmesi -->
       <div>
-        <div class="vol-status-lbl">Değerlendirme</div>
+        <div class="vol-status-lbl">Sinyal sonrası fiyat</div>
         <div id="eqBadge"></div>
         <div class="eq-note" id="eqNote"></div>
       </div>
 
-      <!-- R/R Görsel -->
+      <!-- C-52: Risk/Ödül kartı kalktı (kanon §2) — yerine trend dönüş seviyesi -->
       <div>
-        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji#risk-odul" target="_blank" rel="noopener">Risk / Ödül<span class="sr-only"> (yeni sekmede açılır)</span></a></div>
-        <div id="rrBarContainer"></div>
+        <div class="vol-status-lbl">Trend dönüş seviyesi (<a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>)</div>
         <div id="rrLevels"></div>
       </div>
 
@@ -2658,7 +2656,7 @@ function renderSummary(s, signalData) {
         /* K-CP: display yazimi yok -- gorunurluk applyTab'in kanonu */
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
-          grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
+          grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
         }
       }
       return;
@@ -2672,8 +2670,8 @@ function renderSummary(s, signalData) {
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
           const msg = !signalData
-            ? 'Sinyal aktif — giriş analizi yükleniyor…'
-            : 'Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.';
+            ? 'Sinyal aktif — trend durumu yükleniyor…'
+            : 'Bu sinyal için trend durumu şu an hesaplanamadı, veri yetersiz.';
           grid.innerHTML = `<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">${msg}</div>`;
         }
       }
@@ -2703,107 +2701,31 @@ function renderSummary(s, signalData) {
     // celisebiliyordu (SAT sinyalinde AL rakamlari gorunmesi riski dahil). s.signal
     // ile hizalandi - fonksiyonun geri kalani zaten s.signal'i kanonik kaynak
     // olarak kullaniyor.
+    /* C-52 (24.09, kanon §2.2): giriş kalitesi rozeti, backend entry_note'u
+       ("SL'ye yakın — R/R", "giriş bölgesi"), R/R çubuğu ve SL/TP1/TP2 satırı
+       kalktı. Tek betimleyici satır: trend dönüş seviyesi + fiyata uzaklık. */
+    const eqBadgeEl = document.getElementById('eqBadge');
+    const eqNoteEl = document.getElementById('eqNote');
     if (s.signal === 'SAT') {
-      const eqBadgeEl = document.getElementById('eqBadge');
-      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Zayıflama sinyali</span>`;
-      const eqNoteEl = document.getElementById('eqNote');
-      if (eqNoteEl) eqNoteEl.innerHTML = `<span>Trend aşağı yönlü — somut giriş/hedef seviyesi bu sinyal tipinde gösterilmez.</span>`;
-      const rrBarEl = document.getElementById('rrBarContainer');
-      if (rrBarEl) rrBarEl.innerHTML = '';
-      const rrLevelsEl = document.getElementById('rrLevels');
-      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için Trend Bozuldu sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
+      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Trend aşağı yönlü</span>`;
+      if (eqNoteEl) eqNoteEl.innerHTML = '';
     } else {
-      /* Giriş Değerlendirmesi */
       const eq = signalData.entry_quality;
-      const isSafe = (eq === 'IDEAL' || eq === 'IYI');
-      const eqBadgeEl = document.getElementById('eqBadge');
-      if (eqBadgeEl) {
-        const label = isSafe ? 'Güvenli' : 'Giriş için riskli bölge';
-        eqBadgeEl.innerHTML = `<span class="eq-badge ${isSafe ? 'eq-safe' : 'eq-risky'}">${label}</span>`;
-      }
-      let noteHtml = signalData.entry_note ? `<span>${signalData.entry_note}</span>` : '';
+      const isNear = (eq === 'IDEAL' || eq === 'IYI');
+      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge ${isNear ? 'eq-safe' : 'eq-risky'}">${isNear ? 'Sinyal fiyatına yakın' : 'Sinyal fiyatından uzaklaştı'}</span>`;
       // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
-      if (signalData.earnings_warning) {
-        const ew = signalData.earnings_warning;
-        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(var(--bp-warn-rgb),0.12);border:1px solid rgba(var(--bp-warn-rgb),0.4);border-radius:6px;padding:5px 10px;color:var(--bp-warn);font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
-      }
-      const eqNoteEl = document.getElementById('eqNote');
-      if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
-
-      /* R/R bar görsel */
-      const tp1 = signalData.tp1;
-      const tp2 = signalData.tp2;
-      const sl  = s.sl_level;
-      // bughunt-r120 emsali: header fiyatı (_dispPrice, satır ~2208) ile bu kutu
-      // farklı kaynak kullanıyordu (ham s.price) — bugün CPO-1639 backend senkronu
-      // sayesinde maskeli/eşit ama defansif olarak ayni desene hizalandı.
+      const ew = signalData.earnings_warning;
+      if (eqNoteEl) eqNoteEl.innerHTML = ew ? `<span style="margin-top:8px;display:inline-block;background:rgba(var(--bp-warn-rgb),0.12);border:1px solid rgba(var(--bp-warn-rgb),0.4);border-radius:6px;padding:5px 10px;color:var(--bp-warn);font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta oynaklık yaratabilir" tabindex="0">⚠️ ${ew.message}</span>` : '';
+    }
+    const rrLevelsEl = document.getElementById('rrLevels');
+    if (rrLevelsEl) {
+      const lvl = s.sl_level;
       const cur = _dispPrice;
-      if (tp1 && tp2 && sl && cur) {
-        // ── K-CA (22.09): BU BAR HER HISSEDE AYNI GORUNUYORDU ────────────────
-        // Eski hesap `risk = |cur - sl|`, `reward = |tp2 - cur|` idi. Ama TP2
-        // backend'de ZATEN `cur + 3 x risk` olarak kuruluyor -- yani oran
-        // cebirsel olarak HER ZAMAN 3,0 (bar 25% / 75%). Canli olcum 22.09:
-        // rr_signal'i olan 55 hissenin 55'inde bar tipatip 25/75; ustelik
-        // hemen ALTINDAKI satir ayni karta "13,25x" (TKFEN) ya da "0,34x"
-        // (MAVI) yaziyordu. Tek kart, tek etiket ("Risk / Ödül"), IKI KANON.
-        // CPO-DEV2-045 ayni totolojiyi `rr_now` SAYISINDAN silmisti; BAR ayni
-        // hesabi yasatiyordu (ders 56: kapi komsu kanali gormez).
-        // Artik bar, altinda YAZAN sayinin (rr_signal) ta kendisini cizer.
-        const rrSig = signalData.rr_signal;
-        const rrBarEl = document.getElementById('rrBarContainer');
-        if (rrBarEl) {
-          if (typeof rrSig === 'number' && isFinite(rrSig) && rrSig > 0) {
-            // 1 birim risk : rrSig birim ödül. Uc oranlarda (40,7x) risk dilimi
-            // gorunmez olmasin diye %8-%92 araliginda kirpilir -- kirpma SADECE
-            // genislige uygulanir, yazan sayi ham deger kalir.
-            let riskW = Math.round(100 / (1 + rrSig));
-            riskW = Math.max(8, Math.min(92, riskW));
-            const rewW = 100 - riskW;
-            rrBarEl.innerHTML = `
-            <div class="rr-bar" role="img" aria-label="Risk ödül oranı 1:${rrSig.toFixed(1).replace('.', ',')}">
-              <div class="rr-risk-seg" style="width:${riskW}%"></div>
-              <div class="rr-reward-seg" style="width:${rewW}%"></div>
-            </div>`;
-          } else {
-            // rr_signal yoksa cizilecek bir oran da yok -- sabit bir bar
-            // cizmek "olculmus bir oran var" demektir (K-V: bos != hata).
-            rrBarEl.innerHTML = '';
-          }
-        }
-
-        const rrLevelsEl = document.getElementById('rrLevels');
-        if (rrLevelsEl) {
-          // CPO-DEV2-045 #1: "Şu an girersen R/R" (rr_now) kaldırıldı — TP1=entry+risk*2
-          // sabit formülü yüzünden cebirsel olarak HER ZAMAN 2.0 çıkıyordu (totoloji),
-          // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
-          // K-CA (22.09): yazim kanonu /gundem ile birlestirildi -- ayni buyukluk
-          // orada "1:2,0", burada "2,00x" diye basiliyordu (ayni is, iki kanon).
-          const rrRowsHtml = (typeof rrSig === 'number' && isFinite(rrSig) && rrSig > 0) ? `
-            <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
-              <div style="display:flex;justify-content:space-between;color:var(--bp-text3)">
-                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji#risk-odul" target="_blank" rel="noopener">R/R<span class="sr-only"> (yeni sekmede açılır)</span></a></span>
-                <strong style="color:${rrSig >= 2.0 ? 'var(--bp-al)' : rrSig >= 1.0 ? 'var(--bp-warn)' : 'var(--bp-sat)'}">1:${rrSig.toFixed(1).replace('.', ',')}</strong>
-              </div>
-            </div>` : '';
-          rrLevelsEl.innerHTML = `
-            <div class="rr-level-row">
-              <div class="rr-lvl bp-sat-text">
-                <span>SL</span>
-                <strong class="bp-sat-text">${fmt(sl)}</strong>
-              </div>
-              <div class="rr-lvl" style="text-align:center">
-                <span>Şimdi</span>
-                <strong>${fmt(cur)}</strong>
-              </div>
-              <div class="rr-lvl" style="text-align:right">
-                <span class="bp-al-text" data-tip="Şimdiki fiyattan 2 birim risk yukarıda" tabindex="0">TP1</span>
-                <strong class="bp-al-text">${fmt(tp1)}</strong>
-                <br>
-                <span style="color:var(--bp-brand);font-size:10px" data-tip="Şimdiki fiyattan 3 birim risk yukarıda" tabindex="0">TP2</span>
-                <strong style="color:var(--bp-brand);font-size:var(--bp-text-xs)"> ${fmt(tp2)}</strong>
-              </div>
-            </div>` + rrRowsHtml;
-        }
+      if (lvl && cur) {
+        const dist = Math.abs(cur - lvl) / cur * 100;
+        rrLevelsEl.innerHTML = `<div style="font-variant-numeric:tabular-nums"><strong style="font-size:var(--bp-text-lg)">${fmt(lvl)} ₺</strong> <span style="color:var(--bp-text3);font-size:var(--bp-text-sm)">· fiyatın ${bpPctLevel(dist, 1)} ${lvl < cur ? 'altında' : 'üstünde'}</span></div>`;
+      } else {
+        rrLevelsEl.innerHTML = '';
       }
     }
 
@@ -3283,8 +3205,8 @@ function _resolveStuckEntryAnalysis(warming) {
   const grid = document.getElementById('entryAnalysisGrid');
   if (grid && grid.textContent.indexOf('yükleniyor') !== -1) {
     const msg = warming
-      ? 'Giriş analizi hazırlanıyor, birkaç saniye içinde yüklenecek.'
-      : 'Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.';
+      ? 'Trend durumu hazırlanıyor, birkaç saniye içinde yüklenecek.'
+      : 'Bu sinyal için trend durumu şu an hesaplanamadı, veri yetersiz.';
     grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">' + msg + '</div>';
   }
 }
@@ -4078,7 +4000,7 @@ async function loadFundamentals() {
       const recColor = recColors[f.analyst_rec] || 'var(--bp-text3)';
       const recBadge = f.analyst_rec ? `<span style="background:${recColor};color:var(--bp-bg);font-weight:700;font-size:var(--bp-text-xs);padding:2px 9px;border-radius:var(--bp-radius-20)">${f.analyst_rec}</span>` : '';
       const upsideHtml = upside != null
-        ? `<span style="color:${bpDirColor(upside, 1)};font-weight:600">${bpFormatPct(upside, 1)}</span>`  /* K-BP */
+        ? `<span style="color:var(--bp-text2)">fiyatın ${bpPctLevel(Math.abs(upside), 1)} ${upside >= 0 ? 'üstünde' : 'altında'}</span>`  /* C-52: nötr; "Analist Hedef Fiyatı X ₺ · fiyatın %Y üstünde" */
         : '';
       document.getElementById('fundAnalyst').innerHTML =
         `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -4221,7 +4143,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/learning-mode.js?v=bae3d984" defer></script>
+<script src="/static/learning-mode.js?v=4c5490be" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri

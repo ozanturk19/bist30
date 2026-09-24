@@ -18,7 +18,8 @@
     "SINIR: kapi 'ekrana basan okuma'yi arar; alani yerel degiskene alan yazim",
     "TAKMA AD olarak izlenir (const tp1 = signalData.tp1 -> ${fmt(tp1)}), ama",
     "iki adim otesi (obje icine koyup baska dosyada basmak) gorulmez -- o yuzden",
-    "R1 kanal envanteri asil emniyet kemeridir."
+    "R1 kanal envanteri asil emniyet kemeridir.",
+    "C-52 (24.09): rr_signal/tp1/tp2 hicbir yuzeyde basilmiyor (kanon §2 hedef dili yok); yasak kapi 76 R3."
   ],
   "fields": [
     "entry_quality",
@@ -41,8 +42,7 @@
     },
     "templates/gundem.html": {
       "fields": [
-        "entry_quality",
-        "rr_signal"
+        "entry_quality"
       ],
       "dialects": [
         "jinja",
@@ -53,10 +53,7 @@
     },
     "templates/hisse.html": {
       "fields": [
-        "entry_quality",
-        "tp1",
-        "tp2",
-        "rr_signal"
+        "entry_quality"
       ],
       "dialects": [
         "js"
@@ -66,9 +63,7 @@
     },
     "templates/karsilastir.html": {
       "fields": [
-        "entry_quality",
-        "tp1",
-        "tp2"
+        "entry_quality"
       ],
       "dialects": [
         "js"

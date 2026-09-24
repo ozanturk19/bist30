@@ -73,7 +73,12 @@ SCAN_EXT = ('.html', '.js', '.py')
 # disi (LONG/SHORT mantik degeri). Hukuki metin istisnasi: yasal, gizlilik.
 RE_BANNED = re.compile(
     r'[Üü]cretsiz|ÜCRETSİZ|Yahoo|yfinance|\bLONG\b|\bSHORT\b|Stop Loss|'
-    r'[İi]deal Giriş(?! Penceresi)|Giriş fiyatı')
+    r'[İi]deal Giriş(?! Penceresi)|Giriş fiyatı|'
+    # C-52 (24.09): teknik hedef + islem yonetimi dili (kanon §2.2). Analist
+    # hedef fiyati KALIR -- "Hedef" tek basina taranmaz, yalniz satir etiketi.
+    r'\bTP[12]\b|\bR/R\b|[Rr]isk ?/ ?[Öö]dül|[Ss]top (?:bölgesi|seviyesi)|'
+    r'[İi]deal giriş|[Gg]iriş bölgesi|[Pp]rim potansiyel|hedefe ulaştı|'
+    r'>\s*Hedef\s*(?:\d\s*)?:|Hedef:</')
 # GECICI: RSI bolge adi "İdeal Giriş Penceresi" business_rules.derive_rsi_zone'dan
 # gelir ve kapi 16/47 onu /metodoloji'de arar -- backend adi degisince (D) kalkar.
 BANNED_EXEMPT = ('templates/yasal.html', 'templates/gizlilik.html')
@@ -311,6 +316,11 @@ FIX = [
     ("C-60 LONG", "<li>ST LONG trendi</li>", 1),
     ("C-60 Stop Loss", "<small>Stop Loss: alt bant</small>", 1),
     ("C-60 ideal giris", "<h2>İdeal Giriş Noktası</h2>", 1),
+    ("C-52 Hedef satiri", "<span><strong>Hedef:</strong>12 ₺</span>", 1),
+    ("C-52 TP1", "<span>TP1</span>", 1),
+    ("C-52 R/R", "<span>R/R </span><strong>1:2,0</strong>", 1),
+    ("C-52 stop bolgesi", "<p>Fiyat stop bölgesine yakın</p>", 1),
+    ("C-52 analist hedef kalir", "<span>Analist Hedef Fiyatı</span>", 0),
     ("C-60 yorum muaf", "<!-- yfinance Ücretsiz LONG -->", 0),
     ("C-60 indexOf esleme muaf", "<script>if (z.indexOf('İdeal Giriş') === 0) x=1;</script>", 0),
 ]

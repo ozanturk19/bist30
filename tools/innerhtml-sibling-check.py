@@ -68,7 +68,6 @@ EXEMPT_REASON = {
 EXEMPT = set([
     ('templates/hisse.html', 'entryAnalysisGrid', 'eqBadge'),
     ('templates/hisse.html', 'entryAnalysisGrid', 'eqNote'),
-    ('templates/hisse.html', 'entryAnalysisGrid', 'rrBarContainer'),
     ('templates/hisse.html', 'entryAnalysisGrid', 'rrLevels'),
     ('templates/hisse.html', 'hisseSubCta', 'hisseSubEmail'),
     ('templates/hisse.html', 'hisseSubCta', 'hisseSubKvkk'),

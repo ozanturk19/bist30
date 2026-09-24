@@ -857,26 +857,8 @@ else
   FAIL=$((FAIL + 1))
 fi
 
-# ── K-CA (22.09): GORUNEN BIR ORAN, YANINDA YAZAN SAYIYLA AYNI KAYNAKTAN GELIR ─
-# Canli 22.09: /hisse "Risk / Ödül" kartinin CUBUGU `|cur-sl|` vs `|tp2-cur|`
-# ile ciziliyordu; TP2 = cur + 3 x risk oldugu icin oran cebirsel olarak HER
-# ZAMAN 3,0 -- rr_signal'i olan 55 hissenin 55'inde bar tipatip 25%/75%. Ayni
-# kartta, cubugun HEMEN ALTINDA, ayni etiket altinda rr_signal "13,25x" (TKFEN)
-# / "0,34x" (MAVI) yaziyordu. /karsilastir ise "Risk/Ödül (R/R)" satirini
-# `rr_ratio`dan okuyordu: o alan 79/79 hissede tipatip 2.0, yani karsilastirma
-# sayfasinda hicbir seyi ayirt etmeyen bir sutun. CPO-DEV2-045 ayni totolojiyi
-# `rr_now` SAYISINDAN silmisti, BARI ve bu satiri birakmisti (ders 56).
-# Kapi uc ekseni birden olcer: (A) sabit alanin tuketimi, (B) cubuk genisliginin
-# bagimsiz hesabi, (C) 1:N ankrasi olmadan basilan oran.
-echo "46/80 rr-canon-check (K-CA: cubuk da sayi da rr_signal'den)..."
-if python3 tools/rr-canon-check.py; then
-  echo "  ✓ rr-canon-check PASS"
-else
-  echo "  ✗ K-CA KIRIK: gorunen R/R, yaninda yazan sayidan baska bir seyi gosteriyor."
-  echo "    Detay icin: python3 tools/rr-canon-check.py"
-  echo "    Pozitif kontrol: python3 tools/rr-canon-check.py --ref 6c4eac2"
-  FAIL=$((FAIL + 1))
-fi
+# 46: rr-canon-check (K-CA) C-52 (24.09) ile emekli -- R/R hicbir yuzeyde yok;
+# yasak kapi 76 R3'te (signal-rule-canon-check RE_BANNED).
 
 # ── K-CB (22.09): BEYAN EDILEN PENCERE, GOSTERILEN VERIYLE AYNI OLMALI ──────
 # Canli 22.09: /hisse grafiginin GORUNEN sure etiketi bar sayisindan DINAMIK
