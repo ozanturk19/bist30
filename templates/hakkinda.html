@@ -190,7 +190,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
     <div class="feature-icon"><span aria-hidden="true">🤖</span></div>
     <div>
       <div class="feature-title">AI Haber Özeti</div>
-      <div class="feature-desc">Gemini 2.5 Flash ile hisse başına güncel haber özeti ve piyasa etkisi analizi. Google Search grounding.</div>
+      <div class="feature-desc">Hisse başına güncel haberlerin yapay zekâ ile derlenmiş kısa özeti.</div>
     </div>
   </div>
 </div>
@@ -211,14 +211,6 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
     <div class="tech-desc">TradingView açık kaynak grafik kütüphanesi</div>
   </div>
   <div class="tech-card da-panel">
-    <div class="tech-name">Gunicorn + Gevent</div>
-    <div class="tech-desc">Async prodüksiyon sunucusu</div>
-  </div>
-  <div class="tech-card da-panel">
-    <div class="tech-name">Gemini 2.5 Flash</div>
-    <div class="tech-desc">Google AI — haber özetleme, Search grounding</div>
-  </div>
-  <div class="tech-card da-panel">
     <div class="tech-name">Service Worker / PWA</div>
     <div class="tech-desc">Çevrimdışı destek, hızlı yükleme önbelleği</div>
   </div>
@@ -231,7 +223,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
   <li><strong>Sinyal hesaplama:</strong> Günde bir kez, piyasa kapanışından sonra (~18:00–18:30 TR) sunucu tarafında yenilenir</li>
   <li><strong>BIST kapsamı:</strong> {{ bist_count }} hisse (BIST100 + ek hisseler), 13 sektör</li>
   <li><strong>KAP haberleri:</strong> KAP bildirimleri hisse sayfalarında gösterilir (30 dakikada bir güncellenir)</li>
-  <li><strong>AI haberleri:</strong> Gemini 2.5 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
+  <li><strong>Yapay zekâ haber özeti:</strong> Hisse başına 6 saatte bir yenilenir</li>
 </ul>
 
 <!-- ── YOL HARİTASI ──────────────────────────────────────────── -->
@@ -246,7 +238,7 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Günlük özet sayfası</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>SEO altyapısı (sitemap, meta tags, JSON-LD)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sektör filtreleri ve sektör ısı haritası</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>AI haber özeti — Gemini 2.5 Flash + Google Search grounding</span></li>
+  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Yapay zekâ haber özeti</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Piyasa Gündem Merkezi</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Tarayıcı (ADX / sektör / fiyat filtreli)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Ana sayfa &laquo;Güçlü Trend'de en yüksek skorlar&raquo; vitrini (Teknik Güç Skoru sıralamalı)</span></li>

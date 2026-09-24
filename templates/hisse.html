@@ -1446,8 +1446,8 @@
     </div>
     <div class="news-content" id="newsContent" role="status" aria-live="polite" style="display:none"></div>
     <div class="news-source" id="newsSource" style="display:none">
-      <span class="news-badge">Gemini AI</span>
-      <span>Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir</span>
+      <span class="news-badge">Yapay zekâ özeti</span>
+      <span>Haberlerden derlenen yapay zekâ özeti · 6 saatte bir güncellenir</span>
     </div>
   </div>
 
@@ -3271,7 +3271,7 @@ async function loadNews(retryCount) {
       const desc  = sourceEl.querySelector('span:last-of-type');
       const isKap = data.source === 'kap_ai';
       if (badge) {
-        badge.textContent = isKap ? 'KAP + AI' : 'Gemini AI';
+        badge.textContent = isKap ? 'KAP + AI' : 'Yapay zekâ özeti';
         badge.style.background = isKap ? 'rgba(0,226,144,.12)' : '';
         badge.style.color      = isKap ? 'var(--bp-al)' : '';
         badge.style.borderColor= isKap ? 'rgba(0,226,144,.25)' : '';
@@ -3279,7 +3279,7 @@ async function loadNews(retryCount) {
       if (desc) {
         desc.textContent = isKap
           ? 'KAP bildirimlerinden AI özetlemesi · doğrulanmış veri'
-          : 'Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir';
+          : 'Haberlerden derlenen yapay zekâ özeti · 6 saatte bir güncellenir';
       }
 
       // KAP linki var mı? source row'a ekle
@@ -3380,8 +3380,8 @@ async function loadSignalExplanation(retryCount) {
       // Badge ve footer'ı kaynağa göre ayarla
       const isAI = data.source === 'gemini';
       sigBadge(isAI ? 'ai' : 'rule',
-               isAI ? 'Gemini AI' : 'Algoritmik',
-               isAI ? 'Gemini yapay zekası tarafından oluşturuldu'
+               isAI ? 'Yapay zekâ' : 'Algoritmik',
+               isAI ? 'Yapay zekâ tarafından oluşturuldu'
                     : 'Algoritmik sinyal motorundan türetildi');
       footerEl.innerHTML = isAI
         ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir'
