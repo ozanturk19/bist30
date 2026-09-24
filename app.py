@@ -1372,12 +1372,29 @@ def _get_kap_uuid(ticker: str) -> str | None:
 _kap_cache: dict = {}          # {ticker: {"data": [...], "ts": float}}
 _KAP_CACHE_TTL = 1800          # 30 dakika
 
+# D-45: tüm analiz evreninin KAP akışı (tek kaynak) + Gündem. Mantık modüllerde, burada ince bağlantı.
+import kap_feed  # noqa: E402
+import haber_gundem  # noqa: E402
+_KAP_STORE = kap_feed.Store()
 
-def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
-    """Ticker için son N günlük KAP bildirimlerini çeker (ODA + FR)."""
+
+def fetch_kap_disclosures(ticker: str, days: int = 365) -> list:
+    """Ticker için son N günlük KAP bildirimleri (ODA + FR) — D-45: TEK KAYNAK.
+
+    Akış deposu (data/kap_feed, bist30-macro sürecindeki kap-feed döngüsü doldurur) varsa
+    /haberler akışıyla AYNI kayıtlar okunur: üye eşleme (yayınlayanın kodu; başka üyenin
+    "ilgili şirket" listesi hisseye yazılmaz), kodlama temizliği ("?" → kesme işareti,
+    sondaki \\n) ve 1 yıllık derinlik (eskiden ~90 gün). Depo yoksa (ilk kurulum, geri
+    besleme bitmeden) eski canlı sorgu aynı normalize() süzgecinden geçer."""
+    try:
+        if _KAP_STORE.available():
+            return kap_feed.legacy_rows(kap_feed.for_ticker(_KAP_STORE.all_items(), ticker, days=days))
+    except Exception as e:  # depo okunamazsa canlı sorguya düş (sayfa boş kalmasın)
+        logger.warning("fetch_kap_disclosures(%s): depo okunamadı: %s", ticker, e)
     uuid = _get_kap_uuid(ticker)
     if not uuid:
         return []
+    days = min(days, 360)  # KAP listesi en fazla 1 yıllık aralık kabul ediyor
 
     H = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -1405,29 +1422,14 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
                 json=payload, headers=H, timeout=12
             )
             if r.status_code == 200:
-                items = r.json() or []
-                for item in items:
-                    results.append({
-                        "date":    item.get("publishDate", ""),
-                        "summary": item.get("summary", ""),
-                        "subject": item.get("subject", ""),
-                        "class":   disc_class,
-                        "type":    item.get("disclosureType", ""),
-                        "index":   item.get("disclosureIndex"),
-                        "url":     f"https://www.kap.org.tr/tr/Bildirim/{item.get('disclosureIndex')}",
-                        "late":    item.get("isLate", False),
-                    })
+                for item in (r.json() or []):
+                    it = kap_feed.normalize(item, {ticker})   # D-45: üye eşleme + kodlama
+                    if it:
+                        results.append(it)
         except Exception as e:
             logger.warning("fetch_kap_disclosures(%s, %s): %s", ticker, disc_class, e)
-
-    # En yeni tarihe göre sırala
-    def _parse_date(d):
-        try:
-            return datetime.strptime(d, "%d.%m.%Y %H:%M:%S")
-        except Exception:
-            return datetime.min
-    results.sort(key=lambda x: _parse_date(x["date"]), reverse=True)
-    return results
+    results.sort(key=lambda x: (x["ts"], x["id"]), reverse=True)
+    return kap_feed.legacy_rows(results)
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 # D-23: sektör kovası KAP resmi alt sektöründen (sector_taxonomy.py: 23 kova, BIST sektör
@@ -10032,6 +10034,261 @@ def api_stock_kap(ticker):
     })
 
 
+# ── D-45 Haberler: KAP akışı + Gündem (ince bağlantı; mantık kap_feed.py / haber_gundem.py) ──
+# Sayfa rotaları şablon yoksa 404 döner (C-57 şablonu gelmeden D-45 tek başına güvenli);
+# API'ler depo yoksa boş ama 200 döner (available:false). Dış bağlantı ve kaynak etiketi yok.
+_HABER_STATE = {"AL": ("g", "Güçlü Trend"), "SAT": ("b", "Trend Bozuldu")}
+
+
+def _tpl_ready(name):
+    try:
+        app.jinja_env.get_template(name)
+        return True
+    except Exception:
+        return False
+
+
+def _haber_stock_map():
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    return {s["ticker"]: s for s in stocks if isinstance(s, dict) and s.get("ticker")}
+
+
+def _haber_mini(ticker, smap):
+    s = smap.get(ticker) or {}
+    code, label = _HABER_STATE.get(s.get("signal"), ("y", "Yatay"))
+    return {"t": ticker, "name": STOCK_NAMES.get(ticker, ticker), "price": s.get("price"),
+            "ch": s.get("change_pct"), "bp": s.get("borsapusula_skoru"),
+            "st": code if s else None, "stn": label if s else None}
+
+
+def _haber_page_int(v, default=1, lo=1, hi=10000):
+    try:
+        return max(lo, min(int(v), hi))
+    except (TypeError, ValueError):
+        return default
+
+
+@app.route("/api/haberler")
+@limiter.limit("60 per minute")
+def api_haberler():
+    """Tüm analiz evreninin bildirim akışı, tarihe göre (yeniden eskiye), sayfalı.
+    ?sayfa=1&adet=50&tur=bilanco|temettu|ozel&hisse=THYAO,ASELS&rutin=1&gun=YYYY-MM-DD"""
+    tur = request.args.get("tur")
+    tur = tur if tur in ("bilanco", "temettu", "ozel") else None
+    hisse = [t for t in (request.args.get("hisse") or "").upper().split(",") if re.match(r"^[A-Z0-9]{3,6}$", t)][:50]
+    gun = request.args.get("gun")
+    gun = gun if gun and re.match(r"^\d{4}-\d{2}-\d{2}$", gun) else None
+    if not _KAP_STORE.available():
+        return safe_json({"available": False, "items": [], "page": 1, "pages": 1, "total": 0,
+                          "routine_hidden": 0, "updated_at": None})
+    res = kap_feed.query(_KAP_STORE.all_items(), page=_haber_page_int(request.args.get("sayfa")),
+                         per_page=_haber_page_int(request.args.get("adet"), 50, 1, 200), filt=tur,
+                         tickers=hisse or None, include_rutin=request.args.get("rutin") == "1", day=gun)
+    res["items"] = [kap_feed.public_item(it, STOCK_NAMES) for it in res["items"]]
+    res["available"] = True
+    res["updated_at"] = _KAP_STORE.meta().get("updated_at")
+    return safe_json(res)
+
+
+def _bildirim_payload(idx):
+    it = _KAP_STORE.get(idx)
+    if not it:
+        return None
+    doc = _KAP_STORE.doc(idx) or {}
+    same = [x for x in kap_feed.for_ticker(_KAP_STORE.all_items(), it["ticker"], days=365, classes=None)
+            if not x.get("rutin") and x["id"] != it["id"]][:4]
+    pub = kap_feed.public_item(it, STOCK_NAMES)
+    pub["summary"] = it.get("ozet") or kap_feed.summary_sentence(it, STOCK_NAMES.get(it["ticker"], it["ticker"]),
+                                                                 it.get("onem"))
+    return {"item": pub, "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
+            "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
+                     "lines": doc.get("lines") or [], "resp": doc.get("resp")},
+            "has_text": bool(doc),
+            "similar": [kap_feed.public_item(x, STOCK_NAMES) for x in same]}
+
+
+@app.route("/api/bildirim/<int:idx>")
+@limiter.limit("60 per minute")
+def api_bildirim(idx):
+    """Tek bildirim: kural tabanlı tek cümle özet + önem oranı + bildirimin kendi metni (AI yok)."""
+    p = _bildirim_payload(idx)
+    if not p:
+        return safe_json({"error": "Bildirim bulunamadı"}), 404
+    return safe_json(p)
+
+
+@app.route("/api/gundem-girdi")
+@limiter.limit("30 per minute")
+def api_gundem_girdi():
+    """YALNIZ İÇ KULLANIM (X-Admin-Secret): günün haber başlıkları, kaynak ve bağlantılarıyla.
+    Sitede yayınlanmaz (başka sitelerin metni kopyalanmaz, kanon §4)."""
+    require_admin()
+    day = request.args.get("tarih") or datetime.now(_TZ_TR).date().isoformat()
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", day):
+        return safe_json({"error": "tarih YYYY-MM-DD"}), 400
+    doc = haber_gundem.load_input(day) or {"date": day, "items": []}
+    doc["print"] = haber_gundem.load_latest()
+    resp = safe_json(doc)
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
+@app.route("/haberler")
+def haberler_page():
+    """C-57 sayfası (SSR). Şablon yoksa 404 — D-45 tek başına canlıda güvenli."""
+    if not _tpl_ready("haberler.html"):
+        abort(404)
+    tur = request.args.get("tur")
+    tur = tur if tur in ("bilanco", "temettu", "ozel") else None
+    page = _haber_page_int(request.args.get("sayfa"))
+    smap = _haber_stock_map()
+    items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
+    res = kap_feed.query(items, page=page, per_page=60, filt=tur)
+    days = []
+    for d in kap_feed.group_by_day(res["items"]):
+        cnt = kap_feed.day_counts(items, d["day"])
+        days.append({"day": d["day"], "label": d["label"], "total": cnt["total"], "routine": cnt["routine"],
+                     "rows": [dict(kap_feed.public_item(x, STOCK_NAMES), mc=_haber_mini(x["ticker"], smap))
+                              for x in d["items"]]})
+    counts = {"all": 0, "bilanco": 0, "temettu": 0, "ozel": 0}
+    recent = [x for x in items if not x.get("rutin")][:600]
+    for x in recent:
+        counts["all"] += 1
+        if x.get("filter") in counts:
+            counts[x["filter"]] += 1
+    gundem = haber_gundem.load_latest()
+    for g in (gundem or {}).get("groups") or []:
+        for it in g.get("items") or []:
+            for c in it.get("chips") or []:
+                if c.get("k") == "tk" and c.get("t") in smap:
+                    c["ch"] = smap[c["t"]].get("change_pct")
+    return render_template("haberler.html", gundem=gundem, feed_days=days, feed_page=res["page"],
+                           feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
+                           feed_counts=counts, feed_available=bool(items),
+                           feed_updated=_KAP_STORE.meta().get("updated_at"),
+                           coverage=len(smap))
+
+
+@app.route("/hisse/<ticker>/bildirim/<int:idx>")
+def bildirim_page(ticker, idx):
+    """Kalıcı bildirim sayfası (SSR, dizinlenir). Şablon yoksa 404."""
+    if not _tpl_ready("bildirim.html"):
+        abort(404)
+    p = _bildirim_payload(idx)
+    if not p:
+        abort(404)
+    it = p["item"]
+    if ticker.upper() not in it["tickers"]:
+        return redirect(it["href"], code=301)
+    if ticker != ticker.upper():
+        return redirect(it["href"], code=301)
+    smap = _haber_stock_map()
+    return render_template("bildirim.html", b=p, mc=_haber_mini(it["ticker"], smap),
+                           canonical="https://borsapusula.com" + it["href"])
+
+
+def _kap_feed_universe():
+    tickers = sorted(t for t in BIST100 if t not in INDEX_TICKERS)
+    oids = sorted(set(KAP_UUID_OIDS[t] for t in tickers if KAP_UUID_OIDS.get(t)))
+    return set(tickers), oids
+
+
+def _haber_print_now(now):
+    """Gündem baskısı: kendi verimizden (gün sonu hisseleri, makro şerit, KAP akışı, takvim)."""
+    _load_cache_from_disk()
+    _load_macro_from_disk()
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+        updated = _cache.get("updated_at") or ""
+        macro = list(_macro_cache.get("data") or [])
+    try:
+        close_day = datetime.strptime(updated[:10], "%d.%m.%Y").date()
+    except ValueError:
+        close_day = now.date()
+    lvl = _get_xu100_level()
+    slot = "sabah" if now.hour < 12 else "aksam"
+    doc = haber_gundem.build_print(stocks, macro, {"close": lvl.get("close"), "change_pct": lvl.get("change_pct")},
+                                   _KAP_STORE.all_items(), STOCK_NAMES, ECONOMIC_CALENDAR_2026, now, close_day, slot)
+    if doc:
+        haber_gundem.save_print(doc)
+    return doc
+
+
+def _kap_feed_loop():
+    """bist30-macro sürecinde (7/24, tek süreç) çalışır. KAP'a saygı: istekler arası ≥2 sn,
+    429/5xx'te tur biter. Takvim: 07:00-24:00 her 10 dk, gece saatte bir. Liste sorgusu
+    tur başına ODA+FR (saat başı turda DG+DUY de); yeni rutin-dışı bildirimlerin metni tur başına
+    ≤8, eski metin geri beslemesi (son 90 gün) gündüz 4, gece 40. RSS girdisi 30 dk'da bir.
+    Gündem baskısı 08:30 ve 19:30 (hafta içi). Depo yoksa ilk tur 12 aylık geri besleme (≈36 istek)."""
+    import requests as _rq
+    time.sleep(60)
+    client = kap_feed.KapClient()
+    last_rss = 0.0
+    while True:
+        now = datetime.now(_TZ_TR).replace(tzinfo=None)
+        night = now.hour < 7
+        try:
+            uni, oids = _kap_feed_universe()
+            if not _KAP_STORE.available():
+                n = 0
+                for m in range(12, -1, -1):
+                    first = (now.date().replace(day=1) - timedelta(days=31 * m)).replace(day=1)
+                    last = min(now.date(), (first + timedelta(days=32)).replace(day=1) - timedelta(days=1))
+                    got = kap_feed.fetch_list(client, oids, uni, first.isoformat(), last.isoformat(),
+                                              classes=("ODA", "FR", "DG"))
+                    _KAP_STORE.merge(got, now.date())
+                    n += len(got)
+                logger.info("kap-feed: geri besleme bitti, %d kayıt, %d istek", n, client.count)
+            classes = kap_feed.POLL_CLASSES if (now.minute < 10 or night) else ("ODA", "FR")
+            st = kap_feed.poll_once(_KAP_STORE, client, oids, uni, STOCK_NAMES, now=now, max_docs=8,
+                                    classes=classes, fx_getter=_kap_fx_rate, log=logger.warning)
+            back = kap_feed.backfill_docs(_KAP_STORE, client, STOCK_NAMES, limit=40 if night else 4,
+                                          days=90, fx_getter=_kap_fx_rate)
+            logger.info("kap-feed: liste=%d metin=%d geri=%d istek=%d", st["listed"], st["docs"], back, client.count)
+        except kap_feed.KapStop as e:
+            logger.warning("kap-feed: KAP durdurdu (%s) — sonraki turda devam", e)
+        except Exception as e:
+            logger.warning("kap-feed turu hatası: %s", e)
+        try:
+            if time.time() - last_rss > 1800:
+                last_rss = time.time()
+                haber_gundem.collect_input(
+                    lambda url: _rq.get(url, headers={"User-Agent": haber_gundem.UA}, timeout=20).content,
+                    now=now, log=logger.warning)
+            slot = haber_gundem.due_slot(now, haber_gundem.printed_keys())
+            if slot or haber_gundem.load_latest() is None:
+                _haber_print_now(now)
+        except Exception as e:
+            logger.warning("gündem turu hatası: %s", e)
+        time.sleep(3600 if night else 600)
+
+
+_KAP_FX_CACHE: dict = {}
+
+
+def _kap_fx_rate(day, cur):
+    """Bildirim günü TCMB döviz alış kuru (gün yayımlanmadıysa önceki 5 gün) -> (kur, kur günü) | None."""
+    import requests as _rq
+    d0 = datetime.strptime(day, "%Y-%m-%d").date()
+    for back in range(0, 6):
+        d = d0 - timedelta(days=back)
+        key = d.isoformat()
+        if key not in _KAP_FX_CACHE:
+            try:
+                r = _rq.get(kap_feed.TCMB_URL % (d.strftime("%Y%m"), d.strftime("%d%m%Y")), timeout=15)
+                _KAP_FX_CACHE[key] = kap_feed.parse_tcmb(r.text) if r.status_code == 200 else {}
+            except Exception:
+                return None
+        if _KAP_FX_CACHE[key].get(cur):
+            return _KAP_FX_CACHE[key][cur], key
+    return None
+
+
+if os.environ.get("BP_ROLE") == "macro" and os.environ.get("KAP_FEED", "1") != "0":
+    threading.Thread(target=_kap_feed_loop, daemon=True, name="kap-feed").start()
+
+
 @app.route("/api/hisse/<ticker>/signal-explanation")
 @limiter.limit("20 per minute")
 def api_signal_explanation(ticker):
@@ -11354,6 +11611,17 @@ def sitemap():
             pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
+    # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
+    if _tpl_ready("haberler.html"):
+        pages.append({"loc": "/haberler",           "priority": "0.8", "changefreq": "daily"})
+        if _tpl_ready("bildirim.html") and _KAP_STORE.available():
+            _cut = (datetime.now(_TZ_TR).date() - timedelta(days=180)).isoformat()
+            for _it in _KAP_STORE.all_items():
+                if _it["ts"][:10] < _cut:
+                    break
+                if not _it.get("rutin"):
+                    pages.append({"loc": "/hisse/%s/bildirim/%d" % (_it["ticker"], _it["id"]),
+                                  "priority": "0.4", "changefreq": "never", "lastmod": _it["ts"][:10]})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
                   "lastmod": _tpl_lastmod("karsilastir.html", today)})
     for a in _blog_articles:
@@ -11521,6 +11789,10 @@ def llms_txt():
         body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
                             "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
                             "kapanış günü kalıcı sayfa: /harita/YYYY-AA-GG\n- [Takvim](", 1)
+    if _tpl_ready("haberler.html"):  # D-45/C-57: sayfa canlıysa listelenir
+        body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
+                            "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
+                            "/hisse/{TICKER}/bildirim/{NO}\n- [Blog]", 1)
     return Response(body, mimetype="text/plain")
 
 
