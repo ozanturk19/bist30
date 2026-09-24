@@ -26,7 +26,7 @@ UC EKSEN:
      yaninda basili oldugu icin arsiv cercevesi kaybolmaz.
   A2 DAL: bir REFERANS-GUN degiskeninin DOGRU dalinda indexical sozcuk
      literali ({% if historical_date %}...Bugun...{% endif %}). Sozcuk
-     listesi business_rules.SIGNAL_DATE_LABELS'tan okunur (ikinci kanon YOK).
+     listesi bu dosyada sabit (Bugun/Dun/Yarin).
   A3 JS: bpSignalDateLabel/bpSignalDateKey/bpSignalAge*'e IKINCI argument
      (referans gun) gecirilmesi -- ayni yeniden-capalama, JS yazimi.
      (⛔67. ders: bir kanonun SSR ve JS yazimi AYRI iki yazimdir.)
@@ -55,21 +55,10 @@ JINJA_TAG = re.compile(r"\{%-?\s*(if|elif|else|endif)\b([^%]*?)-?%\}", re.S)
 
 
 def indexical_words(root):
-    """Sozcuk listesi KANONIK kaynaktan: business_rules.SIGNAL_DATE_LABELS."""
-    words = set()
-    p = os.path.join(root, 'business_rules.py')
-    try:
-        src = io.open(p, encoding='utf-8').read()
-        m = re.search(r"SIGNAL_DATE_LABELS\s*=\s*\{(.*?)\}", src, re.S)
-        if m:
-            for w in re.findall(r":\s*[\"']([^\"']+)[\"']", m.group(1)):
-                words.add(w)
-    except OSError:
-        pass
-    if not words:                      # kaynak okunamadiysa kapi SESSIZ KALMASIN
-        raise SystemExit("K-CD KIRIK — business_rules.SIGNAL_DATE_LABELS okunamadi")
-    words.add('Yarın')                 # gelecek yonu ayni indexical sinifta
-    return sorted(words)
+    """Indexical sozcukler: kanon goreli gun adini yasakladi (C-62), etiket artik
+    takvim tarihi; kapi yine de arsiv gunu dalinda bu sozcuklerin donmesini
+    yakalar. Sozcukler burada sabit (business_rules'ta artik kanon sozlugu yok)."""
+    return sorted({'Bugün', 'Dün', 'Yarın'})
 
 
 def true_branch_spans(text):

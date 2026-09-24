@@ -83,7 +83,6 @@ try:
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
-    from business_rules   import SIGNAL_DATE_LABELS            # r53: signal_age_text_filter icin kanonik kaynak
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -137,7 +136,6 @@ except ImportError as _dqv_import_err:
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
     ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Kovalama'}
-    SIGNAL_DATE_LABELS = {'TODAY': 'Bugün', 'YESTERDAY': 'Dün'}
 
 # ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────
 try:
@@ -703,7 +701,7 @@ def tr_num_filter(value):
 
 @app.template_filter('signal_age_text')
 def signal_age_text_filter(signal_date, today=None):
-    """Sinyalin TAKVİM yaşı: "Bugün" / "Dün" / "N gün". Bilinmiyorsa "—".
+    """Sinyalin TAKVİM yaşı: "Son seans" / "N gün". Bilinmiyorsa "—".
 
     Mutlak tarihin yanında gösterilen yerlerde kullanılır (ozet/karsilastir/
     gundem/sinyal_performans); tarihin görünmediği yerlerde signal_date_label
@@ -727,9 +725,7 @@ def signal_age_text_filter(signal_date, today=None):
     if age is None:
         return "—"
     if age == 0:
-        return SIGNAL_DATE_LABELS["TODAY"]
-    if age == 1:
-        return SIGNAL_DATE_LABELS["YESTERDAY"]
+        return "Son seans"
     if age < 0:
         return derive_signal_date_label(signal_date, today=today) or "—"
     return f"{age} gün"
@@ -738,7 +734,7 @@ def signal_age_text_filter(signal_date, today=None):
 @app.template_filter('signal_age_phrase')
 def signal_age_phrase_filter(signal_date, today=None):
     """CPO-1595: hisse.html'de MUTLAK tarih olmadan tek başına gösterilen
-    yerler için tam, nötr cümle: "Bugün oluştu" / "Dün oluştu" / "N gün önce
+    yerler için tam, nötr cümle: "Son seansta oluştu" / "N gün önce
     oluştu". signal_age_text ile aynı yaş hesabını kullanır ama ozet/
     karsilastir/gundem gibi mutlak tarihin YANINDA kısa "N gün" biçiminde
     göründüğü yerlerdeki sözdizimini bozmamak için ayrı filtre olarak
@@ -756,9 +752,7 @@ def signal_age_phrase_filter(signal_date, today=None):
     if age is None:
         return "—"
     if age == 0:
-        return "Bugün oluştu"
-    if age == 1:
-        return "Dün oluştu"
+        return "Son seansta oluştu"
     if age < 0:
         label = derive_signal_date_label(signal_date, today=today)
         return label or "—"
@@ -8073,12 +8067,12 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
             # "18 gündür" diyordu — signal_bars burada 18'di). signal_age_text
             # filtresiyle AYNI takvim-yaşı hesabı kullanılıyor.
             _age = signal_date_age_days(signal_date)
-            dur_text = (f"{dur_label} Güçlü Trend sinyali oluştu" if not _age or _age <= 1
+            dur_text = (f"{dur_label} tarihinde Güçlü Trend sinyali oluştu" if not _age or _age <= 1
                         else f"Son {_age} gündür Güçlü Trend sinyali aktif ({signal_date} tarihinden itibaren)")
         elif signal_bars > 1:
             dur_text = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif"
         else:
-            dur_text = "Bugün Güçlü Trend sinyali oluştu"
+            dur_text = "Son seansta Güçlü Trend sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
@@ -8093,12 +8087,12 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
             dur_label = derive_signal_date_label(signal_date) or signal_date
             # CPO-1668 #3: bkz. AL dalındaki aynı açıklama (signal_bars≠takvim günü).
             _age = signal_date_age_days(signal_date)
-            dur_text = (f"{dur_label} Trend Bozuldu sinyali oluştu" if not _age or _age <= 1
+            dur_text = (f"{dur_label} tarihinde Trend Bozuldu sinyali oluştu" if not _age or _age <= 1
                         else f"Son {_age} gündür Trend Bozuldu sinyali aktif ({signal_date} tarihinden itibaren)")
         elif signal_bars > 1:
             dur_text = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif"
         else:
-            dur_text = "Bugün Trend Bozuldu sinyali oluştu"
+            dur_text = "Son seansta Trend Bozuldu sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
@@ -11756,7 +11750,7 @@ def _compute_gundem_data():
     gundem_closed_msg = None
     if not _mkt_open:
         if not _is_td:
-            gundem_closed_msg = "Bugün BIST işlem günü değil (hafta sonu/resmi tatil) — yeni sinyal beklenmiyor."
+            gundem_closed_msg = "Şu an BIST işlem günü değil (hafta sonu/resmi tatil) — yeni sinyal beklenmiyor."
         elif _now_tr.hour < 10:
             gundem_closed_msg = "BIST henüz açılmadı, seans 10:00'da başlıyor."
         else:
@@ -13332,7 +13326,7 @@ def api_market_news():
                 _news_queue_stats["total_added"] += 1
 
             # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
-            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             if sig == "AL":
                 text = (f"{name} hissesinde {dur} Güçlü Trend sinyali aktif. "
                         "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
@@ -13384,7 +13378,7 @@ def api_market_news():
         )
         if source == "news" and len(snippet) < 160 and \
                 any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
-            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
             entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0
@@ -13399,7 +13393,7 @@ def api_market_news():
 
         # Guard: _skip_prefixes tüm satırları silmişse (ör. "kayda değer" yanıtı) → algoritmik fallback
         if not snippet.strip():
-            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            dur = "son seansta" if bars <= 1 else f"son {bars} gündür"
             # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
             entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0

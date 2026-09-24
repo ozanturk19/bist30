@@ -300,10 +300,9 @@ ENTRY_QUALITY_LABELS = {
 # JS aynası: static/bp-format.js (bpSignalDateLabel) — eşikler birebir aynı,
 # tests/test_cpo1335_signal_date_label.py ikisini birlikte kilitler.
 
-SIGNAL_DATE_LABELS = {
-    "TODAY": "Bugün",
-    "YESTERDAY": "Dün",
-}
+# Kanon: göreli gün adı ("Bugün"/"Dün") yok; etiket her zaman takvim tarihidir.
+TR_MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+             "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
 
 _TZ_TR_NAME = "Europe/Istanbul"
 
@@ -362,21 +361,20 @@ def is_signal_from_today(signal_date, today=None):
 
 
 def derive_signal_date_label(signal_date, today=None):
-    """Kanonik göreli tarih etiketi.
+    """Kanonik görünen tarih etiketi: her yaşta "23 Eylül" (yıl yalnız içinde
+    bulunulan yıldan farklıysa eklenir: "31 Aralık 2025").
 
-    bugün -> "Bugün" · dün -> "Dün" · daha eski VEYA gelecek -> gerçek tarih
-    ("DD.MM.YYYY"). Tarih ayrıştırılamazsa None döner; çağıran nötr bir şey
-    basmalı, "Bugün"e DÜŞMEMELİ.
+    Tarih ayrıştırılamazsa None döner; çağıran nötr bir şey basmalı.
+    static/bp-format.js:bpSignalDateLabel() ile birebir aynı.
     """
-    age = signal_date_age_days(signal_date, today)
-    if age is None:
+    if signal_date_age_days(signal_date, today) is None:
         return None
-    if age == 0:
-        return SIGNAL_DATE_LABELS["TODAY"]
-    if age == 1:
-        return SIGNAL_DATE_LABELS["YESTERDAY"]
     sd = parse_signal_date(signal_date)
-    return sd.strftime("%d.%m.%Y")
+    ref = today if today is not None else _today_tr()
+    if isinstance(ref, datetime):
+        ref = ref.date()
+    label = f"{sd.day} {TR_MONTHS[sd.month - 1]}"
+    return label if ref.year == sd.year else f"{label} {sd.year}"
 
 
 def derive_signal_date_key(signal_date, today=None):

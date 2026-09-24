@@ -912,7 +912,7 @@ fi
 # (baslik, "... olustu" cipi, ust bant, <title>, meta) arsiv modunda MUTLAK
 # tarihe cevrilmisti, yalniz bu iki satir atlanmisti. Uc eksen: A1 goreli-yas
 # filtresine referans-gun argumani, A2 referans-gun dalinda indexical sozcuk
-# literali (sozcukler business_rules.SIGNAL_DATE_LABELS'tan okunur), A3 ayni
+# literali (sozcukler kapi dosyasinda sabit), A3 ayni
 # yeniden-capalamanin JS yazimi (bpSignalDateLabel(..., ...)).
 echo "49/80 relative-time-anchor-check (K-CD: goreli zaman <-> okuyucunun takvimi)..."
 if python3 tools/relative-time-anchor-check.py; then

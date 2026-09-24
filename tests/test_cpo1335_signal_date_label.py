@@ -64,15 +64,16 @@ def _strip_tpl_comments(src):
 @pytest.mark.parametrize(
     "signal_date,expected_label,expected_key",
     [
-        ("08.08.2026", "Bugün", "today"),
-        ("07.08.2026", "Dün", "yesterday"),
+        # Kanon (C-62): göreli gün adı yok, her yaşta takvim tarihi.
+        ("08.08.2026", "8 Ağustos", "today"),
+        ("07.08.2026", "7 Ağustos", "yesterday"),
         # CPO-1335'in tam vakası: RYSAS/PARSN bars=1 ama signal_date 06.08 idi;
         # ekranda "Bugün" yazıyordu. Artık gerçek tarihini yazmalı.
-        ("06.08.2026", "06.08.2026", "older"),
-        ("05.08.2026", "05.08.2026", "older"),
-        ("24.06.2026", "24.06.2026", "older"),
-        # Yıl/ay sınırı
-        ("31.12.2025", "31.12.2025", "older"),
+        ("06.08.2026", "6 Ağustos", "older"),
+        ("05.08.2026", "5 Ağustos", "older"),
+        ("24.06.2026", "24 Haziran", "older"),
+        # Yıl/ay sınırı (yıl yalnız içinde bulunulan yıldan farklıysa)
+        ("31.12.2025", "31 Aralık 2025", "older"),
     ],
 )
 def test_derive_label(signal_date, expected_label, expected_key):
@@ -82,10 +83,10 @@ def test_derive_label(signal_date, expected_label, expected_key):
 
 def test_gun_sinirlari():
     """Sınır günleri kaymasın — ay ve yıl geçişi dahil."""
-    assert br.derive_signal_date_label("01.08.2026", today=date(2026, 8, 1)) == "Bugün"
-    assert br.derive_signal_date_label("31.07.2026", today=date(2026, 8, 1)) == "Dün"
-    assert br.derive_signal_date_label("01.01.2026", today=date(2026, 1, 1)) == "Bugün"
-    assert br.derive_signal_date_label("31.12.2025", today=date(2026, 1, 1)) == "Dün"
+    assert br.derive_signal_date_label("01.08.2026", today=date(2026, 8, 1)) == "1 Ağustos"
+    assert br.derive_signal_date_label("31.07.2026", today=date(2026, 8, 1)) == "31 Temmuz"
+    assert br.derive_signal_date_label("01.01.2026", today=date(2026, 1, 1)) == "1 Ocak"
+    assert br.derive_signal_date_label("31.12.2025", today=date(2026, 1, 1)) == "31 Aralık 2025"
 
 
 def test_is_signal_from_today_donmus_bayrak_yerine():
@@ -113,7 +114,7 @@ def test_bilinmeyen_tarih_bugune_dusmez(bad):
 
 def test_gelecek_tarih_bugun_demez():
     """Saat kayması/bozuk veri gelecek tarih üretirse "Bugün" yazma."""
-    assert br.derive_signal_date_label("09.08.2026", today=_TODAY) == "09.08.2026"
+    assert br.derive_signal_date_label("09.08.2026", today=_TODAY) == "9 Ağustos"
     assert br.derive_signal_date_key("09.08.2026", today=_TODAY) == "older"
 
 
@@ -175,10 +176,10 @@ def test_sunucu_istemci_paritesi(tmp_path):
 
 
 def test_js_kanonik_sozluk_esittir():
-    """Etiket dizeleri iki tarafta da aynı yazılmış olmalı."""
+    """Ay adları iki tarafta da aynı yazılmış olmalı."""
     js = _read(_BP_FORMAT_JS)
-    for value in br.SIGNAL_DATE_LABELS.values():
-        assert f"'{value}'" in js, f"bp-format.js kanonik etiketi taşımıyor: {value}"
+    for value in br.TR_MONTHS:
+        assert f"'{value}'" in js, f"bp-format.js ay adını taşımıyor: {value}"
 
 
 # ── 4. Donmuş eksenlerin geri sızması ───────────────────────────────────────
