@@ -15,6 +15,8 @@
 - **Kapsam:** kademeli olarak Borsa İstanbul'daki tüm paylar (BIST TÜM, 584): önce BIST100'ün tamamı, sonra Yıldız Pazar, sonra kalanı. Gözaltı, Yakın İzleme ve Piyasa Öncesi İşlem Platformu'ndaki paylar kapsam dışı. Verisi yetersiz olan hisse "Sınırlı veri" etiketiyle gösterilir, listelere girmez.
 - **Rakiplere göre konum** (23.09 incelemesi: Fintables, Midas, borsafolio, borsamix, borsacoo…): ücretsiz; Data-Art görsel kimliği; long-only ve tavsiye/hedef dili olmayan dürüst anlatım; sektör gruplu gerçek bir BIST100 ısı haritası (Türk rakiplerde yok); haberin site içinde, bizim verimizle okunması.
 
+- **GEO kalıcı ilke (Ozan, 24.09 O16h notu: "yaptığımız tüm geliştirme GEO mantığına uygun olmalı"):** her yeni sayfa ve bileşen yapay zekâ arama motorlarının okuyup alıntılayabileceği biçimde yapılır: içerik sunucuda (SSR) hazır gelir; tek H1 ve soru biçiminde alt başlıklar; kısa, kendi başına anlamlı olgu blokları (sayı + tarih); JSON-LD (FAQPage, Article, Dataset uygun olanı); sitemap ve `llms.txt` güncel. Kaynak etiketi kuralı (§2.8) GEO için de geçerlidir.
+
 ## 2. Kalıcı dil kuralları
 
 1. **AL / SAT yazılmaz.** Durumlar: **Güçlü Trend** · **Yatay** · **Trend Bozuldu**.
@@ -98,6 +100,8 @@
 ## 4. Bilgi mimarisi
 
 - **Menü (O17=A; "Bugün" → "Piyasa", göreli zaman kuralı):** Piyasa · Keşfet · Haberler · Takip · Öğren (+ arama). Masaüstü ile mobil aynı.
+- **Öğren bölümü (O16h=B, 24.09):** Metodoloji ("Skor ve sinyaller nasıl hesaplanır?") · **Borsa Okulu (blog KALIR — GEO/SEO değeri)** · Sözlük. Eğitim yazıları kavramları (stop-loss, hedef fiyat nedir) genel bilgi olarak anlatabilir; sitenin sinyal ve seviyelerini işlem talimatı gibi sunmaz, AL/SAT yazmaz.
+- **Takip = hesaba bağlı (O16g=B, 24.09):** izleme listesi ve portföy tarayıcıda değil kullanıcı hesabında durur; web ve ileride uygulama aynı hesabı kullanır. Giriş yöntemi O24 (varsayılan: e-posta + tek kullanımlık kodla şifresiz giriş).
 - **Hisse sayfası:** 4 sekme — Özet · Grafik · Temel · Haberler. Özet'in sırası (C-M1 v2):
   1. Başlık: kimlik (kod, ad, sektör) + fiyat + günlük değişim ve kapanış günü + **4 temel gösterge** (Piyasa değeri · Özsermaye kârlılığı · Net kâr marjı · Temettü verimi) + eylemler (Takip et · Paylaş · Karşılaştır) | 1A/3A/1Y alan grafiği. **Başlıkta teknik durum hapı yok.**
   2. Sekme şeridi (mobilde yapışkan).
@@ -234,11 +238,11 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | Hisse Özet v2 | https://claude.ai/artifact/6Rx4X5tZFouMqN2bYUc1Qp | `plans/mockups/hisse-ozet.html` (+ `hisse_data.json`, `build_hisse_data.py`) | O16a B → notlarla v2 (23.09 16:2x) |
 | Ana sayfa v2 | https://claude.ai/artifact/YDcRh13QSYCp3znHcVDo7y | `plans/mockups/anasayfa.html` (+ `home_data.json`, `build_home_data.py`) | O21 A ("Üç soruda BIST."), O16b B → notlarla v2 (23.09 21:5x), v3 "Gündem" adı |
 | **Temel sekmesi v2 + Keşfet listeleri** (O16e=B → v3, O22=B) | https://claude.ai/artifact/6bQEHgLCJj8EqwsepfzwfR | `plans/mockups/temel-v2.html` (+ `temel-v2.tpl.html`, `build_temel_mock.py`; veri ops `kanit/tc/temel_data_TUPRS_GARAN.json`) | O16e B (hizalama notu → v3, 24.09), O22 B |
-| **Tarama v2** (karar bekliyor) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c bekliyor, son tarih 27.09 12:00 |
-| **Haberler** (karar bekliyor) | https://claude.ai/artifact/45h9DvBjYLPSEm4Ct2apLE | `plans/mockups/haberler.html` (+ `build_haberler.py`, `haberler_data.json`; iç kaynak listesi `haberler_gundem_kaynaklari_ic.md`) | O16f bekliyor, son tarih 28.09 12:00 |
-| **Takip** (karar bekliyor) | https://claude.ai/artifact/9u3m9ABRTcLiYUwVmCnnKX | `plans/mockups/takip.html` (+ `takip_data.json`, `build_takip_data.py`) | O16g bekliyor, son tarih 28.09 12:00 |
-| **Metodoloji v2** (karar bekliyor) | https://claude.ai/artifact/KKvDJRKb6YmxAfvVhWc7NV | `plans/mockups/metodoloji.html` (+ `build_metodoloji.py`) | O16h + O23 (haftalık trend şartı) bekliyor, son tarih 28.09 12:00 |
-| **Hisse Grafik + Haberler sekmeleri** (karar bekliyor) | https://claude.ai/artifact/VDogboJLPEUmXxFXcC528g | `plans/mockups/hisse-sekmeler.html` | O16i bekliyor, son tarih 28.09 12:00 |
+| **Tarama v2** (O16c=A) | https://claude.ai/artifact/MimW7U5gPTeFiFJdeRbtNQ | `plans/mockups/tarama.html` (+ `build_tarama_data.py`) | O16c A (24.09) |
+| **Haberler** (O16f=A) | https://claude.ai/artifact/45h9DvBjYLPSEm4Ct2apLE | `plans/mockups/haberler.html` (+ `build_haberler.py`, `haberler_data.json`; iç kaynak listesi `haberler_gundem_kaynaklari_ic.md`) | O16f A (24.09) |
+| **Takip** (O16g=B → hesaba bağlı, O24) | https://claude.ai/artifact/9u3m9ABRTcLiYUwVmCnnKX | `plans/mockups/takip.html` (+ `takip_data.json`, `build_takip_data.py`) | O16g B (24.09): hesap, O24 bekliyor |
+| **Metodoloji v2** (O16h=B, O23=A) | https://claude.ai/artifact/KKvDJRKb6YmxAfvVhWc7NV | `plans/mockups/metodoloji.html` (+ `build_metodoloji.py`) | O16h B (blog kalır, GEO), O23 A (24.09) |
+| **Hisse Grafik + Haberler sekmeleri** (O16i=A) | https://claude.ai/artifact/VDogboJLPEUmXxFXcC528g | `plans/mockups/hisse-sekmeler.html` | O16i A (24.09) |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
@@ -260,6 +264,9 @@ Taslak kodu bu depoya girmez: taslaklar ops deposunda durur, uygulama bu belgeye
 | O9 | 23.09 | PWA ölçüm parametresi kalkar, mağaza görseli şimdilik yok. |
 | O10 | 23.09 | Teknik hedef dili yok. **Düzeltme:** analist hedef fiyatı değerleme göstergesi olarak kalır (§2.2). |
 | O16e / O22 | 24.09 | Temel sekmesi v2 + Keşfet taslağı B: genel uygun; **orta-uzun vade listelerinde hizalama** — kutular bir bütün halinde aşağı iner, rozetler tek grup (taslak v3). F/K ve özsermaye kârlılığı **son 12 ay** kârıyla (son yıllık + son ara dönem raporundaki fark). |
+| O16c, O16f, O16i, O23 | 24.09 | Tarama, Haberler, Hisse Grafik+Haberler taslakları A (onay). O23 A: haftalık trend şartı 5. koşul olarak görünür, sinyal değişmez. |
+| O16h | 24.09 | Metodoloji B: blog (Borsa Okulu) kalır; **GEO kalıcı ilke** (§1). |
+| O16g | 24.09 | Takip B: liste ve portföy **hesaba bağlı**, uygulama da düşünülür → O24 (giriş yöntemi). O14'ün "hesap yok" varsayımı değişti. |
 | O11 / O11b | 23.09 | "Otomatik özet" değil → **"3 Soruda {HİSSE}"**. Feragat 7'den 2'ye. |
 | O12 | 23.09 | Halkalar sitenin diliyle: kimlik renkleri (CPO kararı, §5.3). |
 | O13 | 23.09 | Tek alarm kanalı e-posta; makro şerit olabildiğince canlı (seansta 60 sn). |
