@@ -243,7 +243,8 @@ def overlay_official_bar(df, rec, ticker_base):
         return df, False   # bölünme/bedelsiz benzeri seri kırılması: resmi bar seriye yazılmaz
     row = {"Open": t["open"], "High": t["high"], "Low": t["low"], "Close": t["close"]}
     if "Volume" in df.columns:
-        row["Volume"] = t["volume"]
+        # Endeks kayıtlarında hacim yok (D-04c P2-1): serinin son barının hacmi kalır.
+        row["Volume"] = t["volume"] if "volume" in t else float(df["Volume"].iloc[-1])
     out = df.copy()
     # Önceki bar Yahoo'da oturmamış olabilir: değişim bülten değişimiyle eşleşsin.
     out.iloc[prev_pos if last_day == want else -1, out.columns.get_loc("Close")] = t["prev_close"]
@@ -313,3 +314,22 @@ def collapse_pending(entries, day_iso, tickers=None):
             drop.update(idxs[1:])
     out = [repl.get(i, e) for i, e in enumerate(entries) if i not in drop or i in repl]
     return out, len(entries) - len(out)
+
+
+def rebuild_pending(entries, day_iso, tickers, pre_sig, official, make_entry):
+    """D-04c P1-1: `tickers` için day_iso günlük digest girdilerini resmi sinyalden YENİDEN kurar.
+    18:10 geçici sinyalinin bıraktığı zincir (BEKLE→SAT gibi resmi bar tarafından geri
+    alınan ya da AL→BEKLE→AL ile sahte "yeni sinyal" doğuran) silinir; girdi yalnız
+    EOD öncesi sinyal (`pre_sig`) ile resmi sinyal (`official`) farklı ve resmi ∈ {AL,SAT}
+    ise, resmi fiyat/değişimle (make_entry(ticker, old, new)) yazılır. `pre_sig`'te
+    olmayan hisse dokunulmadan kalır. (yeni_liste, silinen, eklenen) döner."""
+    base = [t for t in tickers if t in pre_sig and t in official]
+    tset = set(base)
+    kept = [e for e in entries
+            if not (str(e.get("ts", ""))[:10] == day_iso and e.get("ticker") in tset)]
+    added = 0
+    for t in base:
+        if official[t] in ("AL", "SAT") and pre_sig[t] != official[t]:
+            kept.append(make_entry(t, pre_sig[t], official[t]))
+            added += 1
+    return kept, len(entries) - (len(kept) - added), added

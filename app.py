@@ -3976,15 +3976,16 @@ def _keep_known_good_cache(data: list):
         _last_known_good_ts = time.time()
 
 
-def _save_daily_snapshot(data: list):
+def _save_daily_snapshot(data: list, overwrite=False):
     """Seans kapandıktan sonra (14:00 UTC = 17:00 TR) günlük snapshot yazar.
-    Her gün için bir kez; dosya varsa üzerine yazmaz."""
+    Her gün için bir kez; dosya varsa üzerine yazmaz (overwrite=True: D-04c resmi
+    kapanış turu günün dosyasını resmi veriyle yeniden yazar)."""
     now = datetime.now()
     # Sadece seans saati sonrası yaz (14:00 UTC → 17:00 TR)
     if now.hour < 14:
         return
     fname = os.path.join(_SNAPSHOTS_DIR, f"{now.strftime('%Y-%m-%d')}.json")
-    if os.path.exists(fname):
+    if os.path.exists(fname) and not overwrite:
         return  # Bugün zaten yazıldı
     try:
         with open(fname, "w", encoding="utf-8") as f:
@@ -4263,6 +4264,8 @@ def _refresh_data_impl():
     for _ps in _prev_data:
         _pt = _ps.get("ticker")
         if _pt and _pt not in _fresh_tickers:
+            if _pt not in BIST30 and _pt != "XU030":
+                continue   # D-04c P2-3: evrenden çıkan hisse (MARKA) önceki cache'ten taşınmaz
             _fallback = dict(_ps)
             _fallback["data_quality"] = "stale"
             # D-P0-2309: bu cycle'da NEDEN taze veri gelmediğini işaretle —
@@ -4564,6 +4567,25 @@ def _official_pass_window(now_tr=None):
     return _OFFICIAL_PASS_START_MIN <= m < _OFFICIAL_PASS_GIVEUP_MIN
 
 
+_OFFICIAL_PASS_SOFT_CAP = 420    # sn — D-04c: havuz turu üst sınırı
+_OFFICIAL_PASS_MIN_RATIO = 0.90  # D-04c: bunun altında dönüşen → tur başarısız, yeniden dene
+
+
+def _prev_day_signals(day):
+    """day'den önceki en son günlük snapshot'ın {ticker: signal} haritası (yoksa {})."""
+    try:
+        _names = sorted(n for n in os.listdir(_SNAPSHOTS_DIR)
+                        if len(n) == 15 and n.endswith(".json") and n[:10] < day.isoformat())
+        if not _names:
+            return {}
+        with open(os.path.join(_SNAPSHOTS_DIR, _names[-1]), encoding="utf-8") as _f:
+            _snap = json.load(_f)
+        return {s["ticker"]: s.get("signal") for s in _snap.get("stocks", []) if s.get("ticker")}
+    except Exception as _e:
+        logger.warning("OFFICIAL_CLOSE: önceki gün sinyalleri okunamadı: %s", _e)
+        return {}
+
+
 def _run_official_close_pass(day=None, notify=True):
     """D-04 kesinleştirme koşusu. Bülteni indirir, kapılar (tarih/≥600 pay/evren
     ≥%98) geçerse arşive yazar ve tüm hisseleri resmi bar ile yeniden analiz eder
@@ -4607,14 +4629,36 @@ def _run_official_close_pass(day=None, notify=True):
     official_close.reset_memory()
     _before = {s.get("ticker"): s for s in _stocks_now}
     _rescued, _failed = [], []
-    for _t in _universe:
-        _r = _analyze_with_timeout(_t)
-        if _r and _r.get("close_status") == "resmi":
-            _enrich_stock(_r)
-            _r["last_fresh_ts"] = time.time()
-            _rescued.append(_r)
-        else:
-            _failed.append(_t)
+    # D-04c P1-2: 4 işçili havuz (refresh ile aynı) — sıralı tur 11-18 dk sürüyordu.
+    _ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="official_par")
+    try:
+        _fmap = {_ex.submit(_analyze_with_timeout, _t): _t for _t in _universe}
+        try:
+            for _f in _cf_analyze.as_completed(_fmap, timeout=_OFFICIAL_PASS_SOFT_CAP):
+                try:
+                    _r = _f.result(timeout=1)
+                except Exception:
+                    _r = None
+                if _r and _r.get("close_status") == "resmi":
+                    _enrich_stock(_r)
+                    _r["last_fresh_ts"] = time.time()
+                    _rescued.append(_r)
+                else:
+                    _failed.append(_fmap[_f])
+        except _cf_analyze.TimeoutError:
+            logger.warning("OFFICIAL_CLOSE: %ds soft cap — bitmeyenler atlandı", _OFFICIAL_PASS_SOFT_CAP)
+            for _f, _t in _fmap.items():
+                if not _f.done():
+                    _f.cancel()
+                    _failed.append(_t)
+    finally:
+        _ex.shutdown(wait=False)
+    if _universe and len(_rescued) < _OFFICIAL_PASS_MIN_RATIO * len(_universe):
+        # D-04c P2-2: çoğu hisse resmi bara dönmediyse (Yahoo CB/timeout) karışık site bırakma;
+        # yazmadan çık, çağıran 5 dk sonra yeniden dener (arşiv/bülten kapıları zaten geçti).
+        logger.warning("OFFICIAL_CLOSE: yalnız %d/%d hisse resmi bara döndü (<%%%d) — yeniden denenecek",
+                       len(_rescued), len(_universe), int(_OFFICIAL_PASS_MIN_RATIO * 100))
+        return False
     _fixed = sum(1 for r in _rescued
                  if (_before.get(r["ticker"]) or {}).get("price") != r.get("price"))
     _flipped = [r["ticker"] for r in _rescued
@@ -4623,15 +4667,27 @@ def _run_official_close_pass(day=None, notify=True):
     # D-04b: 18:10 geçici sinyali resmi barla geri dönen değişimler digest'e girmez.
     try:
         _rt = {r["ticker"] for r in _rescued}
+        # D-04c P1-1: girdiler resmi sinyalden yeniden kurulur (EOD öncesi sinyal = önceki gün snapshot'ı).
+        _pre = _prev_day_signals(day)
+        _off_sig = {r["ticker"]: r.get("signal") for r in _rescued}
+        _by_t = {r["ticker"]: r for r in _rescued}
+        _mk = lambda t, old, new: _serialize_change((t, old, new, _by_t[t]))
+        _rest = {t for t in _rt if t not in _pre}
         with _pending_changes_lock:
             _d, _w = _load_pending_changes(), _load_pending_changes_weekly()
-            _d2, _nd = official_close.collapse_pending(_d, day.isoformat(), _rt)
-            _w2, _nw = official_close.collapse_pending(_w, day.isoformat(), _rt)
-            if _nd:
+            _d2, _dd, _da = official_close.rebuild_pending(_d, day.isoformat(), _rt, _pre, _off_sig, _mk)
+            _w2, _wd, _wa = official_close.rebuild_pending(_w, day.isoformat(), _rt, _pre, _off_sig, _mk)
+            _d2, _nd = official_close.collapse_pending(_d2, day.isoformat(), _rest)   # baseline'sız hisseler
+            _w2, _nw = official_close.collapse_pending(_w2, day.isoformat(), _rest)
+            if _dd or _da or _nd:
                 _save_pending_changes(_d2)
-            if _nw:
+            if _wd or _wa or _nw:
                 _save_pending_changes_weekly(_w2)
-        logger.info("OFFICIAL_CLOSE: digest buffer'dan %d günlük / %d haftalık girdi elendi (geri dönen geçici sinyal)", _nd, _nw)
+        with _prev_signals_lock:
+            _prev_signals.update({t: g for t, g in _off_sig.items() if g})
+            _save_prev_signals(_prev_signals)
+        logger.info("OFFICIAL_CLOSE: digest buffer yeniden kuruldu — günlük -%d/+%d, haftalık -%d/+%d, baseline'sız collapse %d/%d",
+                    _dd, _da, _wd, _wa, _nd, _nw)
     except Exception as _e:
         logger.warning("OFFICIAL_CLOSE: pending buffer sadeleştirilemedi: %s", _e)
     # Endeksler: sinyal maili yok (notify=False); resmi bar uygulanmazsa cache'te eski değer kalır.
@@ -4646,6 +4702,13 @@ def _run_official_close_pass(day=None, notify=True):
         _merge_rescued_into_cache(_idx_rescued, notify=False)
     logger.info("OFFICIAL_CLOSE: endeks resmi kapanışı — %s",
                 {r["ticker"]: (r.get("price"), r.get("change_pct")) for r in _idx_rescued} or "uygulanmadı")
+    # D-04c P2-5: günün arşiv snapshot'ı resmi veriyle yeniden yazılır (/ozet/<tarih>).
+    try:
+        with _lock:
+            _snap_data = list(_cache.get("data") or [])
+        _save_daily_snapshot(_snap_data, overwrite=True)
+    except Exception as _e:
+        logger.warning("OFFICIAL_CLOSE: snapshot yeniden yazılamadı: %s", _e)
     logger.info("OFFICIAL_CLOSE: SONUC — %s bülten %d pay, %d/%d resmi bara çevrildi, %d fiyat düzeldi, "
                 "yön dönen %d %s, uygulanamayan %s",
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
@@ -4883,6 +4946,7 @@ def background_refresh():
                             logger.warning("official_close flag yazılamadı: %s", _e)
                     else:
                         _official_pending = True
+                    _now_tr_bg = datetime.now(_TZ_TR)   # D-04c P1-2: tur uzun sürdü, 18:45 yeniden denemesi atlanmasın
                 _today_unsettled_path = os.path.join(
                     _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_unsettled1845.flag"
                 )

@@ -218,3 +218,50 @@ def test_collapse_pending_round_trip_and_chain():
     out2, n2 = oc.collapse_pending(buf, "2026-09-24", tickers={"C"})
     assert n2 == 1 and len(out2) == 5
     assert oc.collapse_pending([], "2026-09-24") == ([], 0)
+
+
+# ── D-04c: digest yeniden kurulumu + endeks hacmi ────────────────────────────
+def _pe(t, old, new, day="2026-09-25", price=1.0):
+    return {"ticker": t, "old": old, "new": new, "stock": {"price": price}, "ts": day + "T18:10:00+03:00"}
+
+
+def _mk(t, old, new):
+    return _pe(t, old, new, price=99.0)
+
+
+def test_rebuild_provisional_sat_reverted_by_official_bekle_leaves_no_entry():
+    # Üretim biçimi: 18:10 BEKLE→SAT yazıldı; resmi bar BEKLE'ye döndü (geri dönüş hiç yazılmadı).
+    out, removed, added = oc.rebuild_pending([_pe("AAA", "BEKLE", "SAT")], "2026-09-25", {"AAA"},
+                                             {"AAA": "BEKLE"}, {"AAA": "BEKLE"}, _mk)
+    assert out == [] and removed == 1 and added == 0
+
+
+def test_rebuild_al_bekle_al_round_trip_makes_no_new_signal():
+    # Dün AL; 18:10 geçici BEKLE (sessiz), resmi AL → 0 girdi (sahte "yeni Güçlü Trend" yok).
+    out, _, added = oc.rebuild_pending([], "2026-09-25", {"AAA"}, {"AAA": "AL"}, {"AAA": "AL"}, _mk)
+    assert out == [] and added == 0
+
+
+def test_rebuild_uses_official_values_and_keeps_other_days_and_tickers():
+    entries = [_pe("AAA", "BEKLE", "AL"), _pe("BBB", "BEKLE", "SAT"), _pe("AAA", "AL", "SAT", day="2026-09-24")]
+    out, removed, added = oc.rebuild_pending(entries, "2026-09-25", {"AAA"}, {"AAA": "BEKLE"}, {"AAA": "SAT"}, _mk)
+    assert removed == 1 and added == 1
+    assert [(x["ticker"], x["old"], x["new"], x["ts"][:10]) for x in out] == [
+        ("BBB", "BEKLE", "SAT", "2026-09-25"), ("AAA", "AL", "SAT", "2026-09-24"), ("AAA", "BEKLE", "SAT", "2026-09-25")]
+    assert out[-1]["stock"]["price"] == 99.0
+
+
+def test_rebuild_ticker_without_baseline_untouched():
+    entries = [_pe("ZZZ", "BEKLE", "SAT")]
+    out, removed, added = oc.rebuild_pending(entries, "2026-09-25", {"ZZZ"}, {}, {"ZZZ": "BEKLE"}, _mk)
+    assert out == entries and removed == 0 and added == 0
+
+
+def test_overlay_index_record_without_volume_keeps_series_volume():
+    rec = {"date": "2026-09-23", "stocks": {}, "indices": {"XU030": {"close": 16370.07, "open": 16214.0,
+                                                                     "high": 16506.0, "low": 16200.0,
+                                                                     "prev_close": 16214.13}}}
+    df = _df([16200.0, 16214.13, 16300.0])
+    df.index = pd.to_datetime(["2026-09-21", "2026-09-22", "2026-09-23"])
+    out, ok = oc.overlay_official_bar(df, rec, "XU030")
+    assert ok and out["Close"].iloc[-1] == 16370.07 and out["Volume"].iloc[-1] == 1000.0
