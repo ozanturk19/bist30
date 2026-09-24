@@ -55,695 +55,169 @@
 
   .container { max-width:var(--bp-container-1200); margin:0 auto; padding:20px 20px; }
 
-  /* ── CPO-1585: Teknik/Temel sekmeleri — hisse.css:935-1023 .bp-segments'ten
-     taşındı (pill/dolgu aktif-durum, tam ARIA deseni). hisse.html'deki gibi
-     sticky DEĞİL — tarama zaten header (top:32px) + makro bar (top:0) ile
-     2 katmanlı sticky yığını taşıyor, 3. katman eklemek yerine normal akışta
-     bırakıldı (maksimum sadelik, ek offset matematiği riski yok). */
-  .tarama-segments {
-    background: var(--bp-bg);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 24px;
-  }
-  .tarama-segments .bp-segments-inner {
-    display: flex; gap: 4px;
-    max-width: var(--bp-container-1200);
-    margin: 0 auto;
-    background: rgba(255,255,255,0.025);
-    border-radius: var(--bp-radius-lg);
-    padding: 4px;
-  }
-  .tarama-segments .bp-seg-item {
-    flex: 1; text-align: center;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 9px 12px;
-    border-radius: var(--bp-radius-7);
-    border: none;
-    font-family: 'Manrope', system-ui, sans-serif;
-    font-size: var(--bp-text-base); font-weight: 600;
-    color: var(--text3); text-decoration: none;
-    transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .tarama-segments .bp-seg-item:hover { color: var(--bp-text); background: rgba(255,255,255,0.04); }
-  }
-  .tarama-segments .bp-seg-item.active {
-    color: var(--bp-bg);
-    background: var(--brand);
-    box-shadow: 0 1px 2px rgba(var(--bp-brand-rgb),0.35), 0 0 0 1px rgba(var(--bp-brand-rgb),0.5) inset;
-  }
-  .tarama-segments .bp-seg-item.active:hover { background: var(--brand); }
-  @media (max-width: 480px) {
-    .tarama-segments { padding: 8px 12px; }
-    .tarama-segments .bp-seg-item { font-size: var(--bp-text-sm); padding: 8px 6px; }
-  }
+  /* ══ C-34 — Tarama v2 (onaylı taslak O16c=A): tek tablo, sütun seti, hazır listeler ══
+     Renkler yalnız token: Güçlü Trend yeşil dolu hap · Yatay arduvaz (--bp-bkl-bd) ·
+     Trend Bozuldu koyu ve sessiz (kırmızı yalnız fiyat düşüşünde, kanon §5.3). */
+  .tv { --tv-gut: 20px; position: relative; padding-top: 6px; }
+  .tv .mut { color: var(--bp-text3); font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .tv .u { color: var(--bp-al); } .tv .d { color: var(--bp-sat); }
 
-  /* Temel Analiz Tarama — EOD-tazelik notu */
-  .temel-note {
-    font-size: var(--bp-text-sm); color: var(--text2);
-    background: rgba(255,255,255,0.03); border:1px solid var(--border);
-    border-radius: var(--bp-radius-md); padding:8px 14px; margin-bottom:14px;
-  }
-  .partial-dot { font-size:0.85em; opacity:.75; cursor:help; }
+  /* sayfa başı: H1 + kapanış damgası + durum şeridi (her çizgi bir hisse) */
+  .tv-ph { padding: 18px 0 16px; }
+  .tv-ph-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
+  .tv-ph h1 { margin: 0; font-size: clamp(32px, 4.4vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -.035em; color: var(--bp-text); }
+  .tv-stamp { min-height: 1.3em; font: 500 13px/1.3 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .tv-stamp b { color: var(--bp-text2); font-weight: 600; }
+  .tv-strip { display: flex; gap: 1px; height: 18px; margin-top: 16px; border-radius: 5px; overflow: hidden; background: var(--bp-surface); }
+  .tv-strip i { flex: 1 1 0; min-width: 0; transition: opacity .15s; }
+  .tv-strip .g, .tv .k.g { background: var(--bp-al); }
+  .tv-strip .y, .tv .k.y { background: var(--bp-bkl-bd); }
+  .tv-strip .b, .tv .k.b { background: var(--bp-surface3); }
+  .tv-strip i.off { opacity: .13; }
+  .tv-leg { display: flex; flex-wrap: wrap; gap: 4px 18px; min-height: 20px; margin: 9px 0 0; font: 500 13px/1.5 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+  .tv-leg b { color: var(--bp-text); font-weight: 700; }
+  .tv-leg .hl { color: var(--bp-text2); }
+  .tv .k { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+  .tv .k.b { box-shadow: inset 0 0 0 1px var(--bp-border2); }
+  .tv .k.on { background: var(--bp-brand); }
 
-  /* ── Filtre Çubuğu ── */
-  .filter-bar {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--bp-radius-lg); padding:16px 20px; margin-bottom:16px;
-    display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;
-  }
-  .filter-group { display:flex; flex-direction:column; gap:5px; min-width:120px; }
-  /* 20.09 BULGU (denetim #77): Min/Max Fiyat kutulari `.hide-mob` tasiyordu, yani
-     ≤768px'te (tablet dahil) `display:none!important` ile SESSIZCE yok oluyordu —
-     ne bir "daha fazla filtre" dugmesi ne de ozelligin var oldugunu gosteren bir
-     ipucu kaliyordu. `.hide-mob` tablo KOLONLARI icin dogru bir arac (dar tabloda
-     kolon dusurmek), bir FILTRE icin degil: kolon gizlenince veri yine de satirda
-     duruyor, filtre gizlenince yetenek tamamen kayboluyor. Artik gizlenmiyorlar;
-     dar ekranda yan yana iki sutuna sariliyorlar. */
-  /* K-BA: fiyat alanlari type=number -> type=text + inputmode=decimal oldu
-     (Turkce "12,50" girdisini tarayici sessizce "1250" yapiyordu). Genislik
-     kurali TIPE degil, ROLE baglanir; aksi halde tip degisince kutu buyuyup
-     filtre seridi kayardi. */
-  .filter-price input { width:100px; }
-  .filter-group label { font-size:var(--bp-text-2xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
-  .filter-group select,
-  .filter-group input[type=number],
-  .filter-group input[type=text] {
-    background:var(--surface2); border:1px solid var(--bp-field-border);   /* K-Q */
-    color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 10px; font-size:var(--bp-text-lg);
-    font-family:inherit; outline:none; transition:border-color .15s;
-    appearance:none; cursor:pointer;
-  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
-  .filter-group select {
-    /* 20.09: eski palet grisi %238b949e -> kanonik --bp-text3'un LITERALI.
-       data: URI icinde var() calismaz, bu yuzden token adi DEGIL deger yazilir. */
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23909097' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat:no-repeat; background-position:right 10px center; padding-right:26px;
-  }
-  .filter-group select:focus,
-  .filter-group input[type=number]:focus,
-  .filter-group input[type=text]:focus { border-color:var(--brand); }
-  /* K-BA: ayristirilamayan girdi (or. "abc"). type=number bunu engelliyordu,
-     type=text engellemez -> gorunur + duyurulabilir isaret sart (filtre
-     uygulanmaz). ⛔ KONUM KASITLI: bu kural taban `.filter-group input[...]`
-     border bildiriminden ve :focus'tan SONRA gelmeli. Ozgullugu esit
-     (0,2,1 / 0,3,1); once yazilirsa kaynak sirasinda KAYBEDER ve kenarlik hic
-     degismez -- ilk yazimim tam olarak boyle kirikti, olcumle yakalandi
-     (ayni tuzak: CPO-974 Bug3 notu, birkac satir yukarida). */
-  .filter-group input[aria-invalid="true"],
-  .filter-group input[aria-invalid="true"]:focus { border-color:var(--bp-sat); }
-  /* CPO-974 Bug3 (2026-07-02): CPO-468'in padding-left:36 fix'i hiç uygulanmamış —
-     .filter-group input[type=text] (specificity 0,2,1, padding:7px 10px shorthand) .search-group input'u
-     (specificity 0,1,1) her zaman eziyordu. Kalıcı çözüm: aynı [type=text] attribute selector eklenerek
-     specificity eşitlendi (0,2,1) — kaynak sırası bu kural sonra geldiği için kazanır. */
-  .search-group { position:relative; }
-  .search-group input[type=text] {
-    padding-left:36px;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .search-group input[type=text]:focus {
-    outline: none;
-    border-color: rgba(var(--bp-brand-rgb),0.55);
-    box-shadow: 0 0 0 2px rgba(var(--bp-brand-rgb),0.18);
-  }
-  .search-group .search-icon {
-    /* Label ~18px üstte + input height ~34px → bottom:10px ikonu input dikey ortası civarına oturtur (önceden de bu pattern'di).
-       Width=14px explicit (eski 13'ten +1), left=11px → ikon sağ kenarı 25px, padding-left 36 → 11px nefes (placeholder ile çakışmaz). */
-    position:absolute; left:11px; bottom:10px;
-    width:14px; height:14px;
-    color:var(--text3); pointer-events:none;
-    opacity: 0.85;
-  }
-  .search-group input[type=text]:focus ~ .search-icon { opacity: 1; color: rgba(var(--bp-brand-rgb),0.85); }
-  .search-clear {
-    position:absolute; right:8px; bottom:7px;
-    background:none; border:none; color:var(--text3); cursor:pointer;
-    font-size:var(--bp-text-xl); padding:0; line-height:1; display:none;
-    width:20px; height:20px;
-  }
-  .search-clear:hover { color:var(--text2); }
+  /* araç çubuğu: Filtre + hazır liste çipleri */
+  .tv-bar { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; border-top: 1px solid var(--bp-border); }
+  .tv-fbtn { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 40px; font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: var(--bp-radius-xl); padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .tv-fbtn svg { width: 16px; height: 16px; flex: none; }
+  .tv-fn { font: 700 11.5px/1 'Space Grotesk', system-ui, sans-serif; color: var(--bp-bg); background: var(--bp-brand); border-radius: var(--bp-radius-pill); padding: 3px 7px; }
+  .tv-vsep { flex: none; width: 1px; height: 24px; background: var(--bp-border2); margin: 0 4px; }
+  .tv-chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+  .tv-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); text-decoration: none; border: 1px solid var(--bp-border2); border-radius: var(--bp-radius-pill); padding: 8px 14px; white-space: nowrap; }
+  .tv-chip .cn { display: inline-block; min-width: 2ch; font: 600 12px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .tv-chip.on { background: var(--bp-brand); border-color: var(--bp-brand); color: var(--bp-bg); }
+  .tv-chip.on .cn { color: var(--bp-bg); opacity: .72; }
+  .tv-fbtn:hover, .tv-chip:hover { border-color: var(--bp-ctl-border); color: var(--bp-text); }
+  .tv-chip.on:hover { color: var(--bp-bg); }
 
-  .filter-actions { display:flex; gap:8px; align-items:flex-end; margin-left:auto; }
-  /* T2 — inline spinner (filter reactivity fetch göstergesi) */
-  /* 21.09 (K-W): @keyframes tarSpin SİLİNDİ — satır-içi SVG-yay spinner'ı da
-     aynı role hizmet ediyordu (üçüncü bir dönen görüntü), `.da-spin--sm`e
-     alındı. */
+  /* sonuç satırı: sayı + kural cümlesi · Temizle · sütun seti */
+  .tv-stat { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 2px 0 14px; }
+  .tv-stat p { margin: 0; flex: 1 1 360px; min-height: 20px; font: 500 13.5px/1.45 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+  .tv-stat p b { color: var(--bp-text); font-weight: 700; }
+  .tv-clr { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: transparent; border: 1px solid var(--bp-border2); border-radius: var(--bp-radius-pill); padding: 6px 12px 6px 9px; cursor: pointer; }
+  .tv-clr svg { width: 14px; height: 14px; }
+  .tv-seg { display: inline-flex; gap: 2px; background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 11px; padding: 3px; }
+  .tv-seg button { min-height: 34px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); background: transparent; border: 0; border-radius: var(--bp-radius-md); padding: 7px 15px; cursor: pointer; }
+  .tv-seg button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); box-shadow: inset 0 0 0 1px var(--bp-border2); }
+  .tv button:focus-visible, .tv a:focus-visible, .tv [tabindex]:focus-visible { outline: 2px solid var(--bp-accent-cyan); outline-offset: 2px; }
 
-  /* I1 — Active filter chips (SENECA Faz 1, CPO MSG-062) */
-  .active-chips-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 0 6px;
-    margin: 4px 0 8px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .active-chips-bar::-webkit-scrollbar { display: none; }
-  .active-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 4px 4px 10px;
-    background: rgba(var(--bp-brand-rgb),.10);
-    border: 1px solid rgba(var(--bp-brand-rgb),.30);
-    border-radius: var(--bp-radius-20);
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text);
-    white-space: nowrap;
-    line-height: 1;
-    transition: all .15s ease;
-  }
-  .active-chip:hover {
-    background: rgba(var(--bp-brand-rgb),.18);
-    border-color: var(--bp-brand);
-  }
-  .active-chip .chip-x {
-    position: relative;
-    width: 22px;
-    height: 22px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 0;
-    color: var(--text2);
-    cursor: pointer;
-    font-size: var(--bp-text-md);
-    line-height: 1;
-    border-radius: 50%;
-    padding: 0;
-    transition: all .15s;
-  }
-  .active-chip .chip-x::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    min-width: 36px; min-height: 36px;
-    transform: translate(-50%, -50%);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .active-chip .chip-x:hover {
-      background: rgba(var(--bp-sat-rgb),.20);
-      color: var(--bp-sat);
-    }
-  }
-  .chip-clear-all {
-    background: transparent;
-    border: 0;
-    color: var(--text2);
-    font-size: var(--bp-text-sm);
-    cursor: pointer;
-    padding: 4px 10px;
-    border-radius: var(--bp-radius-16);
-    transition: all .15s ease;
-  }
-  .chip-clear-all:hover { color: var(--bp-text); background: rgba(255,255,255,.04); }
-  @media (max-width: 640px) {
-    .active-chips-bar { padding: 8px 0 4px; }
-    .active-chip { font-size: var(--bp-text-xs); padding: 3px 3px 3px 9px; }
-    /* 15.09 fresh-ground-audit #5: filtre/siralama kontrolleri 36px/29.5px idi, 44px dokunma hedefinin altinda */
-    .filter-group select,
-    .filter-group input[type=number],
-    .filter-group input[type=text] { min-height: 44px; }
-    .sort-select { min-height: 44px; padding-top: 9px; padding-bottom: 9px; }
-  }
+  /* tablo */
+  .tv-tbw { border: 1px solid var(--bp-border); border-radius: var(--bp-radius-16); background: var(--bp-surface); overflow-x: auto; }
+  .tv-tb { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tv-tb thead th { font: 600 11px/1.25 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); text-align: left; padding: 0; border-bottom: 1px solid var(--bp-border); white-space: nowrap; vertical-align: bottom; }
+  .tv-tb th.num { text-align: right; }
+  .thb { display: flex; align-items: center; gap: 6px; width: 100%; padding: 13px 14px 11px; background: transparent; border: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: inherit; cursor: pointer; }
+  .num .thb { justify-content: flex-end; }
+  .thb .ar { font-size: 12px; letter-spacing: 0; color: var(--bp-text3); opacity: .6; }
+  .thb:hover { color: var(--bp-text2); }
+  .tv-tb th[aria-sort] .thb { color: var(--bp-text); }
+  .tv-tb th[aria-sort] .ar { color: var(--bp-brand); opacity: 1; }
+  .tv .thb:focus-visible { outline-offset: -2px; border-radius: var(--bp-radius-md); }
+  .tv-tb td { padding: 9px 14px; border-top: 1px solid var(--bp-border); vertical-align: middle; white-space: nowrap; color: var(--bp-text2); }
+  .tv-tb td.num { text-align: right; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--bp-text); }
+  .tv-tb tr.r { position: relative; }
+  .tv-tb tr.tv-nojs { display: none; }
+  .tv-tb .c-hs { min-width: 200px; }
+  .tv-tb .c-hs b { font: 700 14.5px/1.3 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); letter-spacing: .01em; }
+  .tv-tb .c-hs .nm { display: block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; line-height: 1.35; color: var(--bp-text3); }
+  .tv .rl { color: inherit; text-decoration: none; }
+  .tv .rl::after { content: ''; position: absolute; inset: 0; }
+  .tv .rl:focus-visible { outline: none; }
+  .tv .rl:focus-visible::after { outline: 2px solid var(--bp-accent-cyan); outline-offset: -2px; border-radius: var(--bp-radius-lg); }
+  .tv-tb .sub { display: block; font: 500 12px/1.35 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); white-space: normal; }
+  .tv-tb .c-tr .sub { display: inline; margin-left: 8px; }
+  .tv-tb tr.r.b td { color: var(--bp-text3); }
+  .tv-tb tr.r.b td.num, .tv-tb tr.r.b .c-hs b { color: var(--bp-text2); }
+  .tv-stale { position: relative; z-index: 1; display: inline-block; margin-left: 6px; padding: 0 6px; font-size: var(--bp-text-2xs); color: var(--bp-stale); border: 1px solid rgba(var(--bp-stale-rgb), .4); border-radius: var(--bp-radius-sm); vertical-align: 1px; }
+  .tv .pill { display: inline-block; font: 600 11.5px/1.55 'Space Grotesk', system-ui, sans-serif; border-radius: var(--bp-radius-pill); padding: 1px 9px; white-space: nowrap; }
+  .tv .pill.g { background: var(--bp-al); color: var(--bp-bg); }
+  .tv .pill.y { background: var(--bp-bkl-bd); color: var(--bp-text); }
+  .tv .pill.b { background: var(--bp-surface3); color: var(--bp-text2); box-shadow: inset 0 0 0 1px var(--bp-border2); }
+  /* skor: sayı + çubuk (BP yeşil, Temel camgöbeği — kanon §5.3 kimlik renkleri) */
+  .tv-bp { display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px; vertical-align: middle; }
+  .tv-bp b { min-width: 24px; text-align: right; font: 700 15px 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--bp-text); }
+  .tv-bp b sup { font-size: 10px; color: var(--bp-text3); margin-left: 1px; }
+  .tv-bp i { position: relative; display: block; width: 64px; height: 6px; border-radius: var(--bp-radius-pill); background: var(--bp-border); overflow: hidden; }
+  .tv-bp i::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v, 0) * 1%); border-radius: var(--bp-radius-pill); background: var(--bp-al); }
+  .tv-bp.soft b { color: var(--bp-text2); }
+  .tv-bp.soft i::after { background: rgba(var(--bp-al-rgb), .38); }
+  .tv-bp.cy i::after { background: var(--bp-accent-cyan); }
+  .tv-tb td.c-te { text-align: left; }
+  .tv-tb td.c-te .tv-bp { justify-content: flex-start; }
+  .tv-tb .c-te .sub { max-width: 300px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tv-skel b, .tv-skel i::after { visibility: hidden; }
+  .tv-skel b::before { content: '00'; }
+  /* gruplar */
+  .tv-tb .gh th { padding: 0; border-top: 1px solid var(--bp-border); background: linear-gradient(90deg, rgba(var(--bp-text-rgb), .025), transparent 70%); text-align: left; text-transform: none; letter-spacing: 0; }
+  .tv-tb thead + tbody .gh th { border-top: 0; }
+  .ghb { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 14px; background: transparent; border: 0; color: var(--bp-text2); font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; text-align: left; cursor: pointer; }
+  .ghb:hover { background: rgba(var(--bp-text-rgb), .03); }
+  .tv .ghb:focus-visible { outline-offset: -2px; border-radius: var(--bp-radius-lg); }
+  .ghb .chev { width: 16px; height: 16px; flex: none; color: var(--bp-text3); transition: transform .15s; }
+  .ghb[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .ghb .gn { font-weight: 700; color: var(--bp-text); }
+  .ghb .gd { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--bp-text3); font-weight: 500; }
+  .ghb .go { margin-left: auto; flex: none; font: 600 12.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-brand); }
+  .tv-tb tr.more td { padding: 12px 14px; text-align: center; }
+  .tv-moreb { min-height: 44px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: var(--bp-radius-lg); padding: 10px 18px; cursor: pointer; }
+  .tv-moreb:hover { border-color: var(--bp-ctl-border); }
+  .tv-empty { padding: 28px 18px; text-align: center; color: var(--bp-text3); font-size: 14px; }
+  .tv-empty b { display: block; margin-bottom: 4px; color: var(--bp-text); font: 700 16px 'Space Grotesk', system-ui, sans-serif; }
+  .tv-fnote { margin: 12px 0 0; font-size: 12.5px; color: var(--bp-text3); }
 
-  .btn-reset {
-    background:none; color:var(--text2); border:1px solid var(--bp-ctl-border);
-    border-radius:var(--bp-radius); padding:8px 14px; font-size:var(--bp-text-base); cursor:pointer;
-    font-family:inherit; transition:all .15s;
-  }
-  .btn-reset:hover { border-color:var(--text2); color:var(--bp-text); }
+  /* filtre paneli: masaüstünde araç çubuğunun altında açılır kutu */
+  .tv-panel[hidden] { display: none; }
+  .tv-scrim { position: fixed; inset: 0; z-index: var(--bp-z-sheet); background: transparent; }
+  .tv-sheet { position: absolute; left: var(--tv-gut); top: var(--tv-pop-top, 200px); z-index: calc(var(--bp-z-sheet) + 1); width: min(740px, calc(100% - 2 * var(--tv-gut))); display: flex; flex-direction: column; background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: 18px; box-shadow: 0 24px 60px rgba(var(--bp-bg-rgb), .6); }
+  .tv-grab { display: none; }
+  .tv-sh-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--bp-border); }
+  .tv-sh-h h2 { margin: 0; font: 700 18px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); }
+  .tv-esc { margin-left: auto; font: 500 12.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); white-space: nowrap; }
+  .tv-esc kbd { font: 600 11px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); background: var(--bp-surface3); border: 1px solid var(--bp-border2); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; }
+  .tv-xbtn { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; border: 1px solid var(--bp-border2); background: var(--bp-surface3); color: var(--bp-text); cursor: pointer; }
+  .tv-xbtn svg { width: 16px; height: 16px; }
+  .tv-sh-b { max-height: min(62vh, 560px); overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 0; }
+  .tv-pcols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+  .tv-fg { border: 0; margin: 0 0 16px; padding: 0; min-width: 0; }
+  .tv-fg legend { float: left; width: 100%; padding: 0; margin: 0 0 8px; font: 700 14.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); }
+  .tv-fg legend span { margin-left: 8px; font: 500 12.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+  .tv-fg-sort { display: none; }
+  .tv-opts { clear: both; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tv-opt { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); background: var(--bp-surface3); border: 1px solid var(--bp-border); border-radius: var(--bp-radius-lg); padding: 6px 11px; cursor: pointer; white-space: nowrap; }
+  .tv-opt .oc { font-size: 12px; font-weight: 500; color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .tv-opt:not([aria-pressed="true"]):hover { border-color: var(--bp-border2); }
+  .tv-opt[aria-pressed="true"] { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb), .13); color: var(--bp-text); }
+  .tv-pp { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 8px 8px 8px 12px; border-radius: var(--bp-radius-xl); background: rgba(var(--bp-brand-rgb), .08); border: 1px solid rgba(var(--bp-brand-rgb), .25); font: 500 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+  .tv-pp b { color: var(--bp-text); font-weight: 600; }
+  .tv-ppx { margin-left: auto; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; border: 0; background: transparent; color: var(--bp-text2); cursor: pointer; }
+  .tv-ppx svg { width: 14px; height: 14px; }
+  .tv-sh-f { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--bp-border); font: 500 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+  .tv-pn { margin-right: auto; }
+  .tv-pn b { color: var(--bp-text); }
+  .tv-clr2, .tv-pri { min-height: 40px; border-radius: 11px; font: 700 13.5px 'Space Grotesk', system-ui, sans-serif; padding: 0 16px; cursor: pointer; }
+  .tv-clr2 { color: var(--bp-text); background: transparent; border: 1px solid var(--bp-border2); }
+  .tv-clr2:disabled { opacity: .4; cursor: default; }
+  .tv-pri { color: var(--bp-bg); background: var(--bp-brand); border: 0; }
 
-  /* ── Sonuç başlığı ── */
-  .result-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:10px; flex-wrap:wrap; gap:8px;
+  /* tablet: 820–1099 — Sektör gizli, sıkı dolgu, trend alt satırı alta */
+  @media (max-width: 1099.98px) {
+    .tv-tb .hide-t { display: none; }
+    .tv-tb td { padding: 8px 10px; }
+    .thb { padding: 12px 10px 10px; }
+    .tv-tb thead th { white-space: normal; }
+    .tv-tb .c-hs { min-width: 150px; }
+    .tv-tb .c-hs .nm { max-width: 150px; }
+    .tv-bp i { width: 40px; }
+    .tv-bp { gap: 8px; }
+    .tv-tb .c-te .sub { max-width: 210px; white-space: normal; }
+    .tv-tb .c-tr .sub { display: block; margin-left: 0; margin-top: 2px; }
+    .tv-pcols { grid-template-columns: 1fr; }
   }
-  .result-count { font-size:var(--bp-text-base); color:var(--text2); }
-  .result-count strong { color:var(--bp-text); font-size:var(--bp-text-lg); }
+  @media (prefers-reduced-motion: reduce) { .tv-strip i, .ghb .chev { transition: none; } }
+  @media (max-width: 480px) { .tv-bar { flex-wrap: wrap; } .tv-chip { white-space: normal; } }
 
-  /* Sıralama seçici */
-  /* 21.09: bu secici, 8 satir yukaridaki `.filter-group select` ile AYNI filtre
-     cubugunda yan yana duruyor ama appearance:auto + 12px idi — yerli ok +
-     iOS odak-yakinlastirmasi. Ortak receteyi artik `.da-select` veriyor
-     (data-art.css); burada yalniz yuzey/kenarlik ve ok payi kaliyor.
-     `font-size` BILEREK yazilmiyor: .da-select'in 16px'i gecerli olmali. */
-  .sort-wrap { min-width:0; max-width:100%; }
-  .sort-select {
-    max-width:100%; min-width:0;   /* C-04: 320/390'da .result-header'dan tasmasin (kap: .sort-wrap) */
-    background-color:var(--surface2); border:1px solid var(--bp-field-border);   /* K-Q */
-    color:var(--text2); border-radius:var(--bp-radius); padding:5px 28px 5px 10px;
-    outline:none; cursor:pointer;
-  }
-  /* r122 bug-hunt: outline:none klavye kullanicisi icin gorunmez focus birakiyordu,
-     .filter-group select:focus'taki ayni token/desen burada da uygulandi. */
-  .sort-select:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(var(--bp-brand-rgb),.35); }
-
-  /* ── Tablo ── */
-  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
-     thead sticky referansini bozuyordu. >=900px'te tablo zaten viewport'a sigar (mobilde
-     zaten #mobileResultCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
-  /* 20.09 CANLI OLCUM DUZELTMESI: yukaridaki ">=900px'te tablo zaten viewport'a
-     sigar" varsayimi YANLISTI. Canlida olculdu (1024px viewport, Chrome):
-     #resultTable dogal genisligi 1110px, .table-wrap ic genisligi 982px —
-     yani tablo 128px tasiyor, overflow-x:visible oldugu icin .table-wrap
-     scroll ETMIYOR ve html{overflow-x:clip} tasan kismi sessizce KIRPIYOR:
-     900-1149px arasi ekranlarda (kucuk dizustu / yatay tablet) "Sektor"
-     kolonu tamamen, "Tazelik" kolonu kismen GORUNMEZ ve kullanicinin onlara
-     ulasmasinin hicbir yolu yok (yatay kaydirma cubugu da yok). Temel Analiz
-     tablosu da ayni (1106px).
-     Esik, tablonun GERCEKTEN sigdigi genislige tasindi: container 1200px'te
-     tavanlandigi icin >=1200px viewport'ta ic genislik 1160px (~50px pay).
-     900-1199px bandinda .table-wrap yeniden scroll kabi oluyor; bu bantta
-     thead sticky'si bilincli olarak KAPATILIYOR (kural DOSYANIN SONUNDA,
-     kaynak-sirasi gerekcesiyle) — asagidaki (satir ~462)
-     aciklamada oldugu gibi bir scroll kabi ici sticky, referansini hic
-     kaymayan scrollport'a kaydirip yarim-bozuk davranir; veriyi kirpmak
-     yerine sticky'den vazgecmek acik ara daha iyi takas. */
-  @media (min-width:1200px) {
-    .table-wrap { overflow-x: visible; }
-  }
-  table { width:100%; border-collapse:collapse; }
-  thead th {
-    font-size:var(--bp-text-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
-    font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border);
-    text-align:left; white-space:nowrap; background:var(--surface2); cursor:pointer;
-    user-select:none; transition:color .15s;
-    /* 18.09 bughunt: karsilastir.css/portfolio.css ile ayni eksik -- makro-bar
-       (32px+inset) payi hic eklenmemisti, thead header'in alt kismina biniyordu. */
-    position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-dropdown);
-  }
-  thead th:hover { color:var(--bp-text); }
-  thead th.th-sortable { padding:0; }
-  .th-sort-btn {
-    all:unset; box-sizing:border-box; display:block; width:100%;
-    padding:10px 14px; cursor:inherit;
-    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
-  }
-  .th-sort-btn.sort-asc::after  { content:' ▲'; color:var(--brand); }
-  .th-sort-btn.sort-desc::after { content:' ▼'; color:var(--brand); }
-  tbody td { padding:10px 14px; border-bottom:1px solid var(--bp-border-subtle); vertical-align:middle; }
-  tbody tr:last-child td { border-bottom:none; }
-  tbody tr { cursor:pointer; transition:background .15s, box-shadow .15s; }
-  @media (hover: hover) and (pointer: fine) {
-    tbody tr:hover { background:var(--surface2); box-shadow:inset 3px 0 0 rgba(var(--bp-al-rgb),.35); }
-  }
-  #resultTable { transition:opacity .15s ease; }
-  tbody a { text-decoration:none; color:inherit; }
-
-  .tk { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); }
-  .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
-  .sector-tag {
-    font-size:var(--bp-text-2xs); color:var(--text3); background:var(--surface2);
-    border:1px solid var(--bp-border-subtle); border-radius:var(--bp-radius-lg); padding:2px 7px;
-    white-space:nowrap;
-  }
-
-  .sig-badge {
-    display:inline-flex; align-items:stretch; gap:3px;
-    padding:3px 9px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-xs); font-weight:700;
-  }
-  /* K-R (21.09): rozetin ICINDEKI jargon baglantisi GERCEK dokunma hedefi;
-     masaustunde 14px yuksekti (159 ornek /tarama). bilanco_takvimi.css:116 ve
-     temettu_takvimi.css:87 bu kurali 47886c6'da aldi, KARDES /tarama almadi —
-     o tur YALNIZ 375x812'de olculdugu icin masaustu kor kaldi. 24px asgari
-     ROZETE degil BAGLANTIYA yazilir (rozet border-box; padding+border dusunce
-     ic kutu 24'un altina duser). Gorsel boyut/yazi degismez. */
-  .sig-badge > .jargon-term { display:flex; align-items:center; min-height:24px; }
-  .sig-AL   { background:rgba(var(--bp-al-rgb),.12); color:var(--al); border:1px solid rgba(var(--bp-al-rgb),.3); }
-  .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
-  .sig-BEKLE{ background:rgba(var(--bp-text3-rgb),.1); color:var(--bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
-
-  .eq-badge {
-    font-size:var(--bp-text-2xs); font-weight:600; padding:2px 7px; border-radius:var(--bp-radius-lg);
-  }
-  .eq-safe   { background:rgba(var(--bp-al-rgb),.1); color:var(--al); }
-  /* 20.09 CPO: zemin `rgba(227,179,65,.1)` (= --bp-accent-yellow), metin
-     var(--gold) (= --bp-gold #f59e0b) idi — AYNI ROZETIN zemini ve metni iki
-     AYRI sariydan geliyordu. Kardes .eq-safe zaten metniyle AYNI rengin
-     kanal token'ini kullaniyor; ayni desene cekildi. */
-  .eq-risky  { background:rgba(var(--bp-gold-rgb),.1); color:var(--gold); }
-
-  .price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
-  .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
-  .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
-  .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); }
-  /* ── Boş durum ──
-     21.09 (K-V): kanonik `.da-empty` katina alindi (data-art.css). Sablondaki
-     `<p style="font-size:…;margin-top:6px">` satir-ici yamasi da kalkti —
-     `.empty-state p` bu dosyada HIC tanimli degildi, bu yuzden iki sablonda
-     elle yazilmisti. */
-
-  /* ── Loading ── */
-  /* 21.09 (K-W): `.loading-overlay` → `.da-loading--block`, `.spinner` →
-     `.da-spin .da-spin--lg` (data-art.css §5). `.spinner` hisse.css'te de
-     tanımlıydı, BAŞKA geometriyle (18px/2px/.8s) — aynı ad iki farklı
-     görüntü. Halkanın kenarlığı burada `--border` (=--bp-bkl-bd, #30363d)
-     idi, hisse'de `--bp-border` (#2a2a2c): kanonik ikincisi. */
-
-  /* ── Hide mobile ── */
-  @media(max-width:768px) {
-    .hide-mob { display:none!important; }
-    /* denetim #77 — bkz. .filter-price yorumu */
-    .filter-price { flex:1 1 calc(50% - 4px); min-width:0; }
-    .filter-price input[type=number] { width:100%; }
-    .filter-bar { padding:12px; gap:8px; }
-    .container { padding:12px; }
-    header { padding:10px 14px; }
-    thead th, tbody td { padding:8px 10px; }
-  }
-
-  /* ── SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): yeni kolon CSS ── */
-  /* Trend Gücü (eski ADX) — etiket + bar göstergesi */
-  .trend-cell {
-    display:flex; align-items:center; gap:7px; min-width:88px;
-  }
-  .trend-label {
-    font-size:var(--bp-text-xs); font-weight:700; letter-spacing:0.3px;
-    white-space:nowrap;
-  }
-  /* ADX yön-bağımsız bir büyüklük ölçüsü (SAT sinyalinde de yüksek çıkabilir) —
-     --bp-al (yükseliş yeşili) kullanılırsa "Trend Bozuldu" rozetinin yanında
-     çelişkili bir "güçlü/olumlu" izlenimi verir (10.09 canlı denetimde BTCIM'de
-     yakalandı). Nötr --bp-accent-cyan kullanılır, yön rengiyle karışmaz. */
-  .trend-label.strong { color:var(--bp-accent-cyan); }
-  .trend-label.medium { color:var(--bp-text); }
-  .trend-label.weak   { color:var(--text3); }
-  .trend-bar {
-    flex:0 0 44px; height:4px;
-    background:rgba(255,255,255,0.08);
-    border-radius:var(--bp-radius-xs); overflow:hidden;
-  }
-  .trend-bar-fill {
-    height:100%; border-radius:var(--bp-radius-xs);
-    transition:width 0.3s ease;
-  }
-  .trend-bar-fill.strong { background:linear-gradient(90deg,var(--bp-accent-cyan),var(--bp-brand)); }
-  .trend-bar-fill.medium { background:var(--bp-brand); }
-  .trend-bar-fill.weak   { background:var(--text3); }
-
-  /* RVOL× — dot + sayı */
-  .rvol-cell {
-    display:inline-flex; align-items:center; gap:6px;
-    font-variant-numeric:tabular-nums; font-weight:600; font-size:var(--bp-text-base);
-  }
-  /* K-BO (21.09): hacim de ADX gibi YON-BAGIMSIZ bir buyukluk (yukaridaki
-     .trend-label notunun ayni gerekcesi, 10.09 BTCIM) — ama duzeltme kardes
-     hucreye uygulanmamisti. Ustelik AYNI SATIRDAKI "⭐ Hacim Onayli" rozeti
-     zaten --bp-volume: tek eksen, tek satir, iki renk. Hacim ekseni = --bp-volume.
-     (Bu sutun `vol_ratio` = Gunluk Hacim Orani; RVOL'den ayri sayi ama ayni eksen.) */
-  .rvol-cell.high   { color:var(--bp-volume); }
-  .rvol-cell.normal { color:var(--bp-text); }
-  .rvol-cell.low    { color:var(--text3); }
-  .rvol-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .rvol-dot.high   { background:var(--bp-volume); }
-  .rvol-dot.normal { background:var(--bp-brand); }
-  .rvol-dot.low    { background:var(--text3); }
-
-  /* Tazelik (eski Süre) — Bugün/Dün/X gün badges */
-  .fresh-badge {
-    display:inline-flex; align-items:center; gap:4px;
-    padding:2px 8px; border-radius:var(--bp-radius-4);
-    font-size:var(--bp-text-xs); font-weight:600;
-  }
-  .fresh-badge.today     { background:rgba(var(--bp-al-rgb),0.10); color:var(--bp-al); }
-  .fresh-badge.yesterday { background:rgba(var(--bp-brand-rgb),0.10); color:var(--bp-brand); }
-  .fresh-badge.old       { background:rgba(var(--bp-text3-rgb),0.10); color:var(--text3); }
-  .fresh-dot { font-size:8px; line-height:1; }
-
-  /* Sinyal Gücü (T3.5, CPO/Master Dönüşüm Programı) — signal_strength (0-100),
-     compose_score kaynaklı, sıralamayı sürükleyen skor. Tier renkleriyle (guclu_sinyal=premium
-     sınıf/mor, standart=plus sınıf/mavi — CPO-DEV2-053/055, eski .premium/.plus sınıf adları
-     korundu) tutarlı: index.html tg-premium/tg-plus ile aynı palet. */
-  .score-cell { display:flex; align-items:center; gap:7px; min-width:66px; }
-  .score-val { font-size:var(--bp-text-base); font-weight:700; font-variant-numeric:tabular-nums; }
-  .score-val.premium  { color:var(--bp-premium); }
-  .score-val.plus     { color:var(--bp-brand); }
-  .score-val.weak     { color:var(--text3); }
-  .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:var(--bp-radius-xs); overflow:hidden; }
-  .score-bar-fill { height:100%; border-radius:var(--bp-radius-xs); }
-  .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-brand)); }
-  .score-bar-fill.plus     { background:var(--bp-brand); }
-  .score-bar-fill.weak     { background:var(--text3); }
-
-  /* 21.09 (K-AT) — TH tooltip'i artik KANONIK mekanizmada: [data-tip] +
-     static/js/bp-tooltip.js. Eski `th[data-tooltip]:hover::after` kurali
-     SILINDI: (1) `:hover` dokunmatikte hic tetiklenmez, `:focus-within` ise
-     odaklanabilir cocugu olmayan iki basligi (Temel Skor / BorsaPusula
-     Skoru) hic kapsamiyordu -> icerik SADECE fare ile erisilebiliyordu
-     (WCAG 1.4.13); (2) `white-space:nowrap` + max-width yok => 102px'lik
-     baslik altinda 502px, en uzununda ~1000px tek satir; (3) Escape ile
-     kapanmiyor ve `aria-describedby` kurmadigi icin ekran okuyucuya
-     baglanmiyordu. bp-tooltip.js dordunu de sagliyor. */
-  thead th[data-tip], .th-sort-btn[data-tip] { cursor:help; }
-
-  /* Hide tablet ≤768 (yeni: Sektör tablet'te de gizli) */
-  @media (max-width:768px) {
-    .hide-tablet { display:none!important; }
-  }
-  /* Hide mobile narrow ≤480 — gerekirse bazı kolonları daha sıkı gizle */
-  @media (max-width:480px) {
-    .hide-mob-narrow { display:none!important; }
-    .trend-bar { flex:0 0 32px; }
-    .trend-label { font-size:var(--bp-text-sm); }
-    .rvol-cell, .fresh-badge { font-size:var(--bp-text-xs); }
-  }
-
-  /* ── Faz4 Madde-3: Mobile card stack ──
-     r161-bughunt zindex-sticky-overlap: esik 768->899px (CPO-DEV2-100/108 sticky-thead
-     fix'i sadece >=900px'te overflow-x:visible yapiyor; 769-899px araliginda .table-wrap
-     overflow-x:auto olarak kaliyor ve CSS'in "bir eksen visible degilse digeri de auto
-     sayilir" kurali geregi overflow-y de auto oluyor - bu da thead'in sticky referansini
-     viewport'tan .table-wrap'in kendi (hic kaymayan) scrollport'una kaydirip sticky'yi
-     tamamen kirıyor, canli olcumle dogrulandi. T2.4/DEV2-021 emsaliyle (nav esik hizalama)
-     ayni cozum: kart-gorunumu esigini sticky-fix esigiyle (900px) hizala, boslugu kapat. */
-  #mobileResultCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
-  @media (max-width:899px) {
-    #resultTable { display:none !important; }
-    #mobileResultCards { display:flex; }
-  }
-  /* Temel Analiz sekmesi (#resultTableTemel/#mobileResultCardsTemel) yukarıdaki
-     #resultTable/#mobileResultCards ile AYNI sticky-thead kırılganlığına sahip
-     (satır 462-469'daki açıklama) ama bu kural eklendiğinde bu ikinci tabloya
-     hiç uygulanmamıştı — mobilde thead sticky referansı .table-wrap'in kendi
-     scrollport'una kayıp başlık satırını ilk verinin altına itiyordu (15.09
-     Ozan canlı ekran görüntüsü). Aynı 900px eşiğiyle hizalanmalı. */
-  #mobileResultCardsTemel { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
-  @media (max-width:899px) {
-    #resultTableTemel { display:none !important; }
-    #mobileResultCardsTemel { display:flex; }
-  }
-  .mr-card {
-    display:block; background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--bp-radius-lg); padding:12px 14px; text-decoration:none; color:inherit;
-    transition:border-color 0.15s, background .15s, transform .1s;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .mr-card:hover { border-color:var(--bp-brand); }
-  .mr-card:active { transform:scale(.98); background:var(--surface2); }
-  .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  /* flex ogesi varsayilan `min-width:auto` tasir; bu olmadan .mr-name'in
-     text-overflow:ellipsis'i devreye GIRMEZ (kutu icerige gore buyur). */
-  .mr-top > div:first-child { min-width:0; }
-  .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); letter-spacing:0.5px; }
-  /* 20.09 BULGU (denetim #76): sirket adi JS'te `.substring(0,20/22)` ile VERI
-     seviyesinde kesiliyordu — "Anadolu Hayat Emeklili", "Tüpraş Türkiye Petro"
-     gibi uc-noktasiz, hatali gorunen isimler cikiyordu. Kirpma artik CSS'in isi
-     (masaustu `.tk-name`de zaten vardi, mobil kartta EKSIKTI) — yani ad sigarsa
-     TAM gorunuyor, sigmazsa uc nokta ile bitiyor. */
-  .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px;
-               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mr-bottom { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-  .mr-metric { display:flex; flex-direction:column; gap:2px; }
-  /* r169: .score-bar-bg'nin flex:0 0 40px'i .score-cell'in yatay flex bagalamı icin -
-     .mr-metric dikey flex oldugundan ayni kural genislik yerine yukseklik/flex-basis'i
-     bozuyordu (dev buyuk kutu). Burada yatay, ince bir cubuk olarak sabitleniyor. */
-  .mr-metric .score-bar-bg { flex:none; width:100%; height:4px; margin-top:2px; }
-  .mr-metric-label { font-size:var(--bp-text-2xs); color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
-  .mr-price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); }
-
-
-  /* ── CSV export uyarı toast'ı (portfolio.html .import-toast ile ayni desen, token'lastirilmis) ── */
-  .import-toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md);
-    padding: 10px 20px; font-size: var(--bp-text-base); color: var(--bp-text);
-    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
-  }
-  .import-toast.ok  { border-color: var(--bp-al-bd); color: var(--bp-al); }
-  .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
-  @media (max-width: 900px) {
-    .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
-  }
-
-  /* ── Data-Art filtre çubuğu cilası (08.09 gece) — köşe parıltısı, hisse.html
-     içerik-kartlarıyla aynı reçete; yoğun veri tablosuna DOKUNULMADI (tarama/
-     scanability önceliği), sadece "app shell" (filtre chrome) güçlendirildi. ── */
-  .filter-bar {
-    position: relative;
-    overflow: hidden;
-  }
-  .filter-bar::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -4%;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .10), transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .filter-bar > * { position: relative; z-index: 1; }
-  .filter-group select:focus,
-  .filter-group input[type=number]:focus {
-    box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .14);
-  }
-  .active-chip:hover {
-    box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .10);
-  }
-
-
-  /* ══ Data-Art dil aktarımı — tarama.html (20.09, Pazar) ══
-     hisse.html bitti (bkz. memory project_data_art_kapsamli_donusum_baslangici_18_09),
-     trafik sırasında sonraki sayfa burası. 08.09'da SADECE .filter-bar'a köşe parıltısı
-     eklenmişti; yüzeylerin kendisi (düz --bp-surface + radius-lg + jenerik uppercase
-     mikro-etiket) hâlâ Data-Art öncesi dildi — Ozan'ın "amatör / sayfalar birbiriyle
-     konuşmuyor" dediği desenin ta kendisi.
-     Reçete hisse.css'ten birebir ödünç: degrade gövde (surface→surface2), radius-20,
-     degrade başlık şeridi + violet radial glow (.chart-header deseni), Space Grotesk +
-     geniş tracking mikro-etiketler.
-     DOKUNULMAYAN: yoğun veri tablosunun kendisi (satır/hücre) — 08.09'daki kararla aynı,
-     tarama/scanability önceliği; Data-Art sadece "app shell"e (filtre + sonuç şeridi +
-     panel kenarları + mobil kartlar) uygulandı. ══ */
-
-  /* 1 ── Filtre çubuğu: düz yüzey → degrade + radius-20 (mevcut köşe parıltısı korunuyor) */
-  .filter-bar {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
-
-  /* 2 ── Sonuç şeridi, artık tablo panelinin BAŞLIK BANDI (hisse.css .chart-header
-         reçetesi): degrade şerit + violet radial glow, altındaki .table-wrap ile
-         tek bir panel olarak birleşiyor. Yeni içerik eklenmedi, var olan satır
-         (N sonuç + Sırala + CSV) yeniden çerçevelendi. */
-  .result-header {
-    position: relative; overflow: hidden;
-    margin-bottom: 0;
-    padding: 12px 18px;
-    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
-    border: 1px solid var(--border); border-bottom: none;
-    border-radius: var(--bp-radius-20) var(--bp-radius-20) 0 0;
-  }
-  .result-header::before {
-    content: ''; position: absolute; top: -140%; right: -4%;
-    width: 220px; height: 220px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.14), transparent 70%);
-    pointer-events: none;
-  }
-  .result-header > * { position: relative; }
-  .result-count strong {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-variant-numeric: tabular-nums;
-  }
-  .table-wrap {
-    border-radius: 0 0 var(--bp-radius-20) var(--bp-radius-20);
-    border-top: none;
-  }
-
-  /* 3 ── Mikro-etiket tipografisi: filtre etiketleri, tablo başlıkları ve mobil
-         kart metrik etiketleri tek kuralla Data-Art'a (Space Grotesk + geniş
-         tracking) geçiyor. Renk semantiği DEĞİŞMİYOR — cyan bu sayfada
-         .trend-label.strong'un anlamı (trend gücü), etiketleri de cyan yapmak
-         o ayrımı silerdi (hisse.css'teki .section-title kararıyla aynı gerekçe).
-         thead tracking'i .08em'de tutuldu (.5px≈.045em'den ölçülü bir artış):
-         10 kolonlu tablo white-space:nowrap, daha geniş tracking masaüstünde
-         yatay taşma riski yaratır. */
-  .filter-group label,
-  .mr-metric-label {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: .12em;
-  }
-  thead th {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: .08em;
-    background: linear-gradient(180deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
-  }
-  /* (Baslik Space Grotesk + -.01em'i artik `.da-empty h2`den aliyor.) */
-
-  /* 4 ── EOD-tazelik notu: düz kutu → cyan aksanlı Data-Art şeridi.
-         Cyan bilinçli: bu not "resmi/doğrulanabilir veri ne zaman hesaplanır"
-         bilgisi, hisse.html'deki KAP paneliyle aynı semantik (violet = AI üretimi). */
-  .temel-note {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border: 1px solid var(--border);
-    border-left: 3px solid rgba(var(--bp-accent-cyan-rgb),0.55);
-    border-radius: var(--bp-radius-16);
-    padding: 11px 16px;
-  }
-
-  /* 5 ── Mobil sonuç kartları: düz yüzey → degrade + radius-20.
-         GERÇEK BULGU: .mr-card ile onu saran .table-wrap'in ikisi de
-         background:var(--surface) idi, yani mobilde kartlar zeminleriyle AYNI
-         renkteydi ve sadece 1px kenarlıkla ayrışıyordu ("kart" hissi yok).
-         <900px'te sarmalayıcı şeffaflaşıyor (o kırılımda zaten sadece kart
-         taşıyor, tablo gizli), kartlar sayfa zemininde gerçekten yüzüyor. */
-  .mr-card {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
-  @media (max-width: 899px) {
-    .table-wrap {
-      background: transparent; border: none;
-      border-radius: 0;
-    }
-    .result-header {
-      border-bottom: 1px solid var(--border);
-      border-radius: var(--bp-radius-16);
-      margin-bottom: 10px;
-    }
-  }
-
-  /* 900-1199px bandinda thead sticky kapatma kurali (bkz. satir ~275 aciklamasi)
-     DOSYANIN SONUNDA: ayni secici (thead th) yukarida `position:sticky` ile
-     tanimli ve esit ozgullukte — kural oradan SONRA geldigi icin kaynak sirasi
-     kazanir. (Canlida olculdu: dosyanin ortasinda dururken position hala
-     "sticky" donuyordu.) */
-  @media (min-width:900px) and (max-width:1199px) {
-    thead th { position: static; }
-  }
-
-  /* K-AG (WCAG 2.2 SC 2.4.11) TAKIBI: bu sayfada DORDUNCU yapiskan bant var —
-     yukaridaki `thead th` (top:92px, canli olcum 92..125 = 33px). shared.css'teki
-     kanonik --bp-sticky-top makro serit + header'i sayar; K-AG fix'inden SONRA
-     bile Shift+Tab'da odak y=98'e, yani tam bu bandin ICINE dusuyordu
-     (dedektorde 12 TAM ORTULU kaldi -- fix'in kendi olcumu ikinci bandi buldu).
-     Kirilim bilerek 1200px: <900 tablo gizli (kart gorunumu), 900-1199 thead
-     `position:static` (hemen yukarida) -- bant yalniz >=1200'de VAR. Tek
-     genislikte ezmek diger ikisinde 33px gereksiz bosluk birakirdi. */
-  @media (min-width:1200px) {
-    :root { --bp-chrome-extra: 33px; }   /* K-AY: kanonik --bp-sticky-top artık bunu kendisi toplar */
-  }
-
-  /* C-11: sinyal terim aciklamasi satirdaki her rozette degil, sutun basliginda tek "?" */
-  .th-help {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:16px; height:16px; margin-left:4px; border-radius:50%;
-    border:1px solid var(--text2); color:var(--text2); opacity:.7;
-    font-size:var(--bp-text-2xs); line-height:1; text-decoration:none; vertical-align:middle;
-  }
-  .th-help:hover, .th-help:focus-visible { opacity:1; color:var(--bp-text); border-color:var(--bp-text); }
-
-  /* C-33: ilk 50 satırdan sonra "Daha fazla göster" (tablo satırı ya da kart altı) */
-  .more-row td { text-align:center; padding:12px 14px; }
-  .more-wrap { display:flex; justify-content:center; padding:4px 0 12px; }
-  .btn-more { min-height:44px; }

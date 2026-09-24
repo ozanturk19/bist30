@@ -233,7 +233,9 @@ def main():
     # sayisi dusmediyse anlamlidir. Bir refaktor tooltip'i veya merdiveni
     # dedektorun goremedigi bir bicime sokarsa bu kapi FAIL verir, sessiz
     # kapsam kaybi olmaz. Taban duserse once NEDEN dustugunu olc.
-    TABAN_KOD, TABAN_NESIR = 11, 9
+    # C-34 (24.09): /tarama v2'de ADX bant nesri (40+/25-40/18-25 ipuclari) ve hacim
+    # oran bandi ipuclari kalkti (sutun ipucu yalniz 'ADX 25 ve ustu kosulu' diyor) -> 9'dan 6'ya.
+    TABAN_KOD, TABAN_NESIR = 11, 6
     if toplam_kopya < TABAN_KOD or nesir_toplam < TABAN_NESIR:
         print(f"\n  ✗ KAPSAM KAYBI: kod {toplam_kopya}/{TABAN_KOD}, nesir {nesir_toplam}/{TABAN_NESIR}")
         print("    Dedektor daha az sey olcuyor -- 'sapma yok' ciktisi artik kanit degil.")

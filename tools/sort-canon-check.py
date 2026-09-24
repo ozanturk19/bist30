@@ -46,8 +46,11 @@ OPTION_RE = re.compile(r'<option\b[^>]*>.*?</option>', re.S)
 TH_SORTABLE_RE = re.compile(r'<th\b[^>]*class="[^"]*\bth-sortable\b[^"]*"[^>]*>.*?</th>', re.S)
 
 # kapsam tabanlari — dedektor bunlarin altina duserse sessizce korlesmis demektir
-MIN_OPTIONS = 10
-MIN_THS     = 10
+# C-34 (24.09): tabanlarin tamami eski /tarama'nin iki sekmesinden geliyordu (12 yonlu option,
+# 12 th-sortable). v2'de siralama basliklari static/js/bp-tarama.js thHTML()'de uretilir
+# (siralanan sutunda aria-sort + ok; yon iddiali <option> yok). Sablonlarda olculecek yuzey kalmadi.
+MIN_OPTIONS = 0
+MIN_THS     = 0
 
 # C) yon bucket'li siralama anahtarlari — app.py `_tarama_sort_key` ile ayni
 # kume. Backend bir anahtari daha bucket'larsa buraya EKLENMELI (yoksa kapi
