@@ -34,17 +34,15 @@ LADDERS = {
     },
     "RSI (bolge etiketi)": {
         "canon_fn": "derive_rsi_zone",
-        "labels": ["Aşırı Satım", "Dip Toparlanması", "İdeal Giriş Penceresi",
+        "labels": ["Aşırı Satım", "Dip Toparlanması",
                    "Sağlıklı Momentum", "Trend Güçleniyor", "Dikkatli", "Aşırı Alım"],
         "var": r"^(r|rsi|_?rsi\w*|\w*\.rsi\w*)$",
     },
 }
 
-# C-60 (24.09, kanon §2.2): RSI 45-60 bandinin yeni adi "Sağlıklı Momentum".
-# derive_rsi_zone eski adi DEV-CPO-1793 (3) inene kadar dondurebilir;
-# bp-format.js bpRsiZoneText iki adi ayni kanona indirir. Yeni ad eski adin
-# araligini/esigini miras alir. Kaynak degisince bu satir kendiliginden bosa duser.
-ALIAS = {"Sağlıklı Momentum": "İdeal Giriş Penceresi"}
+# C-60 (24.09, kanon §2.2): RSI 45-60 bandinin adi "Sağlıklı Momentum";
+# eski ad eslemesi 24.09 EOD sonrasi kalkti (/api/data eski adi tasimiyor).
+ALIAS = {}
 
 
 def _alias(d):

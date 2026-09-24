@@ -73,7 +73,7 @@ SCAN_EXT = ('.html', '.js', '.py')
 # disi (LONG/SHORT mantik degeri). Hukuki metin istisnasi: yasal, gizlilik.
 RE_BANNED = re.compile(
     r'[Üü]cretsiz|ÜCRETSİZ|Yahoo|yfinance|\bLONG\b|\bSHORT\b|Stop Loss|'
-    r'[İi]deal Giriş(?! Penceresi)|Giriş fiyatı|'
+    r'[İi]deal Giriş|Giriş fiyatı|'
     # C-52 (24.09): teknik hedef + islem yonetimi dili (kanon §2.2). Analist
     # hedef fiyati KALIR -- "Hedef" tek basina taranmaz, yalniz satir etiketi.
     r'\bTP[12]\b|\bR/R\b|[Rr]isk ?/ ?[Öö]dül|[Ss]top (?:bölgesi|seviyesi)|'
@@ -81,13 +81,11 @@ RE_BANNED = re.compile(
     r'>\s*Hedef\s*(?:\d\s*)?:|Hedef:</')
 # C-61 (24.09): C-60 tam yazim aradigi icin "Giriş Fiyatı", "stop-loss",
 # "Kovalama", "Kazanma Oranı" kaldi. Buyuk/kucuk harf + tire/bosluk duyarsiz
-# (Python re.I Turkce İ/ı'yi katlamaz -> sinif ile). "Penceresi" C-60 kalan
-# (RSI bolge adi gecis eslemesi) silinince eklenir.
+# (Python re.I Turkce İ/ı'yi katlamaz -> sinif ile). "penceresi" 24.09 EOD
+# sonrasi eklendi (RSI bolge adi gecis eslemesi silindi).
 RE_BANNED_CI = re.compile(
-    r'g[iİI]r[iİI][şŞ][ \-](?:f[iİI]yat[ıI]|kal[iİI]tes[iİI]|b[öÖ]lges[iİI]|anal[iİI]z[iİI])|'
+    r'g[iİI]r[iİI][şŞ][ \-](?:f[iİI]yat[ıI]|kal[iİI]tes[iİI]|b[öÖ]lges[iİI]|anal[iİI]z[iİI]|pencere)|'
     r'stop[ \-]?loss|kovalama|kazanma oran[ıI]', re.I)
-# GECICI: RSI bolge adi "İdeal Giriş Penceresi" business_rules.derive_rsi_zone'dan
-# gelir ve kapi 16/47 onu /metodoloji'de arar -- backend adi degisince (D) kalkar.
 BANNED_EXEMPT = ('templates/yasal.html', 'templates/gizlilik.html')
 # JS mantik karsilastirmasi (ornek: z.indexOf('İdeal Giriş') -- kaynak
 # dizesini ESLER, yayimlamaz) muaf.

@@ -418,9 +418,8 @@ function bpRsiZoneText(zone, signal) {
      sayisi rozetin hemen yaninda zaten basili). */
   if (z.indexOf('Nötr') === 0) return 'Nötr Bölge';
   /* C-60 (24.09, kanon §2.2): islem yonetimi dili yok -- bant adi "Sağlıklı
-     Momentum". Kaynak (derive_rsi_zone) eski adi DEV-CPO-1793'e kadar
-     dondurebilir; iki ad da ayni kanona iner. */
-  if (z.indexOf('İdeal Giriş') === 0 || z.indexOf('Sağlıklı Momentum') === 0)
+     Momentum" (eski ad eslemesi 24.09 EOD sonrasi kalkti). */
+  if (z.indexOf('Sağlıklı Momentum') === 0)
     return signal === 'AL' ? 'Sağlıklı Momentum' : 'Nötr Bölge';
   return z;
 }
