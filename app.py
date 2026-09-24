@@ -39,6 +39,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text      import MIMEText
 import requests
+import official_close   # D-04: resmi kapanış (BIST bülteni)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -1879,7 +1880,16 @@ def analyze(ticker_base):
         if not _cb_skip:
             df = _fill_intraday_gaps(df, ticker)   # yfinance gecikmeli günleri 1m'den tamamla
         df    = df.sort_index()
-        if _last_bar_unsettled(ticker_base, df, _cb_skip):   # D-P0-2309c
+        # D-04: resmi kapanış (BIST bülteni) varsa son bar Yahoo'nun 17:59 fiyatı değil
+        # bültendir; fiyat, değişim, göstergeler ve sinyal aynı seriden hesaplanır.
+        _official_applied = False
+        try:
+            _off_rec = official_close.load_archive(_expected_bar_date())
+            if _off_rec:
+                df, _official_applied = official_close.overlay_official_bar(df, _off_rec, ticker_base)
+        except Exception as _e:
+            logger.warning("official_close overlay(%s): %s", ticker_base, _e)
+        if not _official_applied and _last_bar_unsettled(ticker_base, df, _cb_skip):   # D-P0-2309c
             _ANALYZE_FAIL_REASON[ticker_base] = ("last_bar_unsettled", len(df))
             return None
         close = df["Close"].squeeze()
@@ -2239,6 +2249,8 @@ def analyze(ticker_base):
             "ticker":        ticker_base,
             "price":         round(c, 2),
             "change_pct":    round(change_pct, 2),
+            "close_status":  "resmi" if _official_applied else "gecici",   # D-04
+            "close_source":  official_close.SOURCE_LABEL if _official_applied else None,
             "signal":        signal,
             "signal_date":   signal_date,
             "signal_bars":   signal_bars,
@@ -4522,6 +4534,69 @@ def _run_catchup_retry_pass(marker_path, only_unsettled=False):
                 _attempted, len(_ordered_stale), len(_rescued), len(_ordered_stale) - len(_rescued))
 
 
+_OFFICIAL_PASS_START_MIN = 18 * 60 + 35   # bülten 18:25-18:30'da çıkar; 5 dk pay
+_OFFICIAL_PASS_GIVEUP_MIN = 19 * 60 + 30  # bundan sonra deneme bırakılır (19:30 catch-up sürer)
+
+
+def _official_pass_window(now_tr=None):
+    """Kesinleştirme turu penceresi: işlem günü 18:35-19:30 TR."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    m = now_tr.hour * 60 + now_tr.minute
+    return _OFFICIAL_PASS_START_MIN <= m < _OFFICIAL_PASS_GIVEUP_MIN
+
+
+def _run_official_close_pass(day=None, notify=True):
+    """D-04 kesinleştirme koşusu. Bülteni indirir, kapılar (tarih/≥600 pay/evren
+    ≥%98) geçerse arşive yazar ve tüm hisseleri resmi bar ile yeniden analiz eder
+    (analyze() arşivi kendisi okur). True → tamamlandı (tekrar denenmez);
+    False → bülten yok/kapı geçilemedi (5 dk sonra yeniden denenir)."""
+    day = day or datetime.now(_TZ_TR).date()
+    try:
+        got = official_close.fetch_bulletin(day)
+    except Exception as _e:
+        logger.warning("OFFICIAL_CLOSE: indirme hatası: %s", _e)
+        return False
+    if not got:
+        logger.info("OFFICIAL_CLOSE: %s bülteni henüz yok", day)
+        return False
+    try:
+        parsed = official_close.parse_bulletin(got["raw"])
+    except Exception as _e:
+        logger.error("OFFICIAL_CLOSE: bülten ayrıştırılamadı: %s", _e)
+        return False
+    with _lock:
+        _stocks_now = list(_cache.get("data") or [])
+    _universe = [s.get("ticker") for s in _stocks_now if s.get("ticker") and s.get("ticker") != "XU030"]
+    ok, why = official_close.check_gates(parsed, day, _universe)
+    if not ok:
+        logger.warning("OFFICIAL_CLOSE: kapı geçilemedi — %s", why)
+        return False
+    official_close.save_archive(parsed, got.get("last_modified"))
+    official_close.reset_memory()
+    _before = {s.get("ticker"): s for s in _stocks_now}
+    _rescued, _failed = [], []
+    for _t in _universe:
+        _r = _analyze_with_timeout(_t)
+        if _r and _r.get("close_status") == "resmi":
+            _enrich_stock(_r)
+            _r["last_fresh_ts"] = time.time()
+            _rescued.append(_r)
+        else:
+            _failed.append(_t)
+    _fixed = sum(1 for r in _rescued
+                 if (_before.get(r["ticker"]) or {}).get("price") != r.get("price"))
+    _flipped = [r["ticker"] for r in _rescued
+                if ((_before.get(r["ticker"]) or {}).get("change_pct") or 0) * (r.get("change_pct") or 0) < 0]
+    _merge_rescued_into_cache(_rescued, notify=notify)
+    logger.info("OFFICIAL_CLOSE: SONUC — %s bülten %d pay, %d/%d resmi bara çevrildi, %d fiyat düzeldi, "
+                "yön dönen %d %s, uygulanamayan %s",
+                day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
+                _flipped[:15], _failed[:15])
+    return True
+
+
 def _purge_stale_chart_caches():
     """Fiyat uyuşmazlığı olan BIST hisse chart cache'lerini temizler.
 
@@ -4738,6 +4813,20 @@ def background_refresh():
                 # D-P0-2309c: 18:45 TR'de yalnız "son seans verisi gelmedi" tickerları
                 # bir kez yeniden dene (19:00 digest öncesi); 19:30 genel catch-up sürer.
                 _now_tr_bg = datetime.now(_TZ_TR)
+                # D-04: 18:35'ten itibaren resmi kapanış kesinleştirmesi (bülten çıkana
+                # kadar 5 dk arayla; başarılı olunca flag). 18:45 turundan ÖNCE koşar.
+                _official_flag = os.path.join(
+                    _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_official_close.flag")
+                _official_pending = False
+                if _official_pass_window(_now_tr_bg) and not os.path.exists(_official_flag):
+                    if _run_official_close_pass(_today_tr):
+                        try:
+                            with open(_official_flag, "w", encoding="utf-8") as _f:
+                                _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+                        except OSError as _e:
+                            logger.warning("official_close flag yazılamadı: %s", _e)
+                    else:
+                        _official_pending = True
                 _today_unsettled_path = os.path.join(
                     _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_unsettled1845.flag"
                 )
@@ -4746,6 +4835,9 @@ def background_refresh():
                     _run_catchup_retry_pass(_today_unsettled_path, only_unsettled=True)
                 if not os.path.exists(_today_catchup_path) and _catchup_retry_ready_after():
                     _run_catchup_retry_pass(_today_catchup_path)
+                if _official_pending:
+                    time.sleep(300)   # bülten 5 dk arayla yeniden denenir
+                    continue
             time.sleep(_EOD_POLL_INTERVAL)
             continue
 
