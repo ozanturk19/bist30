@@ -9902,7 +9902,7 @@ def get_signal_story(ticker: str, signal_date: str) -> dict:
         if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
             all_discs = kap_hit["data"]
         else:
-            all_discs = fetch_kap_disclosures(ticker, days=90)
+            all_discs = fetch_kap_disclosures(ticker)   # D-45: hisse /kap ile aynı liste (365 gün)
             with _lock:
                 _kap_cache[ticker] = {"data": all_discs, "ts": now_ts}
             _save_kap_cache_to_disk()
@@ -10002,7 +10002,7 @@ def _load_kap_cache_from_disk():
 @app.route("/api/hisse/<ticker>/kap")
 @limiter.limit("30 per minute")
 def api_stock_kap(ticker):
-    """KAP bildirimleri — 30 dakikalık cache. Son 90 günlük ODA + FR."""
+    """KAP bildirimleri — 30 dakikalık cache. Son 365 günün ODA + FR'si (D-45: /haberler akışıyla aynı depo)."""
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
@@ -10021,7 +10021,7 @@ def api_stock_kap(ticker):
         if cached and (now - cached["ts"]) < _KAP_CACHE_TTL:
             return safe_json({"disclosures": cached["data"], "cached": True})
 
-    disclosures = fetch_kap_disclosures(ticker, days=90)
+    disclosures = fetch_kap_disclosures(ticker)   # D-45: 365 gün (C-M10: eskiden ~90)
     with _lock:
         _kap_cache[ticker] = {"data": disclosures, "ts": now}
     _save_kap_cache_to_disk()

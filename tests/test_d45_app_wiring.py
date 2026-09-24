@@ -59,8 +59,16 @@ def test_api_bildirim_and_404(client):
     assert client.get("/api/bildirim/1648987").status_code == 404   # baska uyenin bildirimi akista yok
 
 
-def test_stock_kap_same_source(client):
+def test_stock_kap_same_source(client, monkeypatch):
+    seen = {}
+    real = appmod.kap_feed.for_ticker
+
+    def spy(items, ticker, days=365, today=None, classes=("ODA", "FR")):
+        seen["days"] = days
+        return real(items, ticker, days=days, today=today, classes=classes)
+    monkeypatch.setattr(appmod.kap_feed, "for_ticker", spy)
     r = client.get("/api/hisse/AHGAZ/kap")
+    assert seen["days"] == 365                                   # C-M10: eskiden 90 gun
     d = r.get_json()
     ids = [x["index"] for x in d["disclosures"]]
     assert 1625024 in ids and 1648987 not in ids
