@@ -156,3 +156,21 @@ def test_ssr_default_call_matches_first_n_semantics():
     ssr_rows = results[:30]
     assert len(ssr_rows) == 3
     assert all(r["ticker"] != "XU030" for r in ssr_rows)
+
+
+def test_cpo1794_stale_fields_passthrough():
+    """CPO-1794: donuk hisse satirinda stale_reason/data_quality/last_fresh_ts
+    tasinir, taze hissede None kalir."""
+    stale = {"ticker": "MARKA", "signal": "BEKLE", "price": 73.45,
+             "change_pct": -2.39, "adx": 23.2, "data_quality": "stale",
+             "stale_reason": "son seans verisi gelmedi",
+             "last_fresh_ts": 1789139651.47}
+    fn = _fresh_compute(stocks=[stale, _STOCKS[1]])
+    results, _, _ = fn()
+    by = {r["ticker"]: r for r in results}
+    assert by["MARKA"]["data_quality"] == "stale"
+    assert by["MARKA"]["stale_reason"] == "son seans verisi gelmedi"
+    assert by["MARKA"]["last_fresh_ts"] == 1789139651.47
+    assert by["AKBNK"]["stale_reason"] is None
+    assert by["AKBNK"]["data_quality"] is None
+    assert by["AKBNK"]["last_fresh_ts"] is None

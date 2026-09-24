@@ -10056,6 +10056,11 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
             "signal_strength": s.get("signal_strength"),  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Güçlü Sinyal/Standart) doğrudan sürükleyen tek sayı
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
+            # CPO-1794: donuk (bayat) hisse tarama satirinda da isaretlenir --
+            # /hisse ssr_signal ile ayni kaynak; taze hissede alanlar None.
+            "stale_reason":  s.get("stale_reason"),
+            "data_quality":  s.get("data_quality"),
+            "last_fresh_ts": s.get("last_fresh_ts"),
         })
 
     # sort_dir: "" | asc | desc — cagiran taraf (api_tarama) request.args'tan cozer
