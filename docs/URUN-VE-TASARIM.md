@@ -244,6 +244,8 @@ Koyu tek tema. Cüretkâr, veriyi kodlayan görseller; referans ana sayfanın Da
 | **Takip** (O16g=B → hesaba bağlı, O24) | https://claude.ai/artifact/9u3m9ABRTcLiYUwVmCnnKX | `plans/mockups/takip.html` (+ `takip_data.json`, `build_takip_data.py`) | O16g B (24.09): hesap, O24 bekliyor |
 | **Metodoloji v2** (O16h=B, O23=A) | https://claude.ai/artifact/KKvDJRKb6YmxAfvVhWc7NV | `plans/mockups/metodoloji.html` (+ `build_metodoloji.py`) | O16h B (blog kalır, GEO), O23 A (24.09) |
 | **Hisse Grafik + Haberler sekmeleri** (O16i=A) | https://claude.ai/artifact/VDogboJLPEUmXxFXcC528g | `plans/mockups/hisse-sekmeler.html` | O16i A (24.09) |
+| **Takvim** (karar bekliyor) | https://claude.ai/artifact/8R9fSnjJW8uhBumRrYu2hX | `plans/mockups/takvim.html` | O16j bekliyor, son tarih 28.09 12:00 |
+| **Üyelik kararı** (karar bekliyor) | https://claude.ai/artifact/QYyajdEfdzk297pnMThxbP | `plans/mockups/uyelik-karar.html` | O24 (giriş) + O25 (uygulama yolu), son tarih 27.09 12:00 |
 | 2. karar raporu | https://claude.ai/artifact/PtemWS4fRXGbiX5MSwbmCr | `ozan-dispatch/2026-09-23-1330-KARAR-ikinci-tur.md` | O1b, O5b, O6b, O11b, O17, O18, O19 |
 | 1. karar raporu (dönüşüm planı) | https://claude.ai/artifact/F33GWwbEgqmGZ7q33QtGNb | `ozan-dispatch/2026-09-23-0850-KARAR-master-plan.md` | O1–O16 |
 
