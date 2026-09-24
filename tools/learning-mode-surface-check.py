@@ -63,7 +63,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENGINE = 'learning-mode.js'
-MIN_ANCHOR_TEMPLATES = 6
+MIN_ANCHOR_TEMPLATES = 3  # C-11 (24.09): sinyal rozeti capasi kalkti, 5 sayfa motoru birakti
 
 RE_ANCHOR = re.compile(r'class="[^"]*\bjargon-term\b|sigLabelTooltip\s*\(')
 RE_ENGINE_TAG = re.compile(r'src="/static/' + re.escape(ENGINE) + r'\?')

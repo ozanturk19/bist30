@@ -25,7 +25,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
-<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
+<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=ee1dfe2e">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -611,9 +611,9 @@ function renderCompare(json) {
         '<div class="score-bar-track"><div class="score-bar-fill ' + barClass + '" style="width:' + scoreAbs + '%"></div></div>' +
       '</div>' +
       '<div class="cmp-sec-stats">' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabelTooltip('AL') + '</div><div class="cmp-stat-pill-val val-al">' + d.al + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabelTooltip('SAT') + '</div><div class="cmp-stat-pill-val val-sat">' + d.sat + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabelTooltip('BEKLE') + '</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('AL') + '</div><div class="cmp-stat-pill-val val-al">' + d.al + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('SAT') + '</div><div class="cmp-stat-pill-val val-sat">' + d.sat + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('BEKLE') + '</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
       '</div>' +
       '<div class="sec-metrics">' +
         '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2).replace('.', ',') + '×' : '—') + '</div></div>' +
@@ -672,11 +672,6 @@ function fmtPrice(p) {
 </script>
 
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
-<!-- K-DH: bu sayfa sigLabelTooltip() ile `.jargon-term` capasi basiyor;
-     capalar vardi ama Ogrenme Modu betigi HIC yuklenmiyordu (canli olcum
-     22.09: /bilanco-takvimi 46, /temettu-takvimi 28, /karsilastir 4 capa,
-     hicbirinde "?" cikmiyordu). Kapi 76 envanteri bagli tutar. -->
-<script src="/static/learning-mode.js?v=bae3d984" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 
 {% include '_mobile_nav_partial.html' %}

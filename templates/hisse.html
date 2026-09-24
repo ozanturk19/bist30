@@ -100,7 +100,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
+<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=a97a628c">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -3163,7 +3163,7 @@ function renderHistory(history, currentPrice, liveSignal) {
 
     return `<tr>
       <td>${h.date}</td>
-      <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabelTooltip(h.signal)}</span></td>
+      <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabel(h.signal)}</span></td>
       <td style="font-variant-numeric:tabular-nums;font-family:var(--bp-font-mono)">${fmt(h.price)} ₺</td>
       ${retHtml}
     </tr>`;
@@ -4168,7 +4168,7 @@ async function loadMTF() {
       const col  = sigColor(d.signal);
       const bord = sigBord(d.signal);
       const arr  = sigArrow(d.signal);
-      const lbl  = sigLabelTooltip(d.signal);
+      const lbl  = sigLabel(d.signal);
       const scoreBar = d.bull_score >= d.bear_score
         ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
             `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`

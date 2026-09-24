@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
+<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
 <link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=876b47df">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -168,7 +168,7 @@ function render(data) {
         <a href="/hisse/${escapeHtml(s.ticker)}" class="sc-ticker-link" onclick="event.stopPropagation()">
           <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</span>
         </a>
-        <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabelTooltip(s.signal)}</span>
+        <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabel(s.signal)}</span>
       </div>
       <div class="sc-name" title="${escapeHtml(s.name)}">${escapeHtml(s.name)}</div>
       ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}
@@ -253,11 +253,6 @@ document.addEventListener('visibilitychange', () => {
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
 <script src="/static/bp-search.js?v=2d32a06b" defer></script>
-<!-- K-DH: bu sayfa sigLabelTooltip() ile `.jargon-term` capasi basiyor;
-     capalar vardi ama Ogrenme Modu betigi HIC yuklenmiyordu (canli olcum
-     22.09: /bilanco-takvimi 46, /temettu-takvimi 28, /karsilastir 4 capa,
-     hicbirinde "?" cikmiyordu). Kapi 76 envanteri bagli tutar. -->
-<script src="/static/learning-mode.js?v=bae3d984" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=b501a830"></script>

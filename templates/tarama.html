@@ -26,8 +26,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=df616688">
+<script src="/static/bp-vocab.js?v=89442ee2" defer></script>
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=9998dee1">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -163,7 +163,7 @@
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
           <th scope="col">Hisse</th>
-          <th scope="col">Sinyal</th>
+          <th scope="col">Sinyal <a class="th-help" href="/metodoloji#sinyal-onayi" data-tip="Güçlü Trend / Yatay / Trend Bozuldu nasıl belirlenir? (Metodoloji)" aria-label="Sinyal nedir? Metodoloji">?</a></th>
           <th scope="col" class="th-sortable" id="th-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir — yalnız Güçlü Trend sinyalinde (Trend Bozuldu rozet almaz). Varsayılan sıralama: önce sinyal yönü (Güçlü Trend → Yatay → Trend Bozuldu), sonra her grubun içinde skor. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." onclick="sortBy('signal_strength')">Teknik Güç</button></th>
           <th scope="col" class="th-sortable" id="th-adx" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
@@ -177,7 +177,7 @@
       <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'} %}<tr>
         <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','') }}</div></a></td>
         <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
-        <td>{{ s.signal_strength if s.signal_strength is not none else '—' }}</td>
+        <td>{{ s.signal_strength if s.signal_strength is not none and s.signal != 'SAT' else '—' }}</td>
         <td>{{ s.adx_label }}</td>
         {# K-DE: giris kalitesi = ALIM girisi degerlendirmesi (bp-vocab.js eqApplies).
            SSR JS cagiramaz, kural burada `s.signal == 'AL'` yazimiyla tekrar edilir —
@@ -854,7 +854,11 @@ function renderResults(rows, count) {
   // "premium"/"plus" CSS sınıf adları korundu (sadece iç isimlendirme, kullanıcıya görünmez),
   // yeni "standart" tier'i eski "plus" (mavi) rengine eşlendi — hisse.html skor halkasıyla
   // aynı renk sözlüğü (guclu_sinyal=mor, standart=mavi, rozet-yok=nötr).
-  const scoreCell = (score, tier) => {
+  const scoreCell = (score, tier, sig) => {
+    // C-11: Trend Bozuldu satirinda skor gosterilmez (rozet/bant yalniz Guclu Trend'de).
+    if (sig === 'SAT') {
+      return `<div class="score-cell" tabindex="0" data-tip="Trend Bozuldu — Teknik Güç Skoru gösterilmez"><span class="score-val weak">—</span></div>`;
+    }
     // CPO-1640: signal_strength artık BEKLE (sinyal yok) hissede null gelir
     // (bkz. app.py _compute_tarama_results) — "0" yazıp uydurma kötü skor
     // gösterme, hisse.html Hap Bilgi bloğuyla aynı nötr dil.
@@ -885,10 +889,11 @@ function renderResults(rows, count) {
     </div>`;
   };
   // Trend Gücü etiketi sunucudan gelir (business_rules.derive_adx_label, CPO-1196 D0 #4) — burada eşik tekrar tanımlanmaz.
-  const trendCell = (adx, adxLabel) => {
+  const trendCell = (adx, adxLabel, sig) => {
     const a = adx || 0;
     const label = adxLabel || 'Zayıf';
-    const cls = (label === 'Güçlü' || label === 'Çok Güçlü') ? 'strong' : label === 'Orta' ? 'medium' : 'weak';
+    // C-11: Trend Bozuldu satirinda ADX etiketi notr gri (guclu trend rengi AL'ye ozel).
+    const cls = sig === 'SAT' ? 'weak' : (label === 'Güçlü' || label === 'Çok Güçlü') ? 'strong' : label === 'Orta' ? 'medium' : 'weak';
     const pct = cls === 'strong' ? Math.min(100, (a/50)*100) : cls === 'medium' ? Math.min(60, (a/50)*100) : Math.max(20, (a/50)*100);
     return `<div class="trend-cell" tabindex="0" data-tip="ADX ${a.toFixed(1).replace('.', ',')} — ${label.toLowerCase()} trend">
       <span class="trend-label ${cls}">${label}</span>
@@ -942,10 +947,10 @@ function renderResults(rows, count) {
         </a>
       </td>
       <td><span class="sig-badge sig-${s.signal}">
-        ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabelTooltip(s.signal)}
+        ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
       </span></td>
-      <td>${scoreCell(s.signal_strength, s.tier)}</td>
-      <td>${trendCell(s.adx, s.adx_label)}</td>
+      <td>${scoreCell(s.signal_strength, s.tier, s.signal)}</td>
+      <td>${trendCell(s.adx, s.adx_label, s.signal)}</td>
       <td>${eqHtml}</td>
       <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
       <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</td>
@@ -968,12 +973,12 @@ function renderResults(rows, count) {
       const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
-      const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
+      const _tl   = [_tlbl, s.signal === 'SAT' ? 'weak' : (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
       // CPO-1640: null (BEKLE/sinyal yok) → "0" değil "—" (bkz. scoreCell())
-      const _scv  = s.signal_strength;
+      const _scv  = s.signal === 'SAT' ? null : s.signal_strength; // C-11
       const _scDisp = _scv == null ? '—' : _scv;
-      const _sccls = s.signal_strength == null ? 'weak' : s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
+      const _sccls = _scv == null ? 'weak' : s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
       return `<a href="/hisse/${escapeHtml(s.ticker)}" class="mr-card">
         <div class="mr-top">
           <div><div class="mr-ticker">${escapeHtml(s.ticker)}${_prm}</div><div class="mr-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div></div>
@@ -1287,7 +1292,7 @@ function renderTemelResults(rows, count) {
       <td class="hide-mob hide-tablet">${categoryCell(cats.nakit_akisi)}</td>
       <td class="hide-mob hide-tablet">${categoryCell(cats.kaldirac)}</td>
       <td class="hide-mob hide-tablet">${categoryCell(cats.degerleme_buyume)}</td>
-      <td><span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabelTooltip(s.signal)}</span></td>
+      <td><span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span></td>
       <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
     </tr>`;

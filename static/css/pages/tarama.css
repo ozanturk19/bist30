@@ -733,3 +733,12 @@
   @media (min-width:1200px) {
     :root { --bp-chrome-extra: 33px; }   /* K-AY: kanonik --bp-sticky-top artık bunu kendisi toplar */
   }
+
+  /* C-11: sinyal terim aciklamasi satirdaki her rozette degil, sutun basliginda tek "?" */
+  .th-help {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; margin-left:4px; border-radius:50%;
+    border:1px solid var(--text2); color:var(--text2); opacity:.7;
+    font-size:var(--bp-text-2xs); line-height:1; text-decoration:none; vertical-align:middle;
+  }
+  .th-help:hover, .th-help:focus-visible { opacity:1; color:var(--bp-text); border-color:var(--bp-text); }
