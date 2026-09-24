@@ -1,0 +1,132 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{%- set it = b.item -%}{%- set _desc = (it.summary or it.title)|truncate(158, True, '…') -%}<title>{{ b.headline }} ({{ b.date_long }}) | BorsaPusula</title>
+<meta name="description" content="{{ _desc }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta property="og:type"        content="article">
+<meta property="og:title"       content="{{ b.headline }} | BorsaPusula">
+<meta property="og:description" content="{{ _desc }}">
+<meta property="og:url"         content="{{ canonical }}">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{{ b.headline }} | BorsaPusula">
+<meta name="twitter:description" content="{{ _desc }}">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="borsapusula.com">
+<script type="application/ld+json">
+{{ {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://borsapusula.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Haberler", "item": canonical.split('/hisse/')[0] ~ '/haberler'},
+    {"@type": "ListItem", "position": 3, "name": it.ticker, "item": canonical.split('/bildirim/')[0]},
+    {"@type": "ListItem", "position": 4, "name": b.headline}]}|tojson }}
+</script>
+<script type="application/ld+json">
+{{ {"@context": "https://schema.org", "@type": "Article", "headline": b.headline|truncate(110, True, '…'),
+    "description": it.summary or it.title, "datePublished": it.date ~ "+03:00", "dateModified": it.date ~ "+03:00",
+    "inLanguage": "tr", "mainEntityOfPage": canonical, "articleSection": it['class'],
+    "about": {"@type": "Corporation", "name": it.company, "tickerSymbol": "BIST:" ~ it.ticker},
+    "author": {"@type": "Organization", "name": "BorsaPusula", "url": "https://borsapusula.com/"},
+    "publisher": {"@type": "Organization", "name": "BorsaPusula", "url": "https://borsapusula.com/"}}|tojson }}
+</script>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
+<link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
+<link rel="stylesheet" href="/static/css/pages/haberler.css?v=9ba17b83">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% with hdr_title = 'Bildirim', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+{#- C-57: kalici bildirim sayfasi (taslak telefon 2). Baglam D-45 bildirim_page: `b` (item + headline +
+    kural tabanli tek cumle ozet + bildirimin kendi metni + benzerleri), `mc` (hisse mini karti).
+    AI yok; dis baglanti ve kaynak etiketi yok; tarih mutlak. -#}
+{%- set it = b.item -%}
+{%- set AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
+{%- macro trdate(iso) -%}{%- set p = iso[:10].split('-') -%}{{ p[2]|int }} {{ AY[p[1]|int - 1] }} {{ p[0] }}{%- endmacro -%}
+{%- macro ring(v) -%}{%- set c = 113.1 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="40" height="40" aria-hidden="true"><circle class="rg0" cx="20" cy="20" r="18" fill="none" stroke-width="4"/><circle class="rg1" cx="20" cy="20" r="18" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}"/></svg>{%- endmacro -%}
+<main class="hb hb-doc" id="main-content" tabindex="-1">
+  <ol class="hb-bc" aria-label="Konum">
+    <li><a href="/haberler">Haberler</a></li>
+    <li><a href="/hisse/{{ it.ticker }}">{{ it.ticker }}</a></li>
+    <li aria-current="page">Bildirim</li>
+  </ol>
+  <p class="hb-meta"><span class="hb-cl">{{ it['class'] }}</span><time datetime="{{ it.date }}">{{ b.date_long }} {{ b.day_label.split(' ')[-1] }} · {{ it.time }}</time></p>
+  <h1>{{ b.headline }}</h1>
+  <p class="hb-sum">{{ it.summary }}</p>
+
+  {% if it.onem %}{%- set o = it.onem -%}
+  <section class="hb-onc" aria-labelledby="hbOnH">
+    <small id="hbOnH">Önem oranı</small>
+    <b class="big">{{ o.txt }}</b>
+    <p>{{ o.basis|replace(' / ', ' ÷ ') }}</p>
+    <span class="hb-bar" aria-hidden="true"><i style="width:{{ '%.0f'|format(([o.pct, 50]|min) * 2) }}%"></i></span>
+    <div class="hb-scale" aria-hidden="true"><span>0</span><span>%25</span><span>%50 ve üstü</span></div>
+    <p class="hb-calc">
+      {% if o.fx %}<b>{{ o.amount_txt }}</b> × {{ o.fx.rate_txt }} ₺ ({{ trdate(o.fx.date)[:-5] }} kuru) ≈ <b>{{ o.amount_try_txt }}</b>{% else %}<b>{{ o.amount_txt }}</b>{% endif %}
+      · {{ o.rev_year }} hasılatı <b>{{ o.rev_txt }}</b>{% if o.approx %} · döviz tutar çevrildiği için “~”{% endif %}
+    </p>
+  </section>
+  {% endif %}
+
+  {#- "Guncelleme mi? Evet" bayragi bilgi degil: tam metinde kalir, one cikanlarda gosterilmez. -#}
+  {%- set facts = b.text.fields|rejectattr('0', 'equalto', 'Yapılan Açıklama Güncelleme mi?')|list -%}
+  {% if facts %}
+  <section class="hb-sec" aria-labelledby="hbFactsH">
+    <h2 id="hbFactsH">Öne çıkan bilgiler</h2>
+    <dl class="hb-facts">
+      {% for f in facts[:10] %}<dt>{{ f[0] }}</dt><dd>{{ f[1] }}</dd>{% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  <a class="hb-sc" href="/hisse/{{ mc.t }}">
+    <span class="t1">
+      <span><b>{{ mc.t }}</b><span>{{ mc.name }}</span></span>
+      {% if mc.price is not none %}<span class="px">{{ mc.price|tr_price }} ₺<small class="{{ dir_class(mc.ch) }}">{{ pct_text(mc.ch) }}{% if close_label %} · {{ close_label }} kapanışı{% endif %}</small></span>{% endif %}
+    </span>
+    {% if mc.st %}<span class="t2">{% if mc.bp is not none %}<span class="hb-bp">{{ ring(mc.bp) }}{{ mc.bp }} <small>BorsaPusula Skoru</small></span>{% endif %}<span class="hb-st {{ mc.st }}">{{ mc.stn }}</span></span>{% endif %}
+    <span class="go">{{ mc.t }} hisse sayfası →</span>
+  </a>
+
+  <details class="hb-full"{% if not facts and not it.onem %} open{% endif %}>
+    <summary>Bildirimin tam metni</summary>
+    <div class="in">
+      {% if b.has_text %}
+        {% if b.text.text %}<p>{{ b.text.text }}</p>{% endif %}
+        {% if b.text.lines %}{% for ln in b.text.lines %}<p>{{ ln }}</p>{% endfor %}{% endif %}
+        {% if b.text.fields and not b.text.text and not b.text.lines %}{% for f in b.text.fields %}<p><b>{{ f[0] }}:</b> {{ f[1] }}</p>{% endfor %}{% endif %}
+        {% if b.text.resp %}<p class="resp">{{ b.text.resp }}</p>{% endif %}
+      {% else %}
+        <p>Bildirimin metni henüz işlenmedi; başlığı ve sınıfı yukarıda.</p>
+      {% endif %}
+    </div>
+  </details>
+
+  {% if b.similar %}
+  <section class="hb-sec" aria-labelledby="hbSimH">
+    <h2 id="hbSimH">Benzer bildirimler</h2>
+    <ul class="hb-sim">
+      {% for s in b.similar %}
+      <li><a href="{{ s.href }}">
+        <span class="hb-d"><span class="hb-cl">{{ s['class'] }}</span><time datetime="{{ s.date }}">{{ trdate(s.date) }}</time></span>
+        <span class="hb-s">{{ s.title }}</span>
+        <span class="hb-o hb-on">{% if s.onem %}<small>Önem oranı</small><b>{{ s.onem.txt }}</b>{% endif %}</span>
+      </a></li>
+      {% endfor %}
+    </ul>
+    <a class="hb-all" href="/haberler?hisse={{ it.ticker }}">Tüm {{ it.ticker }} bildirimleri →</a>
+  </section>
+  {% endif %}
+
+  <p class="hb-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
+<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

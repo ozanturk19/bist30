@@ -1,0 +1,191 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Haberler — Gündem ve Şirket Bildirimleri | BorsaPusula</title>
+<meta name="description" content="Gündem (Türkiye ve Dünya, günde iki baskı) ve Borsa İstanbul'da kapsamdaki şirketlerin bildirimleri: her bildirim için tek cümle özet, önem oranı ve bildirimin kendi metni.">
+<link rel="canonical" href="https://borsapusula.com/haberler{% if feed_filter %}?tur={{ feed_filter }}{% endif %}">
+{% if feed_page and feed_page > 1 or feed_ticker %}<meta name="robots" content="noindex, follow">{% endif %}
+<meta property="og:title"       content="Haberler — Gündem ve Şirket Bildirimleri | BorsaPusula">
+<meta property="og:description" content="Gündem ve kapsamdaki şirketlerin bildirimleri; her bildirim için özet, önem oranı ve bildirimin kendi metni.">
+<meta property="og:url"         content="https://borsapusula.com/haberler">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Haberler — Gündem ve Şirket Bildirimleri | BorsaPusula">
+<meta name="twitter:description" content="Gündem ve kapsamdaki şirketlerin bildirimleri; her bildirim için özet, önem oranı ve bildirimin kendi metni.">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="borsapusula.com">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+  {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
+  {"@type":"ListItem","position":2,"name":"Haberler"}
+]}
+</script>
+{%- set _ld = [] -%}{%- for d in (feed_days or []) -%}{%- for r in d.rows -%}{%- if _ld|length < 20 -%}{%- set _ = _ld.append({"@type": "ListItem", "position": _ld|length + 1, "url": "https://borsapusula.com" ~ r.href, "name": r.company ~ ": " ~ r.title}) -%}{%- endif -%}{%- endfor -%}{%- endfor %}
+<script type="application/ld+json">
+{{ {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Haberler", "inLanguage": "tr", "description": "Gündem ve Borsa İstanbul'da kapsamdaki şirketlerin bildirimleri.", "mainEntity": {"@type": "ItemList", "numberOfItems": _ld|length, "itemListElement": _ld}}|tojson }}
+</script>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
+<link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
+<link rel="stylesheet" href="/static/css/pages/haberler.css?v=9ba17b83">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<script>document.documentElement.classList.add('js');</script>
+<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% with hdr_title = 'Haberler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+{#- C-57 Haberler v1 (taslak O16f=A). Baglam D-45 /haberler rotasindan: `gundem` (baski, kendi
+    verimizden; yoksa None), `feed_days` (gun basligi + satirlar, rutin elenmis). Her sey sunucuda
+    cizilir; JS yalniz "Takip listem" (yerel liste) filtresini yonetir. Dis baglanti ve kaynak
+    etiketi yok; goreli zaman yok (tarih basliklari). AI yok: satirda bildirimin kendi basligi + sinifi. -#}
+{%- macro ring(v) -%}{%- set c = 37.7 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="16" height="16" aria-hidden="true"><circle class="rg0" cx="8" cy="8" r="6.5" fill="none" stroke-width="3"/><circle class="rg1" cx="8" cy="8" r="6.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}"/></svg>{%- endmacro -%}
+{%- macro mc(m) -%}<span class="hb-mc"><span class="l1"><b>{{ m.t }}</b>{% if m.ch is not none %}<span class="c {{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</span>{% if m.st %}<span class="l2">{% if m.bp is not none %}<span class="hb-bp" title="BorsaPusula Skoru">{{ ring(m.bp) }}{{ m.bp }}</span>{% endif %}<span class="hb-st {{ m.st }}">{{ m.stn }}</span></span>{% endif %}</span>{%- endmacro -%}
+{%- macro chip(c) -%}
+{%- if c.k == 'tk' -%}<a class="hb-chip" href="{{ c.href }}"><b>{{ c.t }}</b>{% if c.ch is not none %}<span class="{{ dir_class(c.ch) }}">{{ pct_text(c.ch) }}</span>{% endif %}</a>
+{%- elif c.k == 'sec' -%}<a class="hb-chip sec" href="{{ c.href }}">{{ c.l }}</a>
+{%- elif c.k == 'hm' -%}<a class="hb-chip" href="{{ c.href }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>{{ c.l }}</a>
+{%- else -%}<a class="hb-chip" href="{{ c.href }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>{{ c.l }}</a>
+{%- endif -%}
+{%- endmacro -%}
+<main class="hb" id="main-content" tabindex="-1">
+  <div class="hb-phd">
+    <h1>Haberler</h1>
+    <p>Gündem ve kapsamdaki şirketlerin bildirimleri; hepsi sitede, verimizle birlikte.</p>
+  </div>
+
+  <section class="hb-gd" aria-labelledby="hbGdH">
+    <div class="hb-gd-h">
+      <div>
+        {% if gundem %}<p class="hb-ed">{{ gundem.date_label }} · {{ gundem.edition_label }} · {{ gundem.time }}</p>{% endif %}
+        <h2 id="hbGdH">Gündem</h2>
+      </div>
+      {% if gundem and gundem.next_label %}<p class="hb-nx">Sonraki baskı: {{ gundem.next_label }}</p>{% endif %}
+    </div>
+    {% if gundem and gundem.groups %}
+    <div class="hb-gd-cols">
+      {%- set ns = namespace(n=0) -%}
+      {% for g in gundem.groups %}{% if g['items'] %}
+      <div class="hb-gd-col">
+        <h3>{{ g.name }} <i>{{ g['items']|length }}</i></h3>
+        {% for it in g['items'] %}{% set ns.n = ns.n + 1 %}
+        <article class="hb-gi">
+          <span class="hb-n" aria-hidden="true">{{ '%02d'|format(ns.n) }}</span>
+          <div>
+            <h4>{{ it.h }}</h4>
+            <p>{{ it.p }}</p>
+            {% if it.chips %}<div class="hb-chips">{% for c in it.chips %}{{ chip(c) }}{% endfor %}</div>{% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% endif %}{% endfor %}
+    </div>
+    {% else %}
+    <p class="hb-gd-empty">Gündem baskısı hazır olduğunda burada görünür; şirket bildirimleri aşağıda.</p>
+    {% endif %}
+  </section>
+
+  <section class="hb-fd" aria-labelledby="hbFdH">
+    <div class="hb-fd-h">
+      <div>
+        <h2 id="hbFdH">Şirket bildirimleri{% if feed_ticker %}: {{ feed_ticker }}{% endif %}</h2>
+        <p>{% if coverage %}Kapsamdaki {{ coverage }} hissenin bildirimleri · {% endif %}rutin duyurular elendi{% if close_label %} · hisse kartlarında {{ close_label }} kapanışı{% endif %}</p>
+      </div>
+    </div>
+    {%- set base = '/haberler' ~ ('?hisse=' ~ feed_ticker if feed_ticker else '') -%}
+    {%- set sep = '&' if feed_ticker else '?' -%}
+    <nav class="hb-flt" aria-label="Bildirim türü">
+      <a href="{{ base }}"{% if not feed_filter %} aria-current="true"{% endif %}>Tümü</a>
+      <button type="button" data-f="takip" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Takip listem <i data-takip-n>0</i></button>
+      <a href="{{ base }}{{ sep }}tur=bilanco"{% if feed_filter == 'bilanco' %} aria-current="true"{% endif %}>Bilanço</a>
+      <a href="{{ base }}{{ sep }}tur=temettu"{% if feed_filter == 'temettu' %} aria-current="true"{% endif %}>Temettü</a>
+      <a href="{{ base }}{{ sep }}tur=ozel"{% if feed_filter == 'ozel' %} aria-current="true"{% endif %}>Özel durum</a>
+    </nav>
+    <p class="hb-fnote" id="hbTakipNote" hidden>Takip listendeki hisselerin bu sayfadaki bildirimleri gösteriliyor.</p>
+    <div class="hb-empty" id="hbTakipEmpty" hidden><b>Takip listendeki hisselerin bu sayfada bildirimi yok</b><span>Daha eski sayfalara bakabilir ya da hisse sayfasındaki Haberler sekmesini açabilirsin.</span></div>
+
+    {% if feed_days %}
+    <div id="hbFeed">
+    {% for d in feed_days %}
+      <section class="hb-day" data-day="{{ d.day }}" aria-labelledby="hbD{{ loop.index }}">
+        <div class="hb-day-h"><h3 id="hbD{{ loop.index }}">{{ d.label }}</h3><span>{{ d.total }} bildirim{% if d.routine %} · {{ d.routine }} rutin bildirim gizli{% endif %}</span></div>
+        {% for r in d.rows %}
+        <a class="hb-row" href="{{ r.href }}" data-t="{{ r.ticker }}" data-f="{{ r.filter or '' }}">
+          <time datetime="{{ r.date }}">{{ r.time }}</time>
+          {{ mc(r.mc) }}
+          <span class="hb-bd"><span class="meta">{{ r.company }} <span class="hb-cl">{{ r['class'] }}</span></span><span class="sm">{{ r.title }}</span></span>
+          <span class="hb-on">{% if r.onem %}<small>Önem oranı</small><b>{{ r.onem.txt }}</b><span class="hb-bar"><i style="width:{{ '%.0f'|format(([r.onem.pct, 50]|min) * 2) }}%"></i></span>{% endif %}</span>
+          <svg class="hb-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>
+        </a>
+        {% endfor %}
+      </section>
+    {% endfor %}
+    </div>
+    <div class="hb-pg">
+      <span>Sayfa {{ feed_page }} / {{ feed_pages }}</span>
+      <span>
+        {% if feed_page > 1 %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page - 1 }}">← Daha yeni</a>{% endif %}
+        {% if feed_page < feed_pages %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page + 1 }}">Daha eski bildirimler →</a>{% endif %}
+      </span>
+    </div>
+    {% elif feed_available %}
+    <div class="hb-empty"><b>Bu seçimde bildirim yok</b><span>Başka bir tür seçebilir ya da tüm bildirimlere dönebilirsin.</span></div>
+    {% else %}
+    <div class="hb-empty"><b>Bildirim akışı şu an boş</b><span>Şirket bildirimleri hisse sayfalarındaki Haberler sekmesinde de yer alıyor.</span></div>
+    {% endif %}
+  </section>
+
+  <p class="hb-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+{% with ftr_self='/haberler', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+
+<script>
+(function(){
+  'use strict';
+  var feed = document.getElementById('hbFeed');
+  var btn = document.querySelector('.hb-flt [data-f="takip"]');
+  if (!feed || !btn) return;
+  /* Takip listem: hisse sayfasindaki yerel liste (bp_watchlist_v2). Yalniz okunur; bossa dugme gizli kalir. */
+  function readWatch(){
+    try {
+      var w = JSON.parse(localStorage.getItem('bp_watchlist_v2') || '[]');
+      return Array.isArray(w) ? w.filter(function(x){ return typeof x === 'string'; }) : [];
+    } catch (e) {
+      console.warn('takip listesi okunamadi, Takip listem filtresi gizli:', e);
+      return [];
+    }
+  }
+  var W = readWatch();
+  if (!W.length) return;
+  var STAR = '<svg class="hb-wst" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
+  var rows = [].slice.call(feed.querySelectorAll('.hb-row'));
+  var n = 0;
+  rows.forEach(function(r){
+    if (W.indexOf(r.dataset.t) >= 0) { n++; var b = r.querySelector('.hb-mc b'); if (b) b.insertAdjacentHTML('afterbegin', STAR); }
+  });
+  btn.hidden = false;
+  btn.querySelector('[data-takip-n]').textContent = n;
+  var cur = document.querySelector('.hb-flt a[aria-current="true"]');
+  var note = document.getElementById('hbTakipNote');
+  var empty = document.getElementById('hbTakipEmpty');
+  btn.addEventListener('click', function(){
+    var on = btn.getAttribute('aria-pressed') !== 'true';
+    btn.setAttribute('aria-pressed', String(on));
+    if (cur) { if (on) cur.removeAttribute('aria-current'); else cur.setAttribute('aria-current', 'true'); }
+    rows.forEach(function(r){ r.hidden = on && W.indexOf(r.dataset.t) < 0; });
+    feed.querySelectorAll('.hb-day').forEach(function(d){
+      d.hidden = on && !d.querySelector('.hb-row:not([hidden])');
+    });
+    note.hidden = !on || n === 0;
+    empty.hidden = !on || n > 0;
+  });
+})();
+</script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
+<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}
