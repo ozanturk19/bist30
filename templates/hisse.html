@@ -100,7 +100,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=c1c2339d">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -1632,8 +1632,8 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b501a830"></script>
-<script src="/static/stale-banner.js?v=72c144ab"></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
 async function hisseSubscribe() {
@@ -2530,7 +2530,7 @@ function renderSummary(s, signalData) {
   const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : s.change_pct;
   if (_dispChg != null) {
     const sign  = _dispChg > 0 ? '+' : '';
-    chgEl.textContent = sign + _dispChg.toFixed(2).replace('.', ',') + '%';
+    chgEl.textContent = bpFormatPct(_dispChg, 2);
     chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
   } else {
     chgEl.textContent = '—';
@@ -2560,7 +2560,7 @@ function renderSummary(s, signalData) {
     // yeşil→kırmızı renk geçişiyle "iyi→geç" ima ediyordu). Nötr yaş bilgisi
     // zaten date + bpSignalAgeText ile veriliyor.
     document.getElementById('icDate').innerHTML =
-      (isNew ? '<span style="color:var(--bp-accent-yellow)">⚡ Bugün</span>'
+      (isNew ? '<span style="color:var(--bp-accent-yellow)">⚡ ' + (bpSignalDateLabel(signalData.signal_date) || date) + '</span>'
              : date + ' · ' + bpSignalAgeText(signalData.signal_date));
     document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
 
@@ -2938,13 +2938,10 @@ function renderSummary(s, signalData) {
     if (signalData && signalData.signal === 'AL' && _dispChg < -3) {
       /* CPO-1335: `|| 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı */
       /* CPO-DEV2-059 r50: 'Dün'/gelecek-tarih dallarında 'X dür aktif' eki dilbilgisel olarak bozuk metin üretiyordu */
-      const _sigAge = bpSignalDateAgeDays(signalData.signal_date);
-      const barLabel = bpIsSignalFromToday(signalData.signal_date)
-        ? 'Bugün oluştu'
-        : _sigAge === 1 ? 'Dünden beri aktif'
-        : (_sigAge !== null && _sigAge < 0) ? bpSignalAgeText(signalData.signal_date)
-        : 'Son ' + bpSignalAgeText(signalData.signal_date) + 'dür aktif';
-      conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
+      /* C-62: göreli gün adı yok, takvim tarihi */
+      const _sigLbl = bpSignalDateLabel(signalData.signal_date);
+      conflictEl.textContent = (_sigLbl ? _sigLbl + ' tarihinde oluşan' : 'Süren') +
+        ' Güçlü Trend sinyali devam ediyor, ancak son seanstaki %' +
         Math.abs(_dispChg).toFixed(1).replace('.', ',') + ' düşüş fiyatı trend dönüş seviyesine (Supertrend) yaklaştırıyor olabilir.';
       conflictEl.style.display = '';
     } else {
@@ -4061,7 +4058,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
 <script src="/static/learning-mode.js?v=628d83c1" defer></script>

@@ -50,7 +50,7 @@ TERIM_IFADELERI = {
     "Güçlü Trend · Trend Bozuldu · Yatay":  ["Güçlü Trend", "Trend Bozuldu", "Yatay"],
     "Teknik Güç Skoru 0–100":               ["Teknik Güç"],
     "Trend Gücü ADX":                       ["Trend Gücü"],
-    "Günlük Hacim Oranı bugün / 20g":       ["Günlük Hacim Oranı"],
+    "Günlük Hacim Oranı son seans / 20g":   ["Günlük Hacim Oranı"],
     "RVOL 5g / 20g":                        ["RVOL"],
     "💎 Yüksek Skor · Orta Skor":           ["Yüksek Skor", "Orta Skor"],
     "⭐ Hacim Onaylı":                      ["Hacim Onaylı"],

@@ -279,7 +279,6 @@ header{
 .da-macro-news-list{display:flex;flex-direction:column;gap:8px}
 .da-macro-news-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),transform var(--bp-dur-base) var(--bp-ease-standard)}
 .da-macro-news-item:hover{border-color:var(--bp-brand);transform:translateX(3px)}
-.da-macro-news-src{font-size:var(--bp-text-xs);font-weight:700;color:var(--bp-brand);flex-shrink:0;min-width:80px}
 .da-macro-news-title{flex:1;font-size:var(--bp-text-sm);color:var(--bp-text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .da-macro-news-time{font-size:var(--bp-text-xs);color:var(--bp-text3);flex-shrink:0}
 .da-gundem-layout{display:grid;grid-template-columns:2fr 1fr;gap:18px}

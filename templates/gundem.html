@@ -1,15 +1,15 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
-<meta name="description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+<meta name="description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/gundem">
 <meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta property="og:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+<meta property="og:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <meta property="og:url"         content="https://borsapusula.com/gundem">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta name="twitter:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+<meta name="twitter:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=3d9d77d4">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -42,7 +42,7 @@
 {% macro gundem_card(s, is_new) %}{% set sig_cls = 'al' if s.signal=='AL' else 'sat' if s.signal=='SAT' else 'bkl' %}<a href="/hisse/{{ s.ticker }}" class="stock-card {{ sig_cls }}{{ ' new-signal' if is_new else '' }}" title="{{ s.name or '' }}">
   <div class="sc-top">
     <div>
-      <div class="sc-ticker">{{ s.ticker }}{% if is_new %}<span class="new-badge">Bugün</span>{% endif %}</div>
+      <div class="sc-ticker">{{ s.ticker }}{% if is_new %}<span class="new-badge">Yeni</span>{% endif %}</div>
       <div class="sc-name">{{ ((s.name or '')|replace(' A.Ş.','')|replace(' T.A.Ş.','')) }}</div>
     </div>
     <span class="badge {{ sig_cls }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span>
@@ -106,14 +106,14 @@
     <div class="section-hdr">
       <h2 class="section-title">
         <span class="dot dot-al"></span>
-        Bugün Sinyal Değişenler
+        Son Seansta Durum Değiştirenler
       </h2>
       <span class="section-sub" id="newSigCount" aria-live="polite">{{ (ssr_new_signals|length ~ ' hisse') if ssr_new_signals else '' }}</span>
     </div>
     <div id="newSignalsGrid" class="stock-grid">
       {% if ssr_new_signals %}{% for s in ssr_new_signals %}{{ gundem_card(s, true) }}{% endfor %}
       {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="da-panel da-empty">{{ ssr_closed_message }}</div>
-      {% elif ssr_market_open is defined %}<div class="da-panel da-empty">Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
+      {% elif ssr_market_open is defined %}<div class="da-panel da-empty">Son seansta durum değiştiren hisse yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
       {% else %}
       <div class="da-skel sk-card"></div>
       <div class="da-skel sk-card"></div>
@@ -228,7 +228,7 @@
      renderCard `bpIndNum`/`bpSignalAgeText`i cagiriyor ve `loadGundem()` parse
      aninda basliyor — cagri async devamda oldugu icin pratikte yetisiyordu, ama
      bu sadece agin betikten yavas olmasina dayanan bir SIRA SANSI idi. -->
-<script src="/static/bp-format.js?v=b501a830"></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
 
 <script>
 /* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,
@@ -264,7 +264,7 @@ function renderCard(s, isNew) {
   const badgeTxt = (isAl ? '▲ ' : isSat ? '▼ ' : '● ') + sigLabel(s.signal);
   const chg  = s.change_pct != null ? parseFloat(s.change_pct) : null;
   const chgCls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'neu';
-  const chgTxt = chg != null ? (chg>0?'+':'') + chg.toFixed(2).replace('.', ',') + '%' : '';
+  const chgTxt = chg != null ? bpFormatPct(chg, 2) : '';
   const priceStr = s.price ? parseFloat(s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
 
   const metrics = [];
@@ -280,7 +280,7 @@ function renderCard(s, isNew) {
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
   /* C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). */
 
-  const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
+  const newMark = isNew ? `<span class="new-badge">Yeni</span>` : '';
 
   const etTicker = escapeHtml(s.ticker);
   return `<a href="/hisse/${etTicker}" class="stock-card ${sigCls}${isNew?' new-signal':''}" title="${escapeHtml(s.name||'')}">
@@ -344,7 +344,7 @@ async function loadGundem() {
       // EOD mimarisiyle tutarlı, gün-sonu odaklı dürüst metin kullanılır.
       const emptyMsg = (d.market_open === false && d.closed_message)
         ? escapeHtml(d.closed_message)
-        : 'Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.';
+        : 'Son seansta durum değiştiren hisse yok — sinyaller seans kapanışında (gün sonu) güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =
         '<div class="da-panel da-empty">' + emptyMsg + '</div>';
     } else {
@@ -471,8 +471,8 @@ async function loadEconCalendar() {
     grid.innerHTML = unique.slice(0, 6).map(e => {
       const imp = IMP[e.importance] || IMP.MED;
       const du  = e.days_until;
-      const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Bugün!</strong>'
-                   : du === 1  ? '<span style="color:var(--bp-gold)">Yarın</span>'
+      const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Gün içinde</strong>'
+                   : du === 1  ? '<span style="color:var(--bp-gold)">1 gün sonra</span>'
                    : `<span style="color:var(--bp-text3)">${du} gün sonra</span>`;
       return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:var(--bp-radius-md);padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
@@ -592,11 +592,11 @@ document.addEventListener('visibilitychange', () => {
 /* ── Makro Ticker ── */
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <!-- K-BU: bp-format.js YUKARI tasindi (satir ~229) — stale-banner.js TR takvim
      gunu icin onun kanonunu cagirir, sirasi hala ONCE. -->
-<script src="/static/stale-banner.js?v=72c144ab"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

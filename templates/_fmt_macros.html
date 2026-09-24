@@ -23,13 +23,13 @@
 {%- endif -%}
 {%- endmacro -%}
 
-{# Yüzde metni: işaret + TR ondalık + '%'. `bpFormatPct` ile aynı çıktı. #}
+{# Yüzde metni: işaret + '%' + TR ondalık ("+%0,24"). `bpFormatPct` ile aynı çıktı. #}
 {%- macro pct_text(v, frac=2) -%}
 {%- if v is none -%}—
 {%- else -%}
 {%- set r0 = v|round(frac) -%}
 {%- set r = 0 if r0 == 0 else r0 -%}
-{{- ('+' if r > 0 else '') ~ (('%.' ~ frac ~ 'f')|format(r))|replace('.', ',') ~ '%' -}}
+{{- ('+' if r > 0 else ('-' if r < 0 else '')) ~ '%' ~ (('%.' ~ frac ~ 'f')|format(r|abs))|replace('.', ',') -}}
 {%- endif -%}
 {%- endmacro -%}
 

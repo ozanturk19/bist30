@@ -69,8 +69,8 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
        "veri şu an hiç alınamıyor") değil; gösterilen fiyat GERÇEK, sadece
        beklenen işlem gününden eski. */
     var eksikTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem gününün kapanışı henüz alınamadı.'
-      : 'Son işlem gününün kapanışı henüz alınamadı — gösterilen veriler daha eski.';
+      ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem günü kapanışı henüz alınamadı.'
+      : 'Son işlem günü kapanışı henüz alınamadı — gösterilen veriler daha eski.';
     if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
     banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
     banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';

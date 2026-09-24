@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/pages/tarama.css?v=9998dee1">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -321,8 +321,8 @@
 
 {% with ftr_self='/tarama', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b501a830"></script>
-<script src="/static/stale-banner.js?v=72c144ab"></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
 <script>
 /* ── Makro ticker — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
 (function() {
@@ -921,7 +921,6 @@ function renderResults(rows, count) {
   const tbody = document.getElementById('resultBody');
   tbody.innerHTML = rows.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
-    const chgSign = s.change_pct > 0 ? '+' : '';
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
@@ -935,7 +934,7 @@ function renderResults(rows, count) {
       <td>${scoreCell(s.signal_strength, s.tier, s.signal)}</td>
       <td>${trendCell(s.adx, s.adx_label, s.signal)}</td>
       <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
-      <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</td>
+      <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—'}</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s)}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
@@ -946,7 +945,6 @@ function renderResults(rows, count) {
   if (_mrl) {
     _mrl.innerHTML = rows.map(s => {
       const _chgCls  = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
-      const _chgSign = s.change_pct > 0 ? '+' : '';
       const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
@@ -965,7 +963,7 @@ function renderResults(rows, count) {
           <div class="mr-metric"><div class="mr-metric-label">Teknik Güç</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
-          <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:var(--bp-text-base);font-weight:600">${s.change_pct != null ? _chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:var(--bp-text-base);font-weight:600">${s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—'}</span></div>
         </div>
       </a>`;
     }).join('');
@@ -1413,7 +1411,7 @@ window.addEventListener('popstate', () => {
    önceki tek-atım eksikliği burada düzeldi) */
 bpStartDataQualityPolling();
 </script>
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/learning-mode.js?v=628d83c1" defer></script>
 {% include '_mobile_nav_partial.html' %}

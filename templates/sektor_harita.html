@@ -25,7 +25,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
 <link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=ee1dfe2e">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -125,8 +125,8 @@
 {% with ftr_self='/sektor-harita', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=b501a830"></script>
-<script src="/static/stale-banner.js?v=72c144ab"></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
 <script>
 const SECTORS = {};  // ticker → sector (doldurulacak)
 let allStocks  = [];
@@ -632,7 +632,7 @@ function renderCompare(json) {
       row.className = 'cmp-stock-row';
       row.href = '/hisse/' + s.ticker;
       var sigCls = s.signal === 'AL' ? 'cmp-sig-al' : (s.signal === 'SAT' ? 'cmp-sig-sat' : 'cmp-sig-bkl');
-      var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct.toFixed(2).replace('.', ',') + '%') : '—';
+      var chgVal = s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—';
       var chgCls = s.change_pct > 0 ? 'cmp-chg-pos' : (s.change_pct < 0 ? 'cmp-chg-neg' : '');
       var rvolVal = s.rvol != null ? s.rvol.toFixed(2).replace('.', ',') + '×' : '';
       /* K-BO: esik 2,0 -> 1,20. Sayfanin lejandi "RVOL >= 1,20 = Hacim Onayli" diyor,
@@ -671,7 +671,7 @@ function fmtPrice(p) {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 
 {% include '_mobile_nav_partial.html' %}

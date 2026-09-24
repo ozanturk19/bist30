@@ -66,9 +66,9 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=02e791a5">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=739c67d0">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -154,7 +154,7 @@
         </div>
       </div>
       {% set _chg = ssr_bist_level.change_pct if ssr_bist_level else none %}
-      <span class="da-index-change {{ 'pos' if _chg is not none and _chg > 0.05 else 'neg' if _chg is not none and _chg < -0.05 else 'neu' }}" id="daIndexChange">{% if _chg is not none %}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="{{ 'M12 4 L19 16 H5 Z' if _chg > 0.05 else 'M12 20 L19 8 H5 Z' if _chg < -0.05 else 'M5 12 H19' }}" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>{{ '+' if _chg > 0 else '' }}{{ '%.2f'|format(_chg)|replace('.', ',') }}%{% else %}<span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>{% endif %}
+      <span class="da-index-change {{ 'pos' if _chg is not none and _chg > 0.05 else 'neg' if _chg is not none and _chg < -0.05 else 'neu' }}" id="daIndexChange">{% if _chg is not none %}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="{{ 'M12 4 L19 16 H5 Z' if _chg > 0.05 else 'M12 20 L19 8 H5 Z' if _chg < -0.05 else 'M5 12 H19' }}" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>{{ bpf.pct_text(_chg) }}{% else %}<span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>{% endif %}
       </span>
     </div>
     <div class="da-index-sub">
@@ -274,7 +274,7 @@
 <section class="da-section" id="daSpotlightSection">
   <div class="da-section-head">
     <div>
-      <div class="da-eyebrow">Günün Öne Çıkanı</div>
+      <div class="da-eyebrow">Son Seansın Öne Çıkanı</div>
       <h2 class="da-section-title da-display">En yüksek BorsaPusula Skoru.</h2>
     </div>
     <p class="da-section-desc">BorsaPusula Skoru — Temel Analiz Skoru (%60) ve Teknik Güç Skoru'nun (%40) bileşik puanı (0–100).</p>
@@ -423,9 +423,9 @@
 
 {% include '_mobile_nav_partial.html' %}
 
-<script src="/static/bp-format.js?v=b501a830"></script>
-<script src="/static/stale-banner.js?v=72c144ab"></script>
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1055,12 +1055,11 @@
         if (!/^\d{2}\.\d{2}$/.test(ds)) return;
         var t = bpTodayTr();
         var todayStr = (t.d < 10 ? '0' : '') + t.d + '.' + (t.m < 10 ? '0' : '') + t.m;
-        hEl.textContent = (ds === todayStr) ? 'Bugünün haberleri.' : ds + ' haberleri.';
+        hEl.textContent = ds + ' haberleri.';
       })();
       list.innerHTML = items.slice(0, 8).map(function(item){
         var url = (typeof safeHref === 'function') ? safeHref(item.url) : (item.url || '#');
         return '<a href="' + url + '" target="_blank" rel="noopener" class="da-macro-news-item">' +
-          '<span class="da-macro-news-src">' + esc(item.source || '') + '</span>' +
           '<span class="da-macro-news-title">' + esc(item.title || '') + '</span>' +
           '<span class="da-macro-news-time">' + esc(item.date_str || '') + ' <span aria-hidden="true">↗</span></span>' +
           '<span class="sr-only"> (yeni sekmede açılır)</span></a>';

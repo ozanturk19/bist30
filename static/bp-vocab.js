@@ -67,7 +67,7 @@ var BP_ASSET_LABELS = {
   BNB:      'BNB',
   ALTIN:    'Altın',
   GUMUS:    'Gümüş',
-  PETROL:   'Petrol',
+  PETROL:   'Brent',
   DOGALGAZ: 'Doğalgaz',
   SP500:    'S&P500',
   NASDAQ:   'NASDAQ',

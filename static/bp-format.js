@@ -26,10 +26,11 @@
    etiket haritası ve ondalık biçimlendirme T1.3'te BU dosyaya eklenecek —
    ayrı dosya açılmayacak. */
 
-var BP_SIGNAL_DATE_LABELS = {
-  TODAY: 'Bugün',
-  YESTERDAY: 'Dün'
-};
+/* C-62 (24.09): EOD sitede göreli gün adı ("Bugün"/"Dün") yazılmaz; kullanıcı
+   sayfayı ertesi sabah açtığında yanlış olur (kanon: göreli zaman yok).
+   Etiket her zaman takvim tarihidir: "23 Eylül". */
+var BP_TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz',
+  'Ağustos','Eylül','Ekim','Kasım','Aralık'];
 
 var BP_TZ_TR = 'Europe/Istanbul';
 
@@ -112,18 +113,22 @@ function bpFormatTrDate(signalDate) {
   return p2(sd.d) + '.' + p2(sd.m) + '.' + sd.y;
 }
 
-/* Kanonik görünen etiket.
-   bugün -> "Bugün" · dün -> "Dün" · daha eski VEYA gelecek -> gerçek tarih.
-   Tarih ayrıştırılamazsa null — çağıran nötr bir şey basmalı, "Bugün" DEĞİL. */
-function bpSignalDateLabel(signalDate) {
-  var age = bpSignalDateAgeDays(signalDate);
-  if (age === null) return null;
-  if (age === 0) return BP_SIGNAL_DATE_LABELS.TODAY;
-  if (age === 1) return BP_SIGNAL_DATE_LABELS.YESTERDAY;
-  return bpFormatTrDate(signalDate);
+/* "23.09.2026" -> "23 Eylül" (yıl, içinde bulunulan yıl değilse eklenir). */
+function bpFormatTrDateLong(signalDate) {
+  var sd = bpParseTrDate(signalDate);
+  if (!sd) return null;
+  var t = (typeof bpTodayTr === 'function') ? bpTodayTr() : null;
+  var s = sd.d + ' ' + BP_TR_MONTHS[sd.m - 1];
+  return (t && t.y === sd.y) ? s : s + ' ' + sd.y;
 }
 
-/* Sinyalin TAKVİM yaşı, metin olarak: "Bugün" / "Dün" / "N gün" / "—".
+/* Kanonik görünen etiket: her zaman takvim tarihi ("23 Eylül").
+   Tarih ayrıştırılamazsa null — çağıran nötr bir şey basmalı. */
+function bpSignalDateLabel(signalDate) {
+  return bpFormatTrDateLong(signalDate);
+}
+
+/* Sinyalin TAKVİM yaşı, metin olarak: "Son seans" / "N gün" / "—".
    Mutlak tarihin YANINDA gösterilen yerlerde kullanılır (gündem kartı, hisse
    detayı); tarihin görünmediği yerlerde bpSignalDateLabel tercih edilir, çünkü
    orada gerçek tarihi yazmak gerekir.
@@ -134,9 +139,8 @@ function bpSignalDateLabel(signalDate) {
 function bpSignalAgeText(signalDate) {
   var age = bpSignalDateAgeDays(signalDate);
   if (age === null) return '—';
-  if (age === 0) return BP_SIGNAL_DATE_LABELS.TODAY;
-  if (age === 1) return BP_SIGNAL_DATE_LABELS.YESTERDAY;
-  if (age < 0) return bpFormatTrDate(signalDate);
+  if (age === 0) return 'Son seans';
+  if (age < 0) return bpFormatTrDateLong(signalDate);
   return age + ' gün';
 }
 
@@ -293,15 +297,16 @@ function bpZero(n, frac) {
   return bpDir(n, frac) === 0 ? 0 : n;
 }
 
-/* Yuzde metni: isaret + TR ondalik + '%'. Yon ile AYNI yuvarlamayi kullanir,
-   boylece -0,004 "-0,00%" degil "0,00%" yazar (isaretli sifir yok). */
+/* Yuzde metni: isaret + '%' + TR ondalik ("+%0,24", "-%1,50"; C-62 tek bicim,
+   Turkce yazim). Yon ile AYNI yuvarlamayi kullanir, boylece -0,004 "-%0,00"
+   degil "%0,00" yazar (isaretli sifir yok). */
 function bpFormatPct(n, frac) {
   var v = (typeof n === 'string') ? parseFloat(n) : n;
   if (typeof v !== 'number' || !isFinite(v)) return '—';
   var f = (typeof frac === 'number') ? frac : 2;
   var r = parseFloat(v.toFixed(f));
   if (r === 0) r = 0;                        /* -0 -> 0 */
-  return (r > 0 ? '+' : '') + r.toFixed(f).replace('.', ',') + '%';
+  return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');
 }
 
 /* ── K-DL (22.09): SEVIYE YUZDESI (degisim degil) ────────────────────────

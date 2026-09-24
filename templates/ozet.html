@@ -4,13 +4,13 @@
 {% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
 <link rel="canonical" href="{{ canonical_url }}">
 <meta property="og:title"       content="BIST Günlük Sinyal Özeti — {{ today_str }}">
-<meta property="og:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
+<meta property="og:description" content="{{ today_str }} tarihinde BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta property="og:url"         content="{{ canonical_url }}">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="BIST Günlük Sinyal Özeti — {{ today_str }}">
-<meta name="twitter:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
+<meta name="twitter:description" content="{{ today_str }} tarihinde BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,7 +27,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=eeccd208">
 <link rel="stylesheet" href="/static/css/data-art.css?v=a698e159">
-<script src="/static/bp-vocab.js?v=dffbf6bc" defer></script>
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/pages/ozet.css?v=68926af8">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -190,7 +190,7 @@ function goToDate(date) {
 <!-- Bugün sinyal değişenler -->
 {% if new_signals %}
 <div class="section-box da-panel">
-  <h2 class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} Sinyal Değişenler{% else %}Bugün Sinyal Değişenler{% endif %}</h2>
+  <h2 class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} Durum Değiştirenler{% else %}Son Seansta Durum Değiştirenler{% endif %}</h2>
   <div class="stock-grid">
     {% for s in new_signals %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
@@ -200,7 +200,7 @@ function goToDate(date) {
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
         {{ s.signal|signal_label }}
       </div>
-      <div class="sc-new"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} oluştu{% else %}Bugün oluştu{% endif %}</div>
+      <div class="sc-new"><span aria-hidden="true">⚡</span> {{ today_str }} oluştu</div>
     </a>
     {% endfor %}
   </div>
@@ -371,7 +371,7 @@ function goToDate(date) {
       if (daysToStart >= 0 && daysToStart <= 30) {
         // Yaklaşıyor (30 gün içinde)
         document.getElementById('bilancoBannerTitle').textContent =
-          `📆 ${p.label} Bilanço Sezonu — ${daysToStart === 0 ? 'Bugün başlıyor!' : daysToStart + ' gün sonra başlıyor'}`;
+          `📆 ${p.label} Bilanço Sezonu — ${daysToStart === 0 ? 'başladı' : daysToStart + ' gün sonra başlıyor'}`;
         document.getElementById('bilancoBannerDesc').textContent =
           `${p.description} · ${trDate(p.start).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})} – ${trDate(p.end).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})}`;
         banner.style.display = 'flex';
@@ -475,10 +475,10 @@ window.addEventListener('pageshow', (ev) => {
      tasimayan 46 durak. Desenin diger 5 yuzeyi (tarama/hisse/karsilastir/
      bilanco/temettu) bu dosyayi zaten yukluyor. -->
 <script src="/static/js/bp-tooltip.js?v=01078545" defer></script>
-<script src="/static/bp-search.js?v=2d32a06b" defer></script>
+<script src="/static/bp-search.js?v=6cbf910e" defer></script>
 <!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=b501a830"></script>
-<script src="/static/stale-banner.js?v=72c144ab"></script>
+<script src="/static/bp-format.js?v=4a213555"></script>
+<script src="/static/stale-banner.js?v=60bb4d13"></script>
 <script>bpStartDataQualityPolling();</script>
 
 {% include '_mobile_nav_partial.html' %}

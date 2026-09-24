@@ -286,7 +286,7 @@
          (virgul) basilirken degisim toFixed(2) ile "+1.23%" (NOKTA) basiliyordu
          — tek satirda iki farkli ondalik ayirici. Ayni dosyadaki makro bar
          (bpRenderMacro) zaten .replace('.', ',') kullaniyor; ayni idiom. */
-      var cSign = c == null ? '—' : (c > 0 ? '+' : '') + c.toFixed(2).replace('.', ',') + '%';
+      var cSign = c == null ? '—' : bpFormatPct(c, 2);
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
       html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
