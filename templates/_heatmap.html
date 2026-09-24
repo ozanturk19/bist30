@@ -74,7 +74,8 @@
           {%- set _s.sep = ' · ' -%}
         {%- endif -%}
         {%- if _xu is not none %}{{ _s.sep }}BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% set _s.sep = ' · ' %}{% endif -%}
-        {%- if _tv or _tb %}{{ _s.sep }}<b class="neu">{{ _tv }}</b> tavan, <b class="neu">{{ _tb }}</b> taban{% endif -%}
+        {%- if _tv %}{{ _s.sep }}<b class="neu">{{ _tv }}</b> tavan{% set _s.sep = ', ' %}{% endif -%}
+        {%- if _tb %}{{ _s.sep }}<b class="neu">{{ _tb }}</b> taban{% endif -%}
       </p>
     </div>
     <div class="hm-body">
