@@ -138,12 +138,7 @@ _PARITY_CASES = [
 ]
 
 
-def test_sunucu_istemci_paritesi(tmp_path):
-    """business_rules.py ile static/bp-format.js AYNI sonucu vermeli.
-
-    JS kaynağını grep'lemek yetmez (feedback_kural_da_kanitlanmali) — node ile
-    gerçekten çalıştırıp değer karşılaştırıyoruz.
-    """
+def _run_probe(tmp_path):
     node = shutil.which("node") or shutil.which("nodejs")
     if not node:
         pytest.skip("node yok — parite testi çalıştırılamıyor")
@@ -160,16 +155,23 @@ def test_sunucu_istemci_paritesi(tmp_path):
     assert proc.returncode == 0, f"node koşumu başarısız: {proc.stderr}"
     js_out = json.loads(proc.stdout)
     assert len(js_out) == len(_PARITY_CASES)
+    return js_out
 
-    for case, js in zip(_PARITY_CASES, js_out):
+
+def test_sunucu_istemci_paritesi(tmp_path):
+    """business_rules.py ile static/bp-format.js AYNI eşikleri kullanmalı
+    (yaş, anahtar, bugün-mü).
+
+    JS kaynağını grep'lemek yetmez (feedback_kural_da_kanitlanmali) — node ile
+    gerçekten çalıştırıp değer karşılaştırıyoruz. Etiket metni aşağıda ayrı.
+    """
+    for case, js in zip(_PARITY_CASES, _run_probe(tmp_path)):
         today = date(*case["today"])
         sd = case["signal_date"]
-        py_label = br.derive_signal_date_label(sd, today=today)
         py_key = br.derive_signal_date_key(sd, today=today)
         py_age = br.signal_date_age_days(sd, today=today)
         py_today = br.is_signal_from_today(sd, today=today)
         ctx = f"signal_date={sd!r} today={today}"
-        assert js["label"] == py_label, f"etiket ayrıştı ({ctx}): js={js['label']!r} py={py_label!r}"
         assert js["key"] == py_key, f"anahtar ayrıştı ({ctx}): js={js['key']!r} py={py_key!r}"
         assert js["age"] == py_age, f"yaş ayrıştı ({ctx}): js={js['age']!r} py={py_age!r}"
         assert js["today"] == py_today, f"bugün-mü ayrıştı ({ctx}): js={js['today']!r} py={py_today!r}"
@@ -180,6 +182,21 @@ def test_js_kanonik_sozluk_esittir():
     js = _read(_BP_FORMAT_JS)
     for value in br.TR_MONTHS:
         assert f"'{value}'" in js, f"bp-format.js ay adını taşımıyor: {value}"
+
+
+_GORELI_GUN = ("Bugün", "Dün", "Yarın")
+
+
+def test_js_goreli_gun_adi_yazmaz():
+    """C-62/C-63: bp-format.js göreli gün adını dize olarak taşımaz (yorumlar hariç)."""
+    js = re.sub(r"/\*.*?\*/", "", _read(_BP_FORMAT_JS), flags=re.S)
+    for w in _GORELI_GUN:
+        assert f"'{w}'" not in js and f'"{w}"' not in js, f"bp-format.js göreli gün adı: {w}"
+
+
+def test_sunucu_sozlugu_goreli_gun_adi_tasimaz():
+    labels = getattr(br, "SIGNAL_DATE_LABELS", {})
+    assert not set(labels.values()) & set(_GORELI_GUN), labels
 
 
 # ── 4. Donmuş eksenlerin geri sızması ───────────────────────────────────────

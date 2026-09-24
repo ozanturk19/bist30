@@ -1110,9 +1110,9 @@
     <h2 class="section-title"><span aria-hidden="true">🧭</span> Trend Durumu</h2>
     <div class="entry-analysis-grid" id="entryAnalysisGrid">
 
-      <!-- Giriş Değerlendirmesi -->
+      <!-- Trend yönü (C-63: entry_quality rozeti kalktı, yön s.signal'dan) -->
       <div>
-        <div class="vol-status-lbl">Sinyal sonrası fiyat</div>
+        <div class="vol-status-lbl">Trend yönü</div>
         <div id="eqBadge"></div>
         <div class="eq-note" id="eqNote"></div>
       </div>
@@ -2155,23 +2155,24 @@ if (document.readyState === 'loading') {
 function shareSignal(platform) {
   const sig  = _shareData.signal  || '';
   const price= _shareData.price   || '';
-  const sl   = _shareData.sl      || '';
-  const entry= _shareData.entry   || '';
+  /* C-63 (24.09, kanon §2.2 / D-39): "Giriş" ve "SL" satırları kalktı; tek
+     betimleyici satır trend dönüş seviyesi (s.sl_level = Supertrend çizgisi). */
+  const stLvl = _shareData.sl     || '';
   const ticker = TICKER;
   const name   = HISSE_NAME;
   const url    = 'https://borsapusula.com/hisse/' + ticker;
+  const stTxt  = stLvl ? 'Trend dönüş seviyesi (Supertrend): ' + stLvl + ' ₺' : '';
 
   let emoji = sig === 'AL' ? '🟢 Güçlü Trend' : sig === 'SAT' ? '🔴 Trend Bozuldu' : '⚪ Yatay';
   let text = ticker + ' (' + name + ') — ' + emoji + '\n';
   if (price) text += '💰 Fiyat: ' + price + ' ₺\n';
-  if (entry) text += '🎯 Giriş: ' + entry + ' ₺\n';
-  if (sl)    text += '🛡 SL: '    + sl    + ' ₺\n';
+  if (stTxt) text += '〰 ' + stTxt + '\n';
   text += '📊 ' + url;
 
   if (platform === 'wa') {
     window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
   } else if (platform === 'x') {
-    const tweet = ticker + ' ' + emoji + (entry ? ' Giriş:' + entry + '₺' : '') + (sl ? ' SL:' + sl + '₺' : '') + ' ' + url;
+    const tweet = ticker + ' ' + emoji + (stTxt ? ' · ' + stTxt : '') + ' ' + url;
     window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet), '_blank', 'noopener');
   } else if (platform === 'copy') {
     const copyFallback = () => {
@@ -2606,7 +2607,6 @@ function renderSummary(s, signalData) {
     // async fetch'ten (/api/data) geliyor ve ilk çizimde null / gecikmeli olabilir,
     // bu da üstte "sinyal aktif" alttaki bölümde "aktif sinyal yok" çelişkisine yol açıyordu.
     const hasActiveSignal = s.signal === 'AL' || s.signal === 'SAT';
-    const hasEntryQuality = hasActiveSignal && signalData && signalData.entry_quality;
 
     if (!hasActiveSignal) {
       /* CPO-983 Opsiyon B: boş kutular yerine anlamlı placeholder — aktif sinyal yok */
@@ -2620,21 +2620,9 @@ function renderSummary(s, signalData) {
       return;
     }
 
-    if (!hasEntryQuality) {
-      /* Sinyal aktif ama giriş analizi verisi henüz gelmedi ya da hesaplanamadı —
-         "aktif sinyal yok" demek yanlış olur, header'la çelişir. */
-      if (section) {
-        /* K-CP: display yazimi yok -- gorunurluk applyTab'in kanonu */
-        const grid = document.getElementById('entryAnalysisGrid');
-        if (grid) {
-          const msg = !signalData
-            ? 'Sinyal aktif — trend durumu yükleniyor…'
-            : 'Bu sinyal için trend durumu şu an hesaplanamadı, veri yetersiz.';
-          grid.innerHTML = `<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">${msg}</div>`;
-        }
-      }
-      return;
-    }
+    /* C-63 (24.09): `entry_quality` kapısı kalktı. Bölüm yalnız s (grafik özeti)
+       ile çizilir: yön s.signal'dan, seviye s.sl_level'dan. signalData yalnız
+       bilanço notu için okunur, /api/data gelince ikinci çizim onu ekler. */
 
     /* K-CP: gorunurluk applyTab'in `data-tab-content` kanonunda */
     // CPO-1558: bir önceki çağrı bu grid'i bir placeholder mesajıyla değiştirmiş
@@ -2668,11 +2656,12 @@ function renderSummary(s, signalData) {
       if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Trend aşağı yönlü</span>`;
       if (eqNoteEl) eqNoteEl.innerHTML = '';
     } else {
-      const eq = signalData.entry_quality;
-      const isNear = (eq === 'IDEAL' || eq === 'IYI');
-      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge ${isNear ? 'eq-safe' : 'eq-risky'}">${isNear ? 'Sinyal fiyatına yakın' : 'Sinyal fiyatından uzaklaştı'}</span>`;
+      /* C-63 (24.09, CPO kararı): "sinyal fiyatına yakın / uzaklaştı" rozeti
+         entry_quality'den (İdeal/İyi/Dikkatli/Kovalama) türüyordu — işlem
+         zamanlama dili (kanon §2.2). Yerine SAT dalıyla simetrik yön betimi. */
+      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-safe">📈 Trend yukarı yönlü</span>`;
       // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
-      const ew = signalData.earnings_warning;
+      const ew = signalData && signalData.earnings_warning;
       if (eqNoteEl) eqNoteEl.innerHTML = ew ? `<span style="margin-top:8px;display:inline-block;background:rgba(var(--bp-warn-rgb),0.12);border:1px solid rgba(var(--bp-warn-rgb),0.4);border-radius:6px;padding:5px 10px;color:var(--bp-warn);font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta oynaklık yaratabilir" tabindex="0">⚠️ ${ew.message}</span>` : '';
     }
     const rrLevelsEl = document.getElementById('rrLevels');
@@ -2924,7 +2913,7 @@ function renderSummary(s, signalData) {
   if (signalData && signalData.vol_ratio != null) {
     const vr = signalData.vol_ratio;
     if (vr >= 1.5) {
-      const vrTip = 'Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Bu sayfadaki RVOL (5 günlük ort. / 20 günlük ort.) FARKLI bir sayıdır.';
+      const vrTip = 'Günlük Hacim Oranı — son seans hacmi / 20 günlük ortalama. Bu sayfadaki RVOL (5 günlük ort. / 20 günlük ort.) FARKLI bir sayıdır.';
       indHtml += `<span class="ind-badge ind-volume" data-tip="${vrTip}" tabindex="0">Hacim Oranı ${_trNum(vr)}×<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
     }
   }
@@ -3167,7 +3156,6 @@ async function loadChart(retry) {
         signal: sum.signal || '',
         price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
         sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
-        entry:  '',  /* /api/data fetch başarısında doldurulur */
       };
       const shareSec = document.getElementById('shareSection');
       if (shareSec) shareSec.style.display = 'flex';
@@ -3190,10 +3178,6 @@ async function loadChart(retry) {
       }
       if (sd) {
         renderSummary(json.chart.summary, sd);  /* re-render with sd */
-        /* _shareData.entry güncellemesi */
-        if (sd.signal_price && _shareData) {
-          _shareData.entry = (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2});
-        }
         /* F2 — Anomali rozet */
         const _ab = document.getElementById('hpAnomalyBadge');
         if (_ab && sd.anomaly && sd.anomaly.flag) {

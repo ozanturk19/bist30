@@ -187,10 +187,10 @@ function goToDate(date) {
 </div>
 {% endif %}
 
-<!-- Bugün sinyal değişenler -->
+<!-- Son seansta değişenler (C-63: today_str D-06'dan sonra son EOD günü) -->
 {% if new_signals %}
 <div class="section-box da-panel">
-  <h2 class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} Durum Değiştirenler{% else %}Son Seansta Durum Değiştirenler{% endif %}</h2>
+  <h2 class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} kapanışında değişenler{% else %}Son seansta değişenler · {{ today_str }}{% endif %}</h2>
   <div class="stock-grid">
     {% for s in new_signals %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
@@ -200,7 +200,7 @@ function goToDate(date) {
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
         {{ s.signal|signal_label }}
       </div>
-      <div class="sc-new"><span aria-hidden="true">⚡</span> {{ today_str }} oluştu</div>
+      <div class="sc-new"><span aria-hidden="true">⚡</span> {{ today_str }} kapanışında oluştu</div>
     </a>
     {% endfor %}
   </div>
@@ -226,16 +226,16 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date or '—' }}</div>
+      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
+        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺
           {# K-CC: `ret >= 0` giris fiyatindan HIC uzaklasmamis pozisyonu YESIL +
                "+0,0%" yapiyordu (22.09 canli: 1 AL karti). Jinja yon kanonu. #}
           <span class="sc-ret {{ bpf.dir_class(ret, 1, 'sc-ret-pos,sc-ret-neg,sc-ret-neu') }}">{{ bpf.pct_text(ret, 1) }}</span>
         </div>
       {% elif s.signal_price %}
-        <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>
+        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺</div>
       {% endif %}
     </a>
     {% endfor %}
@@ -262,17 +262,17 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date or '—' }}</div>
+      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
+        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺
           <!-- CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
                degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
                CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) -->
           <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ bpf.pct_text(ret, 1) }}</span>
         </div>
       {% elif s.signal_price %}
-        <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>
+        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺</div>
       {% endif %}
     </a>
     {% endfor %}

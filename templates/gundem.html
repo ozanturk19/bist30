@@ -1,15 +1,15 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
-<meta name="description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{#- C-63: tek açıklama metni (3 meta); tarih D-06 eod_label'dan, yoksa "Son seansta". -#}{%- set _gdesc -%}{% if ssr_signal_summary %}{{ (ssr_eod_label ~ ' kapanışında') if ssr_eod_label else 'Son seansta' }} BIST'te {{ ssr_signal_summary.al }} güçlü trend var; {% if ssr_new_signals %}{{ ssr_new_signals|length }} hissenin trend durumu değişti.{% else %}trend durumu değişen hisse yok.{% endif %}{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}{%- endset -%}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
+<meta name="description" content="{{ _gdesc }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/gundem">
 <meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta property="og:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+<meta property="og:description" content="{{ _gdesc }}">
 <meta property="og:url"         content="https://borsapusula.com/gundem">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta name="twitter:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} son seansta değişen sinyal.{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
+<meta name="twitter:description" content="{{ _gdesc }}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -50,7 +50,7 @@
   <div class="sc-metrics">
     {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
-    {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
+    {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ bpf.signal_age(s.signal_date) }}</strong></div>{% endif %}
     {# C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). #}
   </div>
   <div class="sc-footer">
@@ -101,18 +101,20 @@
     {% endif %}
   </div>
 
-  <!-- Bugün Sinyal Değişenler -->
+  <!-- Son seansta değişenler. C-63: tarih D-06'nın eod_label alanından; alan
+       yokken (D-06 öncesi) başlık tarihsiz, eski closed_message (göreli zamanlı)
+       gösterilmez. -->
   <div class="section">
     <div class="section-hdr">
       <h2 class="section-title">
         <span class="dot dot-al"></span>
-        Son Seansta Durum Değiştirenler
+        Son seansta değişenler<span id="newSigDate">{% if ssr_eod_label %} · {{ ssr_eod_label }}{% endif %}</span>
       </h2>
       <span class="section-sub" id="newSigCount" aria-live="polite">{{ (ssr_new_signals|length ~ ' hisse') if ssr_new_signals else '' }}</span>
     </div>
     <div id="newSignalsGrid" class="stock-grid">
       {% if ssr_new_signals %}{% for s in ssr_new_signals %}{{ gundem_card(s, true) }}{% endfor %}
-      {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="da-panel da-empty">{{ ssr_closed_message }}</div>
+      {% elif ssr_eod_label and ssr_closed_message %}<div class="da-panel da-empty">{{ ssr_closed_message }}</div>
       {% elif ssr_market_open is defined %}<div class="da-panel da-empty">Son seansta durum değiştiren hisse yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
       {% else %}
       <div class="da-skel sk-card"></div>
@@ -272,10 +274,10 @@ function renderCard(s, isNew) {
   if (s.adx != null)        metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${bpIndNum(s.adx)}</strong></div>`);
   if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${bpIndNum(s.rsi)}</strong></div>`);
   /* CPO-1335: "Süre" bar sayacı değil takvim yaşı.
-     CPO-1668 #2: bpSignalAgeShort ("10G") SSR'ın kanonik signal_age_text filtresiyle
-     ("Bugün"/"Dün"/"N gün") uyuşmuyordu — sayfa yüklenip JS re-render tetiklenince
-     kullanıcı "10 gün → 10G" gibi görünür bir "flaş" yaşıyordu. bpSignalAgeText SSR
-     ile birebir aynı Bugün/Dün/N-gün mantığını uyguluyor (bkz. bp-format.js). */
+     CPO-1668 #2: bpSignalAgeShort ("10G") SSR metniyle uyuşmuyordu — sayfa yüklenip
+     JS re-render tetiklenince kullanıcı "10 gün → 10G" gibi görünür bir "flaş"
+     yaşıyordu. C-63: SSR aynası _fmt_macros.html `signal_age` ("Son seans" /
+     "N gün"), bpSignalAgeText ile birebir (tests/test_c63_son_seans_etiketleri.py). */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
   /* C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). */
@@ -338,11 +340,14 @@ async function loadGundem() {
     // New signals
     const newSigs = d.new_signals || [];
     document.getElementById('newSigCount').textContent = newSigs.length > 0 ? `${newSigs.length} hisse` : '';
+    /* C-63: başlık tarihi D-06'nın `eod_label` alanından ("24 Eylül"); alan yoksa tarihsiz. */
+    document.getElementById('newSigDate').textContent = d.eod_label ? ' · ' + d.eod_label : '';
     if (newSigs.length === 0) {
-      // CPO-DEV2-072 r97(b) + CPO-1646: piyasa kapalıyken sunucunun ayırt ettiği
-      // mesajı kullan; açıkken de "gün içinde güncellenir" YANLIŞ vaadi yerine
-      // EOD mimarisiyle tutarlı, gün-sonu odaklı dürüst metin kullanılır.
-      const emptyMsg = (d.market_open === false && d.closed_message)
+      // CPO-DEV2-072 r97(b) + CPO-1646: gün-sonu odaklı dürüst boş-liste metni.
+      // C-63: sunucu metni yalnız D-06 sonrası (eod_label varken) kullanılır; o
+      // metin tarihlidir ("24 Eylül kapanışında …"). Eski closed_message göreli
+      // zaman taşıyordu, D-06 öncesinde tarihsiz yedek metin basılır.
+      const emptyMsg = (d.eod_label && d.closed_message)
         ? escapeHtml(d.closed_message)
         : 'Son seansta durum değiştiren hisse yok — sinyaller seans kapanışında (gün sonu) güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =

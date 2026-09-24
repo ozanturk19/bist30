@@ -42,3 +42,23 @@
 {{- nm[0] if r > 0 else (nm[1] if r < 0 else nm[2]) -}}
 {%- endif -%}
 {%- endmacro -%}
+
+{# C-63 (24.09): sinyalin takvim yaşı, `bpSignalAgeText` (bp-format.js) ile
+   BİREBİR. Gün sonu verisinde göreli gün adı yazılmaz (kanon §2.7):
+   0 → "Son seans" · N ≥ 1 → "N gün" · bilinmiyor → "—" · gelecek tarih
+   (veri hatası) → `bpFormatTrDateLong` gibi "25 Eylül", yıl içinde bulunulan
+   yıl değilse eklenir (1 Ocak'ın yaşı < 0 ise bugün önceki yıldadır).
+   Yaş `signal_age_days` filtresinden (business_rules.signal_date_age_days;
+   -1000000 = bilinmiyor). Ay adları BP_TR_MONTHS / app._TR_MONTHS ile aynı.
+   Eşlik testi: tests/test_c63_son_seans_etiketleri.py (JS node ile koşar). #}
+{%- macro signal_age(sd) -%}
+{%- set a = sd|signal_age_days -%}
+{%- if a == -1000000 -%}—
+{%- elif a == 0 -%}Son seans
+{%- elif a < 0 -%}
+{%- set p = sd.strip().split('.') -%}
+{{- p[0]|int }} {{ ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][(p[1]|int) - 1] -}}
+{{- (' ' ~ p[2]) if ('01.01.' ~ p[2])|signal_age_days < 0 else '' -}}
+{%- else -%}{{ a }} gün
+{%- endif -%}
+{%- endmacro -%}

@@ -9,6 +9,12 @@ derken /hisse "Uzak" diyordu) -- SIGNAL_LABELS icin CPO-1321'de yapilan
 
 Statik regex/grep testi -- sunucu import gerektirmez
 (feedback_local_mac_no_python310).
+
+C-61/C-63 (24.09, CPO karari, kanon §2.2): giris kalitesi etiketleri
+("Ideal/Kovalama") islem zamanlama dilidir; frontend sozlugu (BP_EQ_LABELS)
+C-61'de, son tuketici (hisse Trend Durumu rozeti) C-63'te kalkti. Frontend
+paritesi yerine artik YOKLUK kilitlenir. Python tarafi (business_rules +
+app.py yedegi) DEV1'in D-39 devaminda kalkana kadar kendi arasinda esit kalir.
 """
 import os
 import re
@@ -40,12 +46,11 @@ def test_business_rules_and_app_fallback_match():
     )
 
 
-def test_frontend_has_no_entry_quality_vocab():
-    """C-61 (24.09, kanon §2.2): giris kalitesi rozetleri (Ideal/Kovalama)
-    islem zamanlama dili -- frontend'den kalkti. bp-vocab.js'e geri donerse
-    FAIL. Python tarafi D-39 ile alani uretmeyi birakana kadar kendi icinde
-    tutarli kalir (yukaridaki test)."""
-    assert "BP_EQ_LABELS" not in _read(_BP_VOCAB_JS)
+def test_frontend_giris_kalitesi_sozlugu_yok():
+    """C-61/C-63: frontend giris kalitesi etiketi tasimaz (yorumlar haric)."""
+    js = re.sub(r"/\*.*?\*/", "", _read(_BP_VOCAB_JS), flags=re.S)
+    assert "BP_EQ_LABELS" not in js
+    assert "Kovalama" not in js
 
 
 def test_uzak_label_is_kovalama_everywhere():

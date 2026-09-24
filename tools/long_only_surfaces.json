@@ -20,7 +20,8 @@
     "iki adim otesi (obje icine koyup baska dosyada basmak) gorulmez -- o yuzden",
     "R1 kanal envanteri asil emniyet kemeridir.",
     "C-52 (24.09): rr_signal/tp1/tp2 hicbir yuzeyde basilmiyor (kanon §2 hedef dili yok); yasak kapi 76 R3.",
-    "C-61 (24.09): tarama/gundem/karsilastir giris kalitesi yuzeyleri KALKTI (kanon §2.2 islem dili yok); geri eklenirse R1 yakalar."
+    "C-61 (24.09): tarama/gundem/karsilastir giris kalitesi yuzeyleri KALKTI (kanon §2.2 islem dili yok); geri eklenirse R1 yakalar.",
+    "C-63 (24.09): son okuyucu templates/hisse.html (Trend Durumu rozeti) da KALKTI -- hicbir yuzey entry_quality okumuyor, DEV1 alani uretmeyi birakabilir (D-39). Geri eklenirse R1 yakalar."
   ],
   "fields": [
     "entry_quality",
@@ -29,16 +30,5 @@
     "tp1",
     "tp2"
   ],
-  "surfaces": {
-    "templates/hisse.html": {
-      "fields": [
-        "entry_quality"
-      ],
-      "dialects": [
-        "js"
-      ],
-      "status": "guarded",
-      "note": "CPO-DEV2-052 #1 (Ozan karari): SAT dalinda somut giris/hedef yapisi yok."
-    }
-  }
+  "surfaces": {}
 }
