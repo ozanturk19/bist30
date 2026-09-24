@@ -16,34 +16,11 @@ import re
 import tempfile
 from datetime import date, timedelta
 
-# KAP alt sektörü → okunur grup (mockup build_heatmap_data.py gruplaması, sözleşme adları).
-GROUPS = {
-    "BANKALAR": "Bankacılık",
-    "HOLDİNGLER VE YATIRIM ŞİRKETLERİ": "Holding",
-    "ELEKTRİK GAZ VE BUHAR": "Enerji",
-    "HAM PETROL VE DOĞAL GAZ ÇIKARTILMASI": "Enerji",
-    "METAL EŞYA MAKİNE ELEKTRİKLİ CİHAZLAR VE ULAŞIM ARAÇLARI": "Otomotiv & Makine",
-    "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER": "Kimya & Petrol",
-    "ANA METAL SANAYİ": "Metal & Maden",
-    "METAL CEVHERİ MADENCİLİĞİ": "Metal & Maden",
-    "GIDA, İÇECEK VE TÜTÜN": "Gıda & İçecek",
-    "YİYECEK VE İÇECEK HİZMETLERİ": "Gıda & İçecek",
-    "PERAKENDE TİCARET": "Perakende & Ticaret",
-    "TOPTAN TİCARET": "Perakende & Ticaret",
-    "TAŞ VE TOPRAĞA DAYALI": "Çimento & Cam",
-    "ULAŞTIRMA VE DEPOLAMA": "Ulaştırma",
-    "SİGORTA ŞİRKETLERİ": "Sigorta & Finans",
-    "ARACI KURUMLAR": "Sigorta & Finans",
-    "FİNANSMAN ŞİRKETLERİ": "Sigorta & Finans",
-    "FİNANSAL KİRALAMA VE FAKTORİNG ŞİRKETLERİ": "Sigorta & Finans",
-    "GAYRİMENKUL YATIRIM ORTAKLIKLARI": "GYO & İnşaat",
-    "GAYRİMENKUL FAALİYETLERİ": "GYO & İnşaat",
-    "İNŞAAT VE BAYINDIRLIK İŞLERİ": "GYO & İnşaat",
-    "SAVUNMA": "Savunma",
-    "TELEKOMÜNİKASYON": "Telekom",
-    "BİLİŞİM": "Teknoloji",
-}
-OTHER = "Diğer"
+import sector_taxonomy
+
+# D-23: grup (`g`) = sitenin tek sektör taksonomisi (sector_taxonomy.py; KAP alt sektörü → BIST
+# sektör endeksine hizalı kova). /hisse sektör etiketi ve /tarama filtresiyle aynı ad.
+OTHER = sector_taxonomy.OTHER
 TREND = {"AL": "guclu", "SAT": "bozuk", "BEKLE": "yatay"}
 MONTHS = ("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos",
           "Eylül", "Ekim", "Kasım", "Aralık")
@@ -79,7 +56,21 @@ def tr_title(s):
 
 
 def group_of(sector):
-    return GROUPS.get((sector or "").strip(), OTHER)
+    """KAP alt sektörü → kova (boş/tanınmayan → 'Diğer')."""
+    return sector_taxonomy.bucket(sector)
+
+
+def regroup(rows, group_for):
+    """Donmuş satırların `g` alanını güncel taksonomiye çeker (fiyat/değişim dokunulmaz): taksonomi
+    değişince son görüntü ertesi günün dondurulmasını beklemeden sitenin geri kalanıyla aynı grubu
+    gösterir. group_for(t) None dönerse satır olduğu gibi kalır. Değişen satır sayısı döner."""
+    n = 0
+    for r in rows or []:
+        g = group_for(r.get("t"))
+        if g and g != r.get("g"):
+            r["g"] = g
+            n += 1
+    return n
 
 
 def pct(a, b):

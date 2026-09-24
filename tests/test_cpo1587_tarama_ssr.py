@@ -19,6 +19,7 @@ _APP_PY = os.path.join(_ROOT, "app.py")
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 import tarama_fields  # noqa: E402
+import sector_taxonomy  # noqa: E402  (D-23: sektör listesi Türkçe sıralı)
 
 _SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
 
@@ -75,6 +76,7 @@ def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00", health=None, fund
         "_financial_health_cache": health if health is not None else {},
         "_fundamentals_cache": fund if fund is not None else {},
         "tarama_fields": tarama_fields,
+        "sector_taxonomy": sector_taxonomy,
     }
     exec(m_d51.group(0), ns)
     exec(m.group(0), ns)

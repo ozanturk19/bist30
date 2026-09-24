@@ -71,7 +71,7 @@ def test_layout_properties_on_real_100():
     for g in groups:
         seq = [mc[t["t"]] for t in tiles if t["g"] == g["g"]]
         assert seq == sorted(seq, reverse=True)
-    assert groups[0]["g"] in ("Bankacılık", "Holding")
+    assert groups[0]["g"] in ("Bankacılık", "Holding ve Yatırım")
 
 
 def test_squarify_simple_and_empty():
@@ -183,9 +183,10 @@ def test_payload_schema_and_size():
         assert r["bp"] is None or 0 <= r["bp"] <= 100
         assert r["g"] and r["n"]
     aefes = next(r for r in snap["rows"] if r["t"] == "AEFES")
-    assert aefes["g"] == "Gıda & İçecek" and aefes["sub"] == "Gıda, İçecek ve Tütün"
+    # D-23: grup = sitenin sektör taksonomisi (sector_taxonomy), /hisse etiketiyle aynı ad
+    assert aefes["g"] == "Gıda ve İçecek" and aefes["sub"] == "Gıda, İçecek ve Tütün"
     assert next(r for r in snap["rows"] if r["t"] == "GARAN")["g"] == "Bankacılık"
-    assert sum(1 for r in snap["rows"] if r["g"] == hm.OTHER) <= 5
+    assert sum(1 for r in snap["rows"] if r["g"] == hm.OTHER) <= 3
     assert hm.quality(snap) == (True, "ok")
     raw = json.dumps(snap).encode()                     # app.safe_json ile aynı (ensure_ascii)
     assert len(gzip.compress(raw, 9)) <= 25 * 1024      # brotli ≤ gzip → ≤25 KB br

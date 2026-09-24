@@ -28,7 +28,7 @@ def _app_literals():
     for node in tree.body:
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             name = node.targets[0].id
-            if name in ("BIST100", "STOCK_NAMES", "SECTORS"):
+            if name in ("BIST100", "STOCK_NAMES"):
                 out[name] = ast.literal_eval(node.value)
     return out
 
@@ -64,10 +64,15 @@ def test_universe_covers_bist100_and_drops_out_of_scope():
     assert lit["BIST100"][-1] == "XU030" and len(lit["BIST100"]) == len(uni)
     # BIST30_LITERAL yedeği (dosya yoksa BIST100[:30]) yeni hisselerden etkilenmez
     assert not set(PLAN_11) & set(lit["BIST100"][:30])
-    sectors = {t for v in lit["SECTORS"].values() for t in v}
+    # D-23: sektör artık elle SECTORS değil, KAP alt sektöründen (sector_taxonomy); her hisse
+    # tanınan bir KAP sektörüyle kovalanır (sorun listesi boş)
+    import sector_taxonomy
+    kap = json.load(open(os.path.join(ROOT, "kap_sirket_bilgileri.json"), encoding="utf-8"))
+    t2b, _, problems = sector_taxonomy.build(sorted(uni - {"XU030"}), seed["companies"], kap)
+    assert not problems, problems
     for t in uni - {"XU030"}:
         assert lit["STOCK_NAMES"].get(t), "ad eksik: %s" % t
-        assert t in sectors, "sektör eksik: %s" % t
+        assert t2b.get(t), "sektör eksik: %s" % t
     for t in PLAN_11:
         assert seed["companies"][t]["sector"], t   # ısı haritası grubu KAP sektöründen
 

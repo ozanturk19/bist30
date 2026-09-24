@@ -43,6 +43,7 @@ import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
+import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 from flask_limiter import Limiter
@@ -1415,74 +1416,18 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
     return results
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
-SECTORS = {
-    "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
-                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB",
-                      "DSTKF", "KTLEV"],
-    "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
-                      "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
-                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "BERA", "POLHO", "LRSHO", "DERHL",
-                      "PAHOL", "GRTHO", "RALYH"],
-    "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
-                      "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
-                      "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
-                      "VESTL", "VESBE", "YATAS", "ARSAN", "BOSSA", "CEMTS",
-                      "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
-                      "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
-                      "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN",
-                      "AYCES", "TRALT", "CVKMD", "TRMET", "GLRMK"],
-    "Enerji":        ["AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
-                      "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
-                      "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM",
-                      "ENTRA", "GWIND", "TRENJ"],
-    "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER",
-                      "KRSTL", "TUKAS", "TUREX", "PENGD", "TCKRC", "MERKO", "TABGD",
-                      "ADESE", "OBAMS", "BALSU", "EFOR"],
-    "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR", "ESCOM", "MTRKS",
-                      "HTTBT", "MPARK", "MIATK", "YEOTK", "REEDR", "FONET", "FORTE", "ARENA", "LINK", "ARDYZ", "KAREL", "EDATA", "ODINE", "PATEK"],
-    "Telekom":       ["TCELL", "TTKOM"],
-    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI", "GRSEL"],
-    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL",
-                      "RGYAS", "TRGYO", "DAPGM", "KUYAS"],
-    "Kimya/Malzeme": ["AKSA", "ALKIM", "ISKPL", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
-                      "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
-                      "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
-                      "MEGAP", "NUHCM", "MERCN",
-                      "GOKNR", "BSOKE"],
-    "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
-    # CPO-1464 #3: GENIL/ECILC/MEDTR "Diğer" catch-all'a dusup spor kulubu/
-    # kagit/basim sirketleriyle "ayni sektor" gosteriliyordu (/hisse/GENIL,
-    # /sektor-harita). ALKLC (Alkaloid Sağlık) hicbir sektorde listeli
-    # degildi, _get_sector zaten "Diğer"e dusuruyordu.
-    "İlaç/Sağlık":   ["GENIL", "ECILC", "MEDTR", "ALKLC", "DNISI"],
-    "Diğer":         ["BJKAS", "FENER", "KARTN", "ADEL",  "DURDO",
-                      "FMIZP", "FORMT", "GSRAY", "IEYHO",
-                      "LKMNH", "PARSN", "AGROT", "MARTI"],
-}
-
-# DEV2-r4-perf: SECTORS lineer taramasi yerine bir kez kurulan ters-index.
-# setdefault kritik: SECTORS icinde birden fazla sektorde gecen ticker'lar
-# (PARSN/LKMNH/NUHCM) icin eski davranis (ilk eslesen sektor kazanir,
-# SECTORS.items() sirasina gore) birebir korunur.
-_TICKER_TO_SECTOR = {}
-for _dev2_sector, _dev2_tickers in SECTORS.items():
-    for _dev2_ticker in _dev2_tickers:
-        _TICKER_TO_SECTOR.setdefault(_dev2_ticker, _dev2_sector)
-del _dev2_sector, _dev2_tickers, _dev2_ticker
-
-# CPO-1517/DEV-1805 Faz1(a): BIST100 (fetch evreni) ve SECTORS (taksonomi)
-# önceden bağımsız iki hardcoded liste olduğu için sessizce senkron kaybediyordu
-# (4 aktif ticker SECTORS'ta yoktu -> "Diğer"e düşüyordu, 8 ölü ticker BIST100'de
-# olmadığı halde SECTORS'ta duruyordu). Tek kaynak BIST100 kalıyor (fetch/refresh
-# evreni); bu assert SECTORS'un BIST100'ü tam kapsamasını zorunlu kılar, gelecekte
-# BIST100'e eklenen bir ticker SECTORS'a eklenmeden deploy edilirse import anında
-# (sessizce "Diğer"e düşmek yerine) net bir hata ile durur.
-_bist100_stocks = set(t for t in BIST100 if t != "XU030")
-_sectors_missing = _bist100_stocks - set(_TICKER_TO_SECTOR)
-if _sectors_missing:
-    # D-46: eksik sektör uygulamayı çökertmez — uyarı + _get_sector() "Diğer"e düşer
-    logger.warning("SECTORS'ta olmayan ticker'lar 'Diğer'e düşüyor: %s", sorted(_sectors_missing))
-del _bist100_stocks, _sectors_missing
+# D-23: sektör kovası KAP resmi alt sektöründen (sector_taxonomy.py: 23 kova, BIST sektör
+# endekslerine hizalı + "Diğer"); elle tutulan SECTORS listesi kalktı (AEFES/CCOLA "Kimya",
+# ULKER "Perakende", ENKAI "Enerji", ISMEN/DSTKF "Bankacılık" gibi hatalar ondan geliyordu).
+# Kaynak: evren dosyası sektörü → KAP'ta sektörsüz 22 kod için açık tablo → kap_sirket_bilgileri.
+# Yeni hisse kovasını KAP sektöründen kendisi alır; sektörü yok/tanınmıyorsa uyarı + "Diğer"
+# (import anında çökme yok, D-46). SECTORS = {kova: [ticker]} (dolu kovalar, taksonomi sırası)
+# ve _TICKER_TO_SECTOR tüketicileri (ilgili hisseler, /api/data sectors, /tarama...) aynen kalır.
+_TICKER_TO_SECTOR, SECTORS, _sectors_unmapped = sector_taxonomy.build(
+    [t for t in BIST100 if t not in INDEX_TICKERS], UNIVERSE.get("companies") or {}, KAP_INFO)
+if _sectors_unmapped:
+    logger.warning("D-23: KAP sektörü olmayan/tanınmayan ticker'lar 'Diğer'e düşüyor: %s", _sectors_unmapped)
+del _sectors_unmapped
 
 
 def _get_sector(ticker: str) -> str:
@@ -4803,8 +4748,8 @@ def _build_heatmap_snapshot(day):
               for t, v in _read_json_quiet(_HEALTH_SCORES_DISK_PATH).items() if isinstance(v, dict)}
     comp = UNIVERSE.get("companies") or {}
     members = sorted(BIST100_MEMBERS)
-    sectors = {t: (comp.get(t) or {}).get("sector") or (KAP_INFO.get(t) or {}).get("kap_alt_sektor")
-               for t in members}
+    # D-23: KAP alt sektörü sitenin taksonomisiyle aynı kaynaktan (sektörsüz bankalar açık tablodan)
+    sectors = {t: sector_taxonomy.kap_sector(t, comp, KAP_INFO) for t in members}
     _load_xu100_chart_from_disk()
     with _lock:
         _ohlc = (_xu100_chart_cache.get("data") or {}).get("ohlc") or []
@@ -4836,6 +4781,9 @@ def _heatmap_latest():
         if _heatmap_mem["path"] != path or _heatmap_mem["mtime"] != mt:
             with open(path, encoding="utf-8") as _f:
                 snap = json.load(_f)
+            # D-23: donmuş görüntünün grubu güncel taksonomiden (eski dosya eski grup adını taşımasın)
+            heatmap.regroup(snap.get("rows"), lambda t: sector_taxonomy.bucket_for(
+                t, UNIVERSE.get("companies"), KAP_INFO, default=None))
             groups, tiles = heatmap.layout(snap.get("rows") or [])
             _heatmap_mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
     except Exception as _e:
@@ -10434,8 +10382,9 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
     results.sort(key=_tarama_sort_key, reverse=rev)
 
     with _lock:
-        sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
-                             if s.get("ticker") not in ("XU030","XU100")))
+        # D-23: Türkçe alfabetik, "Diğer" sonda ("İnşaat"/"İletişim" Z'den sonraya düşmesin)
+        sectors = sector_taxonomy.sort_labels(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
+                                                  if s.get("ticker") not in ("XU030","XU100")))
 
     return results, sectors, upd
 
@@ -12720,8 +12669,8 @@ def hisseler_hub():
         by_letter.setdefault(first, []).append((t, n))
     letters_sorted = sorted(by_letter.keys())
 
-    # Sektörler alfabetik
-    sectors_sorted = sorted(by_sector.keys())
+    # Sektörler Türkçe alfabetik, "Diğer" sonda (D-23)
+    sectors_sorted = sector_taxonomy.sort_labels(by_sector.keys())
 
     return render_template(
         "hisseler.html",
