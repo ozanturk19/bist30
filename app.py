@@ -10208,6 +10208,16 @@ def _kap_feed_universe():
     return set(tickers), oids
 
 
+def _haber_calendar():
+    """Merkez bankası takvimi: D-24 (takvim.MAKRO) varsa oradan, yoksa ECONOMIC_CALENDAR_2026.
+    D-24 eski sabiti kaldırıyor; Gündem baskısı iki durumda da çalışır."""
+    try:
+        import takvim as _tk
+        return [{"date": m[0], "event": m[3]} for m in _tk.MAKRO]
+    except Exception:
+        return list(globals().get("ECONOMIC_CALENDAR_2026") or [])
+
+
 def _haber_print_now(now):
     """Gündem baskısı: kendi verimizden (gün sonu hisseleri, makro şerit, KAP akışı, takvim)."""
     _load_cache_from_disk()
@@ -10223,7 +10233,7 @@ def _haber_print_now(now):
     lvl = _get_xu100_level()
     slot = "sabah" if now.hour < 12 else "aksam"
     doc = haber_gundem.build_print(stocks, macro, {"close": lvl.get("close"), "change_pct": lvl.get("change_pct")},
-                                   _KAP_STORE.all_items(), STOCK_NAMES, ECONOMIC_CALENDAR_2026, now, close_day, slot)
+                                   _KAP_STORE.all_items(), STOCK_NAMES, _haber_calendar(), now, close_day, slot)
     if doc:
         haber_gundem.save_print(doc)
     return doc

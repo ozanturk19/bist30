@@ -365,16 +365,22 @@ def _item_commod(macro, now):
 
 
 def _item_cb(calendar, today):
-    """Ekonomik takvimdeki sonraki merkez bankasi kararlari (TCMB PPK, Fed)."""
+    """Takvimdeki sonraki merkez bankasi faiz kararlari (TCMB, Fed). Takvim: [{date, event}]
+    (app.py ECONOMIC_CALENDAR_2026 ya da D-24 takvim.MAKRO'dan uyarlanmis)."""
     nxt = {}
     for e in calendar or []:
         try:
             d = datetime.strptime(e["date"], "%Y-%m-%d").date()
-        except (KeyError, ValueError):
+        except (KeyError, TypeError, ValueError):
             continue
         if d < today:
             continue
-        key = "TCMB" if "TCMB" in e.get("event", "") else ("Fed" if "Fed" in e.get("event", "") else None)
+        low = _lower_tr(e.get("event"))
+        key = None
+        if "tcmb" in low and ("faiz" in low or "para politikası" in low):
+            key = "TCMB"
+        elif "fed" in low and "faiz" in low and "karar" in low:
+            key = "Fed"
         if key and (key not in nxt or d < nxt[key]):
             nxt[key] = d
     if not nxt:
@@ -383,7 +389,7 @@ def _item_cb(calendar, today):
     if "Fed" in nxt:
         parts.append("Fed'in sonraki faiz kararı %s" % _dm(nxt["Fed"]))
     if "TCMB" in nxt:
-        parts.append("TCMB Para Politikası Kurulu toplantısı %s" % _dm(nxt["TCMB"]))
+        parts.append("TCMB'nin sonraki faiz kararı %s" % _dm(nxt["TCMB"]))
     return {"id": "mb", "h": "Merkez bankası takvimi", "p": "; ".join(parts) + ".", "chips": []}
 
 

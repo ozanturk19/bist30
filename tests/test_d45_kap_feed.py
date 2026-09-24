@@ -390,6 +390,16 @@ def test_gundem_print_own_data_no_sources_no_relative_time(tmp_path):
     assert hg.printed_keys(str(tmp_path)) == {"2026-09-23-aksam"}
 
 
+def test_gundem_central_bank_item_both_calendar_shapes():
+    old = [{"date": "2026-10-22", "event": "TCMB Para Politikası Kurulu"}, {"date": "2026-10-28", "event": "Fed Faiz Kararı"}]
+    d24 = [{"date": "2026-10-07", "event": "Fed toplantı tutanağı"}, {"date": "2026-10-22", "event": "TCMB faiz kararı"},
+           {"date": "2026-10-28", "event": "Fed faiz kararı"}]
+    for cal in (old, d24):
+        it = hg._item_cb(cal, date(2026, 9, 25))
+        assert it["p"] == "Fed'in sonraki faiz kararı 28 Ekim; TCMB'nin sonraki faiz kararı 22 Ekim."
+    assert hg._item_cb([], date(2026, 9, 25)) is None
+
+
 def test_gundem_due_slot():
     assert hg.due_slot(datetime(2026, 9, 24, 8, 0), set()) is None
     assert hg.due_slot(datetime(2026, 9, 24, 8, 31), set()) == "sabah"
