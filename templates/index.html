@@ -311,9 +311,9 @@
 </section>
 
 {# C-55 (24.09): BIST100 ısı haritası sektör mozaiğinin yerini alır. `heatmap`
-   (D-42) yoksa eski mozaik DEĞİŞMEDEN kalır — bu commit backend'den önce de
+   (D-42) ya da yerleşimi (heatmap_groups/heatmap_tiles) yoksa eski mozaik DEĞİŞMEDEN kalır — bu commit backend'den önce de
    güvenle yayına girer. Mozaik JS'i (daRenderMosaic) eleman yoksa sessizce çıkar. #}
-{% if heatmap %}{% include '_heatmap.html' %}{% else %}
+{% if heatmap and heatmap_groups and heatmap_tiles %}{% include '_heatmap.html' %}{% else %}
 <!-- ═══ SEKTÖR MOZAİĞİ ═══ -->
 <section class="da-section" id="sektorler">
   <div class="da-section-head">

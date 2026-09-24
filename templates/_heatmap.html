@@ -35,14 +35,23 @@
 {%- endif -%}
 {%- endmacro -%}
 {%- set hm = heatmap -%}
+{%- set _hmrows = hm.rows or [] -%}
 {%- set _rows = {} -%}
-{%- for r in hm.rows -%}{%- set _ = _rows.update({r.t: r}) -%}{%- endfor -%}
-{%- set _total = hm.rows|selectattr('mcap')|sum(attribute='mcap') -%}
-{%- set _n = hm.n or (hm.rows|length) -%}
-{%- set _c = hm.counts or {} -%}
-{%- set _up = _c.up or 0 -%}{%- set _dn = _c.down or 0 -%}{%- set _fl = _c.flat or 0 -%}
-{%- set _tv = hm.rows|selectattr('lim', 'equalto', 'tavan')|list|length -%}
-{%- set _tb = hm.rows|selectattr('lim', 'equalto', 'taban')|list|length -%}
+{%- for r in _hmrows -%}{%- set _ = _rows.update({r.t: r}) -%}{%- endfor -%}
+{%- set _total = _hmrows|selectattr('mcap')|sum(attribute='mcap') -%}
+{%- set _n = hm.n or (_hmrows|length) -%}
+{%- set _cn = namespace(u=0, d=0, f=0) -%}
+{%- if hm.counts -%}
+  {%- set _cn.u = hm.counts.up or 0 -%}{%- set _cn.d = hm.counts.down or 0 -%}{%- set _cn.f = hm.counts.flat or 0 -%}
+{%- else -%}{#- sözleşmede var; yoksa satırlardan, görünen (2 ondalık) değişimle -#}
+  {%- for r in _hmrows if r.ch and r.ch.d1 is not none -%}
+    {%- set _rv = r.ch.d1|round(2) -%}
+    {%- if _rv > 0 -%}{%- set _cn.u = _cn.u + 1 -%}{%- elif _rv < 0 -%}{%- set _cn.d = _cn.d + 1 -%}{%- else -%}{%- set _cn.f = _cn.f + 1 -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+{%- set _up = _cn.u -%}{%- set _dn = _cn.d -%}{%- set _fl = _cn.f -%}
+{%- set _tv = _hmrows|selectattr('lim', 'equalto', 'tavan')|list|length -%}
+{%- set _tb = _hmrows|selectattr('lim', 'equalto', 'taban')|list|length -%}
 {%- set _na = namespace(any=false, stale=false) -%}
 {%- set _xu = (hm.xu100.ch.d1 if (hm.xu100 and hm.xu100.ch) else none) -%}
 <section class="da-section" id="sektorler" aria-labelledby="hmTitle">
@@ -50,32 +59,37 @@
     <div class="hm-head">
       <div class="da-eyebrow">Piyasa haritası</div>
       <h2 class="hm-title da-display" id="hmTitle">BIST100 <span>· {{ hm.asof_label }} kapanışı</span></h2>
-      <p class="hm-thesis">{{ _n }} hissenin
-        {%- if _up and _up == _n %} tamamı <b class="up">yükseldi</b>
-        {%- elif _dn and _dn == _n %} tamamı <b class="dn">düştü</b>
-        {%- else -%}
-          {%- set _sep = namespace(v='') -%}
-          {%- if _up %} <b class="up">{{ _up }}</b>'{{ _poss(_up) }} yükseldi{% set _sep.v = ',' %}{% endif -%}
-          {%- if _dn %}{{ _sep.v }} <b class="dn">{{ _dn }}</b>'{{ _poss(_dn) }} düştü{% set _sep.v = ',' %}{% endif -%}
-          {%- if _fl %}{{ _sep.v }} <b class="neu">{{ _fl }}</b>'{{ _poss(_fl) }} değişmedi{% endif -%}
+      <p class="hm-thesis">
+        {%- set _s = namespace(sep='') -%}
+        {%- if _up or _dn or _fl -%}
+          {{ _n }} hissenin
+          {%- if _up == _n %} tamamı <b class="up">yükseldi</b>
+          {%- elif _dn == _n %} tamamı <b class="dn">düştü</b>
+          {%- else -%}
+            {%- set _sep = namespace(v='') -%}
+            {%- if _up %} <b class="up">{{ _up }}</b>'{{ _poss(_up) }} yükseldi{% set _sep.v = ',' %}{% endif -%}
+            {%- if _dn %}{{ _sep.v }} <b class="dn">{{ _dn }}</b>'{{ _poss(_dn) }} düştü{% set _sep.v = ',' %}{% endif -%}
+            {%- if _fl %}{{ _sep.v }} <b class="neu">{{ _fl }}</b>'{{ _poss(_fl) }} değişmedi{% endif -%}
+          {%- endif -%}
+          {%- set _s.sep = ' · ' -%}
         {%- endif -%}
-        {%- if _xu is not none %} · BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% endif -%}
-        {%- if _tv or _tb %} · <b class="neu">{{ _tv }}</b> tavan, <b class="neu">{{ _tb }}</b> taban{% endif -%}
+        {%- if _xu is not none %}{{ _s.sep }}BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% set _s.sep = ' · ' %}{% endif -%}
+        {%- if _tv or _tb %}{{ _s.sep }}<b class="neu">{{ _tv }}</b> tavan, <b class="neu">{{ _tb }}</b> taban{% endif -%}
       </p>
     </div>
     <div class="hm-body">
       <div class="hm-map">
-        {%- for grp in heatmap_groups %}
+        {%- for grp in (heatmap_groups or []) if grp.w and grp.h %}
         {%- set gs = namespace(m=0.0, s=0.0, w=0.0) -%}
-        {%- for r in hm.rows if r.g == grp.g and r.mcap -%}
+        {%- for r in _hmrows if r.g == grp.g and r.mcap -%}
           {%- set gs.m = gs.m + r.mcap -%}
           {%- if r.ch and r.ch.d1 is not none -%}{%- set gs.s = gs.s + r.ch.d1 * r.mcap -%}{%- set gs.w = gs.w + r.mcap -%}{%- endif -%}
         {%- endfor -%}
         {%- set gch = (gs.s / gs.w) if gs.w else none %}
-        <div class="hm-g" role="group" aria-label="{{ grp.g }}" style="--x:{{ '%.3f'|format(grp.x) }}%;--y:{{ '%.3f'|format(grp.y) }}%;--w:{{ '%.3f'|format(grp.w) }}%;--h:{{ '%.3f'|format(grp.h) }}%;--s:{{ '%.4f'|format(gs.m / _total if _total else 0) }}">
+        <div class="hm-g" role="group" aria-label="{{ grp.g }}" style="--x:{{ '%.3f'|format(grp.x or 0) }}%;--y:{{ '%.3f'|format(grp.y or 0) }}%;--w:{{ '%.3f'|format(grp.w) }}%;--h:{{ '%.3f'|format(grp.h) }}%;--s:{{ '%.4f'|format(gs.m / _total if _total else 0) }}">
           <div class="hm-gl" aria-hidden="true"><b>{{ grp.g }}</b>{% if gch is not none %}<i class="{{ bpf.dir_class(gch, 1, 'up,dn,neu') }}">{{ bpf.pct_text(gch, 1) }}</i>{% endif %}</div>
           <div class="hm-gi">
-          {%- for tl in heatmap_tiles if tl.g == grp.g %}
+          {%- for tl in (heatmap_tiles or []) if tl.g == grp.g and tl.w and tl.h %}
             {%- set r = _rows.get(tl.t) or {} -%}
             {%- set v = r.ch.d1 if r.ch else none -%}
             {%- if v is none -%}
@@ -88,10 +102,10 @@
             {%- if r.stale -%}{%- set k = k * 0.45 -%}{%- set _na.stale = true -%}{%- endif -%}
             {%- set dark = (cls == 'up' and k >= 0.55) or (cls == 'dn' and k >= 0.83) -%}
             {%- set lim = r.lim if r.lim in ('tavan', 'taban') else none -%}
-            {%- set rx = ((tl.x - grp.x) / grp.w * 100) if grp.w else 0 -%}
-            {%- set ry = ((tl.y - grp.y) / grp.h * 100) if grp.h else 0 -%}
-            {%- set rw = (tl.w / grp.w * 100) if grp.w else 0 -%}
-            {%- set rh = (tl.h / grp.h * 100) if grp.h else 0 %}
+            {%- set rx = ((tl.x or 0) - (grp.x or 0)) / grp.w * 100 -%}
+            {%- set ry = ((tl.y or 0) - (grp.y or 0)) / grp.h * 100 -%}
+            {%- set rw = tl.w / grp.w * 100 -%}
+            {%- set rh = tl.h / grp.h * 100 %}
             <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if r.stale }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ bpf.pct_text(v) if v is not none else 'değişim verisi yok' }}{% if lim %}, {{ lim }}{% endif %}{% if r.stale %}, veri gecikmeli{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ bpf.pct_text(v) }}</span>{% if lim %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if lim == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
           {%- endfor %}
           </div>
@@ -113,6 +127,6 @@
     </div>
     <div class="hm-card" id="hmCard" hidden></div>
   </div>
-  <script type="application/json" id="hmData">{{ {'asof_label': hm.asof_label, 'rows': hm.rows}|tojson }}</script>
+  <script type="application/json" id="hmData">{{ {'asof_label': hm.asof_label, 'rows': _hmrows}|tojson }}</script>
   <script src="/static/js/bp-heatmap.js?v=688ea2cb" defer></script>
 </section>
