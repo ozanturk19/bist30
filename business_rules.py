@@ -195,12 +195,12 @@ def derive_adx_label(adx):
 def derive_rsi_zone(rsi, signal=None):
     """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
 
-    Eşikler: <30 Aşırı Satım · 30-45 Dip Toparlanması · 45-60 İdeal Giriş
-    Penceresi · 60-70 Trend Güçleniyor · 70-80 Dikkatli · >=80 Aşırı Alım.
+    Eşikler: <30 Aşırı Satım · 30-45 Dip Toparlanması · 45-60 Sağlıklı
+    Momentum · 60-70 Trend Güçleniyor · 70-80 Dikkatli · >=80 Aşırı Alım.
 
-    `signal` verilirse (AL/SAT/BEKLE): "İdeal Giriş Penceresi" yalnız AL
+    `signal` verilirse (AL/SAT/BEKLE): "Sağlıklı Momentum" yalnız AL
     sinyalinde döner, aksi halde "Nötr Bölge" — bu isim AL olmayan bir
-    sinyalde giriş vaadi taşımasın diye (CPO-1745). Parantezli aralık
+    sinyalde olumlu vaat taşımasın diye (CPO-1745; ad C-60 ile "Sağlıklı Momentum"). Parantezli aralık
     YOK (CPO-1759): diğer beş bölge adının hiçbiri aralık taşımıyor,
     RSI sayısı zaten rozetin yanında basılı.
     """
@@ -213,7 +213,7 @@ def derive_rsi_zone(rsi, signal=None):
     if r < 45:
         return "Dip Toparlanması"
     if r < 60:
-        return "İdeal Giriş Penceresi" if signal == "AL" else "Nötr Bölge"
+        return "Sağlıklı Momentum" if signal == "AL" else "Nötr Bölge"
     if r < 70:
         return "Trend Güçleniyor"
     if r < 80:

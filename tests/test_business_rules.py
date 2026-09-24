@@ -182,7 +182,7 @@ def test_rsi_zone_dip_toparlanma_lower_bound():
     assert derive_rsi_zone(30) == "Dip Toparlanması"
 
 def test_rsi_zone_ideal_giris_lower_bound():
-    assert derive_rsi_zone(45, "AL") == "İdeal Giriş Penceresi"
+    assert derive_rsi_zone(45, "AL") == "Sağlıklı Momentum"
 
 def test_rsi_zone_trend_guclenior_lower_bound():
     assert derive_rsi_zone(60) == "Trend Güçleniyor"
