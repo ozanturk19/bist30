@@ -1,0 +1,118 @@
+{#- ═══════════════════════════════════════════════════════════════════════
+    C-55 (24.09.2026) — ANA SAYFA BIST100 ISI HARİTASI (sektör mozaiğinin yeri)
+    Onaylı taslak C-M5 (O16d=A), ilk açılış Değişim (O20=A). Renk modu ve dönem
+    seçimi bu blokta YOK: C-29 (/sektor-harita tam ekran).
+
+    Bağlam (D-42, app.py index):
+      heatmap         /api/heatmap?universe=bist100 sözlüğü (None ise index.html
+                      bu partial'ı çağırmaz, eski mozaik kalır)
+      heatmap_groups  [{g,x,y,w,h}] 16:10 kutunun yüzdesi, piyasa değeri sırasıyla
+      heatmap_tiles   [{t,g,x,y,w,h}] aynı kutunun yüzdesi (mutlak)
+
+    İlk çizim SSR: JS kapalıyken de kutular renkli görünür, her biri
+    /hisse/<T>'ye bağlanır, kod + ad + değişim metni DOM'da (GEO).
+    static/js/bp-heatmap.js px'te yeniden dizer, dar kapta (<560px) sektör
+    yığınına geçer (aynı eşik CSS container query'de), mini kartı ekler.
+
+    Renk: kutu zemini nötr (--hm-n) + yön tonu bindirmesi
+    rgba(--bp-al-rgb | --bp-sat-rgb, --k); --k = 0,16 + 0,84·min(|%|/3, 1)^0,72
+    (C-M5 ölçeği, 1G tavanı ±%3). Şablonda renk literali yok, yalnız --k sayısı.
+    Etiket rengi (.dark): beyaz ile --bp-bg'den hangisi daha yüksek kontrast
+    veriyorsa. Nötr=--bp-surface3 üzerinde kesişim yükselişte k≈0,55, düşüşte
+    k≈0,83 (en kötü nokta 4,38:1). Palet değişirse bu iki eşik yeniden hesaplanır.
+
+    `notes` iç alandır: sayfaya ve gömülü JSON'a GİRMEZ.
+    ═══════════════════════════════════════════════════════════════════════ -#}
+{%- import '_fmt_macros.html' as bpf -%}
+{#- Türkçe 3. tekil iyelik eki, sayının okunuşuna göre: 71'i, 25'i, 4'ü, 6'sı, 10'u, 100'ü -#}
+{%- macro _poss(n) -%}
+{%- set u = n % 10 -%}{%- set t = (n // 10) % 10 -%}
+{%- if n == 0 -%}ı
+{%- elif u -%}{{ ['', 'i', 'si', 'ü', 'ü', 'i', 'sı', 'si', 'i', 'u'][u] }}
+{%- elif t -%}{{ ['', 'u', 'si', 'u', 'ı', 'si', 'ı', 'i', 'i', 'ı'][t] }}
+{%- elif (n // 100) % 10 -%}ü
+{%- else -%}i
+{%- endif -%}
+{%- endmacro -%}
+{%- set hm = heatmap -%}
+{%- set _rows = {} -%}
+{%- for r in hm.rows -%}{%- set _ = _rows.update({r.t: r}) -%}{%- endfor -%}
+{%- set _total = hm.rows|selectattr('mcap')|sum(attribute='mcap') -%}
+{%- set _n = hm.n or (hm.rows|length) -%}
+{%- set _c = hm.counts or {} -%}
+{%- set _up = _c.up or 0 -%}{%- set _dn = _c.down or 0 -%}{%- set _fl = _c.flat or 0 -%}
+{%- set _tv = hm.rows|selectattr('lim', 'equalto', 'tavan')|list|length -%}
+{%- set _tb = hm.rows|selectattr('lim', 'equalto', 'taban')|list|length -%}
+{%- set _na = namespace(any=false, stale=false) -%}
+{%- set _xu = (hm.xu100.ch.d1 if (hm.xu100 and hm.xu100.ch) else none) -%}
+<section class="da-section" id="sektorler" aria-labelledby="hmTitle">
+  <div class="da-panel hm" data-hm>
+    <div class="hm-head">
+      <div class="da-eyebrow">Piyasa haritası</div>
+      <h2 class="hm-title da-display" id="hmTitle">BIST100 <span>· {{ hm.asof_label }} kapanışı</span></h2>
+      <p class="hm-thesis">{{ _n }} hissenin
+        {%- if _up and _up == _n %} tamamı <b class="up">yükseldi</b>
+        {%- elif _dn and _dn == _n %} tamamı <b class="dn">düştü</b>
+        {%- else -%}
+          {%- set _sep = namespace(v='') -%}
+          {%- if _up %} <b class="up">{{ _up }}</b>'{{ _poss(_up) }} yükseldi{% set _sep.v = ',' %}{% endif -%}
+          {%- if _dn %}{{ _sep.v }} <b class="dn">{{ _dn }}</b>'{{ _poss(_dn) }} düştü{% set _sep.v = ',' %}{% endif -%}
+          {%- if _fl %}{{ _sep.v }} <b class="neu">{{ _fl }}</b>'{{ _poss(_fl) }} değişmedi{% endif -%}
+        {%- endif -%}
+        {%- if _xu is not none %} · BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% endif -%}
+        {%- if _tv or _tb %} · <b class="neu">{{ _tv }}</b> tavan, <b class="neu">{{ _tb }}</b> taban{% endif -%}
+      </p>
+    </div>
+    <div class="hm-body">
+      <div class="hm-map">
+        {%- for grp in heatmap_groups %}
+        {%- set gs = namespace(m=0.0, s=0.0, w=0.0) -%}
+        {%- for r in hm.rows if r.g == grp.g and r.mcap -%}
+          {%- set gs.m = gs.m + r.mcap -%}
+          {%- if r.ch and r.ch.d1 is not none -%}{%- set gs.s = gs.s + r.ch.d1 * r.mcap -%}{%- set gs.w = gs.w + r.mcap -%}{%- endif -%}
+        {%- endfor -%}
+        {%- set gch = (gs.s / gs.w) if gs.w else none %}
+        <div class="hm-g" role="group" aria-label="{{ grp.g }}" style="--x:{{ '%.3f'|format(grp.x) }}%;--y:{{ '%.3f'|format(grp.y) }}%;--w:{{ '%.3f'|format(grp.w) }}%;--h:{{ '%.3f'|format(grp.h) }}%;--s:{{ '%.4f'|format(gs.m / _total if _total else 0) }}">
+          <div class="hm-gl" aria-hidden="true"><b>{{ grp.g }}</b>{% if gch is not none %}<i class="{{ bpf.dir_class(gch, 1, 'up,dn,neu') }}">{{ bpf.pct_text(gch, 1) }}</i>{% endif %}</div>
+          <div class="hm-gi">
+          {%- for tl in heatmap_tiles if tl.g == grp.g %}
+            {%- set r = _rows.get(tl.t) or {} -%}
+            {%- set v = r.ch.d1 if r.ch else none -%}
+            {%- if v is none -%}
+              {%- set cls = 'na' -%}{%- set k = 0 -%}{%- set _na.any = true -%}
+            {%- else -%}
+              {%- set cls = bpf.dir_class(v, 2, 'up,dn,neu') -%}
+              {%- set t = [(v|round(2))|abs / 3.0, 1.0]|min -%}
+              {%- set k = (0.16 + 0.84 * (t ** 0.72)) if cls != 'neu' else 0 -%}
+            {%- endif -%}
+            {%- if r.stale -%}{%- set k = k * 0.45 -%}{%- set _na.stale = true -%}{%- endif -%}
+            {%- set dark = (cls == 'up' and k >= 0.55) or (cls == 'dn' and k >= 0.83) -%}
+            {%- set lim = r.lim if r.lim in ('tavan', 'taban') else none -%}
+            {%- set rx = ((tl.x - grp.x) / grp.w * 100) if grp.w else 0 -%}
+            {%- set ry = ((tl.y - grp.y) / grp.h * 100) if grp.h else 0 -%}
+            {%- set rw = (tl.w / grp.w * 100) if grp.w else 0 -%}
+            {%- set rh = (tl.h / grp.h * 100) if grp.h else 0 %}
+            <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if r.stale }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ bpf.pct_text(v) if v is not none else 'değişim verisi yok' }}{% if lim %}, {{ lim }}{% endif %}{% if r.stale %}, veri gecikmeli{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ bpf.pct_text(v) }}</span>{% if lim %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if lim == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
+          {%- endfor %}
+          </div>
+        </div>
+        {%- endfor %}
+      </div>
+    </div>
+    <div class="hm-foot">
+      <div class="hm-legend">
+        <div>
+          <div class="hm-lg-bar" aria-hidden="true"></div>
+          <div class="hm-lg-ticks"><span>{{ bpf.pct_text(-3, 0) }}</span><span>{{ bpf.pct_text(-1.5, 1) }}</span><span>0</span><span>{{ bpf.pct_text(1.5, 1) }}</span><span>{{ bpf.pct_text(3, 0) }}</span></div>
+        </div>
+        <span>Gün sonu değişim</span>
+        {%- if _na.any %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Değişim verisi yok</span>{% endif %}
+        {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>{% endif %}
+      </div>
+      <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
+    </div>
+    <div class="hm-card" id="hmCard" hidden></div>
+  </div>
+  <script type="application/json" id="hmData">{{ {'asof_label': hm.asof_label, 'rows': hm.rows}|tojson }}</script>
+  <script src="/static/js/bp-heatmap.js?v=688ea2cb" defer></script>
+</section>

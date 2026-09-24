@@ -306,3 +306,88 @@ header{
 @media (max-width:768px){.da-gundem-layout{grid-template-columns:1fr}}
 
 
+
+/* ═══ C-55 (24.09): BIST100 ısı haritası — templates/_heatmap.html + static/js/bp-heatmap.js ═══
+   Onaylı taslak C-M5 (O16d=A, ilk açılış Değişim O20=A). Renk yalnız token'dan:
+   nötr zemin (--hm-n) + yön tonu bindirmesi rgba(--bp-al-rgb | --bp-sat-rgb, --k);
+   --k sayısını SSR yazar. Etiket rengi (.dark) SSR'da en yüksek kontrasta göre.
+   Aynı bileşen C-29'da /sektor-harita'ya taşınacaksa bu blok ortak dosyaya alınır. */
+.hm{--hm-n:var(--bp-surface3);padding:clamp(16px,2.4vw,26px);--da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.10;--da-glow-size:420px;--da-glow-y:-55%}
+.hm-head{margin-bottom:clamp(14px,2vw,20px)}
+.hm-title{font-weight:800;font-size:clamp(1.55rem,3.2vw,2.35rem);line-height:1.02;letter-spacing:-.03em;margin:0 0 6px}
+.hm-title span{color:var(--bp-text3);font-weight:700}
+.hm-thesis{margin:0;color:var(--bp-text2);font-size:var(--bp-text-15);max-width:76ch}
+.hm-thesis b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:var(--bp-text);white-space:nowrap}
+.hm-thesis .up{color:var(--bp-al)}
+.hm-thesis .dn{color:var(--bp-sat)}
+.hm-thesis .neu{color:var(--bp-text)}
+.hm-body{container:hmb / inline-size}
+.hm-map{position:relative;aspect-ratio:16/10}
+.hm-g{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h)}
+.hm-gl{position:absolute;left:0;right:0;top:0;height:18px;display:flex;gap:8px;align-items:center;overflow:hidden;white-space:nowrap;pointer-events:none}
+.hm-gl b{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;font-size:var(--bp-text-xs);letter-spacing:.09em;text-transform:uppercase;color:var(--bp-text2);overflow:hidden;text-overflow:ellipsis}
+.hm-gl i{font-family:'Space Grotesk',system-ui,sans-serif;font-style:normal;font-weight:600;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums}
+.hm-gl .up{color:var(--bp-al)}
+.hm-gl .dn{color:var(--bp-sat)}
+.hm-gl .neu{color:var(--bp-text2)}
+.hm-gi{position:absolute;left:0;right:0;top:20px;bottom:0}
+.hm-t{--hm-c:transparent;position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h);display:block;overflow:hidden;border-radius:var(--bp-radius-5);text-decoration:none;color:#fff;background-color:var(--hm-n);background-image:linear-gradient(155deg,rgba(var(--bp-text-rgb),.12),rgba(var(--bp-text-rgb),0) 42%),linear-gradient(var(--hm-c),var(--hm-c));container-type:size;transition:filter var(--bp-dur-slow),box-shadow var(--bp-dur-slow)}
+.hm-t.up{--hm-c:rgba(var(--bp-al-rgb),var(--k,0))}
+.hm-t.dn{--hm-c:rgba(var(--bp-sat-rgb),var(--k,0))}
+.hm-t.dark{color:var(--bp-bg)}
+.hm-t.na,.hm-t.stale{background-image:linear-gradient(155deg,rgba(var(--bp-text-rgb),.08),rgba(var(--bp-text-rgb),0) 42%),repeating-linear-gradient(135deg,rgba(var(--bp-text-rgb),.08) 0 2px,transparent 2px 7px),linear-gradient(var(--hm-c),var(--hm-c))}
+.hm-t.lim{z-index:var(--bp-z-base);box-shadow:inset 0 0 0 1.5px rgba(var(--bp-text-rgb),.6),0 0 18px -2px rgba(var(--bp-al-rgb),.75)}
+.hm-t.lim.taban{box-shadow:inset 0 0 0 1.5px rgba(var(--bp-text-rgb),.6),0 0 18px -2px rgba(var(--bp-sat-rgb),.75)}
+.hm .hm-t:hover{z-index:var(--bp-z-raised);box-shadow:inset 0 0 0 2px rgba(var(--bp-text-rgb),.85);filter:brightness(1.08)}
+.hm .hm-t:focus-visible{z-index:var(--bp-z-raised);outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
+.hm-tk{position:absolute;left:7px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--fs,11px);line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
+.hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:calc(var(--fs,11px) * .74);line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
+.hm-lim{position:absolute;right:5px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-text-2xs);line-height:1;letter-spacing:.08em;padding:3px 5px;border-radius:var(--bp-radius-4);background:rgba(var(--bp-bg-rgb),.45);color:var(--bp-text);white-space:nowrap}
+.hm .hm-off{display:none}
+/* JS yokken (SSR): aralık saydam kenarla; sığmayan yazı kutu boyuna göre gizli (kırpılmaz) */
+.hm:not(.js) .hm-g{border:3px solid transparent}
+.hm:not(.js) .hm-t{border:1px solid transparent;background-clip:padding-box}
+@container (max-width:46px) or (max-height:18px){.hm:not(.js) .hm-tk{display:none}}
+@container (max-width:56px) or (max-height:34px){.hm:not(.js) .hm-v{display:none}}
+@container (max-width:110px) or (max-height:42px){.hm:not(.js) .hm-lim{display:none}}
+/* Dar kap (<560px): sektörler alt alta, her biri kendi haritasıyla (C-M5 telefon düzeni).
+   Eşik bp-heatmap.js STACK_MAX ile aynı; yükseklik formülü de aynı. */
+@container hmb (max-width:559.98px){
+  .hm-map{aspect-ratio:auto}
+  .hm-g{position:relative;left:auto;top:auto;width:auto;height:auto;border:0;margin-top:14px}
+  .hm-g:first-child{margin-top:4px}
+  .hm-gl{position:static;height:auto;justify-content:space-between;margin-bottom:6px}
+  .hm-gl b,.hm-gl i{font-size:var(--bp-text-sm)}
+  .hm-gi{position:relative;left:auto;right:auto;top:auto;bottom:auto;height:clamp(78px,calc(var(--s,0) * max(1500px,460cqw)),360px)}
+}
+.hm-foot{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between;margin-top:14px}
+.hm-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);color:var(--bp-text3)}
+.hm-lg-bar{width:min(220px,62vw);height:9px;border-radius:var(--bp-radius-pill);background:linear-gradient(90deg,var(--bp-sat),var(--hm-n) 50%,var(--bp-al))}
+.hm-lg-ticks{display:flex;justify-content:space-between;width:min(220px,62vw);margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hm-lg-sw{display:inline-flex;align-items:center;gap:6px}
+.hm-lg-sw i{width:12px;height:12px;border-radius:var(--bp-radius-sm);background-color:var(--hm-n);background-image:repeating-linear-gradient(135deg,rgba(var(--bp-text-rgb),.3) 0 2px,transparent 2px 5px)}
+.hm-src{margin:0;font-size:var(--bp-text-sm);color:var(--bp-text3);max-width:60ch}
+/* Mini kart (bp-heatmap.js doldurur) */
+.hm .hm-card{position:absolute;z-index:var(--bp-z-dropdown);scroll-margin:100px 0 96px;width:min(268px,calc(100% - 16px));padding:14px 15px 12px;border-radius:var(--bp-radius-14);background:rgba(var(--bp-surface-rgb),.97);border:1px solid var(--bp-border2);box-shadow:var(--bp-shadow-lg);font-size:var(--bp-text-base)}
+.hm-card .c-top{display:flex;gap:8px;align-items:baseline;min-width:0}
+.hm-card .c-top b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-text-17)}
+.hm-card .c-top span{color:var(--bp-text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-card .c-sec{color:var(--bp-text3);font-size:var(--bp-text-sm);margin:2px 0 8px}
+.hm-card .c-price{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.hm-card .c-price strong{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-text-22);font-variant-numeric:tabular-nums}
+.hm-card .c-ch{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-15);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hm-card .c-asof{color:var(--bp-text3);font-size:var(--bp-text-sm)}
+.hm-card .up{color:var(--bp-al)}
+.hm-card .dn{color:var(--bp-sat)}
+.hm-card .neu{color:var(--bp-text2)}
+.hm-card .c-per{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0}
+.hm-card .c-per div{background:var(--bp-surface2);border-radius:var(--bp-radius-7);padding:5px 2px;text-align:center}
+.hm-card .c-per em{display:block;font-style:normal;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-2xs);letter-spacing:.06em;color:var(--bp-text3)}
+.hm-card .c-per span{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hm-card .c-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--bp-border)}
+.hm-card .c-row span{color:var(--bp-text3)}
+.hm-card .c-row b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;text-align:right}
+.hm-card .c-note{margin-top:8px;padding-left:8px;border-left:2px solid var(--bp-stale);color:var(--bp-stale);font-size:var(--bp-text-sm)}
+.hm-card .c-go{display:block;margin-top:10px;text-align:center;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;color:var(--bp-bg);background:var(--bp-brand);border-radius:var(--bp-radius-9);padding:10px 8px;text-decoration:none}
+.hm-card .c-go:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.hm-t{transition:none}}
