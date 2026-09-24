@@ -1666,6 +1666,7 @@
 
 /* hero — BorsaPusula Skoru */
 .hero-gauge { left: 490px; top: 0; width: 260px; height: 260px; z-index: 6; box-shadow: 0 30px 70px -24px rgba(var(--band-rgb), .5); }
+.hero-gauge .gauge-ring { overflow: visible; }   /* C-04: drop-shadow SVG kutusunda kesilip kare kose birakiyordu */
 .hero-gauge .ring-fg { stroke-width: 9; filter: drop-shadow(0 0 12px rgba(var(--band-rgb), .6)); }
 .hero-gauge .gauge-value { font-size: 66px; }
 .hero-gauge .gauge-label { bottom: -46px; font-size: 12px; line-height: 1.5; }

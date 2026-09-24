@@ -361,3 +361,12 @@
     .pf-panel-header { flex-direction: column; align-items: stretch; gap: 8px; }
     .pf-panel-header .pf-actions { justify-content: flex-start; flex: none; }
   }
+
+  /* C-04 (24.09) — dosya SONUNDA durmali (onceki thead th kurallarini ezer).
+     Tablo kabina sigmadiginda (.pf-fits yok) yatay kaydirma kabi sticky'yi
+     bozuyor ve baslik 2. satirin ustune biniyordu: sigmayan tabloda baslik
+     duragan. Ozet tutarlari: kart overflow:hidden (kose parıltısı) oldugu icin
+     1.000.000,00 ₺ kesiliyordu -> tek satir + kart genisligine gore yazi boyu. */
+  .pf-table:not(.pf-fits) thead th { position: static; }
+  .sum-card { container-type: inline-size; }
+  .sum-num { white-space: nowrap; font-size: min(var(--bp-text-28), 10.5cqi); }

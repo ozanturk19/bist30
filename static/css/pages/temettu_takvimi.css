@@ -3,7 +3,7 @@
    sayfa birbirinden bagimsiz suruklendi. 20.09 denetiminde kapatilan farklar:
    odak halkasi rengi, ticker hover rengi, dokunmatikte yapisan filtre hover'i,
    load() yarisi. Ayrica /temettu'de DONEM BOLUMU HIC YOK (canli olculdu:
-   .period-* eslesen 0 oge) — 30+ satirlik olu .period-*/.badge-* CSS'i ve
+   .period-* eslesen 0 oge) — 30+ satirlik olu .period-xxx / .badge-xxx CSS'i ve
    olmayan bir "Yatay" dugmesinin .filter-btn.fbkl.active kurali kaldirildi. */
 
   * { margin:0; padding:0; box-sizing:border-box; }
