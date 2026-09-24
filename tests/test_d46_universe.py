@@ -33,3 +33,12 @@ def test_bist30_literal_from_universe_and_not_slice():
     xu030 = set(app.UNIVERSE["indices"]["XU030"])
     assert set(app.BIST30_LITERAL) == xu030 and len(app.BIST30_LITERAL) == 30
     assert app.STOCK_NAMES["TUREX"] == "Tureks Turizm"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister")
+def test_enrich_stock_overrides_stale_cached_name():
+    sys.path.insert(0, ROOT)
+    import app
+    s = app._enrich_stock({"ticker": "TUREX", "name": "Türk Tuborg"})
+    assert s["name"] == "Tureks Turizm"
+    assert app._enrich_stock({"ticker": "ZZZZZ", "name": "X"})["name"] == "X"

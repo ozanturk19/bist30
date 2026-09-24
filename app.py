@@ -1438,8 +1438,13 @@ def _enrich_stock(s: dict) -> dict:
     # zaten çözülmüştü (aşağıda ~30 satır sonra), sector de aynı yaklaşımı
     # izlemeli: ucuz saf fonksiyon, cache'lemeye değmez.
     s["sector"] = _get_sector(s.get("ticker", ""))
-    if "name" not in s:
-        s["name"] = STOCK_NAMES.get(s.get("ticker", ""), "")
+    # D-46: ad de HER YÜKLEMEDE STOCK_NAMES'ten (disk cache'teki eski ad düzeltmeyi gölgelemesin);
+    # STOCK_NAMES'te olmayan ticker'da cache'teki ad korunur.
+    _nm = STOCK_NAMES.get(s.get("ticker", ""))
+    if _nm:
+        s["name"] = _nm
+    elif "name" not in s:
+        s["name"] = ""
     return s
 
 
