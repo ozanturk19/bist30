@@ -1511,9 +1511,40 @@ def _fill_intraday_gaps(df, ticker):
 
         last_daily = df.index[-1].date()
         last_close = float(df["Close"].iloc[-1])
+        # D-49: günlük serideki ARA boşluk (Yahoo XU100.IS'te 22.09 barı hiç yok)
+        # da 1m'den doldurulur; eskiden yalnız son günden SONRAKİ günler dolduruluyordu
+        # ve boşluk yüzünden değişim %'si iki seans öncesine göre hesaplanıyordu.
+        have_days = set(df.index.date)
         added = False
         for day in sorted(set(df5d.index.date)):
+            if day <= last_daily and (day in have_days or not is_trading_day(day)):
+                continue
             if day <= last_daily:
+                prior = df[df.index.date < day]
+                if prior.empty:
+                    continue
+                last_close = float(prior["Close"].iloc[-1])
+                day_bars = df5d[df5d.index.map(lambda x: x.date()) == day].dropna()
+                if len(day_bars) < 30:
+                    continue
+                synth_close = float(day_bars["Close"].iloc[-1])
+                if last_close > 0 and abs(synth_close / last_close - 1) > 0.25:
+                    logger.warning(
+                        "_fill_intraday_gaps(%s): skala uyusmazligi (%.2f vs %.2f), ara bar atlandi",
+                        ticker, synth_close, last_close,
+                    )
+                    continue
+                ts = pd.Timestamp(day, tz=df.index.tz)
+                df = pd.concat([df, pd.DataFrame({
+                    "Open":   float(day_bars["Open"].iloc[0]),
+                    "High":   float(day_bars["High"].max()),
+                    "Low":    float(day_bars["Low"].min()),
+                    "Close":  synth_close,
+                    "Volume": float(day_bars["Volume"].sum()) if "Volume" in day_bars else 0,
+                }, index=pd.DatetimeIndex([ts]))[df.columns]]).sort_index()
+                last_close = float(df["Close"].iloc[-1])
+                added = True
+                logger.info("_fill_intraday_gaps(%s): ara boşluk %s 1m'den dolduruldu", ticker, day)
                 continue
             day_bars = df5d[df5d.index.map(lambda x: x.date()) == day].dropna()
             if len(day_bars) < 30:
@@ -4812,6 +4843,18 @@ def _get_xu100_level():
         round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
         if len(closes) >= 2 and closes[-2] else None
     )
+    # D-49: son iki bar ardışık işlem günü değilse (Yahoo'da aradaki bar yok)
+    # değişim iki seans öncesine göre hesaplanıp "dünkü değişim" diye basılmaz.
+    _pts = [p for p in _xu100_ohlc if p.get("close")]
+    if change_pct is not None and len(_pts) >= 2 and _pts[-1].get("time") and _pts[-2].get("time"):
+        try:
+            _d_last = date.fromisoformat(str(_pts[-1]["time"])[:10])
+            _d_prev = date.fromisoformat(str(_pts[-2]["time"])[:10])
+            if last_trading_day_on_or_before(_d_last - timedelta(days=1)) != _d_prev:
+                logger.warning("XU100 değişim: önceki bar %s ≠ önceki işlem günü — change_pct None", _d_prev)
+                change_pct = None
+        except Exception:
+            pass
     return {
         "close":       close,
         "change_pct":  change_pct,
@@ -5433,7 +5476,7 @@ _MACRO_TICKERS = [
     ("BTC",    "BTC-USD"),
     ("ALTIN",  "GC=F"),
     ("GUMUS",  "SI=F"),
-    ("PETROL", "CL=F"),
+    ("PETROL", "BZ=F"),   # D-49: Türkiye için referans Brent (WTI CL=F değil); anahtar PETROL kalır (bp-vocab)
     ("SP500",  "^GSPC"),
     ("NASDAQ", "^IXIC"),
 ]
@@ -5593,7 +5636,7 @@ def _do_macro_ai_refresh():
             lines.append(f"BIST100: {xu100:,.0f} ({chg_str})")
         if usdtry: lines.append(f"USD/TRY: {usdtry:.4f}")
         if gold:   lines.append(f"Altın (XAU/USD): {gold:,.2f} USD/ons")
-        if oil:    lines.append(f"Ham Petrol (WTI): {oil:.2f} USD")
+        if oil:    lines.append(f"Ham Petrol (Brent): {oil:.2f} USD")
         if btc:    lines.append(f"BTC: {btc:,.0f} USD")
 
         if not lines:
@@ -7953,7 +7996,7 @@ _TICKER_SYMBOL_MAP = {
     "NASDAQ":   "^IXIC",
     "SOL":      "SOL-USD",
     "BNB":      "BNB-USD",
-    "PETROL":   "CL=F",
+    "PETROL":   "BZ=F",
     "DOGALGAZ": "NG=F",
 }
 
