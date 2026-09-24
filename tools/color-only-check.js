@@ -53,7 +53,7 @@ const CAP = parseInt(((process.argv.find(a => a.startsWith('--cap=')) || '').spl
 const PAGES = [
   '/', '/ozet', '/tarama', '/gundem', '/hisseler', '/sektor-harita',
   '/hisse/ASELS', '/hisse/GARAN', '/karsilastir', '/portfolio',
-  '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/blog/rsi-gostergesi-nedir',
+  '/takvim', '/blog', '/blog/rsi-gostergesi-nedir',
   '/metodoloji', '/hakkinda', '/iletisim', '/profil', '/yasal', '/gizlilik',
 ];
 const EXPECT_4XX = new Set(['/profil']);

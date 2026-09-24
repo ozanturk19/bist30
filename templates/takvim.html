@@ -1,0 +1,317 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Takvim — Temettü, Finansal Rapor ve Veri Günleri | BorsaPusula</title>
+<meta name="description" content="Borsa İstanbul şirketlerinin açıklanmış temettü ödemeleri (temettü ve ödeme tarihi, brüt tutar, verim), finansal rapor tarihleri ve Türkiye ile ABD'nin enflasyon, istihdam ve faiz kararı günleri tek takvimde.">
+<link rel="canonical" href="https://borsapusula.com/takvim">
+<meta property="og:title"       content="Takvim — Temettü, Finansal Rapor ve Veri Günleri | BorsaPusula">
+<meta property="og:description" content="Açıklanmış temettü ödemeleri, finansal rapor tarihleri ve Türkiye ile ABD'nin veri ve faiz kararı günleri tek takvimde.">
+<meta property="og:url"         content="https://borsapusula.com/takvim">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Takvim — Temettü, Finansal Rapor ve Veri Günleri | BorsaPusula">
+<meta name="twitter:description" content="Açıklanmış temettü ödemeleri, finansal rapor tarihleri ve Türkiye ile ABD'nin veri ve faiz kararı günleri tek takvimde.">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="borsapusula.com">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+  {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
+  {"@type":"ListItem","position":2,"name":"Takvim"}
+]}
+</script>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
+<link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
+<link rel="stylesheet" href="/static/css/pages/takvim.css?v=aeda1826">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<script>document.documentElement.classList.add('js');</script>
+<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% with hdr_icon = '📅', hdr_title = 'Takvim', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+{#- C-36: /takvim birlesik sayfa (taslak v2, plans/mockups/takvim.html). Baglam `takvim`
+    arka uctan (D-24 takvim.ssr_context); yoksa ya da bossa sayfa 500 vermez, bos durum
+    gosterir. Tum satirlar sunucuda cizilir: JS kapaliyken de liste tam (GEO); JS yalniz
+    filtre, serit, "olay daha" ve kalan gunu (ziyaretcinin tarihi) yonetir. Goreli zaman
+    yok: tarih basliklari. -#}
+{%- set T = takvim if takvim else none -%}
+{%- set C = (T.counts if T and T.counts else {'all': 0, 'bilanco': 0, 'temettu': 0, 'makro': 0}) -%}
+{%- set D = T.donem if T else none -%}
+{%- macro tl(v) -%}{%- if v is none -%}—{%- elif v < 1 -%}{%- set s = ('%.4f'|format(v + 0.000000001)).rstrip('0') -%}{%- set frac = s.split('.')[1] if '.' in s else '' -%}{{ (s ~ ('0' * (2 - frac|length) if frac|length < 2 else ''))|replace('.', ',') }} ₺{%- else -%}{{ ('%.2f'|format(v + 0.000000001))|replace('.', ',') }} ₺{%- endif -%}{%- endmacro -%}
+{%- macro gun(iso) -%}{%- set A = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}{{ iso[8:10]|int }} {{ A[iso[5:7]|int - 1] }}{%- endmacro -%}
+{%- macro kalan(e, g) -%}{%- if e.kalan is defined and e.kalan > 0 -%}{{ e.kalan }} gün<span class="kl"> kaldı</span>{%- else -%}{{ g.gun }}{%- endif -%}{%- endmacro -%}
+{%- macro ring(v) -%}{%- set c = 37.7 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="16" height="16" aria-hidden="true"><circle class="rg0" cx="8" cy="8" r="6.5" fill="none" stroke-width="3"/><circle class="rg1" cx="8" cy="8" r="6.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}"/></svg>{%- endmacro -%}
+{%- macro mc(e) -%}{%- set h = e.hisse if e.hisse is defined else none -%}<span class="tk-mc"><span class="l1"><b>{{ e.ticker }}</b>{% if h %}<span class="c {{ dir_class(h.change_pct) }}">{{ pct_text(h.change_pct) }}</span>{% endif %}</span><span class="l2">{% if h and h.bp is not none %}<span class="tk-bp" title="BorsaPusula Skoru">{{ ring(h.bp) }}{{ h.bp }}</span>{% endif %}{% if h %}<span class="tk-st {{ h.durum }}">{{ {'g': 'Güçlü Trend', 'y': 'Yatay', 'b': 'Trend Bozuldu'}[h.durum] }}</span>{% endif %}</span></span>{%- endmacro -%}
+{%- set IC_COIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/><path d="M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>' -%}
+{%- set IC_DOC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>' -%}
+{%- set IC_PULSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>' -%}
+{%- set IC_CHEV = '<svg class="tk-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>' -%}
+{%- set IC_STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>' -%}
+<main class="tk" id="main-content" tabindex="-1">
+  <div class="tk-hd">
+    <h1>Takvim</h1>
+    <p>Şirketlerin temettü ve finansal rapor tarihleri; Türkiye ve ABD'nin veri ve faiz kararı günleri.</p>
+  </div>
+{% if T and T.groups %}
+  <section class="tk-strip" aria-labelledby="tkStripH">
+    <h2 class="tk-sr" id="tkStripH">Filtreler ve hafta şeridi</h2>
+    <div class="tk-strip-h">
+      <div class="tk-flt" role="group" aria-label="Takvim filtresi">
+        <button type="button" data-f="all" aria-pressed="true">Tümü <i>{{ C.all }}</i></button>
+        <button type="button" data-f="bilanco" aria-pressed="false"><i class="tk-k b" aria-hidden="true"></i>Bilanço <i>{{ C.bilanco }}</i></button>
+        <button type="button" data-f="temettu" aria-pressed="false"><i class="tk-k t" aria-hidden="true"></i>Temettü <i>{{ C.temettu }}</i></button>
+        <button type="button" data-f="makro" aria-pressed="false"><i class="tk-k m" aria-hidden="true"></i>Makro <i>{{ C.makro }}</i></button>
+        <button type="button" data-f="takip" aria-pressed="false" hidden>{{ IC_STAR|safe }}Takip listem <i data-takip-n>0</i></button>
+      </div>
+      <div class="tk-range"><b>{{ T.groups[0].gun }} – {{ T.last_label }}{% if T.groups[-1].date[:4] != T.asof[:4] %} {{ T.groups[-1].date[:4] }}{% endif %}</b>{% if T.fiyat_label %} · hisse kartları {{ T.fiyat_label }} kapanışı{% endif %}</div>
+      <div class="tk-snv"><button type="button" class="sv-p" aria-label="Önceki haftalar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><button type="button" class="sv-n" aria-label="Sonraki haftalar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
+    </div>
+    <div class="tk-sc">
+{%- for w in T.weeks %}
+      <div class="tk-wk"><div class="tk-wk-l{% if w.ay_basi %} mo{% endif %}">{{ w.label }}</div><div class="tk-wk-d">
+{%- for d in w.days -%}
+{%- set nk = d.kinds|length -%}
+<button type="button" class="tk-dy{% if d.past %} past{% endif %}{% if d.now %} now{% endif %}{% if d.off %} off{% endif %}{% if d.half %} half{% endif %}" data-d="{{ d.date }}" aria-pressed="false"{% if d.now %} aria-current="date"{% endif %}{% if d.past or not nk %} disabled{% endif %} aria-label="{{ d.etiket }}{% if d.not %}, {{ d.not.not|lower }}{% endif %}: {% if nk %}{{ nk }} olay{% else %}olay yok{% endif %}"><span class="wd" aria-hidden="true">{{ d.harf }}</span><span class="dn" aria-hidden="true">{{ d.gun_no }}</span><span class="dots" aria-hidden="true">{% for k in d.kinds %}<i class="tk-k {{ k }}"></i>{% endfor %}</span><span class="xn" aria-hidden="true">{% if nk > 8 %}+{{ nk - 8 }}{% endif %}</span></button>
+{%- endfor -%}
+</div></div>
+{%- endfor %}
+    </div>
+    <div class="tk-strip-f"><span><i class="tk-k t" aria-hidden="true"></i>Temettü</span><span><i class="tk-k b" aria-hidden="true"></i>Bilanço</span><span><i class="tk-k m" aria-hidden="true"></i>Makro</span><span><i class="tk-sw now" aria-hidden="true"></i>{{ T.asof_label }}</span><span><i class="tk-sw off" aria-hidden="true"></i>Borsa kapalı ya da yarım gün</span></div>
+  </section>
+
+  <div class="tk-grid">
+    <section class="tk-ag" id="tkAg" aria-labelledby="tkAgH">
+      <h2 class="tk-sr" id="tkAgH">Tarihe göre olaylar</h2>
+      <p class="tk-fnote" data-fn="temettu" hidden>Kapsamdaki şirketlerin açıklanmış <b>{{ C.temettu }} ödemesi</b> · tutarlar brüt, pay başına{% if T.fiyat_label %} · verim {{ T.fiyat_label }} kapanışına göre{% endif %}</p>
+      <p class="tk-fnote" data-fn="bilanco" hidden>{% if D %}<b>{{ D.tahmini }} tahmini tarih</b> ve yasal son günler · tarihi belli olmayan {{ D.tarihsiz }} şirket ayrı listede{% else %}Şirketlerin finansal rapor tarihleri{% endif %}</p>
+      <p class="tk-fnote" data-fn="makro" hidden>Türkiye ve ABD'nin veri ve faiz kararı günleri · saatler Türkiye saati</p>
+      <p class="tk-fnote" data-fn="takip" hidden>Takip listendeki hisselerin olayları</p>
+{%- for g in T.groups %}
+      <div class="tk-dg{% if loop.first %} first{% endif %}{% if g.late %} late{% endif %}" id="g-{{ g.date }}" data-d="{{ g.date }}">
+        <h3 class="tk-dg-d"><b>{{ g.gun }}{% if g.date[:4] != T.asof[:4] %} {{ g.date[:4] }}{% endif %}</b> <span>{{ g.hafta_gunu }}</span>{% if g.not %}<em>{{ g.not.not }}</em>{% endif %}</h3>
+        <div class="tk-dg-r">
+{%- if not g.events and g.not %}
+          <div class="tk-ev-note" data-note-day>{{ g.not.uzun }}</div>
+{%- endif %}
+{%- for e in g.events %}
+{%- if e.kind == 'temettu' %}
+          <a class="tk-ev t stock" href="/hisse/{{ e.ticker }}" data-cat="temettu" data-d="{{ e.date }}" data-t="{{ e.ticker }}">
+            <span class="tk-ev-k" aria-hidden="true">{{ IC_COIN|safe }}<i class="tk-k t"></i></span>{{ mc(e) }}
+            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.name }}<em>{{ 'tek ödeme' if e.taksit == 'tek' else 'taksit ' ~ e.taksit }}</em></span><span class="tk-ev-s">{% if e.date_kind == 'tahmini' %}<span class="tk-tz">genel kurul bekleniyor</span>{% endif %}Temettü <b>{{ g.gun }}</b><span class="pay"> · ödeme {{ gun(e.pay_date) }}</span><span class="cd"> · <span data-cd="{{ e.date }}">{{ kalan(e, g) }}</span></span></span></span>
+            <span class="tk-ev-n"><span class="amt"><b>{{ tl(e.brut_tl) }}</b> <small>brüt</small></span>{% if e.yield_pct is not none %}{% set verim = ('%.2f'|format(e.yield_pct))|replace('.', ',') %}<span class="yld"><b>%{{ verim }}</b> <small>verim</small></span>{% endif %}</span>
+            <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
+          </a>
+{%- elif e.kind == 'bilanco' and e.ticker %}
+          <a class="tk-ev b stock" href="/hisse/{{ e.ticker }}" data-cat="bilanco" data-sub="rapor" data-d="{{ e.date }}" data-t="{{ e.ticker }}">
+            <span class="tk-ev-k" aria-hidden="true">{{ IC_DOC|safe }}<i class="tk-k b"></i></span>{{ mc(e) }}
+            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.name }}<em>{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'finansal rapor' }}</em></span><span class="tk-ev-s"><span class="tk-tz{% if e.date_kind == 'kesin' %} ks{% endif %}">{{ e.date_kind }}</span><span class="ph">{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'Finansal rapor' }}</span><span class="dk">{% if e.date_kind == 'tahmini' %}Şirket tarihi henüz açıklamadı{% else %}Şirket tarihi açıkladı{% endif %}</span></span></span>
+            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
+          </a>
+{%- elif e.kind == 'bilanco' %}
+          <div class="tk-ev b dl" data-cat="bilanco" data-sub="son_gun" data-d="{{ e.date }}">
+            <span class="tk-ev-k" aria-hidden="true">{{ IC_DOC|safe }}<i class="tk-k b"></i></span><span class="tk-box"><b>Son gün</b><span>yasal süre</span></span>
+            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.title }}</span><span class="tk-ev-s">{{ e.detail }}</span></span>
+            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
+          </div>
+{%- else %}
+          <div class="tk-ev m" data-cat="makro" data-d="{{ e.date }}">
+            <span class="tk-ev-k" aria-hidden="true">{{ IC_PULSE|safe }}<i class="tk-k m"></i></span><span class="tk-box"><b>{{ e.time }}</b><span>{{ 'Türkiye' if e.region == 'TR' else 'ABD' }}</span></span>
+            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.title }}{% if e.period %}<em>{{ e.period }}</em>{% endif %}</span><span class="tk-ev-s"><span class="ph"><span class="rg">{{ e.region }}</span>{{ e.time }} · </span>{{ e.detail }}</span></span>
+            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
+          </div>
+{%- endif %}
+{%- endfor %}
+        </div>
+      </div>
+{%- endfor %}
+      <div class="tk-more-w"{% if not T.late_n %} hidden{% endif %}><button type="button" class="tk-more" aria-controls="tkAg">{{ T.more_label }} – {{ T.last_label }}{% if T.groups[-1].date[:4] != T.asof[:4] %} {{ T.groups[-1].date[:4] }}{% endif %} · <span data-late>{{ T.late_n }}</span> olay daha</button></div>
+      <p class="tk-empty" data-empty hidden>Bu filtrede tarihli olay yok.</p>
+    </section>
+
+    <aside class="tk-side" aria-label="Bilanço dönemi ve okuma notu">
+{%- if D %}
+      <section class="tk-card ssn" aria-labelledby="tkSsnH">
+        <div class="tk-c-ey"><i class="tk-k b" aria-hidden="true"></i>Bilanço dönemi</div>
+        <h2 id="tkSsnH">{{ D.ad|capitalize }} raporları ne zaman?</h2>
+        <p>{{ D.uzun|capitalize }} raporlar için yasal son gün {% for s in D.son_gunler %}{{ gun(s.date) }} ({{ s.kapsam|lower }}){% if not loop.last %}, {% endif %}{% endfor %}.</p>
+        <svg class="tk-plot" id="tkPlot" viewBox="0 0 284 112" role="img" aria-label="{{ D.ad|capitalize }} raporlarının tahmini tarihleri ve yasal son günler" hidden></svg>
+        <div class="tk-ssn-st">
+          <div><b>{{ D.tahmini }}</b><span>tahmini tarih</span></div>
+          <div><b>{{ D.tarihsiz }}</b><span>tarihi belli değil</span></div>
+{%- if D.aciklandi %}
+          <div><b>{{ D.aciklandi }}</b><span>açıklandı</span></div>
+{%- endif %}
+        </div>
+{%- if D.son_aciklananlar %}
+        <p class="tk-pub">Son açıklananlar: {% for p in D.son_aciklananlar[:8] %}<a href="/hisse/{{ p.ticker }}">{{ p.ticker }}</a> {{ gun(p.date) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+{%- endif %}
+{%- if T.undated %}
+        <details class="tk-und">
+          <summary>Tarihi belli olmayanlar <i data-und-c>{{ T.undated|length }} şirket</i></summary>
+          <p class="tk-und-n">Şirket tarihi açıklayınca hisse listeye tarihiyle girer.</p>
+          <p class="tk-und-n" data-und-w hidden>Takip listendeki hisselerin hepsinin tarihi var.</p>
+          <div class="tk-und-l">{% for u in T.undated %}<a href="/hisse/{{ u.ticker }}" data-t="{{ u.ticker }}" aria-label="{{ u.ticker }} · {{ u.name }}">{{ u.ticker }}</a>{% endfor %}</div>
+        </details>
+{%- endif %}
+      </section>
+{%- endif %}
+      <section class="tk-card tk-how" aria-labelledby="tkHowH">
+        <h2 id="tkHowH">Takvim nasıl okunur?</h2>
+        <dl>
+          <div><dt><i class="tk-k t" aria-hidden="true"></i>Temettü</dt><dd><b>Temettü</b>: pay bu tarihte kâr payı olmadan işlem görmeye başlar; ödeme genellikle iki iş günü sonra hesaba geçer. Tutar pay başına brüt{% if T.fiyat_label %}; verim = brüt tutar ÷ {{ T.fiyat_label }} kapanışı{% endif %}.</dd></div>
+          <div><dt><i class="tk-k b" aria-hidden="true"></i>Bilanço</dt><dd><span class="tk-tz">tahmini</span>şirket tarihi henüz açıklamadı. <span class="tk-tz ks">kesin</span>şirket açıkladı.</dd></div>
+          <div><dt><i class="tk-k m" aria-hidden="true"></i>Makro</dt><dd>Türkiye ve ABD'nin veri ve faiz kararı günleri; saatler Türkiye saati.</dd></div>
+          <div><dt>Şerit</dt><dd>Bir nokta bir olay; güne dokununca liste o tarihe gider. <i class="tk-sw now" aria-hidden="true"></i> sayfayı açtığın tarih, <i class="tk-sw off" aria-hidden="true"></i> borsanın kapalı ya da yarım gün olduğu gün.</dd></div>
+          <div><dt>Kalan gün</dt><dd>Sayfayı açtığın tarihe göre sayılır; olay o güne denk gelirse sayı yerine tarih yazar.</dd></div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+{% else %}
+  <p class="tk-empty" id="tkEmpty" role="status">Takvim şu an yüklenemedi. Birkaç dakika sonra yeniden deneyin.</p>
+{% endif %}
+  <p class="tk-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+{% with ftr_self='/takvim', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+
+<script src="/static/bp-format.js?v=63228ae2"></script>
+<script>
+(function(){
+  'use strict';
+  var root = document.querySelector('.tk');
+  var ag = document.getElementById('tkAg');
+  if (!root || !ag) return;
+  var AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  function pd(s){ var a = s.split('-'); return Date.UTC(+a[0], +a[1] - 1, +a[2]); }
+  function dS(s){ var d = new Date(pd(s)); return d.getUTCDate() + ' ' + AY[d.getUTCMonth()]; }
+  /* Ziyaretcinin TR takvim gunu (kanon: goreli zaman yok; kalan gun ziyaretcinin tarihinden). */
+  var VIEW = typeof window.bpTodayTrIso === 'function' ? window.bpTodayTrIso() : null;
+  if (VIEW && /^\d{4}-\d{2}-\d{2}$/.test(VIEW)) {
+    root.querySelectorAll('[data-cd]').forEach(function(el){
+      var n = Math.round((pd(el.getAttribute('data-cd')) - pd(VIEW)) / 864e5);
+      el.innerHTML = n > 0 ? n + ' gün<span class="kl"> kaldı</span>' : dS(el.getAttribute('data-cd'));
+      if (el.classList.contains('tk-ev-c')) el.classList.toggle('soon', n <= 7);
+    });
+  }
+  /* Takip listem: hisse sayfasindaki yerel liste (bp_watchlist_v2) */
+  function readWatch(){
+    /* Yalniz okunur, hic yazilmaz: bozuk kayit oldugu gibi kalir, filtre gizlenir. */
+    try {
+      var w = JSON.parse(localStorage.getItem('bp_watchlist_v2') || '[]');
+      return Array.isArray(w) ? w.filter(function(x){ return typeof x === 'string'; }) : [];
+    } catch (e) {
+      console.warn('takip listesi okunamadi, Takip listem filtresi gizli (kayit degismedi):', e);
+      return [];
+    }
+  }
+  var W = readWatch();
+  var STAR = '<svg class="tk-wst" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
+  function isW(t){ return !!t && W.indexOf(t) >= 0; }
+  var rows = [].slice.call(ag.querySelectorAll('.tk-ev'));
+  var nTakip = 0;
+  rows.forEach(function(r){ if (isW(r.dataset.t)) { nTakip++; var b = r.querySelector('.tk-mc b'); if (b) b.insertAdjacentHTML('afterbegin', STAR); } });
+  var takipBtn = root.querySelector('.tk-flt [data-f="takip"]');
+  if (takipBtn && W.length) { takipBtn.hidden = false; takipBtn.querySelector('[data-takip-n]').textContent = nTakip; }
+  var KIND = {temettu: 't', bilanco: 'b', makro: 'm'};
+  function match(r, f){ if (f === 'all') return true; if (f === 'takip') return isW(r.dataset.t); return r.dataset.cat === f; }
+  function paintStrip(f){
+    var byD = {};
+    rows.forEach(function(r){ if (match(r, f)) (byD[r.dataset.d] = byD[r.dataset.d] || []).push(KIND[r.dataset.cat]); });
+    root.querySelectorAll('.tk-dy').forEach(function(b){
+      var d = b.dataset.d, ks = (byD[d] || []).sort(function(x, y){ return 'tbm'.indexOf(x) - 'tbm'.indexOf(y); });
+      b.querySelector('.dots').innerHTML = ks.map(function(k){ return '<i class="tk-k ' + k + '"></i>'; }).join('');
+      b.querySelector('.xn').textContent = ks.length > 8 ? '+' + (ks.length - 8) : '';
+      var none = !ks.length || b.classList.contains('past');
+      b.disabled = none;
+      b.setAttribute('aria-label', b.getAttribute('aria-label').replace(/: .*$/, ': ' + (ks.length ? ks.length + ' olay' : 'olay yok')));
+      if (none) b.setAttribute('aria-pressed', 'false');
+    });
+  }
+  var FILTERS = ['all', 'bilanco', 'temettu', 'makro', 'takip'];
+  function setF(f, push){
+    if (FILTERS.indexOf(f) < 0 || (f === 'takip' && !W.length)) f = 'all';
+    root.querySelectorAll('.tk-flt button').forEach(function(x){ x.setAttribute('aria-pressed', String(x.dataset.f === f)); });
+    rows.forEach(function(r){ r.hidden = !match(r, f); });
+    ag.querySelectorAll('[data-note-day]').forEach(function(n){ n.hidden = !(f === 'all' || f === 'makro'); });
+    var anyVisible = false;
+    ag.querySelectorAll('.tk-dg').forEach(function(g){ g.hidden = !g.querySelector('.tk-ev:not([hidden]),[data-note-day]:not([hidden])'); if (!g.hidden) anyVisible = true; });
+    ag.querySelectorAll('.tk-fnote').forEach(function(n){ n.hidden = n.dataset.fn !== f; });
+    var late = rows.filter(function(r){ return !r.hidden && r.closest('.tk-dg.late'); }).length;
+    var mw = ag.querySelector('.tk-more-w');
+    if (mw) { mw.querySelector('[data-late]').textContent = late; mw.hidden = !late; }
+    var em = ag.querySelector('[data-empty]'); if (em) em.hidden = anyVisible;
+    var und = root.querySelectorAll('.tk-und-l a'), vis = 0;
+    und.forEach(function(a){ a.hidden = f === 'takip' && !isW(a.dataset.t); if (!a.hidden) vis++; });
+    var uc = root.querySelector('[data-und-c]'); if (uc) uc.textContent = vis + ' şirket';
+    var uw = root.querySelector('[data-und-w]'); if (uw) uw.hidden = !(f === 'takip' && !vis);
+    paintStrip(f);
+    if (push) {
+      try { var u = new URL(location.href); if (f === 'all') u.searchParams.delete('tur'); else u.searchParams.set('tur', f); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) { console.warn('adres guncellenemedi:', e); }
+    }
+  }
+  function goDay(d){
+    var g = document.getElementById('g-' + d);
+    if (!g || g.hidden) return;
+    if (g.classList.contains('late')) ag.classList.add('open');
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var y = g.getBoundingClientRect().top + window.scrollY - 8;
+    window.scrollTo({top: y, behavior: reduce ? 'auto' : 'smooth'});
+    g.classList.remove('hl'); void g.offsetWidth; g.classList.add('hl');
+  }
+  var sc = root.querySelector('.tk-sc'), pv = root.querySelector('.sv-p'), nx = root.querySelector('.sv-n');
+  function arrows(){ if (!pv) return; pv.disabled = sc.scrollLeft < 4; nx.disabled = sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 4; }
+  if (sc) {
+    sc.addEventListener('scroll', function(){ clearTimeout(sc._t); sc._t = setTimeout(arrows, 80); });
+    if (pv) pv.addEventListener('click', function(){ sc.scrollBy({left: -sc.clientWidth, behavior: 'smooth'}); });
+    if (nx) nx.addEventListener('click', function(){ sc.scrollBy({left: sc.clientWidth, behavior: 'smooth'}); });
+    sc.addEventListener('keydown', function(e){
+      if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].indexOf(e.key) < 0) return;
+      var bs = [].slice.call(sc.querySelectorAll('.tk-dy:not(:disabled)')), i = bs.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      var j = e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : Math.max(0, Math.min(bs.length - 1, i + (e.key === 'ArrowRight' ? 1 : -1)));
+      bs[j].focus(); bs[j].scrollIntoView({block: 'nearest', inline: 'nearest'});
+    });
+  }
+  root.addEventListener('click', function(e){
+    var b = e.target.closest('.tk-flt button'); if (b) { setF(b.dataset.f, true); return; }
+    var dy = e.target.closest('.tk-dy');
+    if (dy && !dy.disabled) { root.querySelectorAll('.tk-dy').forEach(function(x){ x.setAttribute('aria-pressed', String(x === dy)); }); goDay(dy.dataset.d); return; }
+    if (e.target.closest('.tk-more')) { ag.classList.add('open'); }
+  });
+  root.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    var dt = e.target.closest && e.target.closest('details[open]');
+    if (dt) { dt.open = false; dt.querySelector('summary').focus(); }
+  });
+  /* 3. ceyrek nokta grafigi: tahmini tarihler (kare = bilanco) + kesikli yasal son gunler */
+  (function plot(){
+    var svg = document.getElementById('tkPlot'); if (!svg) return;
+    var est = rows.filter(function(r){ return r.dataset.sub === 'rapor'; }).map(function(r){ return [r.dataset.d, r.dataset.t]; });
+    var dls = rows.filter(function(r){ return r.dataset.sub === 'son_gun'; }).map(function(r){ return r.dataset.d; });
+    if (!est.length || !dls.length) return;
+    var all = est.map(function(x){ return x[0]; }).concat(dls).sort(), a = pd(all[0]), b = pd(all[all.length - 1]);
+    var span = Math.max(1, (b - a) / 864e5), W0 = 6, W1 = 278, base = 78;
+    function X(s){ return W0 + (pd(s) - a) / 864e5 / span * (W1 - W0); }
+    var cnt = {}, out = '<line class="ax" x1="' + W0 + '" x2="' + W1 + '" y1="' + (base + 4) + '" y2="' + (base + 4) + '"/>';
+    dls.forEach(function(d){ var x = X(d).toFixed(1); out += '<line class="dl" x1="' + x + '" x2="' + x + '" y1="4" y2="' + (base + 4) + '"/>'; });
+    est.forEach(function(x){ var k = cnt[x[0]] = (cnt[x[0]] || 0) + 1; out += '<circle' + (isW(x[1]) ? ' class="w"' : '') + ' cx="' + X(x[0]).toFixed(1) + '" cy="' + (base - 6 - (k - 1) * 8.2).toFixed(1) + '" r="3.4"></circle>'; });
+    var labs = [[all[0], 'start']].concat(dls.slice(0, -1).map(function(d){ return [d, 'middle']; })).concat([[all[all.length - 1], 'end']]);
+    var seen = {};
+    labs.forEach(function(l){ if (seen[l[0]]) return; seen[l[0]] = 1; var d = new Date(pd(l[0])); out += '<text x="' + X(l[0]).toFixed(1) + '" y="' + (base + 22) + '" text-anchor="' + l[1] + '">' + d.getUTCDate() + ' ' + AY[d.getUTCMonth()].slice(0, 3) + '</text>'; });
+    svg.innerHTML = out; svg.removeAttribute('hidden');
+  })();
+  var tur = null;
+  try { tur = new URLSearchParams(location.search).get('tur'); } catch (e) { console.warn('tur parametresi okunamadi:', e); }
+  setF(tur || 'all', false);
+  if (sc) {
+    var now = sc.querySelector('.tk-dy.now');
+    if (now && sc.clientWidth < 700) { sc.scrollLeft += now.getBoundingClientRect().left - sc.getBoundingClientRect().left - 2; }
+    requestAnimationFrame(arrows);
+  }
+})();
+</script>
+<script src="/static/bp-search.js?v=3f9573a7" defer></script>
+<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

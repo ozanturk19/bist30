@@ -45,8 +45,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGETS = [
     'templates/index.html', 'templates/tarama.html', 'templates/hisse.html',
     'templates/karsilastir.html', 'templates/metodoloji.html',
-    'templates/sektor_harita.html', 'templates/bilanco_takvimi.html',
-    'templates/temettu_takvimi.html',
+    'templates/sektor_harita.html', 'templates/takvim.html',
 ]
 
 CANON = {'guclu_sinyal': '--bp-premium', 'standart': '--bp-brand'}

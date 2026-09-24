@@ -38,8 +38,9 @@ YUZEY = {
     "karşılaştırma":        "karsilastir.html",
     "anasayfa":             "index.html",
     "sektör ısı haritası":  "sektor_harita.html",
-    "bilanço":              "bilanco_takvimi.html",
-    "temettü takvimi":      "temettu_takvimi.html",
+    "bilanço":              "takvim.html",       # C-36: iki takvim /takvim'de birlesti
+    "temettü takvimi":      "takvim.html",
+    "takvim":               "takvim.html",
     "csv dışa aktarımı":    "tarama.html",   # CSV uretimi tarama.html icinde
     "sinyal kolonu":        "tarama.html",
 }

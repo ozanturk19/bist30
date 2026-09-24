@@ -56,8 +56,7 @@ CANON = {
     '/portfolio':        'Portföy',
     '/sektor-harita':    'Sektörler',
     '/hisseler':         'Tüm Hisseler',
-    '/bilanco-takvimi':  'Bilanço Takvimi',
-    '/temettu-takvimi':  'Temettü Takvimi',
+    '/takvim':           'Takvim',            # C-36: iki takvim tek sayfada
     '/blog':             'Blog',
     '/metodoloji':       'Metodoloji',
     '/hakkinda':         'Hakkında',

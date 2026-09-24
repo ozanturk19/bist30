@@ -155,7 +155,7 @@
           <span class="dot" style="background:var(--bp-gold)"></span>
           Bilanço Takvimi
         </h2>
-        <a href="/bilanco-takvimi" class="da-tap" aria-label="Tümü — bilanço takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
+        <a href="/takvim?tur=bilanco" class="da-tap" aria-label="Tümü — takvim" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
         <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:var(--bp-radius-md);padding:12px 14px">
@@ -594,7 +594,7 @@ document.addEventListener('visibilitychange', () => {
 /* ── Makro Ticker ── */
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
+<script src="/static/bp-search.js?v=3f9573a7" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <!-- K-BU: bp-format.js YUKARI tasindi (satir ~229) — stale-banner.js TR takvim
      gunu icin onun kanonunu cagirir, sirasi hala ONCE. -->

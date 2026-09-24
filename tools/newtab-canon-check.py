@@ -40,7 +40,7 @@ Cikis: 0 temiz · 1 sapma · 2 kapsam tabani altinda / pozitif kontrol dustu.
 import os, re, sys, glob, io
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MIN_LINKS = 15          # kapsam tabani: bu sayinin altina duserse dedektor korlesmistir (C-P1-2509: hisse Haberler dis baglantilari kalkti, 20->17)
+MIN_LINKS = 14          # kapsam tabani: bu sayinin altina duserse dedektor korlesmistir (C-P1-2509: hisse Haberler dis baglantilari kalkti, 20->17; C-36: eski iki takvim sablonu silindi, 16->14)
 WARN = re.compile(r'yeni\s+sekmede\s+a[çc][ıi]l[ıi]r', re.I)
 ARROW = '↗'        # ↗
 

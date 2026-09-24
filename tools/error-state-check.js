@@ -104,19 +104,7 @@ const SCENARIOS = [
     act: async p => { await p.focus('#t1'); await p.keyboard.type('ZZZ', { delay: 90 }); await p.waitForTimeout(1200); },
     expect: '.ac-empty' },
 
-  { id: 'bilanco-filtre-bos', page: '/bilanco-takvimi',
-    routes: [emptyJson('/api/bilanco-takvimi', '{"periods":["2026/Q2"],"current_period":"2026/Q2","stocks":[]}')],
-    expect: '.empty-state, .loading-msg' },
-
-  { id: 'bilanco-api-500', page: '/bilanco-takvimi',
-    routes: fail500(['/api/bilanco-takvimi']), expect: '.empty-state, .loading-msg' },
-
-  { id: 'temettu-bos', page: '/temettu-takvimi',
-    routes: [emptyJson('/api/temettu-takvimi', '{"stocks":[]}')],
-    expect: '.empty-state, .loading-msg' },
-
-  { id: 'temettu-api-500', page: '/temettu-takvimi',
-    routes: fail500(['/api/temettu-takvimi']), expect: '.empty-state, .loading-msg' },
+  /* C-36: /bilanco-takvimi ve /temettu-takvimi -> /takvim 301; /takvim sunucuda cizilir, API'ye bagli bos/hata durumu yok. */
 
   { id: 'portfolio-bos', page: '/portfolio', expect: '#emptyMsg' },
 
