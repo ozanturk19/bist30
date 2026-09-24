@@ -140,7 +140,8 @@
   var LSK = 'bp_tarama_tab';
   function saveCols() { try { localStorage.setItem(LSK, 'v2:' + st.cols); } catch (e) { /* özel pencere: tercih tutulmaz */ } }
   function resetView() { st.open = {}; st.more = { g: PAGE, y: PAGE, b: PAGE }; }
-  function cols() { return st.cols; }
+  /* C-35: dar ekranda satır [kod | BP | fiyat/değişim] tek biçim; sütun seti yalnız ≥820px'te */
+  function cols() { return WIDE.matches ? st.cols : 'genel'; }
   function sorter() {
     var k = st.sort.k, dir = st.sort.dir, f = k === 't' ? function (r) { return r.t; } : C[k].v;
     return function (a, b) {
