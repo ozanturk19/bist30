@@ -78,6 +78,7 @@
         {%- if _tb %}{{ _s.sep }}<b class="neu">{{ _tb }}</b> taban{% endif -%}
       </p>
     </div>
+    <a class="hm-skip" href="#hmEnd">Isı haritasını geç</a>
     <div class="hm-body">
       <div class="hm-map">
         {%- for grp in (heatmap_groups or []) if grp.w and grp.h %}
@@ -114,7 +115,7 @@
         {%- endfor %}
       </div>
     </div>
-    <div class="hm-foot">
+    <div class="hm-foot" id="hmEnd" tabindex="-1">
       <div class="hm-legend">
         <div>
           <div class="hm-lg-bar" aria-hidden="true"></div>

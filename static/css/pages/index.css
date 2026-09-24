@@ -391,3 +391,9 @@ header{
 .hm-card .c-go{display:block;margin-top:10px;text-align:center;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;color:var(--bp-bg);background:var(--bp-brand);border-radius:var(--bp-radius-9);padding:10px 8px;text-decoration:none}
 .hm-card .c-go:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.hm-t{transition:none}}
+
+/* C-55: 100 kutu = 100 sekme durağı → klavyeyle haritayı atlama bağlantısı (odakta görünür) */
+.hm { position: relative; }
+.hm-skip { position: absolute; left: 12px; top: 12px; z-index: calc(var(--bp-z-raised) + 1); padding: 8px 12px; border-radius: 8px; background: var(--bp-surface2); color: var(--bp-text); font-size: 14px; text-decoration: none; transform: translateY(-200%); opacity: 0; pointer-events: none; }
+.hm-skip:focus-visible { transform: none; opacity: 1; pointer-events: auto; outline: 2px solid var(--bp-accent-cyan); outline-offset: 2px; }
+.hm-foot:focus { outline: none; }
