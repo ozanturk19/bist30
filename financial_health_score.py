@@ -160,7 +160,23 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     ticker'ı) yol açtı: kaldirac kategorisi eksik olsa da hem temel_skor
     hem teknik_skor mevcutsa composite.partial=False kalıyor, kategori
     eksikliğini hiç yansıtmıyordu. Kullanan kod categories_complete'i
-    kullanmalı, partial'ı değil."""
+    kullanmalı, partial'ı değil.
+
+    D-40c: TEMEL_V2=1 iken gün sonu turu her hisseye temel_skor_v2 sonucunu
+    "_temel_v2" anahtarıyla ekler; skor, 5 eksen (categories) ve veri tamlığı
+    oradan gelir, BP formülü aşağıda aynen uygulanır. Bayrak kapalıyken anahtar
+    yoktur ve sonuç birebir eskisidir."""
+    v2 = ticker_fundamentals.get("_temel_v2")
+    if isinstance(v2, dict) and isinstance(v2.get("saglik"), dict):
+        s = v2["saglik"]
+        return {
+            "temel_analiz_skoru": s.get("temel_analiz_skoru"),
+            "data_completeness": s.get("data_completeness"),
+            "categories_complete": s.get("categories_complete"),
+            "band": _band(s.get("temel_analiz_skoru")),
+            "categories": s.get("categories") or {},
+            "categories_na": s.get("categories_na") or [],
+        }
     category_scores = {}
     metrics_with_data = 0
 
@@ -234,6 +250,10 @@ def build_rationale(categories, data_completeness, categories_na=None):
     kategorinin hiç anlamlı olmaması."""
     if not categories:
         return "Yeterli finansal veri bulunmadığı için temel analiz skoru hesaplanamadı."
+    if not (set(categories) & set(CATEGORIES)):
+        # D-40c: v2 eksenleri (kalite, degerleme, ...): betimleyici cevap temel_skor_v2'den
+        import temel_skor_v2
+        return temel_skor_v2.rationale(categories)
 
     ranked = sorted(categories.items(), key=lambda kv: kv[1], reverse=True)
     best_name, best_score = ranked[0]

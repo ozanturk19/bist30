@@ -46,6 +46,7 @@ import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmele
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
+import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bayrağıyla
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 from flask_limiter import Limiter
@@ -9387,10 +9388,14 @@ def _fundamentals_temel_v2(ticker, data):
     with _lock:
         price = next((s.get("price") for s in (_cache.get("data") or []) if s.get("ticker") == ticker), None)
         fund_snap = {tk: (w.get("data") or {}) for tk, w in _fundamentals_cache.items()}
+        v2 = (((_financial_health_cache.get(ticker) or {}).get("data")) or {}).get("temel_v2")
     try:
-        meds = kap_temel_v2.sector_medians(fund_snap, _get_sector, _get_sector(ticker))
+        # D-40c: gün sonu turu v2 ile yazıldıysa sektör ortancası KAP'tan (aynı D-23 kovası, ≥5
+        # şirket) ve banka maddesi KAP özsermaye kârlılığıyla -- Temel skorla tek kaynak.
+        v2_meds = temel_skor_v2.api_medians(v2)
+        meds = v2_meds or kap_temel_v2.sector_medians(fund_snap, _get_sector, _get_sector(ticker))
         return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
-                                   datetime.now(_TZ_TR).date(), meds)
+                                   datetime.now(_TZ_TR).date(), meds, roe=v2.get("roe") if v2_meds else None)
     except Exception as e:
         logger.warning("_fundamentals_temel_v2(%s): %s", ticker, e)
         return data
@@ -9479,6 +9484,29 @@ def _load_health_scores_from_disk():
         logger.warning("_load_health_scores_from_disk hatası: %s", e)
 
 
+def _temel_v2_attach(stocks_with_fundamentals, results):
+    """D-40c: TEMEL_V2=1 ise her hissenin fdata'sına Temel skor v2 sonucu (_temel_v2) eklenir;
+    compute_health_score skoru ve 5 ekseni oradan alır, BP formülü değişmez. Bayrak kapalıyken
+    hiçbir şey yapmaz. Hata olursa v2 eklenmez, eski skor yazılır."""
+    if not temel_skor_v2.enabled():
+        return
+    try:
+        price = {r.get("ticker"): r.get("price") for r in results}
+        today = datetime.now(_TZ_TR).date()
+        inputs = {fd["ticker"]: temel_skor_v2.company_inputs(kap_financials.load_record(fd["ticker"]),
+                                                             price.get(fd["ticker"]), today, fd.get("shares"))
+                  for fd in stocks_with_fundamentals}
+        res = temel_skor_v2.score_universe(inputs, {fd["ticker"]: fd["sector"] for fd in stocks_with_fundamentals})
+        for fd in stocks_with_fundamentals:
+            fd["_temel_v2"] = res.get(fd["ticker"])
+        logger.info("D-40c Temel v2: %d hisse, %d sınırlı veri", len(res),
+                    sum(1 for r in res.values() if r["detay"]["limited_data"]))
+    except Exception as e:
+        logger.error("D-40c Temel v2 hesaplanamadı, eski skor yazılıyor: %s", e)
+        for fd in stocks_with_fundamentals:
+            fd.pop("_temel_v2", None)
+
+
 def _run_eod_scoring_pass(results: list):
     """Seans kapandıktan sonra (14:00 UTC → 17:00 TR) Temel Analiz Skoru turu.
     _save_daily_snapshot ile aynı gate + idempotency deseni: günde bir kez,
@@ -9514,6 +9542,7 @@ def _run_eod_scoring_pass(results: list):
             fdata["ticker"] = tk
             fdata["sector"] = sec
             stocks_with_fundamentals.append(fdata)
+        _temel_v2_attach(stocks_with_fundamentals, results)   # D-40c: TEMEL_V2=1 ise
 
         sector_stats_result = _sector_stats.compute_sector_stats(stocks_with_fundamentals)
         with _lock:
@@ -9549,6 +9578,8 @@ def _run_eod_scoring_pass(results: list):
                 entry["categories"], entry["data_completeness"], entry["categories_na"]
             ) + " Yatırım tavsiyesi değildir."
             scores_out[tk] = entry
+            if fdata.get("_temel_v2"):   # D-40c: eksen cümleleri, veri notu, değerleme hükmü, listeler
+                entry["temel_v2"] = fdata["_temel_v2"]["detay"]
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}
             # CPO-1533: Gemini zenginleştirmesi BIST30 ile sınırlı — kota haber
@@ -10299,17 +10330,19 @@ def _tarama_d51_fields(s, health_snap, fund_snap, val_medians):
     entry = ((health_snap.get(tk) or {}).get("data")) or {}
     has = entry.get("temel_analiz_skoru") is not None
     fund = fund_snap.get(tk) or {}
-    pe, pb = fund.get("pe_ratio"), fund.get("pb_ratio")
+    # D-40c: v2 açıkken F/K, PD/DD, özsermaye kârlılığı ve değerleme hükmü KAP'tan (hisse sayfasıyla aynı)
+    v2 = temel_skor_v2.tarama_view(entry.get("temel_v2"))
+    pe, pb = (v2["pe"], v2["pb"]) if v2 else (fund.get("pe_ratio"), fund.get("pb_ratio"))
     return {
         "temel_analiz_skoru": entry.get("temel_analiz_skoru") if has else None,
         "borsapusula_skoru":  entry.get("borsapusula_skoru") if has else None,
         "data_completeness":  entry.get("data_completeness") if has else None,
         "categories":         (entry.get("categories") or {}) if has else None,
         "categories_na":      (entry.get("categories_na") or []) if has else [],
-        "va":       tarama_fields.derive_valuation_band(pe, pb, _get_sector(tk), val_medians),
+        "va":       v2["va"] if v2 else tarama_fields.derive_valuation_band(pe, pb, _get_sector(tk), val_medians),
         "pe":       pe,
         "pb":       pb,
-        "roe":      fund.get("roe"),
+        "roe":      v2["roe"] if v2 else fund.get("roe"),
         "ema_diff": tarama_fields.ema_diff_pct(s.get("indicators")),
         "lim":      (None if s.get("stale_reason") or s.get("data_quality") == "stale"
                      else tarama_fields.limit_flag_from_change(s.get("price"), s.get("change_pct"))),

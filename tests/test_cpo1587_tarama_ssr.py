@@ -20,6 +20,7 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 import tarama_fields  # noqa: E402
 import sector_taxonomy  # noqa: E402  (D-23: sektör listesi Türkçe sıralı)
+import temel_skor_v2  # noqa: E402  (D-40c: v2 kaydinda oranlar ve va KAP'tan)
 
 _SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
 
@@ -77,6 +78,7 @@ def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00", health=None, fund
         "_fundamentals_cache": fund if fund is not None else {},
         "tarama_fields": tarama_fields,
         "sector_taxonomy": sector_taxonomy,
+        "temel_skor_v2": temel_skor_v2,
     }
     exec(m_d51.group(0), ns)
     exec(m.group(0), ns)
@@ -224,6 +226,20 @@ def test_d51_health_and_ratios_join():
     t = by["THYAO"]
     assert t["temel_analiz_skoru"] is None and t["borsapusula_skoru"] is None and t["categories"] is None
     assert by["ASELS"]["pe"] is None and by["ASELS"]["va"] is None
+
+
+def test_d40c_v2_kaydinda_oranlar_ve_va_kaptan():
+    """TEMEL_V2=1 turu 'temel_v2' yazdiysa F/K, PD/DD, ozsermaye karliligi ve va KAP'tan (hisse
+    sayfasiyla ayni hukum); kaydi olmayan hisse (sebep kap_kaydi_yok) eskisi gibi Yahoo'dan."""
+    health = dict(_HEALTH)
+    ak = dict(health["AKBNK"]["data"], temel_v2={"sebep": None, "roe": 24.7, "degerleme": {
+        "hukum": "karisik", "fk": 4.5, "pd_dd": 1.12, "oran": {"fk": 0.7, "pd_dd": 1.3}}})
+    health["AKBNK"] = dict(health["AKBNK"], data=ak)
+    health["ASELS"] = {"data": {"temel_analiz_skoru": None, "temel_v2": {"sebep": "kap_kaydi_yok"}}, "ts": 1}
+    by = {r["ticker"]: r for r in _fresh_compute(health=health, fund=_FUND)()[0]}
+    a = by["AKBNK"]
+    assert (a["pe"], a["pb"], a["roe"], a["va"]) == (4.5, 1.12, 24.7, "k") and a["temel_analiz_skoru"] == 72
+    assert by["ASELS"]["pe"] is None and by["ASELS"]["va"] is None      # Yahoo'da da yok (eski yol)
 
 
 def test_d51_valuation_band_thresholds_and_mixed():

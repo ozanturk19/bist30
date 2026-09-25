@@ -523,9 +523,11 @@ def build_v2(rec, price=None, today=None, yahoo_shares=None, roe=None, medians=N
     }
 
 
-def extend(data, rec, price=None, today=None, medians=None):
+def extend(data, rec, price=None, today=None, medians=None, roe=None):
     """/api/hisse/<T>/fundamentals icin: kap_financials.apply_to_fundamentals ciktisina
-    Temel v2 alanlari. Kayit yoksa kap_durum='hazirlaniyor' (arayuz eski alanlarla + sessiz not)."""
+    Temel v2 alanlari. Kayit yoksa kap_durum='hazirlaniyor' (arayuz eski alanlarla + sessiz not).
+    roe: banka 5 madde karsilastirmasinda kullanilacak ozsermaye karliligi (D-40c: KAP ortancasi
+    verildiginde KAP son 12 ay degeri; yoksa Yahoo 'roe' -- ortanca ile ayni kaynak)."""
     if not data:
         return data
     out = dict(data)
@@ -536,6 +538,6 @@ def extend(data, rec, price=None, today=None, medians=None):
     out["kap_durum"] = "var"
     kap = dict(out["kap"])
     kap.update(kf._strip(build_v2(rec, price=price, today=today, yahoo_shares=data.get("shares"),
-                                  roe=data.get("roe"), medians=medians)))
+                                  roe=data.get("roe") if roe is None else roe, medians=medians)))
     out["kap"] = kap
     return out
