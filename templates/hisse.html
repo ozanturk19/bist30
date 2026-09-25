@@ -744,7 +744,8 @@
       Saglamlik kontrolu · Bilanco sagligi · Temettu), /fundamentals `kap` blogundan (D-40a0 +
       D-40a2, aciklanan veri) JS ile dolar. `kap` yoksa (hisse icin rapor henuz uretilmedi ya
       da arka uc eski) bugunku alanlarla sade gorunum + sessiz "ayrintili veri hazirlaniyor"
-      notu; veri gelmeyen panel gizlenir (bos kutu yok). -#}
+      notu; veri gelmeyen panel gizlenir (bos kutu yok). Panel izgarasi SSR'da `hidden`: JS'siz
+      okuyucuda iskelet kutu kalmaz, ust bolum (cevap + skor + eksenler) SSR'da tam. -#}
   <div id="panel-temel" data-tab-content="temel" role="tabpanel" aria-labelledby="tab-temel" tabindex="0">
   {%- set _tv_score = hs.temel_analiz_skoru if (hs_available and hs.temel_analiz_skoru is not none) else none -%}
   {%- set _tv_na = hs.categories_na if (hs_available and hs.categories_na is defined and hs.categories_na) else [] %}
@@ -778,40 +779,40 @@
     {% endif %}
   </section>
   <p class="tv-prep" id="tvPrep" hidden>Ayrıntılı finansal veri hazırlanıyor; bu hisse için özet göstergeler gösteriliyor.</p>
-  <div class="tv-grid" id="tvGrid" aria-busy="true">
+  <div class="tv-grid" id="tvGrid" aria-busy="true" hidden>
     <section class="tv-pan" id="tvBuyume" aria-labelledby="tvBuyumeH">
       <div class="tv-ph"><div><h3 id="tvBuyumeH">Büyüme</h3><p class="tv-unit" id="tvBuyumeU">Yıllık değişim</p></div><div class="tv-segs" id="tvBuyumeSeg"></div></div>
-      <p class="tv-say" id="tvBuyumeS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvBuyumeS"></p>
       <div class="tv-ch" id="tvBuyumeCh"></div>
       <div class="tv-kv" id="tvBuyumeT"></div>
       <p class="tv-foot" id="tvBuyumeN" hidden></p>
     </section>
     <section class="tv-pan" id="tvKarlilik" aria-labelledby="tvKarlilikH">
       <div class="tv-ph"><div><h3 id="tvKarlilikH">Kârlılık</h3><p class="tv-unit" id="tvKarlilikU">Oran, %</p></div></div>
-      <p class="tv-say" id="tvKarlilikS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvKarlilikS"></p>
       <div class="tv-ch" id="tvKarlilikCh"></div>
       <div class="tv-kv" id="tvKarlilikT"></div>
     </section>
     <section class="tv-pan" id="tvDegerleme" aria-labelledby="tvDegerlemeH">
       <div class="tv-ph"><div><h3 id="tvDegerlemeH">Değerleme</h3><p class="tv-unit" id="tvDegerlemeU">Fiyatı makul mü?</p></div><span class="tv-chip" id="tvDegerlemeA" hidden></span></div>
-      <p class="tv-say" id="tvDegerlemeS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvDegerlemeS"></p>
       <div class="tv-bands" id="tvDegerlemeB"></div>
       <p class="tv-an" id="tvDegerlemeAn" hidden></p>
       <p class="tv-foot" id="tvDegerlemeN" hidden></p>
     </section>
     <section class="tv-pan" id="tvSaglamlik" aria-labelledby="tvSaglamlikH">
       <div class="tv-ph"><div><h3 id="tvSaglamlikH">Sağlamlık kontrolü</h3><p class="tv-unit" id="tvSaglamlikU">Son yıllık rapor</p></div><div class="tv-score" id="tvSaglamlikP"></div></div>
-      <p class="tv-say" id="tvSaglamlikS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvSaglamlikS"></p>
       <div class="tv-chk" id="tvSaglamlikL"></div>
     </section>
     <section class="tv-pan" id="tvBilanco" aria-labelledby="tvBilancoH">
       <div class="tv-ph"><div><h3 id="tvBilancoH">Bilanço sağlığı</h3><p class="tv-unit" id="tvBilancoU">Dönem sonu</p></div></div>
-      <p class="tv-say" id="tvBilancoS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvBilancoS"></p>
       <div class="tv-kv" id="tvBilancoT"></div>
     </section>
     <section class="tv-pan" id="tvTemettu" aria-labelledby="tvTemettuH">
       <div class="tv-ph"><div><h3 id="tvTemettuH">Temettü</h3><p class="tv-unit" id="tvTemettuU">Hisse başına brüt ödeme · TL</p></div></div>
-      <p class="tv-say" id="tvTemettuS"><span class="tv-sk"></span></p>
+      <p class="tv-say" id="tvTemettuS"></p>
       <div class="tv-divs" id="tvTemettuK"></div>
       <div class="tv-ch" id="tvTemettuCh"></div>
     </section>
@@ -2972,7 +2973,6 @@ function _tvRender(f, divRow) {
   show('tvBilanco', _tvBalance(f, k));
   show('tvTemettu', _tvDividend(f, k, divRow));
   _tvAxes(f, k);
-  document.querySelectorAll('#tvGrid .tv-sk').forEach(el => el.remove());
   _tvEl('tvGrid').setAttribute('aria-busy', 'false');
   _tvEl('tvGrid').classList.toggle('tv-grid--lite', !k);
 }
