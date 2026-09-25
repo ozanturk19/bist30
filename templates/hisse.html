@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=a6712f14">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=cf464647">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1121,20 +1121,10 @@
 
   {#- C-19: Haberler sekmesi tek tabpanel (eskiden iki: storySection + panel-haberler-main). -#}
 <div id="panel-haberler" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
-  <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" hidden class="da-panel da-panel--accent da-story-panel">
-    <div class="da-story-head">
-      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> Sinyal Dönemi</span>
-      <span id="storyWindow" style="font-size:var(--bp-text-xs);color:var(--bp-text3)"></span>
-    </div>
-    <h2 class="da-story-title"><span aria-hidden="true">📰</span> Haber Akışı</h2>
-    <p style="position:relative;font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.55;margin:8px 0 12px">
-      Bu haberler sinyalin oluştuğu dönem çevresindeki şirket duyurularıdır.
-      Sinyal, haberlerden değil fiyat ve teknik göstergelerden üretilir.
-    </p>
-    <div id="storyList" style="position:relative"></div>
-  </div>
-  <!-- Şirket bildirimleri (C-P1-2509: dış bağlantı ve "ODA" alt başlığı kalktı; liste boşsa bölüm gizlenir) -->
+  {#- C-24 (25.09): tek kronolojik zaman çizelgesi -- /kap (son 90 gün) + sinyal dönemi
+      bildirimleri (/signal-story) birleşik, ay başlıklı, aynı günün finansal rapor belgeleri
+      katlanmış, trend durumunun başladığı gün ayraç. Ayrı "Sinyal Dönemi" paneli kalktı.
+      Dış bağlantı yok (kanon §2.8); tarihle yazılır (§2.7). -#}
   <div class="da-panel da-panel--accent kap-section" id="kapSection">
     <h2 class="section-title" style="margin:0 0 12px">Şirket bildirimleri</h2>
     <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
@@ -2601,7 +2591,7 @@ function hxFillNews(data) {
   const ul = document.getElementById('hxNewsL');
   if (!ul) return;
   const items = (data && data.disclosures) || [];
-  if (!items.length) { ul.innerHTML = '<li class="hx-news-e">Son 90 günde bildirim yok.</li>'; return; }
+  if (!items.length) { ul.innerHTML = '<li class="hx-news-e">Listelenecek bildirim şu an yok.</li>'; return; }
   const fmtD = s => { const p = String(s || '').split(' ')[0].split('.'); return p.length === 3 ? (+p[0]) + ' ' + _HX_AY[+p[1] - 1] : ''; };
   ul.innerHTML = items.slice(0, 3).map(d =>
     '<li><time>' + escHtml(fmtD(d.date)) + '</time><div><b>' + escHtml((d.summary || d.subject || '').trim()) + '</b>' +
@@ -2655,99 +2645,96 @@ async function loadChart(retry) {
   }
 }
 
-/* ── Sinyalin Hikayesi ──────────────────────────────── */
-async function loadSignalStory() {
-  try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/signal-story');
-    if (!res.ok) return;
-    const data = await res.json();
-
-    const events = data.events || [];
-    if (!events.length) return;
-
-    const sec  = document.getElementById('storySection');
-    const list = document.getElementById('storyList');
-    const win  = document.getElementById('storyWindow');
-    if (!sec || !list) return;
-
-    if (win && data.window_start && data.signal_date) {
-      win.textContent = `${data.window_start} – ${data.signal_date} (sinyal)`;
-    }
-
-    const CLASS_CLR = { ODA: 'var(--bp-brand)', FR: 'var(--bp-al)' };
-    const CLASS_LBL = { ODA: 'Özel durum', FR: 'Finansal' };
-
-    list.innerHTML = events.map(ev => {
-      const delta    = ev.days_delta;
-      const deltaStr = delta === 0 ? 'Sinyal günü'
-                     : delta > 0  ? `+${delta}g sonra`
-                     : `${Math.abs(delta)}g önce`;
-      const clr     = CLASS_CLR[ev.class] || 'var(--bp-text3)';
-      const summary = ev.summary || ev.subject || '—';
-      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
-        <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(CLASS_LBL[ev.class] || 'Bildirim')}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4">${escHtml(summary)}</div>
-          <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? 'var(--bp-text3)' : 'var(--bp-brand)'}">${deltaStr}</span></div>
-        </div>
-      </div>`;
-    }).join('');
-
-    list.querySelector('div:last-child')?.style?.setProperty('border-bottom', 'none');
-    /* C-19: storySection artik #panel-haberler'in ICINDE ve kendi data-tab-content'i
-       yok (sekme gorunurlugu tek kanon: panel). Bos degilse gosterilir. */
-    sec.hidden = false;
-  } catch(e) { /* sessiz hata */ }
-}
-
 /* ── KAP Bildirimleri ───────────────────────────────── */
+/* C-24: sinyal durumunun basladigi gun (zaman cizelgesinde ayrac). */
+const _HX_SIG = {{ {'s': (ssr_signal.signal if ssr_signal else none), 'd': (ssr_signal.signal_date if ssr_signal else none)}|tojson }};
 async function loadKapDisclosures() {
   const loadEl = document.getElementById('kapLoading');
   const listEl = document.getElementById('kapList');
   if (!loadEl || !listEl) return;
 
   try {
-    const data = await _bpKapJSON();
-
+    /* /kap (son 90 gun) + sinyal donemi bildirimleri tek listede; story hatasi sessiz. */
+    const [data, story] = await Promise.all([
+      _bpKapJSON(),
+      fetch('/api/hisse/' + TICKER + '/signal-story').then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
     loadEl.style.display = 'none';
-    const items = data.disclosures || [];
+
+    const seen = new Set(), items = [];
+    [].concat((data && data.disclosures) || [], (story && story.events) || []).forEach(d => {
+      const k = d.index || (d.date + '|' + d.summary);
+      if (seen.has(k)) return;
+      const p = bpParseTrDate(String(d.date || '').split(' ')[0]);
+      if (!p) return;
+      seen.add(k);
+      items.push({ d, y: p.y, m: p.m, g: p.d, t: String(d.date || '').split(' ')[1] || '', key: p.y * 10000 + p.m * 100 + p.d });
+    });
 
     if (!items.length) {
-      /* C-P1-2509: bos liste cogu zaman eslesme eksigi (D-45); yanlis "bildirim yok"
-         demek yerine bolum cizilmez. */
-      const sec = document.getElementById('kapSection');
-      if (sec) sec.hidden = true;
+      /* C-P1-2509: bos liste cogu zaman eslesme eksigi (D-45); "bildirim yok" iddiasi yazilmaz. */
+      listEl.innerHTML = '<p class="kap-empty">Bu hisse için listelenecek bildirim şu an yok.</p>';
+      listEl.style.display = '';
       return;
     }
+    items.sort((a, b) => (b.key - a.key) || (b.t < a.t ? -1 : b.t > a.t ? 1 : 0));
 
-    // En fazla 20 bildirim; dış bağlantı yok (kanon §2.8)
-    const show = items.slice(0, 20);
-    const CLASS_MAP = { ODA: 'oda', FR: 'fr' };
-    const CLASS_LBL = { ODA: 'Özel durum', FR: 'Finansal' };
+    /* Ayni gunun finansal rapor belgeleri ve ayni ozetli tekrarlar (MTN itfa vb.) tek satirda katlanir. */
+    const norm = d => String(d.summary || d.subject || '').trim().toLocaleLowerCase('tr');
+    const rows = [];
+    items.forEach(it => {
+      const last = rows.find(r => r.key === it.key && r.d.class === it.d.class && (it.d.class === 'FR' || norm(r.d) === norm(it.d)));
+      if (last) last.docs.push(it.d);
+      else rows.push(Object.assign({}, it, { docs: [it.d] }));
+    });
 
-    listEl.innerHTML = show.map(d => {
-      const cls = CLASS_MAP[d.class] || 'oda';
-      const lbl = CLASS_LBL[d.class] || d.class;
-      // Tarih formatını kısalt: "31.12.2025 14:58:09" → "31.12.2025 14:58"
-      const dateShort = d.date ? d.date.substring(0, 16) : '';
-      const summaryText = escHtml(d.summary || '');
-      return `<div class="kap-item">
-        <div class="kap-item-top">
-          <span class="kap-class-badge ${cls}">${lbl}</span>
-          <span class="kap-summary">${summaryText}</span>
-        </div>
-        <div class="kap-meta">
-          <span>${dateShort}</span>
-          ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-tip="${escHtml(d.subject)}" tabindex="0">${escHtml(d.subject)}</span>` : ''}
-          ${d.late ? '<span style="color:var(--bp-warn);font-size:10px">⚠ GECİKMELİ</span>' : ''}
-        </div>
-      </div>`;
-    }).join('');
+    const LBL = { ODA: 'Özel durum', FR: 'Finansal rapor' };
+    const SIG = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu' };
+    const sp = _HX_SIG && _HX_SIG.d ? bpParseTrDate(String(_HX_SIG.d).split(' ')[0]) : null;
+    const sigKey = sp ? sp.y * 10000 + sp.m * 100 + sp.d : null;
+    const sigName = SIG[_HX_SIG && _HX_SIG.s] || 'Yatay durum';
+    const dayTxt = r => r.g + ' ' + _HX_AY[r.m - 1];
+    const one = d => escHtml(String(d.summary || d.subject || '').trim());
+    let html = '', month = null, sigDone = sigKey === null || sigKey > rows[0].key;
+    const CAP = 25;
 
+    rows.forEach((r, i) => {
+      if (i === CAP) html += '<div class="kap-more" hidden>';
+      const mk = r.y * 100 + r.m;
+      if (!sigDone && r.key < sigKey) {
+        const smk = sp.y * 100 + sp.m;
+        if (smk !== month) { html += '<h3 class="kap-month">' + _HX_AY[sp.m - 1] + ' ' + sp.y + '</h3>'; month = smk; }
+        html += '<div class="kap-sig" role="separator"><span>' + escHtml(sigName) + ' başladı · ' + sp.d + ' ' + _HX_AY[sp.m - 1] + ' ' + sp.y + '</span></div>';
+        sigDone = true;
+      }
+      if (mk !== month) { html += '<h3 class="kap-month">' + _HX_AY[r.m - 1] + ' ' + r.y + '</h3>'; month = mk; }
+      if (!sigDone && r.key === sigKey) {
+        html += '<div class="kap-sig" role="separator"><span>' + escHtml(sigName) + ' başladı · ' + dayTxt(r) + ' ' + r.y + '</span></div>';
+        sigDone = true;
+      }
+      const lbl = LBL[r.d.class] || 'Bildirim';
+      let body;
+      if (r.docs.length > 1 && r.d.class === 'FR') {
+        body = '<details class="kap-fold"><summary><span class="kap-summary">' + r.docs.length + ' finansal rapor belgesi</span></summary><ul>' +
+          r.docs.map(x => '<li>' + one(x) + '</li>').join('') + '</ul></details>';
+      } else if (r.docs.length > 1) {
+        body = '<span class="kap-summary">' + one(r.d) + ' <span class="kap-n">· ' + r.docs.length + ' bildirim</span></span>';
+      } else {
+        const sub = r.d.subject && r.d.summary && r.d.subject.trim() !== r.d.summary.trim() && !/^Özel Durum Açıklaması/i.test(r.d.subject.trim())
+          ? '<span class="kap-sub">' + escHtml(r.d.subject.trim()) + '</span>' : '';
+        body = '<span class="kap-summary">' + one(r.d) + '</span>' + sub;
+      }
+      html += '<div class="kap-item"><time class="kap-day">' + dayTxt(r) + '</time><div class="kap-body">' +
+        '<span class="kap-class-badge">' + lbl + '</span>' + body + '</div></div>';
+    });
+    if (!sigDone && sp) html += '<div class="kap-sig" role="separator"><span>' + escHtml(sigName) + ' başladı · ' + sp.d + ' ' + _HX_AY[sp.m - 1] + ' ' + sp.y + '</span></div>';
+    if (rows.length > CAP) html += '</div><button type="button" class="hx-link kap-all" onclick="this.previousElementSibling.hidden=false;this.remove()">Tümünü göster (' + rows.length + ')</button>';
+
+    listEl.innerHTML = html;
     listEl.style.display = '';
 
   } catch(e) {
-    loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> KAP bildirimleri yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
+    loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
   }
 }
 
@@ -3333,7 +3320,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       if (tab === 'ozet') { loadOzetChart(); loadOzetExtras(); }
       else if (tab === 'grafik') { loadChart(); }
       else if (tab === 'temel') { loadFundamentals(); }
-      else if (tab === 'haberler') { loadKapDisclosures(); loadSignalStory(); }
+      else if (tab === 'haberler') { loadKapDisclosures(); }
     } catch (e) { console.warn('sekme verisi yuklenemedi: ' + tab, e); }
   }
   var _odt = document.getElementById('ozetDetailToggle');

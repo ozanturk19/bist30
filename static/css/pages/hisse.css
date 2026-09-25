@@ -705,61 +705,37 @@
     padding: 18px 20px;
     margin-bottom: 20px;
   }
+  /* C-24 (25.09): tek kronolojik zaman cizelgesi -- ay basligi, gun sutunu, notr etiket
+     (kanon: "Ozel durum / Finansal rapor"), trend durumunun basladigi gun ayrac. */
+  .kap-month {
+    font-size: var(--bp-text-xs); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--bp-text3); margin: 16px 0 2px;
+  }
+  .kap-month:first-child { margin-top: 0; }
   .kap-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--bp-surface2);
+    display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--bp-surface2);
   }
-  .kap-item:last-child { border-bottom: none; }
-  .kap-item-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
+  .kap-day { font-size: var(--bp-text-sm); color: var(--bp-text3); font-variant-numeric: tabular-nums; padding-top: 2px; white-space: nowrap; }
+  .kap-body { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
   .kap-class-badge {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: var(--bp-radius-4);
-    font-size: var(--bp-text-2xs);
-    font-weight: 700;
-    letter-spacing: .3px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 1px;
+    display: inline-block; padding: 1px 7px; border-radius: var(--bp-radius-4);
+    font-size: var(--bp-text-2xs); font-weight: 600; letter-spacing: .3px; white-space: nowrap;
+    color: var(--bp-text3); border: 1px solid var(--bp-border); background: transparent;
   }
-  .kap-class-badge.oda { background: rgba(var(--bp-brand-rgb),.1); color:var(--bp-brand); border:1px solid rgba(var(--bp-brand-rgb),.2); }
-  .kap-class-badge.fr  { background: rgba(var(--bp-al-rgb),.1);  color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.2); }
-  .kap-summary {
-    font-size: var(--bp-text-base);
-    color: var(--bp-text2);
-    line-height: 1.45;
-    flex: 1;
-  }
-  .kap-summary a {
-    color: var(--bp-text2);
-    text-decoration: underline;         /* WCAG link-in-text-block: must be distinguishable from text */
-    text-decoration-color: rgba(var(--bp-text2-rgb),.4);
-    text-underline-offset: 2px;
-  }
-  .kap-summary a:hover { color:var(--bp-brand); text-decoration-color: var(--bp-brand); }
-  /* K-T: bildirim BASLIGI satir-ici bir baglantidir ve kutusu font metrigiyle
-     16px'te kalir (line-height kutuyu BUYUTMEZ — satir-ici ogenin sinir kutusu
-     yazi tipi yukseligindendir). Satir-ici dikey dolgu satir kutusunu ETKILEMEZ
-     ama isabet alanini buyutur: duzen kaymasi SIFIR, hedef 16 -> 24px.
-     Not: `.kap-summary` metninin TAMAMI baglanti oldugu icin WCAG'in "cumle
-     icinde" muafiyeti burada GECERSIZ (muafiyet hedef-olmayan metnin satir
-     yuksekligiyle kisitlanmis hedefler icindir). */
-  .kap-summary a { padding-block: 4px; }
-  .kap-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    padding-left: 0;
-  }
+  .kap-summary { font-size: var(--bp-text-base); color: var(--bp-text2); line-height: 1.45; overflow-wrap: anywhere; }
+  .kap-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); line-height: 1.4; overflow-wrap: anywhere; }
+  .kap-fold summary { cursor: pointer; list-style: none; min-height: 24px; }
+  .kap-fold summary::-webkit-details-marker { display: none; }
+  .kap-fold summary::after { content: " ▾"; color: var(--bp-text3); }
+  .kap-fold[open] summary::after { content: " ▴"; }
+  .kap-fold ul { margin: 6px 0 0; padding-left: 16px; font-size: var(--bp-text-sm); color: var(--bp-text3); line-height: 1.5; }
+  .kap-sig { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: var(--bp-text-xs); color: var(--bp-text2); font-weight: 600; }
+  .kap-sig::before, .kap-sig::after { content: ""; flex: 1; height: 1px; background: rgba(var(--bp-art-violet-rgb), .45); }
+  .kap-n { color: var(--bp-text3); font-size: var(--bp-text-sm); white-space: nowrap; }
+  .kap-all { margin-top: 12px; min-height: 44px; }
+  .kap-empty { margin: 0; font-size: var(--bp-text-sm); color: var(--bp-text3); }
+  @media (max-width: 420px) { .kap-item { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; } }
 
   /* ── Metodoloji notu ── */
   .methodology {
@@ -1231,17 +1207,6 @@
       font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0;
     }
     .da-ai-note{font-size:var(--bp-text-xs);color:var(--bp-text3)}
-
-    .da-story-panel{
-      padding:18px 20px;margin-bottom:20px;
-      --da-accent:var(--bp-accent-cyan);--da-glow-x:-10%;--da-glow-size:260px;
-      --da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10;
-    }
-    .da-story-head{position:relative;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-    .da-story-title{
-      position:relative;font-weight:800;letter-spacing:-.01em;font-size:clamp(1.05rem,2vw,1.3rem);
-      color:var(--bp-text);margin:0;
-    }
 
     /* ── "Sinyal Özeti" kutusu — 19.09, hisse.html Data-Art denetiminin devamı.
        Bu kutu Özet sekmesinde hero kartın HEMEN altında, sayfanın en görünür
