@@ -241,7 +241,7 @@ def company_inputs(rec, price=None, today=None, yahoo_shares=None):
     eq_last = kt._tl(last, kt._equity(last, tpl))
     out = {"sablon": tpl, "esas": d.get("basis"), "yil": a["fy"] if a else None,
            "son_rapor": last["donem"], "son12ay_kar": ttm["tutar"] if ttm else None,
-           "yillik_kar": kt._v(a, "net_income_parent") if a else None}
+           "yillik_kar": kt._v(a, "net_income_parent") if a else None, "ozkaynak": eq_last}
 
     # Kalite
     out["roe"] = (kt._pct(ttm["tutar"], eq_last)
@@ -431,8 +431,10 @@ def _sentences(inp, ax, med, check):
         if tpl == "banka" and (med or {}).get("ozsermaye_karliligi"):
             r += " · banka ortancası " + _pc(med["ozsermaye_karliligi"]["deger"])
         parts.append(r)
-    elif inp.get("son12ay_kar") is not None:
+    elif inp.get("son12ay_kar") is not None and inp.get("ozkaynak") is not None and inp["ozkaynak"] <= 0:
         parts.append("Özkaynak negatif; özsermaye kârlılığı hesaplanmıyor")
+    elif inp.get("ozkaynak") is None:
+        parts.append("Özkaynak kalemi raporda okunamadı")
     if tpl in ("sanayi", "gyo") and inp.get("net_marj") is not None:
         parts.append("%s net kâr marjı %s" % (yil, _pc(inp["net_marj"])))
     if tpl == "banka" and inp.get("gider_gelir") is not None:

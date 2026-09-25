@@ -248,6 +248,15 @@ def test_thyao_duzeltmesiz_esas_ve_kucuk_sektorde_hukum_yok():
     assert dm["eksenler"]["kalite"]["girdiler"]["net_marj"]["puan"] is not None   # oran: sektor kovasinda
 
 
+def test_ozkaynak_okunamadi_ile_negatif_ayrilir():
+    t = _inp("TUPRS")
+    neg = dict(t, roe=None, ozkaynak=-5.0e9)
+    miss = dict(t, roe=None, ozkaynak=None)
+    s_neg = ts.score_universe({"N": neg}, {"N": "K"})["N"]["detay"]["eksenler"]["kalite"]["cumle"]
+    s_miss = ts.score_universe({"M": miss}, {"M": "K"})["M"]["detay"]["eksenler"]["kalite"]["cumle"]
+    assert s_neg.startswith("Özkaynak negatif;") and s_miss.startswith("Özkaynak kalemi raporda okunamadı;")
+
+
 def test_kap_kaydi_yok_ve_rapor_yok_limited_data():
     r = ts.score_universe({"X": None, "Y": ts.company_inputs({"reports": []})}, {"X": "Elektrik", "Y": "Elektrik"})
     assert r["X"]["detay"]["limited_data"] and r["X"]["detay"]["sebep"] == "kap_kaydi_yok"
