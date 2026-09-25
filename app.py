@@ -9088,6 +9088,40 @@ def _fundamentals_schema_ok(data):
 
 
 _BETA_MIN_OVERLAP_DAYS = 60  # CPO-1787: rejim/IPO gibi kısa ortak geçmişte regresyon güvenilmez
+_beta_disk_close = {}  # {anahtar: (mtime, {tarih: kapanış})} — diskten okuma mtime korumalı
+
+
+def _beta_close_map(key, mem_ohlc):
+    """Beta regresyonu için {tarih: kapanış}. Bellek cache'i doluysa o; değilse
+    data/charts/chart_<key>.json (mtime korumalı, threadpool'dan okunur)."""
+    if mem_ohlc:
+        return {b["time"]: b["close"] for b in mem_ohlc if b.get("close") is not None}
+    path = os.path.join(_PHASE3_CHART_DIR, f"chart_{key}.json")
+    try:
+        mt = os.path.getmtime(path)
+    except OSError:
+        return {}
+    hit = _beta_disk_close.get(key)
+    if hit and hit[0] == mt:
+        return hit[1]
+    d = _tp_read_json(path) or {}
+    close = {b["time"]: b["close"] for b in (d.get("ohlc") or []) if b.get("close") is not None}
+    _beta_disk_close[key] = (mt, close)
+    return close
+
+
+def _with_beta(ticker_base, data):
+    """Önbellekten dönen temel veride beta boşsa (eski kayıt / bellek-cache'siz süreç)
+    diskteki grafiklerden hesaplayıp yerinde doldurur — 4 saatlik TTL beklenmez."""
+    if data and data.get("beta") is None:
+        _b, _days = _compute_beta_vs_xu030(ticker_base)
+        if _b is not None:
+            _lo, _hi = _FUND_SANITY.get("beta", (-1.0, 5.0))
+            if _lo <= _b <= _hi:
+                data["beta"] = round(_b, 2)
+                data["beta_benchmark"] = "XU030"
+                data["beta_window_days"] = _days
+    return data
 
 def _compute_beta_vs_xu030(ticker_base):
     """CPO-1787: yfinance'in ham `beta` alanı BIST'e göre ölçülmemiş (canlı
@@ -9101,10 +9135,13 @@ def _compute_beta_vs_xu030(ticker_base):
     with _lock:
         _stock_ohlc = ((_stock_chart_cache.get(ticker_base) or {}).get("data") or {}).get("ohlc") or []
         _mkt_ohlc   = (_chart_cache.get("data") or {}).get("ohlc") or []
-    if not _stock_ohlc or not _mkt_ohlc:
+    # D-07 (25.09): bellek cache'leri fundamentals'ı üreten süreçte (refresh işçisi) boş,
+    # web işçisinde yalnız istek gelmişse dolu → beta 234/234 None kalıyordu. Diskteki
+    # data/charts/chart_<T>.json + chart_XU030.json (refresh yazar) yedek kaynak.
+    _stock_close = _beta_close_map(ticker_base, _stock_ohlc)
+    _mkt_close   = _beta_close_map("XU030", _mkt_ohlc)
+    if not _stock_close or not _mkt_close:
         return None, None
-    _stock_close = {b["time"]: b["close"] for b in _stock_ohlc if b.get("close") is not None}
-    _mkt_close   = {b["time"]: b["close"] for b in _mkt_ohlc if b.get("close") is not None}
     _common = sorted(set(_stock_close) & set(_mkt_close))
     if len(_common) < _BETA_MIN_OVERLAP_DAYS:
         return None, None
@@ -9143,12 +9180,14 @@ def _get_fundamentals(ticker_base):
         # (bkz. şablon) ama LEADER de bu eski kaydı bir sonraki warmup turunda
         # (30dk) kendiliğinden tazelesin — TTL'in 4 saatini beklemesin.
         _schema_ok = _fundamentals_schema_ok(cached["data"]) if cached else False
-        if _fresh and (_is_web or _schema_ok):
-            return cached["data"]
+        _ret_cached = _fresh and (_is_web or _schema_ok)
+    if _ret_cached:
+        # D-07: _with_beta _lock alır (threading.Lock, reentrant değil) → kilit dışında
+        return _with_beta(ticker_base, cached["data"])
     # CPO-558G: web worker'da synchronous yfinance yasak — stale/empty cache dön
     if _is_web:
         logger.debug("_get_fundamentals(%s): REFRESH_WORKER=web — cache-only", ticker_base)
-        return cached["data"] if cached else {}
+        return _with_beta(ticker_base, cached["data"]) if cached else {}
     try:
         _fetched = _fetch_fundamentals_subprocess(ticker_base)
         if not _fetched:
