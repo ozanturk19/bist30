@@ -6,7 +6,9 @@
     Durum adreste: ?renk=degisim|bp|trend  &donem=1g|1h|1a|yb|1y (varsayılanlar yazılmaz).
     İlk çizim o durumla SSR (JS kapalıyken anahtarlar bağlantıdır); bp-heatmap.js yerinde boyar
     ve adresi tek yerden (publish) yazar. Eski sektör kartları, 4 sayı kutusu, lejant paneli,
-    Karşılaştır sekmesi ve 2 dakikalık yenileme döngüsü kalktı. -#}
+    Karşılaştır sekmesi ve 2 dakikalık yenileme döngüsü kalktı.
+    C-58 kancası (BIST TÜM): evren seçimi gelince route ?evren= ile ilgili görüntüyü heatmap olarak
+    verir; H1 ve Dataset adı heatmap.universe'ten okunur (adres yayımcısı bp-heatmap.js publish()). -#}
 {%- set _hm_ok = (heatmap is defined) and heatmap and heatmap.rows and heatmap_groups and heatmap_tiles -%}
 {%- set _q = request.args if ((request is defined) and request and request.args) else {} -%}
 {%- set _mode = {'degisim': 'chg', 'bp': 'bp', 'trend': 'tr'}.get(((_q.get('renk') or '') ~ '')|lower, 'chg') -%}
@@ -33,7 +35,7 @@
 ]}
 </script>
 {%- if _hm_ok %}
-<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'Dataset', 'name': 'BIST100 ısı haritası · ' ~ heatmap.asof_label ~ ' kapanışı', 'description': 'BIST100 hisselerinin sektörlere göre gün sonu görüntüsü: piyasa değeri, 1 gün / 1 hafta / 1 ay / yılbaşından beri / 1 yıl değişim, BorsaPusula Skoru ve trend durumu.', 'url': 'https://borsapusula.com/sektor-harita', 'temporalCoverage': heatmap.asof, 'inLanguage': 'tr', 'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'}, 'variableMeasured': ['Piyasa değeri', 'Değişim', 'BorsaPusula Skoru', 'Trend durumu']}|tojson }}</script>
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'Dataset', 'name': (heatmap.universe or 'BIST100') ~ ' ısı haritası · ' ~ heatmap.asof_label ~ ' kapanışı', 'description': 'BIST100 hisselerinin sektörlere göre gün sonu görüntüsü: piyasa değeri, 1 gün / 1 hafta / 1 ay / yılbaşından beri / 1 yıl değişim, BorsaPusula Skoru ve trend durumu.', 'url': 'https://borsapusula.com/sektor-harita', 'temporalCoverage': heatmap.asof, 'inLanguage': 'tr', 'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'}, 'variableMeasured': ['Piyasa değeri', 'Değişim', 'BorsaPusula Skoru', 'Trend durumu']}|tojson }}</script>
 {%- endif %}
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">

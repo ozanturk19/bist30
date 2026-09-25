@@ -16,6 +16,8 @@
       hm_per    'd1' | 'w1' | 'm1' | 'ytd' | 'y1'    (1G / 1H / 1A / YB / 1Y)
       hm_path   anahtar bağlantılarının yolu (ör. '/sektor-harita'); JS kapalıyken
                 bağlantı sayfayı o durumla yeniden açar, JS açıkken yerinde boyar.
+      Evren (C-58 kancası): tam sayfa başlığı görüntünün `universe` alanından okunur
+                ('BIST100'; BIST TÜM görüntüsü gelince route onu verir, şablon değişmez).
     Boyama kuralları bp-heatmap.js paint()/gStat()/thesis() ile BİREBİR (değişirse ikisi).
 
     İlk çizim SSR: JS kapalıyken de kutular renkli görünür, her biri
@@ -145,7 +147,7 @@
     <div class="hm-head">
       <div class="hm-hl">
         <div class="da-eyebrow">Sektör haritası</div>
-        <h1 class="hm-title da-display" id="hmTitle">BIST100 ısı haritası <span>· {{ hm.asof_label }} kapanışı</span></h1>
+        <h1 class="hm-title da-display" id="hmTitle">{{ hm.universe or 'BIST100' }} ısı haritası <span>· {{ hm.asof_label }} kapanışı</span></h1>
         <p class="hm-thesis" id="hmThesis" aria-live="polite">
         {%- if _mode == 'bp' -%}
           {%- if _bps -%}
