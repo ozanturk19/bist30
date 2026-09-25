@@ -443,7 +443,8 @@
           {%- endif %}</p>
         {%- set _c1 = (_pr is not none and _sl is not none and _pr > _sl) -%}
         {%- set _c2 = (_q.adx is not none and _q.adx >= 25) -%}
-        {%- set _c3 = (_q.e12 is not none and _q.e99 is not none and _q.e12 > _q.e99) -%}
+        {%- set _e12 = _q.get('e12') -%}{%- set _e99 = _q.get('e99') -%}{#- yetersiz gecmiste (MARKA 49<120) e12/e99 yok: Undefined karsilastirmasi 500 veriyordu -#}
+        {%- set _c3 = (_e12 is not none and _e99 is not none and _e12 > _e99) -%}
         {%- set _c5 = (_q.weekly_trend == 1) -%}
         {#- DI: ADX >= 25 iken motorun adx.bull/bear bayragi DI yonunu verir; ADX < 25'te bilinmez -> JS. -#}
         {%- set _c4 = none -%}
@@ -451,7 +452,7 @@
         <ul class="hx-conds" aria-label="Trend koşulları">
           <li class="{{ 'ok' if _c1 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c1 else '–' }}</i><span>Fiyat trend dönüş seviyesinin üstünde<span class="sr-only">{{ ': sağlanıyor' if _c1 else ': sağlanmıyor' }}</span></span><b>{{ _sl|tr_price }} ₺</b></li>
           <li class="{{ 'ok' if _c2 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c2 else '–' }}</i><span>Trend gücü yeterli (ADX ≥ 25)<span class="sr-only">{{ ': sağlanıyor' if _c2 else ': sağlanmıyor' }}</span></span><b>{{ ('%.1f'|format(_q.adx))|replace('.', ',') if _q.adx is not none else '—' }}</b></li>
-          <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _q.e12|tr_price }} / {{ _q.e99|tr_price }}</b></li>
+          <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _e12|tr_price }} / {{ _e99|tr_price }}</b></li>
           <li class="{{ 'ok' if _c4 else ('no' if _c4 is sameas false else 'unk') }}" id="q3Di"><i aria-hidden="true">{{ '✓' if _c4 else ('–' if _c4 is sameas false else '·') }}</i><span>Yön alıcılardan yana (DI+ &gt; DI−)<span class="sr-only" id="q3DiSr">{{ ': sağlanıyor' if _c4 else (': sağlanmıyor' if _c4 is sameas false else '') }}</span></span><b id="q3DiV">—</b></li>
           <li class="{{ 'ok' if _c5 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c5 else '–' }}</i><span>Haftalık trend yukarı<span class="sr-only">{{ ': sağlanıyor' if _c5 else ': sağlanmıyor' }}</span></span><b>{{ 'yukarı' if _q.weekly_trend == 1 else ('aşağı' if _q.weekly_trend == -1 else 'belirsiz') }}</b></li>
         </ul>
@@ -2849,7 +2850,11 @@ function _tvChecks(k) {
 
 /* ── Bilanco sagligi ────────────────────────────────────────────────────── */
 function _tvBalance(f, k) {
-  if (k && k.bilanco) {
+  if (k && k.bilanco && _tvBalanceKap(k)) return true;
+  return _tvBalanceLite(f);
+}
+function _tvBalanceKap(k) {
+  {
     const b = k.bilanco, c = b.cur || {}, p = b.prev || {}, sb = k.sablon;
     let rows, say;
     if (sb === 'banka') {
@@ -2869,11 +2874,15 @@ function _tvBalance(f, k) {
       say = (c.net_borc == null ? '' : (c.net_borc < 0 ? 'Nakdi borcundan fazla (net nakit ' + _tvMoney(-c.net_borc) + ')' : 'Net borç FAVÖK\'ün ' + _tvX(c.net_borc_favok) + ' katı')) +
         (c.cari_oran != null ? (c.net_borc == null ? 'K' : '; k') + 'ısa vadeli varlıklar kısa vadeli borçların ' + _tvX(c.cari_oran) + ' katı' : '') + '.';
     }
+    rows = rows.filter(r => r[1] !== '—' || r[2] !== '—');     /* eslenmeyen kalem (ornek: faktoring) satir olmaz */
+    if (!rows.length) return false;
     _tvEl('tvBilancoU').textContent = 'Dönem sonu · ' + (k.basis === 'tms29' ? b.yil + ' sonu alım gücüyle' : (TV_BASIS[k.basis] || 'TL'));
-    _tvEl('tvBilancoS').textContent = say;
+    _tvEl('tvBilancoS').textContent = say === '.' ? '' : say;
     _tvEl('tvBilancoT').innerHTML = _tvKv(['', String(b.yil), String(b.onceki_yil)], rows);
     return true;
   }
+}
+function _tvBalanceLite(f) {
   /* kap yok: bugunku alanlar (tek sutun) */
   const de = f.debt_to_equity != null ? f.debt_to_equity / 100 : null;   /* K-BX: yfinance YUZDE doner */
   const rows = [['Borç / özkaynak', de != null ? _tvX(de) : null], ['Cari oran', f.current_ratio != null ? _tvX(f.current_ratio) : null],
@@ -3005,7 +3014,13 @@ async function loadFundamentals() {
     const [fj, dj] = await Promise.all([_bpFundJSON(), _bpDivJSON().catch(() => undefined)]);
     const f = fj && fj.fundamentals;
     const divRow = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
-    if (!f || !Object.keys(f).length) throw new Error('bos');
+    if (!f || !Object.keys(f).length) {       /* hisse icin temel veri yok: hata degil, sessiz not */
+      _tvEl('tvGrid').hidden = true;
+      _tvEl('tvGrid').setAttribute('aria-busy', 'false');
+      const pr = _tvEl('tvPrep'); pr.textContent = 'Bu hisse için finansal veri henüz yok.'; pr.hidden = false;
+      _tvDone = true;
+      return;
+    }
     _tvRender(f, divRow);
     _tvDone = true;
   } catch (e) {
