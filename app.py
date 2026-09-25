@@ -46,6 +46,7 @@ import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
+import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
@@ -9477,6 +9478,25 @@ def _fundamentals_kap(ticker, data):
         return data
 
 
+def _fundamentals_temel_v2(ticker, data):
+    """D-40a2: Temel sekmesi v2 alanları (kap_temel_v2.extend) — yalnız /fundamentals ucu.
+    kap bloğuna yıllık marj/oran, son 12 ay kârı (O22=B) ile F/K · PD/DD · özsermaye kârlılığı,
+    çeyreklik seri, banka/sigorta/GYO şablonu, sağlamlık kontrolü; üst düzeye sektör ortancası
+    (D-51 'va' kuralı) ve kap_durum ('var' / 'hazirlaniyor'). Hata olursa veri aynen döner."""
+    if not data:
+        return data
+    with _lock:
+        price = next((s.get("price") for s in (_cache.get("data") or []) if s.get("ticker") == ticker), None)
+        fund_snap = {tk: (w.get("data") or {}) for tk, w in _fundamentals_cache.items()}
+    try:
+        meds = kap_temel_v2.sector_medians(fund_snap, _get_sector, _get_sector(ticker))
+        return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
+                                   datetime.now(_TZ_TR).date(), meds)
+    except Exception as e:
+        logger.warning("_fundamentals_temel_v2(%s): %s", ticker, e)
+        return data
+
+
 @app.route("/api/hisse/<ticker>/fundamentals")
 @limiter.limit("30 per minute")  # r37 bug-hunt: aynı /api/hisse/<ticker>/* ailesindeki kardeşlerle (news/kap/signal-story 20-30/min) tutarlılık, eksikti
 def api_stock_fundamentals(ticker):
@@ -9484,7 +9504,7 @@ def api_stock_fundamentals(ticker):
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
-    data = _fundamentals_kap(ticker, _get_fundamentals(ticker))
+    data = _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, _get_fundamentals(ticker)))
     return safe_json({"fundamentals": data})
 
 
