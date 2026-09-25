@@ -172,10 +172,36 @@
      (24px/3px/.7s) ve bu şablondaki altı kullanımın dördü zaten geometriyi
      inline eziyordu. `#chartLoading` yerleşimi `.da-loading--block`a geçti;
      burada yalnız grafik alanının yüksekliği (sayfa deltası) kaldı. */
-  #chartLoading { height: 420px; padding: 0; }
+  #chartLoading { height: clamp(420px, 60vh, 640px); padding: 0; }
 
   #chartsInner { display: none; }
-  #chartMain   { height: 340px; margin: 8px 18px 10px; }
+  #chartMain   { height: clamp(420px, 60vh, 640px); margin: 4px 18px 8px; }
+  /* C-23 (C-M10): donem cipleri, OHLC lejanti, anahtar satiri, getiri seridi. */
+  .ch-chips { margin-left: auto; display: inline-flex; gap: 2px; padding: 2px; background: var(--bp-bg); border: 1px solid var(--bp-border); border-radius: 11px; }
+  .ch-chips button { font: 600 12.5px/1 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); background: transparent; border: 0; border-radius: 9px; padding: 6px 11px; min-width: 40px; min-height: 34px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .ch-chips button:hover { color: var(--bp-text2); }
+  .ch-chips button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); }
+  .ch-chips button:disabled { opacity: .35; cursor: default; }
+  .ch-chips button:focus-visible, .ch-ema:focus-visible { outline: 2px solid var(--bp-accent-cyan); outline-offset: 1px; }
+  .ch-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; min-height: 22px; padding: 10px 18px 0; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-legend b { color: var(--bp-text); font-weight: 600; }
+  .ch-l-date { color: var(--bp-text2); font-weight: 600; }
+  .ch-l-ev { color: var(--bp-text2); }
+  .ch-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 6px 18px 0; font-size: var(--bp-text-xs); color: var(--bp-text3); }
+  .ch-keys[hidden], .ch-returns[hidden] { display: none; }
+  .ch-key { display: inline-flex; align-items: center; gap: 6px; }
+  .ch-key b { color: var(--bp-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ch-sw { display: inline-block; width: 14px; height: 2px; border-radius: 1px; }
+  .ch-sw--close { background: var(--bp-brand); }
+  .ch-sw--st { background: var(--bp-art-violet); }
+  .ch-ev-ic { display: inline-flex; gap: 2px; font-size: 9px; }
+  .ch-ev-ic .up { color: var(--bp-al); } .ch-ev-ic .flat { color: var(--bp-text3); } .ch-ev-ic .down { color: var(--bp-state-broken-text); }
+  .ch-ema { margin-left: auto; font: 600 var(--bp-text-xs) system-ui, sans-serif; color: var(--bp-text3); background: transparent; border: 1px solid var(--bp-border); border-radius: 99px; padding: 5px 10px; min-height: 30px; cursor: pointer; }
+  .ch-ema[aria-pressed="true"] { color: var(--bp-text); border-color: var(--bp-brand); }
+  .ch-period { margin: 0; padding: 0 18px 2px; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-returns { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 4px 18px 12px; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-ret { display: inline-flex; gap: 6px; align-items: baseline; }
+  .ch-ret-k { font-weight: 600; letter-spacing: .04em; }
 
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
@@ -880,12 +906,16 @@
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
-    #chartMain    { height: 224px; margin: 6px 14px 8px; }
+    #chartMain    { height: 360px; margin: 4px 14px 6px; }
+    .ch-chips { order: 5; margin-left: 0; width: 100%; display: flex; }
+    .ch-chips button { flex: 1; min-height: 44px; }
+    .ch-legend, .ch-keys, .ch-period, .ch-returns { padding-left: 14px; padding-right: 14px; }
+    .ch-ema { min-height: 36px; }
     /* 20.09: masaustunde 18px olan serit insetleri mobilde de chartMain ile
        ayni degerde kalmali — aksi halde grafik govdesi seritlerden 4-8px kayiyor. */
     .chart-header { padding: 12px 14px; }
     .week52-bar   { padding: 12px 14px 14px; }
-    #chartLoading { height: 280px; }
+    #chartLoading { height: 360px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; } /* C-61: 3 kart */
     .chart-section { overflow: hidden; }

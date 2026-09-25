@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=c5a34520">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=a6712f14">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -284,9 +284,19 @@
   <!-- Grafik -->
   <div id="chart-section" data-tab-content="grafik" class="da-panel da-panel--accent chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0">
     <div class="chart-header">
-      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik<span id="chartPeriod"></span></span>
+      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik</span>
       <span class="chart-label">{{ ticker }}</span>
-      <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
+      {#- C-23 (C-M10): 1A/3A/6A/1Y/2Y (masaustu varsayilan 1Y, telefon 3A); hacim paneli yok (Ozan 31.08). -#}
+      <div class="ch-chips" id="chChips" role="group" aria-label="Grafik dönemi">
+        <button type="button" data-n="21" aria-pressed="false">1A</button><button type="button" data-n="63" aria-pressed="false">3A</button><button type="button" data-n="126" aria-pressed="false">6A</button><button type="button" data-n="252" aria-pressed="false">1Y</button><button type="button" data-n="504" aria-pressed="false">2Y</button>
+      </div>
+    </div>
+    <div class="ch-legend" id="chLegend" aria-live="off"></div>
+    <div class="ch-keys" id="chKeys" hidden>
+      <span class="ch-key"><i class="ch-sw ch-sw--close" aria-hidden="true"></i>Kapanış</span>
+      <span class="ch-key" id="chKeySt" hidden><i class="ch-sw ch-sw--st" aria-hidden="true"></i>Trend dönüş seviyesi <b id="chStVal"></b></span>
+      <span class="ch-key" id="chKeyEv" hidden><span aria-hidden="true" class="ch-ev-ic"><b class="up">▲</b><b class="flat">●</b><b class="down">▼</b></span>Son <span id="chEvN"></span> durum değişimi</span>
+      <button type="button" class="ch-ema" id="chEma" aria-pressed="false">EMA 12/99</button>
     </div>
     <div id="chartBody" style="min-height:420px">
     <div id="chartLoading" class="da-loading da-loading--block"><div class="da-spin"></div> Grafik yükleniyor…</div>
@@ -297,7 +307,10 @@
          ekran okuyucu "2 yıl". Artik iki etiket de AYNI kaynaktan
          (bp-format.js `bpBarWindowText`) yaziliyor; SSR yalnizca pencere
          IDDIASI ICERMEYEN bir taban ad birakir. #}
-      <div id="chartMain" role="img" aria-label="{{ ticker }} fiyat grafiği, günlük mum"></div>
+      <div id="chartMain" role="img" aria-label="{{ ticker }} kapanış fiyatı grafiği"></div>
+      <ul class="sr-only" id="chEvList"></ul>
+      <p class="ch-period" id="chartPeriod"></p>
+      <div class="ch-returns" id="chReturns" hidden></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       {# 20.09 — guncel fiyat etiketi seridin ORTASINA sabitlenmisti, imlec ise
          gercek konumdaydi (THYAO: imlec %24, etiket %50) — bar "aralığın
@@ -1739,9 +1752,11 @@ let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
 
 function buildChart(d) {
-  /* 15.09 fresh-ground-audit fix: backend'in WARMUP_MIN kapısından bağımsız, kendi
-   * istemci-taraflı güvenlik ağı — backend garantisi bir gün değişirse sessizce
-   * bozuk/boş bir grafik çizmek yerine dürüst bir mesaj göster. */
+  /* C-23 (25.09, C-M10 taslagi): sade grafik. Periwinkle kapanis alani (mum/hacim yok --
+     Ozan 31.08, kanon §5.3 "grafik cizgisi notr"), mor kademeli trend donus seviyesi
+     (st_line; yon degistigi yerde kesilir), son 6 durum degisimi icin etiketsiz oklar
+     (signal_history: baslangic + closed_at_date = Yatay'a donus), EMA 12/99 varsayilan
+     kapali. 1A/3A/6A/1Y/2Y ciplerle pencere; #chartPeriod GORUNEN pencereyi yazar. */
   if ((d.ohlc || []).length < 2) {
     _showChartStatus('Bu hisse için yeterli grafik verisi yok.', false);
     return;
@@ -1752,37 +1767,7 @@ function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
 
-  /* 15.09 fresh-ground-audit fix: backend bu route icin OHLC'yi HER ZAMAN gunluk bar
-   * uretiyor (weekly/monthly resample yok) — bar sayisi veri granularitesini degil,
-   * sadece hissenin ne kadar suredir islem gordugunu yansitir. Eski G27 bloğu bunu
-   * "Haftalik/Aylik" diye yanlis etiketliyordu (150-300 bar arasi her yeni-listelenmis
-   * hisse icin). Etiket her zaman "Gunluk" kalir, sure kismi dogru veriye gore kurulur. */
-  (function() {
-    var n = (d.ohlc || []).length;
-    /* 20.09 Data-Art: baslik artik eyebrow (tur) + .chart-label (ticker) olarak
-       ikiye ayrildi. Sure bilgisi DINAMIK (kisa gecmisli hissede "2 Yil" DEGIL,
-       "N Seans") — bu yuzden SSR'da bos birakilip burada doldurulur, yanlis
-       bir "2 Yil" iddiasi hicbir an ekranda durmaz.
-       K-CB (22.09): esik/yazim artik bp-format.js `bpBarWindowText`te —
-       ve AYNI metin grafigin `aria-label`ina da yaziliyor (SSR'daki sabit
-       "2 yıl" iddiasi oradan kaldirildi; ekran okuyucu ile goren kullanici
-       ayni pencereyi duyuyor). Bos-veri dali SAVUNMA amacli: buildChart zaten
-       ohlc<2'de erken donuyor (MARKA canli: ohlc=0 -> chartsInner display:none,
-       yani eski sabit etiket ekran okuyucuya HIC acilmiyordu). */
-    var sure = bpBarWindowText(n);
-    var elP = document.getElementById('chartPeriod');
-    if (elP) elP.textContent = sure ? (' · ' + sure) : '';
-    var elC = document.getElementById('chartMain');
-    if (elC) {
-      elC.setAttribute('aria-label', sure
-        ? ('{{ ticker }} fiyat grafiği, günlük mum, ' + sure)
-        : '{{ ticker }} için grafik verisi yok');
-    }
-  })();
-
-  /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
-   * OHLC zaten tatilsiz geliyor (backend is_trading_day filtresi).
-   * time field date-string → integer index: her iş günü eşit aralıklı, gap sıfır. */
+  /* Sirali indeks zaman ekseni (tatil/hafta sonu boslugu yok). */
   var _idxToDay = d.ohlc.map(function(b){ return b.time; });
   var _dayToIdx = {};
   _idxToDay.forEach(function(day, i){ _dayToIdx[day] = i; });
@@ -1790,42 +1775,41 @@ function buildChart(d) {
     var dateStr = _idxToDay[Math.round(+idx)];
     if (!dateStr) return '';
     var p = dateStr.split('-');
-    var yr = +p[0], mo = +p[1] - 1, dy = +p[2];
-    if (type === 0) return String(yr);
-    if (type === 1) return _MTHS[mo] || '';
-    if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
+    if (type === 0) return p[0];
+    if (type === 1) return _MTHS[+p[1] - 1] || '';
+    if (type === 2) return (_MTHS[+p[1] - 1] || '') + ' ' + (+p[2]);
     return '';
   }
-  /* Kısa "10 Nis '25" biçimi — EMA legend'in eski date-label'ı ve yeni OHLC
-     tooltip'i AYNI biçimi kullanır (r137 öncesi de bu sıradaydı). */
-  function _fmtDateShort(idx) {
+  function _fmtDay(idx, withYear) {
     var raw = _idxToDay[Math.round(+idx)];
     if (!raw) return '';
     var pts = raw.split('-');
-    return (+pts[2]) + ' ' + (_MTHS[+pts[1]-1] || '') + " '" + pts[0].slice(2);
+    return (+pts[2]) + ' ' + (_MTHS[+pts[1]-1] || '') + (withYear ? ' ' + pts[0] : '');
   }
-  d = Object.assign({}, d, {
-    ohlc:   d.ohlc.map(function(b, i){ return Object.assign({}, b, {time: i}); }),
-    ema12:  d.ema12.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
-    ema99:  d.ema99.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
-    volume: (d.volume || []).map(function(v){ var i = _dayToIdx[v.time]; return i !== undefined ? Object.assign({}, v, {time: i}) : null; }).filter(Boolean)
-  });
+  function _reidx(arr) {
+    return (arr || []).map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean);
+  }
+  var n = d.ohlc.length;
+  var bars = d.ohlc.map(function(b, i){ return Object.assign({}, b, {time: i}); });
+  var closes = bars.map(function(b){ return {time: b.time, value: b.close}; });
+  var ema12 = _reidx(d.ema12), ema99 = _reidx(d.ema99), st = _reidx(d.st_line);
+
+  var fmtP = function(v){ return v == null ? '—' : (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var fmtPct = function(v){ return (v > 0 ? '+' : v < 0 ? '−' : '') + '%' + Math.abs(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
 
   const elMain   = document.getElementById('chartMain');
-  elMain.innerHTML = '';   // r140: onceki render'in orphan tooltip div'i (varsa) temizlensin
-  const isMobile = window.innerWidth < 768;
+  elMain.innerHTML = '';
+  const _chartH = function(){ return window.innerWidth < 768 ? 360 : Math.max(420, Math.min(640, Math.round(window.innerHeight * 0.6))); };
   const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
+  elMain.style.height = _chartH() + 'px';
 
   const chart = _hisseChart = LC.createChart(elMain, {
-    ...BPChart.baseOpts(LC, true),
+    ...BPChart.baseOpts(LC, false),
     width:     chartW,
-    height:    isMobile ? 240 : 340,
-    timeScale: { borderColor: BPChart.tok('--bp-border', '#2a2a2c'), timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmtIdx },  /* K-BG: tek palet kaynagi */
-    /* G26: sequential index time → crosshair x-label shows Unix epoch "01 Oca '70".
-       labelVisible:false hides the erroneous label; date shown in EMA legend + tooltip instead. */
-    /* K-BG: baseOpts zaten bu renkleri token'dan veriyor; burada YALNIZ
-       labelVisible:false icin yeniden yaziliyor -- renkler de ayni kaynaktan. */
-    crosshair: { mode: LC.CrosshairMode.Normal, vertLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: BPChart.tok('--bp-brand', '#b8c3ff'), width: 1, style: 0, labelVisible: false }, horzLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: BPChart.tok('--bp-brand', '#b8c3ff'), width: 1, style: 0 } },
+    height:    _chartH(),
+    timeScale: { borderColor: BPChart.tok('--bp-border', '#2a2a2c'), timeVisible: false, visible: true, rightOffset: 6, tickMarkFormatter: _tickFmtIdx },
+    /* G26: sirali indeks -> dikey imlec etiketi epoch tarihi basardi; tarih lejantta. */
+    crosshair: { mode: LC.CrosshairMode.Magnet, vertLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), width: 1, style: 0, labelVisible: false }, horzLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: BPChart.tok('--bp-brand', '#b8c3ff'), width: 1, style: 0 } },
   });
 
   /* 52-haftalık bar */
@@ -1868,74 +1852,148 @@ function buildChart(d) {
     document.getElementById('week52Bar').style.display = '';
   }
 
-  /* EMA12/EMA99 çizgileri + bull/bear dolgu primitive — bp-chart-common.js (BPChart.addEmaPair) */
-  const emaPair = BPChart.addEmaPair(chart, d.ema12, d.ema99);
-  const e12 = emaPair.e12, e99 = emaPair.e99;
+  /* Kapanis alani: notr periwinkle + gradyan (kanon §5.3). */
+  const brandRgb = BPChart.tok('--bp-brand-rgb', '184,195,255');
+  const area = chart.addAreaSeries({
+    lineColor: BPChart.tok('--bp-brand', '#b8c3ff'), lineWidth: 2,
+    topColor: 'rgba(' + brandRgb + ',0.22)', bottomColor: 'rgba(' + brandRgb + ',0)',
+    priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 3,
+  });
+  area.setData(closes);
 
-  const candle = BPChart.addCandleSeries(chart);
-  candle.setData(d.ohlc);
-
-  /* EMA legend */
-  const legEl = document.getElementById('emaLegend');
-  function updateLeg(v12, v99_, dateStr) {
-    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-    const l12 = v12  ?? d.ema12.at(-1)?.value;
-    const l99 = v99_ ?? d.ema99.at(-1)?.value;
-    const datePart = dateStr
-      ? `<span style="color:var(--bp-text3);margin-right:8px;font-size:var(--bp-text-xs)">${dateStr}</span>`
-      : '';
-    legEl.innerHTML =
-      datePart +
-      `<span style="color:var(--bp-brand)"><span style="display:inline-block;width:14px;height:2px;background:var(--bp-brand);vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
-      `<span style="color:var(--bp-accent-yellow)"><span style="display:inline-block;width:14px;height:2px;background:var(--bp-accent-yellow);vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA99 ${fmt(l99)}</span>`;
+  /* Trend donus seviyesi: tek mor kademeli seri; yon degistigi barda segment seffaf
+     (LC 4.1'de bosluk noktasi cizgiyi kesmiyor, olculdu) -> cizgi orada kesilir. */
+  const violet = BPChart.tok('--bp-art-violet', '#7c5cff');
+  if (st.length) {
+    const stSer = chart.addLineSeries({ color: violet, lineWidth: 2, lineType: 1, priceLineVisible: false,
+      lastValueVisible: true, crosshairMarkerVisible: false });
+    stSer.setData(st.map(function(p, i){
+      return (i > 0 && !!st[i - 1].bull !== !!p.bull) ? {time: p.time, value: p.value, color: 'rgba(0,0,0,0)'} : {time: p.time, value: p.value};
+    }));
+    document.getElementById('chStVal').textContent = fmtP(st[st.length - 1].value) + ' ₺';
+    document.getElementById('chKeySt').hidden = false;
   }
-  updateLeg();
 
-  chart.subscribeCrosshairMove(p => {
-    /* G26: p.time==0 falsy ama geçerli idx — null/undefined ile karşılaştır */
-    if (p?.time == null) { updateLeg(); return; }
-    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value, _fmtDateShort(p.time));
+  /* Son 6 durum degisimi: signal_history'den (AL/SAT baslangici, closed_at_date = Yatay). */
+  const _iso = function(tr){ var p = String(tr || '').split('.'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : null; };
+  const _stName = { up: 'Güçlü Trend', flat: 'Yatay', down: 'Trend Bozuldu' };
+  let evs = [];
+  (d.signal_history || []).forEach(function(h){
+    const s0 = h.signal === 'AL' ? 'up' : h.signal === 'SAT' ? 'down' : null;
+    if (s0) evs.push({ day: _iso(h.date), st: s0, pri: 1 });
+    if (h.closed_at_date) evs.push({ day: _iso(h.closed_at_date), st: 'flat', pri: 0 });
+  });
+  evs = evs.filter(function(e){ return e.day && _dayToIdx[e.day] !== undefined; })
+           .sort(function(x, y){ return x.day < y.day ? -1 : x.day > y.day ? 1 : x.pri - y.pri; });
+  const byDay = {};
+  evs.forEach(function(e){ byDay[e.day] = e; });           /* ayni gun: baslangic Yatay'i ezer */
+  evs = Object.keys(byDay).sort().map(function(k){ return byDay[k]; })
+           .filter(function(e, i, arr){ return i === 0 || arr[i - 1].st !== e.st; }).slice(-6);
+  const evAt = {};
+  const markers = evs.map(function(e){
+    const t = _dayToIdx[e.day]; evAt[t] = e;
+    return e.st === 'up'
+      ? { time: t, position: 'belowBar', shape: 'arrowUp',   color: BPChart.tok('--bp-al', '#00e290'), size: 1 }
+      : e.st === 'down'
+      ? { time: t, position: 'aboveBar', shape: 'arrowDown', color: BPChart.tok('--bp-state-broken-text', '#b9b7c0'), size: 1 }
+      : { time: t, position: 'aboveBar', shape: 'circle',    color: BPChart.tok('--bp-text3', '#909097'), size: 0.6 };
+  });
+  area.setMarkers(markers);
+  if (evs.length) {
+    document.getElementById('chEvN').textContent = evs.length;
+    document.getElementById('chKeyEv').hidden = false;
+    document.getElementById('chEvList').innerHTML = evs.map(function(e){
+      return '<li>' + _fmtDay(_dayToIdx[e.day], true) + ': ' + _stName[e.st] + '</li>';
+    }).join('');
+  }
+  document.getElementById('chKeys').hidden = false;
+
+  /* OHLC lejanti (sol ust): uzerine gelinen gun, yoksa son seans. */
+  const legEl = document.getElementById('chLegend');
+  function updateLeg(i) {
+    const b = d.ohlc[i]; if (!b) return;
+    const prev = i > 0 ? d.ohlc[i - 1].close : null;
+    const ch = prev ? (b.close / prev - 1) * 100 : null;
+    const ev = evAt[i];
+    legEl.innerHTML = '<span class="ch-l-date">' + _fmtDay(i, true) + '</span>'
+      + '<span>A <b>' + fmtP(b.open) + '</b></span><span>Y <b>' + fmtP(b.high) + '</b></span>'
+      + '<span>D <b>' + fmtP(b.low) + '</b></span><span>K <b>' + fmtP(b.close) + '</b></span>'
+      + (ch != null ? '<span class="' + (ch > 0 ? 'bp-al-text' : ch < 0 ? 'bp-sat-text' : '') + '">' + fmtPct(ch) + '</span>' : '')
+      + (ev ? '<span class="ch-l-ev">' + _stName[ev.st] + ' başladı</span>' : '');
+  }
+  updateLeg(n - 1);
+  chart.subscribeCrosshairMove(function(p){
+    updateLeg(p && p.time != null ? Math.round(+p.time) : n - 1);   /* G26: time 0 gecerli */
   });
 
-  /* CPO-DEV2-096: OHLC hover tooltip — eskiden yalnizca alt-kenarda tarih etiketi vardi,
-     acilis/yuksek/dusuk/kapanis hicbir yerde okunmuyordu. Eski _chDateLbl mekanizmasi
-     bunun yerine gecti (tarih artik tooltip icinde, legend'deki datePart ile birlikte). */
-  BPChart.attachOhlcTooltip(chart, candle, elMain, (time) => _fmtDateShort(time));
+  /* Getiri seridi: 1H · 1A · 3A · YB · 1Y (son kapanisa gore). */
+  (function(){
+    const last = d.ohlc[n - 1].close, yr = _idxToDay[n - 1].slice(0, 4);
+    let ybIdx = -1;
+    for (let i = n - 1; i >= 0; i--) { if (_idxToDay[i].slice(0, 4) !== yr) { ybIdx = i; break; } }
+    const cells = [['1H', n - 1 - 5], ['1A', n - 1 - 21], ['3A', n - 1 - 63], ['YB', ybIdx], ['1Y', n - 1 - 252]]
+      .filter(function(c){ return c[1] >= 0; })
+      .map(function(c){
+        const v = (last / d.ohlc[c[1]].close - 1) * 100;
+        return '<span class="ch-ret"><span class="ch-ret-k">' + c[0] + '</span><b class="' + (v > 0 ? 'bp-al-text' : v < 0 ? 'bp-sat-text' : '') + '">' + fmtPct(v) + '</b></span>';
+      });
+    const el = document.getElementById('chReturns');
+    el.innerHTML = cells.join('');
+    el.hidden = !cells.length;
+  })();
 
-  /* Son 1 yılı göster + sağda 10 boş bar boşluk
-     NOT: setVisibleLogicalRange kullanıyoruz çünkü setVisibleRange rightOffset'i eziyor */
-  chart.timeScale().fitContent();
-  requestAnimationFrame(() => {
-    try {
-      const n = d.ohlc.length;
-      if (n > 0) {
-        chart.timeScale().setVisibleLogicalRange({
-          from: Math.max(0, n - 260),   // ~1 yıl + 8 ekstra sol bar (ilk label kırpılmasın)
-          to:   n - 1 + 10,             // son bar + 10 boş slot = sağ boşluk
-        });
-      }
-    } catch(_) { console.warn('chart setVisibleLogicalRange basarisiz', _); }
+  /* EMA 12/99: varsayilan kapali, dugmeyle eklenir/kaldirilir. */
+  let emaPair = null;
+  const emaBtn = document.getElementById('chEma');
+  emaBtn.setAttribute('aria-pressed', 'false');
+  emaBtn.onclick = function(){
+    if (emaPair) { chart.removeSeries(emaPair.e12); chart.removeSeries(emaPair.e99); emaPair = null; }
+    else { emaPair = BPChart.addEmaPair(chart, ema12, ema99); }
+    emaBtn.setAttribute('aria-pressed', emaPair ? 'true' : 'false');
+  };
+
+  /* Donem cipleri + gorunen pencere etiketi (#chartPeriod ve aria-label ayni kaynaktan). */
+  const elP = document.getElementById('chartPeriod');
+  function syncPeriod(r) {
+    if (!r) return;
+    const i0 = Math.max(0, Math.ceil(r.from)), i1 = Math.min(n - 1, Math.floor(r.to));
+    if (i1 < i0) return;
+    const txt = _fmtDay(i0, true) + ' – ' + _fmtDay(i1, true) + ' · ' + (i1 - i0 + 1) + ' seans';
+    if (elP) elP.textContent = txt;
+    elMain.setAttribute('aria-label', '{{ ticker }} kapanış fiyatı grafiği, ' + txt);
+  }
+  chart.timeScale().subscribeVisibleLogicalRangeChange(syncPeriod);
+  const chips = Array.prototype.slice.call(document.querySelectorAll('#chChips button'));
+  function setWin(N) {
+    chips.forEach(function(c){ c.setAttribute('aria-pressed', +c.dataset.n === N ? 'true' : 'false'); });
+    chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - N), to: n - 1 + 6 });
+  }
+  chips.forEach(function(c){
+    c.disabled = +c.dataset.n > n * 1.9 && +c.dataset.n !== 21;   /* cok kisa gecmiste anlamsiz cip */
+    c.onclick = function(){ setWin(+c.dataset.n); };
   });
+  const N0 = window.innerWidth < 768 ? 63 : 252;
+  requestAnimationFrame(function(){ try { setWin(N0); } catch(_) { console.warn('grafik penceresi ayarlanamadi', _); } });
 
   function _syncChartSize() {
     _syncW52Cap();
     const w = elMain.clientWidth;
     if (!w || !chart) return;
-    const isMob = window.innerWidth < 768;
-    chart.applyOptions({ width: w, height: isMob ? 240 : 340 });
+    const h = _chartH();
+    elMain.style.height = h + 'px';
+    chart.applyOptions({ width: w, height: h });
   }
 
   _hisseResizeHandler = function(){ clearTimeout(_chartResizeT); _chartResizeT = setTimeout(_syncChartSize, 150); };
   window.addEventListener('resize', _hisseResizeHandler);
 
-  // SPEC-017 Faz F Bug 3: ResizeObserver — tab switch (display:none→block) resize tetikle
+  // SPEC-017 Faz F Bug 3: ResizeObserver — sekme gecisinde (display:none→block) yeniden boyutla
   try {
     if (typeof ResizeObserver !== 'undefined') {
       _hisseChartRO = new ResizeObserver(_syncChartSize);
       _hisseChartRO.observe(elMain);
     }
   } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (sekme degisince grafik yeniden boyutlanmayacak)', _); }
-  // applyTab hook: AI/Grafik tab açıldığında chart resize zorla
   window.bpChartResize = function(){
     setTimeout(_syncChartSize, 80);
   };
