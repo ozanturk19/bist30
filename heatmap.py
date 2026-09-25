@@ -36,6 +36,17 @@ MIN_ROWS = 95                # kalite kapısı: bundan az dolu satırlı görün
 _DAY_FILE = re.compile(r"^\d{4}-\d{2}-\d{2}\.json$")
 
 
+def iso_day(s):
+    """'25.09.2026' (D-06 analiz satırı `bar_date`) ya da '2026-09-25' → '2026-09-25'; tanınmazsa None.
+    D-06 analyze() sözlüğündeki ikinci `bar_date` anahtarı GG.AA.YYYY yazıyordu; ISO ile kıyaslanınca
+    25.09 görüntüsünde 100/100 satır "bayat" çıktı (canlı /api/heatmap 25.09 20:2x)."""
+    s = str(s or "").strip()
+    m = re.fullmatch(r"([0-9]{2})\.([0-9]{2})\.([0-9]{4})", s)
+    if m:
+        return "%s-%s-%s" % (m.group(3), m.group(2), m.group(1))
+    return s[:10] if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", s[:10]) else None
+
+
 def date_label(iso):
     d = date.fromisoformat(iso[:10])
     return "%d %s" % (d.day, MONTHS[d.month - 1])
@@ -191,7 +202,8 @@ def build(asof_iso, members, official, rows, fund, scores, sectors, names, xu100
         pr = row.get("period_ret") or {}
         ch = {"d1": d1}
         ch.update({k: pr.get(k) for k in PERIODS})
-        stale = (not off) or row.get("bar_date") != asof_iso or (d1 is not None and abs(d1) > STALE_ABS_D1)
+        stale = ((not off) or iso_day(row.get("bar_date")) != asof_iso
+                 or (d1 is not None and abs(d1) > STALE_ABS_D1))
         m, why = mcap_tl(p, (fund.get(t) or {}).get("shares"), reported_mcap(fund.get(t)))
         if why:
             notes.append("%s: %s" % (t, why))

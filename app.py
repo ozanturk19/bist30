@@ -2187,9 +2187,10 @@ def analyze(ticker_base):
             "change_pct":    round(change_pct, 2),
             "close_status":  "resmi" if _official_applied else "gecici",   # D-04
             "close_source":  official_close.SOURCE_LABEL if _official_applied else None,
-            # D-42: son barın tarihi (ısı haritası "bayat" = bar_date ≠ son EOD günü) ve dönem
-            # getirileri (1h/1a/YBB/1y) — fiyat/değişimle AYNI resmi-kapanış serisinden.
-            "bar_date":      close.index[-1].strftime("%Y-%m-%d"),
+            # D-42: dönem getirileri (1h/1a/YBB/1y) — fiyat/değişimle AYNI resmi-kapanış serisinden.
+            # Son barın tarihi aşağıdaki tek `bar_date` (D-06, GG.AA.YYYY); ısı haritası "bayat"
+            # kıyası heatmap.iso_day ile yapar (D-54: burada ikinci bir ISO `bar_date` anahtarı
+            # vardı, sözlükte sonraki anahtar kazandığı için hiç yayınlanmıyordu).
             "period_ret":    heatmap.period_returns(
                 [(_ts.strftime("%Y-%m-%d"), float(_c)) for _ts, _c in close.iloc[-300:].items()]),
             "signal":        signal,

@@ -165,6 +165,20 @@ def test_stale_flags_and_counts():
     assert c["up"] + c["down"] + c["flat"] == sum(1 for x in snap["rows"] if x["ch"]["d1"] is not None)
 
 
+def test_stale_accepts_d06_bar_date_format():
+    """D-54 bulgusu: analyze() `bar_date` GG.AA.YYYY yayınlıyor (D-06); ISO ile kıyas 25.09'da
+    100/100 satırı bayat yaptı. Canlı biçimle bayat yalnız gerçekten eski bar."""
+    rows = {t: dict(r, bar_date="23.09.2026") for t, r in FX["rows"].items()}
+    rows["THYAO"]["bar_date"] = "22.09.2026"
+    rows["GARAN"]["bar_date"] = None
+    base = {x["t"] for x in _snap()["rows"] if x["stale"]}          # ISO bar_date ile (başka nedenler)
+    assert "THYAO" not in base and "GARAN" not in base and len(base) < 20
+    r = {x["t"]: x for x in _snap(rows=rows)["rows"]}
+    assert {t for t, x in r.items() if x["stale"]} == base | {"THYAO", "GARAN"}
+    assert hm.iso_day("23.09.2026") == hm.iso_day("2026-09-23") == "2026-09-23"
+    assert hm.iso_day("2026-09-23T18:00:00") == "2026-09-23" and hm.iso_day("23/09/2026") is None
+
+
 # ── sözleşme şeması + boyut ──────────────────────────────────────────────────
 def test_payload_schema_and_size():
     snap = _snap()
