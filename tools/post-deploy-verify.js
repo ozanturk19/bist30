@@ -427,7 +427,7 @@ const step = async (ad, fn) => {
       await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json', body: COLD }));
       await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
       await pg.waitForTimeout(3500);
-      const t = await rd(pg, '#daSpotlightBody');
+      const t = await rd(pg, '#hpMvUp');  /* C-28: Spotlight kalktı; aynı K-BK dalı hareketliler listesinde */
       (/hazırlanıyor/.test(t) && !/verisi yok/.test(t))
         ? ok('K-BK ana sayfa soguk baslangicta "hazirlaniyor"', '(fix oncesi: "Su an gosterilecek hisse verisi yok.")')
         : bad('K-BK ana sayfa', t);
@@ -441,7 +441,7 @@ const step = async (ad, fn) => {
         body: JSON.stringify({ stocks: [], loading: false }) }));
       await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
       await pg.waitForTimeout(3000);
-      const t = await rd(pg, '#daSpotlightBody');
+      const t = await rd(pg, '#hpMvUp');  /* C-28: Spotlight kalktı; aynı K-BK dalı hareketliler listesinde */
       /verisi yok/.test(t) ? ok('K-BK negatif kontrol', 'GERCEKTEN bos (loading:false) -> "veri yok" aynen kaldi')
                            : bad('K-BK negatif kontrol', t);
       await c.close();
@@ -936,27 +936,18 @@ const step = async (ad, fn) => {
     });
   }
 
-  await step('K-BP anasayfa gundem karti yon rengini GERCEKTEN tasiyor', async () => {
+  await step('K-BP anasayfa hareketliler yon rengini GERCEKTEN tasiyor', async () => {
+    /* C-28 (25.09): Gundem "Hisse" sekmesi kartlari kalkti (C-65 RSS + dis baglanti);
+       ayni K-BP sorusu (renk VAR MI) artik "Son seansin hareketlileri" satirlarinda. */
     await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-    await p.waitForTimeout(1500);
-    /* Kart listesi "Hisse" sekmesinde tembel yukleniyor. */
-    await p.evaluate(() => {
-      const t = [...document.querySelectorAll('.da-gnm-tab')].find(x => /Hisse/.test(x.textContent));
-      if (t) t.click();
-    });
     await p.waitForTimeout(3500);
-    const r = await p.evaluate(() => [...document.querySelectorAll('.da-gnm-card')].map(c => {
-      const s = c.querySelector('.da-gnm-chg');
-      return s ? { t: s.textContent.trim(), c: getComputedStyle(s).color } : null;
-    }).filter(Boolean));
-    if (!r.length) return bad('K-BP anasayfa', 'gundem hisse karti bulunamadi (olcum gecersiz)');
-    /* ASIL HATA: sinif `.da-mrow` altina kilitliydi, 5/5 kart AYNI govde
-       rengindeydi. Yani "renk dogru mu" degil, "renk VAR MI" soruluyor. */
-    const yanlis = r.filter(x => (/^\+/.test(x.t) && x.c !== AL) || (/^-/.test(x.t) && x.c !== SAT));
+    const r = await p.evaluate(() => [...document.querySelectorAll('#hpMvUp .c, #hpMvDn .c')].map(s =>
+      ({ t: s.textContent.trim(), c: getComputedStyle(s).color })));
+    if (!r.length) return bad('K-BP anasayfa', 'hareketliler satiri bulunamadi (olcum gecersiz)');
+    const yanlis = r.filter(x => (/^\+/.test(x.t) && x.c !== AL) || (/^[-−]/.test(x.t) && x.c !== SAT));
     if (yanlis.length) return bad('K-BP anasayfa',
-      yanlis.length + '/' + r.length + ' kartta yon rengi YOK/yanlis: ' + JSON.stringify(yanlis[0]));
-    const renkler = new Set(r.map(x => x.c));
-    ok('K-BP anasayfa', r.length + ' kart · ' + renkler.size + ' farkli yon rengi');
+      yanlis.length + '/' + r.length + ' satirda yon rengi YOK/yanlis: ' + JSON.stringify(yanlis[0]));
+    ok('K-BP anasayfa', r.length + ' satir · ' + new Set(r.map(x => x.c)).size + ' farkli yon rengi');
   });
 
   await step('K-BP kanon bp-format.js sayfada gercekten yuklu', async () => {
@@ -1133,24 +1124,8 @@ const step = async (ad, fn) => {
       else if (/fark: %[\d,]+,?\d{3,}/.test(csr)) bad('K-BR CSR ' + s.ticker, 'EMA fark yuzdesi ham hassasiyette: ' + (csr.match(/fark: %[\d,]+/) || [''])[0]);
       else ok('K-BR CSR ' + s.ticker, 'indikator paneli SSR ile ayni (ADX ' + adxTr + ' · RSI ' + rsiTr + ')');
 
-      /* Anasayfa spotlight: SSR render'i CSR UZERINE farkli sayi yazmasin */
-      await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-      const read = () => p.evaluate(() => {
-        const rows = [...document.querySelectorAll('.da-spot-sub-row')];
-        const f = l => { const r = rows.find(x => x.querySelector('.lbl') &&
-                           x.querySelector('.lbl').textContent.trim() === l);
-                         return r ? r.querySelector('.val').textContent.trim() : null; };
-        return { adx: f('ADX'), rsi: f('RSI') };
-      });
-      const a = await read();
-      await p.waitForTimeout(4000);
-      const bq = await read();
-      if (!a.adx) bad('K-BR anasayfa', 'spotlight ADX satiri yok (olcum gecersiz)');
-      else if (a.adx !== bq.adx || a.rsi !== bq.rsi)
-        bad('K-BR anasayfa', 'SSR ' + JSON.stringify(a) + ' -> CSR ' + JSON.stringify(bq) + ' (gorunur ziplama)');
-      else if (!/,/.test(bq.adx))
-        bad('K-BR anasayfa', 'spotlight ADX tam sayi: ' + bq.adx);
-      else ok('K-BR anasayfa', 'SSR = CSR = ' + JSON.stringify(bq));
+      /* C-28 (25.09): ana sayfa Spotlight'i (ADX/RVOL/RSI satirlari) kalkti; ana sayfada
+         gosterge sayisi yok -> K-BR'nin anasayfa kolu kapsam disi. */
     }
   }
 

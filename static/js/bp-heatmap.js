@@ -200,7 +200,11 @@
     hideCard(true);
     var stack = cq && W < STACK_MAX;
     root.classList.toggle('hm-stack', stack);
+    /* C-28: ana sayfada (tam sayfa değil) dar kapta önizleme — piyasa değeri
+       sırasıyla büyük sektörler ~820 px'e sığdığı kadar, gerisi "Tüm harita →". */
+    var PREV = stack && !FULL, used = 0, cut = false;
     if (!stack) {
+      groups.forEach(function (g) { g.el.style.display = ''; });
       var H = map.clientHeight || Math.round(Wi / 1.6);
       var Wg = Wi + GROUP_GAP, Hg = H + GROUP_GAP;
       groups.forEach(function (g) {
@@ -217,9 +221,13 @@
         layoutTiles(g, gw, gh - lh, 1.15);
       });
     } else {
-      var budget = Math.max(1500, W * 4.6);
-      groups.forEach(function (g) {
-        var h = Math.round(Math.max(78, Math.min(360, budget * g.value / total)));
+      var budget = PREV ? Math.max(900, W * 2.4) : Math.max(1500, W * 4.6);
+      groups.forEach(function (g, i) {
+        var h = Math.round(Math.max(PREV ? 64 : 78, Math.min(PREV ? 240 : 360, budget * g.value / total)));
+        if (PREV && (cut || (i >= 2 && used + h + LABEL_H + 14 > 820))) cut = true;
+        g.el.style.display = cut ? 'none' : '';
+        if (cut) return;
+        used += h + LABEL_H + 14;
         unplace(g.el);
         if (g.lbl) g.lbl.classList.remove('hm-off');
         if (FULL && g.lbl) g.lbl.classList.remove('hm-gl2');
@@ -228,6 +236,7 @@
         layoutTiles(g, Wi, h, 1.1);
       });
     }
+    root.classList.toggle('hm-cut', cut);
     fitText();
     lastW = W;
   }

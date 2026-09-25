@@ -62,7 +62,7 @@
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=dc60c563">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=c93fa372">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 
@@ -153,108 +153,39 @@
   {%- endif %}
 </section>
 
-<!-- ═══ BUGÜN NE OLDU — deterministik, kural tabanlı (LLM/Gemini çağrısı YOK) ═══ -->
-<section class="da-section" id="daRecapSection">
-  <div class="da-panel da-panel--accent da-recap-panel">
-    <div class="da-recap-tag"><span class="dot"></span>Piyasa Özeti</div>
-    <h2 class="da-recap-headline da-display">Son kapanışta ne oldu?</h2>
-    <p class="da-recap-body" id="daRecapText">
-      <span class="da-skel" style="display:block;width:96%;height:1.1em;border-radius:6px;margin-bottom:8px"></span>
-      <span class="da-skel" style="display:block;width:80%;height:1.1em;border-radius:6px;margin-bottom:8px"></span>
-      <span class="da-skel" style="display:block;width:60%;height:1.1em;border-radius:6px"></span>
-    </p>
-    <span class="da-det-badge" tabindex="0" data-tip="Bu özet bir LLM tarafından değil, sabit kurallarla (en yüksek |değişim|, en güçlü sektör) üretildi.">⚙️ Deterministik özet · kural tabanlı</span>
+{#- ═══ C-28 (25.09): ana sayfa 9 blok → 6 (sıra v3) ═══
+    Hero → Güçlü Trend → BIST100 ısı haritası → Hareketliler → Öne çıkan şirketler
+    (C-30) → Gündem + Abonelik. Kalkanlar: Piyasa Özeti paneli (+ "Deterministik
+    özet" rozeti), Gündem RSS sekmeleri (dış bağlantı + kaynak adı, C-65), en
+    yüksek BP Spotlight'ı (yerini C-30 "Öne çıkan şirketler" alır, D-07 tamlık
+    ≥0,8), döndürülmüş/asimetrik skor ızgarası, küratörlü RVOL listesi, ikinci
+    (hareket) şeridi. -#}
+{%- set _gt = ssr_top_signals or [] -%}
+{%- set _asl = (_asof ~ ' kapanışı') if _asof else 'son kapanış' %}
+<section class="da-section hp-blk" id="guclu-trend" aria-labelledby="hpGtT">
+  <div class="hp-blk-h">
+    <h2 class="hp-blk-t da-display" id="hpGtT">Güçlü Trend'deki {{ _sc.al or 0 }} hisse</h2>
+    <p>{% if _sc.total %}{{ _sc.total }} hisseden {{ bpf.poss(_sc.al or 0) }} beş koşulu birden sağlıyor · {% endif %}<span class="hp-asof">{{ _asl }}</span></p>
   </div>
-</section>
-
-<!-- ═══ GÜNDEM & HABERLER — /api/haberler (şirket bildirimleri, site içi) + /api/market-news + /api/bilanco-mini
-     (C-65 26.09: başka sitelerin RSS başlıkları kaynak adı + dış bağlantıyla kalktı, kanon §2.8/§4),
-     mevcut index.html'deki gundem-section'ın Data-Art diline taşınmış hali (denetim sonrası
-     eklendi — orijinal taslak bu bölümü hiç içermiyordu, Ozan'ın "haberler daha detaylı
-     olsun" isteğiyle çelişirdi) ═══ -->
-<section class="da-section" id="daGundemSection" aria-label="Gündem ve haberler">
-  <div class="da-section-head">
-    <div>
-      <div class="da-eyebrow">Gündem</div>
-      <h2 class="da-section-title da-display" id="daGnmHeadline">Gündem başlıkları.</h2>
-    </div>
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div class="da-gnm-tabs" id="daGnmTabs" role="tablist" aria-label="Gündem sekmeleri">
-        <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" tabindex="0" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">📰</span> Bildirimler</button>
-        <button type="button" class="da-gnm-tab" id="daGnmTabHisse" role="tab" aria-selected="false" aria-controls="daGnmPanelHisse" tabindex="-1" onclick="daSwitchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
-      </div>
-      <a href="/haberler" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
-    </div>
-  </div>
-
-  <div id="daGnmPanelMakro" role="tabpanel" aria-labelledby="daGnmTabMakro" tabindex="0">
-    <div class="da-macro-news-list" id="daMacroNewsList">
-      <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md);margin-bottom:8px"></div>
-      <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md);margin-bottom:8px"></div>
-      <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
-    </div>
-  </div>
-
-  <div id="daGnmPanelHisse" style="display:none" role="tabpanel" aria-labelledby="daGnmTabHisse" tabindex="0">
-    <div class="da-gundem-layout">
-      <div class="da-gundem-cards" id="daGundemCards">
-        <div class="da-skel" style="height:120px;border-radius:var(--bp-radius-20)"></div>
-        <div class="da-skel" style="height:120px;border-radius:var(--bp-radius-20)"></div>
-        <div class="da-skel" style="height:120px;border-radius:var(--bp-radius-20)"></div>
-      </div>
-      <div class="da-bilanco-mini" id="daBilancoMini">
-        <h3 class="da-bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</h3>
-        <div id="daBilancoMiniBody" style="min-height:60px">
-          <div class="da-skel" style="height:12px;border-radius:4px;margin-bottom:8px;width:80%"></div>
-          <div class="da-skel" style="height:12px;border-radius:4px;margin-bottom:8px;width:60%"></div>
-          <div class="da-skel" style="height:12px;border-radius:4px;width:70%"></div>
-        </div>
-        <a href="/takvim?tur=bilanco" style="display:inline-block;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm takvim →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ SPOTLIGHT — en yüksek BorsaPusula Skoru'na sahip hisse (13.09/14.09: Ozan'ın
-     tekrarlanan "teknik önde duruyor" geri bildirimi sonrası hisse.html hero ile
-     AYNI hiyerarşiye çekildi — BP dominant, Teknik ikincil) ═══ -->
-<section class="da-section" id="daSpotlightSection">
-  <div class="da-section-head">
-    <div>
-      <div class="da-eyebrow">Son Seansın Öne Çıkanı</div>
-      <h2 class="da-section-title da-display">En yüksek BorsaPusula Skoru.</h2>
-    </div>
-    <p class="da-section-desc">BorsaPusula Skoru — Temel Analiz Skoru (%60) ve Teknik Güç Skoru'nun (%40) bileşik puanı (0–100).</p>
-  </div>
-  <div id="daSpotlightBody">
-    {% if ssr_spotlight %}
-    {% set s = ssr_spotlight %}
-    {% set _useBps = s.hs_available and s.borsapusula_skoru is not none %}
-    <div class="da-spot-grid">
-      <div class="da-spot-ring-wrap"><div class="da-spot-ring-num"><span class="n da-num">{{ (s.borsapusula_skoru if _useBps else s.signal_strength)|tr_num if (s.borsapusula_skoru if _useBps else s.signal_strength) is not none else '—' }}</span><span class="l">{{ 'BorsaPusula Skoru' if _useBps else 'Teknik Güç Skoru' }}</span></div></div>
-      <div class="da-spot-body">
-        <div class="da-spot-top">
-          <div><div class="da-spot-ticker"><a href="/hisse/{{ s.ticker }}">{{ s.ticker }}</a></div>
-          <div class="da-spot-company">{{ s.name or '' }}</div>
-          {% if s.sector %}<span class="da-spot-sector">{{ s.sector }}</span>{% endif %}</div>
-          <div class="da-spot-price"><div class="p da-num">{{ s.price|tr_price }} ₺</div><div class="d da-num" style="color:{{ bpf.dir_color(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</div></div>
-        </div>
-        {% if s.signal == 'AL' %}<span class="da-spot-signal sig-al">● Güçlü Trend</span>{% elif s.signal == 'SAT' %}<span class="da-spot-signal sig-sat">● Trend Bozuldu</span>{% else %}<span class="da-spot-signal sig-bekle">● Yatay</span>{% endif %}
-        <div class="da-spot-subs">
-          {% if _useBps %}<div class="da-spot-sub-row"><span class="lbl">Teknik</span><span class="val da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span></div>{% endif %}
-          <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ '%.1f'|format(s.adx)|replace('.', ',') if s.adx is not none else '—' }}</span></div>
-          <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ ('%.2f'|format(s.rvol)|replace('.', ',')) ~ '×' if s.rvol is not none else '—' }}</span></div>
-          <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ '%.1f'|format(s.rsi)|replace('.', ',') if s.rsi is not none else '—' }}</span></div>
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <div class="da-spot-grid">
-      <div class="da-skel" style="width:190px;height:190px;border-radius:50%"></div>
-      <div style="flex:1"><div class="da-skel" style="width:60%;height:2rem;border-radius:8px;margin-bottom:12px"></div><div class="da-skel" style="width:40%;height:1rem;border-radius:6px"></div></div>
-    </div>
-    {% endif %}
-  </div>
+  {%- if _gt %}
+  <ul class="hp-gt" role="list">
+    {%- for s in _gt %}
+    {%- set _bp = s.borsapusula_skoru if (s.borsapusula_skoru is defined and s.borsapusula_skoru is not none) else none %}
+    <li><a class="hp-card" href="/hisse/{{ s.ticker }}" data-t="{{ s.ticker }}">
+      <span class="hp-card-r1"><b class="hp-tk">{{ s.ticker }}</b>{% if s.is_new_signal %}<span class="hp-pill hp-pill--new">YENİ</span>{% elif s.signal_bars %}<span class="hp-pill">{{ s.signal_bars }} gündür</span>{% endif %}</span>
+      <span class="hp-nm">{{ s.name or '' }}</span>
+      <span class="hp-pr"><b class="da-num">{{ s.price|tr_price }} ₺</b> <span class="da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span></span>
+      <span class="hp-fin">
+        <span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (_bp ~ ' / 100') if _bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _bp or 0 }} 100"/></svg><b class="da-ring-num">{{ _bp if _bp is not none else '—' }}</b></span>
+        <span class="hp-fin-tx" data-fin></span>
+      </span>
+    </a></li>
+    {%- endfor %}
+  </ul>
+  {%- if (_sc.al or 0) > _gt|length %}<p class="hp-more"><a href="/tarama?durum=guclu-trend" class="da-tap">Tümü ({{ _sc.al }}) →</a></p>{% endif %}
+  {%- else %}
+  <p class="hp-empty">{% if _sc.total %}<span class="hp-asof">{{ _asl }}</span>: Güçlü Trend'de hisse yok.{% else %}Veriler hazırlanıyor…{% endif %}</p>
+  {%- endif %}
 </section>
 
 {# C-55 (24.09): BIST100 ısı haritası sektör mozaiğinin yerini alır. `heatmap`
@@ -283,77 +214,40 @@
 </section>
 {% endif %}
 
-<!-- ═══ ÖNE ÇIKAN HİSSELER IZGARASI (mockup sırası: recap→sektör→skor) ═══ -->
-<section class="da-section da-clip-block" id="skorlar">
-  <div class="da-section-head">
-    <div>
-      <div class="da-eyebrow">Teknik Güç Skoru</div>
-      {# K-CW: "sinyal" kelimesi CPO-1682 kanonunda yalnız YÖN için kullanılır;
-         bu ızgara signal==='AL' filtreli ve signal_strength'e göre sıralı —
-         başlık ikisini de söylüyor. #}
-      <h2 class="da-section-title da-display">Güçlü Trend'de en yüksek skorlar.</h2>
-    </div>
-    <a href="/tarama?sort=signal_strength" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tüm taramayı gör →</a>
+{#- Hareketliler (5 + 5, tüm kapsam): eski kayan şerit + küratörlü liste tek blokta.
+    /api/data'dan JS doldurur; iskelet satırları aynı yükseklikte (CLS yok).
+    TAVAN/TABAN etiketi yalnız ısı haritası satırında `lim` olan (BIST100) hissede. -#}
+<section class="da-section hp-blk" id="hareketliler" aria-labelledby="hpMvT">
+  <div class="hp-blk-h">
+    <h2 class="hp-blk-t da-display" id="hpMvT">Son seansın hareketlileri</h2>
+    <p>Tüm kapsam · <span class="hp-asof">{{ _asl }}</span></p>
   </div>
-  <div class="da-stock-grid" id="daStockGrid">
-    {% if ssr_top_signals %}{% for s in ssr_top_signals %}
-    <a href="/hisse/{{ s.ticker }}" class="da-scard sm">
-      <div class="da-sc-top"><div><div class="da-sc-ticker">{{ s.ticker }}</div><div class="da-sc-company">{{ s.name or '' }}</div></div>
-      <div class="da-sc-price"><div class="p">{{ s.price|tr_price }}</div><div class="d" style="color:{{ bpf.dir_color(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</div></div></div>
-      <div class="da-sc-mid"><div class="da-sc-ring-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</div>
-      <span class="da-sc-sig sig-al">● Güçlü Trend</span></div>
-    </a>
-    {% endfor %}{% else %}
-    <div class="da-skel" style="grid-column:span 6;grid-row:span 2;border-radius:var(--bp-radius-20)"></div>
-    <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
-    <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
-    {% endif %}
+  <div class="hp-mv">
+    <div class="da-panel hp-pan"><h3>En çok yükselenler</h3><ol class="hp-rows" id="hpMvUp">{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}</ol></div>
+    <div class="da-panel hp-pan"><h3>En çok düşenler</h3><ol class="hp-rows" id="hpMvDn">{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}</ol></div>
   </div>
+  {%- if heatmap and heatmap.rows %}
+  {%- set _lim = {} -%}{%- for r in heatmap.rows if r.lim -%}{%- set _ = _lim.update({r.t: r.lim}) -%}{%- endfor %}
+  <script type="application/json" id="hpLim">{{ {'asof': heatmap.asof, 'lim': _lim}|tojson }}</script>
+  {%- endif %}
 </section>
 
-<!-- ═══ KÜRATÖRLÜ LİSTELER ═══ -->
-<section class="da-section" id="listeler">
-  <div class="da-section-head">
-    <div>
-      <div class="da-eyebrow">Küratörlü Listeler</div>
-      <h2 class="da-section-title da-display">Tarama motorunun öne çıkardıkları.</h2>
-    </div>
-    <p class="da-section-desc">Son kapanış verisinden her sayfa yüklemesinde yeniden hesaplanır.</p>
+{#- Son şirket bildirimleri (C-28 6. blok "Haberler özeti"): /api/haberler, her satır
+    site içi kalıcı bildirim sayfasına gider (C-57/C-65; kaynak adı ve dış bağlantı yok). -#}
+<section class="da-section hp-blk" id="bildirimler" aria-labelledby="hpNwT">
+  <div class="hp-blk-h">
+    <h2 class="hp-blk-t da-display" id="hpNwT">Son şirket bildirimleri</h2>
+    <a href="/haberler" class="da-tap">Tüm haberler →</a>
   </div>
-  {# K-CE (22.09): burada IKI iskelet karti vardi cunku iki kart basiliyordu;
-     "Bugünün En Güçlü Teknik Sinyalleri" karti bir ust bolumun (#skorlar)
-     ilk 6 hissesinin BIREBIR AYNISIYDI (ayni filtre, ayni siralama, canli
-     olcum 6/6 kesisim) ve ustune EOD veriye "Bugünün" diye tarih iddiasi
-     ekliyordu. Kart kaldirildi -> tek iskelet. #}
-  <div class="da-curated-list" id="daCuratedList">
-    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
-  </div>
+  <ol class="da-panel hp-nw" id="hpNw">{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}</ol>
 </section>
-
-<!-- Son kapanış hareket şeridi — gerçek en çok hareket eden hisseler.
-     K-CE (22.09): etiket "Gün İçi En Çok Hareket Edenler" idi. Mimari
-     CPO-1508/1512/1703 ile EOD-only: /api/data GUNDE TEK KEZ, kapanistan
-     sonra yazilir; change_pct her zaman TAMAMLANMIS gunun kapanis-kapanis
-     degisimidir, gun ici degil. Ustelik AYNI SAYFA ayni alani "Son
-     kapanista ne oldu?" basligi altinda dogru adlandiriyordu. -->
-<div class="da-marquee-wrap">
-  <div class="da-marquee-label">Son Kapanışta En Çok Hareket Edenler</div>
-  {# K-AF (21.09): bu şeridin duraklatma yolu YALNIZ `:hover`'dı — klavye ve
-     dokunmatik kullanıcı için mekanizma HİÇ yoktu (WCAG 2.2.2). Makro şeridin
-     `.macro-pause-btn` deseni birebir uygulandı (aynı aria-pressed/etiket
-     değişimi), yalnız konumu bu bölümün sağ üstü. #}
-  <button type="button" class="da-marquee-pause" id="daMarqueePause" aria-pressed="false" aria-controls="daMarqueeTrack" aria-label="Hareket şeridini duraklat" onclick="(function(b){var w=b.closest('.da-marquee-wrap');var p=w.getAttribute('data-paused')==='true';w.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.querySelector('span').textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Hareket şeridini devam ettir':'Hareket şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button>
-  <div class="da-marquee-track" id="daMarqueeTrack">
-    <span class="da-mrow"><span class="mt">Yükleniyor…</span></span>
-  </div>
-</div>
 
 <!-- ═══ ABONELİK — heroSubmitSub()/KVKK deseni AYNEN (Madde 6b) ═══ -->
-<section class="da-section" id="daSubSection" aria-label="E-posta abonelik">
+<section class="da-section hp-blk" id="daSubSection" aria-label="E-posta abonelik">
   <div class="da-sub-panel" id="daSubPanel">
     <div class="da-sub-copy">
-      <div class="da-sub-title da-display">Sinyal değişince haberin olsun.</div>
-      <div class="da-sub-desc">E-posta bildirimi — istediğin zaman çık.</div>
+      <div class="da-sub-title da-display">Akşam Bülteni</div>
+      <div class="da-sub-desc">Her işlem günü kapanıştan sonra durumu değişen hisseler e-postana gelsin. İstediğin zaman çıkabilirsin.</div>
     </div>
     <div class="da-sub-form" id="heroSubForm">
       <div class="da-sub-row">
@@ -406,51 +300,8 @@
     if (typeof n !== 'number' || !isFinite(n)) return '—';
     return Math.round(n).toLocaleString('tr-TR');
   }
-  // Ürün sözlüğü — filtre butonlarıyla AYNI (index.html'in mevcut Tümü/AL/SAT/BEKLE metni).
-  // "Güçlü Sinyal" ifadesi BİLEREK kullanılmadı — sinyal türü (AL) ile skor bandı
-  // aynı adı taşırsa çakışma yaratır (bkz. reference_guclu_trend_guclu_sinyal_isim_carpismasi_05_09.md).
-  // CPO-1682: bu karar artık sitewide — skorun kanonik adı "Teknik Güç Skoru",
-  // bantları "Yüksek/Orta Skor"; "Sinyal" kelimesi yalnızca YÖN için kullanılır.
-  var SIGNAL_META = {
-    AL:    { label: 'Güçlü Trend',  cls: 'sig-al'    },
-    SAT:   { label: 'Trend Bozuldu', cls: 'sig-sat'   },
-    BEKLE: { label: 'Yatay',        cls: 'sig-bekle' }
-  };
-  function signalMeta(sig){ return SIGNAL_META[sig] || SIGNAL_META.BEKLE; }
-  // K-CW: Teknik Güç Skoru'nun RENGİ kanonik `tier` alanından türer
-  // (app.py _derive_tier — AL sinyali + 70/56 eşiği + likidite/bilanço demote),
-  // /tarama scoreCell() ve /hisse skor halkasıyla BİREBİR aynı sözlük:
-  // guclu_sinyal = mor, standart = periwinkle, rozet-yok = nötr. Eşik BURADA
-  // TEKRAR TANIMLANMAZ.
-  // Önceki hali ham skoru 70/56 ile --bp-al/--bp-volume/--bp-sat'a boyuyordu:
-  // (a) aynı sayi ana sayfada yeşil, /tarama ve /hisse'de mordu (22.09 ölçüm:
-  // ENERY 72 / TUPRS 62 / AYGAZ 49 / BIMAS 43 → 4/4 renk uyuşmazlığı),
-  // (b) AL sinyalli bir hissenin skoru SAT'ın kanonik rengiyle boyanıyordu —
-  // "en yüksek skorlar" ızgarasında 7 karttan 3'ü kırmızı halka + yeşil
-  // "Güçlü Trend" rozeti taşıyordu.
-  function scoreColorVar(tier){
-    if (tier === 'guclu_sinyal') return 'var(--bp-premium)';
-    if (tier === 'standart')     return 'var(--bp-brand)';
-    return 'var(--bp-text3)';
-  }
-  // bughunt-13.09 (CPO-1627 backend fix sonrasi): BorsaPusula Skoru icin AYRI
-  // fonksiyon — scoreColorVar (70/56) Teknik Guc Skoru rozet esigi, BorsaPusula
-  // ise kanonik 70/50 (hisse.html hero + tarama.html _categoryColorVar ile ayni).
-  // Ikisini karistirmak tam da puan-tutarlilik ihlali sinifina girerdi.
-  function bpScoreColorVar(v){
-    if (typeof v !== 'number') return 'var(--bp-text3)';
-    if (v >= 70) return 'var(--bp-al)';
-    if (v >= 50) return 'var(--bp-volume)';
-    return 'var(--bp-sat)';
-  }
-  function ringDash(pct, r){
-    var c = 2 * Math.PI * r;
-    var v = Math.max(0, Math.min(100, pct || 0)) / 100 * c;
-    return v.toFixed(1) + ' ' + c.toFixed(1);
-  }
-
   // ── State ──
-  var st = { macro: null, stocksErr: null, sectorsErr: null, realStocks: null, sectors: null, dataEnvelope: null };
+  var st = { macro: null };
 
   // ═══ 1) Makro şerit (canlı, 180 sn) + hero "Seans içi · 15 dk gecikmeli" satırı ═══
   // C-27 (O16b=B not 3): kahraman kutusunun ana değeri gün sonu kapanışıdır
@@ -498,7 +349,6 @@
       if (chgEl) { chgEl.textContent = fmtPct(chg); chgEl.className = 'hp-idx-c da-num ' + bpDirClass(chg, 2); }
       if (box) box.className = 'hp-idx ' + bpDirClass(chg, 2);
     }
-    daRenderRecap();
   }
   /* C-03 / C-27: "<gün> kapanışı" etiketi /api/data updated_at'ten (göreli zaman yok). */
   function daSetAsof(updatedAt){
@@ -509,316 +359,153 @@
     document.querySelectorAll('.hp-asof').forEach(function(el){ el.textContent = lbl + ' kapanışı'; });
   }
 
-  // ═══ 3) /api/data — spotlight / mozaik-öncesi hisseler / küratörlü listeler / ızgara / marquee / stale banner ═══
+  // ═══ 3) /api/data — hero, Güçlü Trend kartları, hareketliler (C-28) ═══
+  /* Liste (ol/ul) içindeki durum mesajı <li>'ye sarılır (geçerli HTML). */
+  function daWrapState(el, html){ return /^(OL|UL)$/.test(el.tagName) ? '<li class="hp-row-state">' + html + '</li>' : html; }
   function daShowSectionError(containerId, retryFn){
     var el = document.getElementById(containerId);
     if (!el) return;
-    /* 21.09 (K-W): `.da-state-msg`/`.da-state-err` SİTEDEKİ İKİNCİ durum diliydi
-       ve K-V'nin (21.09) kanonikleştirdiği `.da-empty` ailesi ANA SAYFAYI hiç
-       görmemişti — K-V adlarına göre (`.empty-*`, `.loading-msg`) taramıştı.
-       İkinci dilin hata varyantı ayrımı YALNIZ RENKLE yapıyordu (kesikli
-       kenarlığın rengi + metin rengi): WCAG 1.4.1. Kanonik dilde ayrım tint
-       zemin + kenarlık + ⚠ ikon + eylem düğmesi. */
-    el.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.</span><button type="button" class="da-retry">Tekrar dene</button></div>';
+    /* 21.09 (K-W): kanonik `.da-empty` ailesi — ayrım tint zemin + kenarlık + ⚠ ikon + eylem düğmesi. */
+    el.innerHTML = daWrapState(el, '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.</span><button type="button" class="da-retry">Tekrar dene</button></div>');
     var btn = el.querySelector('button');
     if (btn) btn.addEventListener('click', retryFn);
   }
   function daShowSectionEmpty(containerId, text){
     var el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = '<div class="da-panel da-empty">' + esc(text) + '</div>';
+    el.innerHTML = daWrapState(el, '<div class="da-empty">' + esc(text) + '</div>');
   }
-  /* 21.09 (K-BK): "HENÜZ YOK" ile "HİÇ YOK" aynı ekranı basıyordu. `/api/data`
-     soğuk başlangıçta (her `systemctl restart` sonrası, yani HER DEPLOY'dan
-     sonra) `{"stocks": [], "loading": true}` döner; daLoadData() `loading`
-     alanını HİÇ okumuyordu ve dört bölüme birden kesin hükümlü "Şu an
-     gösterilecek hisse verisi yok." basıyordu. daLoadData() sayfa ömrü boyunca
-     BİR KEZ çağrılıyor (satır sonundaki ilk kurulum) ve boş dalında tekrar-dene
-     düğmesi de yok — yani o yalan kendiliğinden İYİLEŞMİYORDU, kullanıcı elle
-     yenileyene kadar ana sayfa "veri yok" diyordu. Kanonik "yükleniyor" dili
-     (.da-loading--block + .da-spin, K-W) zaten var; ana sayfa onu kullanmıyordu.
-     Aynı kök neden `templates/404.html`'de de vardı (orada "bulunamadı" yalanı
-     olarak çıkıyordu); kanon `static/bp-search.js:151` — `d.loading` dalını
-     yazılı gerekçesiyle ele alan TEK yer oydu. */
+  /* 21.09 (K-BK): "HENÜZ YOK" ile "HİÇ YOK" ayrı. `/api/data` soğuk başlangıçta
+     (her restart/deploy sonrası) `{"stocks": [], "loading": true}` döner →
+     "hazırlanıyor" + sınırlı tekrar; `loading:false` ve boş → gerçekten "veri yok". */
   function daShowSectionLoading(containerId, text){
     var el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = '<div class="da-panel da-loading da-loading--block" role="status" aria-live="polite"><div class="da-spin da-spin--lg" aria-hidden="true"></div>' + esc(text) + '</div>';
+    el.innerHTML = daWrapState(el, '<div class="da-loading da-loading--block" role="status" aria-live="polite"><div class="da-spin da-spin--lg" aria-hidden="true"></div>' + esc(text) + '</div>');
   }
   var DA_DATA_RETRY_MS = 5000, DA_DATA_MAX_TRIES = 6;   /* ~30 sn: soguk onbellek dolum penceresi */
   var _daDataTries = 0;
+  /* Veri alanlarını tüketen bloklar (C-28: hareketliler; C-30 ekler). */
+  var DA_DATA_BLOCKS = ['hpMvUp', 'hpMvDn'];
+
+  /* Finansallar betimi (hisse sayfası "Finansalları nasıl?" ile BİREBİR aynı kural:
+     kategori ≥70 güçlü, <50 zayıf — financial_health_score eşikleri). */
+  var CATN = { karlilik: 'kârlılık', nakit_akisi: 'nakit akışı', kaldirac: 'borç durumu', degerleme_buyume: 'değerleme ve büyüme' };
+  function capTr(t){ return t.charAt(0).toLocaleUpperCase('tr-TR') + t.slice(1); }
+  function finAnswer(c){
+    if (!c) return '';
+    var a = Object.keys(CATN).filter(function(k){ return typeof c[k] === 'number'; }).map(function(k){ return [k, c[k]]; })
+      .sort(function(x, y){ return y[1] - x[1]; });
+    if (!a.length) return '';
+    var sg = a.filter(function(x){ return x[1] >= 70; }), wk = a.filter(function(x){ return x[1] < 50; });
+    if (sg.length && wk.length) return capTr(CATN[sg[0][0]]) + ' güçlü, ' + CATN[wk[wk.length - 1][0]] + ' zayıf';
+    if (sg.length >= 2) return capTr(CATN[sg[0][0]]) + ' ve ' + CATN[sg[1][0]] + ' güçlü';
+    if (sg.length) return capTr(CATN[sg[0][0]]) + ' öne çıkıyor';
+    if (wk.length) return capTr(CATN[wk[wk.length - 1][0]]) + ' zayıf, diğerleri dengeli';
+    return 'Dengeli; belirgin zayıf alan yok';
+  }
+  /* Kategori skorları tek istekte (/api/tarama/temel, önbellek okuması ~15 KB). */
+  var daTemel = fetch('/api/tarama/temel').then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d){ var m = {}; ((d && d.results) || []).forEach(function(x){ if (x && x.ticker) m[x.ticker] = x; }); return m; })
+    .catch(function(e){ console.warn('tarama/temel alınamadı', e); return {}; });
+
+  /* Güçlü Trend kartları SSR'dır (ssr_top_signals); JS yalnız eksik BP halkasını
+     ve "Finansallar" betimini doldurur — kart sırası/sayısı değişmez (zıplama yok). */
+  function daHydrateGt(real){
+    var by = {};
+    real.forEach(function(s){ by[s.ticker] = s; });
+    document.querySelectorAll('.hp-card[data-t]').forEach(function(card){
+      var s = by[card.getAttribute('data-t')], num = card.querySelector('.da-ring-num'), arc = card.querySelector('.da-ring-arc'), ring = card.querySelector('.da-ring');
+      if (s && typeof s.borsapusula_skoru === 'number' && num && num.textContent.trim() === '—') {
+        num.textContent = String(s.borsapusula_skoru);
+        if (arc) arc.setAttribute('stroke-dasharray', s.borsapusula_skoru + ' 100');
+        if (ring) ring.setAttribute('aria-label', 'BorsaPusula Skoru ' + s.borsapusula_skoru + ' / 100');
+      }
+    });
+    daTemel.then(function(m){
+      document.querySelectorAll('.hp-card[data-t] [data-fin]').forEach(function(el){
+        var t = el.closest('.hp-card').getAttribute('data-t'), a = finAnswer(m[t] && m[t].categories);
+        if (a) el.innerHTML = '<small>Finansallar</small>' + esc(a);
+      });
+    });
+  }
+
+  /* Hareketliler: tüm kapsam, son seans değişimi (change_pct = tamamlanmış günün
+     kapanış-kapanış değişimi, K-CE). Tavan/taban yalnız bilinen (BIST100) hissede. */
+  /* Etiket yalnız ısı haritası görüntüsünün günü /api/data'nın günüyle aynıysa
+     (donmuş görüntü bir önceki güne ait olabilir) ve değişim ≥ %9 ise basılır. */
+  function daLimMap(updatedAt){
+    var el = document.getElementById('hpLim'), m = /^(\d{2})\.(\d{2})\.(\d{4})/.exec(updatedAt || '');
+    if (!el || !m) return {};
+    try {
+      var j = JSON.parse(el.textContent) || {};
+      return (j.asof === m[3] + '-' + m[2] + '-' + m[1]) ? (j.lim || {}) : {};
+    } catch(e) { console.warn('hpLim okunamadı', e); return {}; }
+  }
+  function daRenderMovers(real, updatedAt){
+    var up = document.getElementById('hpMvUp'), dn = document.getElementById('hpMvDn');
+    if (!up || !dn) return;
+    var lim = daLimMap(updatedAt);
+    var rows = real.filter(function(s){ return typeof s.change_pct === 'number' && typeof s.price === 'number'; });
+    function row(s){
+      var l = Math.abs(s.change_pct) >= 9 ? lim[s.ticker] : null;
+      return '<li><a href="/hisse/' + encodeURIComponent(s.ticker) + '"><b class="tk">' + esc(s.ticker) + '</b><span class="nm">' + esc(s.name || '') + '</span>' +
+        '<span class="p da-num">' + fmtPrice(s.price) + ' ₺</span><span class="chg da-num ' + bpDirClass(s.change_pct, 2) + '">' + fmtPct(s.change_pct) + '</span>' +
+        (l === 'tavan' || l === 'taban' ? '<span class="hp-lim hp-lim--' + l + '">' + (l === 'tavan' ? 'TAVAN' : 'TABAN') + '</span>' : '<span class="hp-lim" aria-hidden="true"></span>') + '</a></li>';
+    }
+    var byUp = rows.slice().sort(function(a, b){ return b.change_pct - a.change_pct || (a.ticker < b.ticker ? -1 : 1); }).filter(function(s){ return s.change_pct > 0; }).slice(0, 5);
+    var byDn = rows.slice().sort(function(a, b){ return a.change_pct - b.change_pct || (a.ticker < b.ticker ? -1 : 1); }).filter(function(s){ return s.change_pct < 0; }).slice(0, 5);
+    up.innerHTML = byUp.length ? byUp.map(row).join('') : '<li class="hp-row-none">Son seansta yükselen hisse yok.</li>';
+    dn.innerHTML = byDn.length ? byDn.map(row).join('') : '<li class="hp-row-none">Son seansta düşen hisse yok.</li>';
+  }
 
   function daLoadData(){
     fetch('/api/data').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
       if (typeof bpUpdateStaleBanner === 'function') bpUpdateStaleBanner(d.data_quality, d.stocks_age_s, d.refreshing);
-      st.dataEnvelope = d;
-      var stocks = d.stocks || [];
-      var real = stocks.filter(function(s){ return s && s.ticker && s.ticker !== 'XU030' && s.ticker !== 'XU100'; });
-      st.realStocks = real;
-      st.stocksErr = null;
-
       // Hero (C-27): kapanış kutusu SSR'da aynı kaynaktan (CPO-1558) basılır; burada
       // yalnız boşsa dolar. Tarih etiketi + seans bayrağı aynı cevaptan.
       setHeroFromEod(d.xu100_close, d.xu100_change_pct);
       daSetAsof(d.updated_at);
       _seans.open = !!(d.data_freshness && d.data_freshness.market_open === true);
       daPaintSeans();
-
+      var real = (d.stocks || []).filter(function(s){ return s && s.ticker && s.ticker !== 'XU030' && s.ticker !== 'XU100'; });
       if (!real.length) {
-        /* K-BK: `loading === true` = backend onbellegi HENUZ dolmadi. Bu "veri
-           yok" DEGIL "veri hazirlaniyor"dur; kendiliginden iyilessin diye
-           sinirli sayida tekrar denenir. `loading` alani hic gelmediyse (eski
-           surum / kismi cevap) davranis ESKISI GIBI kalir — bilinmeyeni
-           "yukleniyor" saymak da bir yalan olurdu. */
         if (d.loading === true && _daDataTries < DA_DATA_MAX_TRIES) {
           _daDataTries++;
-          daShowSectionLoading('daSpotlightBody', 'Veriler hazırlanıyor…');
-          daShowSectionLoading('daStockGrid', 'Veriler hazırlanıyor…');
-          daShowSectionLoading('daCuratedList', 'Veriler hazırlanıyor…');
-          var mLd = document.getElementById('daMarqueeTrack');
-          if (mLd) mLd.innerHTML = '<span class="da-mrow"><span class="mt">Veriler hazırlanıyor…</span></span>';
+          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionLoading(id, 'Veriler hazırlanıyor…'); });
           setTimeout(daLoadData, DA_DATA_RETRY_MS);
         } else {
-          daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.');
-          daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse verisi yok.');
-          daShowSectionEmpty('daCuratedList', 'Şu an liste oluşturulacak veri yok.');
-          var mEl = document.getElementById('daMarqueeTrack');
-          if (mEl) mEl.innerHTML = '<span class="da-mrow"><span class="mt">Şu an veri yok</span></span>';
+          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionEmpty(id, 'Şu an gösterilecek hisse verisi yok.'); });
         }
-      } else {
-        _daDataTries = 0;
-        /* C-P0-2309: donuk (stale) hisse öne çıkan/sıralama havuzuna girmez —
-           MARKA 11.09'dan beri aynı fiyatla Spotlight'a aday oluyordu. */
-        var ranked = real.filter(function(s){ return !s.stale_reason && s.data_quality !== 'stale'; });
-        daRenderSpotlight(ranked);
-        daRenderCurated(ranked);
-        daRenderStockGrid(real);
-        daRenderMarquee(real);
+        return;
       }
-      daRenderRecap();
+      _daDataTries = 0;
+      /* C-P0-2309: donuk (stale) hisse öne çıkan/sıralama havuzuna girmez. */
+      var ranked = real.filter(function(s){ return !s.stale_reason && s.data_quality !== 'stale'; });
+      daHydrateGt(real);
+      daRenderMovers(ranked, d.updated_at);
+      daOnData(real, ranked);
     }).catch(function(e){
       console.error('daLoadData basarisiz', e);
-      st.stocksErr = e;
-      daShowSectionError('daSpotlightBody', daLoadData);
-      daShowSectionError('daStockGrid', daLoadData);
-      daShowSectionError('daCuratedList', daLoadData);
-      var mErrEl = document.getElementById('daMarqueeTrack');
-      if (mErrEl) mErrEl.innerHTML = '<span class="da-mrow"><span class="mt">Veri yüklenemedi</span></span>';
-      daRenderRecap();
+      DA_DATA_BLOCKS.forEach(function(id){ daShowSectionError(id, daLoadData); });
     });
   }
+  /* C-30 blokları için kanca (yoksa no-op). */
+  function daOnData(){}
 
-  // ═══ 4) /api/sektor-summary — mozaik + "bugün ne oldu" en güçlü sektör ═══
+  // ═══ 4) Isı haritası yoksa (heatmap=None) eski sektör mozaiği — /api/sektor-summary ═══
   function daLoadSectors(){
+    if (!document.getElementById('daMosaicBody')) return;   /* C-55 haritası basıldıysa istek yok */
     fetch('/api/sektor-summary').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
       var sectors = d.sectors || [];
-      st.sectors = sectors;
-      st.sectorsErr = null;
       var cnt = document.getElementById('daSectorCount');
       if (cnt) cnt.textContent = sectors.length + ' Sektör · Günlük Ortalama';
       if (!sectors.length) daShowSectionEmpty('daMosaicBody', 'Şu an sektör verisi yok.');
       else daRenderMosaic(sectors);
-      daRenderRecap();
     }).catch(function(e){
       console.error('daLoadSectors basarisiz', e);
-      st.sectorsErr = e;
       daShowSectionError('daMosaicBody', daLoadSectors);
-      daRenderRecap();
     });
-  }
-
-  // ── "Bugün ne oldu" — deterministik, kural tabanlı (LLM YOK) ──
-  function daRenderRecap(){
-    var el = document.getElementById('daRecapText');
-    if (!el) return;
-    if (st.realStocks === null && st.sectors === null && !st.macro) return; // henüz hiçbir kaynak gelmedi
-    if (st.stocksErr && st.sectorsErr && !st.macro) {
-      el.innerHTML = '⚠️ Piyasa özeti şu an oluşturulamıyor — veri kaynaklarına ulaşılamadı.';
-      return;
-    }
-    var frags = [];
-    if (st.macro && typeof st.macro.change === 'number') {
-      /* K-BP: XU100 gunu tam 0,00% kapatirsa YESIL yazmasin. */
-      frags.push('BIST100 son kapanışta <span class="' + bpDirClass(st.macro.change, 2) + '">' + fmtPct(st.macro.change) + '</span> ile <strong>' + fmtPrice(st.macro.price) + '</strong> seviyesinde.');
-    }
-    if (st.sectors && st.sectors.length) {
-      var top = st.sectors[0]; // API zaten score DESC sıralı dönüyor
-      // 18.09 bughunt: top.al===0 && top.sat===0 iken (tüm hisseler Yatay) cümle
-      // "pozitif ayrışmayla öne çıktı" diyordu ama kendi verdiği (0 Güçlü/0 Bozuldu)
-      // rakamlarla çelişiyordu — hiçbir ayrışma yokken "öne çıktı" iddiası saçma.
-      if (top && typeof top.score === 'number' && (top.al > 0 || top.sat > 0)) {
-        frags.push('<strong>' + esc(top.name) + '</strong> sektörü ' + (bpDir(top.score,0)===0?'dengeli':(bpDir(top.score,0)===1?'pozitif':'negatif')) + ' ayrışmayla öne çıktı — sektör skoru ' + fmtNum0(top.score) + ' (' + top.al + ' Güçlü / ' + top.sat + ' Bozuldu).');
-      }
-    }
-    if (st.realStocks && st.realStocks.length) {
-      var withChg = st.realStocks.filter(function(s){ return typeof s.change_pct === 'number'; });
-      if (withChg.length) {
-        var mover = withChg.reduce(function(a,b){ return Math.abs(b.change_pct) > Math.abs(a.change_pct) ? b : a; });
-        /* K-BP: `>= 0` 0,00%'i YESIL yaziyordu. Yon tek kanon (bp-format.js). */
-        frags.push('<strong>' + esc(mover.ticker) + '</strong> <span class="' + bpDirClass(mover.change_pct, 2) + '">' + fmtPct(mover.change_pct) + '</span> değişimle son kapanışın en hareketli hissesi oldu.');
-      }
-    }
-    if (!frags.length) {
-      el.innerHTML = 'Piyasa verileri henüz oluşturulmadı — birazdan tekrar kontrol edin.';
-      return;
-    }
-    el.innerHTML = frags.join(' ');
-  }
-
-  // ── Spotlight: Ozan'ın 13.09 (2. kez) geri bildirimi sonrası hisse.html hero
-  //    ile AYNI hiyerarşi — BorsaPusula Skoru dominant ring, Teknik ikincil.
-  //    Long-only kısıtı (Ozan 10.09: Trend Bozuldu asla "öne çıkan" olmasın)
-  //    AYNEN korunuyor — SAT havuz dışı. 18.09: Ozan "en yüksek BorsaPusula
-  //    Skoru 65 gösteriyor, nasıl olabilir?" diye sordu — kök neden: BPS bir
-  //    KALİTE puanı (Temel+Teknik bileşik, başlık/açıklama bunu zaten söylüyor),
-  //    aktif AL sinyali değil, ama havuz eskiden SADECE AL'a kısıtlıydı — Yatay
-  //    (BEKLE) hisseler (ör. ANHYT BPS=87) havuz dışında kalıp gerçek en yüksek
-  //    skor hiç yarışamıyordu. Artık BEKLE de yarışıyor, sadece SAT (Trend
-  //    Bozuldu) hâlâ hariç. ──
-  function daRenderSpotlight(real){
-    var pool = real.filter(function(s){ return s.signal !== 'SAT'; });
-    var body = document.getElementById('daSpotlightBody');
-    if (!body) return;
-    if (!pool.length) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
-    var withBps = pool.filter(function(s){ return s.hs_available && typeof s.borsapusula_skoru === 'number'; });
-    var useBps = withBps.length > 0;
-    var techPool = pool.filter(function(s){ return typeof s.signal_strength === 'number'; });
-    var s = useBps
-      ? withBps.reduce(function(a,b){ return b.borsapusula_skoru > a.borsapusula_skoru ? b : a; })
-      : (techPool.length ? techPool.reduce(function(a,b){ return b.signal_strength > a.signal_strength ? b : a; }) : null);
-    if (!s) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
-    var sig = signalMeta(s.signal);
-    var ringVal = useBps ? s.borsapusula_skoru : s.signal_strength;
-    var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(s.tier);
-    var dash = ringDash(ringVal, 44);
-    var ringLabel = useBps ? 'BorsaPusula Skoru' : 'Teknik Güç Skoru';
-    /* K-BR (22.09): ADX/RSI burada `Math.round` ile TAM SAYIYA yuvarlaniyordu;
-       AYNI KARTIN SSR hali (satir ~285) de `|round(0)|int` kullaniyordu, yani
-       sayfa /tarama ve /karsilastir'la (ikisi de 1 ondalik) celisiyordu ve
-       ADX 25,x olan 14 hissede esik (25) ile gosterilen sayi cakisiyordu.
-       Tek kanon: bp-format.js `bpIndNum` — SSR tarafi da ayni bicimi basar,
-       boylece CSR render'i SSR degerinin UZERINE farkli bir sayi yazmaz. */
-    var adxPct = Math.max(0, Math.min(100, ((s.adx||0)/50)*100));
-    var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
-    var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
-    /* K-CC: `chg >= 0` 0,00%'i YESIL yaziyordu (kapi 35'in 140-karakterlik
-       yakinlik penceresi bu dolayli degiskeni goremedi). Tek kanon. */
-    var chg = s.change_pct;
-    var hasTek = typeof s.signal_strength === 'number';
-    var tekCol = hasTek ? scoreColorVar(s.tier) : null;
-    body.innerHTML =
-      '<div class="da-spot-grid">' +
-        '<div class="da-spot-ring-wrap"><svg aria-hidden="true" viewBox="0 0 100 100">' +
-          '<circle class="da-spot-ring-track" cx="50" cy="50" r="44"/>' +
-          '<circle class="da-spot-ring-val" cx="50" cy="50" r="44" stroke="' + col + '" stroke-dasharray="' + dash + '"/>' +
-        '</svg><div class="da-spot-ring-num"><span class="n da-num">' + fmtNum0(ringVal) + '</span><span class="l">' + ringLabel + '</span></div></div>' +
-        '<div class="da-spot-body">' +
-          '<div class="da-spot-top">' +
-            '<div><div class="da-spot-ticker"><a href="/hisse/' + encodeURIComponent(s.ticker) + '">' + esc(s.ticker) + '</a></div>' +
-            '<div class="da-spot-company">' + esc(s.name||'') + '</div>' +
-            (s.sector ? '<span class="da-spot-sector">' + esc(s.sector) + '</span>' : '') + '</div>' +
-            '<div class="da-spot-price"><div class="p da-num">' + fmtPrice(s.price) + ' ₺</div><div class="d da-num" style="color:' + bpDirColor(chg, 2) + '">' + fmtPct(chg) + '</div></div>' +
-          '</div>' +
-          '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
-          '<div class="da-spot-subs">' +
-            (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="Teknik Güç Skoru — ADX + günlük hacim oranı + RSI + Teyit bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
-            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + bpIndNum(s.adx) + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2).replace('.', ',')+'×':'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + bpIndNum(s.rsi) + '</span></div>' +
-          '</div>' +
-          (useBps ? '' :
-            '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +
-        '</div>' +
-      '</div>';
-  }
-
-  // ── Küratörlü listeler: en güçlü teknik sinyaller + en yüksek hacimli hareketler ──
-  function daRenderCurated(real){
-    var el = document.getElementById('daCuratedList');
-    if (!el) return;
-    /* K-CE (22.09): `byScore` karti ("Bugünün En Güçlü Teknik Sinyalleri")
-       KALDIRILDI. Iki kusuru birden vardi:
-         1) AYNI SAYFANIN bir ust bolumu (#skorlar, "En güçlü sinyaller.")
-            ZATEN ayni filtreyi (signal==='AL') ayni anahtarla (signal_strength)
-            siralayip ilk 8'i basiyordu; bu kart onun ilk 6'siydi -- canli
-            olcumde 6/6 ticker ayni, ayni sirada. Ayni is icin iki yuzey.
-         2) Basligindaki "Bugünün" TARIH IDDIASIYDI, ama liste hicbir tarih
-            filtresi icermiyor ve veri EOD-only (/api/data gunde tek tur,
-            kapanis sonrasi): 22.09 sabahi kullaniciya 21.09 kapanisinin
-            siralamasi "Bugünün ..." diye sunuluyordu (K-CD 70. ders).
-       Hacim karti KALIR -- o gercekten ayri bir eksen (rvol) ve #skorlar'da
-       karsiligi yok. */
-    var byRvol = real.filter(function(s){ return typeof s.rvol === 'number'; })
-                      .sort(function(a,b){ return b.rvol - a.rvol; }).slice(0, 6);
-    function chip(t, badgeTxt, badgeColorVar, badgeBgVar){
-      return '<a href="/hisse/' + encodeURIComponent(t) + '" class="da-chip" style="text-decoration:none">' + esc(t) +
-             '<span class="da-chip-badge" style="color:' + badgeColorVar + ';background:' + badgeBgVar + '">' + esc(badgeTxt) + '</span></a>';
-    }
-    var cards = [];
-    if (byRvol.length) {
-      cards.push(
-        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">01</div>' +
-        '<div class="da-curated-body"><div class="da-curated-title">Yüksek Hacimli Hareketler</div>' +
-        '<div class="da-curated-desc">Göreli hacim (RVOL) en yüksek hisseler.</div></div>' +
-        '<div class="da-chip-row">' + byRvol.map(function(s){ return chip(s.ticker, s.rvol.toFixed(2).replace('.', ',')+'×', 'var(--bp-volume)', 'rgba(var(--bp-volume-rgb),.12)'); }).join('') + '</div></div>'
-      );
-    }
-    if (!cards.length) { daShowSectionEmpty('daCuratedList', 'Şu an liste oluşturulacak veri yok.'); return; }
-    el.innerHTML = cards.join('');
-  }
-
-  // ── Öne çıkan hisseler ızgarası (top 8 signal_strength, asimetrik boy) —
-  //    Ozan 10.09: long-only, "En güçlü sinyaller" başlığı altında Trend Bozuldu
-  //    (SAT) asla üst sıraya çıkmasın, sadece Güçlü Trend (AL) yarışsın ──
-  function daRenderStockGrid(real){
-    var el = document.getElementById('daStockGrid');
-    if (!el) return;
-    var top = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; })
-                   .sort(function(a,b){ return b.signal_strength - a.signal_strength; }).slice(0, 8);
-    if (!top.length) { daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse yok.'); return; }
-    var rots = [-1.1, 0.9, -0.6, 1.3, -0.9, 0.6, -0.4, 1.0];
-    var sizeCycle = ['xl', 'lg', 'md', 'md', 'sm', 'sm', 'sm', 'xs'];
-    el.innerHTML = top.map(function(s, i){
-      var sizeCls = sizeCycle[i] || 'sm';
-      var sig = signalMeta(s.signal);
-      var col = scoreColorVar(s.tier);
-      var dash = ringDash(s.signal_strength, 27);
-      /* K-CC: bkz. yukarisi — ayni kusurun ikinci kopyasi. */
-      var chg = s.change_pct;
-      // CPO-1557 + 10.09 devamı: xl/lg kartlar (grid-row:span 2) .da-sc-mid'in
-      // margin-top:auto'suyla ring/rozet'i dibe iterken üstte büyük bir boş alan
-      // kalıyordu (Ozan bulgusu, CPO-1557'de sektör/ADX/RVOL chip'leriyle kısmen
-      // ele alınmıştı, 10.09'da "hâlâ bomboş" diye tekrar işaretlendi) — spotlight
-      // bileşeninin zaten var olan ADX/RVOL/RSI bar satırlarını (.da-spot-sub-row,
-      // sıfır yeni CSS) buraya da taşıyıp gerçek veri yoğunluğuyla dolduruyoruz.
-      var extraHtml = '';
-      if (sizeCls === 'xl' || sizeCls === 'lg') {
-        if (s.sector) extraHtml += '<div class="da-sc-extra"><span class="da-sc-chip">' + esc(s.sector) + '</span></div>';
-        var barRows = '';
-        if (typeof s.adx === 'number') {
-          var adxPctG = Math.max(0, Math.min(100, (s.adx/50)*100));
-          barRows += '<div class="da-spot-sub-row"><span class="lbl">ADX</span><div class="bar bar-adx"><i style="width:' + adxPctG.toFixed(0) + '%"></i></div><span class="val">' + bpIndNum(s.adx) + '</span></div>';
-        }
-        if (typeof s.rvol === 'number') {
-          var rvolPctG = Math.max(0, Math.min(100, (s.rvol/3)*100));
-          barRows += '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPctG.toFixed(0) + '%"></i></div><span class="val">' + s.rvol.toFixed(2).replace('.', ',') + '×</span></div>';
-        }
-        if (typeof s.rsi === 'number') {
-          barRows += '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + Math.max(0,Math.min(100,s.rsi)).toFixed(0) + '%"></i></div><span class="val">' + bpIndNum(s.rsi) + '</span></div>';
-        }
-        if (barRows) extraHtml += '<div style="display:flex;flex-direction:column;gap:7px;margin-top:2px">' + barRows + '</div>';
-      }
-      return '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-scard ' + sizeCls + '" style="--rot:' + rots[i%rots.length] + 'deg">' +
-        '<div class="da-sc-top"><div><div class="da-sc-ticker">' + esc(s.ticker) + '</div><div class="da-sc-company">' + esc(s.name||'') + '</div></div>' +
-        '<div class="da-sc-price"><div class="p">' + fmtPrice(s.price) + '</div><div class="d" style="color:' + bpDirColor(chg, 2) + '">' + fmtPct(chg) + '</div></div></div>' +
-        extraHtml +
-        '<div class="da-sc-mid"><div class="da-sc-ring"><svg aria-hidden="true" viewBox="0 0 70 70"><circle class="da-sc-ring-track" cx="35" cy="35" r="27"/><circle class="da-sc-ring-val" cx="35" cy="35" r="27" stroke="' + col + '" stroke-dasharray="' + dash + '"/></svg>' +
-        '<div class="da-sc-ring-num">' + fmtNum0(s.signal_strength) + '</div></div>' +
-        '<span class="da-sc-sig ' + sig.cls + '">● ' + sig.label + '</span></div>' +
-      '</a>';
-    }).join('');
-    var obs = daRevealObserver();
-    if (obs) el.querySelectorAll('.da-scard').forEach(function(c, i){ c.style.transitionDelay = (Math.min(i,8)*0.05) + 's'; obs.observe(c); });
   }
 
   // ── Sektör mozaiği ──
@@ -848,25 +535,6 @@
     if (obs) el.querySelectorAll('.da-tile').forEach(function(t, i){ t.style.transitionDelay = (Math.min(i,10)*0.04) + 's'; obs.observe(t); });
   }
 
-  // ── Son kapanış hareket şeridi (gerçek top |değişim|) — K-CE: EOD-only ──
-  function daRenderMarquee(real){
-    var track = document.getElementById('daMarqueeTrack');
-    if (!track) return;
-    var withChg = real.filter(function(s){ return typeof s.change_pct === 'number' && typeof s.price === 'number'; });
-    var top = withChg.sort(function(a,b){ return Math.abs(b.change_pct) - Math.abs(a.change_pct); }).slice(0, 10);
-    if (!top.length) { track.innerHTML = '<span class="da-mrow"><span class="mt">Şu an veri yok</span></span>'; return; }
-    var rowsHtml = top.map(function(s){
-      /* K-BP: `>= 0` degismeyen hisseyi yesil bant + yesil yuzde yapiyordu. */
-      var band = bpDirColor(s.change_pct, 2);
-      return '<span class="da-mrow"><span class="mband" style="background:' + band + '"></span><span class="mt">' + esc(s.ticker) + '</span><span class="mp">' + fmtPrice(s.price) + ' ₺</span><span class="md ' + bpDirClass(s.change_pct, 2) + '">' + fmtPct(s.change_pct) + '</span></span>';
-    }).join('');
-    /* K-AF (21.09): ikileme YALNIZ kusursuz kaydırma döngüsü için. Hareketi
-       azalt modunda şerit kaydırılmaz, sarılır (tokens.css) — orada ikinci
-       kopya kullanıcıya aynı 10 hisseyi ARKA ARKAYA İKİ KEZ gösterirdi. */
-    var daReduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    track.innerHTML = daReduceMotion ? rowsHtml : (rowsHtml + rowsHtml);
-  }
-
   // ── reveal-on-scroll ──
   var _daObs = null;
   function daRevealObserver(){
@@ -883,7 +551,7 @@
     try {
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
         var panel = document.getElementById('heroSubForm');
-        if (panel) panel.innerHTML = '<div class="da-sub-done">✅ Zaten abonesin — sinyal değişince e-posta alacaksın.</div>';
+        if (panel) panel.innerHTML = '<div class="da-sub-done">✅ Zaten abonesin; durumu değişen hisseler her işlem günü akşamı e-postana gelecek.</div>';
       }
     } catch(e) { console.warn('bp_sub cookie kontrolu basarisiz', e); }
   }
@@ -935,124 +603,24 @@
     if (btn && btn.disabled) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
   });
 
-  // ── Gündem & Haberler (/api/haberler + /api/market-news + /api/bilanco-mini) ──
-  var _daGnmMakroLoaded = false, _daGnmHisseLoaded = false;
-
-  function daSwitchGnmTab(tab){
-    var isMakro = tab === 'makro';
-    document.getElementById('daGnmTabMakro').classList.toggle('active', isMakro);
-    document.getElementById('daGnmTabMakro').setAttribute('aria-selected', String(isMakro));
-    document.getElementById('daGnmTabMakro').tabIndex = isMakro ? 0 : -1;
-    document.getElementById('daGnmTabHisse').classList.toggle('active', !isMakro);
-    document.getElementById('daGnmTabHisse').setAttribute('aria-selected', String(!isMakro));
-    document.getElementById('daGnmTabHisse').tabIndex = isMakro ? -1 : 0;
-    document.getElementById('daGnmPanelMakro').style.display = isMakro ? '' : 'none';
-    document.getElementById('daGnmPanelHisse').style.display = isMakro ? 'none' : '';
-    if (!isMakro && !_daGnmHisseLoaded) daLoadGundemHisse();
-  }
-
-  // Klavye-only kullanıcılar için: sekmeler arasında ok tuşlarıyla gezinme +
-  // Enter/Space ile aktive etme (diğer sekme bileşenleriyle aynı desen).
-  document.getElementById('daGnmTabs').addEventListener('keydown', function(e){
-    var tabs = [document.getElementById('daGnmTabMakro'), document.getElementById('daGnmTabHisse')];
-    var idx = tabs.indexOf(document.activeElement);
-    if (idx === -1) return;
-    var next = null;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End') {
-      next = (e.key === 'Home') ? tabs[0]
-        : (e.key === 'End') ? tabs[tabs.length - 1]
-        : (e.key === 'ArrowRight') ? tabs[(idx + 1) % tabs.length]
-        : tabs[(idx - 1 + tabs.length) % tabs.length];
-      e.preventDefault();
-      next.focus();
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      daSwitchGnmTab(document.activeElement === tabs[0] ? 'makro' : 'hisse');
-    }
-  });
-  window.daSwitchGnmTab = daSwitchGnmTab;
-
-  function daLoadMacroNews(){
-    var list = document.getElementById('daMacroNewsList');
-    if (!list) return;
-    /* 21.09 (K-W): `r.ok` kapısı YOKTU — sunucu 500'de gövdeyi JSON olarak
-       döndürseydi `items` boş çıkar ve kullanıcı BOZUK sistemi "şu an haber
-       yok" diye görürdü (K-V'nin boş≠hata bulgusunun aynısı, ana sayfada). */
-    /* C-65 (26.09): kendi bildirim akışımız (/api/haberler), her satır site içi
-       kalıcı bildirim sayfasına gider; kaynak adı ve dış bağlantı yok. Başlık
-       en yeni bildirimin tarihinden türetilir (göreli zaman yok). */
-    fetch('/api/haberler?adet=8').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
-      var items = (d && d.items) || [];
-      if (!items.length) { list.innerHTML = '<div class="da-panel da-empty">Şu an bildirim yok.</div>'; return; }
-      function dm(day){ var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(day || ''); return m ? m[2] + '.' + m[1] : ''; }
-      var hEl = document.getElementById('daGnmHeadline');
-      if (hEl && dm(items[0].day)) hEl.textContent = dm(items[0].day) + ' şirket bildirimleri.';
-      list.innerHTML = items.slice(0, 8).map(function(item){
-        return '<a href="' + esc(item.href || '/haberler') + '" class="da-macro-news-item">' +
-          '<span class="da-macro-news-title"><b>' + esc(item.ticker || '') + '</b> · ' + esc(item.title || item['class'] || '') + '</span>' +
-          '<span class="da-macro-news-time">' + esc(dm(item.day) + (item.time ? ' ' + item.time : '')) + '</span></a>';
-      }).join('');
-      _daGnmMakroLoaded = true;
-    }).catch(function(){ daShowSectionError('daMacroNewsList', daLoadMacroNews); });
-  }
-
-  function daLoadGundemHisse(){
-    var cardsEl = document.getElementById('daGundemCards');
-    var bilEl = document.getElementById('daBilancoMiniBody');
-    Promise.all([fetch('/api/market-news'), fetch('/api/bilanco-mini')]).then(function(res){
-      /* 21.09 (K-W): burada `!ok` sessizce BOŞ PAYLOAD'a çevriliyordu, yani
-         HTTP 500 kullanıcıya "Şu an güncel haber yok" / "Yaklaşan dönem
-         bulunamadı" diye görünüyordu. Artık null → bölüm kendi hata dalını
-         gösteriyor (diğer bölüm etkilenmeden). */
-      return Promise.all([res[0].ok ? res[0].json() : null, res[1].ok ? res[1].json() : null]);
-    }).then(function(data){
-      var newsData = data[0], bilData = data[1];
-      var items = (newsData && newsData.items) || [];
-      if (cardsEl && newsData === null) {
-        daShowSectionError('daGundemCards', daLoadGundemHisse);
-      } else if (cardsEl) {
-        cardsEl.innerHTML = !items.length
-          ? '<div class="da-panel da-empty">Şu an güncel haber yok.</div>'
-          : items.map(function(item){
-              var chg = item.change_pct;
-              /* K-BP (21.09) IKI hata birden: (a) `>= 0` 0,00%'i YESIL
-                 sayiyordu; (b) `.md.up/.down` YALNIZ `.da-mrow` altinda
-                 tanimliydi, bu kart `.da-mrow` icinde DEGIL — canlida 5/5
-                 kart (BIMAS +2,98% ve ENERY -7,86% dahil) AYNI govde
-                 rengindeydi, yon bilgisi tamamen olmustu. Sinif adi
-                 `da-gnm-chg` ile kendi kuralina baglandi. */
-              var chgCls = 'da-gnm-chg ' + bpDirClass(chg, 2);
-              var chgTxt = (typeof chg === 'number') ? fmtPct(chg) : '';
-              var dest = '/hisse/' + encodeURIComponent(item.ticker || '');
-              return '<div class="da-gnm-card" role="link" tabindex="0" onclick="location.href=\'' + dest + '\'" onkeydown="if(event.key===\'Enter\'){location.href=\'' + dest + '\'}">' +
-                '<div class="da-gnm-card-top"><div><div class="da-gnm-ticker">' + esc(item.ticker || '') + '</div>' +
-                '<div class="da-gnm-name">' + esc(item.name || '') + '</div></div>' +
-                (chgTxt ? '<span class="' + chgCls + '" style="font-weight:700;font-size:var(--bp-text-sm)">' + chgTxt + '</span>' : '') + '</div>' +
-                '<div class="da-gnm-snippet">' + esc(item.snippet || item.summary || 'Özet hazırlanıyor…') + '</div></div>';
-            }).join('');
-      }
-      if (bilEl && bilData === null) {
-        daShowSectionError('daBilancoMiniBody', daLoadGundemHisse);
-      } else if (bilEl) {
-        var periods = (bilData && bilData.periods) || [];
-        bilEl.innerHTML = !periods.length
-          ? '<div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>'
-          : periods.slice(0, 3).map(function(p){
-              return '<div class="da-bp-period"><div class="da-bp-label">' + esc(p.label || '—') + '</div>' +
-                '<div class="da-bp-desc">' + esc(p.desc || '') + '</div></div>';
-            }).join('');
-      }
-      _daGnmHisseLoaded = true;
-    }).catch(function(){
-      if (cardsEl) daShowSectionError('daGundemCards', daLoadGundemHisse);
-    });
-  }
-
   // ── init ──
   daInitSubscribe();
   daLoadData();
+  (function daLoadNews(){
+    var list = document.getElementById('hpNw');
+    if (!list) return;
+    function dm(day){ var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(day || ''); return m ? m[2] + '.' + m[1] : ''; }
+    fetch('/api/haberler?adet=5').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
+      var items = ((d && d.items) || []).slice(0, 5);
+      if (!items.length) { list.innerHTML = '<li class="hp-nw-e">Şu an bildirim yok.</li>'; return; }
+      list.innerHTML = items.map(function(it){
+        return '<li><a href="' + esc(it.href || '/haberler') + '"><span class="tk">' + esc(it.ticker || '') + '</span>' +
+          '<span class="t">' + esc(it.title || it['class'] || '') + '</span>' +
+          '<span class="d da-num">' + esc(dm(it.day)) + '</span></a></li>';
+      }).join('');
+    }).catch(function(){ daShowSectionError('hpNw', daLoadNews); });
+  })();
   daLoadSectors();
-  daLoadMacroNews();
 })();
 </script>
 {% endblock %}

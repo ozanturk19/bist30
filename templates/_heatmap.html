@@ -260,6 +260,7 @@
         {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>{% endif %}
       </div>
       <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
+      <a class="hm-more da-tap" href="/sektor-harita">Tüm harita →</a>
     {%- else %}
       {%- set _half = _cap / 2 -%}{%- set _hf = 1 if (_half != (_half|int)) else 0 %}
       <div class="hm-legend" data-lg="chg"{% if _mode != 'chg' %} hidden{% endif %}>
@@ -328,5 +329,5 @@
   </section>
   {%- endif %}
   <script type="application/json" id="hmData">{{ ({'asof_label': hm.asof_label, 'n': _n, 'counts': hm.counts or none, 'xu100': hm.xu100 or none, 'rows': _hmrows} if _full else {'asof_label': hm.asof_label, 'rows': _hmrows})|tojson }}</script>
-  <script src="/static/js/bp-heatmap.js?v=f1905a72" defer></script>
+  <script src="/static/js/bp-heatmap.js?v=85ba2480" defer></script>
 </section>
