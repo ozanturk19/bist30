@@ -1669,12 +1669,18 @@ def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
     weekly_close = close.resample("W-FRI").last().dropna()
     weekly_ema20 = weekly_close.ewm(span=20, adjust=False).mean()
     ema_prev_by_week = weekly_ema20.shift(1)
-    ema_prev_by_week.index = ema_prev_by_week.index.to_period("W-FRI")
+    def _week_period(idx):
+        # tz'li indeks to_period'da saat dilimini zaten atar (UserWarning basar);
+        # yerel duvar saatini korur, sonuç aynı, uyarı yok (D-05).
+        return (idx.tz_localize(None) if getattr(idx, "tz", None) is not None
+                else idx).to_period("W-FRI")
+
+    ema_prev_by_week.index = _week_period(ema_prev_by_week.index)
     completed_before = pd.Series(range(len(weekly_close)),
-                                  index=weekly_close.index.to_period("W-FRI"))
+                                  index=_week_period(weekly_close.index))
 
     alpha = 2.0 / 21.0  # span=20 → ewm(adjust=False) alpha
-    week_of_day = close.index.to_period("W-FRI")
+    week_of_day = _week_period(close.index)
     dirs = np.zeros(len(close), dtype=int)
     for i, wp in enumerate(week_of_day):
         n_before = completed_before.get(wp)
