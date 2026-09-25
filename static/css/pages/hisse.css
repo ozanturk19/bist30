@@ -1021,6 +1021,17 @@
   .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-al-rgb),0.14); border-color:rgba(var(--bp-al-rgb),0.55); color:var(--bp-al); }
   .hx-acts .hx-act--ico .hib-action-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hx-acts .hx-act--ico{ position:relative; width:40px; padding:0; justify-content:center; }
+  /* C-21c: 🔔 "Takip et" altindaki e-posta paneli (girissiz kullanici; eski sayfa sonu kutusunun yerine) */
+  .hx-sub{ margin-top:12px; padding:12px 14px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl); max-width:460px; }
+  .hx-sub[hidden]{ display:none; }
+  .hx-sub-t{ margin:0 0 8px; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); }
+  .hx-sub-row{ display:flex; gap:8px; }
+  .hx-sub-row input{ flex:1 1 auto; min-width:0; height:40px; padding:0 12px; background:var(--bp-bg); border:1px solid var(--bp-field-border); border-radius:var(--bp-radius-lg); color:var(--bp-text); font:inherit; font-size:var(--bp-text-base); }
+  .hx-sub-row input:focus-visible{ outline:2px solid var(--bp-brand); outline-offset:1px; }
+  .hx-sub-row input[aria-invalid="true"]{ border-color:var(--bp-sat); }
+  .hx-sub-row button{ height:40px; padding:0 14px; border:0; border-radius:var(--bp-radius-lg); background:var(--bp-brand); color:var(--bp-bg); font:inherit; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; white-space:nowrap; }
+  .hx-sub-kvkk{ display:flex; align-items:flex-start; gap:6px; margin-top:8px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
+  .hx-sub-ok{ margin:0; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); }
   .hx-chart{ position:relative; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-16); padding:14px 16px 12px; min-width:0; }
   .hx-chart-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .hx-chart-pc{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text2); }
@@ -1108,7 +1119,7 @@
   }
   @media (max-width:640px){
     .hx-top{ margin-top:2px; gap:14px; }
-    .hx-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"id id" "price acts" "chg chg" "facts facts"; column-gap:10px; }
+    .hx-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"id id" "price acts" "chg chg" "facts facts" "sub sub"; column-gap:10px; }
     .hx-id{ grid-area:id; flex-wrap:nowrap; }
     .hx-tk{ font-size:var(--bp-text-22); }
     .hx-nm{ font-size:var(--bp-text-base); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; }
@@ -1116,6 +1127,8 @@
     .hx-price{ grid-area:price; font-size:40px; margin:10px 0 4px; align-self:end; }
     .hx-chg{ grid-area:chg; font-size:var(--bp-text-md); }
     .hx-facts{ grid-area:facts; margin-top:12px; }
+    .hx-sub{ grid-area:sub; max-width:none; }
+    .hx-sub-row input, .hx-sub-row button{ height:44px; }
     .hx-facts > div{ flex:1 1 40%; }
     .hx-acts{ grid-area:acts; margin:10px 0 4px; align-self:end; gap:6px; flex-wrap:nowrap; }
     .hx-acts .hx-act{ width:44px; height:44px; padding:0; justify-content:center; position:relative; }

@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=bd0e750c">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=c5a34520">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -221,6 +221,16 @@
           <span class="hib-action-lbl">Portföye ekle</span>
         </button>
       </div>
+      {#- C-21c: sayfa sonundaki ayri e-posta kutusu kalkti; girissiz kullanici "Takip et"e basinca
+          ayni istek (/api/subscribe {email, ticker}) bu kucuk panelden gider. -#}
+      <form class="hx-sub" id="hisseSubCta" hidden onsubmit="event.preventDefault();hisseSubscribe()">
+        <p class="hx-sub-t">{{ ticker }} durumu değişince e-postayla haber verelim</p>
+        <div class="hx-sub-row" id="hisseSubForm">
+          <input id="hisseSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresin" aria-label="E-posta adresi">
+          <button type="submit">Haber ver</button>
+        </div>
+        <label class="hx-sub-kvkk"><input type="checkbox" class="da-check" id="hisseSubKvkk" required> <span><a href="/gizlilik" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span></label>
+      </form>
     </div>
     {#- C-20: 260px alan grafigi (1A/3A/1Y = son 30/90/365 takvim gunu). Nötr periwinkle cizgi +
         gradyan; baslangic kesikli cizgisi; son nokta = baslik fiyati (#hpPrice). Ilk cizim D-18b
@@ -1155,30 +1165,6 @@
 
   {# SPEC-017 Faz B Bonus: "Tüm BIST100 Hisseleri" yatay scroll alt bar kaldırıldı (Ozan feedback K7 — amatör, sayfa şişiriyor). #}
 
-<!-- Subscription CTA -->
-<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(var(--bp-art-violet-rgb),.05));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
-  <div style="flex:1;min-width:160px">
-    <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
-    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">E-posta aboneliği</div>
-  </div>
-  <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
-    <input id="hisseSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
-      style="background:var(--bp-surface);border:1px solid var(--bp-field-border);color:var(--bp-text);padding:6px 11px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;transition:border-color .15s;width:200px"
-      onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-field-border)'"
-      onkeydown="if(event.key==='Enter')hisseSubscribe()">
-    <button onclick="hisseSubscribe()"
-      style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;white-space:nowrap">
-      Abone Ol
-    </button>
-  </div>
-  <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);flex-basis:100%;cursor:pointer;line-height:1.4">
-    <input type="checkbox" class="da-check" id="hisseSubKvkk" required>
-    <span><a href="/gizlilik" target="_blank" rel="noopener" class="da-link">Gizlilik Politikası<span class="sr-only"> (yeni sekmede açılır)</span></a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
-  </label>
-  <button class="da-close" onclick="document.getElementById('hisseSubCta').style.display='none'"
-    aria-label="Kapat">×</button>
-</div>
-
 </main>
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
@@ -1195,7 +1181,7 @@ async function hisseSubscribe() {
     if (window.showToast) showToast('Devam etmek için KVKK onay kutusunu işaretleyin.', 'error');
     return;
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailEl.style.borderColor='var(--bp-sat)'; emailEl.focus(); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailEl.setAttribute('aria-invalid','true'); emailEl.focus(); return; }
   const btn = document.querySelector('#hisseSubForm button');
   btn.textContent = 'Kaydediliyor…'; btn.disabled = true;
   try {
@@ -1203,14 +1189,14 @@ async function hisseSubscribe() {
     const j = await r.json();
     const cta = document.getElementById('hisseSubCta');
     if (j.ok) {
-      cta.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + escHtml(j.message||'Kaydınız alındı!') + '</div>';
-      setTimeout(() => { if(cta) cta.style.display='none'; }, 4000);
+      cta.innerHTML = '<p class="hx-sub-ok">' + escHtml(j.message||'Kaydın alındı') + '</p>';
+      setTimeout(() => { if(cta) cta.hidden = true; }, 5000);
     } else {
-      btn.textContent = 'Abone Ol'; btn.disabled = false;
-      emailEl.style.borderColor = 'var(--bp-sat)';
+      btn.textContent = 'Haber ver'; btn.disabled = false;
+      emailEl.setAttribute('aria-invalid','true');
       if (window.showToast) showToast('⚠️ ' + (j.message || j.error || 'Bir hata oluştu'), 'error');
     }
-  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error'); }
+  } catch(e) { btn.textContent = 'Haber ver'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error'); }
 }
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
@@ -1541,6 +1527,10 @@ function toggleHisseWatch() {
     if (_hibSafeWriteWatch(w)) {
       const _loggedIn = _hibLoggedIn();
       _hibToast(TICKER + ' takibe eklendi' + (_loggedIn ? ' — sinyal değiştiğinde e-posta ile haber vereceğiz' : ''), 'success');
+      if (!_loggedIn) {   // C-21c: e-posta kutusu 🔔 ile birlesti
+        const _sub = document.getElementById('hisseSubCta');
+        if (_sub) { _sub.hidden = false; const _em = document.getElementById('hisseSubEmail'); if (_em) _em.focus(); }
+      }
       if (_loggedIn) {
         // 16.09: eskiden burada hicbir sunucu cagrisi yoktu, toast var-olmayan bir
         // "Ana Sayfa Alert Ayarlari" sayfasina yonlendiriyordu (Ozan bulgusu, derin
