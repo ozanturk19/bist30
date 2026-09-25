@@ -62,6 +62,9 @@ WRITE_CHANNELS = {
     '/api/user-alerts':    ['Hisse bazlı e-posta alarmları', 'o hissenin sembolü ve seçtiğiniz alarm koşulu'],
     '/api/contact':        ['İletişim formu', 'ayrı bir veritabanında saklanmaz'],
     '/api/log-error':      ['JavaScript hatası', 'kaynak dosyası/satır numarası'],
+    # C-41/D-50 hesap: kod isteği/doğrulama/çıkış ve hesaptaki liste/portföy/tercih yazımları
+    '/api/auth':           ['Hesap (isteğe bağlı, şifresiz)', 'tek kullanımlık 6 haneli giriş kodu'],
+    '/api/me':             ['takip listeniz', 'portföy bilgileri', 'Hesabı sil'],
 }
 
 # --- R2 tablosu: kodda yasayan her bp_* yerel anahtari ---
@@ -82,6 +85,10 @@ LOCAL_KEYS = {
     'bp_ls_warn_dismissed':  dict(server_mirror=False, note='localStorage uyari bandi'),
     'bp_search_cache_v1':    dict(server_mirror=False, note='arama onbellegi'),
     'bp_search_t_v1':        dict(server_mirror=False, note='arama onbellegi zaman damgasi'),
+    # C-41/D-50: hesap. bp_watchlist_v2 + bp_portfolio ilk girişte POST /api/auth/verify
+    # `import` alanıyla hesaba aktarılır (server_mirror=True zaten ikisinde de işaretli).
+    'bp_acct_imported':      dict(server_mirror=False, note='ilk giriste yerel liste hesaba aktarildi bayragi'),
+    'bp_takip_mode':         dict(server_mirror=False, note='/takip Liste/Portfoy gorunum tercihi'),
 }
 
 # Mutlak "sunucuya gitmez" iddiasi -- nitelendirilmemisse R2 ihlali.
@@ -91,6 +98,9 @@ _ABS_CLAIM_RE = re.compile(
 _QUALIFIERS = ('varsayılan olarak', 'varsayilan olarak', 'istisna')
 
 _FETCH_RE = re.compile(r"""fetch\(\s*[`'"]([^`'"]+)""")
+# C-41: bp-account.js yazmalari tek yardimcidan gecer -> call('POST', '/api/me/...', govde).
+# Degisken URL'li fetch() yukaridaki desene gorunmez; yontem + yol ayni cagrida okunur.
+_HELPER_RE = re.compile(r"""\b(?:call|_call|req|_req|request)\(\s*['"](POST|PUT|DELETE|PATCH)['"]\s*,\s*[`'"](/api/[^`'"]+)""", re.I)
 _METHOD_RE = re.compile(r"method\s*:\s*['\"](\w+)", re.I)
 
 
@@ -139,6 +149,9 @@ def _write_endpoints(files):
                 continue
             base = '/' + '/'.join(url.split('?')[0].strip('/').split('/')[:2])
             found.add(base)
+        for m in _HELPER_RE.finditer(src):
+            url = m.group(2)
+            found.add('/' + '/'.join(url.split('?')[0].strip('/').split('/')[:2]))
     return found
 
 

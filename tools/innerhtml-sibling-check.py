@@ -59,11 +59,8 @@ EXEMPT_REASON = {
         'kabi EZMEZ, mesaji #heroSubMsg`e yazar (index.html heroSubmitSub).',
     ('templates/ozet.html', 'ozSubForm'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
     ('templates/blog_article.html', 'artSubForm'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
-    ('templates/hisse.html', 'hisseSubCta'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
 }
 EXEMPT = set([
-    ('templates/hisse.html', 'hisseSubCta', 'hisseSubEmail'),
-    ('templates/hisse.html', 'hisseSubCta', 'hisseSubKvkk'),
     ('templates/index.html', 'heroSubForm', 'heroSubEmail'),
     ('templates/index.html', 'heroSubForm', 'heroSubKvkk'),
     ('templates/index.html', 'heroSubForm', 'heroSubMsg'),

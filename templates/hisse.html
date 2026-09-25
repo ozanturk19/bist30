@@ -102,6 +102,7 @@
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
 <script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/bp-account.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/pages/hisse.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -252,16 +253,9 @@
           <span class="hib-action-lbl">Portföye ekle</span>
         </button>
       </div>
-      {#- C-21c: sayfa sonundaki ayri e-posta kutusu kalkti; girissiz kullanici "Takip et"e basinca
-          ayni istek (/api/subscribe {email, ticker}) bu kucuk panelden gider. -#}
-      <form class="hx-sub" id="hisseSubCta" hidden onsubmit="event.preventDefault();hisseSubscribe()">
-        <p class="hx-sub-t">{{ ticker }} durumu değişince e-postayla haber verelim</p>
-        <div class="hx-sub-row" id="hisseSubForm">
-          <input id="hisseSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresin" aria-label="E-posta adresi">
-          <button type="submit">Haber ver</button>
-        </div>
-        <label class="hx-sub-kvkk"><input type="checkbox" class="da-check" id="hisseSubKvkk" required> <span><a href="/gizlilik" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span></label>
-      </form>
+      {#- C-41: "Takip et" oturumsuzken giris paneli eylem satirinin HEMEN ALTINDA acilir
+          (tek adim, modal yok; BPAccount.mountLogin). Dar ekranda .acc-slot tam genislik. -#}
+      <div class="acc-slot" id="hibLogin" hidden></div>
     </div>
     {#- C-20: 260px alan grafigi (1A/3A/1Y = son 30/90/365 takvim gunu). Nötr periwinkle cizgi +
         gradyan; baslangic kesikli cizgisi; son nokta = baslik fiyati (#hpPrice). Ilk cizim D-18b
@@ -902,6 +896,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 {% if not kapsam_disi %}
 <script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 <script src="{{ static_v('js/bp-chart-common.js') }}"></script>
+<script src="{{ static_v('js/bp-account.js') }}"></script>
 <script src="{{ static_v('js/hisse.js') }}"></script>
 <script src="{{ static_v('learning-mode.js') }}" defer></script>
 {% endif %}

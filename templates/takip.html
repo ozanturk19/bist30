@@ -1,0 +1,61 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Takip Listesi | BorsaPusula</title>
+{#- C-41 (25.09): hesaba bagli /takip (onayli taslak C-M8; O16g=B liste ve portfoy HESAPTA,
+    O24=A sifresiz e-posta kodu). Kisisel sayfa: arama motoruna kapali (noindex). Sunucu
+    bu sablonu KISISEL BAGLAM OLMADAN basar; liste, portfoy ve tercihler hesap API'sinden
+    gelir (static/js/bp-account.js + static/js/bp-takip.js). SSR yalniz H1, bos kabuk ve
+    "Takip nasil calisir?" blogu. -#}
+<meta name="description" content="Takip listen, portföyün ve e-posta bildirimlerin tek sayfada; hesabına bağlı, her cihazda aynı.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="canonical" href="https://borsapusula.com/takip">
+<link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
+<link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
+<link rel="stylesheet" href="/static/css/bp-account.css?v=a048a807">
+<link rel="stylesheet" href="/static/css/pages/takip.css?v=7e53c8bc">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+
+{% include '_header.html' %}
+
+<main id="main-content" class="tk" tabindex="-1">
+  <div class="tk-ph">
+    <div class="tk-ph-t">
+      <h1 class="tk-h1">Takip</h1>
+      <p class="tk-stat" id="tkStat" aria-live="polite"></p>
+    </div>
+    <div class="tk-ctl" id="tkCtl"></div>
+  </div>
+
+  <div class="tk-app" id="tkApp">
+    <noscript><p class="tk-nojs">Takip listen hesabında durur; görmek için tarayıcında JavaScript açık olmalı.</p></noscript>
+  </div>
+
+  <section class="tk-how" aria-labelledby="tkHowH">
+    <h2 id="tkHowH">Takip nasıl çalışır?</h2>
+    <ul>
+      <li><b>Liste hesabında durur.</b> Takip ettiğin hisseler e-posta adresine bağlı hesabında saklanır; telefonda ve bilgisayarda aynı liste görünür.</li>
+      <li><b>Şifre yok.</b> E-posta adresini yazarsın, gelen 6 haneli kodla girersin. Oturum o cihazda 90 gün açık kalır.</li>
+      <li><b>Portföy isteğe bağlı.</b> Adet ve maliyet girdiğin hisseler portföy özetine girer: toplam değer, kâr/zarar ve son seans değişimi.</li>
+      <li><b>Durum değişince e-posta.</b> Takip ettiğin bir hissenin trend durumu (Güçlü Trend, Yatay, Trend Bozuldu) değişince, istersen kapanıştan sonra tek e-posta gelir.</li>
+    </ul>
+  </section>
+
+  <p class="tk-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+<div class="tk-layer" id="tkLayer"></div>
+<div class="tk-toasts" id="tkToast"></div>
+<div class="sr-only" id="tkLive" aria-live="polite"></div>
+<input type="file" id="tkFile" accept="application/json,.json" hidden>
+
+{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+
+<!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
+<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="/static/bp-vocab.js?v=17025fc9"></script>
+<script src="/static/js/bp-account.js?v=f1114c84"></script>
+<script src="/static/js/bp-takip.js?v=b6a4642e"></script>
+<script src="/static/bp-search.js?v=660f20ac" defer></script>
+<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

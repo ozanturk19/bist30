@@ -1,7 +1,7 @@
 {
   "templates/gizlilik.html": {
-    "text_sha256": "198fbaeedc9c483da4f6ab5996168ea64243db0cf281cb59a1d95f044dde57d0",
-    "updated": "Son güncelleme: 27 Eylül 2026 (rev. 3.1) — yapay zekâ haber özeti kaldırıldığı için Google Gemini maddesi Üçüncü Taraf Hizmetler listesinden çıkarıldı; aşağıdaki \"Değişiklikler\" bölümüne bakınız."
+    "text_sha256": "6de6dae033d9a31dfd111fd4580a2304fb6ba6735d9ae89ed4afb8ba7e36513c",
+    "updated": "Son güncelleme: 2 Ekim 2026 (rev. 4) — şifresiz e-posta koduyla açılan isteğe bağlı hesap eklendi; aşağıdaki \"Değişiklikler\" bölümüne bakınız."
   },
   "templates/yasal.html": {
     "text_sha256": "5e5cee00a002bdd88ce89d7ad8d327e1166a3a908f9086be38a0f1d1495ebaed",
