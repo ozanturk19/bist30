@@ -18,6 +18,7 @@ TG: skor dosyasında varsa oradan, yoksa göstergelerden business_rules.compose_
 
 Kullanım:
     python3 tools/bp_yonlu_sim.py --snapshots DIR --scores DIR [--day YYYY-MM-DD] [--json OUT]
+    python3 tools/bp_yonlu_sim.py --canli last_health_scores.json   # D-21 bayrağı açıldıktan sonra
 D-47 bu aracı "kural değişirse kaç hissenin durumu değişir" raporuna genelleyecek.
 """
 import argparse
@@ -157,13 +158,52 @@ def detail(rows, tickers=("THYAO", "ECZYT", "SMRTG", "MGROS")):
     return {"hisseler": out, "bant_gecis": moves, "spotlight_dc08": spot, "ilk20_yeni": top20}
 
 
+def canli(path, tickers=("THYAO", "ECZYT", "SMRTG")):
+    """D-21 bayrak açıldıktan sonra: last_health_scores.json (ya da scores/<gün>.json)
+    kayıtlarını kâhine karşı denetler. Beklenen: hata 0, bp_trend eksik 0, tb_bp_gt_yatay 0,
+    yapisal_kopya 0. n4_bp_gt_temel_tb ve bp_eq_temel bilgi içindir (bkz. rapor)."""
+    raw = json.load(open(path))
+    entries = raw.get("scores", raw)
+    entries = {t: (w.get("data") if isinstance(w.get("data"), dict) else w) for t, w in entries.items()}
+    out = {"kayit": len(entries), "hata": [], "bp_trend_eksik": 0, "tb_bp_gt_yatay": 0,
+           "n4_bp_gt_temel_tb": 0, "bp_eq_temel": 0, "yapisal_kopya": 0, "bp_ge_70": 0, "hisseler": []}
+    for t, e in sorted(entries.items()):
+        temel, bp, tg, tr = e.get("temel_analiz_skoru"), e.get("borsapusula_skoru"), e.get("teknik_analiz_skoru"), e.get("bp_trend")
+        if temel is None:
+            if bp is not None:
+                out["hata"].append(t)          # yönlüde Temel yoksa BP üretilmez
+            continue
+        if not tr:
+            out["bp_trend_eksik"] += 1         # bayrak kapalıyken üretilmiş kayıt
+            continue
+        durum = tr.get("durum")
+        if bp != bp_yonlu(temel, durum, tg) or tr.get("pay") != trend_payi(durum, tg):
+            out["hata"].append(t)
+        out["tb_bp_gt_yatay"] += durum == "SAT" and bp > bp_yonlu(temel, "BEKLE", None)
+        out["n4_bp_gt_temel_tb"] += durum == "SAT" and bp > temel
+        out["bp_eq_temel"] += bp == temel
+        out["yapisal_kopya"] += bool(e.get("partial")) and tg is None and bp == temel
+        out["bp_ge_70"] += bp >= 70
+        if durum == "AL" or t in tickers:
+            out["hisseler"].append({"t": t, "durum": LABEL.get(durum, durum), "temel": temel, "tg": tg,
+                                    "pay": tr.get("pay"), "bp": bp})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snapshots", required=True)
-    ap.add_argument("--scores", required=True)
+    ap.add_argument("--snapshots")
+    ap.add_argument("--scores")
     ap.add_argument("--day", default=None, help="ayrıntı günü (varsayılan: son gün)")
     ap.add_argument("--json", default=None)
+    ap.add_argument("--canli", default=None, metavar="last_health_scores.json",
+                    help="D-21 sonrası canlı kayıt denetimi (simülasyon yerine)")
     a = ap.parse_args()
+    if a.canli:
+        print(json.dumps(canli(a.canli), ensure_ascii=False, indent=1))
+        return
+    if not (a.snapshots and a.scores):
+        ap.error("--snapshots ve --scores gerekli (ya da --canli)")
 
     days = load_days(a.snapshots, a.scores)
     used = [(d, rows, sd) for d, rows, sd in days if rows]

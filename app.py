@@ -9574,32 +9574,16 @@ def _run_eod_scoring_pass(results: list):
         _save_sector_stats_to_disk()
 
         signal_strength_by_ticker = {r.get("ticker"): r.get("signal_strength") for r in results}
+        # D-21: yönlü BP (BP_DIRECTIONAL=1) trend payını bu turdaki durumdan alır
+        signal_by_ticker = {r.get("ticker"): r.get("signal") for r in results}
 
         health_now = time.time()
         scores_out = {}
         for fdata in stocks_with_fundamentals:
             tk = fdata["ticker"]
-            sec = fdata["sector"]
-            health = _fhs.compute_health_score(fdata, sec, stocks_with_fundamentals)
-            teknik_skor = signal_strength_by_ticker.get(tk)
-            composite = _fhs.compute_borsapusula_score(teknik_skor, health.get("temel_analiz_skoru"))
-            entry = {
-                "teknik_analiz_skoru": teknik_skor,
-                "temel_analiz_skoru": health.get("temel_analiz_skoru"),
-                "borsapusula_skoru": composite.get("borsapusula_skoru"),
-                "data_completeness": health.get("data_completeness"),
-                "categories_complete": health.get("categories_complete"),
-                "partial": composite.get("partial"),
-                "band": health.get("band"),
-                "categories": health.get("categories"),
-                "categories_na": health.get("categories_na") or [],
-            }
-            # CPO-1531 Faz 3: deterministik gerekçe cümlesi hemen hesaplanır (Gemini
-            # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
-            # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
-            entry["temel_analiz_aciklamasi"] = _fhs.build_rationale(
-                entry["categories"], entry["data_completeness"], entry["categories_na"]
-            ) + " Yatırım tavsiyesi değildir."
+            # Temel skor + BP + gerekçe cümlesi tek yerde (financial_health_score, D-21)
+            entry = _fhs.build_score_entry(fdata, fdata["sector"], stocks_with_fundamentals,
+                                           signal_strength_by_ticker.get(tk), signal_by_ticker.get(tk))
             scores_out[tk] = entry
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}

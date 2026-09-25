@@ -3,9 +3,11 @@
 Kapsam (plan N25): compose_score (Teknik Güç), sinyal koşulları (kanon §3,
 O23=A: Supertrend, ADX >= 25, EMA 12 > EMA 99, DI+ > DI-, haftalık EMA 20
 yönü), compute_health_score (Temel skor), compute_borsapusula_score (BP) ve
-bant eşikleri. Hepsi üretim modüllerini import eder; yerelde (Python 3.9) ve
-VPS venv'de (3.12) koşar. Yalnız app.py'yi import eden son iki test yerelde
-atlanır (conftest.app_module).
+bant eşikleri. D-21: BP testleri BP_DIRECTIONAL bayrağının iki durumunda da
+koşar (kapalı = bugünkü formül birebir, açık = kanon §3 yönlü formül; D-10
+kâhiniyle tam alan karşılaştırması). Hepsi üretim modüllerini import eder;
+yerelde (Python 3.9) ve VPS venv'de (3.12) koşar. app.py'yi import eden 4 test
+(dosyanın sonu) yerelde atlanır (conftest.app_module), VPS'te koşar.
 
 Beklenen değerlerin hesabı her vakanın yanında yazılıdır; gerçek veri
 vakaları 22-24.09 gün sonu kayıtlarından (VPS snapshots/ + scores/).
@@ -149,22 +151,155 @@ def test_health_score_small_sector_falls_back_to_whole_pool(stock_pool):
     assert r["temel_analiz_skoru"] == 57
 
 
-# ── compute_borsapusula_score (bugünkü formül): 0,6 × Temel + 0,4 × Teknik ──
-@pytest.mark.parametrize("teknik, temel, expected, partial", [
-    (60, 50, 54, False),       # 30 + 24
-    (86, 54, 67, False),       # ECZYT 22.09: 32,4 + 34,4 = 66,8 (N4 bulgusu)
-    (61, 52, 56, False),       # MGROS 22.09: kanon §3 "eski formülle 56"
-    (None, 61, 61, True),      # THYAO 22.09 Yatay: BP = Temel (iki eşit halka)
-    (70, None, 70, True),      # Temel yok → yalnız Teknik
-    (None, None, None, True),
-])
-def test_borsapusula_score_current_formula(teknik, temel, expected, partial):
-    r = fhs.compute_borsapusula_score(teknik, temel)
-    assert r == {"borsapusula_skoru": expected, "partial": partial}
+# ── compute_borsapusula_score: bayrak kapalı = bugünkü formül (0,6 T + 0,4 TG, ──
+# Yatay'da BP = Temel), açık = yönlü (D-21, kanon §3: 0,6 T + 0,4 × trend payı;
+# pay GT max(50, TG) · Yatay 50 · TB min(50, 100 − TG)). Durum iç anahtarla gelir.
+@pytest.fixture(params=[False, True], ids=["bayrak-kapali", "bayrak-acik"])
+def bp_flag(request, monkeypatch):
+    if request.param:
+        monkeypatch.setenv("BP_DIRECTIONAL", "1")
+    else:
+        monkeypatch.delenv("BP_DIRECTIONAL", raising=False)
+    return request.param
 
 
-def test_borsapusula_score_custom_weights():
+BP_CASES = [
+    # teknik, temel, durum, bayrak kapalı → (BP, partial), bayrak açık → (BP, partial)
+    (60, 50, "AL", (54, False), (54, False)),        # GT, TG ≥ 50: iki formül aynı (30 + 24)
+    (40, 60, "AL", (52, False), (56, False)),        # GT, TG < 50: pay 50 → 36 + 20
+    (86, 54, "SAT", (67, False), (38, False)),       # ECZYT 22.09: eski 66,8 (N4 bulgusu); pay 14 → 38
+    (61, 52, "SAT", (56, False), (47, False)),       # MGROS 22.09: kanon §3 "56 → 47"
+    (62, 52, "SAT", (56, False), (46, False)),       # ECZYT 24.09: pay 38 → 46,4
+    (66, 47, "SAT", (55, False), (42, False)),       # SMRTG 24.09: pay 34 → 41,8
+    (None, 61, "BEKLE", (61, True), (57, False)),    # THYAO 22.09: kanon "61 → 57" (iki eşit halka kalkar)
+    (None, 63, "BEKLE", (63, True), (58, False)),    # THYAO 24.09: 37,8 + 20
+    (None, 60, "SAT", (60, True), (56, True)),       # yön var, güç yok → nötr pay 50, partial
+    (55, 60, None, (58, False), (56, True)),         # durum bilinmiyor → nötr pay 50, partial
+    (70, None, "AL", (70, True), (None, True)),      # Temel yok → yönlüde skor yok (Sınırlı veri)
+    (None, None, "BEKLE", (None, True), (None, True)),
+]
+
+
+@pytest.mark.parametrize("teknik, temel, state, off, on", BP_CASES)
+def test_borsapusula_score_both_flag_states(bp_flag, teknik, temel, state, off, on):
+    r = fhs.compute_borsapusula_score(teknik, temel, state=state)
+    assert (r["borsapusula_skoru"], r["partial"]) == (on if bp_flag else off)
+    if bp_flag and temel is not None:
+        assert r["trend_payi"] == fhs.trend_share(state, teknik)[0]
+    else:
+        assert set(r) == {"borsapusula_skoru", "partial"}      # kapalıyken sözlük eskisiyle aynı
+
+
+def test_borsapusula_score_custom_weights(monkeypatch):
+    monkeypatch.delenv("BP_DIRECTIONAL", raising=False)
     assert fhs.compute_borsapusula_score(60, 40, {"temel": .5, "teknik": .5})["borsapusula_skoru"] == 50
+    assert fhs.compute_borsapusula_score(60, 40, {"temel": .5, "teknik": .5}, state="AL",
+                                         directional=True)["borsapusula_skoru"] == 50
+
+
+@pytest.mark.parametrize("value, enabled", [
+    (None, False), ("", False), ("0", False), ("1", True), (" 1 ", True), ("true", False), ("yes", False),
+])
+def test_bp_directional_flag_parsing(monkeypatch, value, enabled):
+    if value is None:
+        monkeypatch.delenv("BP_DIRECTIONAL", raising=False)
+    else:
+        monkeypatch.setenv("BP_DIRECTIONAL", value)
+    assert fhs.bp_directional_enabled() is enabled
+
+
+def test_directional_grid_acceptance():
+    """D-21 kabulü, tüm tamsayı alanında (Temel ve Teknik Güç üretimde 0-100 tamsayı).
+
+    - GT ≥ Yatay ≥ TB (monoton) → "TB'de BP, Yatay karşılığını geçmez" (long-only)
+    - GT'de Teknik Güç artınca BP düşmez, TB'de artınca BP artmaz (ECZYT sınıfı kapanır)
+    - Yatay'da BP = Temel yalnız Temel 49-51'de (0,6 T + 20 aritmetiği; yapısal kopya yok)
+    """
+    def bp(t, s, g):
+        return fhs.compute_borsapusula_score(g, t, state=s, directional=True)["borsapusula_skoru"]
+    yatay_esit = set()
+    for t in range(101):
+        y = bp(t, "BEKLE", None)
+        if y == t:
+            yatay_esit.add(t)
+        prev = None
+        for g in range(101):
+            gt, tb = bp(t, "AL", g), bp(t, "SAT", g)
+            assert gt >= y >= tb, (t, g)
+            if prev is not None:
+                assert gt >= prev[0] and tb <= prev[1], (t, g)
+            prev = (gt, tb)
+    assert yatay_esit == {49, 50, 51}
+
+
+def _load_sim():
+    import importlib.util
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "bp_yonlu_sim.py")
+    spec = importlib.util.spec_from_file_location("bp_yonlu_sim", path)
+    sim = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sim)
+    return sim
+
+
+def test_directional_matches_d10_oracle():
+    """Üretim (financial_health_score) == D-10 simülasyonunun bağımsız kâhini."""
+    sim = _load_sim()
+    values = list(range(101)) + [None]
+    for t in values:
+        for s in ("AL", "BEKLE", "SAT", None):
+            for g in values:
+                got = fhs.compute_borsapusula_score(g, t, state=s, directional=True)["borsapusula_skoru"]
+                assert got == sim.bp_yonlu(t, s, g), (t, s, g)
+                assert fhs.compute_borsapusula_score(g, t, state=s, directional=False)["borsapusula_skoru"] \
+                    == sim.bp_bugun(t, g), (t, s, g)
+
+
+ENTRY_KEYS = ["teknik_analiz_skoru", "temel_analiz_skoru", "borsapusula_skoru", "data_completeness",
+              "categories_complete", "partial", "band", "categories", "categories_na"]
+
+
+def test_build_score_entry_both_flag_states(bp_flag, stock_pool):
+    pool = stock_pool("Sanayi", POOL5)
+    tb = fhs.build_score_entry(pool[0], "Sanayi", pool, 62, "SAT")     # Temel 56, TG 62
+    ya = fhs.build_score_entry(pool[1], "Sanayi", pool, None, "BEKLE")  # Temel 41
+    assert (tb["temel_analiz_skoru"], ya["temel_analiz_skoru"]) == (56, 41)
+    if bp_flag:
+        assert (tb["borsapusula_skoru"], tb["partial"]) == (49, False)   # 33,6 + 0,4 × 38 = 48,8
+        assert (ya["borsapusula_skoru"], ya["partial"]) == (45, False)   # 24,6 + 20 = 44,6
+        assert tb["bp_trend"] == {"durum": "SAT", "pay": 38.0}
+        assert ya["bp_trend"] == {"durum": "BEKLE", "pay": 50.0}
+        assert list(tb) == ENTRY_KEYS + ["bp_trend", "temel_analiz_aciklamasi"]
+    else:
+        assert (tb["borsapusula_skoru"], tb["partial"]) == (58, False)   # 33,6 + 24,8 = 58,4
+        assert (ya["borsapusula_skoru"], ya["partial"]) == (41, True)    # Yatay: BP = Temel
+        assert list(tb) == ENTRY_KEYS + ["temel_analiz_aciklamasi"]      # kayıt biçimi eskisiyle aynı
+    assert tb["temel_analiz_aciklamasi"].endswith(" Yatırım tavsiyesi değildir.")
+
+
+def test_canli_check_flags_bad_and_legacy_entries(stock_pool, tmp_path):
+    """tools/bp_yonlu_sim.py --canli: bayrak sonrası kayıtları kâhine karşı denetler."""
+    import json
+    sim = _load_sim()
+    pool = stock_pool("Sanayi", POOL5)
+    ok = {"AAAA": fhs.build_score_entry(pool[0], "Sanayi", pool, 62, "SAT", directional=True),
+          "BBBB": fhs.build_score_entry(pool[1], "Sanayi", pool, None, "BEKLE", directional=True)}
+    bozuk = dict(fhs.build_score_entry(pool[2], "Sanayi", pool, 70, "AL", directional=True))
+    bozuk["borsapusula_skoru"] += 1
+    eski = fhs.build_score_entry(pool[3], "Sanayi", pool, None, "BEKLE", directional=False)
+    p = tmp_path / "last_health_scores.json"
+    p.write_text(json.dumps({t: {"data": e, "ts": 0} for t, e in
+                             dict(ok, CCCC=bozuk, DDDD=eski).items()}), encoding="utf-8")
+    r = sim.canli(str(p))
+    assert r["hata"] == ["CCCC"] and r["bp_trend_eksik"] == 1
+    assert r["tb_bp_gt_yatay"] == 0 and r["yapisal_kopya"] == 0
+
+
+def test_eod_pass_passes_state_to_entry(app_function):
+    body = app_function("_run_eod_scoring_pass")
+    assert 'signal_by_ticker = {r.get("ticker"): r.get("signal") for r in results}' in body
+    assert "signal_strength_by_ticker.get(tk), signal_by_ticker.get(tk))" in body
+    assert "_fhs.build_score_entry(" in body and "compute_borsapusula_score(" not in body
 
 
 @pytest.mark.parametrize("score, band", [
@@ -197,3 +332,44 @@ def test_app_bar_signal_fast_matches_rule(app_module):
     args = (s([110.0, 110.0, 90.0]), s([100.0, 100.0, 100.0]), s([30.0, 30.0, 30.0]),
             s([25.0, 25.0, 15.0]), s([15.0, 15.0, 25.0]), s([1, 1, -1]), s([1, 0, -1]))
     assert [app_module._bar_signal_fast(*args, i) for i in range(3)] == ["AL", "BEKLE", "SAT"]
+
+
+@pytest.mark.parametrize("flag", [False, True], ids=["bayrak-kapali", "bayrak-acik"])
+def test_eod_pass_writes_bp_for_flag_state(app_module, monkeypatch, tmp_path, stock_pool, flag):
+    """D-21 uçtan uca (VPS): _run_eod_scoring_pass durumu kayda taşır; önbellek ve
+    scores/<gün>.json aynı BP'yi yazar. Disk/ağ yan etkileri monkeypatch ile kapalı."""
+    import json
+    app = app_module
+    if flag:
+        monkeypatch.setenv("BP_DIRECTIONAL", "1")
+    else:
+        monkeypatch.delenv("BP_DIRECTIONAL", raising=False)
+    pool = stock_pool("Sanayi", POOL5)
+    fund = {d["ticker"]: {"data": {k: v for k, v in d.items() if k not in ("ticker", "sector")}, "ts": 0}
+            for d in pool}
+
+    class _FixedNow(app.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return app.datetime(2026, 9, 24, 15, 30, tzinfo=tz)
+
+    monkeypatch.setattr(app, "datetime", _FixedNow)
+    monkeypatch.setattr(app, "_SCORES_DIR", str(tmp_path))
+    monkeypatch.setattr(app, "_build_sector_map", lambda results: {"Sanayi": [{"ticker": d["ticker"]} for d in pool]})
+    monkeypatch.setattr(app, "_fundamentals_cache", fund)
+    monkeypatch.setattr(app, "_sector_stats_cache", {})
+    monkeypatch.setattr(app, "_financial_health_cache", {})
+    monkeypatch.setattr(app, "_save_sector_stats_to_disk", lambda: None)
+    monkeypatch.setattr(app, "_save_health_scores_to_disk", lambda: None)
+
+    app._run_eod_scoring_pass([{"ticker": "AAAA", "signal": "SAT", "signal_strength": 62},
+                               {"ticker": "BBBB", "signal": "BEKLE", "signal_strength": None}])
+
+    cache = app._financial_health_cache
+    assert cache["AAAA"]["data"]["borsapusula_skoru"] == (49 if flag else 58)
+    assert cache["BBBB"]["data"]["borsapusula_skoru"] == (45 if flag else 41)
+    assert ("bp_trend" in cache["AAAA"]["data"]) is flag
+    with open(tmp_path / "2026-09-24.json", encoding="utf-8") as f:
+        saved = json.load(f)["scores"]
+    assert {t: e["borsapusula_skoru"] for t, e in saved.items()} == \
+        {t: w["data"]["borsapusula_skoru"] for t, w in cache.items()}
