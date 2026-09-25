@@ -84,3 +84,18 @@
 {%- else -%}{{ t }}'{{ {'Ocak':'ta','Şubat':'ta','Mart':'ta','Nisan':'da','Mayıs':'ta','Haziran':'da','Temmuz':'da','Ağustos':'ta','Eylül':'de','Ekim':'de','Kasım':'ta','Aralık':'ta'}[t.split(' ')[1]] }} oluştu
 {%- endif -%}
 {%- endmacro -%}
+
+{#- C-18a: görünür sayfa başlığı (`.da-pagehead`, data-art.css §7a) — H1 +
+    tek veri cümlesi (≤ ~75 karakter: 320px'te 2 satıra sığar, göreli zaman
+    yok, kanon §2). Kullanım: {% call bpf.pagehead('Başlık') %}cümle{% endcall %} -#}
+{%- macro pagehead(title) -%}
+{%- set _lede = caller()|trim if caller else '' -%}
+<div class="da-pagehead"><h1 class="da-pagehead-title">{{ title }}</h1>{% if _lede %}<p class="da-pagehead-lede">{{ _lede }}</p>{% endif %}</div>
+{%- endmacro -%}
+
+{#- "23.09.2026" → "23 Eylül" (başlık cümleleri için; biçim dışıysa aynen). -#}
+{%- macro day_month(dmy) -%}
+{%- set p = (dmy or '').split('.') -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[0]|int }} {{ ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][p[1]|int - 1] }}
+{%- else -%}{{ dmy or '' }}{%- endif -%}
+{%- endmacro -%}

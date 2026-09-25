@@ -32,26 +32,6 @@
   }
 
 
-  /* 20.09 Data-Art: hero kendi el-yapimi degrade+kenar recetesiyle duruyordu
-     (cyan->yesil tint, ana sayfanin hicbir yuzeyine benzemiyordu). Artik
-     paylasilan `.da-panel` recetesi; burada YALNIZ delta var. Parilti sayfanin
-     kendi aksani olan camgobegine cekildi (--da-glow-rgb), sol serit de ayni. */
-  .hh-hero {
-    --da-accent: var(--bp-accent-cyan);
-    --da-glow-rgb: var(--bp-accent-cyan-rgb);
-    --da-glow-a: .13;
-    --da-glow-size: 320px;
-    padding: 26px 28px 22px;
-    margin: 14px 0 18px;
-  }
-  .hh-hero h1 { font-size: var(--bp-text-3xl); font-weight: 800; color: var(--bp-text); margin-bottom: 6px; letter-spacing: -0.025em; }
-  .hh-hero p  { font-size: var(--bp-text-md); color: var(--bp-text2); line-height: 1.6; margin: 0; max-width: 780px; }
-  .hh-hero p strong { color: var(--bp-text); font-weight: 700; }
-  .hh-hero .hh-stats { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-  .hh-hero .hh-stat  { background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding: 8px 14px; font-size: var(--bp-text-sm); }
-  .hh-hero .hh-stat strong { color: var(--bp-accent-cyan); font-size: var(--bp-text-lg); font-weight: 800; display: block; }
-  .hh-hero .hh-stat span { color: var(--bp-text3); font-size: var(--bp-text-xs); }
-
   .hh-alpha-bar {
     background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     padding: 10px 14px; margin: 0 0 12px;
@@ -116,8 +96,6 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   @media (max-width: 720px) {
-    .hh-hero { padding: 20px 18px 16px; margin: 12px 0; }
-    .hh-hero h1 { font-size: var(--bp-text-2xl); }
     .hh-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
     .hh-card { padding: 9px 10px; }
   }

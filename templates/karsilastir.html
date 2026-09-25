@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
 {# ⛔ K-CA (22.09): ASAGIDAKI UC `|default(...)` METNI CANLIDA HIC RENDER
    OLMAZ. app.py `/karsilastir` rotasi (~10876) page_description'i HER ZAMAN
    veriyor, ticker secilince de (~10902) yeniden yaziyor. Yani buradaki metni
@@ -63,11 +63,12 @@
 </div>
 
 {% with hdr_title = 'Hisse Karşılaştırma', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">Hisse Karşılaştırma</h1>
 
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
+
+{% call bpf.pagehead('Hisse Karşılaştırma') %}2-4 hisseyi değerleme, kârlılık ve trend göstergeleriyle yan yana koy.{% endcall %}
 
 {#- K-DO (22.09): secilen hisselerin yankisi `hdr_sub_id='compareSubtitle'`
     ile uretiliyordu; `.page-sub` kalici gizli oldugu icin `role="status"`

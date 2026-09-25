@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler) | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler) | BorsaPusula</title>
 <meta name="description" content="BorsaPusula'nın takip ettiği {{ total_count }} BIST hissesinin (BIST100 + ek hisseler) tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hisseler">
@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=e0936136">
 <link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/hisseler.css?v=eb4f02ae">
+<link rel="stylesheet" href="/static/css/pages/hisseler.css?v=7d0681f3">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 
 <!-- /hisseler — özel stil -->
@@ -38,21 +38,7 @@
 
 {% include '_stale_banner.html' %}
 
-<section class="hh-hero da-panel da-panel--accent">
-  <div class="da-eyebrow">Hisse Evreni</div>
-  <h1 class="da-display">BIST Hisse Listesi</h1>
-  <p>
-    BorsaPusula'nın takip ettiği <strong>{{ total_count }} BIST hissesi</strong>
-    (BIST100 + ek hisseler) — sektörlere göre gruplandırılmış, alfabetik erişimli.
-    Her hisse için günlük teknik analiz, trend sinyali, fiyat grafiği, hacim verisi,
-    KAP haberleri ve şirket raporu mevcut.
-  </p>
-  <div class="hh-stats">
-    <div class="hh-stat"><strong class="da-num">{{ total_count }}</strong><span>Takip edilen hisse</span></div>
-    <div class="hh-stat"><strong class="da-num">{{ sectors_sorted|length }}</strong><span>Sektör</span></div>
-    <div class="hh-stat"><strong>Günlük</strong><span>Sinyal güncelleme</span></div>
-  </div>
-</section>
+{% call bpf.pagehead('BIST Hisse Listesi') %}<span class="da-num">{{ total_count }}</span> BIST hissesi, <span class="da-num">{{ sectors_sorted|length }}</span> sektörde; sektöre ya da harfe göre göz at.{% endcall %}
 
 <div class="hh-alpha-bar" aria-label="Alfabetik hızlı erişim">
   {% for L in letters_sorted %}<a href="#letter-{{ L }}" class="hh-alpha-link" onclick="hhSetMode('alpha')">{{ L }}</a>{% endfor %}

@@ -61,11 +61,12 @@
     <span class="sc-arrow">Detay →</span>
   </div>
 </a>{% endmacro %}
-<h1 class="sr-only">Piyasa Gündem Merkezi</h1>
 
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
+
+{% call bpf.pagehead('Piyasa Gündemi') %}{% if ssr_signal_summary %}{{ (ssr_eod_label ~ ' kapanışı: ') if ssr_eod_label else 'Son kapanış: ' }}<span class="da-num">{{ ssr_signal_summary.al }}</span> Güçlü Trend, <span class="da-num">{{ ssr_signal_summary.sat }}</span> Trend Bozuldu, <span class="da-num">{{ (ssr_new_signals or [])|length }}</span> durum değişikliği.{% else %}Trend durumu değişen hisseler ve piyasa özeti.{% endif %}{% endcall %}
 
 {#- K-DO (22.09): bu damga `_header.html`in `hdr_sub`/`hdr_sub_id`
       parametreleriyle uretiliyordu; olusan `.page-sub` dugumu anti-CLS

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sektör Isı Haritası ve Karşılaştırma | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sektör Isı Haritası ve Karşılaştırma | BorsaPusula</title>
 <meta name="description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın. Hangi sektörler güçlü trend sergiliyor?">
 <link rel="canonical" href="https://borsapusula.com/sektor-harita">
 <meta property="og:title"       content="Sektör Isı Haritası ve Karşılaştırma — BorsaPusula">
@@ -35,11 +35,12 @@
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 {% with hdr_title='Sektör Isı Haritası', hdr_title_tag='div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">Sektör Isı Haritası ve Karşılaştırma — BIST</h1>
 
 <main class="container" id="main-content" tabindex="-1">
 
   {% include '_stale_banner.html' %}
+
+  {% call bpf.pagehead('Sektör Haritası') %}{% if ssr_sectors %}<span class="da-num">{{ ssr_sectors|sum(attribute='total') }}</span> hisse, <span class="da-num">{{ ssr_sectors|length }}</span> sektörde: <span class="da-num">{{ ssr_sectors|sum(attribute='al') }}</span> Güçlü Trend, <span class="da-num">{{ ssr_sectors|sum(attribute='bekle') }}</span> Yatay, <span class="da-num">{{ ssr_sectors|sum(attribute='sat') }}</span> Trend Bozuldu.{% else %}Sektörlerin trend durumu, hisse sayısına göre.{% endif %}{% endcall %}
 
 {#- K-DO (22.09): bu damga `_header.html`in `hdr_sub`/`hdr_sub_id`
       parametreleriyle uretiliyordu; olusan `.page-sub` dugumu anti-CLS

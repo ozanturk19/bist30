@@ -37,7 +37,6 @@
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% include '_header.html' %}
-<h1 class="sr-only">Günlük Sinyal Özeti — BIST Hisseleri</h1>
 
 <div style="max-width:1100px;margin:0 auto;padding:14px 24px 0;display:flex;justify-content:flex-end">
   <div style="display:flex;align-items:center;gap:8px">
@@ -74,6 +73,8 @@ function goToDate(date) {
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
+
+{% call bpf.pagehead('Kapanış Özeti') %}{% if not loading and stocks %}{{ bpf.day_month(today_str) }} kapanışı: <span class="da-num">{{ al_list|length }}</span> Güçlü Trend, <span class="da-num">{{ bekle_list|length }}</span> Yatay, <span class="da-num">{{ sat_list|length }}</span> Trend Bozuldu.{% endif %}{% endcall %}
 
 {% if loading %}
 <div style="text-align:center;padding:60px;color:var(--bp-text3)">
