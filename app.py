@@ -2718,6 +2718,30 @@ def _save_subscribers(subs):
         logger.error("subscribers.json kaydetme hatası: %s", e)
 
 
+def _follow_ticker(raw):
+    """D-P1-2509: istekteki hisse kodunu normalize eder; evren dışı/endeks/bozuk → None."""
+    t = str(raw or "").strip().upper()
+    if not re.match(r"^[A-Z0-9]{1,10}$", t) or t in INDEX_TICKERS or t not in BIST100:
+        return None
+    return t
+
+
+def _sub_follow_set(rec):
+    """Abonenin takip listesi (`follow`). `tickers` bir FİLTRE (boş = hepsi) olduğu için
+    takip ayrı alanda tutulur; hisse sayfasından eklemek özet e-postasını daraltmaz."""
+    return {str(t).upper() for t in (rec.get("follow") or []) if t}
+
+
+def _add_follow(rec, ticker):
+    """True: yeni eklendi; False: zaten takipte."""
+    cur = list(rec.get("follow") or [])
+    if ticker in cur:
+        return False
+    cur.append(ticker)
+    rec["follow"] = cur
+    return True
+
+
 _LOGIN_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_sends.json")
 _login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")
 
@@ -3024,8 +3048,37 @@ def _build_login_email(email, login_url, unsubscribe_url, name=None):
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
 
-def _build_signal_email(changes, unsubscribe_url):
-    """Sinyal değişim maili — premium-aware, modern card layout."""
+def _build_follow_confirm_email(email, ticker, confirm_url, unsubscribe_url, name=None):
+    """D-P1-2509: kayıtlı abonede çerezsiz istekle gelen takip eklemesi için tek kullanımlık
+    onay maili (D-38 çift onay deseni — başkası adına takip eklenemez)."""
+    greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
+    t = _html.escape(ticker)
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
+          <strong style="color:#e5e1e4">{t}</strong> için sinyal değişimi bildirimlerini açmak istediğini onayla.<br>
+          Bağlantı <strong style="color:#e5e1e4">24 saat</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
+        </p>
+        <a href="{confirm_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          {t} takibini onayla →
+        </a>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin — hesabında hiçbir değişiklik yapılmayacak.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader=f"{ticker} takibini onayla")
+
+
+def _build_signal_email(changes, unsubscribe_url, follow=None):
+    """Sinyal değişim maili — premium-aware, modern card layout.
+    D-P1-2509: `follow` (takip listesi) varsa takipteki hisseler başa alınır ve "TAKİPTE" rozeti alır."""
+    follow = set(follow or ())
+    if follow:
+        changes = sorted(changes, key=lambda c: c[0] not in follow)
     sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
     sig_bg     = {"AL": "rgba(0,226,144,0.10)", "SAT": "rgba(248,81,73,0.10)", "BEKLE": "rgba(144,144,151,0.08)"}
     sig_border = {"AL": "rgba(0,226,144,0.30)", "SAT": "rgba(248,81,73,0.30)", "BEKLE": "rgba(144,144,151,0.20)"}
@@ -3058,6 +3111,8 @@ def _build_signal_email(changes, unsubscribe_url):
         prem_badge = ""
         if is_prem:
             prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">⭐ HACİM ONAYLI</span>'''
+        if t in follow:
+            prem_badge += '''<span style="display:inline-block;background:rgba(184,195,255,0.12);border:1px solid rgba(184,195,255,0.40);color:#b8c3ff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">TAKİPTE</span>'''
 
         # D-39 (kanon §2.2): "SL" (stop) dili yok — betimleyici trend dönüş seviyesi.
         sl_html = f'<span style="color:#909097">Trend dönüş seviyesi (Supertrend): <strong style="color:#c7c5cd">{tr_price_filter(sl_level)} ₺</strong></span>' if sl_level else ''
@@ -3269,14 +3324,15 @@ def _notify_email_signal_changes(changes):
             token    = data.get("token", "")
             name     = data.get("name", "")
             tickers  = data.get("tickers", [])
+            follow   = _sub_follow_set(data)
             # Filter changes by user prefs
             relevant = list(changes)
-            # Premium-only filter
+            # Premium-only filter (takipteki hisse premium olmasa da gelir)
             if mail_pref == "premium":
-                relevant = [c for c in relevant if c[3].get("is_premium")]
-            # Watchlist filter
+                relevant = [c for c in relevant if c[3].get("is_premium") or c[0] in follow]
+            # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
             if tickers:
-                relevant = [c for c in relevant if c[0] in tickers]
+                relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
@@ -3284,7 +3340,7 @@ def _notify_email_signal_changes(changes):
             subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
             if len(relevant) > 3:
                 subject += f" +{len(relevant) - 3}"
-            if send_email(email, subject, _build_signal_email(relevant, unsub_url), unsubscribe_url=unsub_url):
+            if send_email(email, subject, _build_signal_email(relevant, unsub_url, follow=follow), unsubscribe_url=unsub_url):
                 sent += 1
             time.sleep(0.3)
         if sent:
@@ -3573,10 +3629,11 @@ def _send_digest_emails(timeframe="daily", force=False):
         token   = data.get("token", "")
         name    = data.get("name", "")
         tickers = data.get("tickers", [])
-        # Watchlist filter
+        follow  = _sub_follow_set(data)
+        # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
         relevant = list(changes)
         if tickers:
-            relevant = [c for c in relevant if c[0] in tickers]
+            relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
         if not relevant:
             skip_reasons["watchlist_empty"] += 1
             continue
@@ -3594,7 +3651,7 @@ def _send_digest_emails(timeframe="daily", force=False):
         if prem_count > 0:
             subject += f" — {prem_count} Hacim Onaylı ⭐"
 
-        if send_email(email, subject, _build_signal_email(relevant, unsub_url), unsubscribe_url=unsub_url):
+        if send_email(email, subject, _build_signal_email(relevant, unsub_url, follow=follow), unsubscribe_url=unsub_url):
             sent += 1
         else:
             skip_reasons["send_fail"] += 1
@@ -13639,6 +13696,12 @@ def api_subscribe():
     # İsim isteğe bağlı; varsa minimum 2 karakter
     if name and len(name) < 2:
         return safe_json({"ok": False, "error": "Ad çok kısa"}), 400
+    # D-P1-2509: hisse sayfasından "sinyali değişince bildirim al" — isteğe bağlı hisse kodu.
+    follow_t = None
+    if data.get("ticker") not in (None, ""):
+        follow_t = _follow_ticker(data.get("ticker"))
+        if not follow_t:
+            return safe_json({"ok": False, "error": "Geçersiz hisse kodu"}), 400
     # CPO-DEV2-076 (C): worker-local Flask-Limiter sayacini disk-tabanli
     # cross-process kilitle guclendir -- ayni yapilandirilmis limit (5/saat).
     if not _mail_route_allowed("subscribe", get_remote_address(), 5, 3600):
@@ -13647,14 +13710,43 @@ def api_subscribe():
     with _sub_lock:
         subs = _load_subscribers()
         if email in subs:
-            if subs[email].get("active", True):
+            if subs[email].get("active", True) and follow_t:
+                rec = subs[email]
+                _ck = request.cookies.get("bp_sub", "")
+                _tok = rec.get("token") or ""
+                if follow_t in _sub_follow_set(rec):
+                    return safe_json({"ok": True, "status": "already", "ticker": follow_t,
+                                      "message": f"{follow_t}'yi zaten takip ediyorsun."})
+                if _ck and _tok and secrets.compare_digest(_ck, _tok):
+                    _add_follow(rec, follow_t)
+                    _save_subscribers(subs)
+                    return safe_json({"ok": True, "status": "added", "ticker": follow_t,
+                                      "message": f"{follow_t} bildirimleri açıldı."})
+                _ct = secrets.token_hex(20)
+                rec["follow_pending"] = {"token": _ct, "ticker": follow_t, "expires": time.time() + 86400}
+                _save_subscribers(subs)
+                # Çerez yok/eşleşmiyor: başkası adına takip eklenemesin → onay bağlantısı e-postalanır.
+                if not _mail_route_allowed("follow_confirm", email, 3, 3600):
+                    return safe_json({"ok": False, "error": "Çok fazla istek, lütfen daha sonra tekrar deneyin"}), 429
+                _unsub = f"https://borsapusula.com/unsubscribe/{_tok}"
+                _sent = send_email(email, f"{follow_t} takibini onayla — BorsaPusula",
+                                   _build_follow_confirm_email(email, follow_t, f"https://borsapusula.com/api/follow/confirm?t={_ct}", _unsub, name=rec.get("name")),
+                                   _unsub)
+                if not _sent:
+                    logger.error("Takip onay maili gonderilemedi: %s", _mask_email(email))
+                return safe_json({"ok": True, "status": "confirm_sent", "ticker": follow_t, "email_sent": _sent,
+                                  "message": "Onay bağlantısını e-postana gönderdik." if _sent else "Onay e-postası şu an gönderilemedi, lütfen sonra tekrar dene."})
+            elif subs[email].get("active", True):
                 # bughunt-r120 json-error-shape: diger tum hata dallari "error" anahtari
                 # kullaniyor, bu dal "message" kullaniyordu - ozet.html substring-esleme
                 # ile bu metne bagimliydi. "message" korunuyor (mevcut tuketiciler bozulmaz),
                 # "error" additive eklendi (sema tutarliligi).
                 return safe_json({"ok": False, "error": "Bu e-posta zaten kayıtlı.", "message": "Bu e-posta zaten kayıtlı."})
+        if email in subs:
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
+            if follow_t:
+                _add_follow(subs[email], follow_t)
             subs[email]["subscribed_at"] = datetime.now(_TZ_TR).isoformat()
             if name and not subs[email].get("name"):
                 subs[email]["name"] = name
@@ -13672,7 +13764,7 @@ def api_subscribe():
             )
             if not email_sent:
                 logger.error("Abonelik yenileme maili gonderilemedi: %s", _mask_email(email))
-            react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email, "email_sent": email_sent})
+            react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!" + (f" {follow_t} bildirimleri açıldı." if follow_t else ""), "token": token, "name": subs[email].get("name", ""), "email": email, "email_sent": email_sent})
             react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
 
@@ -13682,6 +13774,7 @@ def api_subscribe():
             "subscribed_at": datetime.now(_TZ_TR).isoformat(),
             "name":          name,            # FAZ 3: kullanıcı adı
             "tickers":       [],
+            "follow":        [follow_t] if follow_t else [],   # D-P1-2509: takip listesi (`tickers` filtre, boş = hepsi)
             "active":        True,
             "level":         None,            # FAZ 4: yatırım deneyimi
             "freq":          None,            # FAZ 4: işlem sıklığı
@@ -13703,7 +13796,8 @@ def api_subscribe():
     logger.info("Yeni e-posta abonesi: %s", _mask_email(email))
     resp = safe_json({
         "ok":      True,
-        "message": "Abonelik başarılı! Onay e-postası gönderildi." if email_sent else "Abonelik başarılı! Onay e-postası şu an gönderilemedi, kaydınız aktif.",
+        "message": ("Abonelik başarılı! Onay e-postası gönderildi." if email_sent else "Abonelik başarılı! Onay e-postası şu an gönderilemedi, kaydınız aktif.")
+                   + (f" {follow_t} bildirimleri açıldı." if follow_t else ""),
         "token":   token,
         "name":    name,
         "email":   email,
@@ -13712,6 +13806,30 @@ def api_subscribe():
     # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
     resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
     return resp
+
+
+@app.route("/api/follow/confirm")
+@limiter.limit("60 per minute")
+def api_follow_confirm():
+    """D-P1-2509: takip onay bağlantısı — tek kullanımlık, 24 saat; geçerliyse hisse takip
+    listesine eklenir ve hisse sayfasına dönülür. Geçersiz/süresi dolmuş → ana sayfa."""
+    tok = (request.args.get("t") or "").strip()
+    if tok:
+        with _sub_lock:
+            subs = _load_subscribers()
+            for em, rec in subs.items():
+                p = rec.get("follow_pending") or {}
+                if p.get("token") and secrets.compare_digest(str(p["token"]), tok):
+                    t = _follow_ticker(p.get("ticker"))
+                    ok = bool(t) and time.time() < p.get("expires", 0)
+                    rec.pop("follow_pending", None)
+                    if ok:
+                        _add_follow(rec, t)
+                    _save_subscribers(subs)
+                    if ok:
+                        return redirect(f"/hisse/{t}?takip=ok")
+                    break
+    return redirect("/?takip=expired")
 
 
 @app.route("/profil")
