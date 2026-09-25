@@ -138,7 +138,6 @@
     <div class="da-eyebrow-row">
       <span class="da-badge">Gün Sonu Verisi</span>
       <span class="da-badge">Algoritmik Teknik Analiz</span>
-      <span class="da-badge" id="daUniverseBadge" hidden></span>
     </div>
 
     <div class="da-index-row">
@@ -431,7 +430,6 @@
    DATA-ART ANA SAYFA — veri katmanı. Gerçek endpoint'ler:
      /api/data           → hisseler, xu100_spark, data_quality/stocks_age_s/refreshing
      /api/sektor-summary  → sektör mozaiği + "bugün ne oldu" en güçlü sektör
-     /api/stocks/list     → taranan evren büyüklüğü (eyebrow rozeti)
      /api/macro           → BIST100 canlı seviye + değişim (mevcut bpLoadMacroBar)
    LLM/Gemini çağrısı YOK — "Bugün ne oldu" tamamen deterministik/kural tabanlı.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -542,14 +540,6 @@
     }
     daRenderRecap();
   }
-
-  // ═══ 2) /api/stocks/list — taranan evren büyüklüğü rozeti ═══
-  fetch('/api/stocks/list').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
-    var n = (d.stocks || []).length;
-    if (!n) return;
-    var b = document.getElementById('daUniverseBadge');
-    if (b) { b.textContent = n + ' Hisse Otomatik Taranıyor'; b.hidden = false; }
-  }).catch(function(){ /* dekoratif rozet — sessizce atlanır, sayfa akışını bloklamaz */ });
 
   // ═══ 3) /api/data — spotlight / mozaik-öncesi hisseler / küratörlü listeler / ızgara / marquee / stale banner ═══
   function daShowSectionError(containerId, retryFn){
