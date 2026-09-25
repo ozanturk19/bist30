@@ -253,7 +253,7 @@ def derive_ema_deadband(e12, e99):
 # ── T1.1 (CPO-1321 FAZ 1) — kanonik sözlük evi ──────────────────────────────
 # derive_adx_label ile aynı desen. NOT (r53 bug-hunt + CPO-DEV2-060 düzeltmesi):
 # bu 4 sözlük app.py için tek kaynak ama templates/*.html HÂLÂ kendi bağımsız
-# kopyalarını tutuyor (ENTRY_QUALITY_LABELS 3+, SIGNAL_LABELS 14+ yerde) — değerler
+# kopyalarını tutuyor (SIGNAL_LABELS 14+ yerde) — değerler
 # şu an senkron ama gerçek 'tek kaynağa taşıma' refactor'ü henüz yapılmadı. Yeni bir
 # etiket eklerken/değiştirirken template kopyalarını da elle güncellemeyi unutma.
 # T1.2 (CPO-1321): SIGNAL_LABELS['SAT'] eski SAT etiketinden "Trend Bozuldu"ya
@@ -266,23 +266,14 @@ SIGNAL_LABELS = {
     "BEKLE": "Yatay",
 }
 
-# Kod → görünen ad. Kısa form (gundem/karsilastir/tarama şablonlarındaki
-# çoğunluk) kanonik alındı. templates/index.html eskiden farklı, uzun-form bir
-# eşleme kullanıyordu (örn. "✓ İdeal giriş bölgesi") — bu sapma r41'de (22.08,
-# commit fd4d9f5) index.html'in kısa forma geçirilmesiyle kapatıldı.
-ENTRY_QUALITY_LABELS = {
-    "IDEAL": "İdeal",
-    "IYI": "İyi",
-    "DIKKATLI": "Dikkatli",
-    "UZAK": "Kovalama",
-}
+# D-39b: ENTRY_QUALITY_LABELS kalktı (entry_quality üretilmiyor).
 
 # ── D-39 (Ozan O10, kanon §2.2) — teknik hedef / işlem yönetimi dili ────────
 # API'lerden kalkan alanlar: analyze() artık üretmez; disk cache'ten gelen eski
 # kayıtlardan app._enrich_stock düşürür. Analist hedef fiyatı (temel analiz)
 # bu listede DEĞİL — değerleme göstergesi olarak kalır.
 RETIRED_TRADE_KEYS = ("tp1", "tp2", "tp_level", "rr_signal", "rr_ratio", "rr_now",
-                      "entry_note", "optimal_entry")
+                      "entry_note", "optimal_entry", "entry_quality")
 
 # Üretilen teknik metinde (sinyal açıklaması, e-posta, yorum) olmaması gereken
 # dil; varyant ve büyük/küçük harf duyarsız. Haber/analist metnine UYGULANMAZ

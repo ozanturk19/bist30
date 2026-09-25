@@ -46,7 +46,7 @@ def test_retired_keys_cover_plan_fields():
     for k in ("tp1", "tp2", "tp_level", "rr_signal", "rr_ratio", "entry_note", "optimal_entry"):
         assert k in br.RETIRED_TRADE_KEYS
     assert "sl_level" not in br.RETIRED_TRADE_KEYS        # Supertrend seviyesi (trend dönüş) kalır
-    assert "entry_quality" not in br.RETIRED_TRADE_KEYS   # kod değeri; tarama/karsilastir/gundem/hisse tüketiyor
+    assert "entry_quality" in br.RETIRED_TRADE_KEYS       # D-39b: tüketici kalmadı, üretim de kalktı
 
 
 @pytest.mark.parametrize("text", [
@@ -80,7 +80,7 @@ def test_app_py_never_names_a_retired_field():
     assert hits == []
     analyze_keys = {k.value for n in ast.walk(ast.parse(_func_src("analyze")))
                     if isinstance(n, ast.Dict) for k in n.keys if isinstance(k, ast.Constant)}
-    assert {"entry_quality", "sl_level", "signal_date", "bar_date"} <= analyze_keys
+    assert {"sl_level", "signal_date", "bar_date"} <= analyze_keys
     assert not {"LONG", "SHORT"} & set(_strings("analyze"))
 
 
@@ -93,7 +93,7 @@ def test_enrich_stock_drops_legacy_disk_cache_fields():
            "indicators": {"supertrend": {"value": "SHORT", "bull": False, "bear": True}}}
     s = ns["_enrich_stock"](old)
     assert not set(br.RETIRED_TRADE_KEYS) & set(s)
-    assert s["sl_level"] == 280.0 and s["entry_quality"] == "IDEAL"
+    assert s["sl_level"] == 280.0
     assert s["indicators"]["supertrend"]["value"] == "Aşağı"
     s2 = ns["_enrich_stock"]({"ticker": "X", "indicators": {"supertrend": None}})
     assert s2["indicators"]["supertrend"] is None
@@ -163,3 +163,15 @@ def test_app_wiring_on_vps():
     assert app._TRADE_LANG_RE.pattern == br.TRADE_LANG_RE.pattern
     s = app._enrich_stock({"ticker": "THYAO", "tp1": 1.0, "rr_signal": 2.0, "entry_note": "SL yakın — R/R"})
     assert not set(br.RETIRED_TRADE_KEYS) & set(s)
+
+
+def test_d39b_sinyal_ozeti_ve_bilanco_uyarisi_islem_dili_tasimaz():
+    """D-39b: entry_quality üretimi kalktı; Sinyal Özeti / bilanço uyarısında
+    "giriş riski", "kovalamak", "acele", "pozisyon riski" dili yok."""
+    import re
+    bad = re.compile(r"(?i)giriş (riski|zamanlaması|için)|kovala|acele|pozisyon (riski|için)|yeni giriş")
+    for fn in ("build_signal_summary", "analyze"):
+        for s in _strings(fn):
+            assert not bad.search(s), (fn, s)
+            assert not br.TRADE_LANG_RE.search(s), (fn, s)
+    assert not hasattr(br, "ENTRY_QUALITY_LABELS")

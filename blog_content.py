@@ -2278,7 +2278,7 @@ Kaldıraç, belirli koşullar altında ve **çok küçük miktarlarda** değerle
 
 ## BorsaPusula Kullanıcıları İçin Not
 
-BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) ve **entry_quality** metrikleriyle değerlendirir. "İdeal" veya "İyi" giriş kalitesi olan, yüksek ADX'li sinyaller bile kaldıraçsız kullanıldığında daha güvenlidir.
+BorsaPusula'nın sinyal sistemi, trend gücünü ADX, EMA ve Supertrend göstergelerinin ortak yönüyle değerlendirir. Yüksek ADX'li güçlü trendler bile kaldıraçsız izlendiğinde daha güvenlidir.
 
 > **Altın kural:** Kaldıraç, kazancınızı artırmak için değil, yalnızca çok emin olduğunuz işlemleri *biraz* büyütmek için kullanın. Emin olmak için önce kaldıraçsız deneyin.""",
     "faqs": [

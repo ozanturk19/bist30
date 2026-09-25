@@ -92,7 +92,6 @@ try:
     from business_rules   import derive_signal_date_label      # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
-    from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
     from business_rules   import last_eod_day, parse_signal_date  # D-06: son EOD günü veriden
     from business_rules   import RETIRED_TRADE_KEYS as _RETIRED_TRADE_KEYS, TRADE_LANG_RE as _TRADE_LANG_RE  # D-39
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
@@ -151,7 +150,6 @@ except ImportError as _dqv_import_err:
     _TRADE_LANG_RE      = re.compile(r"(?!)")   # hiçbir şeyle eşleşmez
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
-    ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Kovalama'}
 
 # ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────
 try:
@@ -2081,28 +2079,8 @@ def analyze(ticker_base):
             signal_vol_ratio = round(svol / svol_avg, 2) if svol_avg > 0 else 1.0
             vol_confirmed    = signal_vol_ratio >= 1.7
 
-        # ── Sinyal fiyatına uzaklık (entry_quality) ───────────────────────────
-        # Ölçüt: Fiyat sinyal gününden bu yana kaç ATR hareket etti?
-        # < 1 ATR → IDEAL  |  1-2 ATR → IYI  |  2-3.5 ATR → DIKKATLI  |  >3.5 → UZAK
-        # Ters yönde hareket (CPO-1666 #2) → UZAK. Kod değeri korunur (tarama/
-        # karsilastir/gundem/hisse tüketiyor); metin tarafı şablonda.
-        # D-39 (O10, kanon §2.2): entry_note ("SL yakın — R/R"), optimal_entry,
-        # tp1/tp2 ve rr_signal artık üretilmez — teknik hedef/işlem yönetimi dili yok.
-        entry_quality = None
-        if signal in ("AL", "SAT") and signal_price and sl_val and atr_now > 0 \
-                and (c > sl_val if signal == "AL" else c < sl_val):
-            _dir       = 1 if signal == "AL" else -1
-            pct_moved  = _dir * (c - signal_price) / signal_price * 100   # sinyal yönünde %
-            atr_pct    = atr_now / c * 100
-            atrs_moved = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
-            if pct_moved < 0 or atrs_moved >= 3.5:
-                entry_quality = "UZAK"
-            elif atrs_moved < 1.0:
-                entry_quality = "IDEAL"
-            elif atrs_moved < 2.0:
-                entry_quality = "IYI"
-            else:
-                entry_quality = "DIKKATLI"
+        # D-39/D-39b (O10, kanon §2.2): tp1/tp2/rr_signal/entry_note/optimal_entry ve
+        # entry_quality (giriş kalitesi) üretilmez — teknik hedef/işlem yönetimi dili yok.
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
@@ -2134,7 +2112,7 @@ def analyze(ticker_base):
                 earnings_warning = {
                     "date": _e["date"],
                     "days_ahead": _e["days_ahead"],
-                    "message": f"Bilanço {_e['days_ahead']} gün sonra ({_e['date']}) — pozisyon riski yüksek"
+                    "message": f"Bilanço {_e['days_ahead']} gün sonra ({_e['date']}) — fiyat hareketi oynak olabilir"
                 }
 
         # NOT (CPO-1595, 11.09): "Sinyal Yaşı Yorumu" (eski Faz 1 #4 —
@@ -2267,7 +2245,6 @@ def analyze(ticker_base):
             "vol_confirmed":   vol_confirmed,
             "signal_vol_ratio": signal_vol_ratio,
             "atr14":           round(atr_now, 2) if atr_now else None,
-            "entry_quality":   entry_quality,
             # D-39 (O10): tp1/tp2/rr_signal/entry_note/optimal_entry üretilmez
             # (CPO-1758 rr_ratio ve CPO-1762 rr_now zaten kalkmıştı).
         }
@@ -8606,7 +8583,7 @@ def build_signal_summary(stock):
     Deterministik (Gemini DEĞİL), kural-tabanlı durum matrisi.
     3 katman döner:
       verdict — tek cümle, teknik terimsiz kullanıcı sonucu
-      points  — 3 madde "neden böyle söylüyoruz" (trend / giriş riski / risk seviyesi)
+      points  — 3 madde "neden böyle söylüyoruz" (trend / sinyalden bu yana fiyat / trend dönüş seviyesi)
     Tüm AL/SAT/BEKLE durumlarını kapsar.
     """
     if not stock:
@@ -8620,7 +8597,6 @@ def build_signal_summary(stock):
     adx     = stock.get("adx")
     sl      = stock.get("sl_level")
     weekly  = stock.get("weekly_trend")   # int: 1 = haftalık yukarı, -1 = aşağı
-    eq      = stock.get("entry_quality")
 
     try:
         if entry and current:
@@ -8640,20 +8616,20 @@ def build_signal_summary(stock):
     if signal == "AL":
         if not gain_pct_known:
             verdict = ("Güçlü Trend sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
-                       "trend gücü ve giriş zamanlaması için ek göstergelere bakılması öneriliyor.")
+                       "trend gücü için ek göstergelere bakılması öneriliyor.")
         elif gain_pct > 50 and rsi_hot:
             verdict = ("Trend güçlü kalmaya devam ediyor; ancak fiyat sinyal "
-                       "başlangıcına göre ciddi yükseldiği için yeni girişte kovalamak "
-                       "yerine geri çekilme beklemek daha sağlıklı görünüyor.")
+                       "başlangıcına göre ciddi yükseldi; kısa vadeli geri çekilme ihtimali "
+                       "artmış görünüyor.")
         elif gain_pct > 50:
             verdict = ("Trend güçlü; fiyat sinyal başından bu yana belirgin yükseldi ve "
                        "trend korunuyor.")   # D-39: "ideal bölge"/pozisyon dili yok
         elif gain_pct > 20 and rsi_hot:
-            verdict = ("Trend yukarı yönlü ama fiyat kısa vadede ısınmış; yeni girişte "
-                       "acele etmeden geri çekilmeyi beklemek daha mantıklı görünüyor.")
+            verdict = ("Trend yukarı yönlü ama fiyat kısa vadede ısınmış; "
+                       "kısa vadeli geri çekilme ihtimali artmış görünüyor.")
         elif bars <= 5:
-            verdict = ("Trend yeni güçlenmiş; sinyal taze ve giriş için nispeten erken "
-                       "bir aşamada görünüyor.")
+            verdict = ("Trend yeni güçlenmiş; sinyal taze, trendin erken bir aşamasında "
+                       "görünüyor.")
         else:
             verdict = "Trend güçlü, sinyal aktif kalmaya devam ediyor."
     elif signal == "SAT":
@@ -8662,8 +8638,8 @@ def build_signal_summary(stock):
                        "trend yönü için ek göstergelere bakılması öneriliyor.")
         elif gain_pct < -20 and rsi_cold:
             verdict = ("Düşüş trendi sürüyor; fiyat sinyal başlangıcına göre belirgin "
-                       "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — yeni "
-                       "pozisyon için acele etmek yerine tepki ihtimalini izlemek daha sağlıklı.")
+                       "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — "
+                       "kısa vadeli tepki ihtimali artmış görünüyor.")
         elif gain_pct < -20:
             verdict = ("Düşüş trendi güçlü; fiyat sinyal başından bu yana belirgin geriledi, "
                        "düşüş baskısı sürüyor görünüyor.")
@@ -8675,14 +8651,13 @@ def build_signal_summary(stock):
     else:  # BEKLE
         if weekly == 1:
             verdict = ("Net bir yön sinyali yok; göstergeler kararsız ancak "
-                       "orta vadeli görünüm hâlâ yukarı yönlü — beklemek şu an daha "
-                       "temkinli bir tercih.")
+                       "orta vadeli görünüm hâlâ yukarı yönlü.")
         elif weekly == -1:
-            verdict = ("Net bir sinyal yok ve orta vadeli görünüm zayıf — yeni pozisyon "
-                       "için acele etmemek, netleşmeyi beklemek daha sağlıklı görünüyor.")
+            verdict = ("Net bir sinyal yok ve orta vadeli görünüm zayıf; "
+                       "yön netleşene kadar göstergeler izleniyor.")
         else:
             verdict = ("Şu an net bir yön sinyali yok; göstergeler kararsız, "
-                       "yön belirginleşene kadar beklemek daha mantıklı görünüyor.")
+                       "yön belirginleşene kadar göstergeler izleniyor.")
 
     # ── Katman B — 3 madde ────────────────────────────────────────────────────
     points = []
@@ -8708,21 +8683,21 @@ def build_signal_summary(stock):
             "tip":  "ADX, EMA ve Supertrend gibi göstergeler bir arada değerlendirilir.",
         })
 
-    # 2) Giriş riski maddesi
+    # 2) Sinyal başlangıcına göre fiyat maddesi (D-39b: "giriş riski" dili yok)
     if signal == "AL":
         if not gain_pct_known:
-            risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
+            risk_txt = "Sinyal başlangıç fiyatı verisi eksik; sinyalden bu yana değişim hesaplanamıyor."
         elif gain_pct > 50:
-            risk_txt = f"Giriş riski yüksek: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
+            risk_txt = f"Fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda; hareket belirgin ilerlemiş."
         elif gain_pct > 15:
-            risk_txt = f"Giriş riski arttı: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
+            risk_txt = f"Fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
         elif gain_pct >= 0:
-            risk_txt = f"Giriş riski sınırlı: fiyat sinyal başlangıcına yakın (~%{gain_pct:.0f})."
+            risk_txt = f"Fiyat sinyal başlangıcına yakın (~%{gain_pct:.0f})."
         else:
-            risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında — sinyal başlangıç fiyatına yakın."
+            risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında."
     elif signal == "SAT":
         if not gain_pct_known:
-            risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
+            risk_txt = "Sinyal başlangıç fiyatı verisi eksik; sinyalden bu yana değişim hesaplanamıyor."
         else:
             risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
                         "Trend Bozuldu sinyali bu hareketle uyumlu.")
@@ -10196,7 +10171,7 @@ def _tarama_d51_fields(s, health_snap, fund_snap, val_medians):
 
 
 def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
-                             eq="", sort_by="signal_strength", sort_dir="",
+                             sort_by="signal_strength", sort_dir="",
                              only_premium=False):
     """Tarama filtre/sirala/sekillendirme mantigi — /tarama (SSR, varsayilan
     parametrelerle) ve /api/tarama (kullanici filtreleriyle) tarafindan ortak
@@ -10223,7 +10198,6 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
         if s.get("ticker") in INDEX_TICKERS: continue
         if sig    and s.get("signal")              != sig:    continue
         if sector and _get_sector(s.get("ticker","")).lower() != sector.lower(): continue
-        if eq     and s.get("entry_quality")       != eq:    continue
         raw_price = s.get("price")
         price = raw_price if raw_price is not None else 0  # SADECE min_p/max_p filtresi icin
         adx   = _parse_adx(s)
@@ -10250,7 +10224,6 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
             # yoktu; tarama tablosu göreli tarihi bar sayacından türetmek
             # zorunda kalıyordu ve bir tam gün kayıyordu.
             "signal_date":   s.get("signal_date"),
-            "entry_quality": s.get("entry_quality",""),
             "vol_ratio":     s.get("vol_ratio") or 1.0,
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
@@ -10372,8 +10345,8 @@ def _qfloat(name, default):
 def api_tarama():
     """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
     # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
-    # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
-    # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
+    # sessizce 0 sonuc donduruyordu (signal/sector) veya siralamayi sessizce
+    # iptal ediyordu (sort). Kanonik veri (signal) hep ASCII
     # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
     # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
     sig      = request.args.get("signal",    "").strip().upper()
@@ -10384,14 +10357,13 @@ def api_tarama():
     except _BadFilterValue as e:
         return jsonify({"error": f"Gecersiz sayisal filtre degeri: {e.args[0]}"}), 400
     sector   = sector_taxonomy.canonical_label(request.args.get("sector",    "").strip())  # D-23: eski sektör adı → yeni kova
-    eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
     sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
     sort_dir = request.args.get("sort_dir", "")  # asc | desc | (default desc)
     only_premium = request.args.get("only_premium", "") == "1"
 
     results, sectors, upd = _compute_tarama_results(
         sig=sig, min_adx=min_adx, min_p=min_p, max_p=max_p, sector=sector,
-        eq=eq, sort_by=sort_by, sort_dir=sort_dir, only_premium=only_premium)
+        sort_by=sort_by, sort_dir=sort_dir, only_premium=only_premium)
 
     return safe_json({"results": results, "sectors": sectors,
                       "count": len(results), "updated_at": upd})
@@ -11728,7 +11700,6 @@ def api_karsilastir():
             "rsi_zone":       derive_rsi_zone(s.get("rsi"), s.get("signal")),
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
-            "entry_quality":  s.get("entry_quality"),
             "is_premium":     s.get("is_premium", False),
             "sl_level":       s.get("sl_level"),
             # D-39 (O10): tp1/tp2/rr_signal kalktı (karsilastir.html tüketmiyor;
