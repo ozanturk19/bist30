@@ -1,7 +1,7 @@
 {#- ═══════════════════════════════════════════════════════════════════════
     C-55 (24.09.2026) — ANA SAYFA BIST100 ISI HARİTASI (sektör mozaiğinin yeri)
     Onaylı taslak C-M5 (O16d=A), ilk açılış Değişim (O20=A). Renk modu ve dönem
-    seçimi bu blokta YOK: C-29 (/sektor-harita tam ekran).
+    seçimi ana sayfada YOK; C-29 (/sektor-harita tam ekran) aşağıdaki seçeneklerle açar.
 
     Bağlam (D-42, app.py index):
       heatmap         /api/heatmap?universe=bist100 sözlüğü (None ise index.html
@@ -9,14 +9,27 @@
       heatmap_groups  [{g,x,y,w,h}] 16:10 kutunun yüzdesi, piyasa değeri sırasıyla
       heatmap_tiles   [{t,g,x,y,w,h}] aynı kutunun yüzdesi (mutlak)
 
+    C-29 seçenekleri (yalnız /sektor-harita verir; ana sayfa hiçbirini vermez ve
+    çıktısı C-55 ile BİREBİR aynıdır):
+      hm_full   true → renk modu + dönem anahtarları, H1 başlık, sektör sıralaması
+      hm_mode   'chg' | 'bp' | 'tr'                  (Değişim / BP Skoru / Trend)
+      hm_per    'd1' | 'w1' | 'm1' | 'ytd' | 'y1'    (1G / 1H / 1A / YB / 1Y)
+      hm_path   anahtar bağlantılarının yolu (ör. '/sektor-harita'); JS kapalıyken
+                bağlantı sayfayı o durumla yeniden açar, JS açıkken yerinde boyar.
+    Boyama kuralları bp-heatmap.js paint()/gStat()/thesis() ile BİREBİR (değişirse ikisi).
+
     İlk çizim SSR: JS kapalıyken de kutular renkli görünür, her biri
     /hisse/<T>'ye bağlanır, kod + ad + değişim metni DOM'da (GEO).
     static/js/bp-heatmap.js px'te yeniden dizer, dar kapta (<560px) sektör
     yığınına geçer (aynı eşik CSS container query'de), mini kartı ekler.
 
     Renk: kutu zemini nötr (--hm-n) + yön tonu bindirmesi
-    rgba(--bp-al-rgb | --bp-sat-rgb, --k); --k = 0,16 + 0,84·min(|%|/3, 1)^0,72
-    (C-M5 ölçeği, 1G tavanı ±%3). Şablonda renk literali yok, yalnız --k sayısı.
+    rgba(--bp-al-rgb | --bp-sat-rgb, --k); --k = 0,16 + 0,84·min(|%|/tavan, 1)^0,72
+    (C-M5 ölçeği; tavan 1G ±%3 · 1H ±%6 · 1A ±%12 · YB ±%50 · 1Y ±%80, kanon §5.6).
+    BP Skoru: 50 merkezli, ≥50 yeşil k = 0,10 + 0,85·t^0,9, <50 mor k = 0,08 + 0,55·t^0,9,
+    t = min(|BP−50|/40, 1). Trend: Güçlü Trend yeşil (k 0,9) · Yatay --bp-state-flat ·
+    Trend Bozuldu --bp-state-broken (kanon §5.3). Veri yoksa taralı.
+    Şablonda renk literali yok, yalnız --k sayısı.
     Etiket rengi (.dark): beyaz ile --bp-bg'den hangisi daha yüksek kontrast
     veriyorsa. Nötr=--bp-surface3 üzerinde kesişim yükselişte k≈0,55, düşüşte
     k≈0,83 (en kötü nokta 4,38:1). Palet değişirse bu iki eşik yeniden hesaplanır.
@@ -32,6 +45,55 @@
 {%- elif t -%}{{ ['', 'u', 'si', 'u', 'ı', 'si', 'ı', 'i', 'i', 'ı'][t] }}
 {%- elif (n // 100) % 10 -%}ü
 {%- else -%}i
+{%- endif -%}
+{%- endmacro -%}
+{#- Değişim cümlesi: "100 hissenin 51'i yükseldi, 45'i düştü · BIST100 +%0,24 · 4 tavan" -#}
+{%- macro _thesis_chg(_n, _up, _dn, _fl, _xu, _tv, _tb) -%}
+        {%- set _s = namespace(sep='') -%}
+        {%- if _up or _dn or _fl -%}
+          {{ _n }} hissenin
+          {%- if _up == _n %} tamamı <b class="up">yükseldi</b>
+          {%- elif _dn == _n %} tamamı <b class="dn">düştü</b>
+          {%- else -%}
+            {%- set _sep = namespace(v='') -%}
+            {%- if _up %} <b class="up">{{ _up }}</b>'{{ _poss(_up) }} yükseldi{% set _sep.v = ',' %}{% endif -%}
+            {%- if _dn %}{{ _sep.v }} <b class="dn">{{ _dn }}</b>'{{ _poss(_dn) }} düştü{% set _sep.v = ',' %}{% endif -%}
+            {%- if _fl %}{{ _sep.v }} <b class="neu">{{ _fl }}</b>'{{ _poss(_fl) }} değişmedi{% endif -%}
+          {%- endif -%}
+          {%- set _s.sep = ' · ' -%}
+        {%- endif -%}
+        {%- if _xu is not none %}{{ _s.sep }}BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% set _s.sep = ' · ' %}{% endif -%}
+        {%- if _tv %}{{ _s.sep }}<b class="neu">{{ _tv }}</b> tavan{% set _s.sep = ', ' %}{% endif -%}
+        {%- if _tb %}{{ _s.sep }}<b class="neu">{{ _tb }}</b> taban{% endif -%}
+{%- endmacro -%}
+{#- C-29 kutu boyası → "sınıf|k|koyu(1/0)|kutu metni|okunan metin" (bp-heatmap.js paint() ile aynı) -#}
+{%- macro _paint(r, mode, per, cap) -%}
+{%- if mode == 'bp' -%}
+  {%- set b = r.bp -%}
+  {%- if b is not number -%}na|0.000|0|—|BorsaPusula Skoru yok
+  {%- else -%}
+    {%- set bi = (b + 0.5)|round(0, 'floor')|int -%}{%- set d = (b - 50) / 40.0 -%}{%- set t = [d|abs, 1.0]|min -%}
+    {%- if d >= 0 -%}{%- set k = 0.10 + 0.85 * (t ** 0.9) -%}bp-hi|{{ '%.3f'|format(k) }}|{{ 1 if k >= 0.55 else 0 }}|BP {{ bi }}|BorsaPusula Skoru {{ bi }}
+    {%- else -%}{%- set k = 0.08 + 0.55 * (t ** 0.9) -%}bp-lo|{{ '%.3f'|format(k) }}|0|BP {{ bi }}|BorsaPusula Skoru {{ bi }}
+    {%- endif -%}
+  {%- endif -%}
+{%- elif mode == 'tr' -%}
+  {%- if r.tr == 'guclu' -%}tr-g|0.900|1|Güçlü Trend|Güçlü Trend
+  {%- elif r.tr == 'yatay' -%}tr-y|0.000|0|Yatay|Yatay
+  {%- elif r.tr == 'bozuk' -%}tr-b|0.000|0|Trend Bozuldu|Trend Bozuldu
+  {%- else -%}na|0.000|0|—|trend verisi yok
+  {%- endif -%}
+{%- else -%}
+  {%- set v = r.ch.get(per) if r.ch else none -%}
+  {%- if v is not number -%}na|0.000|0|—|değişim verisi yok
+  {%- else -%}
+    {%- set cls = bpf.dir_class(v, 2, 'up,dn,neu') -%}
+    {%- set t = [(v|round(2))|abs / cap, 1.0]|min -%}
+    {%- set k = (0.16 + 0.84 * (t ** 0.72)) if cls != 'neu' else 0 -%}
+    {%- if r.stale -%}{%- set k = k * 0.45 -%}{%- endif -%}
+    {%- set dark = (cls == 'up' and k >= 0.55) or (cls == 'dn' and k >= 0.83) -%}
+    {{- cls }}|{{ '%.3f'|format(k) }}|{{ 1 if dark else 0 }}|{{ bpf.pct_text(v) }}|{{ bpf.pct_text(v) }}
+  {%- endif -%}
 {%- endif -%}
 {%- endmacro -%}
 {%- set hm = heatmap -%}
@@ -54,30 +116,75 @@
 {%- set _tb = _hmrows|selectattr('lim', 'equalto', 'taban')|list|length -%}
 {%- set _na = namespace(any=false, stale=false) -%}
 {%- set _xu = (hm.xu100.ch.d1 if (hm.xu100 and hm.xu100.ch) else none) -%}
+{#- ── C-29 tam sayfa durumu ── -#}
+{%- set _full = (hm_full is defined) and hm_full -%}
+{%- set _mode = hm_mode if (_full and hm_mode is defined and hm_mode in ('chg', 'bp', 'tr')) else 'chg' -%}
+{%- set _per = hm_per if (_full and hm_per is defined and hm_per in ('d1', 'w1', 'm1', 'ytd', 'y1')) else 'd1' -%}
+{%- if _full -%}
+  {#- (kod, düğme, okunan ad, lejant adı, açıklama cümlesi, cümle öneki, sıralama cümlesi) — bp-heatmap.js PER ile aynı -#}
+  {%- set _PER = [('d1', '1G', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'), ('w1', '1H', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'), ('m1', '1A', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'), ('ytd', 'YB', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'), ('y1', '1Y', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime')] -%}
+  {%- set _CAP = {'d1': 3, 'w1': 6, 'm1': 12, 'ytd': 50, 'y1': 80} -%}
+  {%- set _MQ = {'chg': 'degisim', 'bp': 'bp', 'tr': 'trend'} -%}
+  {%- set _PQ = {'d1': '1g', 'w1': '1h', 'm1': '1a', 'ytd': 'yb', 'y1': '1y'} -%}
+  {%- set _cap = _CAP[_per] -%}
+  {%- set _pinfo = (_PER|selectattr('0', 'equalto', _per)|list)[0] -%}
+  {%- set _limon = _mode == 'chg' and _per == 'd1' -%}
+  {%- set _path = hm_path if hm_path is defined and hm_path else '' -%}
+{%- endif -%}
+{%- macro _href(path, m, p, MQ, PQ) -%}{{ path }}{% set q = [] %}{% if m != 'chg' %}{% set _ = q.append('renk=' ~ MQ[m]) %}{% endif %}{% if p != 'd1' %}{% set _ = q.append('donem=' ~ PQ[p]) %}{% endif %}{{ ('?' ~ q|join('&')) if q else ('' if path else '?') }}{%- endmacro -%}
 <section class="da-section" id="sektorler" aria-labelledby="hmTitle">
-  <div class="da-panel hm" data-hm>
+  <div class="da-panel hm{{ ' hm-full hm-m-' ~ _mode ~ (' hm-lim-on' if _limon else '') if _full }}" data-hm{% if _full %} data-hm-full data-mode="{{ _mode }}" data-per="{{ _per }}"{% endif %}>
+    {%- if not _full %}
     <div class="hm-head">
       <div class="da-eyebrow">Piyasa haritası</div>
       <h2 class="hm-title da-display" id="hmTitle">BIST100 <span>· {{ hm.asof_label }} kapanışı</span></h2>
-      <p class="hm-thesis">
-        {%- set _s = namespace(sep='') -%}
-        {%- if _up or _dn or _fl -%}
-          {{ _n }} hissenin
-          {%- if _up == _n %} tamamı <b class="up">yükseldi</b>
-          {%- elif _dn == _n %} tamamı <b class="dn">düştü</b>
-          {%- else -%}
-            {%- set _sep = namespace(v='') -%}
-            {%- if _up %} <b class="up">{{ _up }}</b>'{{ _poss(_up) }} yükseldi{% set _sep.v = ',' %}{% endif -%}
-            {%- if _dn %}{{ _sep.v }} <b class="dn">{{ _dn }}</b>'{{ _poss(_dn) }} düştü{% set _sep.v = ',' %}{% endif -%}
-            {%- if _fl %}{{ _sep.v }} <b class="neu">{{ _fl }}</b>'{{ _poss(_fl) }} değişmedi{% endif -%}
-          {%- endif -%}
-          {%- set _s.sep = ' · ' -%}
-        {%- endif -%}
-        {%- if _xu is not none %}{{ _s.sep }}BIST100 <b class="{{ bpf.dir_class(_xu, 2, 'up,dn,neu') }}">{{ bpf.pct_text(_xu) }}</b>{% set _s.sep = ' · ' %}{% endif -%}
-        {%- if _tv %}{{ _s.sep }}<b class="neu">{{ _tv }}</b> tavan{% set _s.sep = ', ' %}{% endif -%}
-        {%- if _tb %}{{ _s.sep }}<b class="neu">{{ _tb }}</b> taban{% endif -%}
-      </p>
+      <p class="hm-thesis">{{ _thesis_chg(_n, _up, _dn, _fl, _xu, _tv, _tb) }}</p>
     </div>
+    {%- else %}
+    {%- set _bps = _hmrows|selectattr('bp', 'number')|list %}
+    <div class="hm-head">
+      <div class="hm-hl">
+        <div class="da-eyebrow">Sektör haritası</div>
+        <h1 class="hm-title da-display" id="hmTitle">BIST100 ısı haritası <span>· {{ hm.asof_label }} kapanışı</span></h1>
+        <p class="hm-thesis" id="hmThesis" aria-live="polite">
+        {%- if _mode == 'bp' -%}
+          {%- if _bps -%}
+          Ortalama BorsaPusula Skoru <b class="neu">{{ ((_bps|sum(attribute='bp')) / (_bps|length) + 0.5)|round(0, 'floor')|int }}</b> · <b class="up">{{ _bps|selectattr('bp', 'ge', 70)|list|length }}</b> hissede 70 ve üstü
+          {%- endif -%}
+          {%- if _hmrows|length > _bps|length %}{{ ' · ' if _bps }}<b class="neu">{{ _hmrows|length - _bps|length }}</b> hissede skor yok{% endif -%}
+        {%- elif _mode == 'tr' -%}
+          {%- set _tg = _hmrows|selectattr('tr', 'equalto', 'guclu')|list|length -%}
+          {%- set _ty = _hmrows|selectattr('tr', 'equalto', 'yatay')|list|length -%}
+          {%- set _tz = _hmrows|selectattr('tr', 'equalto', 'bozuk')|list|length -%}
+          <b class="up">{{ _tg }}</b> hisse Güçlü Trend'de · <b class="neu">{{ _ty }}</b> Yatay · <b class="neu">{{ _tz }}</b> Trend Bozuldu
+          {%- if _hmrows|length > _tg + _ty + _tz %} · <b class="neu">{{ _hmrows|length - _tg - _ty - _tz }}</b> hissede trend verisi yok{% endif -%}
+        {%- elif _per == 'd1' -%}
+          {{ _thesis_chg(_n, _up, _dn, _fl, _xu, _tv, _tb) }}
+        {%- else -%}
+          {%- set _pc = namespace(u=0, d=0, f=0) -%}
+          {%- for r in _hmrows if r.ch and r.ch.get(_per) is number -%}
+            {%- set _rv = r.ch.get(_per)|round(2) -%}
+            {%- if _rv > 0 -%}{%- set _pc.u = _pc.u + 1 -%}{%- elif _rv < 0 -%}{%- set _pc.d = _pc.d + 1 -%}{%- else -%}{%- set _pc.f = _pc.f + 1 -%}{%- endif -%}
+          {%- endfor -%}
+          {%- set _xp = (hm.xu100.ch.get(_per) if (hm.xu100 and hm.xu100.ch) else none) -%}
+          {{ _pinfo[5] }}{{ _thesis_chg(_n, _pc.u, _pc.d, _pc.f, _xp if _xp is number else none, 0, 0) }}
+        {%- endif -%}
+        </p>
+      </div>
+      <div class="hm-ctl">
+        <div class="hm-seg" role="group" aria-label="Renk ölçüsü">
+          {%- for m, lbl in [('chg', 'Değişim'), ('bp', 'BP Skoru'), ('tr', 'Trend')] %}
+          <a class="hm-sw" href="{{ _href(_path, m, _per, _MQ, _PQ) }}" data-m="{{ m }}"{% if m == _mode %} aria-current="true"{% endif %}>{{ lbl }}</a>
+          {%- endfor %}
+        </div>
+        <div class="hm-seg hm-seg-per" role="group" aria-label="Dönem"{% if _mode != 'chg' %} aria-disabled="true"{% endif %}>
+          {%- for p in _PER %}
+          <a class="hm-sw"{% if _mode == 'chg' %} href="{{ _href(_path, 'chg', p[0], _MQ, _PQ) }}"{% else %} aria-disabled="true"{% endif %} data-p="{{ p[0] }}"{% if p[0] == _per %} aria-current="true"{% endif %}>{{ p[1] }}<span class="sr-only"> ({{ p[2] }})</span></a>
+          {%- endfor %}
+        </div>
+      </div>
+    </div>
+    {%- endif %}
     <a class="hm-skip" href="#hmEnd">Isı haritasını geç</a>
     <div class="hm-body">
       <div class="hm-map">
@@ -89,10 +196,32 @@
         {%- endfor -%}
         {%- set gch = (gs.s / gs.w) if gs.w else none %}
         <div class="hm-g" role="group" aria-label="{{ grp.g }}" style="--x:{{ '%.3f'|format(grp.x or 0) }}%;--y:{{ '%.3f'|format(grp.y or 0) }}%;--w:{{ '%.3f'|format(grp.w) }}%;--h:{{ '%.3f'|format(grp.h) }}%;--s:{{ '%.4f'|format(gs.m / _total if _total else 0) }}">
+          {%- if not _full %}
           <div class="hm-gl" aria-hidden="true"><b>{{ grp.g }}</b>{% if gch is not none %}<i class="{{ bpf.dir_class(gch, 1, 'up,dn,neu') }}">{{ bpf.pct_text(gch, 1) }}</i>{% endif %}</div>
+          {%- else %}
+          {%- set ga = namespace(s=0.0, w=0.0, bs=0.0, bn=0, tg=0) -%}
+          {%- for r in _hmrows if r.g == grp.g and r.mcap -%}
+            {%- if r.ch and r.ch.get(_per) is number -%}{%- set ga.s = ga.s + r.ch.get(_per) * r.mcap -%}{%- set ga.w = ga.w + r.mcap -%}{%- endif -%}
+            {%- if r.bp is number -%}{%- set ga.bs = ga.bs + r.bp -%}{%- set ga.bn = ga.bn + 1 -%}{%- endif -%}
+            {%- if r.tr == 'guclu' -%}{%- set ga.tg = ga.tg + 1 -%}{%- endif -%}
+          {%- endfor -%}
+          {%- if _mode == 'bp' -%}{%- set gcl = 'neu' -%}{%- set gtx = ('ort. ' ~ ((ga.bs / ga.bn + 0.5)|round(0, 'floor')|int)) if ga.bn else '' -%}
+          {%- elif _mode == 'tr' -%}{%- set gcl = 'up' if ga.tg else 'neu' -%}{%- set gtx = ga.tg ~ ' Güçlü Trend' -%}
+          {%- else -%}{%- set gpc = (ga.s / ga.w) if ga.w else none -%}{%- set gcl = bpf.dir_class(gpc, 1, 'up,dn,neu') -%}{%- set gtx = bpf.pct_text(gpc, 1) if gpc is not none else '' -%}
+          {%- endif %}
+          <div class="hm-gl" aria-hidden="true"><b>{{ grp.g }}</b><i class="{{ gcl }}">{{ gtx }}</i></div>
+          {%- endif %}
           <div class="hm-gi">
           {%- for tl in (heatmap_tiles or []) if tl.g == grp.g and tl.w and tl.h %}
             {%- set r = _rows.get(tl.t) or {} -%}
+            {%- if _full -%}
+              {%- set pp = _paint(r, _mode, _per, _cap).split('|') -%}
+              {%- set cls = pp[0] -%}{%- set k = pp[1]|float -%}{%- set dark = pp[2] == '1' -%}{%- set vt = pp[3] -%}{%- set av = pp[4] -%}
+              {%- set stl = r.stale and _mode == 'chg' -%}
+              {%- if cls == 'na' -%}{%- set _na.any = true -%}{%- endif -%}{%- if stl -%}{%- set _na.stale = true -%}{%- endif -%}
+              {%- set limsp = r.lim if r.lim in ('tavan', 'taban') else none -%}
+              {%- set lim = limsp if _limon else none -%}
+            {%- else -%}
             {%- set v = r.ch.d1 if r.ch else none -%}
             {%- if v is none -%}
               {%- set cls = 'na' -%}{%- set k = 0 -%}{%- set _na.any = true -%}
@@ -104,11 +233,13 @@
             {%- if r.stale -%}{%- set k = k * 0.45 -%}{%- set _na.stale = true -%}{%- endif -%}
             {%- set dark = (cls == 'up' and k >= 0.55) or (cls == 'dn' and k >= 0.83) -%}
             {%- set lim = r.lim if r.lim in ('tavan', 'taban') else none -%}
+            {%- set limsp = lim -%}{%- set stl = r.stale -%}{%- set vt = bpf.pct_text(v) -%}{%- set av = bpf.pct_text(v) if v is not none else 'değişim verisi yok' -%}
+            {%- endif -%}
             {%- set rx = ((tl.x or 0) - (grp.x or 0)) / grp.w * 100 -%}
             {%- set ry = ((tl.y or 0) - (grp.y or 0)) / grp.h * 100 -%}
             {%- set rw = tl.w / grp.w * 100 -%}
             {%- set rh = tl.h / grp.h * 100 %}
-            <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if r.stale }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ bpf.pct_text(v) if v is not none else 'değişim verisi yok' }}{% if lim %}, {{ lim }}{% endif %}{% if r.stale %}, veri gecikmeli{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ bpf.pct_text(v) }}</span>{% if lim %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if lim == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
+            <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if stl }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ av }}{% if lim %}, {{ lim }}{% endif %}{% if stl %}, veri gecikmeli{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ vt }}</span>{% if limsp %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if limsp == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
           {%- endfor %}
           </div>
         </div>
@@ -116,6 +247,7 @@
       </div>
     </div>
     <div class="hm-foot" id="hmEnd" tabindex="-1">
+    {%- if not _full %}
       <div class="hm-legend">
         <div>
           <div class="hm-lg-bar" aria-hidden="true"></div>
@@ -126,9 +258,73 @@
         {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>{% endif %}
       </div>
       <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
+    {%- else %}
+      {%- set _half = _cap / 2 -%}{%- set _hf = 1 if (_half != (_half|int)) else 0 %}
+      <div class="hm-legend" data-lg="chg"{% if _mode != 'chg' %} hidden{% endif %}>
+        <div>
+          <div class="hm-lg-bar" aria-hidden="true"></div>
+          <div class="hm-lg-ticks" data-lg-ticks><span>{{ bpf.pct_text(-_cap, 0) }}</span><span>{{ bpf.pct_text(-_half, _hf) }}</span><span>0</span><span>{{ bpf.pct_text(_half, _hf) }}</span><span>{{ bpf.pct_text(_cap, 0) }}</span></div>
+        </div>
+        <span data-lg-name>{{ _pinfo[3] }}</span>
+        <span class="hm-lg-sw" data-lg-na{% if not (_mode == 'chg' and _na.any) %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Değişim verisi yok</span>
+        <span class="hm-lg-sw" data-lg-stale{% if not _na.stale %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>
+      </div>
+      <div class="hm-legend" data-lg="bp"{% if _mode != 'bp' %} hidden{% endif %}>
+        <div>
+          <div class="hm-lg-bar hm-lg-bar--bp" aria-hidden="true"></div>
+          <div class="hm-lg-ticks"><span>10</span><span>30</span><span>50</span><span>70</span><span>90</span></div>
+        </div>
+        <span>BorsaPusula Skoru</span>
+        <span class="hm-lg-sw" data-lg-na{% if not (_mode == 'bp' and _na.any) %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Skor yok</span>
+      </div>
+      <div class="hm-legend" data-lg="tr"{% if _mode != 'tr' %} hidden{% endif %}>
+        <span class="hm-lg-sw"><i class="tr-g" aria-hidden="true"></i>Güçlü Trend</span>
+        <span class="hm-lg-sw"><i class="tr-y" aria-hidden="true"></i>Yatay</span>
+        <span class="hm-lg-sw"><i class="tr-b" aria-hidden="true"></i>Trend Bozuldu</span>
+        <span class="hm-lg-sw" data-lg-na{% if not (_mode == 'tr' and _na.any) %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Trend verisi yok</span>
+      </div>
+      <p class="hm-src" id="hmSrc">
+      {%- if _mode == 'bp' -%}Kutu büyüklüğü piyasa değeri, renk BorsaPusula Skoru: 50 nötr; 90 ve üstü en koyu yeşil, 10 ve altı en koyu mor.
+      {%- elif _mode == 'tr' -%}Kutu büyüklüğü piyasa değeri, renk trend durumu.
+      {%- else -%}Kutu büyüklüğü piyasa değeri, renk {{ _pinfo[4] }}; ±%{{ _cap }} ve üstü en koyu tonda.
+      {%- endif -%}
+      </p>
+    {%- endif %}
     </div>
     <div class="hm-card" id="hmCard" hidden></div>
   </div>
-  <script type="application/json" id="hmData">{{ {'asof_label': hm.asof_label, 'rows': _hmrows}|tojson }}</script>
-  <script src="/static/js/bp-heatmap.js?v=688ea2cb" defer></script>
+  {%- if _full %}
+  {#- Sektör sıralaması: haritadaki grupların tek sıralı listesi (seçili ölçüye göre, yüksekten düşüğe;
+      eşitlikte piyasa değeri sırası). bp-heatmap.js dönem/ölçü değişince yeniden sıralar. -#}
+  {%- set _sl = [] -%}
+  {%- for grp in (heatmap_groups or []) if grp.w and grp.h -%}
+    {%- set sa = namespace(n=0, s=0.0, w=0.0, bs=0.0, bn=0, tg=0) -%}
+    {%- for r in _hmrows if r.g == grp.g and r.mcap -%}
+      {%- set sa.n = sa.n + 1 -%}
+      {%- if r.ch and r.ch.get(_per) is number -%}{%- set sa.s = sa.s + r.ch.get(_per) * r.mcap -%}{%- set sa.w = sa.w + r.mcap -%}{%- endif -%}
+      {%- if r.bp is number -%}{%- set sa.bs = sa.bs + r.bp -%}{%- set sa.bn = sa.bn + 1 -%}{%- endif -%}
+      {%- if r.tr == 'guclu' -%}{%- set sa.tg = sa.tg + 1 -%}{%- endif -%}
+    {%- endfor -%}
+    {%- set sc = (sa.s / sa.w) if sa.w else none -%}
+    {%- set sb = ((sa.bs / sa.bn + 0.5)|round(0, 'floor')|int) if sa.bn else none -%}
+    {%- set key = (sc|round(1) if sc is not none else -1e9) if _mode == 'chg' else ((sb if sb is not none else -1e9) if _mode == 'bp' else sa.tg) -%}
+    {%- set _ = _sl.append({'g': grp.g, 'n': sa.n, 'c': sc, 'b': sb, 'tg': sa.tg, 'key': key}) -%}
+  {%- endfor %}
+  <section class="da-panel hm-sum" id="hmSum" aria-labelledby="hmSumTitle">
+    <h2 class="hm-sum-title da-display" id="hmSumTitle">Sektörler nasıl sıralanıyor?</h2>
+    <p class="hm-sum-sub" id="hmSumSub">
+    {%- if _mode == 'bp' -%}Ortalama BorsaPusula Skoruna göre, yüksekten düşüğe.
+    {%- elif _mode == 'tr' -%}Güçlü Trend'deki hisse sayısına göre, çoktan aza.
+    {%- else -%}Piyasa değeriyle ağırlıklı {{ _pinfo[6] }} göre, yüksekten düşüğe.
+    {%- endif -%}
+    </p>
+    <ol class="hm-sl" id="hmSl">
+      {%- for s in _sl|sort(attribute='key', reverse=true) %}
+      <li class="hm-sr" data-g="{{ s.g }}"><a class="hm-sr-g" href="/tarama?sector={{ s.g|urlencode }}">{{ s.g }}</a><span class="hm-sr-n">{{ s.n }} hisse</span><span class="hm-sr-ms"><span class="hm-sr-m hm-sr-chg {{ bpf.dir_class(s.c, 1, 'up,dn,neu') }}{{ ' on' if _mode == 'chg' }}">{{ bpf.pct_text(s.c, 1) }}</span><span class="hm-sr-m hm-sr-bp{{ ' on' if _mode == 'bp' }}">BP ort. {{ s.b if s.b is not none else '—' }}</span><span class="hm-sr-m hm-sr-tr{{ ' up' if s.tg }}{{ ' on' if _mode == 'tr' }}">{{ s.tg }} Güçlü Trend</span></span></li>
+      {%- endfor %}
+    </ol>
+  </section>
+  {%- endif %}
+  <script type="application/json" id="hmData">{{ ({'asof_label': hm.asof_label, 'n': _n, 'counts': hm.counts or none, 'xu100': hm.xu100 or none, 'rows': _hmrows} if _full else {'asof_label': hm.asof_label, 'rows': _hmrows})|tojson }}</script>
+  <script src="/static/js/bp-heatmap.js?v=f1905a72" defer></script>
 </section>
