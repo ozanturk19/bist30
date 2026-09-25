@@ -496,12 +496,14 @@
        bagimli degil, kendi bolumu; `data-tab-content="ozet"` ile applyTab
        zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
        kardes bir bileseni yok etmemeli). -->
+  {#- C-21a (25.09): Yatay'da Hacim Profili gosterilmez (plan C-21a); panel yalniz Guclu Trend / Trend Bozuldu'da. -#}
+  {% if ssr_signal and ssr_signal.signal in ('AL', 'SAT') %}
   <div class="entry-analysis-section" id="volumeProfileSection">
     <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
     <div class="hacim-profili">
       <div class="hp-row-line" id="hpRvolRow" style="display:none">
         <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
-        <span class="hp-row-text">Haftalık hacim ivmesi:</span>
+        <span class="hp-row-text"><abbr tabindex="0" data-tip="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</abbr> (5 gün / 20 gün):</span>
         <span class="hp-row-val" id="hpRvolVal">—</span>
       </div>
       <div class="hp-row-line" id="hpSvolRow" style="display:none">
@@ -512,6 +514,7 @@
       <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
+  {% endif %}
 
   <!-- İndikatörler -->
   <div class="indicators-section">
@@ -2051,24 +2054,24 @@ function renderSummary(s, signalData) {
       if (vr == null) {
         txt = rvolVal == null ? ''
           : rvolVal >= 1.20
-            ? 'Haftalık hacim momentumu güçlü. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
+            ? 'RVOL güçlü. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
             : rvolVal >= 1.0
-              ? 'Haftalık hacim momentumu ortalama seviyede. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
-              : 'Haftalık hacim momentumu zayıf. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.';
+              ? 'RVOL ortalama seviyede. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
+              : 'RVOL zayıf. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.';
       } else if (isPremium && vr >= 1.7) {
         txt = 'İkisi de güçlü — Hacim hem yapısal hem sinyal günü güçlü.';
       } else if (isPremium && vr < 1.7) {
-        txt = 'Haftalık hacim güçlü, sinyal günü sessiz — yavaş kıvılcımlanan trend.';
+        txt = 'RVOL güçlü, sinyal günü sessiz — yavaş kıvılcımlanan trend.';
       } else if (!isPremium && vr >= 1.7) {
-        txt = 'Sinyal günü güçlü patladı ama haftalık momentum henüz oluşmamış.';
+        txt = 'Sinyal günü güçlü patladı ama RVOL henüz yükselmemiş.';
       } else if (rvolVal != null && rvolVal >= 1.20 && vr < 1.0) {
-        txt = 'Yapısal momentum güçlü; sinyal günü hacmi düşük — kademeli birikim.';
+        txt = 'RVOL güçlü; sinyal günü hacmi düşük — kademeli birikim.';
       } else if (rvolVal != null && rvolVal < 1.0 && vr != null && vr >= 1.2) {
-        txt = 'Sinyal günü orta hacim ama haftalık momentum oluşmamış — temkinli izle.';
+        txt = 'Sinyal günü orta hacim ama RVOL düşük.';
       } else if (rvolVal != null && rvolVal >= 1.0 && vr != null && vr >= 1.0) {
         txt = 'Hacim profili ortalama seviyede — net üstünlük yok.';
       } else if (vr != null && rvolVal != null) {
-        txt = 'Hem haftalık momentum hem sinyal günü patlama zayıf — dikkatli ol.';
+        txt = 'RVOL ve sinyal günü hacmi ikisi de zayıf.';
       }
       hpSummary.textContent = txt;
     }
