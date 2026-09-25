@@ -258,7 +258,7 @@ html {
 body {
   background: var(--bp-bg);
   color: var(--bp-text);
-  font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Grotesk', 'SG Fallback', system-ui, -apple-system, sans-serif;
 }
 
 

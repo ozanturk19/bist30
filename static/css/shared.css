@@ -14,7 +14,7 @@
    Data-Art dilinde yazi tipi birincil marka tasiyicisi; bu dogrudan gorunur
    bir kirilma. Tek kanon buraya yaziliyor: ELEMAN ozgullugunde (0,0,1), yani
    kendi yazi tipini BILEREK secen her sinif kurali (ticker girdisinin
-   ui-monospace'i, .mbn-item'in Manrope'u) uzerine yazmaya devam eder.
+   ui-monospace'i, .mbn-item'in gövde fontu) uzerine yazmaya devam eder.
    [[reference_k_turu_olcum_dersleri_hub]] · 171. ders: ayni is, tek kanon. */
 button,
 input,
@@ -41,7 +41,7 @@ textarea {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 4px; text-decoration: none; color: var(--bp-text3); font-size: var(--bp-text-sm); font-weight: 600;
     letter-spacing: 0.05px; transition: color .2s ease;
-    font-family: 'Manrope', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     position: relative; background: none; border: none; cursor: pointer;
     padding: 0; min-height: 48px; -webkit-tap-highlight-color: transparent;
   }
@@ -80,7 +80,7 @@ textarea {
     gap: 7px; text-decoration: none; color: var(--bp-text);
     background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     padding: 14px 6px; font-size: var(--bp-text-xs); font-weight: 600;
-    font-family: 'Manrope', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     letter-spacing: 0.1px; min-height: 70px;
     transition: background .15s, border-color .15s, transform .1s;
     text-align: center;

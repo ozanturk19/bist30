@@ -20,11 +20,7 @@
   {"@type":"ListItem","position":2,"name":"Gizlilik Politikası","item":"https://borsapusula.com/gizlilik"}
 ]}
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=e0936136">
+<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
 <link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
 <link rel="stylesheet" href="/static/css/pages/gizlilik.css?v=bd0b5d95">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -35,7 +31,7 @@
 
 <div class="container lg-head">{% call bpf.pagehead('Gizlilik Politikası') %}Hangi verileri neden topladığımızı, nasıl sakladığımızı ve haklarınızı açıklar.{% endcall %}</div>
 <main class="container" id="main-content" tabindex="-1">
-  <p class="updated">Son güncelleme: 22 Eylül 2026 (rev. 2) — hisse bazlı e-posta alarmlarının sunucuda saklanması ayrı bir madde olarak eklendi; aşağıdaki "Değişiklikler" bölümüne bakınız.</p>
+  <p class="updated">Son güncelleme: 25 Eylül 2026 (rev. 3) — yazı tipleri artık kendi sunucumuzdan yükleniyor, Google Fonts maddesi kaldırıldı; aşağıdaki "Değişiklikler" bölümüne bakınız.</p>
 
   <p>Bu gizlilik politikası, <strong>borsapusula.com</strong> web sitesinin kişisel verilerinizi nasıl ele aldığını açıklamaktadır.</p>
 
@@ -70,7 +66,6 @@
     <li><strong>Google Gemini AI:</strong> AI haber özeti özelliği için Google Gemini API kullanılır. Sorgu metinleri (hisse adı) Google sunucularına iletilir. Google'ın gizlilik politikası geçerlidir.</li>
     <li><strong>Google Analytics (GA4):</strong> Yalnızca yukarıdaki onay bandında "Kabul Et"e bastığınızda çalışır (bkz. Çerezler bölümü). Onaylarsanız sayfa görüntüleme ve etkileşim verileri Google'a iletilir. Google'ın gizlilik politikası geçerlidir.</li>
     <li><strong>Cloudflare (CDN/proxy + Web Analytics):</strong> Site, Cloudflare CDN/proxy hizmeti üzerinden sunulur. Ayrıca çerez kullanmayan, IP adresini saklamayan Cloudflare Web Analytics ile temel ziyaret istatistikleri (sayfa görüntüleme sayısı vb.) toplanır — bu, onay bandındaki tercihinizden bağımsız çalışır. Cloudflare'ın gizlilik politikası geçerlidir.</li>
-    <li><strong>Google Fonts:</strong> Sayfa yazı tipleri Google'ın sunucularından (fonts.googleapis.com, fonts.gstatic.com) yüklenir; bu istek sırasında IP adresiniz Google'a iletilir. Google'ın gizlilik politikası geçerlidir.</li>
   </ul>
 
   <h2>Veri Saklama</h2>
@@ -94,6 +89,7 @@
   <h2>Değişiklikler</h2>
   <p>Bu politika zaman zaman güncellenebilir. Önemli değişiklikler bu sayfada duyurulacaktır.</p>
   <ul>
+    <li><strong>25 Eylül 2026 (rev. 3):</strong> Sayfa yazı tipleri artık BorsaPusula sunucusundan yükleniyor; Google Fonts'a istek gönderilmediği için "Google Fonts" maddesi Üçüncü Taraf Hizmetler listesinden kaldırıldı. Toplanan veri miktarında bir <em>artış olmamıştır</em>.</li>
     <li><strong>22 Eylül 2026 (rev. 2):</strong> "Hisse bazlı e-posta alarmları" maddesi eklendi — abone bir kullanıcı bir hisseyi izlemeye aldığında hisse sembolünün ve alarm koşulunun e-posta adresiyle ilişkilendirilerek sunucuda saklandığı açıkça beyan edildi. Önceki metin bu veriyi yanlışlıkla bulut senkronizasyonu kanalına atfediyor ve Çerezler bölümünde izleme listesinin sunucuya hiç gönderilmediğini söylüyordu; her iki ifade de düzeltildi. Ayrıca JavaScript hata kayıtlarının sunucu günlüğüne yazıldığı "Teknik veriler" maddesine eklendi. Toplanan veri miktarında bir <em>artış olmamıştır</em> — değişiklik yalnızca mevcut işlemenin doğru beyan edilmesidir.</li>
   </ul>
 </main>
@@ -104,7 +100,7 @@
 <script src="/static/bp-format.js?v=63228ae2"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<script src="/static/bp-search.js?v=6cbf910e" defer></script>
+<script src="/static/bp-search.js?v=660f20ac" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

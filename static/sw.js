@@ -1,5 +1,5 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v60';
+const CACHE = 'borsapusula-v61';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
@@ -8,10 +8,12 @@ const STATIC = [
   '/static/icon-192.png?v=933a8452',
   '/static/icon-512.png?v=e9ec3ef2',
   '/static/favicon.svg?v=6ef6d5a3',
-  '/static/css/tokens.css?v=e0936136',
-  '/static/css/shared.css?v=417d22d0',
+  '/static/css/tokens.css?v=13e1ddc7',
+  '/static/css/shared.css?v=8fb82747',
   '/static/css/data-art.css?v=d9121b8e',
   '/static/css/pages/offline.css?v=34a9a271',
+  '/static/fonts/space-grotesk.woff2?v=5ac34783',
+  '/static/fonts/bricolage-800.woff2?v=c76bd7c0',
   '/offline',
 ];
 
@@ -45,7 +47,7 @@ self.addEventListener('activate', e => {
 
 /* Strateji:
  * - API + SSE: SW bypass (tarayıcı doğrudan çeksin)
- * - Static asset (/static/, fonts.googleapis.com): stale-while-revalidate
+ * - Static asset (/static/, fontlar dahil — C-13'ten beri kendi sunucumuzda): stale-while-revalidate
  * - HTML ve diğer her şey: NETWORK-ONLY (SW geçmez, browser her zaman taze çeker)
  *
  * Eski SW (v18) HTML'i de cache'liyordu → kullanıcılar bayat sayfa görüyordu.
@@ -53,11 +55,6 @@ self.addEventListener('activate', e => {
  */
 function isStaticAsset(url) {
   if (url.pathname.startsWith('/static/')) return true;
-  /* fonts.googleapis.com KASITLI olarak DIŞARIDA: sayfalar bu CSS'i <link rel=preload as=style>
-     ile önceden ısıtıyor (CPO-06.09) — SW burayı intercept ederse tarayıcı preload'ı "cross-world
-     service worker resource mismatch" diye reddedip ikinci kez ağdan çekiyor, preload boşa gidiyor.
-     15.09 fresh-ground-audit bulgusu. Asıl font dosyaları (gstatic) SW cache'inde kalmaya devam eder. */
-  if (url.hostname === 'fonts.gstatic.com') return true;
   return false;
 }
 

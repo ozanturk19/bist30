@@ -152,7 +152,7 @@
   .chip {
     padding:7px 14px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-sm); font-weight:600;
     border:1px solid var(--bp-border); background:transparent; color:var(--bp-text2);
-    cursor:pointer; transition:all .15s; font-family:'Manrope',system-ui,sans-serif;
+    cursor:pointer; transition:all .15s; font-family:'Space Grotesk',system-ui,sans-serif;
     -webkit-tap-highlight-color:transparent;
   }
   .chip:hover { border-color:var(--bp-border2); color:var(--bp-text); }
