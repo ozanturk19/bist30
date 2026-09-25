@@ -63,62 +63,98 @@ header{
 #staleBanner{max-width:1360px;margin:14px auto 0;margin-left:clamp(16px,4vw,40px);margin-right:clamp(16px,4vw,40px)}
 
 
-/* ── HERO ── */
-.da-hero{position:relative;left:50%;width:100vw;margin-left:-50vw;padding:clamp(28px,5vw,56px) 0 clamp(50px,7vw,88px);overflow:hidden}
-.da-hero-art{position:absolute;inset:-52px 0 auto 0;/* C-13: -8% hero uzadikca kayiyordu (CLS 0,19) */height:115%;width:100%;z-index:0;pointer-events:none;opacity:.8;
-  /* CPO-1557: blur'lu blob'lar kendi içinde yumuşak ama kapsayıcı overflow:hidden'la
-     SERT kesiliyordu (Ozan bulgusu: "kesilmesi iyi durmuyor") — alt %35'i şeffaflığa
-     doğru maskeleyerek sayfanın düz koyu zeminine yumuşak geçiş sağlanıyor. */
-  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 55%,transparent 100%);
-  mask-image:linear-gradient(to bottom,#000 0%,#000 55%,transparent 100%);
-}
-.da-hero-art svg{width:100%;height:100%;display:block}
-.da-blob{transform-box:fill-box;transform-origin:center}
-.da-blob-a{animation:daDriftA 17s ease-in-out infinite alternate}
-.da-blob-b{animation:daDriftB 20s ease-in-out infinite alternate}
-.da-blob-c{animation:daDriftC 15s ease-in-out infinite alternate}
-.da-blob-d{animation:daDriftD 21s ease-in-out infinite alternate}
-@keyframes daDriftA{from{transform:translate(0,0) scale(1)}to{transform:translate(26px,-20px) scale(1.08)}}
-@keyframes daDriftB{from{transform:translate(0,0) scale(1)}to{transform:translate(-22px,18px) scale(.95)}}
-@keyframes daDriftC{from{transform:translate(0,0) scale(1)}to{transform:translate(16px,22px) scale(1.05)}}
-@keyframes daDriftD{from{transform:translate(0,0) scale(1)}to{transform:translate(-20px,-16px) scale(1.1)}}
-.da-node{transform-box:fill-box;transform-origin:center;animation:daNodePulse 3.6s ease-in-out infinite}
-@keyframes daNodePulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.95;transform:scale(1.5)}}
-.da-hero-content{position:relative;z-index:2;max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
-.da-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:clamp(24px,4vw,40px)}
-.da-index-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(14px,3vw,24px);margin-bottom:8px}
-.da-index-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
-/* CPO-1558: gradient-text için fallback yoktu — background-clip:text tarayıcıda
-   desteklenmese veya CSS henüz uygulanmamışken yakalansa color:transparent tek
-   başına metni görünmez bırakıyordu (Fable denetimi, 2/4 masaüstü yüklemede
-   yakaladı). Temel renk her zaman okunur, gradyan sadece destekleniyorsa binir. */
-.da-index-number{font-weight:800;letter-spacing:-.03em;font-size:clamp(3.4rem,10.5vw,7.6rem);line-height:.92;color:var(--bp-text);min-width:5ch;display:inline-block;filter:drop-shadow(0 0 46px rgba(var(--bp-al-rgb),.14))}
+/* ── C-27 HERO v2 (C-M2 v2 · O21=A · O16b=B) ─────────────────────────────────
+   Gerçek BIST100 eğrisi (son 30 seans; yükseliş/düşüş günleri alanda hafif
+   yeşil/kırmızı), gün sonu kapanış kutusu (+ seans içi satırı), H1, üç soru,
+   arama, tüm kapsamın durum şeridi. Sahte dalga/blob/düğüm sanatı kalktı. */
+.hp-hero{position:relative;isolation:isolate;padding:clamp(26px,4vw,44px) 0 clamp(8px,1.6vw,14px)}
+.hp-hero::before{content:'';position:absolute;inset:-40% -10% auto auto;width:70%;height:140%;background:radial-gradient(closest-side,rgba(var(--bp-art-violet-rgb),.20),transparent 70%);pointer-events:none;z-index:-1}
+.hp-wave{position:absolute;right:0;top:clamp(20px,2.4vw,26px);width:62%;height:250px;pointer-events:none}
+.hp-wave svg{display:block;width:100%;height:100%;overflow:visible}
+.hp-wa{fill-opacity:.13}
+.hp-wa.u{fill:var(--bp-al)}
+.hp-wa.d{fill:var(--bp-sat)}
+.hp-wa.n{fill:none}
+.hp-ws1{stop-color:var(--bp-art-violet)}
+.hp-ws2{stop-color:var(--bp-brand)}
+.hp-ws3{stop-color:var(--bp-accent-cyan)}
+.hp-wl{fill:none;stroke:url(#hpWg);stroke-width:3;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.hp-wl--glow{stroke-width:7;opacity:.45;filter:url(#hpGl)}
+.hp-wdot{position:absolute;right:-6px;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--bp-text2)}
+.hp-wdot::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(var(--bp-text-rgb),.35)}
+.hp-wdot.u{background:var(--bp-al)}
+.hp-wdot.d{background:var(--bp-sat)}
+.hp-idx{position:absolute;right:0;top:40px;z-index:2;text-align:right;padding:10px 14px;border-radius:var(--bp-radius-14);background:rgba(var(--bp-bg-rgb),.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(var(--bp-text-rgb),.06)}
+.hp-idx-l{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-xs);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3)}
+.hp-idx-v{font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--bp-text)}
+/* endeks parıltısı yöne bağlı (C-27 kabul metni) */
+.hp-idx.up .hp-idx-v{text-shadow:0 0 28px rgba(var(--bp-al-rgb),.35)}
+.hp-idx.down .hp-idx-v{text-shadow:0 0 28px rgba(var(--bp-sat-rgb),.35)}
+.hp-idx-c{font-weight:600;font-size:var(--bp-text-15)}
+.up.hp-idx-c,.hp-seans .up{color:var(--bp-al)}
+.down.hp-idx-c,.hp-seans .down{color:var(--bp-sat)}
+.neu.hp-idx-c,.hp-seans .neu{color:var(--bp-text2)}
+.hp-seans{margin-top:8px;padding-top:8px;border-top:1px solid rgba(var(--bp-text-rgb),.08);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);line-height:1.45;color:var(--bp-text3)}
+/* tokens.css `[hidden]{display:none!important}` yer ayırmaya izin vermez → sınıfla:
+   varsayılan kapalı; seans saatinde yer ayrılır (görünmez); `.is-on` ile görünür. */
+.hp-seans{display:none}
+.hp-idx--seans .hp-seans{display:block;visibility:hidden}
+.hp-seans.is-on{display:block;visibility:visible}
+.hp-seans-l{display:inline-flex;align-items:center;gap:5px}
+.hp-seans-l i{width:6px;height:6px;border-radius:50%;background:var(--bp-text2)}
+.hp-seans-v > span{white-space:nowrap}
+.hp-seans-v b{color:var(--bp-text);font-weight:600}
+.hp-seans-v > span + span::before{content:' · '}
+.hp-hero-in{position:relative;z-index:1;max-width:640px}
+.hp-h1{font-weight:800;font-size:clamp(52px,7.4vw,96px);line-height:.92;letter-spacing:-.045em;margin:14px 0 16px;color:var(--bp-text)}
+.hp-h1 em{font-style:normal;color:var(--bp-brand)}
 @supports (background-clip:text) or (-webkit-background-clip:text){
-  .da-index-number{background:linear-gradient(120deg,var(--bp-text) 0%,var(--bp-text) 55%,var(--bp-accent-cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hp-h1 em{background:linear-gradient(100deg,var(--bp-art-violet),var(--bp-accent-cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
 }
-.da-index-change{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:clamp(1rem,1.8vw,1.3rem);padding:8px 16px 8px 12px;border-radius:var(--bp-radius-pill);transform:rotate(-1.6deg);margin-bottom:10px}
-.da-index-change.pos{color:var(--bp-al);background:var(--bp-al-bg);border:1px solid var(--bp-al-bd)}
-.da-index-change.neg{color:var(--bp-sat-on-tint);background:var(--bp-sat-bg);border:1px solid var(--bp-sat-bd-tint)}
-.da-index-change.neu{color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border2)}
-.da-index-change svg{width:13px;height:13px}
-.da-index-sub{font-size:var(--bp-text-sm);color:var(--bp-text3);margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.da-spark{width:110px;height:28px;flex-shrink:0}
-.da-tagline{font-weight:800;letter-spacing:-.035em;font-size:clamp(2.6rem,7.6vw,5.4rem);line-height:.98;margin:clamp(30px,5vw,54px) 0 clamp(22px,4vw,34px);max-width:16ch}
-.da-tagline .accent{background:linear-gradient(100deg,var(--bp-art-violet),var(--bp-premium) 55%,var(--bp-volume));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block;transform:rotate(-1.2deg)}
-.da-hero-sub{font-size:clamp(.98rem,1.6vw,1.15rem);color:var(--bp-text2);max-width:52ch;line-height:1.65;margin-bottom:clamp(28px,4vw,40px)}
-.da-search-trigger{display:flex;align-items:center;gap:12px;max-width:600px;width:100%;background:var(--bp-surface);border:1px solid var(--bp-ctl-border);border-radius:var(--bp-radius-xl);padding:15px 18px;transform:rotate(-.5deg);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),box-shadow var(--bp-dur-base) var(--bp-ease-standard),transform var(--bp-dur-base) var(--bp-ease-standard);cursor:pointer;font-family:inherit;color:var(--bp-text3);text-align:left}
-.da-search-trigger:hover,.da-search-trigger:focus-visible{border-color:var(--bp-accent-cyan);box-shadow:0 0 0 4px rgba(var(--bp-accent-cyan-rgb),.14),0 20px 50px -20px rgba(var(--bp-art-violet-rgb),.5);transform:rotate(0deg) translateY(-1px);outline:none}
-.da-search-trigger svg{width:19px;height:19px;flex:none;color:var(--bp-text3)}
-.da-search-trigger span.da-st-label{flex:1;font-size:var(--bp-text-lg);color:var(--bp-text3)}
+.hp-lede{margin:0;color:var(--bp-text2);font-size:var(--bp-text-17);line-height:1.55;max-width:46ch}
+.hp-qs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;list-style:none}
+.hp-qs a{display:inline-flex;align-items:center;min-height:32px;padding:6px 12px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);background:rgba(var(--bp-text-rgb),.04);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-base);color:var(--bp-text);text-decoration:none}
+.hp-qs a:hover{border-color:var(--bp-brand)}
+.hp-qs a:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
+.da-search-trigger{display:flex;align-items:center;gap:10px;margin-top:22px;width:100%;max-width:460px;min-height:48px;padding:12px 14px;background:var(--bp-surface);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-14);color:var(--bp-text3);font:inherit;text-align:left;cursor:pointer;transition:border-color var(--bp-dur-base) var(--bp-ease-standard),box-shadow var(--bp-dur-base) var(--bp-ease-standard)}
+.da-search-trigger:hover,.da-search-trigger:focus-visible{border-color:var(--bp-accent-cyan);box-shadow:0 0 0 4px rgba(var(--bp-accent-cyan-rgb),.14);outline:none}
+.da-search-trigger svg{width:18px;height:18px;flex:none}
+.da-search-trigger span.da-st-label{flex:1;font-size:var(--bp-text-15);color:var(--bp-text3)}
 .da-search-kbd{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);color:var(--bp-text3);border:1px solid var(--bp-border2);padding:3px 8px;border-radius:var(--bp-radius-sm);flex:none}
-/* 19.09: masaüstünden kalma ⌘K rozeti dokunmatik/mobil cihazda anlamsız — fiziksel
-   Cmd tuşu yok, kafa karıştırıyordu. */
+.hp-uni{position:relative;z-index:1;margin-top:26px}
+.hp-strip{display:flex;gap:1px;height:26px;border-radius:var(--bp-radius-md);overflow:hidden}
+.hp-strip i{flex:1 1 0;min-width:0}
+.hp-strip .g,.hp-k.g{background:var(--bp-al)}
+.hp-strip .y,.hp-k.y{background:var(--bp-state-flat)}
+.hp-strip .b,.hp-k.b{background:var(--bp-state-broken)}
+.hp-k.b{box-shadow:inset 0 0 0 1px var(--bp-border2)}
+.hp-uni-cap{margin:8px 0 0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);line-height:1.6;color:var(--bp-text3)}
+.hp-uni-cap b{font-weight:700;color:var(--bp-text)}
+.hp-k{display:inline-block;width:9px;height:9px;margin:0 5px 0 3px;border-radius:2px}
+@media (max-width:1060px){.hp-wave{opacity:.5}}
+@media (min-width:761px) and (max-width:1060px){
+  .hp-seans-v > span{display:block}
+  .hp-seans-v > span + span::before{content:none}
+}
 @media (max-width:680px){.da-search-kbd{display:none}}
-.da-legend-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(30px,5vw,50px);padding:14px clamp(16px,3vw,22px);background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);max-width:fit-content}
-.da-legend-item{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);color:var(--bp-text2)}
-.da-legend-item .sw{width:10px;height:10px;border-radius:3px;flex:none}
-.da-legend-sep{width:1px;background:var(--bp-border);align-self:stretch}
-
+/* Telefon (C-M2 .m): yazı → dalga → kapanış kutusu → şerit. Seans satırı
+   kutunun altında (taslaktaki gibi); yalnız seans içinde görünür. */
+@media (max-width:760px){
+  .hp-hero{display:flex;flex-direction:column}
+  .hp-hero-in{order:1}
+  .hp-wave{order:2;position:relative;right:auto;top:auto;width:100%;height:120px;margin-top:14px;opacity:1}
+  .hp-wdot{right:-3px}
+  .hp-idx{order:3;position:relative;top:auto;right:auto;margin-top:8px;text-align:left}
+  .hp-idx-v{font-size:26px}
+  .hp-seans-v > span{display:block}
+  .hp-seans-v > span + span::before{content:none}
+  .hp-uni{order:4;margin-top:20px}
+  .hp-h1{font-size:50px}
+  .hp-lede{font-size:var(--bp-text-15)}
+  .hp-strip{gap:0}
+  .da-search-trigger{max-width:none}
+}
+@media (pointer:coarse){.hp-qs a{min-height:44px}}
 
 /* ── bugün ne oldu ── */
 .da-recap-panel{padding:clamp(24px,4vw,40px);--da-glow-y:-40%;--da-glow-size:320px;--da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.16}  /* gövde reçetesi: data-art.css .da-panel */
