@@ -2209,6 +2209,9 @@ def analyze(ticker_base):
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
+            # D-07: DI+/DI- sayısal alan (etiket metnini geri parse etmek gerekmesin)
+            "di_plus":       round(di_p, 1),
+            "di_minus":      round(di_m, 1),
             # CPO-1760: etiket YUVARLANMIŞ değerden türer (esiklenen sayi = gosterilen
             # sayi) — ham adx_val'den türetilirse tam eşikte (ör. 24.9x) yayınlanan
             # "25,0" ile farklı bant seçilir; _tarama_core/karsilastir zaten böyle yapıyordu.
@@ -5202,6 +5205,13 @@ def api_data():
             if len(_parts) >= 2:
                 s["di_plus"]  = float(_parts[0])
                 s["di_minus"] = float(_parts[1])
+        # D-07: eski disk cache kayıtları (analyze() sayısal DI alanı yazmadan önce) etiketten
+        if s.get("di_plus") is None or s.get("di_minus") is None:
+            _dv = ((s.get("indicators") or {}).get("adx") or {}).get("value") or ""
+            _dm = re.match(r"DI\+(\d+(?:\.\d+)?)/DI-(\d+(?:\.\d+)?)$", _dv)
+            if _dm:
+                s["di_plus"]  = float(_dm.group(1))
+                s["di_minus"] = float(_dm.group(2))
     # CPO-1627: hisse.html hero / karsilastir.html / /api/tarama/temel ile AYNI
     # kaynak (_financial_health_cache, EOD turunda dolduruluyor) — ekstra hesaplama
     # yok, O(1) dict okuma. /api/data bu 2 alanı hiç taşımıyordu, anasayfa spotlight
@@ -5213,6 +5223,9 @@ def api_data():
         _hs_data  = _hs_entry.get("data") if _hs_entry else None
         s["borsapusula_skoru"] = _hs_data.get("borsapusula_skoru") if _hs_data else None
         s["hs_available"]     = _hs_data is not None
+        # D-07: bileşen eksikliği ve veri tamlığı (Spotlight/sıralama havuzu tüketicisi C tarafında)
+        s["data_completeness"] = _hs_data.get("data_completeness") if _hs_data else None
+        s["bps_partial"]       = _hs_data.get("partial") if _hs_data else None
     # ── Stale-safe fields (CPO-551 Aşama 2 → CPO-1114 K1-K3: per-ticker orana dayalı) ──
     with _lock:
         _loading = _cache.get("loading", False)
