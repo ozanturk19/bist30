@@ -67,7 +67,7 @@
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=ccab7473">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=2315a340">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 
@@ -153,7 +153,7 @@
     <div class="hp-strip" role="img" aria-label="{{ _sc.total }} hissenin durumu: {{ _g }} Güçlü Trend, {{ _y }} Yatay, {{ _b }} Trend Bozuldu">
       {%- for _ in range(_g) %}<i class="g"></i>{% endfor %}{% for _ in range(_y) %}<i class="y"></i>{% endfor %}{% for _ in range(_b) %}<i class="b"></i>{% endfor -%}
     </div>
-    <p class="hp-uni-cap">{{ _sc.total }} hissenin <span class="hp-k g" aria-hidden="true"></span><b>{{ bpf.poss(_g) }}</b> Güçlü Trend · <span class="hp-k y" aria-hidden="true"></span><b>{{ bpf.poss(_y) }}</b> Yatay · <span class="hp-k b" aria-hidden="true"></span><b>{{ bpf.poss(_b) }}</b> Trend Bozuldu</p>
+    <p class="hp-uni-cap">{{ _sc.total }} hissenin <span class="hp-nw1"><span class="hp-k g" aria-hidden="true"></span><b>{{ bpf.poss(_g) }}</b> Güçlü Trend</span> · <span class="hp-nw1"><span class="hp-k y" aria-hidden="true"></span><b>{{ bpf.poss(_y) }}</b> Yatay</span> · <span class="hp-nw1"><span class="hp-k b" aria-hidden="true"></span><b>{{ bpf.poss(_b) }}</b> Trend Bozuldu</span></p>
   </div>
   {%- endif %}
 </section>
@@ -170,7 +170,7 @@
 <section class="da-section hp-blk" id="guclu-trend" aria-labelledby="hpGtT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpGtT">Güçlü Trend'deki {{ _sc.al or 0 }} hisse</h2>
-    <p>{% if _sc.total %}{{ _sc.total }} hisseden {{ bpf.poss(_sc.al or 0) }} beş koşulu birden sağlıyor · {% endif %}<span class="hp-asof">{{ _asl }}</span></p>
+    <p>{% if _sc.total %}{{ _sc.total }} hisseden {{ bpf.poss(_sc.al or 0) }} beş koşulu birden sağlıyor · {% endif %}<span class="hp-asof hp-nw1">{{ _asl }}</span></p>
   </div>
   {%- if _gt %}
   <ul class="hp-gt" role="list">
@@ -181,7 +181,7 @@
       <span class="hp-nm">{{ s.name or '' }}</span>
       <span class="hp-pr"><b class="da-num">{{ s.price|tr_price }} ₺</b> <span class="da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span></span>
       <span class="hp-fin">
-        <span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (_bp ~ ' / 100') if _bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _bp or 0 }} 100"/></svg><b class="da-ring-num">{{ _bp if _bp is not none else '—' }}</b></span>
+        <span class="hp-ring"><span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (_bp ~ ' / 100') if _bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _bp or 0 }} 100"/></svg><b class="da-ring-num">{{ _bp if _bp is not none else '—' }}</b></span><small aria-hidden="true">BP Skoru</small></span>
         <span class="hp-fin-tx" data-fin></span>
       </span>
     </a></li>
@@ -235,6 +235,58 @@
   {%- set _lim = {} -%}{%- for r in heatmap.rows if r.lim -%}{%- set _ = _lim.update({r.t: r.lim}) -%}{%- endfor %}
   <script type="application/json" id="hpLim">{{ {'asof': heatmap.asof, 'lim': _lim}|tojson }}</script>
   {%- endif %}
+</section>
+
+{#- ═══ C-30: Öne çıkan şirketler (orta-uzun vade; C-56 listelerinin ilk hali) — SSR (D-53 `ssr_featured`)
+    Havuz: Trend Bozuldu ve donuk hisse hariç, BP + veri tamlığı ≥0,8, BP azalan ilk 5 (home_fields.featured_pool).
+    Değerleme = hisse "Fiyatı makul mü?" kanonu (`valuation`: sektör ortancasına oran); neden = `fin_answer`. -#}
+{%- set _ft = ssr_featured or [] -%}
+{%- set _vl = {'ucuz': ('Ucuz tarafta', 'ucuz'), 'makul': ('Makul', 'makul'), 'pahali': ('Pahalı tarafta', 'pahali'), 'karisik': ('Karışık', 'mix')} %}
+<section class="da-section hp-blk" id="one-cikan" aria-labelledby="hpFtT">
+  <div class="hp-blk-h">
+    <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
+    <a href="/tarama?liste=bp-70">Tüm liste →</a>
+  </div>
+  <div class="da-panel hp-pan">
+    <p class="hp-rule"><b>Kural:</b> BorsaPusula Skoru en yüksek beş şirket; verisi en az %80 tamam olanlar, Trend Bozuldu hariç.</p>
+    {%- if _ft %}
+    <div class="hp-ft-h" aria-hidden="true"><span>Şirket</span><span>Değerleme</span><span>Trend</span><span>BP</span></div>
+    <ol class="hp-ft" id="hpFt">
+      {%- for s in _ft %}{%- set v = _vl.get(s.valuation) %}
+      <li><a class="hp-ft-row" href="/hisse/{{ s.ticker|urlencode }}">
+        <span class="hp-ft-co"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}{% if s.sector %} · {{ s.sector }}{% endif %}</span><span class="why">{% if s.fin_answer %}{{ s.fin_answer }}.{% endif %}</span></span>
+        <span class="hp-ft-tags"><span class="hp-val{% if v %} hp-val--{{ v[1] }}{% endif %}"><span class="sr-only">Değerleme: </span>{{ v[0] if v else '—' }}</span><span class="da-signal da-signal--{{ 'strong' if s.signal == 'AL' else 'flat' }}"><span class="sr-only">Trend: </span>{{ 'Güçlü Trend' if s.signal == 'AL' else 'Yatay' }}</span></span>
+        <span class="hp-ft-bp"><span class="sr-only">BorsaPusula Skoru </span><b class="da-num">{{ s.borsapusula_skoru|round|int }}</b>{% if s.bps_partial %}<em class="hp-partial" title="Kısmi skor: yalnız finansallardan (Temel)">Kısmi</em>{% endif %}</span>
+      </a></li>
+      {%- endfor %}
+    </ol>
+    {%- else %}
+    <p class="hp-nw-e">Şu an kurala uyan şirket yok.</p>
+    {%- endif %}
+  </div>
+</section>
+
+{#- C-30: Son seansta değişenler — SSR (D-53 `ssr_gundem`, /api/gundem ile aynı kaynak; BEKLE'ye dönüş listelenmez).
+    long-only: Trend Bozuldu'ya geçenler sessiz koyu çip, kırmızı yok. -#}
+{%- set _gd = ssr_gundem or {} -%}
+{%- set _ns = _gd.new_signals or [] %}
+<section class="da-section hp-blk" id="degisenler" aria-labelledby="hpChT">
+  <div class="hp-blk-h">
+    <h2 class="hp-blk-t da-display" id="hpChT">Son seansta değişenler</h2>
+    <a href="/gundem">Tüm gündem →</a>
+  </div>
+  <div class="da-panel hp-pan hp-chg">
+    {%- if _ns %}
+    <p class="hp-chg-h"><b>Son kapanışta {{ _ns|length }} hisse durum değiştirdi</b>{% if _gd.eod_label %} · <span class="hp-nw1">{{ _gd.eod_label }}</span>{% endif %}</p>
+    {%- for sig, lbl, cls in [('AL', "Güçlü Trend'e geçen", 'strong'), ('SAT', "Trend Bozuldu'ya geçen", 'broken')] %}
+    {%- set _l = _ns|selectattr('signal', 'equalto', sig)|list %}
+    <div class="hp-chg-g hp-chg-g--{{ cls }}"><p class="hp-chg-l">{{ lbl }} <b class="da-num">{{ _l|length }}</b></p>
+      {%- if _l %}<ul class="hp-chips">{% for x in _l[:8] %}<li><a class="hp-chip hp-chip--{{ cls }}" href="/hisse/{{ x.ticker|urlencode }}">{{ x.ticker }}</a></li>{% endfor %}{% if _l|length > 8 %}<li><a class="hp-chip hp-chip--more" href="/gundem">+{{ _l|length - 8 }}</a></li>{% endif %}</ul>{% endif %}</div>
+    {%- endfor %}
+    {%- else %}
+    <p class="hp-chg-h">{{ _gd.closed_message or 'Son seansta trend durumu değişen hisse yok.' }}</p>
+    {%- endif %}
+  </div>
 </section>
 
 {#- Son şirket bildirimleri (C-28 6. blok "Haberler özeti"): /api/haberler, her satır
@@ -489,15 +541,11 @@
       var ranked = real.filter(function(s){ return !s.stale_reason && s.data_quality !== 'stale'; });
       daHydrateGt(real);
       daRenderMovers(ranked, d.updated_at);
-      daOnData(real, ranked);
     }).catch(function(e){
       console.error('daLoadData basarisiz', e);
       DA_DATA_BLOCKS.forEach(function(id){ daShowSectionError(id, daLoadData); });
     });
   }
-  /* C-30 blokları için kanca (yoksa no-op). */
-  function daOnData(){}
-
   // ═══ 4) Isı haritası yoksa (heatmap=None) eski sektör mozaiği — /api/sektor-summary ═══
   function daLoadSectors(){
     if (!document.getElementById('daMosaicBody')) return;   /* C-55 haritası basıldıysa istek yok */
