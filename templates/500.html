@@ -11,15 +11,15 @@
 <meta name="twitter:title"       content="Sunucu Hatası — borsapusula.com">
 <meta name="twitter:description" content="Beklenmeyen bir sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/404.css?v=45fba591">
-{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
+<link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
+<link rel="stylesheet" href="/static/css/pages/404.css?v=181fae68">
+{% endblock %}{% block body %}{% import '_brand.html' as brand %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a class="brand" href="/">
-    <img src="/static/favicon.svg" alt="" width="26" height="26">
-    <span class="brand-name">Borsa<b>Pusula</b></span>
+    {{ brand.mark(28, 'err') }}
+    <span class="brand-name">{{ brand.wordmark() }}</span>
   </a>
 </header>
 <main id="main-content" tabindex="-1">

@@ -648,6 +648,9 @@ body {
 .bp-al-text{color:var(--bp-al)}
 /* K-CZ: marka sozcuk-isareti vurgusu -- .bp-al-text'in ikizi DEGIL, ayri eksen. */
 .bp-logo-accent{color:var(--bp-logo-accent)}
+/* C-06: sozcuk-isareti tek <span> (_brand.html wordmark), §5.7 Bricolage 800 */
+.bp-wordmark{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
+.bp-mark{flex:none;display:block}
 .bp-sat-text{color:var(--bp-sat)}
 /* K-BW (22.09): yon ucluysa sinif da uclu olmali. AL/SAT icin sinif vardi,
    BEKLE dali her yerde `style="color:var(--bp-bkl)"` diye satir-ici

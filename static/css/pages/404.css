@@ -16,10 +16,6 @@
   }
   header a.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--bp-text); }
   header .brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: var(--bp-text-xl); }
-  /* K-CZ (22.09): --bp-brand idi -- ayni sozcuk-isareti header/footer`ta
-     var(--bp-al) ile basiliyordu; bu deger CPO-1558 ONCESI logo gradyaninin
-     rengiydi ve goc burada yarim kalmisti. Tek kanon: --bp-logo-accent. */
-  header .brand-name b { color: var(--bp-logo-accent); }
   main {
     max-width: var(--bp-container-640);
     margin: 64px auto;

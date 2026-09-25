@@ -1,16 +1,16 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v61';
+const CACHE = 'borsapusula-v62';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
   '/static/lightweight-charts.min.js?v=86b4c600',
-  '/static/manifest.json?v=287c7b00',
-  '/static/icon-192.png?v=933a8452',
-  '/static/icon-512.png?v=e9ec3ef2',
-  '/static/favicon.svg?v=6ef6d5a3',
-  '/static/css/tokens.css?v=13e1ddc7',
+  '/static/manifest.json?v=00de4c25',
+  '/static/icon-192.png?v=0b40a6a6',
+  '/static/icon-512.png?v=265a8cb2',
+  '/static/favicon.svg?v=6834d771',
+  '/static/css/tokens.css?v=d45615e3',
   '/static/css/shared.css?v=8fb82747',
-  '/static/css/data-art.css?v=d9121b8e',
+  '/static/css/data-art.css?v=40964c70',
   '/static/css/pages/offline.css?v=34a9a271',
   '/static/fonts/space-grotesk.woff2?v=5ac34783',
   '/static/fonts/bricolage-800.woff2?v=c76bd7c0',

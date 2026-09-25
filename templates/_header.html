@@ -8,32 +8,15 @@
       hdr_self  str -> sayfanin KENDI nav href'i; o oge menude gizlenir.
                        {% with hdr_self='/hisseler' %}{% include '_header.html' %}{% endwith %}
 -#}
+{% import '_brand.html' as brand %}
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula ana sayfası">
     <svg class="bp-logo" width="215" height="56" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <!-- CPO-1558: kare-çerçeveli pusula/ızgara ikonu, onaylı Data-Art mockup'ındaki
-           (mockup-c-dataart.html) gerçek marka işaretiyle hiç örtüşmüyordu — mockup'taki
-           çember + 4-uçlu kıvılcım/pusula-yıldızı işareti (mor→camgöbeği gradyan)
-           birebir uygulandı, kare/ızgara/ikinci-ibre tamamen kaldırıldı.
-           CPO-1558 devamı: ilk sürüm gradyanı --bp-brand (soluk periwinkle) kullanıyordu,
-           mockup'un canlı morundan (#7c5cff) çok soluk kaldığı için gradyan geçişi neredeyse
-           hiç görünmüyordu (Ozan yakaladı) — --bp-art-violet (mockup'la aynı doygun ton,
-           tokens.css'e eklendi) ile değiştirildi. -->
-      <defs>
-        <linearGradient id="bpMark" x1="18" y1="24" x2="90" y2="96" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="var(--bp-art-violet)"/>
-          <stop offset="1" stop-color="var(--bp-accent-cyan)"/>
-        </linearGradient>
-      </defs>
-      <circle cx="54" cy="60" r="36" fill="none" stroke="url(#bpMark)" stroke-width="3"/>
-      <path d="M54 35 L63 57.5 L86.5 60 L63 62.5 L54 85 L45 62.5 L21.5 60 L45 57.5 Z" fill="url(#bpMark)"/>
-      <!-- CPO: wordmark önceden 'Bricolage Grotesque','Sora' istiyordu ama bu iki font
-           bu partial'ı kullanan ~25 sayfanın HİÇBİRİNDE yüklenmiyor (sadece index.html
-           yüklüyor) — sessizce yedek fonta düşüyordu. Gerçekten yüklü olan (500/600/700)
-           ve zaten bu sayfaların kendi h1/h2 font'u olan Space Grotesk'e geçirildi. -->
-      <text x="116" y="64" fill="var(--bp-text)" font-family="'Space Grotesk',system-ui,sans-serif" font-size="38" font-weight="700" letter-spacing="-0.5">Borsa<tspan fill="var(--bp-logo-accent)">Pusula</tspan></text>
-      <line x1="118" y1="78" x2="430" y2="78" stroke="var(--bp-border)" stroke-width="1"/>
-      <text x="118" y="102" fill="var(--bp-text3)" font-family="'Space Grotesk',system-ui,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>
+      {#- C-06: isaret _brand.html tek kaynagindan (logo v2 A); yazi Bricolage 800 (§5.7, _head.html yukler) -#}
+      {{ brand.mark(96, 'hdr', x=6, y=12) }}
+      <text x="116" y="66" fill="var(--bp-text)" font-family="'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif" font-size="40" font-weight="800" letter-spacing="-1.2">Borsa<tspan fill="var(--bp-logo-accent)">Pusula</tspan></text>
+      <line x1="118" y1="80" x2="430" y2="80" stroke="var(--bp-border)" stroke-width="1"/>
+      <text x="118" y="104" fill="var(--bp-text3)" font-family="'Space Grotesk',system-ui,sans-serif" font-size="20" font-weight="600" letter-spacing="4">PİYASANIN YÖNÜ</text>
     </svg>
   </a>
   <nav class="bp-main-nav" aria-label="Ana navigasyon">

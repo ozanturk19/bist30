@@ -31,7 +31,7 @@
    ama önceki tavana göre ~%35 daraltıldı. */
 .da-section{padding:clamp(32px,4.5vw,62px) 0}
 .da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,3vw,30px)}
-.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-volume);margin-bottom:8px}
+.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
 .da-section-title{font-weight:800;letter-spacing:-.025em;font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.04;max-width:20ch}
 .da-section-desc{color:var(--bp-text3);max-width:44ch;font-size:var(--bp-text-base);line-height:1.6}
 

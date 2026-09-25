@@ -55,18 +55,10 @@
     {%- elif ftr_note is defined and ftr_note %}
     <div class="da-footer-note">{{ ftr_note }}</div>
     {%- endif %}
+    {%- import '_brand.html' as brand %}
     <div class="da-footer-brand">
-      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect width="36" height="36" rx="6" fill="var(--bp-surface)"/>
-        <circle cx="18" cy="18" r="13" stroke="var(--bp-border2)" stroke-width="1"/>
-        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="var(--bp-al)"/>
-        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="var(--bp-border)"/>
-        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="var(--bp-border)"/>
-        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="var(--bp-border)"/>
-        <circle cx="18" cy="18" r="2.8" fill="var(--bp-brand)"/>
-        <circle cx="18" cy="18" r="1.4" fill="var(--bp-text)"/>
-      </svg>
-      Borsa<span class="bp-logo-accent">Pusula</span>
+      {{ brand.mark(24, 'ftr') }}
+      {{ brand.wordmark() }}
     </div>
     {%- set _self = ftr_self|default('', true) %}
     <nav class="da-footer-links" aria-label="Alt bilgi bağlantıları">
