@@ -86,7 +86,7 @@ def test_app_py_never_names_a_retired_field():
 
 def test_enrich_stock_drops_legacy_disk_cache_fields():
     ns = {"_get_sector": lambda t: "Ulaştırma", "STOCK_NAMES": {"THYAO": "Türk Hava Yolları"},
-          "_RETIRED_TRADE_KEYS": br.RETIRED_TRADE_KEYS}
+          "_RETIRED_TRADE_KEYS": br.RETIRED_TRADE_KEYS, "BIST100_MEMBERS": frozenset()}
     exec(_func_src("_enrich_stock"), ns)
     old = {"ticker": "THYAO", "tp1": 320.0, "tp2": 330.0, "rr_signal": 2.1, "entry_note": "SL yakın — R/R",
            "optimal_entry": 290.0, "sl_level": 280.0, "entry_quality": "IDEAL",
