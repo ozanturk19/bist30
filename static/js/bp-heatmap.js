@@ -696,10 +696,12 @@
      1) Telefonda (hover yok + kaba işaretçi) navigator.share varsa düğme menüyü
         açmaz, paylaşım sayfasını açar: dosya paylaşımı destekleniyorsa -kare.png
         (1080×1350) + metin + bağlantı; değilse başlık + metin + bağlantı (bağlantı
-        önizlemesi 1200×630 görseli zaten taşır). Web Share kullanıcı dokunuşu
-        içinde çağrılmalı → görsel beklenmez: düğme ekrana girince boşta önceden
-        alınır (veri tasarrufu açıkken yalnız dokunuşta). Hazır değilse o dokunuş
-        dosyasız paylaşır. İptal sessiz; başka hata → menü açılır.
+        önizlemesi 1200×630 görseli zaten taşır). Görsel (~400 KB) sayfa açılışında
+        İNDİRİLMEZ: parmak düğmeye değince (pointerdown) alınmaya başlar, dokunuş
+        en çok 4 sn bekler (düğme aria-busy), sonra paylaşır. Tarayıcı bekleme
+        yüzünden paylaşımı reddederse (NotAllowedError) menü açılır; görsel artık
+        hazır olduğundan ikinci dokunuş dosyayla paylaşır. Veri tasarrufu açıkken
+        dosya hiç alınmaz (bağlantı paylaşılır). İptal sessiz.
      2) Masaüstünde menü: "Bağlantıyı kopyala" panoya yazar (Clipboard API →
         execCommand yedeği → seçili adres kutusu), sonucu okunur duyurur. Esc
         kapatır ve odağı düğmeye verir; dışarı tıklama / odak çıkışı kapatır.
@@ -771,33 +773,30 @@
       }).catch(function () { return null; });   /* görsel yoksa dosyasız paylaşılır */
       return fileP;
     }
-    if (FILES) {
-      btn.addEventListener('pointerdown', getFile);
-      if (!SAVE && window.IntersectionObserver) {
-        var io = new IntersectionObserver(function (es) {
-          for (var i = 0; i < es.length; i++) {
-            if (es[i].isIntersecting) {
-              io.disconnect();
-              if (window.requestIdleCallback) requestIdleCallback(getFile, { timeout: 3000 }); else setTimeout(getFile, 800);
-              return;
-            }
-          }
-        });
-        io.observe(box);
-      }
-    }
+    if (FILES && !SAVE) btn.addEventListener('pointerdown', getFile);   /* niyet: dokunuşta indirmeye başla */
+    var busy = false;
     btn.addEventListener('click', function (e) {
       if (!SHARE) return;                  /* masaüstü: <details> menüsü (yerel davranış) */
       e.preventDefault();
-      var url = link(), data;
-      if (file) data = { files: [file], title: D.title, text: D.text + '\n' + url };
-      else data = { title: D.title, text: D.text, url: url };
-      var fallback = function (err) {
+      if (busy) return;
+      var url = link();
+      var fail = function (err) {
         if (err && err.name === 'AbortError') return;   /* kullanıcı vazgeçti */
         box.open = true;
       };
-      try { navigator.share(data).then(function () { say('Paylaşıldı'); }, fallback); } catch (err) { fallback(err); }
-      if (!file) getFile();
+      var run = function (f) {
+        var data = f ? { files: [f], title: D.title, text: D.text + '\n' + url } : { title: D.title, text: D.text, url: url };
+        try { navigator.share(data).then(function () { say('Paylaşıldı'); }, fail); } catch (err) { fail(err); }
+      };
+      if (file || !FILES || SAVE) return run(file);
+      busy = true;
+      btn.setAttribute('aria-busy', 'true');
+      var late = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+      Promise.race([getFile(), late]).then(function (f) {
+        busy = false;
+        btn.removeAttribute('aria-busy');
+        run(f);
+      });
     });
 
     /* ── Masaüstü menüsü ── */
