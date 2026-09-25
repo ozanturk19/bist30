@@ -348,6 +348,21 @@
    aria-selected=false olan sekmenin paneli gizlenmelidir). Icindeki dokuz
    panelin HEPSI zaten data-tab-content="ozet"; sarmalayici ayni degeri alinca
    ikinci bir gorunurluk kanonu dogmaz, yalniz mevcut kanon tam uygulanir. #}
+{#- C-22: "Finansallari nasil?" betimleyici cevabi -- Ozet Q1 ve Temel sekmesi ayni makrodan
+    (kategori skorlari; >=70 guclu, <50 zayif: financial_health_score esikleri; sirkete yargi yok). -#}
+{%- macro fin_answer(hs, hs_available) -%}
+{%- if hs_available and hs.categories -%}
+{%- set _N = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
+{%- set _ord = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
+{%- set _st = _ord|selectattr('1', 'ge', 70)|list -%}
+{%- set _wk = _ord|selectattr('1', 'lt', 50)|list -%}
+{%- if _st and _wk %}{{ _N[_st[0][0]]|capitalize }} güçlü, {{ _N[_wk[-1][0]] }} zayıf
+{%- elif _st|length >= 2 %}{{ _N[_st[0][0]]|capitalize }} ve {{ _N[_st[1][0]] }} güçlü
+{%- elif _st %}{{ _N[_st[0][0]]|capitalize }} öne çıkıyor
+{%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
+{%- else %}Dengeli; belirgin zayıf alan yok{% endif -%}
+{%- else -%}Veri bekleniyor{%- endif -%}
+{%- endmacro -%}
 <div id="panel-ozet" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
   {#- C-20 (25.09): "3 Soruda {HISSE}" (O11b=A) -- eski "2 Saniyede Karar Yardimcisi / Sinyal
       Ozeti" kutusunun yerine. C-M1 v2 + O16a=B notlari: tek halka (BP, "N / 100", bant kelimesi
@@ -383,16 +398,7 @@
       <div class="hx-q">
         <h3 class="hx-qq">Finansalları nasıl?</h3>
         {% if hs_available and hs.categories %}
-        {%- set _N = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
-        {%- set _ord = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
-        {%- set _st = _ord|selectattr('1', 'ge', 70)|list -%}
-        {%- set _wk = _ord|selectattr('1', 'lt', 50)|list -%}
-        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>
-          {%- if _st and _wk %}{{ _N[_st[0][0]]|capitalize }} güçlü, {{ _N[_wk[-1][0]] }} zayıf
-          {%- elif _st|length >= 2 %}{{ _N[_st[0][0]]|capitalize }} ve {{ _N[_st[1][0]] }} güçlü
-          {%- elif _st %}{{ _N[_st[0][0]]|capitalize }} öne çıkıyor
-          {%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
-          {%- else %}Dengeli; belirgin zayıf alan yok{% endif %}</p>
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>{{ fin_answer(hs, hs_available) }}</p>
         {% if hs.temel_analiz_skoru is not none %}<p class="hx-ts">Temel skor <b>{{ hs.temel_analiz_skoru }} / 100</b></p>{% endif %}
         {%- set _na = hs.categories_na if (hs.categories_na is defined and hs.categories_na) else [] %}
         <ul class="hx-bars">
@@ -410,9 +416,10 @@
         <p class="hx-qp">Bu hisse için son gün sonu turu temel skoru üretmedi.</p>
         {% endif %}
       </div>
-      {#- Q2 -- Fiyati makul mu? /fundamentals (Ozet'te bir kez) ile dolar; F/K ve PD/DD sitenin
-          bugunku olcegiyle (Temel sekmesindeki Ucuz/Makul/Pahali etiketleriyle ayni esik: F/K 12/25,
-          PD/DD 1/3). Sektor ortancasi alani gelince (DEV1) C-M1 esigine (0,8 / 1,25) gecer. -#}
+      {#- Q2 -- Fiyati makul mu? /fundamentals (Ozet'te bir kez) ile dolar; C-22b: Temel sekmesiyle
+          tek kanon (tvValuation): F/K ve PD/DD `kap` varsa son 12 ay (O22=B), oran = deger / sektor
+          ortancasi (D-51; akran <3 ise BIST), <0,80 ucuz, >1,25 pahali (kanon §5.6). Ortanca yoksa
+          yalniz deger yazilir, hukum yok. -#}
       <div class="hx-q" id="q2">
         <h3 class="hx-qq">Fiyatı makul mü?</h3>
         <p class="hx-ans"><span class="hx-dot hx-dot--val" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">—</span></p>
@@ -730,392 +737,87 @@
   <p class="hx-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
   </div><!-- /panel-ozet -->
 
-  {#- C-19: Temel sekmesi. Icerik simdilik eski Ozet'teki Temel Analiz paneli
-      (C-22/C-22b Temel v2 bu panelin yerine gelir). /fundamentals yalniz bu
-      sekme (ve Ozet) acilinca istenir. -#}
+  {#- C-22 + C-22b (25.09): Temel sekmesi v2 -- onayli taslak v3 (C-M6, O16e=B, O22=B).
+      Ust: "Finansallari nasil?" + betimleyici cevap (Q1 ile ayni makro) + Temel skor halkasi
+      (camgobegi) + eksen satirlari (puan + tek satir metrik). Eksenler bugunku 4 kategori
+      skorundan (D-40c'nin 5 ekseni gelene kadar). Alt: 6 panel (Buyume · Karlilik · Degerleme ·
+      Saglamlik kontrolu · Bilanco sagligi · Temettu), /fundamentals `kap` blogundan (D-40a0 +
+      D-40a2, aciklanan veri) JS ile dolar. `kap` yoksa (hisse icin rapor henuz uretilmedi ya
+      da arka uc eski) bugunku alanlarla sade gorunum + sessiz "ayrintili veri hazirlaniyor"
+      notu; veri gelmeyen panel gizlenir (bos kutu yok). -#}
   <div id="panel-temel" data-tab-content="temel" role="tabpanel" aria-labelledby="tab-temel" tabindex="0">
-  {#- C-20: Skor Analizi (BP + Teknik + Temel halkalari, radar) Ozet'ten buraya tasindi --
-      Ozet'te tek halka (plan C-20; C-21b ile ayni yon). -#}
-  <!-- CPO-1554 Faz 4 — Üç Skor Analizi (BorsaPusula / Teknik / Temel + radar).
-       Organik/Asimetrik konsept (judge-panel 8.4/10), Kokpit+Kart Yığını'ndan
-       aşılandı. hs_available=False iken (EOD turu bu ticker için hiç çalışmadı)
-       kompakt dürüst-bekleme durumu; Teknik Analiz Skoru HER ZAMAN ssr_signal'dan
-       (mevcut, çalışan kaynak) bağımsız gösterilir — hs'e hiç bağımlı değil. -->
-  {% set new_teknik_score = (ssr_signal.signal_strength | int) if (ssr_signal and ssr_signal.signal_strength) else none %}
-  {% if new_teknik_score or hs_available %}
-  {% set RING_R = 45 %}
-  {% set RING_C = 282.743 %}
-  {% set RADAR_CX = 260 %}
-  {% set RADAR_CY = 260 %}
-  {% set RADAR_R  = 225 %}
-  {% set BAND_META = {
-    'yesil':   {'var': '--bp-al',     'rgb_var': '--bp-al-rgb'},
-    'sari':    {'var': '--bp-volume', 'rgb_var': '--bp-volume-rgb'},
-    'kirmizi': {'var': '--bp-sat',    'rgb_var': '--bp-sat-rgb'}
-  } %}
-  {# bughunt-13.09 (finansal-analist workflow): eşik backend'in kanonik _band()
-     (financial_health_score.py) ile aynı hizaya getirildi — 65/40 iken bir
-     kategori 66 puanla yeşil gösterirken kompozit skor 66<70 olduğu için
-     sarı bantta kalabiliyordu, aynı sayfada iki farklı renk-eşiği çelişkisi
-     (feedback_puan_tutarlilik_kanonik ihlali). #}
-  {% macro health_color(v) -%}
-  {%- if v is none -%}var(--bp-text3)
-  {%- elif v >= 70 -%}var(--bp-al)
-  {%- elif v >= 50 -%}var(--bp-volume)
-  {%- else -%}var(--bp-sat)
-  {%- endif -%}
-  {%- endmacro %}
-
-  {% set temel_score  = hs.temel_analiz_skoru if hs_available else none %}
-  {% set hero_score   = hs.borsapusula_skoru if hs_available else none %}
-  {# bughunt-12.09: hs_available=False iken (temel hiç hesaplanmamış) ama
-     aktif bir Teknik sinyal (new_teknik_score) varsa hero_score DAİMA None
-     kalıyordu — gauge'in büyük sayısı ve aria-label'ı ham "None" basıyordu.
-     hero_display bu durumda Teknik'e düşer (aşağıdaki "sadece Teknik"
-     dalının zaten anlattığı şeyle tutarlı), ikisi de yoksa None kalır
-     (o zaman zaten dış {% if new_teknik_score or hs_available %} kapısı
-     bu bloğu hiç render etmez). #}
-  {% set hero_display = hero_score if hero_score is not none else new_teknik_score %}
-  {% set temel_missing = (not hs_available) or temel_score is none %}
-  {% set radar_categories_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.kaldirac is defined and hs.categories.degerleme_buyume is defined %}
-  {# CPO-1617/1619 (DEV-1897): kaldirac bazı ticker'larda (mevduat bankaları +
-     SAHOL/YESIL, financial_health_score.LEVERAGE_NA_TICKERS) GEÇİCİ veri
-     boşluğu değil, bilanço yapısı gereği YAPISAL olarak uygulanamaz.
-     hs.categories_na bunu ayırt eder — bu durumda radar'ı TAMAMEN gizlemek
-     yerine 3 gerçek eksen + "N/A" etiketli 1 eksen gösteriyoruz. Genel
-     "gerçek veri boşluğu" durumunda (categories_na boş) eski hep-ya-da-hiç
-     davranış AYNEN korunuyor. hs.categories_na eski cache'lerde (Pazartesi
-     EOD öncesi) henüz yok olabilir — "is defined" ile güvenli kontrol
-     ediliyor, aksi halde CPO-1606 P0'ındaki gibi Undefined aritmetiği 500
-     üretir. #}
-  {% set kaldirac_na = hs_available and (hs.categories_na is defined) and hs.categories_na and ('kaldirac' in hs.categories_na) %}
-  {% set radar_other3_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.degerleme_buyume is defined %}
-  {# bughunt-16.09: financial_health_score.py'nin kendi docstring'i (CPO-1606 P0
-     emsali) "hs.partial composite (temel+teknik) skorun tek taraflı kalmasını
-     gösterir, categories_complete/radar_categories_complete'ten TAMAMEN AYRI —
-     bunu karıştırma" diye açıkça uyarıyordu, ama bu iki satır AYNI karışıklığı
-     tekrar etmişti: hs.partial (mesela sadece o an aktif bir Teknik sinyal
-     olmadığı için True) radar'ı sektöre veya bilançoya göre değil, sinyal
-     durumuna göre "Sınırlı Veri" gösteriyordu — 216 hissenin ~%76'sı (Yatay/
-     Bekle sinyalli TÜM hisseler) fundamental verisi %100 tam olsa bile
-     (ör. ASELS/SİSE/EREGL, data_completeness=1.0) gereksiz yere donuklaşıyordu.
-     Ozan'ın "hisseler arası tutarsız, standart yok" geri bildirimiyle bulundu. #}
-  {% set radar_partial_na = kaldirac_na and radar_other3_complete and not radar_categories_complete and not temel_missing %}
-  {% set radar_dim = temel_missing or (not radar_categories_complete and not radar_partial_na) %}
-  {% set band = BAND_META.get(hs.band, BAND_META['sari']) if hs_available else BAND_META['sari'] %}
-  {% set completeness_pct = ((hs.data_completeness * 100) | round | int) if (hs_available and hs.data_completeness is not none) else 0 %}
-
-  {% if new_teknik_score %}
-    {% set teknik_offset = '%.2f'|format(RING_C * (100 - new_teknik_score) / 100) %}
-  {% endif %}
-  {% if hero_display is not none %}
-    {% set hero_offset = '%.2f'|format(RING_C * (100 - hero_display) / 100) %}
-  {% endif %}
-  {% if not temel_missing %}
-    {% set temel_offset = '%.2f'|format(RING_C * (100 - temel_score) / 100) %}
-  {% endif %}
-  {% if not radar_dim %}
-    {% set y_karlilik  = RADAR_CY - (RADAR_R * hs.categories.karlilik / 100) %}
-    {% set x_nakit     = RADAR_CX + (RADAR_R * hs.categories.nakit_akisi / 100) %}
-    {% set x_degerleme = RADAR_CX - (RADAR_R * hs.categories.degerleme_buyume / 100) %}
-    {% if radar_categories_complete %}
-      {% set y_kaldirac = RADAR_CY + (RADAR_R * hs.categories.kaldirac / 100) %}
+  {%- set _tv_score = hs.temel_analiz_skoru if (hs_available and hs.temel_analiz_skoru is not none) else none -%}
+  {%- set _tv_na = hs.categories_na if (hs_available and hs.categories_na is defined and hs.categories_na) else [] %}
+  <section class="tv-hero" aria-labelledby="tvQ">
+    <div class="tv-lead">
+      <h2 class="tv-q" id="tvQ">Finansalları nasıl?</h2>
+      <p class="tv-ans">{{ fin_answer(hs, hs_available) }}</p>
+      {% if _tv_score is not none %}
+      <div class="tv-ringrow">
+        <div class="da-ring da-ring--lg da-ring--temel tv-ring" role="img" aria-label="Temel skor {{ _tv_score }} / 100">
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _tv_score }} 100"/></svg>
+          <b class="da-ring-num" aria-hidden="true">{{ _tv_score }}</b>
+        </div>
+        <div><div class="tv-lbl">Temel skor</div><div class="tv-sub">100 üzerinden</div></div>
+      </div>
+      {% endif %}
+      <p class="tv-kind" id="tvKind">{% if 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
+      <p class="tv-per" id="tvPer" hidden></p>
+    </div>
+    {% if hs_available and hs.categories %}
+    <ul class="tv-axes" aria-label="Temel skorun alanları">
+      {%- for _k, _lb in [('karlilik', 'Kârlılık'), ('nakit_akisi', 'Nakit akışı'), ('kaldirac', 'Borç durumu'), ('degerleme_buyume', 'Değerleme ve büyüme')] %}
+      {%- if _k in hs.categories %}
+      {%- set _v = hs.categories[_k] %}
+      <li class="tv-ax" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><svg class="tv-ax-tr" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="tv-ax-bg" width="100" height="8" rx="4"/><rect class="tv-ax-fg" width="{{ '%.1f'|format(_v) }}" height="8" rx="4"/></svg><b class="tv-ax-v">{{ '%.0f'|format(_v) }}</b><span class="tv-ax-l" id="tvAx-{{ _k }}">{{ 'Güçlü alan' if _v >= 70 else ('Zayıf alan' if _v < 50 else 'Dengeli') }}</span></li>
+      {%- elif _k in _tv_na %}
+      <li class="tv-ax tv-ax--na" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><span class="tv-ax-na">bu bilanço yapısında hesaplanmaz</span><b class="tv-ax-v">—</b><span class="tv-ax-l" id="tvAx-{{ _k }}"></span></li>
+      {%- endif %}
+      {%- endfor %}
+    </ul>
     {% endif %}
-  {% endif %}
-
-  <section class="score-section" id="threeScoreSection" data-state="{{ 'full' if hs_available else 'partial' }}">
-    <div class="score-section-eyebrow">
-      <div>
-        <div class="score-section-title"><span aria-hidden="true">🧭</span> Skor Analizi</div>
-        <div class="formula-note">BorsaPusula Skoru = <b>Temel ×%60</b> + <b>Teknik ×%40</b>{% if hs_available %} — dört eksenli Temel kırılımı radar grafikte{% endif %}</div>
-      </div>
-    </div>
-
-    {% if hs_available %}
-    <div class="axis-legend">
-      {# CPO-1668 #4: kaldirac_na ticker'larda (mevduat bankaları/SAHOL/YESIL)
-         bu kategori hiç hesaplanmıyor ve ağırlığı (25) diğer 3 kategoriye
-         yeniden dağıtılıyor (financial_health_score.compute_health_score,
-         total_weight normalizasyonu) — eskiden metin sabitti, gerçek
-         hesaplamada hiç kullanılmayan bir kategoriyi göstermeye devam ediyordu. #}
-      {% if kaldirac_na %}
-      <span>Kârlılık</span> ×%40 · <span>Nakit Akışı</span> ×%40 · <span>Değerleme/Büyüme</span> ×%20
-      {% else %}
-      <span>Kârlılık</span> ×%30 · <span>Nakit Akışı</span> ×%30 · <span>Kaldıraç</span> ×%25 · <span>Değerleme/Büyüme</span> ×%15
-      {% endif %}
-      <em>— Temel Analiz Skoru'nun alt kırılımı</em>
-    </div>
-    {% endif %}
-
-    <div class="score-canvas">
-
-      {% if hs_available %}
-      <!-- köşe-dolduran takımyıldız deseni (dekoratif, homepage hero-art yankısı) -->
-      <svg class="decor-nodes" viewBox="0 0 170 170" aria-hidden="true">
-        <line x1="20" y1="140" x2="70" y2="90" stroke="var(--bp-brand)" stroke-opacity=".25" stroke-width="1"/>
-        <line x1="70" y1="90" x2="55" y2="30" stroke="var(--bp-accent-cyan)" stroke-opacity=".2" stroke-width="1"/>
-        <line x1="70" y1="90" x2="130" y2="60" stroke="var(--bp-brand)" stroke-opacity=".18" stroke-width="1"/>
-        <circle cx="20" cy="140" r="3" fill="var(--bp-brand)" fill-opacity=".5"/>
-        <circle cx="70" cy="90" r="4.5" fill="var(--bp-accent-cyan)" fill-opacity=".55"/>
-        <circle cx="55" cy="30" r="2.5" fill="var(--bp-brand)" fill-opacity=".4"/>
-        <circle cx="130" cy="60" r="2.5" fill="var(--bp-accent-cyan)" fill-opacity=".35"/>
-      </svg>
-
-      <!-- RADAR: Temel Analiz Skoru'nun 4 eksenli kırılımı -->
-      <div class="radar-wrap" data-dim="{{ 'true' if radar_dim else 'false' }}"
-           role="img"
-           aria-label="Temel Analiz kırılımı: Kârlılık {{ '%.0f'|format(hs.categories.karlilik) if not radar_dim else '—' }}, Nakit Akışı {{ '%.0f'|format(hs.categories.nakit_akisi) if not radar_dim else '—' }}, Kaldıraç {{ (('%.0f'|format(hs.categories.kaldirac) if radar_categories_complete else 'Sektöre özgü, uygulanamaz') if not radar_dim else '—') }}, Değerleme/Büyüme {{ '%.0f'|format(hs.categories.degerleme_buyume) if not radar_dim else '—' }}">
-        <svg viewBox="-50 -25 620 570" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" style="stop-color:var(--bp-accent-cyan)" stop-opacity="0.30"/>
-              <stop offset="100%" style="stop-color:var(--bp-brand)" stop-opacity="0.14"/>
-            </linearGradient>
-            <filter id="dotGlow" x="-120%" y="-120%" width="340%" height="340%">
-              <feGaussianBlur stdDeviation="3.2" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <polygon points="260,203.75 316.25,260 260,316.25 203.75,260" class="radar-grid"/>
-          <polygon points="260,147.5 372.5,260 260,372.5 147.5,260" class="radar-grid"/>
-          <polygon points="260,91.25 428.75,260 260,428.75 91.25,260" class="radar-grid"/>
-          <polygon points="260,35 485,260 260,485 35,260" class="radar-grid radar-grid--outer"/>
-
-          <line x1="260" y1="260" x2="260" y2="35" class="radar-axis"/>
-          <line x1="260" y1="260" x2="485" y2="260" class="radar-axis"/>
-          <line x1="260" y1="260" x2="260" y2="485" class="radar-axis"/>
-          <line x1="260" y1="260" x2="35" y2="260" class="radar-axis"/>
-
-          {% if not radar_dim %}
-          {% if radar_categories_complete %}
-          <polygon points="{{ RADAR_CX }},{{ '%.1f'|format(y_karlilik) }} {{ '%.1f'|format(x_nakit) }},{{ RADAR_CY }} {{ RADAR_CX }},{{ '%.1f'|format(y_kaldirac) }} {{ '%.1f'|format(x_degerleme) }},{{ RADAR_CY }}" class="radar-data" fill="url(#radarGrad)"/>
-
-          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_karlilik) }}" r="6" style="fill:{{ health_color(hs.categories.karlilik) }}" filter="url(#dotGlow)"><title>Kârlılık: {{ '%.1f'|format(hs.categories.karlilik) |replace('.', ',') }}</title></circle>
-          <circle cx="{{ '%.1f'|format(x_nakit) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.nakit_akisi) }}" filter="url(#dotGlow)"><title>Nakit Akışı: {{ '%.1f'|format(hs.categories.nakit_akisi) |replace('.', ',') }}</title></circle>
-          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_kaldirac) }}" r="6" style="fill:{{ health_color(hs.categories.kaldirac) }}" filter="url(#dotGlow)"><title>Kaldıraç: {{ '%.1f'|format(hs.categories.kaldirac) |replace('.', ',') }}</title></circle>
-          <circle cx="{{ '%.1f'|format(x_degerleme) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}" filter="url(#dotGlow)"><title>Değerleme/Büyüme: {{ '%.1f'|format(hs.categories.degerleme_buyume) |replace('.', ',') }}</title></circle>
-          <circle cx="260" cy="260" r="3" fill="var(--bp-text3)"/>
-
-          <text x="260" y="2" text-anchor="middle">
-            <tspan class="axis-name">KÂRLILIK</tspan>
-            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.karlilik) }}">{{ '%.0f'|format(hs.categories.karlilik) }}</tspan>
-          </text>
-          <text x="498" y="253" text-anchor="start">
-            <tspan class="axis-name">NAKİT AKIŞI</tspan>
-            <tspan x="498" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.nakit_akisi) }}">{{ '%.0f'|format(hs.categories.nakit_akisi) }}</tspan>
-          </text>
-          <text x="260" y="502" text-anchor="middle">
-            <tspan class="axis-name">KALDIRAÇ</tspan>
-            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.kaldirac) }}">{{ '%.0f'|format(hs.categories.kaldirac) }}</tspan>
-          </text>
-          <text x="22" y="238" text-anchor="end">
-            <tspan class="axis-name">DEĞERLEME</tspan>
-            <tspan x="22" dy="13" class="axis-name">/BÜYÜME</tspan>
-            <tspan x="22" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}">{{ '%.0f'|format(hs.categories.degerleme_buyume) }}</tspan>
-          </text>
-          {% elif radar_partial_na %}
-          <!-- CPO-1617/1619: kaldirac sektöre özgü uygulanamaz — 3 gerçek eksen +
-               1 "N/A" eksen. polyline kasıtlı: fill kapalı üçgeni ima eder ama
-               stroke kaldirac köşesine değmez, eksik veri görsel olarak dürüst. -->
-          <polyline points="{{ '%.1f'|format(x_degerleme) }},{{ RADAR_CY }} {{ RADAR_CX }},{{ '%.1f'|format(y_karlilik) }} {{ '%.1f'|format(x_nakit) }},{{ RADAR_CY }}" class="radar-data" fill="url(#radarGrad)"/>
-
-          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_karlilik) }}" r="6" style="fill:{{ health_color(hs.categories.karlilik) }}" filter="url(#dotGlow)"><title>Kârlılık: {{ '%.1f'|format(hs.categories.karlilik) |replace('.', ',') }}</title></circle>
-          <circle cx="{{ '%.1f'|format(x_nakit) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.nakit_akisi) }}" filter="url(#dotGlow)"><title>Nakit Akışı: {{ '%.1f'|format(hs.categories.nakit_akisi) |replace('.', ',') }}</title></circle>
-          <circle cx="{{ '%.1f'|format(x_degerleme) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}" filter="url(#dotGlow)"><title>Değerleme/Büyüme: {{ '%.1f'|format(hs.categories.degerleme_buyume) |replace('.', ',') }}</title></circle>
-          <circle cx="260" cy="260" r="3" fill="var(--bp-text3)"/>
-
-          <text x="260" y="2" text-anchor="middle">
-            <tspan class="axis-name">KÂRLILIK</tspan>
-            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.karlilik) }}">{{ '%.0f'|format(hs.categories.karlilik) }}</tspan>
-          </text>
-          <text x="498" y="253" text-anchor="start">
-            <tspan class="axis-name">NAKİT AKIŞI</tspan>
-            <tspan x="498" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.nakit_akisi) }}">{{ '%.0f'|format(hs.categories.nakit_akisi) }}</tspan>
-          </text>
-          <text x="260" y="502" text-anchor="middle">
-            <title>Kaldıraç: sektöre özgü, uygulanamaz</title>
-            <tspan class="axis-name">KALDIRAÇ</tspan>
-            <tspan x="260" dy="17" class="axis-value" style="fill:var(--bp-text3);font-size:12px">N/A</tspan>
-          </text>
-          <text x="22" y="238" text-anchor="end">
-            <tspan class="axis-name">DEĞERLEME</tspan>
-            <tspan x="22" dy="13" class="axis-name">/BÜYÜME</tspan>
-            <tspan x="22" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}">{{ '%.0f'|format(hs.categories.degerleme_buyume) }}</tspan>
-          </text>
-          {% endif %}
-          {% endif %}
-        </svg>
-        <div class="radar-partial-note">
-          {% if temel_missing %}Temel Analiz verisi eksik — radar gösterge amaçlıdır, kompozite dahil edilmedi.
-          {% else %}Veri kalitesi sınırlı — bu kırılım gösterge amaçlıdır.{% endif %}
-        </div>
-      </div>
-
-      <!-- HERO: BorsaPusula Skoru -->
-      {# bughunt-13.09 (derinlemesine tasarım araştırması, P0-2): temel_missing
-         iken hero_display aslında SAF TEKNİK skoru (:744'te new_teknik_score'a
-         düşüyor), ama etiket/aria-label sabit "BorsaPusula Skoru" diyordu —
-         bugün düzeltilen "🔜 Yakında" ile aynı hata ailesi (etiket veriyi
-         yanlış temsil ediyor). Ekran okuyucu da yanlış etiketliyordu. #}
-      <div class="gauge hero-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
-           style="--band-color:var({{ band.var }}); --band-rgb:var({{ band.rgb_var }});"
-           role="img" aria-label="{{ 'Teknik Güç Skoru' if temel_missing else 'BorsaPusula Skoru' }} {{ hero_display }} / 100">
-        <div class="partial-badge">◐ Sınırlı Veri</div>
-        <svg aria-hidden="true" class="gauge-ring" viewBox="0 0 100 100">
-          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
-          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ hero_offset }}"/>
-        </svg>
-        <div class="gauge-center">
-          <span class="gauge-value">{{ hero_display }}</span>
-          <span class="gauge-max">/100</span>
-        </div>
-        <div class="gauge-label">
-          {%- if temel_missing -%}
-          Teknik Güç<br><span style="font-size:9px;opacity:.65;font-weight:400">Skoru (Temel bekleniyor)</span>
-          {%- else -%}
-          BorsaPusula<br>Skoru
-          {%- endif -%}
-        </div>
-        <div class="hero-formula">
-          {% if temel_missing %}{{ hero_display }} ≈ sadece Teknik ({{ new_teknik_score }}) — Temel Analiz eksik
-          {% elif not new_teknik_score %}{{ hero_score }} ≈ sadece Temel ({{ temel_score }}) — Teknik sinyal aktif değil (Yatay)
-          {% else %}{{ hero_score }} ≈ Temel {{ temel_score }}×%60 + Teknik {{ new_teknik_score }}×%40{% endif %}
-        </div>
-      </div>
-      {% endif %}
-
-      {% if new_teknik_score %}
-      {# bughunt-13.09 (derinlemesine tasarım araştırması, P1-5): aynı sayı
-         (ssr_signal.signal_strength) sayfada 3 farklı isimle gösteriliyordu
-         ("sinyal gücü", "Teknik Analiz Skoru", "Teknik Güç Skoru") + bu
-         gauge sabit mavi (--bp-brand) renkliydi, skordan bağımsız — hero'daki
-         AYNI skorun rengiyle (_hc, AL/SAT yön+güç bazlı) hizalandı. #}
-      <!-- Teknik Güç Skoru — mevcut kaynak (ssr_signal), hs'ten bağımsız -->
-      <div class="gauge teknik-gauge" tabindex="0" data-tip="Teknik Güç Skoru (0–100) — ADX + günlük hacim oranı + RSI + Teyit bileşimi. Supertrend/EMA sinyalin YÖNÜNÜ belirler, bu skora girmez."
-           style="--band-color:{{ _hc }};"
-           role="img" aria-label="Teknik Güç Skoru {{ new_teknik_score }} / 100">
-        <svg aria-hidden="true" class="gauge-ring" viewBox="0 0 100 100">
-          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
-          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ teknik_offset }}"/>
-        </svg>
-        <div class="gauge-center">
-          <span class="gauge-value">{{ new_teknik_score }}</span>
-          <span class="gauge-max">/100</span>
-        </div>
-        <div class="gauge-label">Teknik Güç<br>Skoru</div>
-      </div>
-      {% endif %}
-
-      {% if hs_available %}
-      <!-- Temel Analiz Skoru -->
-      <div class="gauge temel-gauge" tabindex="0" data-missing="{{ 'true' if temel_missing else 'false' }}"
-           data-tip="Temel Analiz Skoru — 4 eksenli finansal sağlık"
-           role="img" aria-label="Temel Analiz Skoru {{ temel_score if not temel_missing else 'veri yok' }} / 100">
-        {# bughunt-13.09 (derinlemesine tasarım araştırması, P0-3): "YENİ" rozeti
-           koşulsuzdu, git log ile 09.09 (Faz 4 lansmanı) tarihli olduğu
-           doğrulandı — 4 gündür bayat. Özellik artık hero'da da eşit ağırlıkla
-           gösteriliyor, "yeni" iddiası fazladan bir dikkat katmanıydı, kaldırıldı. #}
-        <svg aria-hidden="true" class="gauge-ring" viewBox="0 0 100 100">
-          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
-          {% if temel_missing %}
-          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="0,{{ RING_C }}"/>
-          {% else %}
-          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ temel_offset }}"/>
-          {% endif %}
-        </svg>
-        <div class="gauge-center">
-          <span class="gauge-value">{{ temel_score if not temel_missing else '—' }}</span>
-          <span class="gauge-max">/100</span>
-        </div>
-        <div class="gauge-label">Temel Analiz<br>Skoru</div>
-        {% if not temel_missing %}
-        <div class="completeness">
-          <span>Veri tamlığı %{{ completeness_pct }}</span>
-          <div class="bar"><i style="width:{{ completeness_pct }}%"></i></div>
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- AI gerekçe -->
-      <div class="rationale-card">
-        <div class="rc-eyebrow">✦ AI Yorumu</div>
-        {% if hs.temel_analiz_aciklamasi %}
-        <p>{{ hs.temel_analiz_aciklamasi }}</p>
-        {% else %}
-        <p>AI yorumu hazırlanıyor.</p>
-        {% endif %}
-        {% if temel_missing %}
-        <p class="rc-note">Not: sadece Teknik Analiz verisine dayanır.</p>
-        {% endif %}
-      </div>
-      {% else %}
-      <!-- kompakt dürüst bekleme — Temel/BorsaPusula bu hisse için bugünkü EOD turunu bekliyor -->
-      <div class="pending-note">
-        <div class="pending-icon">⏳</div>
-        <div>
-          <div class="pending-title">Temel Analiz &amp; BorsaPusula Skoru bekleniyor</div>
-          <div class="pending-text">Bu hisse için son EOD (gün-sonu) turu Temel Analiz Skoru ve BorsaPusula kompozit skorunu üretmedi. Teknik Analiz Skoru yukarıda güncel.</div>
-          <div class="pending-eta">Tahmini: işlem günü kapanışından sonra, ~18:00 TR</div>
-        </div>
-      </div>
-      {% endif %}
-
-    </div>
   </section>
-  {% endif %}
-  <!-- Temel Analiz — CPO-1651: Ozan 14.09 akşam "temel analiz sayfada ön planda
-       değil, uzun scroll boyunca hiç görünmüyor" geri bildirimi. Kök neden:
-       bu blok önceden #ozetDetailToggle'ın (varsayılan KAPALI "Detaylı Analiz"
-       accordion'u) İÇİNDEYDİ — Onaylar/Çoklu Zaman Dilimi/Sinyal Geçmişi/Sinyal
-       Performansı ile aynı genel etikette gizliydi, kullanıcı ayırt edemiyordu.
-       Artık kendi başına, her zaman görünür, adı geçen accordion'un DIŞINDA. -->
-  <div class="da-panel da-fund-panel" id="fundSection">
-    <div class="da-fund-head">
-      <h2 class="section-title"><span aria-hidden="true">📋</span> Temel Analiz</h2>
-      <span class="da-fund-note">4 saatte bir güncellenir</span>
-    </div>
-    <div id="fundLoading" style="color:var(--bp-text3);font-size:var(--bp-text-base);display:flex;align-items:center;gap:8px;padding:20px 18px">
-      <div class="da-spin da-spin--sm"></div> Yükleniyor…
-    </div>
-    <div id="fundContent" style="display:none;padding:16px 18px">
-      <!-- Raporlama para birimi uyarısı — CPO-1674 (20.09). Sadece finansallarını TRY
-           dışında bir para biriminde raporlayan hisselerde görünür. Canlı ölçüm (prod
-           cache, 210 hisse): sadece 3 hisse — THYAO/ENKAI USD, TAVHL EUR. -->
-      <div id="fundCurNote" style="display:none;margin-bottom:14px;background:rgba(var(--bp-gold-rgb),.08);border:1px solid rgba(var(--bp-gold-rgb),.28);border-radius:var(--bp-radius-md);padding:10px 13px;font-size:var(--bp-text-xs);color:var(--bp-text2);line-height:1.55"></div>
-      <!-- Analist Konsensüsü — r174 (Ozan istegi) -->
-      <div id="fundAnalyst" style="display:none;margin-bottom:16px;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
-      <!-- Değerleme -->
-      <div id="fundValuation" style="margin-bottom:16px">
-        <div class="da-fund-group-label"><span aria-hidden="true">💰</span> Değerleme</div>
-        <div class="da-fund-grid" id="fundGridVal"></div>
-      </div>
-      <!-- Kârlılık & Büyüme -->
-      <div id="fundProfitability" style="margin-bottom:16px">
-        <div class="da-fund-group-label"><span aria-hidden="true">📈</span> Kârlılık</div>
-        <div class="da-fund-grid" id="fundGridProfit"></div>
-      </div>
-      <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi) + CPO-1667 (19.09, ceyreklik toggle) -->
-      <div id="fundTrend" style="display:none;margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
-          <div class="da-fund-group-label" style="margin-bottom:0"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi</div>
-          <div id="fundTrendToggle" style="display:none;gap:4px;background:var(--bp-surface2);border-radius:var(--bp-radius-pill);padding:3px" role="group" aria-label="Zaman aralığı">
-            <button type="button" id="fundTrendBtnY" onclick="fundTrendSetPeriod('y')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;min-height:26px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Yıllık</button>
-            <button type="button" id="fundTrendBtnQ" onclick="fundTrendSetPeriod('q')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;min-height:26px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Çeyreklik</button>
-          </div>
-        </div>
-        <div id="fundTrendChart" style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
-      </div>
-      <div id="fundTrendNote" style="display:none;margin-bottom:16px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Çok yıllı karşılaştırma, enflasyon düzeltmesi tamamlanınca gösterilecek.</div>
-      <!-- Getiri & Risk -->
-      <div id="fundReturn">
-        <div class="da-fund-group-label"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
-        <div class="da-fund-grid" id="fundGridReturn"></div>
-      </div>
-      <!-- Sahiplik — r174 (Ozan istegi) -->
-      <div id="fundOwnership" style="display:none;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-text3)"></div>
-    </div>
+  <p class="tv-prep" id="tvPrep" hidden>Ayrıntılı finansal veri hazırlanıyor; bu hisse için özet göstergeler gösteriliyor.</p>
+  <div class="tv-grid" id="tvGrid" aria-busy="true">
+    <section class="tv-pan" id="tvBuyume" aria-labelledby="tvBuyumeH">
+      <div class="tv-ph"><div><h3 id="tvBuyumeH">Büyüme</h3><p class="tv-unit" id="tvBuyumeU">Yıllık değişim</p></div><div class="tv-segs" id="tvBuyumeSeg"></div></div>
+      <p class="tv-say" id="tvBuyumeS"><span class="tv-sk"></span></p>
+      <div class="tv-ch" id="tvBuyumeCh"></div>
+      <div class="tv-kv" id="tvBuyumeT"></div>
+      <p class="tv-foot" id="tvBuyumeN" hidden></p>
+    </section>
+    <section class="tv-pan" id="tvKarlilik" aria-labelledby="tvKarlilikH">
+      <div class="tv-ph"><div><h3 id="tvKarlilikH">Kârlılık</h3><p class="tv-unit" id="tvKarlilikU">Oran, %</p></div></div>
+      <p class="tv-say" id="tvKarlilikS"><span class="tv-sk"></span></p>
+      <div class="tv-ch" id="tvKarlilikCh"></div>
+      <div class="tv-kv" id="tvKarlilikT"></div>
+    </section>
+    <section class="tv-pan" id="tvDegerleme" aria-labelledby="tvDegerlemeH">
+      <div class="tv-ph"><div><h3 id="tvDegerlemeH">Değerleme</h3><p class="tv-unit" id="tvDegerlemeU">Fiyatı makul mü?</p></div><span class="tv-chip" id="tvDegerlemeA" hidden></span></div>
+      <p class="tv-say" id="tvDegerlemeS"><span class="tv-sk"></span></p>
+      <div class="tv-bands" id="tvDegerlemeB"></div>
+      <p class="tv-an" id="tvDegerlemeAn" hidden></p>
+      <p class="tv-foot" id="tvDegerlemeN" hidden></p>
+    </section>
+    <section class="tv-pan" id="tvSaglamlik" aria-labelledby="tvSaglamlikH">
+      <div class="tv-ph"><div><h3 id="tvSaglamlikH">Sağlamlık kontrolü</h3><p class="tv-unit" id="tvSaglamlikU">Son yıllık rapor</p></div><div class="tv-score" id="tvSaglamlikP"></div></div>
+      <p class="tv-say" id="tvSaglamlikS"><span class="tv-sk"></span></p>
+      <div class="tv-chk" id="tvSaglamlikL"></div>
+    </section>
+    <section class="tv-pan" id="tvBilanco" aria-labelledby="tvBilancoH">
+      <div class="tv-ph"><div><h3 id="tvBilancoH">Bilanço sağlığı</h3><p class="tv-unit" id="tvBilancoU">Dönem sonu</p></div></div>
+      <p class="tv-say" id="tvBilancoS"><span class="tv-sk"></span></p>
+      <div class="tv-kv" id="tvBilancoT"></div>
+    </section>
+    <section class="tv-pan" id="tvTemettu" aria-labelledby="tvTemettuH">
+      <div class="tv-ph"><div><h3 id="tvTemettuH">Temettü</h3><p class="tv-unit" id="tvTemettuU">Hisse başına brüt ödeme · TL</p></div></div>
+      <p class="tv-say" id="tvTemettuS"><span class="tv-sk"></span></p>
+      <div class="tv-divs" id="tvTemettuK"></div>
+      <div class="tv-ch" id="tvTemettuCh"></div>
+    </section>
   </div>
+  <p class="tv-err" id="tvErr" hidden>Finansal veri şu an alınamadı. <button type="button" class="da-retry" id="tvRetry">Tekrar dene</button></p>
+  <p class="hx-disc" id="tvDisc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
   </div><!-- /panel-temel -->
   
 
@@ -2534,18 +2236,21 @@ function hxFillDI(sum) {
   v.textContent = _hxNF1.format(+sum.di_plus) + ' / ' + _hxNF1.format(+sum.di_minus);
 }
 
-/* 4 temel gosterge + Q2 (Fiyati makul mu?) */
-function _hxVal(v, lo, hi) { return (v == null || !(v > 0)) ? null : (v < lo ? -1 : (v > hi ? 1 : 0)); }
+/* 4 temel gosterge + Q2 (Fiyati makul mu?). C-22b: Temel sekmesiyle tek kanon --
+   `kap` varsa ozsermaye karliligi O22=B son 12 ay, temettu son 12 ay KAP odemeleri / fiyat,
+   Q2 hukmu tvValuation (sektor ortancasina oran 0,80 / 1,25; ortanca yoksa hukum yok). */
 function hxFillFund(f, divRow) {
   const set = (id, txt, dim) => { const el = document.getElementById(id); if (el) { el.textContent = txt; el.classList.toggle('hx-dim', !!dim); } };
+  const k = f && f.kap_durum === 'var' ? f.kap : null;
+  const now = k && k.degerleme_simdi;
   if (f) {
-    set('hxfMcap', f.market_cap && f.market_cap.value != null ? (_fmtMoneyObj(f.market_cap) || '—') : '—');
-    set('hxfRoe', f.roe != null ? bpPctLevel(f.roe, 1) : '—');
+    set('hxfMcap', now && now.piyasa_degeri ? _tvMoney(now.piyasa_degeri) : (f.market_cap && f.market_cap.value != null ? (_fmtMoneyObj(f.market_cap) || '—') : '—'));
+    set('hxfRoe', now && now.ozsermaye_karliligi != null ? bpPctLevel(now.ozsermaye_karliligi, 1) : (f.roe != null ? bpPctLevel(f.roe, 1) : '—'));
     set('hxfMargin', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : '—');
   }
-  /* Temettu (son 12 ay) = son 12 ayda odenen / fiyat. Takvimde yalniz son odeme var
-     (DEV1: 12 ay toplami); takvimde olmayan hisse "Veri yok". */
-  if (divRow === undefined) { /* takvim alinamadi: dokunma */ }
+  if (k && k.temettu) {
+    set('hxfDiv', k.temettu.odeme_var && HX_PRICE ? bpPctLevel(k.temettu.brut_toplam / HX_PRICE * 100, 2) : 'Ödeme yok', !k.temettu.odeme_var);
+  } else if (divRow === undefined) { /* takvim alinamadi: dokunma */ }
   else if (!divRow) set('hxfDiv', 'Veri yok', true);
   else {
     const last = divRow.last_div_date ? new Date(divRow.last_div_date + 'T00:00:00') : null;
@@ -2555,34 +2260,31 @@ function hxFillFund(f, divRow) {
   }
   if (!f) return;
   const kv = document.getElementById('q2Kv'), ans = document.getElementById('q2Ans'), dot = document.getElementById('q2Dot');
-  const parts = [['F/K', f.pe_ratio, 12, 25, 1], ['PD/DD', f.pb_ratio, 1, 3, 2]]
-    .map(p => ({ l: p[0], v: p[1], t: _hxVal(p[1], p[2], p[3]), lo: p[2], hi: p[3], fr: p[4] }))
-    .filter(p => p.t !== null);
-  const W = { '-1': 'ucuz', '0': 'makul', '1': 'pahalı' };
-  if (kv) kv.innerHTML = parts.length
-    ? parts.map(p => '<div><dt>' + p.l + '</dt><dd>' + p.v.toLocaleString('tr-TR', { minimumFractionDigits: p.fr, maximumFractionDigits: p.fr }) +
-        ' <small>· ' + W[p.t] + ' (' + p.lo + ' altı ucuz, ' + p.hi + ' üstü pahalı)</small></dd></div>').join('')
+  const V = tvValuation(f);
+  const rows = V ? V.rows.filter(r => r.v != null) : [];
+  if (kv) kv.innerHTML = rows.length
+    ? rows.map(r => '<div><dt>' + r.l + '</dt><dd>' + _tvX(r.v, r.fr) + (r.m ? ' <small>· ' + escHtml(_tvMedTxt(r.m, r.fr)) + '</small>' : '') + '</dd></div>').join('')
     : '<div><dt>F/K ve PD/DD</dt><dd>hesaplanamıyor</dd></div>';
-  let a = 'Veri yok', cls = 'hx-dot--na';
-  if (parts.length) {
-    const sum = parts.reduce((x, p) => x + p.t, 0);
-    const mixed = parts.length === 2 && parts[0].t * parts[1].t === -1;
-    a = mixed ? 'Karışık' : (sum < 0 ? 'Ucuz tarafta' : (sum > 0 ? 'Pahalı tarafta' : 'Makul'));
-    cls = mixed || sum > 0 ? 'hx-dot--warn' : (sum < 0 ? 'hx-dot--val' : 'hx-dot--brand');
+  let a = rows.length ? rows.map(r => r.l + ' ' + _tvX(r.v, r.fr)).join(' · ') : 'Veri yok', cls = 'hx-dot--na';
+  if (V && V.word) {
+    a = V.word;
+    cls = V.word === 'Karışık' || V.word === 'Pahalı tarafta' ? 'hx-dot--warn' : (V.word === 'Ucuz tarafta' ? 'hx-dot--val' : 'hx-dot--brand');
   }
   if (ans) ans.textContent = a;
   if (dot) dot.className = 'hx-dot ' + cls;
   const an = document.getElementById('q2An');
   if (an && f.analyst_target != null && f.analyst_count && HX_PRICE) {
     const up = (f.analyst_target / HX_PRICE - 1) * 100;
-    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b> · fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' + (up >= 0 ? 'üstünde' : 'altında') + ' · ' + f.analyst_count + ' analist';
+    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b> · fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' + (up > 0 ? 'üstünde' : (up < 0 ? 'altında' : 'düzeyinde')) + ' · ' + f.analyst_count + ' analist';
     an.hidden = false;
   }
   const note = document.getElementById('q2Note');
-  const cur = f.financial_currency || 'TRY';
-  if (note && cur !== 'TRY') {
-    note.textContent = 'Şirket finansallarını ' + cur + ' cinsinden raporluyor' + (parts.length ? '.' : '; F/K ve PD/DD bu yüzden hesaplanmıyor.');
-    note.hidden = false;
+  if (note) {
+    const basis = k && k.basis === 'yabanci_para' ? 'Şirketin işlevsel para birimi döviz; oranlar TL\'ye çevrilmiş finansallardan.' : null;
+    const noMed = V && rows.length && !V.hasMed ? 'Sektör ortancası olmadığı için yorum yapılmıyor.' : null;
+    const cur = f.financial_currency || 'TRY';
+    const txt = basis || noMed || (cur !== 'TRY' && !rows.length ? 'Şirket finansallarını ' + cur + ' cinsinden raporluyor; F/K ve PD/DD bu yüzden hesaplanmıyor.' : null);
+    if (txt) { note.textContent = txt; note.hidden = false; }
   }
 }
 
@@ -2751,88 +2453,16 @@ function escHtml(s) {
    uygulama bugun ayni davransa da, birini degistiren bir sonraki tur icin
    sessiz bir tuzakti. Kanon: bp-vocab.js (tools/global-collision-check.py). */
 
-/* ── Temel Analiz ──────────────────────────────────── */
-function _fundCard(lbl, val, color, sub) {
-  if (val == null) return '';
-  const c = color || 'var(--bp-text)';
-  const subHtml = sub ? `<div style="font-size:10px;color:var(--bp-text3);margin-top:2px">${sub}</div>` : '';
-  return `<div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:11px 13px">
-    <div style="font-size:10px;color:var(--bp-text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;font-weight:600">${lbl}</div>
-    <div style="font-size:var(--bp-text-15);font-weight:700;color:${c};font-variant-numeric:tabular-nums">${val}</div>
-    ${subHtml}
-  </div>`;
-}
-/* K-DL (22.09) — K-DI'nin "TAM SIFIR" dersinin "yuksek = iyi" ailesindeki
-   karsiligi. Her iki fonksiyon da `v > 0` yanlis dalinda sifiri NEGATIFLE
-   ayni kefeye koyuyordu: %0,0 net kar marji (basabas) ya da %0,0 kazanc
-   buyumesi (yatay) KIRMIZI boyaniyordu. Sifir bir yon degil, yonun YOKLUGU
-   -- notr. `=== 0` dali bilincli ve acik (kapi 45 / K-BP kurali). */
-function _growthColor(v) { return v == null ? 'var(--bp-text)' : v > 10 ? 'var(--bp-al)' : v > 0 ? 'var(--bp-gold)' : v === 0 ? 'var(--bp-text)' : 'var(--bp-sat)'; }
-function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp-al)' : v > 10 ? 'var(--bp-gold)' : v > 0 ? 'var(--bp-sat)' : v === 0 ? 'var(--bp-text)' : 'var(--bp-sat)'; }
-/* K-BX (22.09) — "DUSUK = IYI" metriklerinde NEGATIF deger en iyi kefeye
-   duser: zarar eden sirketin F/K'si negatiftir ve `-8 < 12` -> 'Ucuz' +
-   yesil. Bugun canlida olusMUYOR (app.py _FUND_SANITY pe/forward_pe/pb/
-   debt_to_equity alt sinirlari 0.0, negatifi None'a ceviriyor) ama sablon
-   bu savunmaya yaslanmamali -- K-BP'nin `null >= 0` dersinin aynisi:
-   yon/kefe karari SIFIRI ve isareti ACIKCA ele almali. */
-/* K-DI (22.09): esik `v < 0` idi -- yani TAM SIFIR `0 < 12` dalina dusup
-   YESIL "ucuz" rengini aliyordu, oysa hemen altindaki `_ucuzlukEtiketi`
-   `v <= 0`i etiketsiz birakiyor: ayni karta 0 gelseydi RENK "ucuz", YAZI
-   yok olurdu (K-BO'nun renk/yazi ayrismasi). Bugun canlida olusmuyor
-   (`_FUND_SANITY` alt siniri 0.0) ama ustteki K-BX yorumu tam da buna
-   yaslanmamayi soyluyor. `!(v > 0)` yazimi bilincli: `<= 0 ?` yazimi kapi
-   45'in (K-BP) sifiri bir yonle ayni kefeye koyan desenine takilir. */
-function _peColor(v) { return !(v > 0) ? 'var(--bp-text)' : v < 12 ? 'var(--bp-al)' : v < 25 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
-function _pbColor(v) { return !(v > 0) ? 'var(--bp-text)' : v < 1 ? 'var(--bp-al)' : v < 3 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
-/* Tek kanon: F/K, ileriye donuk F/K ve F/DD kartlarinin alt etiketi. Negatif
-   (ya da 0) deger bir "ucuzluk" degil, oranin TANIMSIZ oldugu anlamina gelir. */
-function _ucuzlukEtiketi(v, ucuzAlti, makulAlti) {
-  if (v == null || v <= 0) return null;
-  return v < ucuzAlti ? 'Ucuz' : v < makulAlti ? 'Makul' : 'Pahalı';
-}
-
-/* Ciro & Net Kâr Trendi — r174 (yıllık) + CPO-1667 (19.09, çeyreklik — DEV1'in
-   statement_trend_quarterly alanı, "en yüksek skor" ve "Resmi Kaynaklar" fix'leriyle
-   aynı gece Ozan'ın 5 maddelik geri bildiriminin devamı, bkz. memory
-   project_data_art_kapsamli_donusum_baslangici_18_09). Tek render fonksiyonu her iki
-   period için de kullanılıyor, bar/etiket boyutu bar sayısına göre otomatik daralıyor
-   (yıllık ~4 bar geniş, çeyreklik ~8 bar dar). */
-const _fundTrendData = { y: [], q: [] };
-
-/* ── Raporlama para birimi — CPO-1674 (20.09), kalıcı çözüm DEV1 (21.09) ─────
-   BIST'te birkac sirket finansallarini TRY disinda raporluyor (canli olcum,
-   prod cache 210 hisse: THYAO+ENKAI USD, TAVHL EUR — baska yok).
-
-   Backend artik iki AYRI, cozulmus alan gonderiyor (magnitude-tahmini frontend
-   heuristigi kaldirildi):
-   - f.financial_currency -> statement_trend grafiginin para birimi (yfinance
-     income_stmt, dort kontrol hissesinde de %100 dogrulandi).
-   - f.statement_currency -> revenue/net_income/total_cash/book_value kartlarinin
-     GERCEK para birimi. TAVHL'de financial_currency="EUR" etiketli olsa da
-     bu alan "TRY" doner (deger orada fiilen TRY, bkz. CPO-1674) — market_cap'e
-     bolunen F/S oraninin makul araliga (0.03-25) mi dustugune bakan bir
-     plausibility testiyle backend'de cozuluyor (app.py _resolve_statement_currency). */
+/* ── Para birimi yardimcilari (Ozet 4 gosterge ve Temel ortak) ───────────
+   KAP finansal raporlari TL sunar (USD/EUR raporlayanlar dahil, "TL'ye cevrilmis");
+   Yahoo alanlari {value, currency} nesnesi olarak gelir. Olcek kisaltmasi tek
+   kanon: bp-format.js bpMoneyCompact (K-BV). */
 const _CUR_SYM = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' };
-const _CUR_ADI = { USD: 'ABD doları', EUR: 'euro', GBP: 'İngiliz sterlini' };
-let _fundCur = 'TRY';  // statement_trend'in para birimi (financial_currency)
 function _curSym(c){ return _CUR_SYM[c] || (c ? ' ' + c : '₺'); }
-
-/* {value, currency} -> "26,35 Mrd$" gibi bicimli metin. perShare=true iken
-   Mrd/Mn/T olcekleme yapilmaz (book_value gibi hisse-basi kucuk sayilar icin).
-   Geriye-uyumluluk (canli olcum, ilk deploy denemesinde kirdi — bkz. revert
-   5371780): backend restart'tan SONRA bile eski onbellek (fmt_billion string,
-   ornegin "197,98 Mrd₺") 4 saate kadar servis edebiliyor. String gelirse
-   oldugu gibi goster (para birimi duzeltmesi eski girdide zaten yok, ama en
-   azindan kart BOS gorunmuyor) — yeni girdiler geldikce dogru objeye gecer. */
 function _fmtMoneyObj(m, perShare){
   if (typeof m === 'string') return m || null;
   if (!m || m.value == null) return null;
   const sym = _curSym(m.currency);
-  /* K-BV (22.09): olcek kisaltmasi tek kanon (bp-format.js bpMoneyCompact).
-     perShare=true iken olcekleme yapilmaz (book_value gibi hisse-basi kucuk
-     sayilar) -> 1e6 altinda kanon zaten tam yazar, ama hisse-basi bir deger
-     teorik olarak da milyona ulasmayacagi icin niyet acik kalsin diye
-     dogrudan bicimleniyor. */
   const v = m.value;
   if (perShare) {
     return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ' + sym;
@@ -2840,300 +2470,550 @@ function _fmtMoneyObj(m, perShare){
   return bpMoneyCompact(v, { sym: sym });
 }
 
-/* K-BV (22.09): BU FONKSIYON "Mr" DIYORDU, 40 PIKSEL YUKARIDAKI KART "Mrd".
-   Ayni Temel sekmesinde ayni buyukluk iki ayri kisaltmayla basiliyordu
-   (canli 22.09: ASELS karti "197,98 Mrd₺", hemen altindaki grafik
-   "180,4 Mr ₺"); ustelik burada T basamagi YOKTU, TUPRS kartta "1,03 T₺"
-   iken grafikte 2022 cirosu "916,8 Mr ₺" kaliyordu. Bu metin yalnizca
-   gorunen etiket degil, her yil grubunun `aria-label`/`data-tip` okumasi da.
-   Tek kanon: bp-format.js bpMoneyCompact. */
-function _fmtCompactCur(v){
-  return bpMoneyCompact(v, { sym: _curSym(_fundCur) }) || '—';
+/* ══ C-22 + C-22b (25.09) — Temel sekmesi v2 ════════════════════════════════
+   Onayli taslak v3 (C-M6; O16e=B hizalama, O22=B son 12 ay). Veri: /fundamentals
+   `kap` blogu (D-40a0 + D-40a2, aciklanan veri: her yilin degisimi kendi raporundan,
+   farkli raporlarin tutarlari tek seride yok, kendi TUFE duzeltmemiz yok) + ust duzey
+   `sektor_ortanca` (D-51 kurali) + `kap_durum`. `kap` yoksa bugunku alanlarla sade
+   gorunum + "ayrintili veri hazirlaniyor" notu; verisi olmayan panel gizlenir.
+   Fiyati makul mu? kanon §5.6: oran = deger / ortanca; <0,80 ucuz, >1,25 pahali,
+   biri ucuz biri pahaliysa Karisik. Ortanca yoksa deger yazilir, hukum yazilmaz
+   (Ozet Q2 ayni fonksiyonu kullanir: tvValuation). */
+const TV_LBL = { revenue: 'Hasılat', gross_profit: 'Brüt kâr', operating_profit: 'Esas faaliyet kârı', ebitda: 'FAVÖK',
+  net_income_parent: 'Net kâr', fcf: 'Serbest nakit akışı', equity_parent: 'Özkaynak', net_interest_income: 'Net faiz geliri',
+  net_fees: 'Ücret ve komisyon', operating_income: 'Faaliyet geliri', loans: 'Krediler', deposits: 'Mevduat',
+  total_assets: 'Varlıklar', cfo: 'İşletme nakit akışı' };
+const TV_GROWTH = { sanayi: ['revenue', 'net_income_parent', 'fcf'], gyo: ['revenue', 'net_income_parent', 'fcf'],
+  banka: ['net_interest_income', 'net_fees', 'net_income_parent', 'loans', 'deposits'],
+  sigorta: ['net_income_parent', 'equity_parent', 'total_assets'] };
+const TV_BASIS = { tms29: 'enflasyon düzeltmeli TL', nominal: 'nominal TL', banka: 'nominal TL', sigorta: 'nominal TL',
+  yabanci_para: 'TL\'ye çevrilmiş' };
+const TV_SABLON = { sanayi: 'Sanayi şablonu', gyo: 'GYO şablonu', banka: 'Banka şablonu', sigorta: 'Sigorta şablonu' };
+const TV_CUT = 0.80, TV_EXP = 1.25;                  /* kanon §5.6 (C-M1): ucuz / pahali esigi */
+const TV = { f: null, k: null, per: 'y', met: null, wired: false };
+
+function _tvEl(id) { return document.getElementById(id); }
+function _tvMoney(v) {
+  if (v == null || !isFinite(v)) return '—';
+  const a = Math.abs(v);
+  return bpMoneyCompact(v, { frac: a >= 1e12 ? 2 : (a >= 1e11 ? 0 : 1) }) || '—';
 }
-function _renderFundTrendChart(period) {
-  const chartEl = document.getElementById('fundTrendChart');
-  if (!chartEl) return;
-  const trend = period === 'q' ? _fundTrendData.q : _fundTrendData.y;
-  if (!trend.length) {
-    chartEl.innerHTML = '<div class="da-empty">Çeyreklik veri bulunamadı.</div>';
+/* Isaretten sonra U+2060 (kelime birlestirici): "-%66,7" satir sonunda bolunmesin */
+function _tvNb(t) { return String(t).replace(/^([+-])%/, '$1\u2060%'); }
+function _tvChg(v) { return v == null ? '—' : _tvNb(bpFormatPct(v, 1)); }        /* degisim: +%12,3 */
+function _tvLvl(v) { return v == null ? '—' : _tvNb(bpPctLevel(v, 1)); }         /* seviye: %12,3 */
+function _tvX(v, d) { return v == null ? '—' : v.toLocaleString('tr-TR', { minimumFractionDigits: d == null ? 2 : d, maximumFractionDigits: d == null ? 2 : d }); }
+function _tvDate(iso) { return _hxDate(iso); }
+function _tvHide(id, hide) { const el = _tvEl(id); if (el) el.hidden = !!hide; }
+function _tvYearKey(k) { return k && k.son_yillik ? String(k.son_yillik).slice(0, 4) : null; }
+
+/* ── Fiyati makul mu? (Temel + Ozet Q2 tek kanon) ─────────────────────────── */
+function tvValuation(f) {
+  if (!f) return null;
+  const k = f.kap_durum === 'var' ? f.kap : null;
+  const now = k && k.degerleme_simdi;
+  const med = f.sektor_ortanca || null;
+  /* O22=B: KAP son 12 ay F/K ve son aciklanan ozkaynakla PD/DD; kayit yoksa bugunku alanlar */
+  const pe = now && !now.pay_uyumsuz ? now.fk : (k ? null : f.pe_ratio);
+  const pb = now && !now.pay_uyumsuz ? now.pd_dd : (k ? null : f.pb_ratio);
+  const rows = [['F/K', pe, med && med.fk, 1], ['PD/DD', pb, med && med.pd_dd, 2]].map(r => {
+    const v = r[1], m = r[2];
+    const ok = v != null && v > 0 && m && m.deger > 0;
+    const q = ok ? v / m.deger : null;
+    return { l: r[0], v: (v != null && v > 0) ? v : null, neg: v != null && !(v > 0), m: m || null, q: q, fr: r[3],
+             t: q == null ? null : (q < TV_CUT ? -1 : (q > TV_EXP ? 1 : 0)) };
+  });
+  const scored = rows.filter(r => r.t !== null);
+  let word = null;
+  if (scored.length) {
+    const s = scored.reduce((a, r) => a + r.t, 0);
+    const mixed = scored.length === 2 && scored[0].t * scored[1].t === -1;
+    word = mixed ? 'Karışık' : (s < 0 ? 'Ucuz tarafta' : (s > 0 ? 'Pahalı tarafta' : 'Makul'));
+  }
+  return { rows: rows, word: word, hasMed: !!(med && (med.fk || med.pd_dd)) };
+}
+function _tvMedTxt(m, fr) { return m ? (m.kapsam === 'sektor' ? 'sektör ' : 'BIST ') + _tvX(m.deger, fr == null ? 2 : fr) : null; }
+
+/* ── Grafikler (SVG, kutuphane yok; renk yalniz sinifla -> tokens.css) ─────── */
+function _tvBars(items, W, H, label) {
+  const CAP = 150;
+  const clip = v => Math.max(-CAP, Math.min(CAP, v));
+  const vals = items.filter(d => d.v != null).map(d => clip(d.v));
+  if (!vals.length) return '';
+  let mx = Math.max(0, Math.max.apply(null, vals)), mn = Math.min(0, Math.min.apply(null, vals));
+  if (mx - mn < 20) { const e = (20 - (mx - mn)) / 2; if (mx > 0) mx += e; if (mn < 0) mn -= e; if (mx - mn < 20) mx = mn + 20; }
+  const sp = mx - mn; mx += sp * 0.16; mn -= sp * 0.16;
+  const top = 8, bot = H - 22, Y = v => top + (mx - v) / (mx - mn) * (bot - top);
+  const n = items.length, gw = W / n, bw = Math.min(56, gw * 0.56);
+  let s = '<svg class="tv-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escHtml(label) + '">' +
+    '<line class="tv-zero" x1="0" x2="' + W + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '"/>';
+  items.forEach((d, i) => {
+    const cx = gw * i + gw / 2;
+    if (d.v == null) {
+      s += '<text x="' + cx.toFixed(1) + '" y="' + (Y(0) - 6).toFixed(1) + '" text-anchor="middle">veri yok</text>';
+    } else {
+      const cv = clip(d.v), y0 = Y(0), y1 = Y(cv), y = Math.min(y0, y1), h = Math.max(2, Math.abs(y1 - y0));
+      const cls = d.v < 0 ? 'tv-bar tv-bar--neg' : (d.v > 0 ? 'tv-bar' : 'tv-bar tv-bar--zero');
+      s += '<rect class="' + cls + '" x="' + (cx - bw / 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="5"/>';
+      if (cv !== d.v) {
+        const zy = cv > 0 ? y + 10 : y + h - 10;
+        s += '<path class="tv-cut" d="M' + (cx - bw / 2 - 2).toFixed(1) + ' ' + (zy + 3).toFixed(1) + ' l' + (bw / 4 + 1).toFixed(1) + ' -6 l' + (bw / 4 + 1).toFixed(1) + ' 6 l' + (bw / 4 + 1).toFixed(1) + ' -6 l' + (bw / 4 + 1).toFixed(1) + ' 6"/>';
+      }
+      s += '<text class="tv-vl" x="' + cx.toFixed(1) + '" y="' + (cv < 0 ? y1 + 15 : y1 - 6).toFixed(1) + '" text-anchor="middle">' + bpFormatPct(d.v, Math.abs(d.v) >= 1000 ? 0 : 1) + '</text>';
+    }
+    s += '<text x="' + cx.toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle">' + escHtml(String(d.k)) + '</text>';
+  });
+  return s + '</svg>';
+}
+function _tvLines(years, series, W, H) {
+  const all = [];
+  series.forEach(se => se.v.forEach(v => { if (v != null) all.push(v); }));
+  if (!all.length) return '';
+  let mx = Math.max.apply(null, all), mn = Math.min(0, Math.min.apply(null, all));
+  mx = mx + (mx - mn) * 0.12 || 1;
+  const L = 40, R = W - 16, T = 10, B = H - 22;   /* sol 40px: eksen etiketi sutunu (nokta ile cakismasin) */
+  const X = i => L + (years.length === 1 ? 0 : i / (years.length - 1) * (R - L)), Y = v => T + (mx - v) / (mx - mn) * (B - T);
+  let s = '<svg class="tv-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escHtml(series.map(se => se.n).join(', ')) + ', yıllara göre">';
+  [0, 0.5, 1].forEach(fr => {
+    const v = mn + (mx - mn) * fr, y = Y(v);
+    s += '<line class="tv-grid-l" x1="' + L + '" x2="' + R + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
+    s += '<text x="0" y="' + (y + 4).toFixed(1) + '">' + bpPctLevel(v, 0) + '</text>';
+  });
+  if (mn < 0) s += '<line class="tv-zero" x1="' + L + '" x2="' + R + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '"/>';
+  years.forEach((y, i) => { s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle">' + escHtml(String(y)) + '</text>'; });
+  series.forEach((se, si) => {
+    const pts = [];
+    se.v.forEach((v, i) => { if (v != null) pts.push([X(i), Y(v)]); });
+    if (!pts.length) return;
+    const lastIsInterim = se.interim && se.v[se.v.length - 1] != null;
+    const main = lastIsInterim ? pts.slice(0, -1) : pts;
+    if (main.length > 1) s += '<path class="tv-ln tv-ln--' + si + '" d="' + main.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') + '"/>';
+    if (lastIsInterim && main.length) {
+      const a = main[main.length - 1], b = pts[pts.length - 1];
+      s += '<path class="tv-ln tv-ln--' + si + ' tv-ln--dash" d="M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + ' L' + b[0].toFixed(1) + ' ' + b[1].toFixed(1) + '"/>';
+    }
+    pts.forEach(p => { s += '<circle class="tv-dot tv-dot--' + si + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.2"/>'; });
+  });
+  const lgd = '<div class="tv-lgd">' + series.map((se, si) => {
+    let lv = null, li = -1;
+    for (let i = se.v.length - 1; i >= 0; i--) { if (se.v[i] != null) { lv = se.v[i]; li = i; break; } }
+    return '<span><i class="tv-sw tv-sw--' + si + '" aria-hidden="true"></i>' + escHtml(se.n) + (lv == null ? '' : ' <b>' + bpPctLevel(lv, 1) + '</b> <small>' + escHtml(String(years[li])) + '</small>') + '</span>';
+  }).join('') + '</div>';
+  return lgd + s + '</svg>';
+}
+function _tvBand(b, W) {
+  const pts = b.band.filter(x => x.v != null && x.v > 0);
+  const vals = pts.map(x => x.v);
+  if (b.now != null) vals.push(b.now);
+  if (b.med != null) vals.push(b.med);
+  if (!vals.length) return '';
+  const mx = Math.max.apply(null, vals) * 1.12, L = 8, R = W - 8, X = v => L + v / mx * (R - L);
+  let s = '<svg class="tv-svg tv-band" viewBox="0 0 ' + W + ' 58" role="img" aria-label="' + escHtml(b.n + ': yıl sonu değerleri, son kapanış ve sektör ortancası') + '">' +
+    '<rect class="tv-band-bg" x="' + L + '" y="22" width="' + (R - L) + '" height="10" rx="5"/>';
+  if (pts.length) {
+    const lo = Math.min.apply(null, pts.map(x => x.v)), hi = Math.max.apply(null, pts.map(x => x.v));
+    s += '<rect class="tv-band-rg" x="' + X(lo).toFixed(1) + '" y="22" width="' + Math.max(4, X(hi) - X(lo)).toFixed(1) + '" height="10" rx="5"/>';
+    pts.forEach(x => { s += '<circle class="tv-band-y" cx="' + X(x.v).toFixed(1) + '" cy="27" r="3.4"><title>' + x.y + ' sonu: ' + _tvX(x.v, 1) + '</title></circle>'; });
+    s += '<text x="' + X(lo).toFixed(1) + '" y="50" text-anchor="middle">' + _tvX(lo, 1) + '</text>';
+    if (X(hi) - X(lo) > 26) s += '<text x="' + X(hi).toFixed(1) + '" y="50" text-anchor="middle">' + _tvX(hi, 1) + '</text>';
+  }
+  if (b.med != null) {
+    const mxp = Math.min(R - 30, Math.max(L + 30, X(b.med)));
+    s += '<line class="tv-band-med" x1="' + X(b.med).toFixed(1) + '" x2="' + X(b.med).toFixed(1) + '" y1="14" y2="40"/><text x="' + mxp.toFixed(1) + '" y="10" text-anchor="middle">' + escHtml(b.medLbl) + '</text>';
+  }
+  if (b.now != null) s += '<circle class="tv-band-now" cx="' + X(b.now).toFixed(1) + '" cy="27" r="7.5"/>';
+  return s + '</svg>';
+}
+function _tvDivBars(ys, W, H) {
+  const mx = Math.max.apply(null, ys.map(d => d.v || 0)) || 1, n = ys.length, gw = W / n, bw = Math.min(28, gw * 0.6), T = 18, B = H - 20;
+  let s = '<svg class="tv-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Hisse başına brüt temettü, yıllara göre"><line class="tv-zero" x1="0" x2="' + W + '" y1="' + B + '" y2="' + B + '"/>';
+  ys.forEach((d, i) => {
+    const cx = gw * i + gw / 2, h = Math.max(2, d.v / mx * (B - T));
+    s += '<rect class="tv-bar" x="' + (cx - bw / 2).toFixed(1) + '" y="' + (B - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="4"><title>' + d.y + ': ' + _tvX(d.v) + ' ₺</title></rect>';
+    s += '<text class="tv-vl" x="' + cx.toFixed(1) + '" y="' + (B - h - 5).toFixed(1) + '" text-anchor="middle">' + _tvX(d.v) + '</text>';
+    s += '<text x="' + cx.toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle">' + d.y + '</text>';
+  });
+  return s + '</svg>';
+}
+function _tvW(el, mobile, desk) { const w = el && el.clientWidth; return w ? Math.max(260, Math.round(w)) : (window.innerWidth < 600 ? mobile : desk); }
+
+/* ── kv tablosu: etiket + sabit genislikli 1-2 sayi sutunu (O16e=B hizalama) ── */
+function _tvKv(head, rows, cls) {
+  const two = head.length === 3;
+  return '<div class="tv-kv-t' + (two ? '' : ' tv-kv-t--1') + (cls ? ' ' + cls : '') + '" role="table">' +
+    '<div class="tv-kv-h" role="row">' + head.map((h, i) => '<span role="' + (i ? 'columnheader' : 'rowheader') + '">' + escHtml(h) + '</span>').join('') + '</div>' +
+    rows.map(r => '<div class="tv-kv-r" role="row"><span role="rowheader">' + escHtml(r[0]) + '</span><b role="cell">' + r[1] + '</b>' + (two ? '<b role="cell" class="tv-p">' + r[2] + '</b>' : '') + '</div>').join('') + '</div>';
+}
+
+/* ── Buyume ─────────────────────────────────────────────────────────────── */
+function _tvGrowthDraw() {
+  const k = TV.k, sb = k.sablon, basis = TV_BASIS[k.basis] || 'TL';
+  const ann = k.yillik_seri || [], qs = k.ceyrek_seri || [];
+  const src = TV.per === 'q' ? qs.map(q => ({ k: q.ceyrek, d: q.degisim })) : ann.map(a => ({ k: a.yil, d: a.degisim }));
+  const has = key => src.some(x => x.d && x.d[key] != null);
+  let mets = TV_GROWTH[sb].filter(has);
+  if (!mets.length) mets = TV_GROWTH[sb];
+  if (mets.indexOf(TV.met) < 0) TV.met = mets[0];
+  const seg = _tvEl('tvBuyumeSeg');
+  seg.innerHTML = '<span class="tv-seg" role="group" aria-label="Kalem">' + TV_GROWTH[sb].map(m =>
+      '<button type="button" data-m="' + m + '" aria-pressed="' + (m === TV.met) + '"' + (has(m) ? '' : ' disabled') + '>' + TV_LBL[m] + '</button>').join('') + '</span>' +
+    (qs.length ? '<span class="tv-seg" role="group" aria-label="Dönem"><button type="button" data-p="y" aria-pressed="' + (TV.per === 'y') + '">Yıllık</button><button type="button" data-p="q" aria-pressed="' + (TV.per === 'q') + '">Çeyreklik</button></span>' : '');
+  _tvEl('tvBuyumeU').textContent = (TV.per === 'q' ? 'Çeyreklik değişim · geçen yılın aynı çeyreğine göre · ' : 'Yıllık değişim · ') + basis;
+  const tvChEl = _tvEl('tvBuyumeCh');
+  tvChEl.innerHTML = _tvBars(src.map(x => ({ k: x.k, v: x.d ? x.d[TV.met] : null })), _tvW(tvChEl, 330, 520), window.innerWidth < 380 ? 136 : (window.innerWidth < 600 ? 150 : 190),
+    TV_LBL[TV.met] + (TV.per === 'q' ? ' çeyreklik değişim' : ' yıllık değişim'));
+}
+function _tvGrowth(k) {
+  const sb = k.sablon, ann = k.yillik_seri || [], qs = k.ceyrek_seri || [];
+  if (!ann.length && !qs.length) return false;
+  TV.met = TV_GROWTH[sb][0];
+  const last = ann[ann.length - 1], lq = qs[qs.length - 1];
+  const g = TV_GROWTH[sb];
+  const parts = [];
+  if (last) parts.push(last.yil + ' yılında ' + g.slice(0, 2).filter(m => last.degisim[m] != null).map(m => TV_LBL[m].toLocaleLowerCase('tr-TR') + ' ' + _tvChg(last.degisim[m])).join(', '));
+  if (lq) {
+    const qm = g.filter(m => lq.degisim[m] != null).slice(0, 2);
+    if (qm.length) parts.push('son çeyrekte (' + lq.ceyrek + ') ' + qm.map(m => TV_LBL[m].toLocaleLowerCase('tr-TR') + ' ' + _tvChg(lq.degisim[m])).join(', '));
+  }
+  const say = parts.join('; ');
+  _tvEl('tvBuyumeS').textContent = say ? say.charAt(0).toLocaleUpperCase('tr-TR') + say.slice(1) + '.' : '';
+  const t = k.tutarlar;
+  if (t && t.kalemler) {
+    const title = k.basis === 'tms29' ? 'Tutar · ' + t.yil + ' sonu alım gücüyle' : 'Tutar · ' + (TV_BASIS[k.basis] || 'TL');
+    const rows = Object.keys(t.kalemler).map(key => [TV_LBL[key] || key, _tvMoney(t.kalemler[key].cur), _tvMoney(t.kalemler[key].prev)]);
+    _tvEl('tvBuyumeT').innerHTML = _tvKv([title, String(t.yil), String(t.onceki_yil)], rows);
+  }
+  const notes = ['Her yılın değişimi, şirketin o yılki raporundaki kendi karşılaştırmasından.'];
+  if ((k.dusen_yillar || []).length) notes.push(Math.max.apply(null, k.dusen_yillar) + ' ve öncesi raporlar enflasyon düzeltmesi içermediği için grafikte yok.');
+  if (qs.length) notes.push('Dördüncü çeyrek ayrıca açıklanmıyor.');
+  const n = _tvEl('tvBuyumeN'); n.textContent = notes.join(' '); n.hidden = false;
+  _tvGrowthDraw();
+  return true;
+}
+
+/* ── Karlilik ───────────────────────────────────────────────────────────── */
+function _tvProfit(k) {
+  const sb = k.sablon, o = k.oranlar || {}, yrs = Object.keys(o).sort();
+  if (!yrs.length) return false;
+  const ara = k.ara_donem, cy = yrs[yrs.length - 1], py = yrs[yrs.length - 2];
+  const sv = key => yrs.map(y => (o[y] || {})[key] == null ? null : o[y][key]);
+  let series, unit, kv, say;
+  const labels = yrs.slice();
+  if (sb === 'banka') {
+    series = [{ n: 'Özsermaye kârlılığı', v: sv('ozsermaye_karliligi') }, { n: 'Gider / gelir', v: sv('gider_gelir') }];
+    unit = 'Oran, % · yıllara göre';
+    kv = [['Özsermaye kârlılığı', 'ozsermaye_karliligi'], ['Gider / gelir', 'gider_gelir'], ['Net faiz geliri / ort. varlık', 'net_faiz_marji'], ['Ücret ve komisyon payı', 'ucret_payi']];
+    say = 'Özsermaye kârlılığı ' + cy + ' yılında ' + _tvLvl(o[cy].ozsermaye_karliligi) + ', gider / gelir oranı ' + _tvLvl(o[cy].gider_gelir) + '.';
+  } else if (sb === 'sigorta') {
+    series = [{ n: 'Özsermaye kârlılığı', v: sv('ozsermaye_karliligi') }];
+    unit = 'Oran, % · yıllara göre';
+    kv = [['Özsermaye kârlılığı', 'ozsermaye_karliligi'], ['Özkaynak değişimi', 'ozkaynak_degisim'], ['Varlık değişimi', 'varlik_degisim']];
+    say = 'Özsermaye kârlılığı ' + cy + ' yılında ' + _tvLvl(o[cy].ozsermaye_karliligi) + (py ? ' (' + py + ': ' + _tvLvl(o[py].ozsermaye_karliligi) + ')' : '') + '.';
+  } else {
+    const withAra = ara && (ara.brut != null || ara.net != null);
+    series = [{ n: 'Brüt', v: sv('brut'), interim: withAra }, { n: 'Net', v: sv('net'), interim: withAra }];
+    if (withAra) { labels.push(ara.kisa); series[0].v.push(ara.brut); series[1].v.push(ara.net); }
+    unit = 'Brüt ve net marj, % · yıllara göre' + (withAra ? ' ve ' + ara.etiket : '');
+    kv = [['Özsermaye kârlılığı', 'ozsermaye_karliligi'], ['Net kâr / hasılat', 'net'], ['FAVÖK marjı', 'favok']];
+    const c = o[cy] || {};
+    say = cy + ' yılında brüt marj ' + _tvLvl(c.brut) + ', net marj ' + _tvLvl(c.net) + (withAra && ara.net != null ? '; ' + ara.etiket + ' net marj ' + _tvLvl(ara.net) : '') + '.';
+  }
+  _tvEl('tvKarlilikU').textContent = unit;
+  _tvEl('tvKarlilikS').textContent = say;
+  const tvChEl = _tvEl('tvKarlilikCh');
+  tvChEl.innerHTML = _tvLines(labels, series, _tvW(tvChEl, 330, 520), window.innerWidth < 380 ? 136 : (window.innerWidth < 600 ? 150 : 200));
+  const fmt = key => (key.indexOf('degisim') >= 0 ? _tvChg : _tvLvl);
+  _tvEl('tvKarlilikT').innerHTML = _tvKv(['', cy, py || ''], kv.filter(r => (o[cy] || {})[r[1]] != null)
+    .map(r => [r[0], fmt(r[1])(o[cy][r[1]]), py ? fmt(r[1])((o[py] || {})[r[1]]) : '—']));
+  return true;
+}
+
+/* ── Degerleme ──────────────────────────────────────────────────────────── */
+function _tvValue(f, k) {
+  const V = tvValuation(f);
+  if (!V) return false;
+  const rows = V.rows.filter(r => r.v != null || r.neg);
+  if (!rows.length && !(f.analyst_target != null && f.analyst_count)) return false;
+  const chip = _tvEl('tvDegerlemeA');
+  if (V.word) { chip.textContent = V.word; chip.className = 'tv-chip' + (V.word === 'Ucuz tarafta' ? ' tv-chip--u' : (V.word === 'Pahalı tarafta' ? ' tv-chip--p' : '')); chip.hidden = false; }
+  const band = k ? (k.degerleme_bandi_v2 || []) : [];
+  const inBand = (r, key) => {
+    const b = band.map(x => x[key]).filter(v => v != null && v > 0);
+    if (r.v == null || b.length < 2) return null;
+    const lo = Math.min.apply(null, b), hi = Math.max.apply(null, b);
+    return r.v < lo ? 'altında' : (r.v > hi ? 'üstünde' : 'içinde');
+  };
+  const sent = rows.map(r => {
+    if (r.neg) return r.l + ' hesaplanmıyor (son 12 ayda zarar)';
+    return r.l + ' ' + _tvX(r.v, r.fr) + (r.m ? ' · ' + _tvMedTxt(r.m, r.fr) : '');
+  });
+  let say = sent.join('; ');
+  if (band.length) {
+    const pos = [['F/K', 'fk'], ['PD/DD', 'pd_dd']].map(p => {
+      const r = V.rows.filter(x => x.l === p[0])[0];
+      const w = r ? inBand(r, p[1]) : null;
+      return w ? p[0] + ' kendi yıl sonu bandının ' + w : null;
+    }).filter(Boolean);
+    if (pos.length) say += '. ' + pos.join(', ');
+  }
+  if (!V.hasMed) say += (say ? '. ' : '') + 'Sektör ortancası olmadığı için yorum yapılmıyor';
+  _tvEl('tvDegerlemeS').textContent = say ? say + '.' : '';
+  const tvBox = _tvEl('tvDegerlemeB');
+  const now = k && k.degerleme_simdi;
+  if (band.length && now && !now.pay_uyumsuz) {
+    const W = _tvW(tvBox, 330, 520);
+    const defs = [['F/K', 'fk', V.rows[0]], ['PD/DD', 'pd_dd', V.rows[1]]];
+    if (k.sablon === 'gyo' || k.sablon === 'banka') defs.reverse();   /* GYO/bankada PD/DD one */
+    tvBox.innerHTML = defs.map(d => {
+      const b = { n: d[0], now: d[2].v, med: d[2].m ? d[2].m.deger : null, medLbl: _tvMedTxt(d[2].m, d[2].fr) || '', band: band.map(x => ({ y: x.yil, v: x[d[1]] })) };
+      if (!b.band.some(x => x.v != null && x.v > 0) && b.now == null) return '';
+      return '<div class="tv-bd"><div class="tv-bd-h"><b>' + d[0] + '</b><span>' + (b.now != null ? 'Son kapanış ' + _tvX(b.now, d[2].fr) : 'Son 12 ayda zarar') + '</span></div>' + _tvBand(b, W) + '</div>';
+    }).join('');
+  } else tvBox.innerHTML = '';
+  const an = _tvEl('tvDegerlemeAn');
+  if (f.analyst_target != null && f.analyst_count && HX_PRICE) {
+    const up = (f.analyst_target / HX_PRICE - 1) * 100;
+    const dt = document.querySelector('.hx-dt');
+    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b> · fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' +
+      (up > 0 ? 'üstünde' : (up < 0 ? 'altında' : 'düzeyinde')) + ' · ' + f.analyst_count + ' analist' + (dt ? ' · ' + escHtml(dt.textContent.trim()) + 'na göre' : '');
+    an.hidden = false;
+  }
+  const foot = _tvEl('tvDegerlemeN');
+  if (now) {
+    const ttm = now.son12ay_yontem === 'son12ay' ? 'son 12 ayın kârı (son yıllık kâr + ' + now.son12ay_etiket + ' raporunda açıklanan fark)' : 'son yıllık kâr';
+    foot.textContent = 'F/K: piyasa değeri ÷ ' + ttm + '. PD/DD: piyasa değeri ÷ son açıklanan özkaynak.' + (band.length ? ' Bant: yıl sonu değerleri.' : '') +
+      (V.hasMed ? ' Ucuz / pahalı: sektör ortancasına oran 0,80 altı / 1,25 üstü.' : '');
+    foot.hidden = false;
+  }
+  return true;
+}
+
+/* ── Saglamlik kontrolu ─────────────────────────────────────────────────── */
+const TV_CHK = {
+  aktif_karliligi_pozitif: ['Aktif kârlılığı pozitif', 'lvl'], isletme_nakit_akisi_pozitif: ['İşletme nakit akışı pozitif', 'money1'],
+  aktif_karliligi_artti: ['Aktif kârlılığı arttı', 'lvl2'], nakit_akisi_kardan_buyuk: ['Nakit akışı kârdan büyük', 'cmp'],
+  uv_borc_orani_dustu: ['Uzun vadeli borç oranı düştü', 'lvl2'], cari_oran_artti: ['Cari oran arttı', 'x2'],
+  yeni_pay_yok: ['Yeni pay çıkarılmadı', 'pay'], brut_marj_artti: ['Brüt marj arttı', 'lvl2'], aktif_devir_artti: ['Aktif devir hızı arttı', 'x2'],
+  net_kar_pozitif: ['Net kâr pozitif', 'money1'], ozsermaye_karliligi_ortanca_ustu: ['Özsermaye kârlılığı banka ortancasının üstünde', 'med'],
+  kredi_mevduat_100_alti: ['Krediler mevduatı aşmıyor', 'lvl'], ozkaynak_varliktan_hizli: ['Özkaynak büyümesi varlık büyümesine yetişti', 'grow'],
+  gider_gelir_40_alti: ['Gider / gelir oranı %40 veya altı', 'lvl'] };
+const TV_CHK_KISA = { aktif_karliligi_pozitif: 'aktif kârlılığı', isletme_nakit_akisi_pozitif: 'işletme nakit akışı', aktif_karliligi_artti: 'aktif kârlılığındaki değişim',
+  nakit_akisi_kardan_buyuk: 'nakit akışı ile kâr karşılaştırması', uv_borc_orani_dustu: 'uzun vadeli borç oranı', cari_oran_artti: 'cari oran',
+  yeni_pay_yok: 'pay sayısı', brut_marj_artti: 'brüt marj', aktif_devir_artti: 'aktif devir hızı', net_kar_pozitif: 'net kâr',
+  ozsermaye_karliligi_ortanca_ustu: 'özsermaye kârlılığı', kredi_mevduat_100_alti: 'kredi / mevduat oranı',
+  ozkaynak_varliktan_hizli: 'özkaynak büyümesi', gider_gelir_40_alti: 'gider / gelir oranı' };
+const TV_CHK_GRP = {
+  piotroski: [['Kârlılık', ['aktif_karliligi_pozitif', 'isletme_nakit_akisi_pozitif', 'aktif_karliligi_artti', 'nakit_akisi_kardan_buyuk']],
+    ['Borç ve likidite', ['uv_borc_orani_dustu', 'cari_oran_artti', 'yeni_pay_yok']], ['Verimlilik', ['brut_marj_artti', 'aktif_devir_artti']]],
+  banka5: [['Kârlılık', ['net_kar_pozitif', 'ozsermaye_karliligi_ortanca_ustu']], ['Fonlama ve sermaye', ['kredi_mevduat_100_alti', 'ozkaynak_varliktan_hizli']],
+    ['Verimlilik', ['gider_gelir_40_alti']]] };
+function _tvChkVal(it, kind) {
+  const c = it.cur, p = it.prev;
+  if (kind === 'lvl') return _tvLvl(c);
+  if (kind === 'lvl2') return _tvLvl(c) + ' ← ' + _tvLvl(p);
+  if (kind === 'x2') return _tvX(c) + ' ← ' + _tvX(p);
+  if (kind === 'money1') return _tvMoney(c);
+  if (kind === 'cmp') return it.gecti ? 'nakit > kâr' : 'nakit ≤ kâr';
+  if (kind === 'pay') return it.gecti ? 'sermaye aynı' : 'sermaye arttı';
+  if (kind === 'med') return _tvLvl(c) + ' · ortanca ' + _tvLvl(p);
+  if (kind === 'grow') return _tvChg(c) + ' · varlık ' + _tvChg(p);
+  return '';
+}
+function _tvChecks(k) {
+  const s = k.saglamlik;
+  if (!s || !s.maddeler || !s.toplam) return false;
+  const by = {}; s.maddeler.forEach(m => { by[m.k] = m; });
+  _tvEl('tvSaglamlikU').textContent = (s.yontem === 'piotroski' ? '9 maddelik bilinen yöntem (Piotroski) · ' : 'Bankaya uygun 5 madde · ') + s.yil + ' ile ' + (s.yil - 1);
+  _tvEl('tvSaglamlikP').innerHTML = '<b>' + s.puan + '</b><span>/ ' + s.toplam + '</span>';
+  const grp = TV_CHK_GRP[s.yontem] || [];
+  const okN = g => g[1].filter(x => by[x] && by[x].gecti === true).length, allN = g => g[1].filter(x => by[x] && by[x].gecti != null).length;
+  const full = grp.filter(g => allN(g) && okN(g) === allN(g)).map(g => g[0].toLocaleLowerCase('tr-TR'));
+  const miss = s.maddeler.filter(m => m.gecti === false).map(m => TV_CHK_KISA[m.k] || (TV_CHK[m.k] || [m.k])[0].toLocaleLowerCase('tr-TR'));
+  let say = s.toplam + ' maddenin ' + s.puan + ' tanesi geçiyor';
+  if (full.length) say += '; ' + full.join(' ve ') + ' maddelerinin hepsi geçiyor';
+  if (miss.length && miss.length <= 3) say += '. Geçmeyen: ' + (miss.length > 1 ? miss.slice(0, -1).join(', ') + ' ve ' + miss[miss.length - 1] : miss[0]);
+  if (s.eksik && s.eksik.length) say += '. ' + s.eksik.length + ' madde veri olmadığı için sayılmadı';
+  _tvEl('tvSaglamlikS').textContent = say + '.';
+  _tvEl('tvSaglamlikL').innerHTML = grp.map(g => {
+    const its = g[1].filter(x => by[x] && by[x].gecti != null);
+    if (!its.length) return '';
+    return '<div><h4>' + g[0] + '</h4><ul>' + its.map(x => {
+      const m = by[x], d = TV_CHK[x] || [x, ''];
+      return '<li class="' + (m.gecti ? 'ok' : 'no') + '"><i aria-hidden="true">' + (m.gecti ? '✓' : '–') + '</i><span>' + escHtml(d[0]) +
+        '<span class="sr-only">' + (m.gecti ? ': geçti' : ': geçmedi') + '</span></span><b>' + escHtml(_tvChkVal(m, d[1])) + '</b></li>';
+    }).join('') + '</ul></div>';
+  }).join('');
+  return true;
+}
+
+/* ── Bilanco sagligi ────────────────────────────────────────────────────── */
+function _tvBalance(f, k) {
+  if (k && k.bilanco) {
+    const b = k.bilanco, c = b.cur || {}, p = b.prev || {}, sb = k.sablon;
+    let rows, say;
+    if (sb === 'banka') {
+      rows = [['Krediler', _tvMoney(c.krediler), _tvMoney(p.krediler)], ['Mevduat', _tvMoney(c.mevduat), _tvMoney(p.mevduat)],
+        ['Kredi / mevduat', _tvLvl(c.kredi_mevduat), _tvLvl(p.kredi_mevduat)], ['Özkaynak', _tvMoney(c.ozkaynak), _tvMoney(p.ozkaynak)]];
+      const o = (k.oranlar || {})[String(b.yil)] || {};
+      say = 'Kredi / mevduat oranı ' + _tvLvl(c.kredi_mevduat) + (o.ozkaynak_degisim != null && o.varlik_degisim != null
+        ? '; özkaynak ' + _tvChg(o.ozkaynak_degisim) + ', varlıklar ' + _tvChg(o.varlik_degisim) + ' değişti' : '') + '.';
+    } else if (sb === 'sigorta') {
+      rows = [['Özkaynak', _tvMoney(c.ozkaynak), _tvMoney(p.ozkaynak)], ['Toplam varlık', _tvMoney(c.toplam_varlik), _tvMoney(p.toplam_varlik)],
+        ['Nakit', _tvMoney(c.nakit), _tvMoney(p.nakit)], ['Cari oran', _tvX(c.cari_oran), _tvX(p.cari_oran)]];
+      say = 'Özkaynak ' + b.yil + ' sonunda ' + _tvMoney(c.ozkaynak) + '; kısa vadeli varlıklar kısa vadeli borçların ' + _tvX(c.cari_oran) + ' katı.';
+    } else {
+      const nbf = (x) => x.net_borc == null ? '—' : (x.net_borc < 0 ? 'net nakit' : _tvX(x.net_borc_favok));
+      rows = [['Net borç (kiralamalar dahil)', _tvMoney(c.net_borc), _tvMoney(p.net_borc)], ['Net borç / FAVÖK', nbf(c), nbf(p)],
+        ['Cari oran', _tvX(c.cari_oran), _tvX(p.cari_oran)], ['Nakit', _tvMoney(c.nakit), _tvMoney(p.nakit)]];
+      say = (c.net_borc == null ? '' : (c.net_borc < 0 ? 'Nakdi borcundan fazla (net nakit ' + _tvMoney(-c.net_borc) + ')' : 'Net borç FAVÖK\'ün ' + _tvX(c.net_borc_favok) + ' katı')) +
+        (c.cari_oran != null ? (c.net_borc == null ? 'K' : '; k') + 'ısa vadeli varlıklar kısa vadeli borçların ' + _tvX(c.cari_oran) + ' katı' : '') + '.';
+    }
+    _tvEl('tvBilancoU').textContent = 'Dönem sonu · ' + (k.basis === 'tms29' ? b.yil + ' sonu alım gücüyle' : (TV_BASIS[k.basis] || 'TL'));
+    _tvEl('tvBilancoS').textContent = say;
+    _tvEl('tvBilancoT').innerHTML = _tvKv(['', String(b.yil), String(b.onceki_yil)], rows);
+    return true;
+  }
+  /* kap yok: bugunku alanlar (tek sutun) */
+  const de = f.debt_to_equity != null ? f.debt_to_equity / 100 : null;   /* K-BX: yfinance YUZDE doner */
+  const rows = [['Borç / özkaynak', de != null ? _tvX(de) : null], ['Cari oran', f.current_ratio != null ? _tvX(f.current_ratio) : null],
+    ['Nakit ve benzerleri', _fmtMoneyObj(f.total_cash)]].filter(r => r[1]);
+  if (!rows.length) return false;
+  _tvEl('tvBilancoU').textContent = 'Son bilanço';
+  _tvEl('tvBilancoS').textContent = '';
+  _tvEl('tvBilancoS').hidden = true;
+  _tvEl('tvBilancoT').innerHTML = _tvKv(['', 'Son'], rows);
+  return true;
+}
+
+/* ── Temettu ────────────────────────────────────────────────────────────── */
+function _tvDividend(f, k, divRow) {
+  const tvBox = _tvEl('tvTemettuK'), tvChEl = _tvEl('tvTemettuCh');
+  if (k && k.temettu) {
+    const t = k.temettu, ys = (k.temettu_yillar || []).map(x => ({ y: x.yil, v: x.brut }));
+    const stats = [];
+    stats.push(['Son 12 ay verim', t.odeme_var && HX_PRICE ? bpPctLevel(t.brut_toplam / HX_PRICE * 100, 2) : 'Ödeme yok']);
+    if (t.son_odeme) stats.push(['Son ödeme', _tvDate(t.son_odeme.odeme) + ' · ' + _tvX(t.son_odeme.brut) + ' ₺']);
+    if ((t.duyurulan || []).length) stats.push(['Duyurulan', _tvDate(t.duyurulan[0].odeme) + ' · ' + _tvX(t.duyurulan[0].brut) + ' ₺']);
+    tvBox.innerHTML = stats.map(s => '<div><span>' + s[0] + '</span><b>' + s[1] + '</b></div>').join('');
+    _tvEl('tvTemettuS').textContent = t.odeme_var
+      ? 'Son 12 ayda ' + t.odemeler.length + ' ödeme; hisse başına toplam ' + _tvX(t.brut_toplam) + ' ₺ brüt.' + ((t.duyurulan || []).length ? ' Duyurulan ödeme son 12 ay verimine girmez.' : '')
+      : 'Son 12 ayda ödeme yok.' + (t.son_odeme ? ' Son ödeme ' + _tvDate(t.son_odeme.odeme) + '.' : '');
+    tvChEl.innerHTML = ys.length >= 2 ? _tvDivBars(ys, _tvW(tvChEl, 330, 520), window.innerWidth < 380 ? 104 : (window.innerWidth < 600 ? 118 : 140)) : '';
+    _tvEl('tvTemettuU').textContent = 'Hisse başına brüt ödeme · TL, ödendiği yılın parasıyla';
+    return true;
+  }
+  if (divRow === undefined || divRow === null) return false;
+  const last = divRow.last_div_date ? new Date(divRow.last_div_date + 'T00:00:00') : null;
+  const asof = _hxSeries ? new Date(_hxSeries[_hxSeries.length - 1][0] + 'T00:00:00') : new Date();
+  const recent = last && (asof - last) <= 365 * 864e5 && divRow.last_div_amount != null;
+  tvBox.innerHTML = '<div><span>Son 12 ay</span><b>' + (recent ? 'Son ödeme ' + _tvDate(divRow.last_div_date) : 'Ödeme yok') + '</b></div>' +
+    (recent ? '<div><span>Tutar</span><b>' + _tvX(divRow.last_div_amount) + ' ₺</b></div>' : '');
+  _tvEl('tvTemettuS').textContent = recent ? '' : 'Son 12 ayda ödeme yok.';
+  _tvEl('tvTemettuS').hidden = !!recent;
+  tvChEl.innerHTML = '';
+  return true;
+}
+
+/* ── Eksen satirlari (Temel skorun 4 alani; D-40c'nin 5 ekseni gelene kadar) ── */
+function _tvAxes(f, k) {
+  /* Satir: ilk ifade her zaman, digerleri telefonda gizli (taslak v3: mobilde tek ifade) */
+  const set = (key, txt) => {
+    const el = _tvEl('tvAx-' + key); if (!el || !txt) return;
+    const parts = String(txt).split(/ · |; /);
+    el.innerHTML = '<span>' + escHtml(parts[0]) + '</span>' + (parts.length > 1 ? '<span class="tv-ax-x"> · ' + escHtml(parts.slice(1).join(' · ')) + '</span>' : '');
+  };
+  const V = tvValuation(f), ve = V ? V.rows.filter(r => r.v != null).map(r => r.l + ' ' + _tvX(r.v, r.fr) + (r.m ? ' · ' + _tvMedTxt(r.m, r.fr) : '')) : [];
+  if (k) {
+    const now = k.degerleme_simdi || {}, cy = _tvYearKey(k), o = (k.oranlar || {})[cy] || {}, sb = k.sablon;
+    const roe = now.ozsermaye_karliligi != null ? 'Özsermaye kârlılığı son 12 ayda ' + _tvLvl(now.ozsermaye_karliligi) : null;
+    const yl = (k.yillik_seri || []).slice(-1)[0], b = (k.bilanco || {}).cur || {};
+    if (sb === 'banka') {
+      set('karlilik', [roe, cy + ' gider / gelir ' + _tvLvl(o.gider_gelir)].filter(Boolean).join(' · '));
+      set('nakit_akisi', yl ? cy + ' yılında krediler ' + _tvChg(yl.degisim.loans) + ', mevduat ' + _tvChg(yl.degisim.deposits) : null);
+      set('kaldirac', b.kredi_mevduat != null ? 'Kredi / mevduat ' + _tvLvl(b.kredi_mevduat) : null);
+    } else if (sb === 'sigorta') {
+      set('karlilik', [roe, cy + ' yılı ' + _tvLvl(o.ozsermaye_karliligi)].filter(Boolean).join(' · '));
+      set('nakit_akisi', yl && yl.degisim.cfo != null ? cy + ' yılında işletme nakit akışı ' + _tvChg(yl.degisim.cfo) : null);
+      set('kaldirac', b.cari_oran != null ? 'Cari oran ' + _tvX(b.cari_oran) + (o.ozkaynak_degisim != null ? ' · özkaynak ' + _tvChg(o.ozkaynak_degisim) : '') : null);
+    } else {
+      set('karlilik', [roe, cy + ' net marj ' + _tvLvl(o.net), 'FAVÖK marjı ' + _tvLvl(o.favok)].filter(Boolean).join(' · '));
+      const t = (k.tutarlar || {}).kalemler || {}, sn = k.saglamlik && k.saglamlik.maddeler ? k.saglamlik.maddeler.filter(m => m.k === 'isletme_nakit_akisi_pozitif')[0] : null;
+      set('nakit_akisi', [sn && sn.cur != null ? cy + ' işletme nakit akışı ' + _tvMoney(sn.cur) : null,
+        t.fcf && t.fcf.cur != null ? 'serbest nakit akışı ' + _tvMoney(t.fcf.cur) : null].filter(Boolean).join(' · '));
+      set('kaldirac', b.net_borc == null ? null : (b.net_borc < 0 ? 'Net nakit ' + _tvMoney(-b.net_borc) : 'Net borç / FAVÖK ' + _tvX(b.net_borc_favok)) + (b.cari_oran != null ? ' · cari oran ' + _tvX(b.cari_oran) : ''));
+    }
+    const g = yl ? TV_GROWTH[sb].filter(m => yl.degisim[m] != null)[0] : null;
+    set('degerleme_buyume', [ve.join('; '), g ? cy + ' ' + TV_LBL[g].toLocaleLowerCase('tr-TR') + ' ' + _tvChg(yl.degisim[g]) : null].filter(Boolean).join(' · '));
     return;
   }
-  const maxVal = Math.max(...trend.flatMap(t => [Math.abs(t.total_revenue || 0), Math.abs(t.net_income || 0)]));
-  const n = trend.length;
-  const groupW = Math.max(46, Math.min(92, Math.floor(440 / n)));
-  const barW = Math.max(12, Math.min(28, Math.floor(groupW * 0.32)));
-  const gap = n > 6 ? 6 : 10;
-  const containerW = Math.min(460, n * (groupW + gap));
-  const lblFont = n > 6 ? '8px' : '10px';
-  /* K-AL (21.09) — WCAG 1.4.1 "Use of Color": bu grafikte HANGI sayinin ciro,
-     hangisinin net kâr oldugunu soyleyen TEK sey RENKTI. Cizgi/desen farki yoktu,
-     etiket yoktu; barlardaki `title=` ise K-AH'nin olctugu gibi YALNIZCA-FARE bir
-     yan kanal. Ustune legend'in "Net Kâr" kutucugu SABIT yesildi: net kâr negatif
-     oldugunda barlar KIRMIZI ciziliyor, legend'de o kirmizinin karsiligi YOKTU
-     (canli olcum: HEKTS 4 yilin 3'unde kirmizi, legend yesil; ornekledigimiz
-     20 hissenin 9'unda en az bir zarar yili var — teorik degil).
-     Care, renkten BAGIMSIZ uc kanal: (1) net kâr barinda capraz TARAMA deseni +
-     legend'de ayni desen, (2) net kâr sayisinda italik (ciro dik), (3) her yil
-     grubu tek bir odaklanabilir role="img" — etiketli tam okuma hem ekran
-     okuyucuya hem dokunmatik/klavye kullanicisina ayni metni verir. */
-  const NI_HATCH = 'repeating-linear-gradient(45deg,rgba(0,0,0,.42) 0 2px,rgba(0,0,0,0) 2px 5px)';
-  const hasNeg = trend.some(t => (t.net_income || 0) < 0);
-  const barsHtml = trend.map(t => {
-    const label = period === 'q' ? (t.quarter + 'Ç\'' + String(t.year).slice(2)) : String(t.year);
-    const revPct = maxVal > 0 ? Math.max(4, Math.abs(t.total_revenue || 0) / maxVal * 100) : 4;
-    const niPct  = maxVal > 0 ? Math.max(4, Math.abs(t.net_income || 0) / maxVal * 100) : 4;
-    const niNeg  = (t.net_income || 0) < 0;
-    const revTxt = _fmtCompactCur(t.total_revenue);
-    const niTxt  = _fmtCompactCur(t.net_income);
-    const niWord = niNeg ? 'Net Zarar' : 'Net Kâr';
-    const grpLbl = `${label} — Ciro: ${revTxt} · ${niWord}: ${niTxt}`;
-    return `<div role="img" aria-label="${grpLbl}" data-tip="${grpLbl}" tabindex="0" style="flex:1;max-width:${groupW}px;display:flex;flex-direction:column;align-items:center;gap:5px;border-radius:var(--bp-radius-sm)">
-      <div class="ft-num" style="font-size:${lblFont};line-height:1.5;text-align:center;white-space:nowrap">
-        <div style="color:var(--bp-brand);font-weight:700">${revTxt}</div>
-        <div style="color:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};font-weight:700;font-style:italic">${niTxt}</div>
-      </div>
-      <div style="width:100%;display:flex;align-items:flex-end;justify-content:center;gap:${Math.max(2, Math.floor(barW*0.2))}px;height:64px">
-        <div aria-hidden="true" style="flex:1;max-width:${barW}px;background:var(--bp-brand);border-radius:3px 3px 0 0;height:${revPct}%;min-height:3px"></div>
-        <div aria-hidden="true" style="flex:1;max-width:${barW}px;background-color:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};background-image:${NI_HATCH};border-radius:3px 3px 0 0;height:${niPct}%;min-height:3px"></div>
-      </div>
-      <div style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:600">${label}</div>
-    </div>`;
-  }).join('');
-  const swatch = (bg, hatch) =>
-    `<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:2px;background-color:${bg}${hatch ? ';background-image:' + NI_HATCH : ''};margin-right:4px"></span>`;
-  /* K-BV eki (22.09): ETIKET GENISLIGI ICERIGE BAGLIDIR, VIEWPORT'A DEGIL.
-     Olcek kisaltmasi kanona gecince ("Mr" -> "Mrd") etiketler ~12px buyudu ve
-     320px'te (WCAG 1.4.10) son yil grubu grafik kutusunun 11,3px DISINA tasti
-     -- canli olcum /hisse/BIMAS, chart scrollWidth 268 > clientWidth 256.
-     Cozum sabit bir kirilma noktasi DEGIL, render SONRASI olcum: satir
-     kutusuna sigmiyorsa yazi ve bosluk bir kademe kuculur (8px/6px ile 320px'te
-     218,6px <= 228px, olculdu); o da yetmezse sarmal yatay kaydirir ve
-     ortalama birakilir -- `justify-content:center` tasma halinde SOL ucu
-     erisilemez kilar, bu yuzden ayni dalda flex-start'a cekiliyor. */
-  chartEl.innerHTML =
-    `<div class="ft-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="ft-row" data-basegap="${gap}" data-basefont="${lblFont}" style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div></div>
-     <div style="display:flex;gap:14px;margin-top:10px;justify-content:center;flex-wrap:wrap;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
-       <span>${swatch('var(--bp-brand)', false)}Ciro</span>
-       <span>${swatch('var(--bp-al)', true)}<em>Net Kâr</em></span>
-       ${hasNeg ? `<span>${swatch('var(--bp-sat)', true)}<em>Net Zarar</em></span>` : ''}
-     </div>
-     <div style="margin-top:6px;text-align:center;font-size:var(--bp-text-2xs);color:var(--bp-text3)">Taramalı ve <em>italik</em> olan net kâr/zarardır.</div>`;
+  set('karlilik', [f.roe != null ? 'Özsermaye kârlılığı ' + _tvLvl(f.roe) : null, f.profit_margin != null ? 'net kâr marjı ' + _tvLvl(f.profit_margin) : null].filter(Boolean).join(' · '));
+  set('kaldirac', f.current_ratio != null ? 'Cari oran ' + _tvX(f.current_ratio) : null);
+  set('degerleme_buyume', ve.join('; '));
+}
 
-  _ftFitLabels(chartEl);
-  /* ⛔ TEK SEFERLIK OLCUM YETMEDI (canli kanit 22.09, /hisse/BIMAS @320px):
-     innerHTML'in hemen ardindaki olcum sigiyor dedi, birkac kare sonra
-     kap 228px'e oturunca satir 254px'le TASIYORDU ve kuculme dali bir daha
-     hic calismadi. Yerlesim sonrasi iki rAF + kabin kendi ResizeObserver'i:
-     olcum kabin GERCEK genisligine baglanir, donme/yeniden boyutlandirma da
-     kapsanir. (Ayni aile: getComputedStyle ayni tick'te bayat okur.) */
-  requestAnimationFrame(() => requestAnimationFrame(() => _ftFitLabels(chartEl)));
-  if (typeof ResizeObserver === 'function' && !chartEl._ftRO) {
-    chartEl._ftRO = new ResizeObserver(() => _ftFitLabels(chartEl));
-    chartEl._ftRO.observe(chartEl);
+/* ── Giris: sekme acilinca bir kez ──────────────────────────────────────── */
+function _tvRender(f, divRow) {
+  const k = f.kap_durum === 'var' && f.kap ? f.kap : null;
+  _tvEl('tvGrid').hidden = false;
+  TV.f = f; TV.k = k;
+  const show = (id, ok) => { const el = _tvEl(id); if (el) el.hidden = !ok; };
+  if (k) {
+    const per = _tvEl('tvPer');
+    per.textContent = (TV_SABLON[k.sablon] || '') + ' · ' + (TV_BASIS[k.basis] || 'TL') + ' · son finansallar ' + (k.son_rapor_etiket || '');
+    per.hidden = false;
+    _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + (k.son_rapor_etiket || '') + ' dönemine kadar. Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.';
+  } else {
+    _tvHide('tvPrep', false);
   }
+  show('tvBuyume', k ? _tvGrowth(k) : false);
+  show('tvKarlilik', k ? _tvProfit(k) : _tvProfitLite(f));
+  show('tvDegerleme', _tvValue(f, k));
+  show('tvSaglamlik', k ? _tvChecks(k) : false);
+  show('tvBilanco', _tvBalance(f, k));
+  show('tvTemettu', _tvDividend(f, k, divRow));
+  _tvAxes(f, k);
+  document.querySelectorAll('#tvGrid .tv-sk').forEach(el => el.remove());
+  _tvEl('tvGrid').setAttribute('aria-busy', 'false');
+  _tvEl('tvGrid').classList.toggle('tv-grid--lite', !k);
 }
-
-/* K-BV eki: etiket genisligi ICERIGE baglidir (Mn/Mrd/T + basamak sayisi),
-   viewport'a degil. Once TABAN olcuye don, sonra olc -- kuculmus hali
-   "sigiyor" der ve kap genisledigin de bir daha asla buyumez (histerezis). */
-function _ftFitLabels(chartEl) {
-  const scr = chartEl && chartEl.querySelector('.ft-scroll');
-  const row = chartEl && chartEl.querySelector('.ft-row');
-  if (!scr || !row || !scr.clientWidth) return;   /* olculemeyen sey kuculmez */
-  const baseGap  = row.dataset.basegap || '10';
-  const baseFont = row.dataset.basefont || '10px';
-  row.style.gap = baseGap + 'px';
-  row.style.justifyContent = 'center';
-  const nums = row.querySelectorAll('.ft-num');
-  nums.forEach(el => { el.style.fontSize = baseFont; });
-  if (scr.scrollWidth <= scr.clientWidth + 1) return;
-  row.style.gap = '6px';
-  nums.forEach(el => { el.style.fontSize = '8px'; });
-  /* Hala tasiyorsa sarmal kaydirir; ortalanmis tasan icerigin SOL ucuna
-     kaydirarak ulasilamaz, bu yuzden flex-start. */
-  if (scr.scrollWidth > scr.clientWidth + 1) row.style.justifyContent = 'flex-start';
+function _tvProfitLite(f) {
+  const rows = [['Özsermaye kârlılığı', f.roe], ['Net kâr marjı', f.profit_margin], ['Faaliyet marjı', f.operating_margin]].filter(r => r[1] != null);
+  if (!rows.length) return false;
+  _tvEl('tvKarlilikU').textContent = 'Oran, % · son 12 ay';
+  _tvEl('tvKarlilikS').hidden = true;
+  _tvEl('tvKarlilikT').innerHTML = _tvKv(['', 'Son'], rows.map(r => [r[0], _tvLvl(r[1])]));
+  return true;
 }
-window.fundTrendSetPeriod = function(period) {
-  _renderFundTrendChart(period);
-  const btnY = document.getElementById('fundTrendBtnY'), btnQ = document.getElementById('fundTrendBtnQ');
-  if (!btnY || !btnQ) return;
-  const on  = { background: 'var(--bp-bg)', color: 'var(--bp-text)' };
-  const off = { background: 'none', color: 'var(--bp-text3)' };
-  Object.assign(btnY.style, period === 'y' ? on : off);
-  Object.assign(btnQ.style, period === 'q' ? on : off);
-};
-
+function _tvWire() {
+  if (TV.wired) return;
+  TV.wired = true;
+  _tvEl('tvBuyumeSeg').addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b || b.disabled || !TV.k) return;
+    if (b.dataset.m) TV.met = b.dataset.m;
+    if (b.dataset.p) TV.per = b.dataset.p;
+    _tvGrowthDraw();
+  });
+  let t = null;
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => { clearTimeout(t); t = setTimeout(() => { if (TV.k) { _tvGrowthDraw(); _tvProfit(TV.k); if (TV.f) _tvValue(TV.f, TV.k); } }, 120); }).observe(_tvEl('tvGrid'));
+  _tvEl('tvRetry').addEventListener('click', () => { _tvEl('tvErr').hidden = true; loadFundamentals(); });
+}
+let _tvDone = false;
 async function loadFundamentals() {
+  if (_tvDone) return;
+  _tvWire();
   try {
-    const json = await _bpFundJSON();
-    document.getElementById('fundLoading').style.display = 'none';
-    const f = json.fundamentals;
-    if (!f || Object.keys(f).length === 0) {
-      document.getElementById('fundSection').classList.add('da-fund-empty');
-      return;
-    }
-
-    /* Raporlama para birimi — DEV1/CPO-1674: artik backend cozuyor, burada
-       sadece okunuyor. _fundCur (trend grafigi) <- financial_currency,
-       kartlar <- f.statement_currency (asagida _fmtMoneyObj icinde
-       her deger kendi .currency'sini tasidigi icin ayrica global degiskene
-       gerek yok, sadece not/trend icin _fundCur kaliyor). */
-    _fundCur = f.financial_currency || 'TRY';
-    const _stmtCur = f.statement_currency || 'TRY';
-    if (_fundCur !== 'TRY' || _stmtCur !== 'TRY') {
-      const _note = document.getElementById('fundCurNote');
-      if (_note) {
-        const _adi = _CUR_ADI[_fundCur] || _fundCur;
-        _note.innerHTML = (_stmtCur !== 'TRY')
-          ? `<strong style="color:var(--bp-gold)">Para birimi:</strong> Bu şirket finansallarını <strong>${_fundCur}</strong> (${_adi}) cinsinden raporluyor. Ciro, net kâr, nakit ve trend grafiğindeki tutarlar <strong>${_curSym(_fundCur)}</strong> cinsindedir; piyasa değeri ve hisse fiyatı ₺ cinsindedir. Bu ikisini doğrudan oranlamayın.`
-          : `<strong style="color:var(--bp-gold)">Para birimi:</strong> Bu şirket finansallarını <strong>${_fundCur}</strong> (${_adi}) cinsinden raporluyor. Trend grafiğindeki tutarlar <strong>${_curSym(_fundCur)}</strong>, üstteki kartlar ₺ cinsindedir.`;
-        _note.style.display = '';
-      }
-    }
-
-    /* Değerleme kartları */
-    const valCards = [
-      _fundCard('Piyasa Değeri', _fmtMoneyObj(f.market_cap), 'var(--bp-text)'),  /* mcap her zaman ₺ */
-      _fundCard('F/K Oranı', f.pe_ratio != null ? f.pe_ratio.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.pe_ratio), _ucuzlukEtiketi(f.pe_ratio, 12, 25)),
-      _fundCard('İleriye Dönük F/K', f.forward_pe != null ? f.forward_pe.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.forward_pe), _ucuzlukEtiketi(f.forward_pe, 12, 25)),
-      _fundCard('F/DD Oranı', f.pb_ratio != null ? f.pb_ratio.toFixed(2).replace('.', ',') + 'x' : null, _pbColor(f.pb_ratio), _ucuzlukEtiketi(f.pb_ratio, 1, 3)),
-      _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, 'var(--bp-text)'),
-      _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, 'var(--bp-text)'),
-      _fundCard('Defter Değeri (Hisse Başı)', _fmtMoneyObj(f.book_value, true), 'var(--bp-text)'),
-      _fundCard('Nakit ve Benzerleri', _fmtMoneyObj(f.total_cash), 'var(--bp-text)'),
-    ].filter(Boolean).join('');
-
-    /* Kârlılık kartları */
-    const profCards = [
-      _fundCard('Yıllık Ciro', _fmtMoneyObj(f.revenue), 'var(--bp-text)'),
-      _fundCard('Net Kâr', _fmtMoneyObj(f.net_income), 'var(--bp-text)'),
-      _fundCard('Net Kâr Marjı', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : f.profit_margin === 0 ? 'Başabaş' : 'Negatif'),
-      _fundCard('Faaliyet Marjı', f.operating_margin != null ? bpPctLevel(f.operating_margin, 1) : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : f.operating_margin === 0 ? 'Başabaş' : 'Negatif'),
-    ].filter(Boolean).join('');
-    /* C-P1-2309 (24.09): "Kazanç/Gelir Büyümesi" kartları kalktı — yfinance
-       yıllar arası oranı TMS 29 dönemlerini karıştırıyordu. Açıklanan veri
-       ilkesiyle (şirketin kendi raporundaki karşılaştırma) D-40a0 sonrası döner. */
-
-    /* ── Getiri & Risk kartları ───────────────────────────────────────────
-       K-BX (22.09) — yfinance `debtToEquity` alanı YÜZDE döner, kat (x)
-       değil: THYAO 89,39 = 0,89x · OTKAR 869,17 = 8,69x · ARCLK 318,33 =
-       3,18x · AKMGY 0,03 ≈ borçsuz. app.py `_FUND_SANITY`'nin üst sınırı
-       (2000) da bunu söylüyor — 2000 KAT diye bir şey yok, %2000 = 20x var.
-       Kart bugüne kadar yüzdeyi doğrudan "x" diye basıp eşikleri (2 / 1)
-       ORAN gibi uyguluyordu: canlı 94 hissenin 85'i kırmızı "Yüksek"
-       etiketliydi, doğru çevrimde 80'i yeşil "Düşük" çıkıyor. Yani kart
-       borçsuz şirketleri aşırı borçlu ilan ediyordu. Tek kanon: burada
-       BİR KEZ orana çevrilir, aşağıdaki renk ve etiket aynı değişkeni okur. */
-    /* C-P1-2309 (24.09): Yahoo "dividendYield" bayattı (THYAO son ödeme
-       02.09.2025 iken %2,28 gösteriyordu). Kart artık temettü takviminin
-       açıklanan son ödemesini okur; takvimde olmayan hissede kart çıkmaz. */
-    let _divCard = '';
-    try {
-      const dj = await _bpDivJSON();
-      const d = (dj.stocks || []).find(x => x.ticker === TICKER);
-      if (d) {
-        const last = d.last_div_date ? new Date(d.last_div_date + 'T00:00:00') : null;
-        const recent = last && (Date.now() - last.getTime()) <= 365 * 864e5;
-        _divCard = recent && d.last_div_amount != null
-          ? _fundCard('Temettü (son 12 ay)', d.last_div_amount.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺', 'var(--bp-text)', 'Son ödeme ' + last.toLocaleDateString('tr-TR'))
-          : _fundCard('Temettü (son 12 ay)', 'Son 12 ayda ödeme yok', 'var(--bp-text3)');
-      }
-    } catch (_) { _divCard = ''; /* takvim yoksa kart çıkmaz */ }
-    const _deRatio = f.debt_to_equity != null ? f.debt_to_equity / 100 : null;
-    const retCards = [
-      _divCard,
-      _fundCard('ROE (Öz Ser. Get.)', f.roe != null ? bpPctLevel(f.roe, 1) : null, _roeColor(f.roe), f.roe > 20 ? 'Güçlü' : f.roe > 10 ? 'Orta' : f.roe > 0 ? 'Zayıf' : f.roe === 0 ? 'Başabaş' : 'Negatif'),
-      /* ── K-DL (22.09): BETA KARTI KALDIRILDI ────────────────────────────
-         Kart `f.beta`yı (app.py `safe_num("beta")` → yfinance `beta`) "Piyasa
-         Riski" diye sunup BIST'e göre bir yargı basıyordu ("Piyasa altı/üstü
-         hareket"). Bu sayı BIST'e göre ÖLÇÜLMÜŞ değil.
-
-         Ölçüm (22.09, sitenin KENDİ verisiyle — /api/hisse/<T>/chart 494 günlük
-         kapanış, kıyas XU030): kartın gösterdiği beta ≠ ölçülen beta.
-           ISCTR kart 0,20 → ölçülen 1,21 · GARAN 0,51 → 1,15 · AKBNK 0,69 → 1,29
-           FROTO 0,30 → 0,86 · CCOLA 0,23 → 0,73 · ARCLK 0,12 → 0,83
-         25 büyük hissede kart ortalaması 0,45; ölçülen ortalama 0,92. Endeksin
-         kendi ağır hisselerinin betası inşa gereği ~1,0 etrafında olmak
-         ZORUNDA — 0,45 bir ölçüm değil, farklı bir kıyas (TL değil, BIST değil).
-         "Piyasa altı hareket" etiketi taşıyan 10 hissenin 9'unda ölçüm TERSİNİ
-         söylüyordu: kart bankaları "piyasadan az oynak" ilan ediyordu. Canlı
-         dağılım tek başına da yeter: beta dolu 128 hissenin 96'sı (%75) "Piyasa
-         altı", yalnız 5'i "üstü".
-
-         app.py `_FUND_SANITY`'nin kendi yorumu da bunu zaten itiraf ediyor:
-         `"beta": (0.10, 5.0),  # 0.06-0.09 beta havacılık için saçma` — alt
-         sınır, saçma sayıyı DÜZELTMİYOR, yalnızca en uçtakini gizliyor (THYAO
-         bugün bu yüzden None).
-
-         Doğru sayı üretilebilir: XU030'un 500 barı da, hissenin 500 barı da
-         zaten elimizde. Bu backend işi — CPO-1787 ile DEV1'e yazıldı. Alan
-         XU030'a göre hesaplanıp döndüğünde kart bu satıra geri gelir (band
-         kanonu 0,7/1,3, K-BX'in tek-band kuralı). Sayıyı frontend'de "tahmin
-         etmek" yerine göstermemeyi seçtik: yanlış yön, eksik bilgiden kötüdür. */
-      _fundCard('Borç/Öz Sermaye', _deRatio != null ? _deRatio.toFixed(2).replace('.', ',') + 'x' : null, (_deRatio == null || _deRatio < 0) ? 'var(--bp-text)' : _deRatio > 2 ? 'var(--bp-sat)' : _deRatio > 1 ? 'var(--bp-gold)' : 'var(--bp-al)', (_deRatio == null || _deRatio < 0) ? null : _deRatio > 2 ? 'Yüksek' : _deRatio > 1 ? 'Orta' : 'Düşük'),
-      _fundCard('Cari Oran', f.current_ratio != null ? f.current_ratio.toFixed(2).replace('.', ',') : null, f.current_ratio >= 2 ? 'var(--bp-al)' : f.current_ratio >= 1 ? 'var(--bp-gold)' : 'var(--bp-sat)', f.current_ratio >= 2 ? 'Güçlü' : f.current_ratio >= 1 ? 'Yeterli' : 'Zayıf'),
-    ].filter(Boolean).join('');
-
-    const allEmpty = !valCards && !profCards && !retCards;
-    if (allEmpty) { document.getElementById('fundSection').classList.add('da-fund-empty'); return; }
-
-    if (valCards)  document.getElementById('fundGridVal').innerHTML    = valCards;
-    else           document.getElementById('fundValuation').style.display = 'none';
-    if (profCards) document.getElementById('fundGridProfit').innerHTML  = profCards;
-    else           document.getElementById('fundProfitability').style.display = 'none';
-    if (retCards)  document.getElementById('fundGridReturn').innerHTML  = retCards;
-    else           document.getElementById('fundReturn').style.display = 'none';
-
-    /* Analist Konsensüsü — r174 (Ozan istegi): kucuk hisselerde analist kapsamı
-       hic yok (yfinance null donuyor), o yuzden analyst_count yoksa hic gosterme. */
-    if (f.analyst_target != null && f.analyst_count) {
-      const curP = _hibCurrentPrice();
-      const upside = (curP && curP > 0) ? ((f.analyst_target - curP) / curP * 100) : null;
-      const recColors = { 'Güçlü Pozitif': 'var(--bp-al)', 'Pozitif': 'var(--bp-al)', 'Nötr': 'var(--bp-bkl)', 'Negatif': 'var(--bp-sat)', 'Güçlü Negatif': 'var(--bp-sat)' };
-      const recColor = recColors[f.analyst_rec] || 'var(--bp-text3)';
-      const recBadge = f.analyst_rec ? `<span style="background:${recColor};color:var(--bp-bg);font-weight:700;font-size:var(--bp-text-xs);padding:2px 9px;border-radius:var(--bp-radius-20)">${f.analyst_rec}</span>` : '';
-      const upsideHtml = upside != null
-        ? `<span style="color:var(--bp-text2)">fiyatın ${bpPctLevel(Math.abs(upside), 1)} ${upside >= 0 ? 'üstünde' : 'altında'}</span>`  /* C-52: nötr; "Analist Hedef Fiyatı X ₺ · fiyatın %Y üstünde" */
-        : '';
-      document.getElementById('fundAnalyst').innerHTML =
-        `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          ${recBadge}
-          <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px">Analist Hedef Fiyatı</span>
-          <span style="font-size:var(--bp-text-lg);font-weight:800;font-variant-numeric:tabular-nums">${f.analyst_target.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>
-          ${upsideHtml}
-          <span style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto">${f.analyst_count} analist</span>
-        </div>`;
-      document.getElementById('fundAnalyst').style.display = '';
-    }
-
-    /* Ciro & Net Kâr Trendi — r174 (yıllık) + CPO-1667 (19.09, çeyreklik toggle).
-       Render mantığı + fmt helper artık _renderFundTrendChart()/_fmtCompactCur()'de
-       (loadFundamentals'ın ÜSTÜNDE tanımlı, toggle butonları her an çağırabilsin diye). */
-    const trendY = f.statement_trend || [];
-    const trendQ = f.statement_trend_quarterly || [];
-    _fundTrendData.y = trendY;
-    _fundTrendData.q = trendQ;
-    /* C-P1-2309 (24.09): çok yıllı çubuklar yanıltıcıydı (TMS 29 öncesi ve
-       sonrası yıllar yan yana). D-40a0 canlı olana kadar grafik yerine not;
-       son yıl değerleri yukarıdaki Kârlılık kartlarında. */
-    if (trendY.length >= 2) {
-      document.getElementById('fundTrendNote').style.display = '';
-    }
-
-    /* Sahiplik — r174 */
-    if (f.insider_pct != null || f.institutional_pct != null) {
-      const parts = [];
-      if (f.insider_pct != null) parts.push(`İçeriden sahiplik ${bpPctLevel(f.insider_pct, 1)}`);
-      if (f.institutional_pct != null) parts.push(`Kurumsal sahiplik ${bpPctLevel(f.institutional_pct, 1)}`);
-      document.getElementById('fundOwnership').textContent = parts.join(' · ');
-      document.getElementById('fundOwnership').style.display = '';
-    }
-
-    document.getElementById('fundContent').style.display = '';
-  } catch(e) {
-    document.getElementById('fundSection').classList.add('da-fund-empty');
+    const [fj, dj] = await Promise.all([_bpFundJSON(), _bpDivJSON().catch(() => undefined)]);
+    const f = fj && fj.fundamentals;
+    const divRow = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
+    if (!f || !Object.keys(f).length) throw new Error('bos');
+    _tvRender(f, divRow);
+    _tvDone = true;
+  } catch (e) {
+    _tvEl('tvGrid').hidden = true;
+    _tvEl('tvErr').hidden = false;
   }
 }
+
 /* ── Çoklu Zaman Dilimi ───────────────────────────── */
 async function loadMTF() {
   try {
