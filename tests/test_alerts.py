@@ -5,7 +5,8 @@ import sys
 import time
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+# D-09: üretim modülü (depo kökü, tests/conftest.py); tools/ kopyası silindi
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from _alerts import _check_api_stale, _format_alert_md, _should_alert_telegram
 
 

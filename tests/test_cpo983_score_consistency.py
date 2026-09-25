@@ -61,10 +61,14 @@ def test_gucu_yuksek_does_not_recompute_compose_score():
 def test_compose_score_called_only_in_analyze():
     """compose_score() tanımı hariç sadece analyze() içinde çağrılmalı (tek kanonik yazım noktası)."""
     src = _read_app()
+    # D-09: tanım business_rules.py'de (yerelde test edilebilsin diye); app.py
+    # kopya tutmaz, yalnız import eder. Tek tanım = tek kanon.
+    with open(os.path.join(os.path.dirname(_APP_PY), "business_rules.py"), encoding="utf-8") as f:
+        assert f.read().count("def compose_score(") == 1, "compose_score() tanımı business_rules.py'de değil"
+    assert "def compose_score(" not in src, "app.py compose_score()'un ikinci bir kopyasını tanımlıyor"
+    assert "from business_rules import compose_score" in src, "app.py compose_score()'u business_rules'tan almıyor"
     # Tüm 'compose_score(' çağrılarını (tanım hariç) bul, hangi fonksiyon
     # içinde olduklarını kabaca eşleştir.
-    def_pos = src.find("def compose_score(")
-    assert def_pos != -1, "compose_score() tanımı bulunamadı"
 
     call_positions = [m.start() for m in re.finditer(r"(?<!def )compose_score\(", src)]
     assert call_positions, "compose_score() hiç çağrılmıyor"

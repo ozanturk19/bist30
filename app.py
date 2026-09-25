@@ -15,6 +15,8 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from indicators import compute_ema, compute_adx, compute_rsi, compute_atr, compute_supertrend
+# D-09: Teknik Güç ve sinyal kuralı tek kaynak (yerelde test edilir; zorunlu import)
+from business_rules import compose_score, trend_flags, classify_signal, signal_from_indicators
 from datetime import datetime, date, timedelta, timezone
 
 # Türkiye saati: UTC+3, DST yok (2016'dan beri sabit)
@@ -1697,64 +1699,8 @@ def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
     return pd.Series(dirs, index=close.index)
 
 
-def compose_score(adx: float, vol_ratio: float, bull_score: int,
-                  confirmed: bool, rsi: float, signal: str = "AL") -> int:
-    """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
-
-    SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
-    yazılır (F5 AI Sentiment ±5 ayarıyla birlikte). Güçlü Trend listesi
-    (_mscore) ve hisse detay sayfası ikisi de bu TEK cache alanını okur —
-    ayrı ayrı yeniden hesaplama YASAK (CPO-983 puanlama tutarlılık fix, Site
-    Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36) — ve
-    SPEC-018 W2'de tier badge ataması da bu skora taşındı (CPO-1004).
-
-    CPO-DEV2-053 (2026-08-22): "Yön gücü" bileşeni (bull_or_bear_score/3*25)
-    kaldırıldı — 54 aktif sinyalin tamamında bull_score/bear_score istisnasız
-    =3 olduğu kanıtlandı (sinyal gate'i zaten 3/3 oybirliği şart koşuyor, ara
-    değer hiç yayınlanamıyor), yani bu bileşen aktif bir sinyal için hiçbir
-    ayrıştırıcı bilgi taşımıyordu — sabit +25 puanlık bir taban gibi
-    davranıyordu. bull_score parametresi imza uyumluluğu için tutuldu ama
-    artık skora katkısı yok.
-
-    Bileşenler (ham max 75, 100/75 ile 0-100'e yeniden ölçeklenir):
-        ADX       : min(adx, 50) / 50 * 30   → max 30
-        Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
-        Teyit     : +10 (signal_bars >= 3)
-        RSI bölge : AL  → +10 (50-75) | +5 (>75)
-                    SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
-                    önceki sürüm signal parametresi almıyordu, SAT sinyalinde de AL
-                    bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
-                    bonus alıyor, tier'ı yapay olarak şişiriyordu)
-
-    Tier eşikleri (bkz. _derive_tier — CPO-DEV2-053/055, 70/56 kesim):
-        70+ → Güçlü Sinyal | 56-69 → Standart | <56 → (rozet yok)
-        Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
-    """
-    import math
-
-    def _finite(v, default):
-        try:
-            v = float(v)
-        except (TypeError, ValueError):
-            return default
-        return v if math.isfinite(v) else default
-
-    s = 0.0
-    s += min(_finite(adx, 0), 50) / 50 * 30
-    s += min(_finite(vol_ratio, 1.0), 5) / 5 * 25
-    s += 10 if confirmed else 0
-    rsi = _finite(rsi, 50)
-    if signal == "SAT":
-        if 25 <= rsi <= 50:
-            s += 10
-        elif rsi < 25:
-            s += 5
-    else:
-        if 50 <= rsi <= 75:
-            s += 10
-        elif rsi > 75:
-            s += 5
-    return int(round(s * 100 / 75))
+# compose_score (Teknik Güç, CPO-535) D-09'da business_rules.py'ye taşındı —
+# yukarıdaki import; davranış birebir aynı (tests/test_d09_skor_sinyal.py).
 
 
 def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
@@ -1980,37 +1926,19 @@ def analyze(ticker_base):
                            ticker_base, change_pct)
             return None  # background_refresh prev_cache fallback'i devreye girer
 
-        # ── 3-Kriter Sinyal Motoru: ST + ADX≥25 + EMA12/99 ─────────────
-        st_bull  = st_val == 1
-        st_bear  = st_val == -1
-        adx_bull = adx_val >= 25 and di_p > di_m
-        adx_bear = adx_val >= 25 and di_m > di_p
-        e12_bull = e12 > e99
-        e12_bear = e12 < e99
+        # ── Sinyal motoru: kanon §3'ün 5 koşulu (D-09: business_rules tek kaynak) ──
+        _flags = trend_flags(st_val, adx_val, di_p, di_m, e12, e99)
+        st_bull,  st_bear  = _flags["st_bull"],  _flags["st_bear"]
+        adx_bull, adx_bear = _flags["adx_bull"], _flags["adx_bear"]
+        e12_bull, e12_bear = _flags["e12_bull"], _flags["e12_bear"]
         # CPO-1656 EK YANIT Seçenek B: ham fark yüzdesi + kararsızlık-bölgesi
         # rozeti — SADECE UI için, e12_bull/e12_bear karşılaştırması (yukarıda)
         # bu değerleri hiç kullanmaz, sinyal motoru değişmez.
         ema_diff_pct, ema_deadband = derive_ema_deadband(e12, e99)
 
-        bull_score = int(st_bull) + int(adx_bull) + int(e12_bull)  # max 3
-        bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)  # max 3
-
-        # Haftalık gate: büyük ters trendde sinyal üretme
-        # CPO-DEV2-039/040 P1-SIGNAL-1: CB açıkken weekly_dir=0 GERÇEK bir
-        # "yatay trend" ölçümü değil, _weekly_trend() hiç çağrılmadığı için
-        # (satır ~1683) yapay bir doldurma değeri — bu durumda weekly_dir=0'ı
-        # gate'in her iki yönde de "geçti" sayması fail-open bir mantık
-        # hatasıydı (veri kalitesi en düşükken ana-trend filtresi devre
-        # dışı kalıyordu). CPO-1496: `not _cb_skip` yalnızca CB-skip yolunu
-        # yakalıyordu — _weekly_trend()'in KENDİ <25-bar/exception fallback'i
-        # (CB kapalıyken de olabilir) de aynı weekly_dir=0'ı üretip gate'i
-        # atlatıyordu. weekly_dir != 0 her iki "hesaplanamadı" yolunu da kapsar.
-        if bull_score >= 3 and weekly_dir != -1 and weekly_dir != 0:
-            signal = "AL"
-        elif bear_score >= 3 and weekly_dir != 1 and weekly_dir != 0:
-            signal = "SAT"
-        else:
-            signal = "BEKLE"
+        # Haftalık kapı (weekly_dir == 0 → Yatay, fail-closed): classify_signal
+        # docstring'i (CPO-DEV2-039/040, CPO-1496).
+        signal, bull_score, bear_score = classify_signal(_flags, weekly_dir)
 
         # ── Sinyal tarihi & süre ─────────────────────────────────────────
         # CPO-1559 P0-2: bar_signal(i) eskiden ham 3-kriter hizalamasına
@@ -2024,18 +1952,8 @@ def analyze(ticker_base):
         weekly_dir_hist = _historical_weekly_dir_series(close)
 
         def bar_signal(i):
-            ei12  = float(ema12.iloc[i]);  ei99  = float(ema99.iloc[i])
-            ai    = float(adx.iloc[i])
-            dip_i = float(di_plus.iloc[i]); dim_i = float(di_minus.iloc[i])
-            sti   = int(supertrend.iloc[i])
-            wdir_i = int(weekly_dir_hist.iloc[i])
-            bs  = int(sti == 1)  + int(ai >= 25 and dip_i > dim_i) + int(ei12 > ei99)
-            brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
-            if bs >= 3 and wdir_i != -1 and wdir_i != 0:
-                return "AL"
-            elif brs >= 3 and wdir_i != 1 and wdir_i != 0:
-                return "SAT"
-            return "BEKLE"
+            return _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend,
+                                    weekly_dir_hist, i)
 
         today_str   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
         signal_date = today_str
@@ -12848,22 +12766,16 @@ def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, weekly_di
     """i. bar için sinyal hesapla.
 
     CPO-1559 P0-1: canlı analyze()'nin uyguladığı haftalık-trend gate'i
-    (app.py ~1587-1592, büyük ters trendde sinyal üretme) artık burada da
-    uygulanıyor — weekly_dir, _historical_weekly_dir_series() ile lookahead
-    olmadan hesaplanmış geçmiş haftalık yön serisi.
+    (büyük ters trendde sinyal üretme) burada da uygulanır — weekly_dir,
+    _historical_weekly_dir_series() ile lookahead olmadan hesaplanmış geçmiş
+    haftalık yön serisi. D-09: kural business_rules.signal_from_indicators'ta
+    (analyze() canlı durumla aynı kaynak); analyze() geriye yürürken de bunu çağırır.
     """
-    ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
-    ai    = float(adx.iloc[i])
-    dip   = float(di_plus.iloc[i]); dim   = float(di_minus.iloc[i])
-    sti   = int(supertrend.iloc[i])
-    wdir  = int(weekly_dir.iloc[i])
-    bs    = int(sti == 1)  + int(ai >= 25 and dip > dim) + int(ei12 > ei99)
-    brs   = int(sti == -1) + int(ai >= 25 and dim > dip) + int(ei12 < ei99)
-    if bs >= 3 and wdir != -1 and wdir != 0:
-        return "AL"
-    elif brs >= 3 and wdir != 1 and wdir != 0:
-        return "SAT"
-    return "BEKLE"
+    return signal_from_indicators(
+        int(supertrend.iloc[i]), float(adx.iloc[i]),
+        float(di_plus.iloc[i]), float(di_minus.iloc[i]),
+        float(ema12.iloc[i]), float(ema99.iloc[i]),
+        int(weekly_dir.iloc[i]))
 
 
 def backtest_ticker(ticker_base, fwd_days=20):

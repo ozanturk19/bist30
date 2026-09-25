@@ -6,7 +6,8 @@ import sys
 import pytest
 from datetime import datetime, timezone
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+# D-09: üretim modülü (depo kökü, tests/conftest.py); tools/ kopyası silindi
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from _guards import (
     _is_valid_fundamentals,
     _is_valid_chart,
