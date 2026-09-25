@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
 <link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=71e198ca">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=5ef39f47">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1112,32 +1112,9 @@
     </p>
     <div id="storyList" style="position:relative"></div>
   </div>
-  <!-- AI Haberler -->
-  <div id="news-section"></div>
-  <div class="da-panel da-panel--accent news-section" id="newsSection">
-    <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
-    <div class="da-loading news-loading" id="newsLoading" role="status" aria-live="polite">
-      <div class="da-spin"></div> Haberler yükleniyor…
-    </div>
-    <div class="news-content" id="newsContent" role="status" aria-live="polite" style="display:none"></div>
-    <div class="news-source" id="newsSource" style="display:none">
-      <span class="news-badge">Yapay zekâ özeti</span>
-      <span>Haberlerden derlenen yapay zekâ özeti · 6 saatte bir güncellenir</span>
-    </div>
-  </div>
-
-  <!-- KAP Bildirimleri -->
+  <!-- Şirket bildirimleri (C-P1-2509: dış bağlantı ve "ODA" alt başlığı kalktı; liste boşsa bölüm gizlenir) -->
   <div class="da-panel da-panel--accent kap-section" id="kapSection">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
-      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
-      <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
-         class="da-tap"
-         style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
-         onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
-        <span aria-hidden="true">KAP'ta Aç ↗</span><span class="sr-only">{{ ticker }} tüm KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span>
-      </a>
-    </div>
+    <h2 class="section-title" style="margin:0 0 12px">Şirket bildirimleri</h2>
     <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
       <div class="da-spin da-spin--sm"></div>
       Bildirimler yükleniyor…
@@ -1223,7 +1200,7 @@ async function hisseSubscribe() {
   const btn = document.querySelector('#hisseSubForm button');
   btn.textContent = 'Kaydediliyor…'; btn.disabled = true;
   try {
-    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}), signal: AbortSignal.timeout(10000) });
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, ticker: TICKER}), signal: AbortSignal.timeout(10000) });
     const j = await r.json();
     const cta = document.getElementById('hisseSubCta');
     if (j.ok) {
@@ -2631,116 +2608,6 @@ async function loadChart(retry) {
   }
 }
 
-/* ── AI Haberler ────────────────────────────────────── */
-function mdToHtml(text) {
-  const lines = text.split('\n');
-  let html = '', inList = false;
-  for (let line of lines) {
-    // CPO-DEV2-r34: Gemini AI ozeti (Google Search grounding, harici web icerigi)
-    // onceden escape edilmeden innerHTML'e basiliyordu -- ayni dosyadaki storyList/
-    // kapList icin zaten kullanilan escHtml() deseniyle hizalandi (HTML/script injection).
-    line = escHtml(line.trim());
-    // Bold **text**
-    line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    if (!line) {
-      if (inList) { html += '</ul>'; inList = false; }
-      continue;
-    }
-    if (/^[\*\-•]\s+/.test(line)) {
-      if (!inList) { html += '<ul>'; inList = true; }
-      html += '<li>' + line.replace(/^[\*\-•]\s+/, '') + '</li>';
-    } else {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += '<p>' + line + '</p>';
-    }
-  }
-  if (inList) html += '</ul>';
-  return html;
-}
-
-let _newsActive = false;  /* bug-hunt r54: loadSignalExplanation'daki _sigExplainActive ile ayni desen */
-async function loadNews(retryCount) {
-  retryCount = retryCount || 0;
-  if (retryCount === 0) {
-    if (_newsActive) return;
-    _newsActive = true;
-  }
-  const loadingEl = document.getElementById('newsLoading');
-  const contentEl = document.getElementById('newsContent');
-  const sourceEl  = document.getElementById('newsSource');
-
-  loadingEl.style.display = 'flex';
-  contentEl.style.display = 'none';
-  sourceEl.style.display  = 'none';
-
-  try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/news');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    loadingEl.style.display = 'none';
-
-    if (data.news) {
-      _newsActive = false;
-      contentEl.innerHTML    = mdToHtml(data.news);
-      contentEl.style.display = '';
-      sourceEl.style.display  = 'flex';
-
-      // Source badge: KAP-grounded vs search-grounded
-      const badge = sourceEl.querySelector('.news-badge');
-      const desc  = sourceEl.querySelector('span:last-of-type');
-      const isKap = data.source === 'kap_ai';
-      if (badge) {
-        badge.textContent = isKap ? 'KAP + AI' : 'Yapay zekâ özeti';
-        badge.style.background = isKap ? 'rgba(0,226,144,.12)' : '';
-        badge.style.color      = isKap ? 'var(--bp-al)' : '';
-        badge.style.borderColor= isKap ? 'rgba(0,226,144,.25)' : '';
-      }
-      if (desc) {
-        desc.textContent = isKap
-          ? 'KAP bildirimlerinden AI özetlemesi · doğrulanmış veri'
-          : 'Haberlerden derlenen yapay zekâ özeti · 6 saatte bir güncellenir';
-      }
-
-      // KAP linki var mı? source row'a ekle
-      if (data.kap_url && !document.getElementById('newsKapLink')) {
-        const kapA = document.createElement('a');
-        kapA.id = 'newsKapLink';
-        kapA.href = data.kap_url;
-        kapA.target = '_blank';
-        kapA.rel = 'noopener';
-        kapA.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);background:rgba(var(--bp-text3-rgb),.1);border:1px solid rgba(var(--bp-text3-rgb),.2);border-radius:var(--bp-radius-4);padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
-        kapA.innerHTML = 'KAP <span aria-hidden="true">↗</span>';
-        sourceEl.appendChild(kapA);
-      }
-    } else if (data.unavailable) {
-      // CPO-1153/1154 P0-B(c): backend zaten "başarısız" olarak biliyor (negatif cache/
-      // kota devresi açık) — anlamsız "yeniden deneniyor" simülasyonu YOK, dürüst göster.
-      contentEl.innerHTML     = '<div class="news-error">🤖 '
-        + escHtml(data.reason || 'Haber özeti şu an kullanılamıyor')
-        + '. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
-      contentEl.style.display = '';
-      _newsActive = false;
-    } else {
-      // API null döndürdü (gerçek cache-miss, ilk kez sorgulanıyor) — hata mesajı göster
-      if (retryCount < 2) {
-        // Otomatik 8 saniye sonra tekrar dene
-        contentEl.innerHTML    = '<div class="news-error">⏳ Haber özeti hazırlanıyor, yeniden deneniyor…</div>';
-        contentEl.style.display = '';
-        setTimeout(() => loadNews(retryCount + 1), 8000);
-      } else {
-        contentEl.innerHTML    = '<div class="news-error">🤖 AI haber özeti şu an alınamadı. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
-        contentEl.style.display = '';
-        _newsActive = false;
-      }
-    }
-  } catch(e) {
-    loadingEl.style.display = 'none';
-    contentEl.innerHTML    = '<div class="news-error">Bağlantı hatası — lütfen daha sonra tekrar deneyin. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
-    contentEl.style.display = '';
-    _newsActive = false;
-  }
-}
-
 /* ── Sinyalin Hikayesi ──────────────────────────────── */
 async function loadSignalStory() {
   try {
@@ -2761,6 +2628,7 @@ async function loadSignalStory() {
     }
 
     const CLASS_CLR = { ODA: 'var(--bp-brand)', FR: 'var(--bp-al)' };
+    const CLASS_LBL = { ODA: 'Özel durum', FR: 'Finansal' };
 
     list.innerHTML = events.map(ev => {
       const delta    = ev.days_delta;
@@ -2770,12 +2638,11 @@ async function loadSignalStory() {
       const clr     = CLASS_CLR[ev.class] || 'var(--bp-text3)';
       const summary = ev.summary || ev.subject || '—';
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
-        <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
+        <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(CLASS_LBL[ev.class] || 'Bildirim')}</span>
         <div style="flex:1;min-width:0">
-          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:var(--bp-text-base);color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(var(--bp-text2-rgb),.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}<span class="sr-only"> (yeni sekmede açılır)</span></a>
+          <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4">${escHtml(summary)}</div>
           <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? 'var(--bp-text3)' : 'var(--bp-brand)'}">${deltaStr}</span></div>
         </div>
-        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç (yeni sekmede açılır)" style="font-size:var(--bp-text-xs);color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
       </div>`;
     }).join('');
 
@@ -2799,15 +2666,17 @@ async function loadKapDisclosures() {
     const items = data.disclosures || [];
 
     if (!items.length) {
-      listEl.innerHTML = '<div class="da-empty kap-empty">Son 90 günde bildirim bulunamadı.</div>';
-      listEl.style.display = '';
+      /* C-P1-2509: bos liste cogu zaman eslesme eksigi (D-45); yanlis "bildirim yok"
+         demek yerine bolum cizilmez. */
+      const sec = document.getElementById('kapSection');
+      if (sec) sec.hidden = true;
       return;
     }
 
-    // En fazla 20 bildirim göster, daha fazlası için KAP linki
+    // En fazla 20 bildirim; dış bağlantı yok (kanon §2.8)
     const show = items.slice(0, 20);
     const CLASS_MAP = { ODA: 'oda', FR: 'fr' };
-    const CLASS_LBL = { ODA: 'ÖZEL DURUM', FR: 'FİNANSAL' };
+    const CLASS_LBL = { ODA: 'Özel durum', FR: 'Finansal' };
 
     listEl.innerHTML = show.map(d => {
       const cls = CLASS_MAP[d.class] || 'oda';
@@ -2815,14 +2684,10 @@ async function loadKapDisclosures() {
       // Tarih formatını kısalt: "31.12.2025 14:58:09" → "31.12.2025 14:58"
       const dateShort = d.date ? d.date.substring(0, 16) : '';
       const summaryText = escHtml(d.summary || '');
-      const summaryHtml = (d.url && summaryText)
-        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}${dateShort ? ' — ' + dateShort : ''} (yeni sekmede açılır)">${summaryText}</a>`
-        : summaryText;
       return `<div class="kap-item">
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
-          <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="${summaryText || 'Bildirim'}${dateShort ? ' (' + dateShort + ')' : ''} — KAP'ta aç (yeni sekmede açılır)">↗</a>` : ''}
+          <span class="kap-summary">${summaryText}</span>
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -2832,26 +2697,7 @@ async function loadKapDisclosures() {
       </div>`;
     }).join('');
 
-    if (items.length > 20) {
-      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:var(--bp-text-sm);color:var(--bp-text3)">
-        +${items.length - 20} daha fazla bildirim —
-        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(var(--bp-brand-rgb),.45);text-underline-offset:2px"><span aria-hidden="true">KAP'ta görüntüle ↗</span><span class="sr-only">${TICKER} tüm KAP bildirimlerini görüntüle (kap.org.tr, yeni sekmede açılır)</span></a>
-      </div>`;
-    }
-
     listEl.style.display = '';
-
-    // GA4: KAP link tıklamaları (delegated) — bound-flag guard, ayni listEl icin
-    // ikinci kez calistirildiginda listener'in tekrar eklenmesini onler.
-    if (!listEl._bpKapBound) {
-      listEl.addEventListener('click', function(e) {
-        const link = e.target.closest('.kap-ga-link');
-        if (link && typeof gtag === 'function') {
-          gtag('event', 'kap_click', { ticker: TICKER, class: link.dataset.cls || 'unknown' });
-        }
-      }, { once: false });
-      listEl._bpKapBound = true;
-    }
 
   } catch(e) {
     loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> KAP bildirimleri yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
@@ -3440,7 +3286,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       if (tab === 'ozet') { loadOzetChart(); loadOzetExtras(); }
       else if (tab === 'grafik') { loadChart(); }
       else if (tab === 'temel') { loadFundamentals(); }
-      else if (tab === 'haberler') { loadKapDisclosures(); loadNews(0); loadSignalStory(); }
+      else if (tab === 'haberler') { loadKapDisclosures(); loadSignalStory(); }
     } catch (e) { console.warn('sekme verisi yuklenemedi: ' + tab, e); }
   }
   var _odt = document.getElementById('ozetDetailToggle');

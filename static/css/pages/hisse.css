@@ -666,94 +666,6 @@
     gap: 8px;
   }
 
-  /* ── AI Haberler ── */
-  /* Data-Art (20.09): AI haber ozeti paneli. Glow rengi VIOLET — bu kutunun
-     icerigi Gemini uretimi, sayfadaki diger AI yuzeyleriyle (AI Analiz sekmesi)
-     ayni aksan; KAP paneli ise resmi/dogrulanabilir veri oldugu icin cyan. */
-  /* K-T: Haberler sekmesinin UC panelinden ikisi (story + KAP) 3px accent
-     seridi tasirken bu SERITSIZDI — ayni goruntude kardes panellerle ayni
-     aileye ait gorunmuyordu. Parilti moru oldugu icin serit de mor. */
-  .news-section {
-    --da-accent: var(--bp-art-violet);
-    --da-glow-rgb: var(--bp-art-violet-rgb);
-    --da-glow-a: .13;
-    --da-glow-size: 240px;
-    padding: 18px 20px;
-    margin-bottom: 20px;
-  }
-  /* 21.09 (K-W): `.news-loading` yerleşimi kanonik `.da-loading`a geçti;
-     burada yalnız dikey boşluk deltası kaldı. */
-  .news-loading { padding: 8px 0; }
-  .news-content {
-    font-size: var(--bp-text-base);
-    color: var(--bp-text2);
-    line-height: 1.75;
-  }
-  .news-content ul {
-    margin: 4px 0;
-    padding-left: 18px;
-  }
-  .news-content li {
-    margin-bottom: 8px;
-  }
-  .news-content p {
-    margin: 6px 0;
-  }
-  .news-content strong {
-    color: var(--bp-text);
-    font-weight: 600;
-  }
-  .news-content a {
-    color: var(--bp-brand);
-    text-decoration: underline;         /* WCAG link-in-text-block */
-    text-decoration-color: rgba(var(--bp-brand-rgb),.4);
-    text-underline-offset: 2px;
-  }
-  .news-content a:hover { text-decoration-color: var(--bp-brand); }
-  .news-error {
-    color: var(--bp-text3);
-    font-size: var(--bp-text-base);
-    padding: 6px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  /* K-T (21.09): GIZLI SEKMEDE olculen ilk ihlal grubu. 22px yuksekti —
-     WCAG 2.5.8 (24px). Haberler sekmesi `display:none` oldugu icin K-L'nin
-     189 ihlallik canli turu bu dugmeyi HIC gormedi. */
-  .news-retry-btn {
-    background: none;
-    border: 1px solid var(--bp-border);
-    color: var(--bp-brand);
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 3px 10px;
-    border-radius: var(--bp-radius-5);
-    cursor: pointer;
-    font-size: var(--bp-text-sm);
-    transition: border-color .15s;
-  }
-  .news-retry-btn:hover { border-color: var(--bp-brand); }
-  .news-source {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .news-badge {
-    background: rgba(var(--bp-brand-rgb),0.1);
-    border: 1px solid rgba(var(--bp-brand-rgb),0.2);
-    color: var(--bp-brand);
-    font-size: var(--bp-text-2xs);
-    font-weight: 600;
-    padding: 1px 7px;
-    border-radius:var(--bp-radius-lg);
-    letter-spacing: 0.3px;
-  }
-
   /* ── KAP Bildirimleri ── */
   /* K-T: gorunum zaten kanonikle AYNIYDI, ama el yazimiyla kopyalanmisti —
      tek kaynaga alindi (parilti SOLDA kalir: --da-glow-left). */
@@ -822,28 +734,6 @@
     color: var(--bp-text3);
     padding-left: 0;
   }
-  /* K-T: "↗" ikon baglantisi 8.5x13 idi — sitenin EN KUCUK hedefi (GARAN'da
-     20 kopya). `.kap-item-top` yogun bir satir (rozet + baslik + ikon), yani
-     `.da-tap-halo` burada komsulara tasardi; data-art.css'in kendi notu bu
-     durumda "ogenin KENDISINI 24px yap" diyor. Glifin gorsel boyu degismez. */
-  .kap-link-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    min-height: 24px;
-    gap: 3px;
-    font-size: var(--bp-text-xs);
-    color: var(--bp-brand);
-    text-decoration: none;
-    opacity: .7;
-    transition: opacity .15s;
-  }
-  .kap-link-btn:hover { opacity: 1; }
-  /* 21.09 (K-V): gövde kanonik `.da-empty`den geliyor; burada DELTA yalniz
-     dar ic boşluk — bu kutu panelin ICINDE, kisa bir listenin yerinde durur,
-     sayfa boyu bos durum degildir. */
-  .kap-empty { padding: 12px 0; }
 
   /* ── Metodoloji notu ── */
   .methodology {
