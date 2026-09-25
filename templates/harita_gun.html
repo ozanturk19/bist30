@@ -96,7 +96,9 @@
 {%- endif %}
 </main>
 
-{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+{#- Kalıcı (tarihli) sayfa: ftr_data_note'un tarihsiz "son kapanışa aittir" rozeti burada yanlış olur
+    (paylaşılan bağlantı ertesi kapanıştan sonra hep geçmiş gündür); yerine tarihli not. -#}
+{% with ftr_note=(('Bu sayfadaki değişimler ' ~ _lbl ~ ' kapanışına aittir; sayfa sonradan güncellenmez.') if _hm_ok else '') %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=63228ae2"></script>

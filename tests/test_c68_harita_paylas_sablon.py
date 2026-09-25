@@ -200,3 +200,14 @@ def test_og_image_override(tpl, path):
     shared = t.render(**BASE, request=_req(path), heatmap_og_image="/harita/%s.png" % DAY, **ctx)
     assert _og(shared) == ("https://borsapusula.com/harita/%s.png" % DAY,) * 2
     assert 'content="BIST100 ısı haritası · 23 Eylül kapanışı"' in shared
+
+
+def test_day_page_footer_note_is_dated():
+    # Kalıcı sayfa ertesi kapanıştan sonra geçmiş gündür: tarihsiz "son kapanışa aittir" rozeti yanlış olur.
+    out = _day()
+    foot = re.search(r'<footer class="da-footer">.*?</footer>', out, re.S).group(0)
+    assert "Bu sayfadaki değişimler 23 Eylül 2026 kapanışına aittir; sayfa sonradan güncellenmez." in foot
+    assert "son kapanış" not in foot and "EOD" not in foot
+    empty = E.get_template("harita_gun.html").render(**BASE, request=_req("/harita/x"))
+    efoot = re.search(r'<footer class="da-footer">.*?</footer>', empty, re.S).group(0)
+    assert "da-footer-note" not in efoot and "son kapanış" not in efoot
