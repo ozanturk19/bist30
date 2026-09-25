@@ -1,14 +1,27 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sektör Isı Haritası ve Karşılaştırma | BorsaPusula</title>
-<meta name="description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın. Hangi sektörler güçlü trend sergiliyor?">
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-29 (25.09): /sektor-harita = tam ekran BIST100 ısı haritası (C-55 bileşeninin tam hali).
+    Veri: D-42 donmuş gün sonu görüntüsü (heatmap / heatmap_groups / heatmap_tiles, anasayfayla
+    aynı SSR bağlamı). Bağlam yoksa ya da boşsa (ilk görüntüden önce /api/heatmap 503) sayfa
+    boş durum gösterir; asla 500 değil.
+    Durum adreste: ?renk=degisim|bp|trend  &donem=1g|1h|1a|yb|1y (varsayılanlar yazılmaz).
+    İlk çizim o durumla SSR (JS kapalıyken anahtarlar bağlantıdır); bp-heatmap.js yerinde boyar
+    ve adresi tek yerden (publish) yazar. Eski sektör kartları, 4 sayı kutusu, lejant paneli,
+    Karşılaştır sekmesi ve 2 dakikalık yenileme döngüsü kalktı. -#}
+{%- set _hm_ok = (heatmap is defined) and heatmap and heatmap.rows and heatmap_groups and heatmap_tiles -%}
+{%- set _q = request.args if ((request is defined) and request and request.args) else {} -%}
+{%- set _mode = {'degisim': 'chg', 'bp': 'bp', 'trend': 'tr'}.get(((_q.get('renk') or '') ~ '')|lower, 'chg') -%}
+{%- set _per = {'1g': 'd1', '1h': 'w1', '1a': 'm1', 'yb': 'ytd', '1y': 'y1'}.get(((_q.get('donem') or '') ~ '')|lower, 'd1') -%}
+{% block head %}<title>BIST100 Isı Haritası: Sektörler ve Hisseler | BorsaPusula</title>
+<meta name="description" content="BIST100 hisselerinin sektörlere göre gün sonu ısı haritası. Kutu büyüklüğü piyasa değeri; renk değişim, BorsaPusula Skoru ya da trend durumu.">
 <link rel="canonical" href="https://borsapusula.com/sektor-harita">
-<meta property="og:title"       content="Sektör Isı Haritası ve Karşılaştırma — BorsaPusula">
-<meta property="og:description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
+<meta property="og:title"       content="BIST100 Isı Haritası — BorsaPusula">
+<meta property="og:description" content="BIST100 hisselerinin sektörlere göre gün sonu ısı haritası: piyasa değeri, değişim, BorsaPusula Skoru ve trend.">
 <meta property="og:url"         content="https://borsapusula.com/sektor-harita">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Sektör Isı Haritası ve Karşılaştırma — BorsaPusula">
-<meta name="twitter:description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
+<meta name="twitter:title"       content="BIST100 Isı Haritası — BorsaPusula">
+<meta name="twitter:description" content="BIST100 hisselerinin sektörlere göre gün sonu ısı haritası: piyasa değeri, değişim, BorsaPusula Skoru ve trend.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -16,639 +29,46 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
-  {"@type":"ListItem","position":2,"name":"Sektör Isı Haritası ve Karşılaştırma","item":"https://borsapusula.com/sektor-harita"}
+  {"@type":"ListItem","position":2,"name":"BIST100 Isı Haritası","item":"https://borsapusula.com/sektor-harita"}
 ]}
 </script>
+{%- if _hm_ok %}
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'Dataset', 'name': 'BIST100 ısı haritası · ' ~ heatmap.asof_label ~ ' kapanışı', 'description': 'BIST100 hisselerinin sektörlere göre gün sonu görüntüsü: piyasa değeri, 1 gün / 1 hafta / 1 ay / yılbaşından beri / 1 yıl değişim, BorsaPusula Skoru ve trend durumu.', 'url': 'https://borsapusula.com/sektor-harita', 'temporalCoverage': heatmap.asof, 'inLanguage': 'tr', 'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'}, 'variableMeasured': ['Piyasa değeri', 'Değişim', 'BorsaPusula Skoru', 'Trend durumu']}|tojson }}</script>
+{%- endif %}
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
-<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=17995f68">
+<link rel="stylesheet" href="/static/css/heatmap.css?v=28871ce8">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=d6cca0db">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
-<!-- Mobile Bottom Navigation -->
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 {% include '_header.html' %}
 
 <main class="container" id="main-content" tabindex="-1">
-
-  {% include '_stale_banner.html' %}
-
-  {% call bpf.pagehead('Sektör Haritası') %}{% if ssr_sectors %}<span class="da-num">{{ ssr_sectors|sum(attribute='total') }}</span> hisse, <span class="da-num">{{ ssr_sectors|length }}</span> sektörde: <span class="da-num">{{ ssr_sectors|sum(attribute='al') }}</span> Güçlü Trend, <span class="da-num">{{ ssr_sectors|sum(attribute='bekle') }}</span> Yatay, <span class="da-num">{{ ssr_sectors|sum(attribute='sat') }}</span> Trend Bozuldu.{% else %}Sektörlerin trend durumu, hisse sayısına göre.{% endif %}{% endcall %}
-
-{#- K-DO (22.09): bu damga `_header.html`in `hdr_sub`/`hdr_sub_id`
-      parametreleriyle uretiliyordu; olusan `.page-sub` dugumu anti-CLS
-      kurali yuzunden HER sayfada KALICI gizli (canli olcum: metin dolu,
-      kutu 0x0) ve `aria-live` da olu aliyordu. Artik <main> icinde,
-      gorunur. Yazan JS DEGISMEDI -- ayni id. -#}
-  <p class="da-updated" id="lastUpdate" role="status" aria-live="polite">Yükleniyor…</p>
-
-  <div class="sekt-tabs" id="sektTabs" role="tablist" aria-label="Sektör görünümü sekmeleri">
-    <button class="sekt-tab-btn active" id="sektTabBtnHm" role="tab" aria-selected="true" aria-controls="panelIsiHaritasi" onclick="switchSektorTab('heatmap')"><span aria-hidden="true">🗺️</span> Isı Haritası</button>
-    <button class="sekt-tab-btn" id="sektTabBtnCmp" role="tab" aria-selected="false" aria-controls="panelKarsilastir" onclick="switchSektorTab('compare')"><span aria-hidden="true">⚖️</span> Karşılaştır</button>
+{%- if _hm_ok %}
+  {% with hm_full=true, hm_mode=_mode, hm_per=_per, hm_path='/sektor-harita' %}{% include '_heatmap.html' %}{% endwith %}
+{%- else %}
+  {% call bpf.pagehead('BIST100 Isı Haritası') %}Hisseler sektörlerine göre: kutu büyüklüğü piyasa değeri, renk değişim, BorsaPusula Skoru ya da trend durumu.{% endcall %}
+  <div class="da-panel da-empty da-empty--page hm-empty" role="status">
+    <h2 class="da-empty-title">Harita hazır değil</h2>
+    <p>Isı haritası her işlem günü resmi kapanıştan sonra hazırlanır. Hisselere sektörüne göre <a href="/tarama">taramadan</a> bakabilirsin.</p>
   </div>
-
-  <div id="panelIsiHaritasi" role="tabpanel" aria-labelledby="sektTabBtnHm">
-    <div class="legend da-panel da-panel--accent" id="sektLegend">
-      <div class="legend-row">
-        <span><span class="legend-dot" style="background:var(--bp-al)"></span> Güçlü Trend ağırlıkta</span>
-        <span><span class="legend-dot" style="background:var(--bp-sat)"></span> Trend Bozuldu ağırlıkta</span>
-        <span><span class="legend-dot" style="background:var(--bp-bkl)"></span> Dengede (Yatay)</span>
-        <span data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ Hacim Onaylı</span>
-      </div>
-      <p class="legend-key">Kartın <strong>rengi</strong> sektörün yönünü, zemin <strong>doluluğu</strong> endeksin
-      büyüklüğünü gösterir. <strong class="da-num">Sektör Trend Endeksi</strong> = (Güçlü Trend − Trend Bozuldu) ÷ Toplam × 100.
-      <strong>RVOL</strong> = sektörün 5 günlük ortalama hacmi ÷ 20 günlük ortalama hacmi.</p>
-    </div>
-
-    <div class="sum-row" id="sumRow">
-      <div class="sum-chip da-panel"><div class="sum-num da-num bp-al-text" id="sumAl">{{ ssr_sectors|sum(attribute='al') if ssr_sectors else '—' }}</div><div class="sum-lbl">Güçlü Trend</div></div>
-      <div class="sum-chip da-panel"><div class="sum-num da-num bp-sat-text" id="sumSat">{{ ssr_sectors|sum(attribute='sat') if ssr_sectors else '—' }}</div><div class="sum-lbl">Trend Bozuldu</div></div>
-      <div class="sum-chip da-panel"><div class="sum-num da-num bp-bkl-text" id="sumBkl">{{ ssr_sectors|sum(attribute='bekle') if ssr_sectors else '—' }}</div><div class="sum-lbl">Yatay</div></div>
-      <div class="sum-chip da-panel"><div class="sum-num da-num" id="sumTotal" style="color:var(--bp-brand)">{{ ssr_sectors|sum(attribute='total') if ssr_sectors else '—' }}</div><div class="sum-lbl">Toplam Hisse</div></div>
-    </div>
-
-    <div class="heatmap" id="heatmap">{% for sec in ssr_sectors %}{% set color = 'var(--bp-al)' if sec.score >= 10 else 'var(--bp-sat)' if sec.score <= -10 else 'var(--bp-bkl)' %}{% set al_pct = (sec.al / sec.total * 100)|round(0)|int if sec.total > 0 else 0 %}{% set sat_pct = (sec.sat / sec.total * 100)|round(0)|int if sec.total > 0 else 0 %}{% set heat_op = [0.28, 0.05 + (sec.score|abs) / 100 * 0.22]|min %}
-      <a href="/tarama?sector={{ sec.name|urlencode }}" class="sector-card" data-sector="{{ sec.name }}" data-href="/tarama?sector={{ sec.name|urlencode }}" data-heat-target="{{ '%.3f'|format(heat_op) }}" style="--heat-color:{{ color }};--heat-opacity:0;cursor:pointer;text-decoration:none;display:block" data-tip="{{ sec.name }} sektöründeki tüm hisseleri taramaya götür">
-        <h2 class="sec-name da-display" style="color:{{ color }}">{{ sec.name }}</h2>
-        <div class="sec-stats">
-          {% if sec.premium %}<span class="stat-pill pill-prem" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ {{ sec.premium }}</span>{% endif %}
-          <span class="stat-pill pill-al">▲ {{ sec.al }}</span>
-          <span class="stat-pill pill-sat">▼ {{ sec.sat }}</span>
-          <span class="stat-pill pill-bkl">● {{ sec.bekle }}</span>
-          <span style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-text3)">{{ sec.total }} hisse</span>
-        </div>
-        <div class="seg-bar">
-          <div class="seg-al" style="width:{{ al_pct }}%"></div>
-          <div class="seg-sat" style="width:{{ sat_pct }}%"></div>
-          <div class="seg-bkl"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="score da-num" style="color:{{ color }}">{{ '+' if sec.score > 0 else '' }}{{ sec.score }}</div>
-          {% if sec.avg_rvol is not none %}<span style="font-size:10px;color:{{ 'var(--bp-volume)' if sec.avg_rvol|round(2) >= 1.20 else 'var(--bp-text3)' }}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL {{ '%.2f'|format(sec.avg_rvol)|replace('.', ',') }}×</span>{% endif %}
-        </div>
-      </a>{% else %}<div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>{% endfor %}
-    </div>
-  </div>
-
-  <div id="panelKarsilastir" role="tabpanel" aria-labelledby="sektTabBtnCmp" style="display:none">
-    <p class="cmp-intro">2 veya 3 sektörü sinyal gücü, hacim ve performans bazında yan yana karşılaştırın.</p>
-
-    <div class="selector-wrap da-panel">
-      <div class="selector-label">Sektör seç (maks. 3)</div>
-      <div class="sector-chips" id="sectorChips" role="status" aria-live="polite">
-        <div class="da-skel" style="width:90px;height:32px;border-radius:20px"></div>
-        <div class="da-skel" style="width:80px;height:32px;border-radius:20px"></div>
-        <div class="da-skel" style="width:110px;height:32px;border-radius:20px"></div>
-      </div>
-      <div class="selector-hint" id="selectorHint" role="status" aria-live="polite">Seçili: 0 sektör — en az 2 seçin</div>
-      <button class="compare-btn" id="compareBtn" disabled onclick="runCompare()">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="6" cy="18" r="3"/><line x1="18" y1="6" x2="18" y2="21"/><circle cx="18" cy="6" r="3"/></svg>
-        Karşılaştır
-      </button>
-    </div>
-
-    <div id="cmpLoadingOverlay" class="da-loading da-loading--block">
-      <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:cmpSpin .8s linear infinite;margin-bottom:10px"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-      <div>Veriler yükleniyor…</div>
-    </div>
-
-    <div id="compareResult" role="status" aria-live="polite"></div>
-  </div>
+{%- endif %}
 </main>
 
 {% with ftr_self='/sektor-harita', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/stale-banner.js?v=5d95f69f"></script>
 <script>
-const SECTORS = {};  // ticker → sector (doldurulacak)
-let allStocks  = [];
-
-// bughunt-r120 number-rounding-display-mismatch: Python 3 round() (round-half-to-even)
-// esdegeri - JS Math.round yarimi hep yukari yuvarlar, /api/sektor-compare ayni skoru
-// Python round() ile hesapliyor, kucuk sektorlerde (.5 sinirinda) heatmap karti ile
-// Karsilastir paneli farkli sayi gosterebiliyordu.
-function _pyRound(x) {
-  const floor = Math.floor(x);
-  const diff = x - floor;
-  if (diff < 0.5) return floor;
-  if (diff > 0.5) return floor + 1;
-  return (floor % 2 === 0) ? floor : floor + 1;
-}
-
-function heatColor(score) {
-  // 20.09 (CPO): burasi 7 adimli bir ham-hex gradyandi ve 7 degerin 3'u
-  // (iki Tailwind emerald tonu + bir Tailwind red tonu) HICBIR token'a karsilik
-  // gelmiyordu -- canlida olculdu, Tailwind red tonu aktif render ediliyordu.
-  // (Degerlerin kendisi bilerek buraya yazilmadi: style-guard duz regex ile
-  // tarar, yorum ile kodu ayirt etmez -- ornek olarak anilan bir hex kapiyi
-  // tetikler. Tam liste tools/style-guard.py OLU_PALET'inde.)
-  // Bu degerler her iki kapinin da kor noktasindaydi: K-B yalniz KANONIK-degerli
-  // literalleri sayar (bunlar hicbir token'a esit degil), K-E yalniz denylist'teki
-  // olu-palet degerlerini sayar (bunlar listede degildi) -- yani "ne kanonik ne
-  // denylist'te" olan bir hex HICBIR guard tarafindan gorulmuyor.
-  //
-  // Asil sorun renklerin kendisi degil, KODLAMANIN CIFTLENMESIYDI: skorun
-  // BUYUKLUGU zaten --heat-opacity ile (|score| ile orantili) tasiniyor, renk
-  // bandi ayni bilgiyi IKINCI kez, ustelik farkli bir paletle tasiyordu. Sayfanin
-  // KENDI lejandi ise sadece 3 renk (al/sat/bkl) tanimliyordu -- yani lejant
-  // kartlari hicbir zaman dogru anlatmiyordu.
-  // Artik: renk = YON (3 kanonik semantik renk, lejantla birebir),
-  //        opaklik = BUYUKLUK. hisse.html'in zaten kullandigi kodlama.
-  if (score >= 10)  return 'var(--bp-al)';
-  if (score <= -10) return 'var(--bp-sat)';
-  return 'var(--bp-bkl)';
-}
-
-function renderHeatmap(stocks) {
-  // Sektörlere göre grupla
-  const secMap = {};
-  let totalAl = 0, totalSat = 0, totalBkl = 0;
-
-  stocks.forEach(s => {
-    const sec = s.sector || 'Diğer';
-    if (!secMap[sec]) secMap[sec] = { al:[], sat:[], bkl:[], premium:[] };
-    if (s.is_premium) secMap[sec].premium.push(s);
-    if (s.signal === 'AL') { secMap[sec].al.push(s); totalAl++; }
-    else if (s.signal === 'SAT') { secMap[sec].sat.push(s); totalSat++; }
-    else { secMap[sec].bkl.push(s); totalBkl++; }
-  });
-
-  // Özet güncelle
-  document.getElementById('sumAl').textContent    = totalAl;
-  document.getElementById('sumSat').textContent   = totalSat;
-  document.getElementById('sumBkl').textContent   = totalBkl;
-  document.getElementById('sumTotal').textContent = stocks.length;
-
-  // Sektörleri skor'a göre sırala
-  // r122 bug-hunt: esit skorlu sektorlerde tiebreak yoktu, secMap'in anahtar
-  // sirasi (stocks dizisinin backend cache sirasi -> surekli degisen
-  // bull_score/bear_score'a bagli) sizip esit-skorlu sektorlerin sirasi
-  // refresh arasinda kayabiliyordu. Alfabetik tiebreak deterministik yapar.
-  const sectors = Object.entries(secMap).map(([name, d]) => {
-    const total = d.al.length + d.sat.length + d.bkl.length;
-    const score = total > 0 ? _pyRound((d.al.length - d.sat.length) / total * 100) : 0;
-    return { name, ...d, total, score };
-  }).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'tr'));
-
-  const hm = document.getElementById('heatmap');
-  hm.innerHTML = sectors.map(sec => {
-    const color = heatColor(sec.score);
-    const alPct  = sec.total > 0 ? (sec.al.length  / sec.total * 100).toFixed(0) : 0;
-    const satPct = sec.total > 0 ? (sec.sat.length / sec.total * 100).toFixed(0) : 0;
-
-    const alChips  = sec.al.map(s  => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-al">${esc(s.ticker)}</a>`).join('');
-    const satChips = sec.sat.map(s => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-sat">${esc(s.ticker)}</a>`).join('');
-    const bklSample = sec.bkl.slice(0,6).map(s => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-bkl">${esc(s.ticker)}</a>`).join('');
-    const bklMore  = sec.bkl.length > 6 ? `<span class="stock-chip chip-more" data-tip="${sec.bkl.length-6} hisse daha (Yatay)" tabindex="0">+${sec.bkl.length-6}</span>` : '';
-
-    const premCount = sec.premium ? sec.premium.length : 0;
-    const premPill  = premCount > 0
-      ? `<span class="stat-pill pill-prem" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ ${premCount}</span>`
-      : '';
-
-    /* Avg RVOL per sector */
-    const allSec = [...sec.al, ...sec.sat, ...sec.bkl];
-    const rvols  = allSec.map(s => s.rvol).filter(v => v != null && !isNaN(v));
-    const avgRvol = rvols.length > 0 ? (rvols.reduce((a,b) => a+b, 0) / rvols.length) : null;
-    const rvolHtml = avgRvol != null
-      ? (() => {
-          /* K-BO (21.09): hacim YON-BAGIMSIZ bir buyukluk olcusudur (cokuste de yuksek
-             cikar) — --bp-al (yukselis yesili) kullanilirsa ayni kartin seg-al cubugu
-             ve skor rengi zaten sinyal ekseninde oldugu icin "olumlu" okunuyordu;
-             emsal: tarama.css .trend-label (ADX, 10.09 BTCIM). Ustelik bu dal OLUYDU:
-             sektor ORTALAMA rvol'u canli veride max 1,48 (21.09, 13 sektor) — 2,0 esigi
-             hic tetiklenmiyordu. Tek eksen (--bp-volume, hacmin kanonik rengi) + sayfanin
-             KENDI lejandinin ilan ettigi tek esik (RVOL >= 1,20 = Hacim Onayli). */
-          /* K-BO ek: ESIKLENEN SAYI = GOSTERILEN SAYI olmali. Ilk yazim ham degeri
-             esikliyordu ama ekrana `toFixed(2)` yaziyordu: canlida 1,1987 olan iki
-             sektor ekranda "RVOL 1,20×" yazip GRI kaliyordu — sayfanin kendi lejandi
-             "RVOL >= 1,20 = Hacim Onayli" derken. Kullanicinin OKUDUGU sayi rengi
-             belirler. (K-BO dogrulama adimi bunu canli yakaladi.) */
-          const rc = parseFloat(avgRvol.toFixed(2)) >= 1.20 ? 'var(--bp-volume)' : 'var(--bp-text3)';
-          return `<span style="font-size:10px;color:${rc}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL ${avgRvol.toFixed(2).replace('.', ',')}×</span>`;
-        })()
-      : '';
-
-    // r171 (cool/stunning denetimi): opaklik skordan bagimsiz sabit %6'ydi, +50 ile
-    // +11 skorlu sektor gorsel olarak ayirt edilemiyordu - bir isi haritasinin temel
-    // vaadi (orantili yogunluk) karsilanmiyordu. Skorun mutlak degerine gore olceklendi.
-    const heatOpacity = Math.min(0.28, 0.05 + Math.abs(sec.score) / 100 * 0.22);
-
-    return `
-    <div class="sector-card" data-sector="${esc(sec.name)}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" data-heat-target="${heatOpacity.toFixed(3)}" style="--heat-color:${color};--heat-opacity:0;cursor:pointer" data-tip="${esc(sec.name)} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
-      <h2 class="sec-name da-display" style="color:${color}">${esc(sec.name)}</h2>
-      <div class="sec-stats">
-        ${premPill}
-        <span class="stat-pill pill-al">▲ ${sec.al.length}</span>
-        <span class="stat-pill pill-sat">▼ ${sec.sat.length}</span>
-        <span class="stat-pill pill-bkl">● ${sec.bkl.length}</span>
-        <span style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-text3)">${sec.total} hisse</span>
-      </div>
-      <div class="seg-bar">
-        <div class="seg-al"  style="width:${alPct}%"></div>
-        <div class="seg-sat" style="width:${satPct}%"></div>
-        <div class="seg-bkl"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="score da-num" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
-        <div style="display:flex;align-items:center;gap:8px">${rvolHtml}<span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Trend Endeksi</span></div>
-      </div>
-      ${alChips || satChips || bklSample ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
-    </div>`;
-  }).join('');
-
-  // r178 (Ozan hedefi: "stunning/high-tech"): isi haritasi kartlari her render'da
-  // 0 opaklikta basliyor, bir sonraki frame'de gercek --heat-opacity'ye geciyor -
-  // CSS transition (sector_harita.css) bunu yumusak bir "doluyor" hissine ceviriyor.
-  // rAF sarti: stil DOM'a yazildiktan (0 olarak) sonraki paint'ten SONRA degistirmek
-  // gerekiyor, aksi halde tarayici iki degeri tek adimda birlestirip animasyonu atlar.
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      document.querySelectorAll('.sector-card[data-heat-target]').forEach(card => {
-        card.style.setProperty('--heat-opacity', card.dataset.heatTarget);
-      });
-    });
-  });
-
-  // Click delegation: card click navigates, BUT inner <a> (stock chip) clicks pass through naturally
-  document.querySelectorAll('.sector-card').forEach(card => {
-    if (card._bpBound) return;
-    card._bpBound = true;
-    card.addEventListener('click', e => {
-      // If a child <a> was clicked, let it handle (browser default)
-      if (e.target.closest('a')) return;
-      const href = card.dataset.href;
-      if (href) window.location.href = href;
-    });
-    card.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const href = card.dataset.href;
-        if (href) window.location.href = href;
-      }
-    });
-  });
-}
-
-let _loadAttempts = 0;
-let _loading = false;  /* retry-zinciri (setTimeout) ile görünürlük yenilemesi cakismasin (bug-hunt) */
-let _secUpdatedAt = null;  /* C-09: aynı veri yeniden çizilmez */
-
-async function load() {
-  if (_loading) return;
-  _loading = true;
-  try {
-    const r = await fetch('/api/data');
-    const j = await r.json();
-    if (!j.stocks || j.stocks.length === 0) {
-      _loadAttempts++;
-      if (_loadAttempts >= 4) {
-        document.getElementById('heatmap').innerHTML =
-          '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veriler henüz hazır değil.</span><button type="button" class="da-retry" onclick="load()">Tekrar dene</button></div>';
-        document.getElementById('lastUpdate').textContent = 'Veri bekleniyor…';
-        return;
-      }
-      setTimeout(load, 15000);
-      return;
-    }
-    _loadAttempts = 0;
-    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s, j.refreshing);
-    if (j.updated_at && j.updated_at === _secUpdatedAt) return;
-    _secUpdatedAt = j.updated_at || null;
-    allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
-    document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
-    renderHeatmap(allStocks);
-  } catch(e) {
-    _loadAttempts++;
-    if (_loadAttempts >= 3) {
-      document.getElementById('heatmap').innerHTML =
-        '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Bağlantı hatası — veriler yüklenemedi.</span><button type="button" class="da-retry" onclick="load()">Tekrar dene</button></div>';
-      document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
-      return;
-    }
-    setTimeout(load, 15000);
-  } finally {
-    _loading = false;
-  }
-}
-
-load();
-/* C-09 (26.09): 2 dk'lık setInterval kalktı (EOD: veri günde bir değişir).
-   Sekme görünür olunca, en fazla 15 dk'da bir ve yalnız Isı Haritası paneli
-   açıkken yeniden okunur; `updated_at` aynıysa yeniden çizilmez (load()).
-   Odak korunur (K-AX: bpPreserveFocus tık anında çözülür). */
-let _secLastCheck = Date.now();
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden || Date.now() - _secLastCheck < 15 * 60 * 1000) return;
-  var panelHm = document.getElementById('panelIsiHaritasi');
-  if (panelHm && panelHm.style.display === 'none') return;
-  _secLastCheck = Date.now();
-  (window.bpPreserveFocus ? window.bpPreserveFocus(load) : load)();
-});
-
-window.addEventListener('pageshow', function(e) {
-  if (e.persisted) {
-    var overlay = document.getElementById('cmpLoadingOverlay');
-    if (overlay) overlay.classList.remove('visible');
-    var btn = document.getElementById('compareBtn');
-    if (btn) btn.disabled = _selected.length < 2;
-  }
-});
-
 // Makro Ticker Bandı
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
-
-// ── T4.2: Sektör Tab Sistemi ──
-let _cmpLoaded = false;
-function switchSektorTab(tab) {
-  const btnHm   = document.getElementById('sektTabBtnHm');
-  const btnCmp  = document.getElementById('sektTabBtnCmp');
-  const panelHm  = document.getElementById('panelIsiHaritasi');
-  const panelCmp = document.getElementById('panelKarsilastir');
-  if (!panelHm || !panelCmp) return;
-  if (tab === 'compare') {
-    btnCmp && btnCmp.classList.add('active');
-    btnHm && btnHm.classList.remove('active');
-    btnCmp && btnCmp.setAttribute('aria-selected', 'true');
-    btnHm && btnHm.setAttribute('aria-selected', 'false');
-    panelCmp.style.display = 'block';
-    panelHm.style.display = 'none';
-    if (!_cmpLoaded) { _cmpLoaded = true; loadSectors(); }
-  } else {
-    btnHm && btnHm.classList.add('active');
-    btnCmp && btnCmp.classList.remove('active');
-    btnHm && btnHm.setAttribute('aria-selected', 'true');
-    btnCmp && btnCmp.setAttribute('aria-selected', 'false');
-    panelHm.style.display = 'block';
-    panelCmp.style.display = 'none';
-    if (!document.hidden) load();  /* C-09: updated_at aynıysa çizim yok */
-  }
-  _publishSektorUrl(tab);
-}
-
-/* ── K-CT (22.09): adres cubugunun TEK yazari ────────────────────────────────
-   Once iki ayri yazar vardi ve ikisi birbirinden habersizdi: switchSektorTab
-   yalniz `tab`i, updateHint yalniz `s`yi yaziyordu. Sonuc olculdu (canli):
-   Karsilastir'da 2 sektor secip Isi Haritasi'na donunce adres
-   `?s=Ulasim&s=Telekom` kaliyordu -- sayfa KENDI URETTIGI olu derin baglantiyi
-   paylastiriyordu: o adres acildiginda `loadSectors()` hic kosmadigi icin
-   `_selected` [] geliyor, hicbir sey geri yuklenmiyordu.
-   K-CS kanonu: adres cubugu YALNIZ aktif sekmenin durumunu tasir. */
-function _publishSektorUrl(tab) {
-  if (!tab) {
-    var _pc = document.getElementById('panelKarsilastir');
-    tab = (_pc && _pc.style.display === 'block') ? 'compare' : 'heatmap';
-  }
-  var url = new URL(location.href);
-  url.searchParams.delete('tab');
-  url.searchParams.delete('s');
-  if (tab === 'compare') {
-    /* K-CR: varsayilan sekme (Isi Haritasi) adreste gorunmez. */
-    url.searchParams.set('tab', 'compare');
-    (_selected || []).forEach(function(s) { url.searchParams.append('s', s); });
-  }
-  var next = url.pathname + url.search;
-  if (next !== location.pathname + location.search) {
-    history.replaceState(null, '', url.toString());
-  }
-}
-
-/* Sekme niyetinin TEK okuyucusu: `tab=compare` ya da tasidigi `s` durumu.
-   Eski `/sektor-karsilastir?s=...` derin baglantilari `tab` tasimiyordu. */
-function _resolveSektorTab() {
-  var params = new URLSearchParams(location.search);
-  if (params.get('tab') === 'compare') return 'compare';
-  if (params.getAll('s').length > 0) return 'compare';
-  return 'heatmap';
-}
-
-// r103 bug-hunt: role="tab" sekmelerinde ok-tuşu navigasyonu yoktu (APG tab
-// deseni gereği ArrowLeft/ArrowRight/Home/End odağı+seçimi taşımalı, sadece
-// Tab+Enter/tık değil).
-document.addEventListener('DOMContentLoaded', function(){
-  var tabs = document.getElementById('sektTabs');
-  if (!tabs) return;
-  tabs.addEventListener('keydown', function(e){
-    if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
-    var btnHm = document.getElementById('sektTabBtnHm');
-    var btnCmp = document.getElementById('sektTabBtnCmp');
-    if (!btnHm || !btnCmp) return;
-    e.preventDefault();
-    var target = (e.key === 'Home') ? btnHm
-      : (e.key === 'End') ? btnCmp
-      : (document.activeElement === btnHm) ? btnCmp : btnHm;
-    var tab = (target === btnCmp) ? 'compare' : 'heatmap';
-    switchSektorTab(tab);
-    target.focus();
-  });
-});
-
-// ── T4.2: Sektör Karşılaştırma (eski /sektor-karsilastir, sektor_karsilastir.html'den taşındı) ──
-var _selected = [];
-var _sectors = [];
-
-async function loadSectors() {
-  try {
-    var res = await fetch('/api/sektor-summary');
-    var json = await res.json();
-    if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
-    _sectors = json.sectors || [];
-    renderChips();
-    // URL'den on-yukleme (eski /sektor-karsilastir?s=...&s=... deep-link'leri icin)
-    /* K-CT: esik `>= 2` idi -- tek sektorluk secim adrese YAZILIYOR ama geri
-       OKUNMUYORDU (canli olcum: `?tab=compare&s=Ulasim` -> "Secili: 0 sektor").
-       Ayrica `params.getlist` Python API'si; JS'te hicbir zaman tanimli degil,
-       olu daldi. */
-    var pre = new URLSearchParams(location.search).getAll('s');
-    pre.forEach(function(s) { if (_sectors.find(function(x){return x.name===s;})) toggleChip(s); });
-    /* Taninmayan `s` degeri hicbir sipi eslestirmez; adresi gercege esitle
-       (aksi halde adres, sayfanin gostermedigi bir durumu iddia etmeye devam
-       ederdi -- hicbir chip secili degilse toggleChip hic kosmaz). */
-    _publishSektorUrl('compare');
-    if (_selected.length >= 2) runCompare();
-  } catch(e) {
-    document.getElementById('sectorChips').innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Sektör verileri yüklenemedi.</span><button type="button" class="da-retry" onclick="loadSectors()">Tekrar dene</button></div>';
-  }
-}
-
-function renderChips() {
-  var wrap = document.getElementById('sectorChips');
-  wrap.innerHTML = '';
-  _sectors.forEach(function(sec) {
-    var chip = document.createElement('button');
-    chip.className = 'chip';
-    chip.textContent = sec.name;
-    chip.dataset.name = sec.name;
-    chip.setAttribute('aria-pressed', 'false');
-    chip.onclick = function() { toggleChip(sec.name); };
-    wrap.appendChild(chip);
-  });
-}
-
-function toggleChip(name) {
-  var idx = _selected.indexOf(name);
-  if (idx >= 0) {
-    _selected.splice(idx, 1);
-  } else {
-    if (_selected.length >= 3) return;
-    _selected.push(name);
-  }
-  updateChipStyles();
-  updateHint();
-}
-
-function updateChipStyles() {
-  document.querySelectorAll('.chip').forEach(function(c) {
-    var name = c.dataset.name;
-    var si = _selected.indexOf(name);
-    c.className = 'chip';
-    if (si >= 0) c.classList.add('sel-' + (si + 1));
-    c.setAttribute('aria-pressed', String(si >= 0));
-  });
-}
-
-function updateHint() {
-  var hint = document.getElementById('selectorHint');
-  var btn = document.getElementById('compareBtn');
-  var n = _selected.length;
-  if (n === 0) { hint.textContent = 'Seçili: 0 sektör — en az 2 seçin'; }
-  else if (n === 1) { hint.textContent = 'Seçili: 1 sektör — 1 tane daha seçin'; }
-  else { hint.textContent = 'Seçili: ' + n + ' sektör — Karşılaştır\'a basın'; }
-  btn.disabled = n < 2;
-  _publishSektorUrl();
-}
-
-var _cmpReqId = 0;
-async function runCompare() {
-  if (_selected.length < 2) return;
-  var myReqId = ++_cmpReqId;
-  var overlay = document.getElementById('cmpLoadingOverlay');
-  var result = document.getElementById('compareResult');
-  var btn = document.getElementById('compareBtn');
-  // bug-hunt r95: karsilastir.html'in doCompare()'inin aksine buton istek surerken
-  // disable edilmiyordu (sadece _cmpReqId bayat-render koruması vardi, istegin
-  // kendisini engellemiyordu) -- cift-tiklama/hizli-ardisik-istek korumasi eklendi.
-  if (btn) btn.disabled = true;
-  overlay.classList.add('visible');
-  result.innerHTML = '';
-  try {
-    var qs = _selected.map(function(s){return 's=' + encodeURIComponent(s);}).join('&');
-    var res = await fetch('/api/sektor-compare?' + qs, { signal: AbortSignal.timeout(15000) });
-    var json = await res.json();
-    if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
-    if (myReqId !== _cmpReqId) return; // bayat yanit — daha yeni bir runCompare cagrisi var
-    overlay.classList.remove('visible');
-    renderCompare(json);
-  } catch(e) {
-    if (myReqId !== _cmpReqId) return;
-    overlay.classList.remove('visible');
-    result.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Karşılaştırma verisi yüklenemedi.</span><button type="button" class="da-retry" onclick="runCompare()">Tekrar dene</button></div>';
-  } finally {
-    if (myReqId === _cmpReqId && btn) btn.disabled = _selected.length < 2;
-  }
-}
-
-/* ACCENT_COLORS kaldirildi (20.09): tek tuketicisi skor sayisiydi, o da artik
-   degere gore boyaniyor. Sutun kimlik rengi CSS'te (.col-accent-N .sec-col-name). */
-
-function renderCompare(json) {
-  var compare = json.compare || {};
-  var selected = json.selected || _selected;
-  var result = document.getElementById('compareResult');
-  var n = selected.length;
-  var grid = document.createElement('div');
-  grid.className = 'compare-grid cols-' + n;
-
-  selected.forEach(function(secName, i) {
-    var d = compare[secName];
-    if (!d) return;
-    var col = document.createElement('div');
-    col.className = 'sec-col da-panel col-accent-' + i;
-
-    var score = d.score || 0;
-    var scoreAbs = Math.min(Math.abs(score), 100);
-    var barClass = score > 0 ? 'score-positive' : (score < 0 ? 'score-negative' : 'score-neutral');
-    var scoreSign = score > 0 ? '+' : '';
-    /* 20.09: skor SAYISI ACCENT_COLORS[i] ile, yani SUTUN SIRASIYLA boyaniyordu --
-       hemen yanindaki bar ise (barClass) DEGERE gore boyaniyor. Ayni widget'ta iki
-       celisen renk kaynagi: 3. sirada secilen +40'lik bir sektorun sayisi kirmizi
-       (= Trend Bozuldu rengi), bari yesil cikiyordu. Sayi artik bar ile ayni degere
-       bagli. Sutun kimligi (ad rengi + cip rengi) bilincli olarak degismedi. */
-    var scoreColor = score > 0 ? 'var(--bp-al)' : (score < 0 ? 'var(--bp-sat)' : 'var(--bp-bkl)');
-
-    col.innerHTML = '<div class="sec-col-header">' +
-      '<h2 class="sec-col-name da-display">' + esc(d.name) + '</h2>' +
-      '<div class="score-bar-wrap">' +
-        '<div class="score-bar-label"><span>Sektör Trend Endeksi</span><span style="color:' + scoreColor + ';font-weight:800">' + scoreSign + score + '</span></div>' +
-        '<div class="score-bar-track"><div class="score-bar-fill ' + barClass + '" style="width:' + scoreAbs + '%"></div></div>' +
-      '</div>' +
-      '<div class="cmp-sec-stats">' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('AL') + '</div><div class="cmp-stat-pill-val val-al">' + d.al + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('SAT') + '</div><div class="cmp-stat-pill-val val-sat">' + d.sat + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('BEKLE') + '</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
-      '</div>' +
-      '<div class="sec-metrics">' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2).replace('.', ',') + '×' : '—') + '</div></div>' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg.toFixed(2).replace('.', ',') + '%' : '—') + '</div></div>' +
-      '</div>' +
-    '</div>';
-
-    var stocksDiv = document.createElement('div');
-    var titleDiv = document.createElement('div');
-    titleDiv.className = 'stocks-title';
-    titleDiv.textContent = d.total + ' hisse';
-    stocksDiv.appendChild(titleDiv);
-
-    (d.stocks || []).forEach(function(s) {
-      var row = document.createElement('a');
-      row.className = 'cmp-stock-row';
-      row.href = '/hisse/' + s.ticker;
-      var sigCls = s.signal === 'AL' ? 'cmp-sig-al' : (s.signal === 'SAT' ? 'cmp-sig-sat' : 'cmp-sig-bkl');
-      var chgVal = s.change_pct != null ? bpFormatPct(s.change_pct, 2) : '—';
-      var chgCls = s.change_pct > 0 ? 'cmp-chg-pos' : (s.change_pct < 0 ? 'cmp-chg-neg' : '');
-      var rvolVal = s.rvol != null ? s.rvol.toFixed(2).replace('.', ',') + '×' : '';
-      /* K-BO: esik 2,0 -> 1,20. Sayfanin lejandi "RVOL >= 1,20 = Hacim Onayli" diyor,
-         ama bu liste 2,0'a kadar griye boyuyordu: 21.09 canli veride 1,20+ olan 79
-         hissenin 74'u burada sonuk goruluyordu — sayfa kendi lejandiyla celisiyordu. */
-      var rvolCls = parseFloat(s.rvol.toFixed(2)) >= 1.20 ? 'cmp-rvol-high' : '';
-      row.innerHTML = '<span class="cmp-stock-ticker">' + esc(s.ticker) + '</span>' +
-        '<span class="cmp-stock-sig ' + sigCls + '">' + sigLabel(s.signal) + '</span>' +
-        '<span class="cmp-stock-price">' + (s.price != null ? fmtPrice(s.price) : '') + '</span>' +
-        '<span class="cmp-stock-chg ' + chgCls + '">' + chgVal + '</span>' +
-        '<span class="cmp-stock-rvol ' + rvolCls + '">' + rvolVal + '</span>';
-      stocksDiv.appendChild(row);
-    });
-
-    col.appendChild(stocksDiv);
-    grid.appendChild(col);
-  });
-
-  result.appendChild(grid);
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function fmtPrice(p) {
-  if (p == null) return '—';
-  var n = parseFloat(p);
-  if (isNaN(n)) return String(p);
-  return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-// Sayfa yuklendiginde sekme niyeti tek yerden cozulur (eski /sektor-karsilastir 301'i)
-(function(){
-  if (_resolveSektorTab() === 'compare') switchSektorTab('compare');
-})();
 </script>
 
 <script src="/static/bp-search.js?v=8cee77ec" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
 
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

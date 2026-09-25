@@ -16,10 +16,6 @@
       "mode": "filtered",
       "reason": "ana sayfa vitrini tum evreni listeler (satir ~807 XU030/XU100 elenir)"
     },
-    "templates/sektor_harita.html": {
-      "mode": "filtered",
-      "reason": "sektor dagilimi tum evreni sayar (satir ~681 XU030 elenir)"
-    },
     "static/bp-search.js": {
       "mode": "filtered",
       "reason": "site geneli arama evreni — KANON kopya (satir ~168 XU030/XU100 elenir)"
