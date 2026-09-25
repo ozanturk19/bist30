@@ -45,6 +45,7 @@ import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /harita gün sayfası bağlamı
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
+import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
@@ -9460,6 +9461,22 @@ def _get_fundamentals(ticker_base):
         return {}
 
 
+def _fundamentals_kap(ticker, data):
+    """D-40a0: data/kap_fin/<T>.json varsa büyüme, net borç, değerleme bandı ve temettü
+    KAP'ta açıklanan rapordan (kap_financials.apply_to_fundamentals). Yahoo'nun tek çeyrek
+    nominal revenue_growth/earnings_growth'u büyüme diye kullanılmaz."""
+    if not data:
+        return data
+    with _lock:
+        price = next((s.get("price") for s in (_cache.get("data") or []) if s.get("ticker") == ticker), None)
+    try:
+        return kap_financials.apply_to_fundamentals(
+            data, kap_financials.load_record(ticker), price, datetime.now(_TZ_TR).date())
+    except Exception as e:
+        logger.warning("_fundamentals_kap(%s): %s", ticker, e)
+        return data
+
+
 @app.route("/api/hisse/<ticker>/fundamentals")
 @limiter.limit("30 per minute")  # r37 bug-hunt: aynı /api/hisse/<ticker>/* ailesindeki kardeşlerle (news/kap/signal-story 20-30/min) tutarlılık, eksikti
 def api_stock_fundamentals(ticker):
@@ -9467,7 +9484,7 @@ def api_stock_fundamentals(ticker):
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
-    data = _get_fundamentals(ticker)
+    data = _fundamentals_kap(ticker, _get_fundamentals(ticker))
     return safe_json({"fundamentals": data})
 
 
@@ -9574,7 +9591,7 @@ def _run_eod_scoring_pass(results: list):
         for tk, sec in ticker_to_sector.items():
             with _lock:
                 cached = _fundamentals_cache.get(tk)
-            fdata = dict(cached["data"]) if cached else {}
+            fdata = dict(_fundamentals_kap(tk, cached["data"])) if cached else {}  # D-40a0: büyüme/net borç KAP'tan
             fdata["ticker"] = tk
             fdata["sector"] = sec
             stocks_with_fundamentals.append(fdata)
@@ -11898,7 +11915,7 @@ def api_karsilastir():
         # /api/data ve /api/tarama'nın da kaynağı) — doğrudan onu kullan.
         adx_val = s.get("adx")
         # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
-        fund = _get_fundamentals(ticker) if ticker in BIST100 and bool(s) else {}
+        fund = _fundamentals_kap(ticker, _get_fundamentals(ticker)) if ticker in BIST100 and bool(s) else {}
         results.append({
             "ticker":         ticker,
             "name":           STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
