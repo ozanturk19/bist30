@@ -65,7 +65,7 @@ header{
 
 /* ── HERO ── */
 .da-hero{position:relative;left:50%;width:100vw;margin-left:-50vw;padding:clamp(28px,5vw,56px) 0 clamp(50px,7vw,88px);overflow:hidden}
-.da-hero-art{position:absolute;inset:-8% 0 auto 0;height:115%;width:100%;z-index:0;pointer-events:none;opacity:.8;
+.da-hero-art{position:absolute;inset:-52px 0 auto 0;/* C-13: -8% hero uzadikca kayiyordu (CLS 0,19) */height:115%;width:100%;z-index:0;pointer-events:none;opacity:.8;
   /* CPO-1557: blur'lu blob'lar kendi içinde yumuşak ama kapsayıcı overflow:hidden'la
      SERT kesiliyordu (Ozan bulgusu: "kesilmesi iyi durmuyor") — alt %35'i şeffaflığa
      doğru maskeleyerek sayfanın düz koyu zeminine yumuşak geçiş sağlanıyor. */
