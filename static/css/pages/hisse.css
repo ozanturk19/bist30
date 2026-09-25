@@ -1052,7 +1052,6 @@
   .hx-ring-fg{ fill:none; stroke-width:7; stroke-linecap:round; }
   .hx-ring-fg--bp{ stroke:var(--bp-al); }
   .hx-bp-l{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-xs); font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--bp-text3); }
-  .hx-bp-v{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-15); font-weight:700; }
   .hx-bp-f{ font-size:var(--bp-text-sm); color:var(--bp-text3); }
   .hx-qs{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .hx-q{ padding:18px 20px 4px 0; min-width:0; }

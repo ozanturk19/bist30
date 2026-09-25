@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=5ef39f47">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=bd0e750c">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -350,7 +350,6 @@
         </div>
         <div class="hx-bp-tx">
           <div class="hx-bp-l">BorsaPusula Skoru</div>
-          <div class="hx-bp-v">{{ _bp }} / 100</div>
           <div class="hx-bp-f">{% if hs.partial %}Kısmi · yalnız Temel{% else %}Finansallar %60 · Trend %40{% endif %}</div>
         </div>
       </div>
@@ -1126,7 +1125,7 @@
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
   <aside class="da-panel content-card" data-tab-content="always" aria-labelledby="related-heading">
-    <h2 class="section-title" id="related-heading"><span aria-hidden="true">🔗</span> {{ sector }} Sektöründen Diğer Hisseler</h2>
+    <h2 class="section-title" id="related-heading">{{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
       <a href="/hisse/{{ r.ticker }}" class="related-chip" title="{{ r.name }}">
@@ -1141,7 +1140,7 @@
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
   <div data-tab-content="always" style="margin-bottom:16px">
-    <h2 class="section-title" style="margin-bottom:10px"><span aria-hidden="true">📖</span> İlgili Okumalar</h2>
+    <h2 class="section-title" style="margin-bottom:10px">İlgili Okumalar</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
