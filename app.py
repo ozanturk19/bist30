@@ -10,7 +10,7 @@ if 'gevent' in _sys.modules or any('gunicorn' in arg for arg in _sys.argv):
 import socket as _socket
 _socket.setdefaulttimeout(8)   # CPO-505: 20→8s (uzun yfinance hang -w4 satürasyon yapıyordu)
 
-from flask import Flask, jsonify, render_template, Response, request, abort, redirect
+from flask import Flask, jsonify, render_template, Response, request, abort, redirect, send_file
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -42,6 +42,7 @@ import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
+import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /harita gün sayfası bağlamı
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
@@ -4750,31 +4751,73 @@ def _build_heatmap_snapshot(day):
     logger.info("HEATMAP: %s %s — n=%d, sayım %s, bayat %d, not %d", day,
                 "donduruldu " + path if path else "zaten donmuş, dokunulmadı", snap["n"], snap["counts"],
                 sum(1 for r in snap["rows"] if r["stale"]), len(snap["notes"]))
+    _render_heatmap_images(day.isoformat())
     return snap
 
 
+def _render_heatmap_images(day_iso):
+    """D-54: günün paylaşım görselleri (1200×630 + 1080×1350) donmuş görüntüden BİR KEZ üretilir
+    (data/heatmap/<gün>.png, <gün>-kare.png; var olana dokunulmaz). Hata EOD turunu bozmaz;
+    eksik kalırsa /harita/<gün>.png ilk istekte kilit altında üretir."""
+    try:
+        m = _heatmap_day(day_iso)
+        if not m:
+            return []
+        done = heatmap_image.ensure(_HEATMAP_DIR, day_iso, lambda: m["snap"])
+        logger.info("HEATMAP: %s görsel %s", day_iso, [os.path.basename(p) for p in done] or "zaten var")
+        return done
+    except Exception as _e:
+        logger.warning("HEATMAP: %s görsel üretilemedi: %s", day_iso, _e)
+        return []
+
+
 _heatmap_mem = {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []}
+_heatmap_day_mem = {}   # D-54: geçmiş günler (yol → _heatmap_mem biçimi), en çok 16 gün
 
 
-def _heatmap_latest():
-    """Son donmuş görüntü + treemap geometrisi (dosya mtime'ına göre bellekte) ya da None."""
-    path = heatmap.latest_path(_HEATMAP_DIR)
-    if not path:
-        return None
+def _heatmap_load(path, mem):
+    """Donmuş görüntü + treemap geometrisi (mem'de, dosya mtime'ına göre) ya da None."""
     try:
         mt = os.path.getmtime(path)
-        if _heatmap_mem["path"] != path or _heatmap_mem["mtime"] != mt:
+        if mem["path"] != path or mem["mtime"] != mt:
             with open(path, encoding="utf-8") as _f:
                 snap = json.load(_f)
             # D-23: donmuş görüntünün grubu güncel taksonomiden (eski dosya eski grup adını taşımasın)
             heatmap.regroup(snap.get("rows"), lambda t: sector_taxonomy.bucket_for(
                 t, UNIVERSE.get("companies"), KAP_INFO, default=None))
             groups, tiles = heatmap.layout(snap.get("rows") or [])
-            _heatmap_mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
+            mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
     except Exception as _e:
         logger.warning("HEATMAP: %s okunamadı: %s", path, _e)
         return None
-    return _heatmap_mem
+    return mem
+
+
+def _heatmap_latest():
+    """Son donmuş görüntü + treemap geometrisi (dosya mtime'ına göre bellekte) ya da None."""
+    path = heatmap.latest_path(_HEATMAP_DIR)
+    return _heatmap_load(path, _heatmap_mem) if path else None
+
+
+def _heatmap_day(day):
+    """D-54: o günün donmuş görüntüsü (yalnız katı YYYY-AA-GG; yol geçişi yok) ya da None."""
+    if not heatmap_image.valid_day(day):
+        return None
+    path = os.path.join(_HEATMAP_DIR, day + ".json")
+    if not os.path.isfile(path):
+        return None
+    if path == heatmap.latest_path(_HEATMAP_DIR):
+        return _heatmap_latest()
+    if path not in _heatmap_day_mem and len(_heatmap_day_mem) >= 16:
+        _heatmap_day_mem.pop(next(iter(_heatmap_day_mem)))
+    mem = _heatmap_day_mem.setdefault(path, {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []})
+    return _heatmap_load(path, mem)
+
+
+def _heatmap_og_image():
+    """D-54: son günün bağlantı önizleme görseli yolu ('/harita/<gün>.png') ya da None."""
+    d = heatmap.days(_HEATMAP_DIR)
+    return heatmap_image.url(d[-1]) if d else None
 
 
 def _heatmap_ssr_context():
@@ -5234,6 +5277,7 @@ def index():
         ssr_top_signals=_ssr["top_signals"],
         ssr_spotlight=_ssr["spotlight"],
         **_heatmap_ssr_context(),   # D-42: heatmap / heatmap_groups / heatmap_tiles (yoksa None/[]/[])
+        heatmap_og_image=_heatmap_og_image(),   # D-54: og:image = son günün haritası (yoksa None)
     ))
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
@@ -5431,6 +5475,76 @@ def api_hisse_lite(ticker):
 @app.route("/heatmap")
 def heatmap_page():
     return redirect("/sektor-harita", code=301)
+
+
+# ── D-54: paylaşılabilir ısı haritası — /harita/<gün> kalıcı sayfa + PNG görseller ──────────────
+def _harita_page_ready():
+    """harita_gun.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /harita ve
+    /harita/<gün> 404 döner (500 yok); görseller şablondan bağımsız çalışır."""
+    try:
+        app.jinja_env.get_template("harita_gun.html")
+        return True
+    except Exception:
+        return False
+
+
+def _harita_png(day, kind):
+    m = _heatmap_day(day)
+    if not m:
+        abort(404)
+    path = heatmap_image.image_path(_HEATMAP_DIR, day, kind)
+    if not os.path.isfile(path):
+        try:   # EOD'da üretilemediyse bir kez, dosya kilidi altında (var olan asla yeniden çizilmez)
+            heatmap_image.ensure(_HEATMAP_DIR, day, lambda: m["snap"], kinds=(kind,))
+        except Exception as e:
+            logger.warning("HARITA: %s %s görseli üretilemedi: %s", day, kind, e)
+            return Response("gorsel uretilemedi", status=503, mimetype="text/plain",
+                            headers={"Cache-Control": "no-store"})
+    resp = send_file(path, mimetype="image/png", conditional=True, etag=True, max_age=0)
+    d = heatmap.days(_HEATMAP_DIR)
+    # Geçmiş gün değişmez; son gün aynı gece veri düzeltmesine karşı 1 saat.
+    resp.headers["Cache-Control"] = ("public, max-age=3600" if d and day == d[-1]
+                                     else "public, max-age=31536000, immutable")
+    return resp
+
+
+@app.route("/harita")
+def harita_son():
+    d = heatmap.days(_HEATMAP_DIR)
+    if not d or not _harita_page_ready():
+        abort(404)
+    resp = redirect("/harita/" + d[-1], code=302)
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/harita/<name>")
+def harita(name):
+    """/harita/<YYYY-AA-GG> sayfa · .png 1200×630 · -kare.png 1080×1350 · son.png → son gün.
+    Ad heatmap_image.parse_name ile katı (yalnız ASCII rakam, gerçek tarih); değilse 404."""
+    if name == "son.png":
+        d = heatmap.days(_HEATMAP_DIR)
+        if not d:
+            abort(404)
+        resp = redirect(heatmap_image.url(d[-1]), code=302)
+        resp.headers["Cache-Control"] = "public, max-age=300"
+        return resp
+    parsed = heatmap_image.parse_name(name)
+    if not parsed:
+        abort(404)
+    day, kind = parsed
+    if kind:
+        return _harita_png(day, kind)
+    if not _harita_page_ready():
+        abort(404)
+    m = _heatmap_day(day)
+    if not m:
+        abort(404)
+    resp = app.make_response(render_template(
+        "harita_gun.html", heatmap=m["snap"], heatmap_groups=m["groups"], heatmap_tiles=m["tiles"],
+        harita_gun=heatmap_image.day_context(m["snap"], heatmap.days(_HEATMAP_DIR))))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
 
 
 @app.route("/api/heatmap")
@@ -11163,6 +11277,10 @@ def sitemap():
             pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
+    # D-54: /harita/<gün> kalıcı ısı haritası sayfaları (şablon yayındaysa)
+    if _harita_page_ready():
+        for d in reversed(heatmap.days(_HEATMAP_DIR)[-90:]):
+            pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
@@ -11328,6 +11446,10 @@ def llms_txt():
 ## İletişim
 - [İletişim](https://borsapusula.com/iletisim)
 """
+    if _harita_page_ready():   # D-54: kalıcı gün sayfaları (şablon yayındaysa)
+        body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
+                            "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
+                            "kapanış günü kalıcı sayfa: /harita/YYYY-AA-GG\n- [Takvim](", 1)
     return Response(body, mimetype="text/plain")
 
 
@@ -12741,7 +12863,8 @@ def sektor_harita():
     # CPO-1587 Faz 2: sektör sayısı az olduğu için tamamı SSR context'e geçiliyor
     # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
     ssr_sectors, ssr_updated_at = _compute_sector_heatmap()
-    return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at)
+    return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at,
+                           heatmap_og_image=_heatmap_og_image())   # D-54: og:image (yoksa None)
 
 
 @app.route("/api/sector-heatmap")

@@ -1,7 +1,9 @@
 // C-06: favicon.svg, logo.svg, icon-192/512.png'yi logo v2 A geometrisinden
+// (D-54: + assets/brand/mark-256.png ve mark-sade-256.png — saydam zemin, isi haritasi
+// paylasim gorseli heatmap_image.py bunlari kucultur; sade = <=32 px kalin surum)
 // (templates/_brand.html ile ayni, docs/URUN-VE-TASARIM.md §5.7) uretir.
 // Kullanim: NODE_PATH="$HOME/Bist ve BTC/Bist30/node_modules" node tools/brand-icons.mjs
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -18,5 +20,11 @@ for (const px of [192, 512]) {
   const p = await b.newPage({ viewport: { width: px, height: px } });
   await p.setContent(`<body style="margin:0">${pwa.replace('width="120" height="120"', `width="${px}" height="${px}"`)}</body>`);
   await p.screenshot({ path: `static/icon-${px}.png`, omitBackground: false });
+}
+mkdirSync('assets/brand', { recursive: true });
+for (const [name, small] of [['mark-256', false], ['mark-sade-256', true]]) {
+  const p = await b.newPage({ viewport: { width: 256, height: 256 } });
+  await p.setContent(`<body style="margin:0;background:transparent"><svg width="256" height="256" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${mark(small)}</svg></body>`);
+  await p.screenshot({ path: `assets/brand/${name}.png`, omitBackground: true });
 }
 await b.close();
