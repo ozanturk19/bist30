@@ -595,3 +595,37 @@ label:has(> .da-check){min-height:24px}
 .da-signal--broken{background:var(--bp-state-broken);color:var(--bp-state-broken-text);box-shadow:inset 0 0 0 1px var(--bp-border)}
 .da-signal > .jargon-term{display:flex;align-items:center;min-height:24px;color:inherit}
 @media (prefers-reduced-motion:no-preference){.da-ring-arc{transition:stroke-dasharray var(--bp-dur-base) var(--bp-ease-standard)}}
+
+/* 7d. C-16b çekirdek bileşenler II (tasarım denetimi §9.6 #2, #4, #11).
+   .da-label: tek mikro etiket (kanon §5.4 xs 11 · büyük harf · ~.12em). Eski
+   sum-lbl/stat-lbl/metric-lbl/info-card-label vb. göçte buna bağlanır.
+   <span class="da-label">Piyasa değeri</span> */
+.da-label{display:block;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1.3;color:var(--bp-text3)}
+
+/* .da-stat: sayı + etiket (+ değişim). Sayı stat 32 / mobil 26, tabular.
+   Değişim rengi yalnız fiyat yönü için (kanon §5.3), metin her zaman yazılır.
+   <div class="da-stat"><span class="da-label">Özsermaye kârlılığı</span>
+     <b class="da-stat-num">%24,1</b><span class="da-stat-delta da-stat-delta--up">+1,2</span></div> */
+.da-stat{display:flex;flex-direction:column;gap:6px;min-width:0}
+.da-stat-num{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-variant-numeric:tabular-nums;font-size:32px;line-height:1;letter-spacing:-.01em;color:var(--bp-text);overflow-wrap:anywhere}
+.da-stat-note{font-size:var(--bp-text-base);line-height:1.45;color:var(--bp-text2)}
+.da-stat-delta{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);font-weight:600;font-variant-numeric:tabular-nums;color:var(--bp-text2)}
+.da-stat-delta--up{color:var(--bp-al)}
+.da-stat-delta--down{color:var(--bp-sat)}
+.da-stat--sm{gap:4px}
+.da-stat--sm .da-stat-num{font-size:var(--bp-text-lg)}
+@media (max-width:600px){.da-stat-num{font-size:26px}}
+
+/* .da-meter: yatay çubuk (iz + dolgu), 6px (--thin 4px), hap uçlu. Doluluk
+   --da-meter-v (0-100). Renk: skor kimliği (bp/temel/teknik) ya da fiyat yönü
+   (up/down); varsayılan nötr periwinkle. Değer yanında her zaman yazılır.
+   <div class="da-meter da-meter--temel" style="--da-meter-v:62" role="img" aria-label="Kârlılık 62/100"><i></i></div> */
+.da-meter{--da-meter-c:var(--bp-brand);--da-meter-v:0;position:relative;display:block;height:6px;border-radius:var(--bp-radius-pill);background:var(--bp-ring-track);overflow:hidden}
+.da-meter > i{position:absolute;inset:0 auto 0 0;width:calc(var(--da-meter-v) * 1%);max-width:100%;border-radius:inherit;background:var(--da-meter-c)}
+.da-meter--thin{height:4px}
+.da-meter--bp,.da-meter--up{--da-meter-c:var(--bp-al)}
+.da-meter--temel{--da-meter-c:var(--bp-accent-cyan)}
+.da-meter--teknik{--da-meter-c:var(--bp-art-violet)}
+.da-meter--down{--da-meter-c:var(--bp-sat)}
+.da-meter--volume{--da-meter-c:var(--bp-volume)}
+@media (prefers-reduced-motion:no-preference){.da-meter > i{transition:width var(--bp-dur-base) var(--bp-ease-standard)}}
