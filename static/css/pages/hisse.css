@@ -1256,23 +1256,6 @@
       width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);
       box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);flex:none;
     }
-    .da-share-panel{
-      display:flex;flex-direction:column;gap:12px;
-      padding:16px 20px;margin-bottom:20px;
-      --da-glow-y:-55%;--da-glow-size:200px;
-      --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.14;
-    }
-    .da-share-btns{position:relative;display:flex;flex-wrap:wrap;gap:10px}
-    .da-share-btn{
-      display:inline-flex;align-items:center;gap:6px;
-      border-radius:var(--bp-radius-pill);padding:7px 14px;
-      font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;
-      transition:transform .15s ease, background .15s ease;transform:rotate(-1deg);
-    }
-    .da-share-btn:nth-child(2){ transform:rotate(.8deg); }
-    .da-share-btn:nth-child(3){ transform:rotate(-.6deg); }
-    .da-share-btn:hover{ transform:rotate(0deg) translateY(-1px); }
-    .da-share-btn:active{ transform:scale(.96); }
 
     /* SEO teknik-ozet seridi — 20.09'a kadar sablon icinde inline duz-kutu
        (surface + uppercase mikro-etiket) olarak duruyordu, yani Ozan'in
