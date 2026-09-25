@@ -144,6 +144,12 @@
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
   --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
   --bp-accent-cyan: #22d3ee;   /* Data-Art ana sayfa (08.09) — vurgu/glow, dördüncü nötr-olmayan aksan */
+  /* C-16a (25.09): kanon §5.2-5.3 durum ve halka renkleri — .da-signal / .da-ring
+     tek tüketici. Yatay arduvaz; Trend Bozuldu kırmızı DEĞİL (koyu zemin + sessiz metin). */
+  --bp-state-flat:        #343a48;
+  --bp-state-broken:      #232228;
+  --bp-state-broken-text: #b9b7c0;
+  --bp-ring-track:        #26262c;
   --bp-art-violet: #7c5cff;   /* CPO-1558: Data-Art mockup'ın kendi dekoratif gradyan mor'u (hero-art
                                   blob'ları + logo mark'ı aynı kaynaktan — --bp-brand'in soluk
                                   periwinkle'ından KASITLI olarak daha canlı/doygun */
