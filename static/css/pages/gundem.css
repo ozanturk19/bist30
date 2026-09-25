@@ -10,8 +10,6 @@
     padding: 14px 24px; display: flex; align-items: center; gap: 16px;
     position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; }
-  .page-sub   { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 1px; }
 
   .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
@@ -137,7 +135,6 @@
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     .stat-num  { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: 1fr; }
-    .page-title { font-size: var(--bp-text-lg); }
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {

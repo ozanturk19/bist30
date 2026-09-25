@@ -1,66 +1,12 @@
-{#- KANONIK HEADER (T2.2 ikinci yari) — 27 sablonun tek masaustu header kaynagi.
-    KAPSAM: logo + sayfa basligi/alt-basligi + .bp-main-nav + arama dugmesi.
-    KULLANIM — sayfa sablonu {% with %} ile parametre gecer (SET DEGIL: {% set %}
-    blok icinde include'a sizmayabilir, {% with %} deterministik):
-      {% with hdr_title='Hakkinda' %}{% include '_header.html' %}{% endwith %}
-    Parametrelerin HEPSI opsiyonel; hicbiri verilmezse cikti KANONIK header'in
-    kendisidir (blog / kategori / metodoloji / portfolio / tarama).
-      hdr_title            str  vars. yok  -> verilirse logo ile nav arasina baslik
-      hdr_icon              str  vars. yok  -> hdr_title basina, ayri <span aria-hidden="true">
-                                             ile sarili dekoratif emoji/ikon (T22-a11y).
-                                             hdr_title'in KENDI icine emoji gomme —
-                                             autoescape span'i literal metne cevirir.
-      hdr_sub              str  ⛔ KULLANMAYIN (K-DO 22.09) -- asagiya bakin
-      hdr_sub_id           str  ⛔ KULLANMAYIN (K-DO 22.09) -- asagiya bakin
-      hdr_title_tag        str  vars. 'h1' -> yalniz 'h1'/'h2'/'div'; baskasi 'h1'e duser
-      hdr_self             str  vars. yok  -> sayfanin KENDI nav href'i; verilirse
-                                             o oge menude GIZLENIR (bulundugun sayfaya
-                                             link verme deseni). Bugun tek kullanici:
-                                             hisseler.html -> hdr_self='/hisseler'.
-                                             NEDEN request.endpoint DEGIL: `request`
-                                             Flask'te Jinja global'idir, `is not defined`
-                                             asla dogru olmaz ve istek baglami disinda
-                                             render RuntimeError atar (olculdu).
-
-    SOZLESME DUZELTMESI: "hepsi opsiyonel" ifadesi yanlis okunabilir.
-    hdr_sub / hdr_sub_id / hdr_title_tag YALNIZCA hdr_title ile birlikte etkilidir;
-    hdr_title verilmeden yazilirlarsa hata da uyari da vermeden SESSIZCE DUSERLER.
-
-    ESKI UYARI (20.09'da OLCUMLE CURUTULDU, kayit olarak birakildi):
-    "hdr_title_tag='div' + hdr_sub YOK kombinasyonu kullanmayin, ortaya cikan
-    <div class="page-title"> anti-CLS kurallarinin HICBIRINE eslesmez" denmisti.
-    YANLIS: _bp_critical_css.html (19.09 konsolidasyonu) ilk kuralinda
-    `header div.page-title{display:none !important}` selektorunu ACIKCA
-    tasiyor — bare <div class="page-title"> de gizleniyor; bp-search.js:59
-    ayni selektoru bir kez daha basiyor. Kombinasyon GUVENLI.
-    Gercek durum: .page-title bu partial'i kullanan HER sayfada KALICI
-    gizli (gerekce bp-search.js:58: "nav ortada kalsin"), yani hdr_title/
-    hdr_icon parametreleri GORSEL OLARAK hicbir sey uretmiyor; degerleri
-    yalnizca sayfa sahibinin niyetini belgeliyor.
-    ⛔ K-DO (22.09) -- `hdr_sub` / `hdr_sub_id` BIR TUZAKTIR, KAPI 81 REDDEDER.
-    Yukaridaki "gorsel olarak hicbir sey uretmiyor" tespiti `.page-title` icin
-    yazilmisti; ayni sey `.page-sub` icin de GECERLI, cunku gizlenen sey
-    SARMALAYICI: `header > div:has(> .page-sub){display:none !important}`.
-    5 sayfa (gundem · sektor-harita · bilanco-takvimi · temettu-takvimi ·
-    karsilastir) VERI TAZELIK DAMGASINI ve secim yankisini buraya yaziyordu.
-    Canli olcum 22.09: `#lastUpdate`.textContent = "Son güncelleme: 22.09.2026
-    07:50", getBoundingClientRect() = 0x0, parent display=none. Yani damga
-    13 saat eski bir veriyi isaret ediyordu ve kullanici bunu GORMUYORDU.
-    Ustelik dugum `role="status" aria-live="polite"` tasiyordu: `display:none`
-    alt agaci a11y agacindan duser, dolayisiyla canli bolge EKRAN OKUYUCUYA DA
-    hic duyurulmuyordu -- kanal iki yonlu oluydu.
-    Dogrusu: damgayi `<main>` icinde `<p class="da-updated" id="..."
-    role="status" aria-live="polite">` ile ciz (data-art.css). Yazan JS
-    degismez, id ayni kalir.
-
-    NOT (olculmus, kasitli): abd_tarama.html basligi <div class="page-title">.
-    ONCEKI GEREKCEM YANLISTI ve olcumle duzeltildi: "anti-CLS davranisini
-    degistirir" demistim; DEGISTIRMEZ. Baslik bir <div> ile sarilmis ve o
-    sarmalayici zaten `header > div:has(> .page-sub)` kuraliyla gizleniyor —
-    yani gorunur davranis <h1>/<div> ayriminda AYNI.
-    <div>'in korunmasinin TEK gecerli nedeni sudur: sayfada zaten gorsel-gizli
-    bir <h1> var (abd_tarama.html:182); etiketi <h1> yapmak IKI <h1> yaratirdi.
-    Bu tur DEGERI KORUDU, ayri bilet onerildi.
+{#- KANONIK HEADER — sayfa sablonlarinin tek masaustu header kaynagi:
+    logo + .bp-main-nav + arama dugmesi. Sayfa basligi header'da DEGIL,
+    <main> icinde gorunur `bpf.pagehead(...)` makrosuyla (_fmt_macros.html,
+    C-18a/b 25.09). Eski hdr_title / hdr_icon / hdr_title_tag / hdr_sub /
+    hdr_sub_id parametreleri KALKTI (anti-CLS kurali onlari zaten gizliyordu).
+      {% include '_header.html' %}
+    Tek parametre (opsiyonel, {% with %} ile — {% set %} include'a sizmayabilir):
+      hdr_self  str -> sayfanin KENDI nav href'i; o oge menude gizlenir.
+                       {% with hdr_self='/hisseler' %}{% include '_header.html' %}{% endwith %}
 -#}
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula ana sayfası">
@@ -89,15 +35,8 @@
       <line x1="118" y1="78" x2="430" y2="78" stroke="var(--bp-border)" stroke-width="1"/>
       <text x="118" y="102" fill="var(--bp-text3)" font-family="'Manrope',system-ui,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>
     </svg>
-{%- set _hdr_tag = hdr_title_tag|default('h1') %}
-{%- set _hdr_tag = _hdr_tag if _hdr_tag in ['h1', 'h2', 'div'] else 'h1' %}
-  </a>{% if hdr_title is defined and hdr_title %}
-{% if hdr_sub is defined and hdr_sub %}  <div>
-    <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
-    <div class="page-sub"{% if hdr_sub_id is defined and hdr_sub_id %} id="{{ hdr_sub_id }}" role="status" aria-live="polite"{% endif %}>{{ hdr_sub }}</div>
-  </div>
-{% else %}  <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
-{% endif %}{% endif %}  <nav class="bp-main-nav" aria-label="Ana navigasyon">
+  </a>
+  <nav class="bp-main-nav" aria-label="Ana navigasyon">
   <a href="/" data-route="/" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Ana Sayfa</span>

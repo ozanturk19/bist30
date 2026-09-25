@@ -33,7 +33,7 @@
 
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_title = 'BIST Hisse Listesi', hdr_self = '/hisseler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_self = '/hisseler' %}{% include '_header.html' %}{% endwith %}
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}

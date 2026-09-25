@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hakkında | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hakkında | BorsaPusula</title>
 <meta name="description" content="BorsaPusula hakkında: BIST100 + ek hisseler için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hakkinda">
@@ -26,15 +26,15 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=e0936136">
 <link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/hakkinda.css?v=88984c3c">
+<link rel="stylesheet" href="/static/css/pages/hakkinda.css?v=2ef7ab6b">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_title = 'Hakkında', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">BorsaPusula Hakkında</h1>
+{% include '_header.html' %}
 
 
 <main class="container" id="main-content" tabindex="-1">
+{% call bpf.pagehead('Hakkında') %}<span class="da-num">{{ bist_count }}</span> BIST hissesi, her iş günü kapanıştan sonra güncellenen verilerle.{% endcall %}
 <article class="prose">
 
 <!-- ── HERO ─────────────────────────────────────────────────────── -->

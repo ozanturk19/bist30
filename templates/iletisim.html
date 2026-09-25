@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>İletişim | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>İletişim | BorsaPusula</title>
 <meta name="description" content="borsapusula.com iletişim sayfası. Öneri, hata bildirimi veya genel sorularınız için bize ulaşın.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/iletisim">
@@ -26,19 +26,18 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=e0936136">
 <link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=0d4116fb">
+<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=142dcf8e">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_icon = '📬', hdr_title = 'İletişim', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">İletişim</h1>
+{% include '_header.html' %}
 
 
 <main class="container" id="main-content" tabindex="-1">
+{% call bpf.pagehead('İletişim') %}Hata bildirimi, öneri veya işbirliği için formu doldurun; genellikle 1–3 iş günü içinde yanıt veriyoruz.{% endcall %}
   <section class="card da-panel da-panel--accent cf-intro">
     <div class="da-recap-tag"><span class="dot" aria-hidden="true"></span>İletişim Kanalı</div>
     <h2>Bize Ulaşın</h2>
-    <p>Hata bildirimi, öneri veya işbirliği için formu doldurun. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
 
     <div class="contact-row">
       <div class="contact-icon"><span aria-hidden="true">📧</span></div>

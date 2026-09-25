@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Rehberi | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Rehberi | BorsaPusula</title>
 <meta name="description" content="BorsaPusula'nın kullandığı algoritmik teknik analiz metodolojisi. Supertrend(10,3), ADX≥25 ve EMA12/99 göstergelerinin nasıl çalıştığı ve nasıl yorumlandığı açıklanıyor.">
 <meta name="keywords" content="supertrend nasıl kullanılır, ADX indikatörü nedir, EMA crossover stratejisi, BIST teknik analiz, algoritmik borsa sinyali">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
@@ -36,9 +36,9 @@
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 {% include '_header.html' %}
-<h1 class="sr-only">BorsaPusula Metodolojisi — Algoritmik Analiz</h1>
 
 <main class="container" id="main-content" tabindex="-1">
+{% call bpf.pagehead('Metodoloji') %}Trend durumu dört koşulla belirlenir: Supertrend yönü, ADX gücü, DI yönü ve EMA12/EMA99 dizilimi.{% endcall %}
 
 <!-- TL;DR Özet Kart -->
 <div class="tldr-card da-panel da-panel--accent">

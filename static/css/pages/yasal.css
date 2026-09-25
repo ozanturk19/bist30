@@ -11,6 +11,8 @@
   .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); }
 
   .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 36px 24px 48px; }
+  /* C-18b: görünür başlık <main> dışında (hukuki metin kapısı <main>'i izler); main üst boşluğu arayı verir */
+  .container.lg-head { padding-top: 0; padding-bottom: 0; }
 
   /* Büyük uyarı banner */
   .warn-banner {
