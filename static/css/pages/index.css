@@ -365,3 +365,25 @@ header{
 .hm-skip:focus-visible { transform: none; opacity: 1; pointer-events: auto; outline: 2px solid var(--bp-accent-cyan); outline-offset: 2px; }
 .hm-foot:focus { outline: none; }
 .hp-nw .hp-row-sk{height:50px}
+
+/* ═══ C-68 (25.09): "Paylaş" — _heatmap.html _share() + bp-heatmap.js paylaşım bloğu ═══
+   <details>/<summary>: JS kapalıyken de açılır (iki düz bağlantı). Başlığın üst satırında
+   (üst yazı solda, düğme sağda); satır düğme boyunda, negatif kenar boşluğuyla başlığı itmez.
+   static/css/heatmap.css'teki C-68 bloğunun BİREBİR kopyası (C-28'de tek kaynağa iner). */
+.hm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:-6px 0 2px}
+.hm-top .da-eyebrow{margin-bottom:0}
+.hm-share{position:relative;flex:none;margin-left:auto}
+.hm-share-btn{box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 14px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);background:var(--bp-surface2);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-md);line-height:1;white-space:nowrap;cursor:pointer;list-style:none;user-select:none;-webkit-user-select:none}
+.hm-share-btn::-webkit-details-marker{display:none}
+.hm-share-btn::marker{content:''}
+.hm-share-ic{flex:none}
+.hm-share[open] > .hm-share-btn{background:var(--bp-surface3)}
+.hm-share-btn:hover{border-color:var(--bp-brand);color:var(--bp-brand)}
+.hm-share-btn:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
+.hm-share-menu{box-sizing:border-box;position:absolute;right:0;top:calc(100% + 6px);z-index:var(--bp-z-dropdown);min-width:212px;padding:6px;border-radius:var(--bp-radius-14);background:var(--bp-surface2);border:1px solid var(--bp-border2);box-shadow:var(--bp-shadow-lg)}
+.hm-share-it{box-sizing:border-box;display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--bp-radius-9);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:var(--bp-text-md);text-decoration:none;white-space:nowrap}
+.hm-share-it.ok{color:var(--bp-brand)}
+.hm-share-it:hover{background:var(--bp-surface3)}
+.hm-share-it:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
+.hm-share-url{box-sizing:border-box;display:block;width:100%;margin-top:6px;padding:8px 10px;border-radius:var(--bp-radius-9);border:1px solid var(--bp-border2);background:var(--bp-bg);color:var(--bp-text);font:inherit;font-size:var(--bp-text-sm)}
+@media (pointer:coarse){.hm-share-btn,.hm-share-it{min-height:44px}}

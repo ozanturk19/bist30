@@ -18,6 +18,15 @@
                 bağlantı sayfayı o durumla yeniden açar, JS açıkken yerinde boyar.
       Evren (C-58 kancası): tam sayfa başlığı görüntünün `universe` alanından okunur
                 ('BIST100'; BIST TÜM görüntüsü gelince route onu verir, şablon değişmez).
+
+    C-68 paylaşım (25.09): başlıkta "Paylaş" (_share makrosu). YALNIZ paylaşım rotaları
+    varken çıkar — route `heatmap_og_image` (ana sayfa, /sektor-harita) ya da `harita_gun`
+    (/harita/<gün>) verirse; ikisi de yoksa çıktı C-29 ile BİREBİR aynıdır (D-54'ten önce
+    deploy güvenli). Görsel/bağlantı günü haritanın kendi `asof`'undan; gün sayfasında
+    harita_gun'dan. Paylaşılan bağlantı kalıcı gün sayfası (/harita/<gün>); /sektor-harita'da
+    varsayılan dışı görünümde (renk/dönem) o görünümün adresi, görsel yine günün görseli.
+      hm_h1     (ana, ek) → ana sayfa h2'si yerine H1 "<ana> · <ek>" (gün sayfası:
+                ('BIST100 ısı haritası', '25 Eylül 2026')). Verilmezse ana sayfa başlığı.
     Boyama kuralları bp-heatmap.js paint()/gStat()/thesis() ile BİREBİR (değişirse ikisi).
 
     İlk çizim SSR: JS kapalıyken de kutular renkli görünür, her biri
@@ -98,6 +107,26 @@
   {%- endif -%}
 {%- endif -%}
 {%- endmacro -%}
+{#- C-68 paylaşım metni: "100 hissenin 64'ü yükseldi, 33'ü düştü" (görseldeki cümle; değişmeyenler yazılmaz) -#}
+{%- macro _share_counts(_n, _up, _dn) -%}
+{%- if _up and _up == _n -%}{{ _n }} hissenin tamamı yükseldi
+{%- elif _dn and _dn == _n -%}{{ _n }} hissenin tamamı düştü
+{%- elif _up or _dn -%}{{ _n }} hissenin {% if _up %}{{ _up }}'{{ _poss(_up) }} yükseldi{% endif %}{% if _up and _dn %}, {% endif %}{% if _dn %}{{ _dn }}'{{ _poss(_dn) }} düştü{% endif %}
+{%- else -%}{{ _n }} hissede değişim yok
+{%- endif -%}
+{%- endmacro -%}
+{#- C-68 "Paylaş": <details> — JS kapalıyken de açılır, iki düz bağlantı (kalıcı adres + görsel indir).
+    bp-heatmap.js: telefonda Web Share (dosya destekleniyorsa -kare.png), masaüstünde pano + Esc/dışarı. -#}
+{%- macro _share(perma, href, img, kare, text, title, fname, view) -%}
+<details class="hm-share" data-hm-share data-url="{{ perma }}" data-kare="{{ kare }}" data-text="{{ text }}" data-title="{{ title }}"{% if view %} data-view="{{ view }}"{% endif %}>
+        <summary class="hm-share-btn"><svg class="hm-share-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Paylaş</summary>
+        <div class="hm-share-menu">
+          <a class="hm-share-it" href="{{ href }}" data-share-copy>Bağlantıyı kopyala</a>
+          <a class="hm-share-it" href="{{ img }}" download="{{ fname }}">Görseli indir</a>
+        </div>
+        <span class="sr-only" role="status" data-share-st></span>
+      </details>
+{%- endmacro -%}
 {%- set hm = heatmap -%}
 {%- set _hmrows = hm.rows or [] -%}
 {%- set _rows = {} -%}
@@ -134,12 +163,39 @@
   {%- set _path = hm_path if hm_path is defined and hm_path else '' -%}
 {%- endif -%}
 {%- macro _href(path, m, p, MQ, PQ) -%}{{ path }}{% set q = [] %}{% if m != 'chg' %}{% set _ = q.append('renk=' ~ MQ[m]) %}{% endif %}{% if p != 'd1' %}{% set _ = q.append('donem=' ~ PQ[p]) %}{% endif %}{{ ('?' ~ q|join('&')) if q else ('' if path else '?') }}{%- endmacro -%}
+{#- ── C-68 paylaşım bağlamı (rotalar yoksa _sh.on false → çıktı C-29 ile aynı) ── -#}
+{%- set _hg = harita_gun if ((harita_gun is defined) and harita_gun) else none -%}
+{%- set _sh = namespace(on=false) -%}
+{%- set _sday = (_hg.date if _hg else ((hm.asof or '')[:10] if ((heatmap_og_image is defined) and heatmap_og_image) else '')) -%}
+{%- if _sday -%}
+  {%- set _sh.on = true -%}
+  {%- set _sh.perma = 'https://borsapusula.com/harita/' ~ _sday -%}
+  {%- set _sh.img = (_hg.og_image if (_hg and _hg.og_image) else '/harita/' ~ _sday ~ '.png') -%}
+  {%- set _sh.kare = (_hg.og_image_kare if (_hg and _hg.og_image_kare) else '/harita/' ~ _sday ~ '-kare.png') -%}
+  {%- set _sh.text = (_hg.share_text if (_hg and _hg.share_text) else (hm.universe or 'BIST100') ~ ' · ' ~ hm.asof_label ~ ' kapanışı: ' ~ _share_counts(_n, _up, _dn) ~ '.') -%}
+  {%- set _sh.ttl = (hm.universe or 'BIST100') ~ ' ısı haritası · ' ~ (_hg.label if (_hg and _hg.label) else hm.asof_label ~ ' ' ~ _sday[:4]) -%}
+  {%- set _sh.fname = 'borsapusula-isi-haritasi-' ~ _sday ~ '.png' -%}
+  {%- set _sh.view = ('https://borsapusula.com' ~ _path) if (_full and _path) else '' -%}
+  {%- set _sh.href = ('https://borsapusula.com' ~ _href(_path, _mode, _per, _MQ, _PQ)) if (_sh.view and (_mode != 'chg' or _per != 'd1')) else _sh.perma -%}
+{%- endif -%}
+{%- set _h1 = hm_h1 if ((hm_h1 is defined) and hm_h1 and not _full) else none -%}
 <section class="da-section" id="sektorler" aria-labelledby="hmTitle">
   <div class="da-panel hm{{ ' hm-full hm-m-' ~ _mode ~ (' hm-lim-on' if _limon else '') if _full }}" data-hm{% if _full %} data-hm-full data-mode="{{ _mode }}" data-per="{{ _per }}"{% endif %}>
     {%- if not _full %}
     <div class="hm-head">
+      {%- if _sh.on %}
+      <div class="hm-top">
       <div class="da-eyebrow">Piyasa haritası</div>
+      {{ _share(_sh.perma, _sh.href, _sh.img, _sh.kare, _sh.text, _sh.ttl, _sh.fname, _sh.view) }}
+      </div>
+      {%- else %}
+      <div class="da-eyebrow">Piyasa haritası</div>
+      {%- endif %}
+      {%- if _h1 %}
+      <h1 class="hm-title da-display" id="hmTitle">{{ _h1[0] }} <span>· {{ _h1[1] }}</span></h1>
+      {%- else %}
       <h2 class="hm-title da-display" id="hmTitle">BIST100 <span>· {{ hm.asof_label }} kapanışı</span></h2>
+      {%- endif %}
       <p class="hm-thesis">{{ _thesis_chg(_n, _up, _dn, _fl, _xu, _tv, _tb) }}</p>
     </div>
     {%- else %}
@@ -173,12 +229,18 @@
         {%- endif -%}
         </p>
       </div>
-      <div class="hm-ctl">
+      <div class="hm-ctl{{ ' hm-ctl--sh' if _sh.on }}">
+        {%- if _sh.on %}
+        <div class="hm-ctl-top"><a class="hm-arc" href="/harita">Geçmiş günler</a>{{ _share(_sh.perma, _sh.href, _sh.img, _sh.kare, _sh.text, _sh.ttl, _sh.fname, _sh.view) }}
+        {%- endif %}
         <div class="hm-seg" role="group" aria-label="Renk ölçüsü">
           {%- for m, lbl in [('chg', 'Değişim'), ('bp', 'BP Skoru'), ('tr', 'Trend')] %}
           <a class="hm-sw" href="{{ _href(_path, m, _per, _MQ, _PQ) }}" data-m="{{ m }}"{% if m == _mode %} aria-current="true"{% endif %}>{{ lbl }}</a>
           {%- endfor %}
         </div>
+        {%- if _sh.on %}
+        </div>
+        {%- endif %}
         <div class="hm-seg hm-seg-per" role="group" aria-label="Dönem"{% if _mode != 'chg' %} aria-disabled="true"{% endif %}>
           {%- for p in _PER %}
           <a class="hm-sw"{% if _mode == 'chg' %} href="{{ _href(_path, 'chg', p[0], _MQ, _PQ) }}"{% else %} aria-disabled="true"{% endif %} data-p="{{ p[0] }}"{% if p[0] == _per %} aria-current="true"{% endif %}>{{ p[1] }}<span class="sr-only"> ({{ p[2] }})</span></a>

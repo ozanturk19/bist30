@@ -25,6 +25,8 @@
         yazılmaz, adresi yalnız publish() yazar (tek yayımcı, replaceState).
      7) Masaüstü haritada grup etiketi sığmazsa önce değeri, sonra kendisi gizlenir;
         grup yeterince yüksekse ad iki satıra kırılır (kırpılmaz).
+   C-68 (25.09.2026) "Paylaş" — dosyanın sonundaki AYRI blok (harita bloğundan
+   bağımsız; ana sayfa, /sektor-harita ve /harita/<gün>'de başlıktaki düğme).
    Renk ve yön bu dosyada HESAPLANMAZ (SSR'da, token'dan); biçimler
    bp-format.js / bp-vocab.js kanonundan (bpFormatPct, bpDirClass,
    bpMoneyCompact, sigLabel).
@@ -684,4 +686,185 @@
   }
   if (window.ResizeObserver) new ResizeObserver(onResize).observe(body);
   else window.addEventListener('resize', onResize);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   C-68 (25.09.2026) — "Paylaş" (templates/_heatmap.html _share()).
+   SSR: <details class="hm-share"> — JS kapalıyken de açılır; içinde iki düz
+   bağlantı: "Bağlantıyı kopyala" (kalıcı gün sayfasına <a>) ve "Görseli indir"
+   (<a download>). Bu blok haritadan BAĞIMSIZ çalışır ve yalnız İYİLEŞTİRİR:
+     1) Telefonda (hover yok + kaba işaretçi) navigator.share varsa düğme menüyü
+        açmaz, paylaşım sayfasını açar: dosya paylaşımı destekleniyorsa -kare.png
+        (1080×1350) + metin + bağlantı; değilse başlık + metin + bağlantı (bağlantı
+        önizlemesi 1200×630 görseli zaten taşır). Web Share kullanıcı dokunuşu
+        içinde çağrılmalı → görsel beklenmez: düğme ekrana girince boşta önceden
+        alınır (veri tasarrufu açıkken yalnız dokunuşta). Hazır değilse o dokunuş
+        dosyasız paylaşır. İptal sessiz; başka hata → menü açılır.
+     2) Masaüstünde menü: "Bağlantıyı kopyala" panoya yazar (Clipboard API →
+        execCommand yedeği → seçili adres kutusu), sonucu okunur duyurur. Esc
+        kapatır ve odağı düğmeye verir; dışarı tıklama / odak çıkışı kapatır.
+     3) /sektor-harita'da (data-view) varsayılan dışı görünüm (renk/dönem)
+        paylaşılırsa bağlantı o görünümün adresidir (C-29 publish() ile aynı
+        parametreler); görsel her durumda günün varsayılan görseli.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var boxes = document.querySelectorAll('[data-hm-share]');
+  if (!boxes.length) return;
+  var MQ = { chg: 'degisim', bp: 'bp', tr: 'trend' }, PQ = { d1: '1g', w1: '1h', m1: '1a', ytd: 'yb', y1: '1y' };
+  function mq(q) { try { return !!(window.matchMedia && matchMedia(q).matches); } catch (e) { return false; } }
+  var SHARE = mq('(hover: none) and (pointer: coarse)') && typeof navigator.share === 'function';
+  var FILES = SHARE && typeof navigator.canShare === 'function' && typeof File === 'function' && typeof fetch === 'function';
+  var SAVE = !!(navigator.connection && navigator.connection.saveData);
+
+  Array.prototype.forEach.call(boxes, function (box) {
+    var btn = box.querySelector('summary');
+    if (!btn) return;
+    var copyA = box.querySelector('[data-share-copy]'), dl = box.querySelector('a[download]');
+    var live = box.querySelector('[data-share-st]'), menu = box.querySelector('.hm-share-menu');
+    var D = {
+      url: box.getAttribute('data-url') || location.href, kare: box.getAttribute('data-kare'),
+      text: box.getAttribute('data-text') || '', title: box.getAttribute('data-title') || document.title,
+      view: box.getAttribute('data-view') || ''
+    };
+    var copyLbl = copyA ? copyA.textContent : '', file = null, fileP = null, tmr = null, urlBox = null;
+
+    /* Paylaşılan bağlantı: tam sayfada varsayılan dışı görünümün adresi, yoksa kalıcı gün sayfası */
+    function link() {
+      if (D.view) {
+        var r = document.querySelector('[data-hm-full]'), q = [];
+        var m = r ? r.getAttribute('data-mode') : 'chg', p = r ? r.getAttribute('data-per') : 'd1';
+        if (m !== 'chg' && MQ[m]) q.push('renk=' + MQ[m]);
+        if (p !== 'd1' && PQ[p]) q.push('donem=' + PQ[p]);
+        if (q.length) return D.view + '?' + q.join('&');
+      }
+      return D.url;
+    }
+    function say(msg) {
+      if (!live) return;
+      live.textContent = '';
+      setTimeout(function () { live.textContent = msg; }, 40);
+    }
+    function reset() {
+      clearTimeout(tmr);
+      if (copyA) { copyA.textContent = copyLbl; copyA.classList.remove('ok'); }
+      if (urlBox && urlBox.parentNode) urlBox.parentNode.removeChild(urlBox);
+      urlBox = null;
+    }
+    function close(focus) {
+      if (box.open) box.open = false;
+      if (focus) btn.focus();
+    }
+
+    /* ── Telefon: Web Share ── */
+    function getFile() {
+      if (fileP || !FILES || !D.kare) return fileP;
+      fileP = fetch(D.kare, { credentials: 'same-origin' }).then(function (res) {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.blob();
+      }).then(function (b) {
+        var name = (dl && dl.getAttribute('download')) || 'borsapusula-isi-haritasi.png';
+        var f = new File([b], name, { type: b.type || 'image/png' });
+        if (navigator.canShare({ files: [f] })) file = f;
+        return file;
+      }).catch(function () { return null; });   /* görsel yoksa dosyasız paylaşılır */
+      return fileP;
+    }
+    if (FILES) {
+      btn.addEventListener('pointerdown', getFile);
+      if (!SAVE && window.IntersectionObserver) {
+        var io = new IntersectionObserver(function (es) {
+          for (var i = 0; i < es.length; i++) {
+            if (es[i].isIntersecting) {
+              io.disconnect();
+              if (window.requestIdleCallback) requestIdleCallback(getFile, { timeout: 3000 }); else setTimeout(getFile, 800);
+              return;
+            }
+          }
+        });
+        io.observe(box);
+      }
+    }
+    btn.addEventListener('click', function (e) {
+      if (!SHARE) return;                  /* masaüstü: <details> menüsü (yerel davranış) */
+      e.preventDefault();
+      var url = link(), data;
+      if (file) data = { files: [file], title: D.title, text: D.text + '\n' + url };
+      else data = { title: D.title, text: D.text, url: url };
+      var fallback = function (err) {
+        if (err && err.name === 'AbortError') return;   /* kullanıcı vazgeçti */
+        box.open = true;
+      };
+      try { navigator.share(data).then(function () { say('Paylaşıldı'); }, fallback); } catch (err) { fallback(err); }
+      if (!file) getFile();
+    });
+
+    /* ── Masaüstü menüsü ── */
+    box.addEventListener('toggle', function () {
+      if (box.open) { if (copyA) copyA.setAttribute('href', link()); }
+      else reset();
+    });
+    function legacyCopy(t) {
+      var ta = document.createElement('textarea'), ok = false;
+      ta.value = t;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+    function copy(t) {
+      if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+        return navigator.clipboard.writeText(t).then(null, function () {
+          if (!legacyCopy(t)) throw new Error('copy');
+        });
+      }
+      return legacyCopy(t) ? Promise.resolve() : Promise.reject(new Error('copy'));
+    }
+    if (copyA) copyA.addEventListener('click', function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;  /* yeni sekme: düz bağlantı */
+      e.preventDefault();
+      var url = link();
+      copy(url).then(function () {
+        copyA.textContent = 'Bağlantı kopyalandı';
+        copyA.classList.add('ok');
+        copyA.focus();
+        say('Bağlantı kopyalandı');
+        clearTimeout(tmr);
+        tmr = setTimeout(function () { close(box.contains(document.activeElement)); }, 1600);
+      }, function () {
+        /* pano kapalı: adres seçili kutuda, kullanıcı kendisi kopyalar */
+        if (!urlBox) {
+          urlBox = document.createElement('input');
+          urlBox.type = 'text';
+          urlBox.readOnly = true;
+          urlBox.className = 'hm-share-url';
+          urlBox.setAttribute('aria-label', 'Paylaşım bağlantısı');
+          (menu || box).appendChild(urlBox);
+        }
+        urlBox.value = url;
+        urlBox.focus();
+        urlBox.select();
+        say('Kopyalanamadı; bağlantı seçili, kopyalayabilirsin');
+      });
+    });
+    if (dl) dl.addEventListener('click', function () { setTimeout(function () { close(false); }, 0); });
+    box.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && box.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        close(true);
+      }
+    });
+    box.addEventListener('focusout', function (e) {
+      var to = e.relatedTarget;
+      if (box.open && to && !box.contains(to)) close(false);
+    });
+    document.addEventListener('click', function (e) {
+      if (box.open && !box.contains(e.target)) close(false);
+    });
+  });
 })();

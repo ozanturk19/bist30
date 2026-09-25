@@ -1,0 +1,110 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-68 (25.09): /harita/<YYYY-MM-DD> — bir günün donmuş BIST100 ısı haritasının kalıcı sayfası
+    (paylaşılan bağlantı buraya gelir). Route (D-54) bağlamı:
+      heatmap / heatmap_groups / heatmap_tiles   o günün donmuş görüntüsü (ana sayfayla aynı yardımcılar)
+      harita_gun = {date:'2026-09-25', label:'25 Eylül 2026', prev:'2026-09-24'|None, next:None|'…',
+                    og_image:'/harita/2026-09-25.png' (1200×630), og_image_kare:'/harita/2026-09-25-kare.png'
+                    (1080×1350), share_text:'BIST100 · 25 Eylül kapanışı: 100 hissenin 64'ü yükseldi, 33'ü düştü.'}
+    Bilinmeyen gün route'ta 404 olur; bağlam yine eksikse sayfa 500 vermez, boş durum gösterir.
+    Harita _heatmap.html'in ana sayfa hali (Değişim · 1G) + H1 (hm_h1) + başlıkta Paylaş; altında
+    önceki/sonraki gün ve "Bu harita nedir?". Görsel ve bağlantı günün kendisine aittir. -#}
+{%- set _MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] -%}
+{%- macro _dlabel(iso) -%}
+{%- set p = (iso or '')[:10].split('-') -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MONTHS[p[1]|int - 1] }} {{ p[0] }}{%- else -%}{{ iso }}{%- endif -%}
+{%- endmacro -%}
+{%- set _hg = harita_gun if ((harita_gun is defined) and harita_gun) else {} -%}
+{%- set _hm_ok = (heatmap is defined) and heatmap and heatmap.rows and heatmap_groups and heatmap_tiles and _hg.date -%}
+{%- set _day = _hg.date or '' -%}
+{%- set _lbl = _hg.label or _dlabel(_day) -%}
+{%- set _uni = (heatmap.universe if ((heatmap is defined) and heatmap and heatmap.universe) else 'BIST100') -%}
+{%- set _url = 'https://borsapusula.com/harita/' ~ _day -%}
+{%- set _img = 'https://borsapusula.com' ~ (_hg.og_image or ('/harita/' ~ _day ~ '.png')) -%}
+{%- set _ttl = _uni ~ ' ısı haritası · ' ~ _lbl -%}
+{%- set _desc = (_hg.share_text or (_uni ~ ' · ' ~ _lbl ~ ' kapanışı.')) ~ ' Kutu büyüklüğü piyasa değeri, renk kapanış değişimi; hisseler sektörlerine göre gruplu.' -%}
+{% block head %}<title>{{ _uni }} Isı Haritası · {{ _lbl }} | BorsaPusula</title>
+<meta name="description" content="{{ _desc }}">
+<link rel="canonical" href="{{ _url }}">
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ _ttl }}">
+<meta property="og:description" content="{{ _desc }}">
+<meta property="og:url"         content="{{ _url }}">
+<meta property="og:site_name"   content="borsapusula.com">
+<meta property="og:locale"      content="tr_TR">
+<meta property="og:image"       content="{{ _img }}">
+<meta property="og:image:type"  content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"   content="{{ _uni }} ısı haritası · {{ _lbl }} kapanışı">
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{{ _ttl }}">
+<meta name="twitter:description" content="{{ _desc }}">
+<meta name="twitter:image"       content="{{ _img }}">
+<meta name="twitter:image:alt"   content="{{ _uni }} ısı haritası · {{ _lbl }} kapanışı">
+{%- if _hm_ok %}
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': [
+  {'@type': 'WebPage', '@id': _url ~ '#sayfa', 'url': _url, 'name': _ttl, 'description': _desc, 'inLanguage': 'tr',
+   'datePublished': _day, 'isPartOf': {'@type': 'WebSite', '@id': 'https://borsapusula.com/#website', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'},
+   'primaryImageOfPage': {'@id': _img}, 'breadcrumb': {'@id': _url ~ '#yol'}},
+  {'@type': 'ImageObject', '@id': _img, 'url': _img, 'contentUrl': _img, 'encodingFormat': 'image/png', 'width': 1200, 'height': 630,
+   'name': _ttl, 'caption': _hg.share_text or _ttl, 'datePublished': _day, 'inLanguage': 'tr',
+   'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'}, 'creditText': 'BorsaPusula'},
+  {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
+    {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': 'https://borsapusula.com/'},
+    {'@type': 'ListItem', 'position': 2, 'name': _uni ~ ' Isı Haritası', 'item': 'https://borsapusula.com/sektor-harita'},
+    {'@type': 'ListItem', 'position': 3, 'name': _lbl, 'item': _url}]}
+]}|tojson }}</script>
+{%- endif %}
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
+<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
+<link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
+<link rel="stylesheet" href="/static/css/heatmap.css?v=401ab811">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=77552c67">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+<!-- Makro Ticker Bandı (sayfa kabuğu /sektor-harita ile aynı: pages/sektor_harita.css) -->
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+
+{% include '_header.html' %}
+
+<main class="container hg" id="main-content" tabindex="-1">
+{%- if _hm_ok %}
+  {% with hm_h1=(_uni ~ ' ısı haritası', _lbl) %}{% include '_heatmap.html' %}{% endwith %}
+  {%- if _hg.prev or _hg.next %}
+  <nav class="hg-pager" aria-label="Diğer günlerin haritası">
+    {%- if _hg.prev %}
+    <a class="hg-pg hg-prev" rel="prev" href="/harita/{{ _hg.prev }}"><span aria-hidden="true">←</span> {{ _dlabel(_hg.prev) }}</a>
+    {%- endif %}
+    {%- if _hg.next %}
+    <a class="hg-pg hg-next" rel="next" href="/harita/{{ _hg.next }}">{{ _dlabel(_hg.next) }} <span aria-hidden="true">→</span></a>
+    {%- endif %}
+  </nav>
+  {%- endif %}
+  <section class="da-panel hg-about" aria-labelledby="hgAboutT">
+    <h2 class="hg-about-t da-display" id="hgAboutT">Bu harita nedir?</h2>
+    <p>{{ _uni }} endeksindeki {{ heatmap.n or heatmap.rows|length }} hissenin {{ _lbl }} kapanışındaki görüntüsü. Her kutu bir hisse: alanı piyasa değerini, rengi kapanıştaki günlük değişimi gösterir (yükselenler yeşil, düşenler kırmızı; ±%3 ve üstü en koyu ton). Hisseler sektörlerine göre gruplanır; harita kapanıştan sonra bir kez hazırlanır ve sonradan değişmez.</p>
+    <p>Dönem, BorsaPusula Skoru ve trend görünümleri için <a href="/sektor-harita">sektör haritası</a>.</p>
+  </section>
+{%- else %}
+  <div class="da-pagehead"><h1 class="da-pagehead-title">{{ _uni }} ısı haritası{% if _lbl %} · {{ _lbl }}{% endif %}</h1></div>
+  <div class="da-panel da-empty da-empty--page hm-empty" role="status">
+    <h2 class="da-empty-title">Bu günün haritası yok</h2>
+    <p>Isı haritası her işlem günü kapanıştan sonra hazırlanır. Son haritaya <a href="/sektor-harita">sektör haritasından</a> bakabilirsin.</p>
+  </div>
+{%- endif %}
+</main>
+
+{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+
+<!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
+<script src="/static/bp-format.js?v=63228ae2"></script>
+<script>
+// Makro Ticker Bandı (/sektor-harita ile aynı)
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })();
+</script>
+<script src="/static/bp-search.js?v=660f20ac" defer></script>
+
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}
