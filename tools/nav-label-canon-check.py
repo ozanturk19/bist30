@@ -88,10 +88,10 @@ LOGO_OK = {'BorsaPusula ana sayfası'}
 #    disinda kalir; kural yine de burada, cunku kapsam blogu degisirse
 #    dogru davranis korunmalidir.)
 FILES = ['_header.html', '_mobile_nav_partial.html', '_footer.html',
-         '404.html', '410.html', '429.html', '500.html']
+         '_error_page.html']
 # Hata sayfalarinda yalnizca bu blok gezinme bilesenidir:
-SCOPE_BLOCK = {'404.html': 'popular-grid', '410.html': 'popular-grid',
-               '429.html': 'popular-grid', '500.html': 'popular-grid'}
+# C-44 (26.09): 404/410/429/500 tek kabukta; gezinme bileseni `<nav class="err-links">`.
+SCOPE_BLOCK = {'_error_page.html': 'err-links'}
 
 A_RE = re.compile(r'<a\b([^>]*)>(.*?)</a>', re.S)
 HREF_RE = re.compile(r'href="([^"]*)"')
@@ -122,7 +122,7 @@ def main():
             if i < 0:
                 print(f'  ✗ {fn}: kapsam blogu "{blk}" BULUNAMADI — sablon degismis')
                 return 2
-            j = src.find('</div>', src.find('>', i))
+            j = src.find('</nav>', src.find('>', i))
             src = src[i:j if j > 0 else len(src)]
         if KILL:
             # POZITIF KONTROL — uc EKSENI birden bozar (her biri ayri kod yolu)
@@ -169,8 +169,9 @@ def main():
     print(f'  ayri sayilan (sapma DEGIL): {brand} marka isareti · {len(notes)} ses-komutu notu')
     for fn, href, why in notes:
         print(f'      · {fn:28} {href:20} {why}')
-    if checked < 40:
-        print(f'  ✗ KAPSAM TABANI ALTINDA ({checked} < 40) — secici/dosya listesi bozulmus olabilir')
+    # C-44 (26.09): 4 hata sayfasinin 18 kopya baglantisi tek kabukta 3'e indi (41 -> 26).
+    if checked < 24:
+        print(f'  ✗ KAPSAM TABANI ALTINDA ({checked} < 24) — secici/dosya listesi bozulmus olabilir')
         return 2
     if bad:
         print(f'  ✗ {len(bad)} SAPMA:')
