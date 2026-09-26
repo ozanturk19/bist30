@@ -241,6 +241,8 @@ header{
 .hp-ft li:first-child{border-top:0}
 /* taslak "3-5 satır": masaüstü 4, mobil 3 (sayfa bütçesi ≤3.700 / ≤5.000 px) */
 .hp-ft li:nth-child(n+5){display:none}
+#one-cikan .hp-blk-h p{flex:1 1 auto}
+#one-cikan .hp-pan{padding-block:6px}
 .hp-ft-row{padding:8px 0;color:inherit;text-decoration:none}
 .hp-ft-row:hover .tk{text-decoration:underline}
 .hp-ft-row:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
