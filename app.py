@@ -46,6 +46,7 @@ import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /harita gün sayfası bağlamı
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
+import home_fields      # D-53: ana sayfa SSR alanları (öne çıkan şirketler, Finansallar betimi, değerleme hükmü)
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
@@ -5130,11 +5131,59 @@ def _get_xu100_level():
                 change_pct = None
         except Exception:
             pass
+    # D-53: son barın ISO tarihi (kapanış etiketi ısı haritası yokken de tarihli olsun)
+    _last_bar = next((p for p in reversed(_xu100_ohlc) if p.get("close")), None)
     return {
         "close":       close,
         "change_pct":  change_pct,
         "spark":       [round(c, 2) for c in closes],
+        "date":        str(_last_bar["time"])[:10] if _last_bar and _last_bar.get("time") else None,
     }
+
+
+_HOME_EXTRAS_TTL = 120   # sn: değerleme hükmü /fundamentals önbelleğinden okunur, her istekte yeniden hesaplanmaz
+_home_extras_cache = {}  # {ticker: (ts, {"valuation": ...})}
+_HOME_API_POOL_N = 10    # /api/data'da fin_answer/valuation taşıyan satır sayısı (öne çıkan 5'in üst kümesi)
+
+
+def _home_featured_extras(ticker, hs_data):
+    """D-53: öne çıkan satırın Finansallar betimi (anlık, kayıttan) + Değerleme hükmü
+    (hisse "Fiyatı makul mu?" ile aynı kanon; /fundamentals ucundaki zincir, web işçisinde
+    yalnız önbellek — ağ çağrısı yok)."""
+    now = time.time()
+    hit = _home_extras_cache.get(ticker)
+    if hit and now - hit[0] < _HOME_EXTRAS_TTL:
+        val = hit[1]
+    else:
+        try:
+            val = home_fields.valuation(
+                hs_data, _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, _get_fundamentals(ticker))))
+        except Exception as e:
+            logger.warning("_home_featured_extras(%s): %s", ticker, e)
+            val = None
+        _home_extras_cache[ticker] = (now, val)
+    return {"fin_answer": home_fields.fin_answer(hs_data), "valuation": val}
+
+
+def _home_featured_rows(stocks, hs_snap, n):
+    """D-53: öne çıkan şirketler (BP azalan, tamlık >= 0,8; Trend Bozuldu + donuk hariç) — satırlar
+    api_data()'daki borsapusula_skoru/hs_available/data_completeness/bps_partial alanlarını taşır."""
+    enriched = []
+    for s in stocks:
+        entry = hs_snap.get(s.get("ticker", ""))
+        d = entry.get("data") if entry else None
+        enriched.append(dict(s, borsapusula_skoru=(d or {}).get("borsapusula_skoru"),
+                             hs_available=d is not None,
+                             data_completeness=(d or {}).get("data_completeness"),
+                             bps_partial=(d or {}).get("partial")))
+    out = []
+    for s in home_fields.featured_pool(enriched, n):
+        d = (hs_snap.get(s["ticker"]) or {}).get("data")
+        out.append(dict(
+            {k: s.get(k) for k in ("ticker", "name", "sector", "signal", "borsapusula_skoru",
+                                   "bps_partial", "data_completeness")},
+            **_home_featured_extras(s["ticker"], d)))
+    return out
 
 
 def _compute_index_ssr_context():
@@ -5180,11 +5229,30 @@ def _compute_index_ssr_context():
         _tech_pool = [s for s in spot_pool if isinstance(s.get("signal_strength"), (int, float))]
         spotlight = max(_tech_pool, key=lambda s: s["signal_strength"]) if _tech_pool else None
 
+    # D-53: Güçlü Trend kartlarına BP + "Finansallar" betimi (JS'siz ilk boyada dolu);
+    # önbellek satırı değiştirilmez (kopya).
+    _top = []
+    for s in top_signals:
+        _e = (_hs_snap.get(s.get("ticker", "")) or {}).get("data")
+        _top.append(dict(s, borsapusula_skoru=(_e or {}).get("borsapusula_skoru"),
+                         hs_available=_e is not None,
+                         data_completeness=(_e or {}).get("data_completeness"),
+                         bps_partial=(_e or {}).get("partial"),
+                         fin_answer=home_fields.fin_answer(_e)))
+    _g = _compute_gundem_data()
     return {
         "bist_level":    _get_xu100_level(),
         "signal_counts": signal_counts,
-        "top_signals":   top_signals,
+        "top_signals":   _top,
         "spotlight":     spotlight,
+        "featured":      _home_featured_rows(bist, _hs_snap, home_fields.FEATURED_N),
+        "gundem": {     # D-53: "Son seansta değişenler" (BEKLE'ye dönüş listelenmez; /api/gundem ile aynı kaynak)
+            "new_signals":    [{k: s.get(k) for k in ("ticker", "name", "signal", "signal_date")}
+                               for s in _g["new_signals"]],
+            "eod_date":       _g["eod_date"],
+            "eod_label":      _g["eod_label"],
+            "closed_message": _g["closed_message"],
+        },
     }
 
 
@@ -5201,6 +5269,8 @@ def index():
         ssr_signal_counts=_ssr["signal_counts"],
         ssr_top_signals=_ssr["top_signals"],
         ssr_spotlight=_ssr["spotlight"],
+        ssr_featured=_ssr["featured"],      # D-53: öne çıkan şirketler (5 satır; valuation + fin_answer dolu)
+        ssr_gundem=_ssr["gundem"],          # D-53: son kapanışta durum değiştirenler
         **_heatmap_ssr_context(),   # D-42: heatmap / heatmap_groups / heatmap_tiles (yoksa None/[]/[])
         heatmap_og_image=_heatmap_og_image(),   # D-54: og:image = son günün haritası (yoksa None)
     ))
@@ -5256,6 +5326,24 @@ def api_data():
         # D-07: bileşen eksikliği ve veri tamlığı (Spotlight/sıralama havuzu tüketicisi C tarafında)
         s["data_completeness"] = _hs_data.get("data_completeness") if _hs_data else None
         s["bps_partial"]       = _hs_data.get("partial") if _hs_data else None
+        # D-53: tavan/taban bayrağı tüm evrende (D-51 `lim` ile aynı hesap; donuk satırda yok).
+        # Önbellek satırı yerinde güncellendiği için her çağrıda ya yazılır ya silinir.
+        _lim = (None if s.get("stale_reason") or s.get("data_quality") == "stale"
+                else tarama_fields.limit_flag_from_change(s.get("price"), s.get("change_pct")))
+        if _lim:
+            s["lim"] = _lim
+        else:
+            s.pop("lim", None)
+    # D-53: öne çıkan şirketler havuzunun (üst 10) satırlarına değerleme hükmü + Finansallar betimi —
+    # ana sayfadaki 5 ayrı /fundamentals isteği kalkar. Havuz dışı satırda alan yok (yerinde silinir).
+    _feat_rows = {r["ticker"]: r for r in _home_featured_rows(stocks, _hs_snap, _HOME_API_POOL_N)}
+    for s in stocks:
+        _fr = _feat_rows.get(s.get("ticker"))
+        if _fr:
+            s["valuation"], s["fin_answer"] = _fr["valuation"], _fr["fin_answer"]
+        else:
+            s.pop("valuation", None)
+            s.pop("fin_answer", None)
     # ── Stale-safe fields (CPO-551 Aşama 2 → CPO-1114 K1-K3: per-ticker orana dayalı) ──
     with _lock:
         _loading = _cache.get("loading", False)
@@ -5292,6 +5380,7 @@ def api_data():
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
         "xu100_close":  xu100_close,       # CPO-1558: EOD kapanış (aynı chart cache, live değil)
         "xu100_change_pct": xu100_change_pct,  # CPO-1558: önceki EOD kapanışa göre %
+        "xu100_date":   _xu100_lvl["date"],    # D-53: son kapanış barının ISO tarihi
     }
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
     if _DQV_AVAILABLE:

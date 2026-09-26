@@ -214,6 +214,18 @@ def test_xu100_level_empty_ohlc_returns_none():
     assert lvl["spark"] == []
 
 
+def _d53_stubs(ns):
+    """D-53: _compute_index_ssr_context artik home_fields + gundem/featured yardimcilarini da kullanir
+    (bunlar kendi testlerinde: test_d53_home_fields.py) -- burada yalniz sayim/secim mantigi izole."""
+    import home_fields
+    ns.setdefault("home_fields", home_fields)
+    ns.setdefault("_compute_gundem_data", lambda: {"new_signals": [], "eod_date": None, "eod_label": None,
+                                                    "closed_message": ""})
+    ns.setdefault("_home_featured_rows", lambda *a, **k: [])
+    return ns
+
+
+
 def _fresh_index_ssr_context(financial_health_cache=None):
     ns = {
         "_lock": _FakeLockCtx(),
@@ -226,7 +238,7 @@ def _fresh_index_ssr_context(financial_health_cache=None):
     }
     # _compute_index_ssr_context, govde icinde _get_xu100_level'i cagiriyor --
     # ikisi de ayni namespace'te tanimlanmali.
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     return ns["_compute_index_ssr_context"]
 
 
@@ -270,7 +282,7 @@ def test_index_ssr_spotlight_no_top8_restriction_includes_bekle():
         "_xu100_chart_cache": {"data": {"ohlc": [{"close": 100.0}]}},
         "_financial_health_cache": {},
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "TCELL"  # BEKLE ama SAT haric en yuksek skor
 
@@ -291,7 +303,7 @@ def test_index_ssr_spotlight_prefers_borsapusula_skoru_over_signal_strength():
         "_xu100_chart_cache": {"data": {"ohlc": []}},
         "_financial_health_cache": hs_cache,
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "AEFES"
     assert ctx["spotlight"]["hs_available"] is True
@@ -314,7 +326,7 @@ def test_index_ssr_excludes_stale_from_spotlight_and_top_signals():
         "_xu100_chart_cache": {"data": {"ohlc": []}},
         "_financial_health_cache": {},
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "AKBNK"
     assert [s["ticker"] for s in ctx["top_signals"]] == ["AKBNK"]
