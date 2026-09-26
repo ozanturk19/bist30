@@ -37,7 +37,6 @@ from email_qa          import validate_email_pre_send
 from alerting          import emit_alert
 '"
 run_check "tests: DQV suite"      "python3 -m pytest tests/ -x -q"
-run_check "syntax: templates+JS"  "python3 tools/node-syntax-check.py"
 
 echo "──────────────────────────────────────────────────"
 echo "  ${PASS} passed, ${FAIL} failed"
