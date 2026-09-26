@@ -57,9 +57,10 @@ def test_prefetch_thread_starts_unconditionally():
     src = _read_app()
     idx = src.index("_prefetch_thread = threading.Thread(")
     window = src[idx: idx + 600]
-    assert "_prefetch_thread.start()" in window
+    # D-20: başlatma `_bg_start(_prefetch_thread)` ile (BP_ROLE=batch|shadow'da atlanır).
+    assert "_bg_start(_prefetch_thread)" in window
     # Eski desende .start() bir `if _is_gemini_leader():` bloğunun İÇİNDE idi.
-    start_idx = window.index("_prefetch_thread.start()")
+    start_idx = window.index("_bg_start(_prefetch_thread)")
     before_start = window[:start_idx]
     assert "if _is_gemini_leader():" not in before_start, (
         "gemini-prefetch thread'i hâlâ module-load-time leader kapısının "

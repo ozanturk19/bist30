@@ -1521,6 +1521,21 @@ try:
 except Exception:
     _GIT_SHA = None
 
+# D-20: import yan etkisi yok. BP_ROLE=batch|shadow (araç, shadow_compare, test) modül
+# düzeyindeki daemon thread'lerini BAŞLATMAZ; import sonrası threading.active_count()==1.
+# Prod servisleri (bist30 / bist30-refresh / bist30-macro) BP_ROLE=batch|shadow taşımaz →
+# davranış birebir aynı (aynı sıra, aynı koşul).
+_NO_BG_THREADS = os.environ.get("BP_ROLE") in ("batch", "shadow")
+
+
+def _bg_start(th):
+    """Modül düzeyi daemon thread başlatıcı; BP_ROLE=batch|shadow'da hiçbir şey yapmaz."""
+    if _NO_BG_THREADS:
+        return None
+    th.start()
+    return th
+
+
 # D-01b: /api/health tüm süreçlerin (web + macro + refresh) git sha'sını göstersin.
 # Web dışı süreçler açılışta kendi sha'sını dosyaya yazar, web okur; ölü pid elenir.
 # Dosya adı uygulama dizininden türetilir (prod/staging /tmp'yi paylaşır).
@@ -3661,7 +3676,7 @@ def _digest_cron_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
+_bg_start(threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron"))
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
@@ -3727,7 +3742,7 @@ def _freshness_monitor_loop():
 # #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker Telegram alarmı
 # gönderir (anti-spam state worker-local olduğu için gate şart). CPO-1207 §1:
 # thread artık KOŞULSUZ başlar — leader kontrolü döngü içinde her turda.
-threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
+_bg_start(threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor"))
 logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → Telegram)")
 
 
@@ -3777,8 +3792,8 @@ def _chart_integrity_alarm_loop():
 
 # Anti-spam state worker-local; 4× duplicate alarm engellenir. CPO-1207 §1:
 # thread koşulsuz başlar — leader kontrolü döngü içinde her turda.
-threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
-                 name="chart-integrity-alarm").start()
+_bg_start(threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
+                 name="chart-integrity-alarm"))
 logger.info("Chart-integrity alarm başlatıldı (leader durumu döngü içinde her turda — SPEC-008 L5)")
 
 
@@ -3836,8 +3851,8 @@ def _synthetic_drift_monitor():
             logger.error("synthetic_drift_monitor: %s", e)
 
 
-threading.Thread(target=_synthetic_drift_monitor, daemon=True,
-                 name="drift-monitor").start()
+_bg_start(threading.Thread(target=_synthetic_drift_monitor, daemon=True,
+                 name="drift-monitor"))
 logger.info("Synthetic drift monitor başlatıldı (M6 — her 90s drift analizi)")
 
 
@@ -5656,7 +5671,7 @@ def _macro_news_bg_loop():
             logger.debug("Makro RSS loop: %s", e)
         time.sleep(_MACRO_NEWS_TTL)
 
-threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").start()
+_bg_start(threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss"))
 
 
 # ── Ekonomik Takvim ───────────────────────────────────────────────────────────
@@ -5952,7 +5967,7 @@ def _fetch_macro():
 
 
 # Background macro refresh — _fetch_macro DEFINED olduktan SONRA başlat
-threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
+_bg_start(threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop"))
 
 
 # Macro refresh — ARTIK SADECE bg loop (request-spawned thread leak'ini önle)
@@ -8123,7 +8138,7 @@ _prefetch_thread = threading.Thread(
 # maliyet multiplier fix (non-leader 3 worker prefetch yapmaz, on-demand
 # cache'ten okur). CPO-1207 §1: thread artık KOŞULSUZ başlar — leader
 # kontrolü döngü içinde her turda (_prefetch_news_worker üstünde).
-_prefetch_thread.start()
+_bg_start(_prefetch_thread)
 logger.info("gemini-prefetch: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
@@ -8160,7 +8175,7 @@ def _gemini_cache_sync_loop():
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
 
-threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync").start()
+_bg_start(threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync"))
 
 
 def _on_demand_news_worker():
@@ -8213,7 +8228,7 @@ _on_demand_thread = threading.Thread(
     daemon=True,
     name="news-ondemand"
 )
-_on_demand_thread.start()
+_bg_start(_on_demand_thread)
 
 
 def _on_demand_signal_explain_worker():
@@ -8258,7 +8273,7 @@ _signal_explain_ondemand_thread = threading.Thread(
     daemon=True,
     name="signal-explain-ondemand"
 )
-_signal_explain_ondemand_thread.start()
+_bg_start(_signal_explain_ondemand_thread)
 
 
 def _tr1(value):
@@ -10340,7 +10355,7 @@ def _kap_fx_rate(day, cur):
 
 
 if os.environ.get("BP_ROLE") == "macro" and os.environ.get("KAP_FEED", "1") != "0":
-    threading.Thread(target=_kap_feed_loop, daemon=True, name="kap-feed").start()
+    _bg_start(threading.Thread(target=_kap_feed_loop, daemon=True, name="kap-feed"))
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
@@ -11461,7 +11476,7 @@ def _health_snapshot_loop():
             logger.error("dispatch heartbeat write: %s", e)
         time.sleep(8)
 
-threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
+_bg_start(threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot"))
 logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
 
 
@@ -11500,7 +11515,7 @@ def _lock_probe_loop():
             logger.error("_lock_probe_loop: %s", e)
         time.sleep(3)
 
-threading.Thread(target=_lock_probe_loop, daemon=True, name="lock-probe").start()
+_bg_start(threading.Thread(target=_lock_probe_loop, daemon=True, name="lock-probe"))
 logger.info("_lock probe loop başlatıldı (CPO-1269 §6/§7 — lock-free, asla kendisi asılı kalamaz)")
 
 
@@ -15037,10 +15052,10 @@ def _systemd_watchdog_thread():
 
 if os.environ.get("NOTIFY_SOCKET"):
     _wd_thread = threading.Thread(target=_systemd_watchdog_thread, daemon=True, name="systemd-watchdog")
-    _wd_thread.start()
+    _bg_start(_wd_thread)
     logger.info("CPO-576: systemd watchdog heartbeat başlatıldı (30s ping, WatchdogSec=120)")
 
-threading.Thread(target=_startup, daemon=True).start()
+_bg_start(threading.Thread(target=_startup, daemon=True))
 
 # CPO-585: MTF warmup daemon — REFRESH_WORKER=1 only, web worker hang önlenir
 # /api/hisse/<ticker>/mtf cache miss → web worker artık blocking call yapmaz (guard var)
@@ -15086,7 +15101,7 @@ def _mtf_warmup_daemon():
         time.sleep(1800)
 
 if os.environ.get("REFRESH_WORKER") == "1":
-    threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup").start()
+    _bg_start(threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup"))
     logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, 30dk interval)")
 
 _FUND_DISK_FLUSH_EVERY_N = 10  # MTF'nin 5'lik aralığından seyrek — fundamentals TTL daha uzun (4s)
@@ -15129,7 +15144,7 @@ def _fundamentals_warmup_daemon():
         time.sleep(1800)
 
 if os.environ.get("REFRESH_WORKER") == "1":
-    threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup").start()
+    _bg_start(threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup"))
     logger.info("CPO-DEV2-038: fundamentals warmup daemon başlatıldı (REFRESH_WORKER=1, tüm BIST kapsam, disk köprülü)")
 
 logger.info("=" * 50)
