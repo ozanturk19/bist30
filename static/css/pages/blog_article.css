@@ -5,20 +5,22 @@
   body { font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
 
-  .container { max-width:760px; margin:0 auto; padding:32px 24px; }
+  /* C-43: sutun = govde metninin okuma olcusu. Space Grotesk'te 68ch ~712px = satirda ~90 karakter
+     (olculdu 26.09); 17px x 34em ~578px = satirda <=75 karakter. Baslik, modul ve SSS ayni sutunda. */
+  .container { max-width:calc(578px + 48px); margin:0 auto; padding:32px 24px; }
 
   .article-header { margin-bottom:28px; }
   .art-cat  { font-size:var(--bp-text-sm); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-  /* C-43 (26.09): baslik Bricolage (Data-Art .da-pagehead-title dili), govdeyle ayni 68ch sutunda */
+  /* C-43 (26.09): baslik Bricolage (Data-Art .da-pagehead-title dili), govdeyle ayni sutunda */
   .art-title{ font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:clamp(1.75rem,3.4vw,2.5rem); font-weight:800; letter-spacing:-.02em; color:var(--bp-text); line-height:1.12; margin:10px 0 12px; overflow-wrap:anywhere; }
-  .art-desc { font-size:var(--bp-text-17); color:var(--bp-text2); line-height:1.6; margin-bottom:14px; max-width:68ch; }
+  .art-desc { font-size:var(--bp-text-17); color:var(--bp-text2); line-height:1.6; margin-bottom:14px; }
   .art-meta { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px 16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
   .art-share { display:flex; gap:4px; }
   .art-share-btn { background:none; border:0; padding:0 8px; min-height:44px; font:inherit; font-size:var(--bp-text-sm); color:var(--bp-text3); cursor:pointer; }
   .art-share-btn:hover, .art-share-btn:focus-visible { color:var(--bp-text); text-decoration:underline; }
 
-  /* C-43 (26.09): okuma olcusu — 68ch, 17px/1,7, H2 28px (satir <=75 karakter) */
-  .prose { max-width:68ch; font-size:var(--bp-text-17); line-height:1.7; color:var(--bp-text2); }
+  /* C-43 (26.09): okuma olcusu — sutun genisligi (<=75 karakter), 17px/1,7, H2 28px (satir <=75 karakter) */
+  .prose { font-size:var(--bp-text-17); line-height:1.7; color:var(--bp-text2); }
   .prose h2 { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-28); font-weight:700; letter-spacing:-.015em; line-height:1.2; color:var(--bp-text); margin:40px 0 12px; }
   .prose h3 { font-size:var(--bp-text-lg); font-weight:600; color:var(--bp-text); margin:24px 0 8px; }
   .prose p  { margin-bottom:16px; }
@@ -49,7 +51,7 @@
   .rel-title { font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); line-height:1.4; }
   .rel-mins  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; }
 
-  .disclaimer { max-width:68ch; color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1.6; margin-top:20px; }
+  .disclaimer { color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1.6; margin-top:20px; }
 
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
@@ -68,7 +70,7 @@
   .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.65; }
 
   /* C-43 (26.09): sonda TEK modul — canli hisse satiri + kural baglantisi + tek satir abonelik */
-  .art-live { max-width:68ch; margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); }
+  .art-live { margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); }
   .art-live-title { font-size:var(--bp-text-sm); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
   .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-border); }
   .art-live-t { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-22); font-weight:800; }
