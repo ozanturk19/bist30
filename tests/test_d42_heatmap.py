@@ -294,4 +294,4 @@ def test_sektor_harita_ssr_baglami(tmp_path, monkeypatch):
     finally:
         template_rendered.disconnect(_rec, app.app)
     assert seen and len(seen[0]["heatmap_tiles"]) == 100 and seen[0]["heatmap"]["asof"] == "2026-09-23"
-    assert "ssr_sectors" in seen[0]   # eski şablon C-29'a kadar çalışır
+    assert "ssr_sectors" not in seen[0]   # C-29 canlı: eski sektör kartı bağlamı kalktı (D-52)

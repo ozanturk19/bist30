@@ -11769,7 +11769,7 @@ def llms_txt():
 ## Ana Sayfalar
 - [Sinyal Paneli](https://borsapusula.com/): BIST100 güncel Güçlü Trend/Trend Bozuldu sinyalleri, BIST100 endeks durumu
 - [Hisse Tarayıcı](https://borsapusula.com/tarama): sinyal/sektör/fiyat/ADX filtreli tarama, Teknik ve Temel Analiz modları
-- [Sektör Haritası](https://borsapusula.com/sektor-harita): sektör bazlı sinyal yoğunluğu
+- [Sektör Haritası](https://borsapusula.com/sektor-harita): BIST100 hisselerinin günlük değişimi, piyasa değerine göre kutular ve sektör grupları
 - [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta sinyal değiştiren hisseler
 - [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
 - [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
@@ -13205,11 +13205,9 @@ def _compute_sector_heatmap():
 
 @app.route("/sektor-harita")
 def sektor_harita():
-    # CPO-1587 Faz 2: sektör sayısı az olduğu için tamamı SSR context'e geçiliyor
-    # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
-    ssr_sectors, ssr_updated_at = _compute_sector_heatmap()
-    return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at,
-                           **_heatmap_ssr_context(),   # D-52: heatmap / heatmap_groups / heatmap_tiles (C-29 tüketir; ssr_sectors eski şablon için kalır)
+    # D-52: C-29 şablonu yalnız ısı haritası bağlamını tüketir (ssr_sectors/ssr_updated_at kalktı).
+    return render_template("sektor_harita.html",
+                           **_heatmap_ssr_context(),   # heatmap / heatmap_groups / heatmap_tiles
                            heatmap_og_image=_heatmap_og_image())   # D-54: og:image (yoksa None)
 
 
