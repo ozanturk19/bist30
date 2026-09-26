@@ -270,8 +270,6 @@ limiter = Limiter(
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "").strip()
-# MSG-019B: admin endpoint token (mail credential ile decoupled — least privilege)
-ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
 
 def require_admin():
     """Bulgu 5 (danışman audit) fix: ADMIN_SECRET boşsa endpoint KAPALI (503).
@@ -728,7 +726,6 @@ def tr_num_filter(value):
 # Şablonlar eskiden `{{ s.signal_bars }} gün` yazıyordu. signal_bars bir BAR
 # sayacıdır: hafta sonlarını ve ticker'ın tazelenemediği günleri atlar, bu
 # yüzden "gün" birimiyle sunulduğunda yanlıştı. Kanonik eksen signal_date.
-
 
 
 @app.template_filter('signal_age_text')
@@ -5622,7 +5619,6 @@ def api_heatmap():
     return _resp
 
 
-
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
 import feedparser as _feedparser
 
@@ -5741,52 +5737,6 @@ def api_macro_news():
         "updated_at": datetime.fromtimestamp(_macro_news_ts, _TZ_TR).strftime("%H:%M")
                         if _macro_news_ts else "—",
         "count":      len(_macro_news_cache),
-    })
-
-@app.route("/api/refresh", methods=["POST"])
-@limiter.limit("1 per 5 minutes")
-def api_refresh():
-    require_admin()
-    threading.Thread(target=refresh_data, daemon=True).start()
-    return jsonify({"status": "refreshing"})
-
-
-# MSG-019B: Daily digest manuel tetikleyici (token korumalı)
-# Pending boş olsa bile force=true ile test mail göndermek için.
-# Auth: Authorization: Bearer <ADMIN_TOKEN> + localhost-only.
-@app.route("/admin/send-digest-now", methods=["POST"])
-@limiter.limit("3 per hour")
-def admin_send_digest_now():
-    # Layer 1: ADMIN_TOKEN header zorunlu (Bearer auth)
-    if not ADMIN_TOKEN:
-        return jsonify({"error": "ADMIN_TOKEN configured değil (env eksik)"}), 503
-    auth_header = request.headers.get("Authorization", "")
-    expected = f"Bearer {ADMIN_TOKEN}"
-    if not secrets.compare_digest(auth_header, expected):
-        logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
-        abort(401)
-
-    # Layer 2: sadece localhost erişebilir. ProxyFix (P0-SEC-2) kurulduktan sonra
-    # request.remote_addr artik dogrudan gercek client IP'yi veriyor (nginx tek
-    # X-Forwarded-For hop'u ekliyor, ProxyFix onu remote_addr'a tasiyor).
-    remote_first = request.remote_addr or ""
-    if remote_first not in ("127.0.0.1", "::1", "localhost"):
-        logger.warning("admin_send_digest_now: non-localhost erişim engellendi (remote=%s)", remote_first)
-        return jsonify({"error": "Sadece localhost'tan erişilebilir"}), 403
-
-    # Params
-    timeframe = (request.args.get("timeframe") or "daily").strip()
-    if timeframe not in ("daily", "weekly"):
-        return jsonify({"error": "timeframe daily|weekly olmalı"}), 400
-    force = (request.args.get("force") or "false").strip().lower() in ("1", "true", "yes")
-
-    logger.info("admin_send_digest_now: timeframe=%s, force=%s tetiklendi", timeframe, force)
-    result = _send_digest_emails(timeframe=timeframe, force=force)
-    return safe_json({
-        "triggered": True,
-        "timeframe": timeframe,
-        "force": force,
-        "result": result,
     })
 
 
@@ -6194,125 +6144,6 @@ def api_macro_summary():
                           "stale_warning": (24 <= age_h < 48) or date_changed,
                           "hidden": age_h >= 48})
     return safe_json({"summary": "", "cached": False})
-
-
-@app.route("/api/market-summary")
-@limiter.limit("60 per minute")
-def api_market_summary():
-    """Feature 1 #1A — Bugünün Özeti hero card data (CPO MSG-054 onayı).
-
-    Sabit 3-cümle şablon için backend compute:
-      Cümle 1: BIST'de bugün N hisse güçlü trende geçti (topTickers)
-      Cümle 2: <hottestSector> sektörü en güçlü ivmesinde, ortalama %X
-      Cümle 3: Genel sinyal dağılımı dünden +N güçlü/zayıf
-
-    Snapshot pattern: _SNAPSHOTS_DIR/<YYYY-MM-DD>.json (mevcut, _save_daily_snapshot kullanılır)
-    """
-    with _lock:
-        stocks = list(_cache.get("data") or [])
-    if not stocks:
-        return jsonify({"loading": True}), 200
-
-    # BIST hisseleri (XU030 hariç)
-    bist = [s for s in stocks if s.get("ticker") != "XU030"]
-    # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
-    # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
-    # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
-    # DEV2-r4-perf: referans gün istek boyunca sabit, N+1 yerine bir kez hesapla.
-    # D-06: referans gün takvim değil verideki son EOD günü (/gundem ile aynı).
-    _eod_ms = last_eod_day(bist)
-    new_bull = [s for s in bist
-                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "AL"]
-    new_bear = [s for s in bist
-                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "SAT"]
-    all_bull = [s for s in bist if s.get("signal") == "AL"]
-
-    # Top tickers (en taze 4 AL)
-    top_tickers = [s.get("ticker") for s in new_bull[:8] if s.get("ticker")]
-
-    # Hottest sector — change_pct avg max (en az 2 hisse, mock güvenilirlik)
-    sector_agg = {}
-    for s in bist:
-        sec = s.get("sector")
-        if not sec or sec == "Diğer":
-            continue
-        agg = sector_agg.setdefault(sec, {"sum": 0.0, "count": 0})
-        try:
-            agg["sum"] += float(s.get("change_pct") or 0)
-            agg["count"] += 1
-        except Exception:
-            pass
-
-    hottest_sector = None
-    sector_change = 0.0
-    max_avg = float("-inf")
-    for name, agg in sector_agg.items():
-        if agg["count"] < 2:
-            continue
-        avg = agg["sum"] / agg["count"]
-        if avg > max_avg:
-            max_avg = avg
-            hottest_sector = name
-            sector_change = round(avg, 1)
-
-    # Dün snapshot ile delta (al_count fark)
-    delta = 0
-    try:
-        from datetime import timedelta as _td
-        ydate = (datetime.now(_TZ_TR) - _td(days=1)).strftime("%Y-%m-%d")
-        yfile = os.path.join(_SNAPSHOTS_DIR, f"{ydate}.json")
-        if os.path.exists(yfile):
-            with open(yfile, encoding="utf-8") as f:
-                ysnap = json.load(f)
-            delta = len(all_bull) - int(ysnap.get("al_count") or 0)
-    except Exception as e:
-        logger.debug("market-summary delta hesabı: %s", e)
-
-    # Market status (TR saatine göre) — kanonik trading_calendar (hafta sonu + resmi tatil)
-    now_tr = datetime.now(_TZ_TR)
-    market_open_hours = _market_open(now_tr)
-    market_status = "open" if market_open_hours else "closed"
-
-    # D-06: "Yarın"/"Pazartesi" yerine sonraki işlem gününün tarihi (tatil güvenli).
-    closed_msg = None
-    if not market_open_hours:
-        if is_trading_day(now_tr.date()) and now_tr.hour < 10:
-            closed_msg = "BIST henüz açılmadı. 10:00'da seans başlar."
-        else:
-            _next_session = now_tr.date() + timedelta(days=1)
-            while not is_trading_day(_next_session):
-                _next_session += timedelta(days=1)
-            closed_msg = f"BIST kapalı. Sonraki seans {_tr_day_month(_next_session)} 10:00'da."
-
-    # CPO-1344 §A ikincil: asOfTime duvar saatiydi (now_tr), veri ne zaman
-    # üretildiğini değil "şu an ne zaman" olduğunu söylüyordu. Kanonik veri
-    # zamanına (_data_quality_snapshot) çeviriyoruz; farklı takvim günündeyse
-    # (hafta sonu/tatil sonrası bayat veri) tarihi de basıyoruz — sadece saat
-    # basmak "bugünmüş gibi" yanıltır.
-    as_of_time = now_tr.strftime("%H:%M")
-    try:
-        _data_updated_at = _data_quality_snapshot(stocks).get("updated_at")
-        if _data_updated_at:
-            _dt = datetime.strptime(_data_updated_at, "%d.%m.%Y %H:%M:%S")
-            as_of_time = (_dt.strftime("%H:%M") if _dt.date() == now_tr.date()
-                          else _dt.strftime("%d.%m %H:%M"))
-    except Exception as e:
-        logger.debug("market-summary asOfTime veri-zamanı hesabı: %s", e)
-
-    return safe_json({
-        "asOfTime": as_of_time,
-        "marketStatus": market_status,
-        "closedMessage": closed_msg,
-        "newBullCount": len(new_bull),
-        "newBearCount": len(new_bear),
-        "topTickers": top_tickers,
-        "hottestSector": hottest_sector,
-        "sectorChange": sector_change,
-        "delta": delta,
-        "totalBullCount": len(all_bull),
-        # watchlistMoved: client-side hesaplanır (watchlist localStorage)
-    })
-
 
 
 def _safe_float(val):
@@ -7264,8 +7095,6 @@ def _gemini_rate_acquire() -> float:
     return _gemini_rate_acquire_blocking()
 
 
-
-
 # ═══════════════════════════════════════════════════════════════════════════
 # IMPLICIT CACHING — Gemini 2.5 sabit prefix sistem prompt'ları (1024+ token)
 # Aynı prefix tekrar gönderildiğinde input token maliyeti %75 düşer.
@@ -7426,85 +7255,6 @@ KURAL 4 — YASAKLI İFADELER:
 ═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
 """
 
-
-_SYS_KAP = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun KAP (Kamuyu Aydınlatma Platformu) bildirim özet asistanısın. Borsa İstanbul'da işlem gören şirketlerin KAP'a yaptıkları resmi bildirimleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — SADECE VERİLEN BİLDİRİMLER:
-Sana ham veri olarak verilen KAP bildirimlerinden BAŞKA bilgi katma. Ek araştırma yapma, dış kaynak kullanma, kendi yorumunu ekleme. Görevin sadece verilen bildirimleri Türkçe sadeleştirmek.
-
-KURAL 2 — UYDURMA YASAĞI:
-Tarih uydurma, rakam uydurma, kontrat numarası uydurma. Bildirim metninde olmayan bilgileri YAZMA. "Bu bildirimin anlamı muhtemelen..." gibi yorum kullanma.
-
-KURAL 3 — GİRİŞ/KAPANIŞ YASAĞI:
-"Aşağıda X şirketinin KAP bildirimlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur" gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun.
-
-KURAL 4 — SADE DİL ZORUNLU:
-KAP'ta kullanılan teknik finansal terimleri sıradan dile çevir:
-  - "tahvil itfası" → "tahvil geri ödemesi" (vade sona erdi)
-  - "ihraç" → "satış / çıkarma"
-  - "iştirak" → "bağlı şirket"
-  - "konsolide finansal sonuçlar" → "şirket grubunun toplam finansal sonuçları"
-  - "FAVÖK" → "esas faaliyet kârı (FAVÖK)"
-  - "ana ortaklığa ait net kâr" → "ana şirkete düşen net kâr"
-  - "yönetim kurulu kararı" → "yönetim kurulu kararı"
-  - "kar payı dağıtımı" → "temettü ödemesi"
-  - "MKK" → "Merkezi Kayıt Kuruluşu (MKK)"
-  - "SPK" → "Sermaye Piyasası Kurulu (SPK)"
-
-═══ FORMAT ═══
-
-• Her madde "•" (madde imi) ile başlasın.
-• Her madde 1-2 cümle olsun, gereksiz uzatma.
-• Tarihi başta yaz: "8 Mayıs 2026: ..."
-• Önemli sayıları belirgin yap: 250 milyon TL, %5 oranında, vb.
-• Yatırımcı için "ne anlama geliyor" kısmını parantezle ekleyebilirsin (kısa, max 5 kelime).
-• Birden fazla bildirim varsa kronolojik (yeni → eski) sırala.
-• Sayıları Türkçe formatla: 1.234,56 TL, %12,5.
-
-═══ İYİ ÖRNEK ═══
-
-• 8 Mayıs 2026: Şirket, 2025 yılı sürdürülebilirlik raporunu yayınladı (çevresel ve sosyal performans verisi).
-
-• 7 Mayıs 2026: 250 milyon TL nominal değerli tahvilin geri ödemesi tamamlandı (vadesi gelen borçlanma kapatıldı).
-
-• 6 Mayıs 2026: Yönetim kurulu, %15 temettü dağıtım kararı aldı; ödeme 15 Mayıs'ta yapılacak.
-
-═══ KÖTÜ ÖRNEKLER ═══
-
-❌ "Aşağıda X şirketinin bildirimlerini bulabilirsiniz" (Kural 3 — giriş yasağı)
-❌ "Bu temettü artışı hissenin yükselmesine neden olabilir" (Kural 2 — yorum yasağı)
-❌ "Sektör genelinde benzer trendler görülüyor" (Kural 1 — ek bilgi yasağı)
-❌ "**KAP Bildirimleri**" başlık (Kural 3 — formatlama yok)
-
-═══ KAP BİLDİRİM TÜRLERİ REFERANSI ═══
-
-Yatırımcılar için en önemli KAP bildirim kategorileri (sadeleştirilmiş açıklama):
-
-• "Finansal Rapor" → çeyrek bilanço açıklaması (3 ayda bir).
-  Yatırımcıya etkisi: net kâr/zarar, satış büyümesi → hisse fiyatına yansır.
-
-• "Esas Sözleşme Değişikliği" → şirket tüzüğünde değişiklik.
-  Yatırımcıya etkisi: yönetişim/oy hakları değişimi olabilir.
-
-• "Genel Kurul Toplantısı" → ortaklar yıllık toplantısı.
-  Yatırımcıya etkisi: temettü dağıtım kararı, yönetim kurulu seçimi.
-
-• "Pay Geri Alımı" (buyback) → şirket kendi hissesini satın alıyor.
-  Yatırımcıya etkisi: hisse arzı azalır → fiyat desteği oluşur.
-
-• "Önemli Olaylar" → satın alma, satış, ortaklık değişikliği, davalar.
-  Yatırımcıya etkisi: olayın boyutuna göre büyük fiyat etkisi olabilir.
-
-• "İhraç Tavanı" → şirket yeni borçlanma izni almış.
-  Yatırımcıya etkisi: borç yükü artabilir, faiz gideri yükselir.
-
-• "Bağımsız Denetim" → yıllık dış denetim sonuçları.
-  Yatırımcıya etkisi: muhasebe doğruluğu teyidi.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
 
 def _gemini_cap_alert_mail():
     """D-P0-2409: aylık harcama tavanı dolduğunda tek uyarı e-postası (ay başına bir kez)."""
@@ -9785,21 +9535,6 @@ def _run_eod_scoring_pass(results: list):
             logger.warning("EOD scoring dosya yazma hatası: %s", e)
     except Exception as e:
         logger.error("_run_eod_scoring_pass hatası: %s", e)
-
-
-@app.route("/api/hisse/<ticker>/health-score")
-@limiter.limit("30 per minute")
-def api_stock_health_score(ticker):
-    """Teknik/Temel/BorsaPusula kompozit skoru — CPO-1528 Faz 2, sadece manuel
-    doğrulama için, ana UI'a henüz bağlanmadı (CPO Faz 4'te bağlayacak)."""
-    ticker = ticker.upper()
-    if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-    with _lock:
-        cached = _financial_health_cache.get(ticker)
-    if not cached:
-        return safe_json({"error": "Skor henüz hesaplanmadı (EOD turu bekleniyor)"}), 404
-    return safe_json(cached["data"])
 
 
 # ─── News endpoint queue pattern ───
@@ -12487,23 +12222,6 @@ def api_gundem():
     return safe_json(_compute_gundem_data())
 
 
-# ── Geçmiş Günlük Snapshot API ───────────────────────────────────────────────
-@app.route("/api/snapshots")
-@limiter.limit("30 per minute")
-def api_snapshots():
-    """Mevcut günlük snapshot tarihlerini listele."""
-    try:
-        files = sorted([
-            f.replace(".json", "")
-            for f in os.listdir(_SNAPSHOTS_DIR)
-            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
-        ], reverse=True)
-        return safe_json({"dates": files[:30]})  # son 30 gün
-    except Exception as e:
-        logger.error("Snapshots list: %s", e)
-        return safe_json({"dates": [], "error": "Sunucu hatası"}), 500
-
-
 @app.route("/ozet/<tarih>")
 def ozet_gecmis(tarih, via_auto_fallback=False):
     """Geçmiş tarihli sinyal özeti.
@@ -13161,14 +12879,6 @@ def api_backtest():
     return safe_json(bt)
 
 
-@app.route("/api/backtest/run", methods=["POST"])
-@limiter.limit("1 per 30 minutes")
-def api_backtest_run():
-    require_admin()
-    threading.Thread(target=run_backtest, daemon=True).start()
-    return jsonify({"status": "started"})
-
-
 @app.route("/nasdaq")
 def _redir_nasdaq():
     return redirect("/", code=301)
@@ -13295,12 +13005,6 @@ def sektor_harita():
                            heatmap_og_image=_heatmap_og_image())   # D-54: og:image (yoksa None)
 
 
-@app.route("/api/sector-heatmap")
-def api_sector_heatmap():
-    result, updated_at = _compute_sector_heatmap()
-    return safe_json({"sectors": result, "updated_at": updated_at})
-
-
 # ── F12: Sektör Karşılaştırma ─────────────────────────────────────────────────
 
 def _build_sector_map(stocks):
@@ -13343,58 +13047,6 @@ def api_sektor_summary():
         })
     result.sort(key=lambda x: x["score"], reverse=True)
     return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
-
-
-@app.route("/api/sektor-compare")
-@limiter.limit("30 per minute")
-def api_sektor_compare():
-    """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
-    selected = request.args.getlist("s")
-    if not selected:
-        return safe_json({"ok": False, "error": "s parametresi gerekli"}), 400
-    # bug-hunt r93: dedup yoktu -- ayni sektor tekrar tekrar (?s=X&s=X&s=X) gonderilirse
-    # renderCompare() ayni sektoru N ayri sutunda (farkli accent renkleriyle) tekrar ciziyordu.
-    selected = list(dict.fromkeys(s.strip() for s in selected))[:3]  # max 3 sektor, dedup sira-koruyarak
-    with _lock:
-        stocks = list(_cache["data"])
-    sec_map = _build_sector_map(stocks)
-    # bug-hunt r86: /api/karsilastir'deki tickers whitelist deseniyle tutarli
-    # defense-in-depth -- dogrulanmamis sec_name JSON yanitina aynen yaziliyordu.
-    selected = [s for s in selected if s in sec_map]
-    if not selected:
-        return safe_json({"ok": False, "error": "geçerli sektör bulunamadı"}), 400
-    result = {}
-    for sec_name in selected:
-        items = sec_map.get(sec_name, [])
-        al = [s for s in items if s.get("signal") == "AL"]
-        sat = [s for s in items if s.get("signal") == "SAT"]
-        bkl = [s for s in items if s.get("signal") == "BEKLE"]
-        total = len(items)
-        score = round((len(al) - len(sat)) / total * 100) if total > 0 else 0
-        rvol_vals = [float(s["rvol"]) for s in items if s.get("rvol") is not None]
-        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
-        avg_chg = None
-        chg_vals = [float(s["change_pct"]) for s in items if s.get("change_pct") is not None]
-        if chg_vals:
-            avg_chg = round(sum(chg_vals) / len(chg_vals), 2)
-        def _stock_row(s):
-            return {
-                "ticker": s.get("ticker"), "name": s.get("name", ""),
-                "signal": s.get("signal", "BEKLE"),
-                "price": s.get("price"), "change_pct": s.get("change_pct"),
-                "rvol": s.get("rvol"),
-            }
-        result[sec_name] = {
-            "name": sec_name,
-            "found": sec_name in sec_map,  # DEV2-r4-input-edge: bilinmeyen/case-mismatch sektor artik ayirt edilebilir
-            "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
-            "score": score, "avg_rvol": avg_rvol, "avg_chg": avg_chg,
-            "stocks": sorted([_stock_row(s) for s in items],
-                             key=lambda x: (x["signal"] != "AL", x["signal"] != "SAT",
-                                            -(float(x["rvol"] or 0)))),
-        }
-    return safe_json({"compare": result, "selected": selected,
-                      "updated_at": _cache.get("updated_at")})
 
 
 # T4.2 (BIRLESTIR): /sektor-karsilastir sektor_harita.html'e ikinci tab olarak
@@ -14640,21 +14292,6 @@ def unsubscribe_page(token):
         # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor.
         resp.delete_cookie("bp_sub", samesite="Lax", secure=True, httponly=True)
         return resp
-
-
-@app.route("/api/telegram/test", methods=["POST"])
-@limiter.limit("5 per hour")
-def api_telegram_test():
-    """Admin: Telegram bağlantısını test et."""
-    require_admin()
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"}), 503
-    _send_telegram(
-        "🔔 <b>BorsaPusula Test Mesajı</b>\n"
-        "Telegram entegrasyonu başarıyla yapılandırıldı!\n"
-        f"<i>Sunucu: {datetime.now(_TZ_TR).strftime('%d.%m.%Y %H:%M:%S')}</i>"
-    )
-    return safe_json({"ok": True, "channel": TELEGRAM_CHANNEL_ID})
 
 
 # ── Blog önbelleği: startup'ta bir kez normalize et, her request'te yeniden hesaplama yok ──

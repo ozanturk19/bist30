@@ -14,11 +14,11 @@ DROP = {"stocks_age_s", "age_s", "ts", "cached", "uptime_sec", "generated_at",
         "fetched_at", "server_time", "updated_at", "stocks_updated_at"}  # son ikisi: diskten yüklemede dosya saati
 DROP_SUFFIX = ("_age_seconds", "_age_s")
 API = ["/api/data", "/api/data-lite", "/api/tarama", "/api/tarama/temel", "/api/gundem",
-       "/api/sector-heatmap", "/api/sektor-summary", "/api/bilanco-takvimi",
+       "/api/sektor-summary", "/api/bilanco-takvimi",
        "/api/temettu-takvimi", "/api/macro", "/api/stocks/list", "/api/backtest"]
 # Yalnız bellekte (yfinance/lider iş parçacığı) hesaplanır, shadow'da soğuk → yalnız HTTP durumu karşılaştırılır
 COLD = {"/api/bilanco-takvimi", "/api/backtest"}
-PER_TICKER = ["lite", "chart", "fundamentals", "health-score", "mtf", "signal-story"]
+PER_TICKER = ["lite", "chart", "fundamentals", "mtf", "signal-story"]
 PAGES = ["/", "/tarama", "/sektor-harita"]
 SAMPLE = ["THYAO", "GARAN", "ASELS", "BIMAS", "EREGL", "KCHOL", "ANHYT", "ULKER", "ENKAI", "AEFES"]
 

@@ -15,7 +15,7 @@ Bu test üç şeyi kilitler:
      çalıştırır, kaynak grep'iyle yetinmez.
 
 Ayrıca donmuş eksenlerin geri sızmasını statik olarak yakalar (şablonlarda
-signal_bars'tan Bugün/Dün türetimi, api_market_summary'de is_new_signal).
+signal_bars'tan Bugün/Dün türetimi).
 """
 import json
 import os
@@ -200,25 +200,6 @@ def test_sunucu_sozlugu_goreli_gun_adi_tasimaz():
 
 
 # ── 4. Donmuş eksenlerin geri sızması ───────────────────────────────────────
-
-def test_market_summary_donmus_is_new_signal_kullanmaz():
-    """api_market_summary hero'yu donmuş is_new_signal'den üretmemeli.
-
-    Kök neden: bayrak analiz anında donuyor; bayat ticker'da eski günün True'su
-    taşınıyordu (RYSAS 06.08 → hero "bugün güçlü trende geçti" diyordu).
-    """
-    src = _read(_APP_PY)
-    start = src.index("def api_market_summary(")
-    end = src.index("\n@app.route", start)
-    body = _strip_py_comments(src[start:end])
-    assert "is_new_signal" not in body, (
-        "api_market_summary hâlâ donmuş is_new_signal filtreliyor — "
-        "business_rules.is_signal_from_today(signal_date) kullanılmalı"
-    )
-    assert "is_signal_from_today" in body, (
-        "api_market_summary okuma-anı tarih kontrolü kullanmıyor"
-    )
-
 
 def test_sablonlar_bars_uzerinden_bugun_dun_turetmez():
     """Şablonlar göreli etiketi bar sayacından türetmemeli.
