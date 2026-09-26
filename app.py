@@ -13224,6 +13224,7 @@ def sektor_harita():
     # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
     ssr_sectors, ssr_updated_at = _compute_sector_heatmap()
     return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at,
+                           **_heatmap_ssr_context(),   # D-52: heatmap / heatmap_groups / heatmap_tiles (C-29 tüketir; ssr_sectors eski şablon için kalır)
                            heatmap_og_image=_heatmap_og_image())   # D-54: og:image (yoksa None)
 
 

@@ -272,3 +272,26 @@ def test_app_route_and_index_context(tmp_path, monkeypatch):
     monkeypatch.setattr(app, "_HEATMAP_DIR", str(tmp_path / "bos"))
     assert c.get("/api/heatmap").status_code == 503
     assert app._heatmap_ssr_context() == {"heatmap": None, "heatmap_groups": [], "heatmap_tiles": []}
+
+
+@PY310
+def test_sektor_harita_ssr_baglami(tmp_path, monkeypatch):
+    """D-52: /sektor-harita şablonu ana sayfadakiyle aynı ısı haritası bağlamını alır."""
+    import app
+    from flask import template_rendered
+    d = str(tmp_path / "heatmap")
+    hm.save_frozen(_snap(), d)
+    monkeypatch.setattr(app, "_HEATMAP_DIR", d)
+    seen = []
+
+    def _rec(sender, template, context, **kw):
+        if template.name == "sektor_harita.html":
+            seen.append(context)
+
+    template_rendered.connect(_rec, app.app)
+    try:
+        assert app.app.test_client().get("/sektor-harita").status_code == 200
+    finally:
+        template_rendered.disconnect(_rec, app.app)
+    assert seen and len(seen[0]["heatmap_tiles"]) == 100 and seen[0]["heatmap"]["asof"] == "2026-09-23"
+    assert "ssr_sectors" in seen[0]   # eski şablon C-29'a kadar çalışır
