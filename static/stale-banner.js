@@ -87,36 +87,26 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
 }
 
 /* tarama/hisseler/sinyal_performans — /api/data (216 kayıt) çekmiyorlar, hafif
-   /api/data-quality endpoint'ini (CPO-1121 §1) 60s'de bir çekip aynı fonksiyona post eder. */
+   /api/data-quality endpoint'ini (CPO-1121 §1) okuyup aynı fonksiyona post eder.
+   C-09 (26.09): 60 sn'lik setInterval kalktı (EOD: veri günde bir değişir).
+   Yüklemede bir kez + sekme görünür olunca en fazla 15 dk'da bir okunur.
+   Sayfa gizli yüklenirse ilk okuma görünür olunca yapılır (bughunt-12/13.09). */
 var _dqEverLoaded = false;
+var _dqLastFetch = 0;
 function bpPollDataQuality() {
-  /* bughunt-13.09: bpLoadMacroBar'daki AYNI kilit bug'ı burada da vardı —
-     hidden iken KOŞULSUZ atlanıyordu, sayfa hidden yüklenip visibilitychange
-     hiç ateşlenmezse stale-banner hiçbir zaman ilk kontrolünü yapamıyordu
-     (bkz. bpLoadMacroBar fix'i, aynı prensip: hiç veri gelmediyse hidden'dan
-     bağımsız dene, zaten yüklendiyse hidden'da boşa pil harcama). */
-  if (document.hidden && _dqEverLoaded) return;
+  _dqLastFetch = Date.now();
   fetch('/api/data-quality', {cache: 'no-store', signal: AbortSignal.timeout(10000)})
     .then(function(r) { return r.json(); })
     .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); _dqEverLoaded = true; })
-    .catch(function(e) { console.error('data-quality polling basarisiz', e); });
+    .catch(function(e) { console.error('data-quality okunamadi', e); });
 }
-var _dqPollInterval = null;
-var _dqVisListenerAdded = false;
+var _dqStarted = false;
 function bpStartDataQualityPolling() {
-  if (_dqPollInterval) return;
+  if (_dqStarted) return;
+  _dqStarted = true;
   bpPollDataQuality();
-  _dqPollInterval = setInterval(bpPollDataQuality, 60000);
-  /* bughunt-12.09: bpLoadMacroBar ile ayni desendeki bug — sayfa document.hidden
-     iken yuklenirse ilk poll no-op donuyordu, sekme gorunur olunca da hicbir
-     yerde tekrar denenmiyordu (60s'lik interval de arka planda tarayicilar
-     tarafindan suspend edilebiliyor). Tum 8 sayfa bu fonksiyonu TEK cagri
-     noktasindan kullandigi icin fix burada merkezi, sablon basina tekrar
-     gerekmiyor (r98/bpLoadMacroBar fix'iyle ayni ilke). */
-  if (!_dqVisListenerAdded) {
-    _dqVisListenerAdded = true;
-    document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) bpPollDataQuality();
-    });
-  }
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) return;
+    if (!_dqEverLoaded || Date.now() - _dqLastFetch >= 15 * 60 * 1000) bpPollDataQuality();
+  });
 }

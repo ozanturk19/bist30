@@ -123,7 +123,7 @@
 
 <!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="/static/stale-banner.js?v=5d95f69f"></script>
 <script>
 const SECTORS = {};  // ticker → sector (doldurulacak)
 let allStocks  = [];
@@ -295,7 +295,8 @@ function renderHeatmap(stocks) {
 }
 
 let _loadAttempts = 0;
-let _loading = false;  /* retry-zinciri (setTimeout) ile setInterval(load,120000) cakismasin (bug-hunt) */
+let _loading = false;  /* retry-zinciri (setTimeout) ile görünürlük yenilemesi cakismasin (bug-hunt) */
+let _secUpdatedAt = null;  /* C-09: aynı veri yeniden çizilmez */
 
 async function load() {
   if (_loading) return;
@@ -315,9 +316,11 @@ async function load() {
       return;
     }
     _loadAttempts = 0;
+    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s, j.refreshing);
+    if (j.updated_at && j.updated_at === _secUpdatedAt) return;
+    _secUpdatedAt = j.updated_at || null;
     allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
-    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s, j.refreshing);  /* CPO-1125 İş Kolu B */
     renderHeatmap(allStocks);
   } catch(e) {
     _loadAttempts++;
@@ -334,36 +337,17 @@ async function load() {
 }
 
 load();
-/* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
-   Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
-   ile baştan yazdığı için o an ODAKTA olan öğeyi yok ediyordu: odak <body>'ye
-   düşüyor, Enter hiçbir şey yapmıyor, Tab belgenin EN BAŞINDAN başlıyor — ve
-   bu, süre dolduğu her seferde yeniden oluyordu (WCAG 2.2.2 A / 2.4.3 A).
-
-   ⛔ SARMALAMA TIK ANINDA (lazy) YAPILIR: `bp-search.js` `defer` ile ve bu
-   inline betikten SONRA çalışır, yani BURADA `window.bpPreserveFocus` henüz
-   TANIMSIZDIR. Parse anında sarmalamak `ReferenceError` atıp sayfanın tüm
-   betiğini öldürürdü. `||` dalı ayrıca bp-search.js hiç yüklenemezse eski
-   davranışa sessizce döner — yenileme çalışmaya devam eder. */
-const _secLoadTick = () => (window.bpPreserveFocus ? window.bpPreserveFocus(load) : load)();
-let _sectorLoadInt = setInterval(_secLoadTick, 120000);  // Her 2 dakika yenile
-
-/* Page Visibility - sekme arka plandayken duraklat (index.html/gundem.html'deki
-   ayni ilke), sekme tekrar gorunur oldugunda hemen tazele */
+/* C-09 (26.09): 2 dk'lık setInterval kalktı (EOD: veri günde bir değişir).
+   Sekme görünür olunca, en fazla 15 dk'da bir ve yalnız Isı Haritası paneli
+   açıkken yeniden okunur; `updated_at` aynıysa yeniden çizilmez (load()).
+   Odak korunur (K-AX: bpPreserveFocus tık anında çözülür). */
+let _secLastCheck = Date.now();
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clearInterval(_sectorLoadInt);
-  } else {
-    // bughunt-12.09: kullanıcı Karşılaştır sekmesindeyken (panelIsiHaritasi
-    // gizli) bu geçmişte koşulsuz resume ediyordu — arka planda görünmeyen
-    // Isı Haritası'nı gereksiz yere yeniden yüklüyordu (fazladan /api/data
-    // isteği). Artık sadece Isı Haritası paneli gerçekten görünürken tazeler.
-    var panelHm = document.getElementById('panelIsiHaritasi');
-    if (panelHm && panelHm.style.display !== 'none') {
-      load();
-      _sectorLoadInt = setInterval(_secLoadTick, 120000);
-    }
-  }
+  if (document.hidden || Date.now() - _secLastCheck < 15 * 60 * 1000) return;
+  var panelHm = document.getElementById('panelIsiHaritasi');
+  if (panelHm && panelHm.style.display === 'none') return;
+  _secLastCheck = Date.now();
+  (window.bpPreserveFocus ? window.bpPreserveFocus(load) : load)();
 });
 
 window.addEventListener('pageshow', function(e) {
@@ -393,7 +377,6 @@ function switchSektorTab(tab) {
     btnHm && btnHm.setAttribute('aria-selected', 'false');
     panelCmp.style.display = 'block';
     panelHm.style.display = 'none';
-    clearInterval(_sectorLoadInt);
     if (!_cmpLoaded) { _cmpLoaded = true; loadSectors(); }
   } else {
     btnHm && btnHm.classList.add('active');
@@ -402,11 +385,7 @@ function switchSektorTab(tab) {
     btnCmp && btnCmp.setAttribute('aria-selected', 'false');
     panelHm.style.display = 'block';
     panelCmp.style.display = 'none';
-    if (!document.hidden) {
-      clearInterval(_sectorLoadInt);
-      load();
-      _sectorLoadInt = setInterval(_secLoadTick, 120000);
-    }
+    if (!document.hidden) load();  /* C-09: updated_at aynıysa çizim yok */
   }
   _publishSektorUrl(tab);
 }

@@ -736,6 +736,7 @@ function removePosition(id) {
 }
 
 let _fetchLiveBusy = false;
+let _pfUpdatedAt = null;
 async function fetchLive() {
   if (_fetchLiveBusy) return;
   _fetchLiveBusy = true;
@@ -761,6 +762,7 @@ async function fetchLive() {
       _pfFetchErr.warming = true;
       if (_pfWarmTries < PF_WARM_MAX_TRIES) { _pfWarmTries++; setTimeout(fetchLive, PF_WARM_RETRY_MS); }
     } else {
+      _pfUpdatedAt = j.updated_at || null;
       j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
       _pfFetchErr.live = false;
       _pfFetchErr.warming = false;
@@ -963,36 +965,18 @@ document.getElementById('addTicker').addEventListener('input', e => {
 render();
 fetchLive();
 fetchCharts();
-/* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
-   Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
-   ile baştan yazdığı için o an ODAKTA olan öğeyi yok ediyordu: odak <body>'ye
-   düşüyor, Enter hiçbir şey yapmıyor, Tab belgenin EN BAŞINDAN başlıyor — ve
-   bu, süre dolduğu her seferde yeniden oluyordu (WCAG 2.2.2 A / 2.4.3 A).
-
-   ⛔ SARMALAMA TIK ANINDA (lazy) YAPILIR: `bp-search.js` `defer` ile ve bu
-   inline betikten SONRA çalışır, yani BURADA `window.bpPreserveFocus` henüz
-   TANIMSIZDIR. Parse anında sarmalamak `ReferenceError` atıp sayfanın tüm
-   betiğini öldürürdü. `||` dalı ayrıca bp-search.js hiç yüklenemezse eski
-   davranışa sessizce döner — yenileme çalışmaya devam eder. */
-const _pfLiveTick   = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchLive)   : fetchLive)();
-const _pfChartsTick = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchCharts) : fetchCharts)();
-let _pfLiveInt   = setInterval(_pfLiveTick, 60000);
-let _pfChartsInt = setInterval(_pfChartsTick, 300000); // sparkline + XU030 5dk'da bir yenile
-
-/* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
-   index.html/hisse.html'deki CPO-DEV2-072 r98 deseniyle aynı ilke; bu sayfa
-   setInterval kullandığı için (setTimeout polling değil) clearInterval +
-   yeniden setInterval ile uygulanıyor. */
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clearInterval(_pfLiveInt);
-    clearInterval(_pfChartsInt);
-  } else {
-    _pfLiveTick();
-    _pfChartsTick();
-    _pfLiveInt   = setInterval(_pfLiveTick, 60000);
-    _pfChartsInt = setInterval(_pfChartsTick, 300000);
-  }
+/* C-09 (26.09): EOD mimarisinde veri günde bir değişir — 60 sn / 5 dk
+   setInterval'ları kalktı. Sekme görünür olunca (en fazla 15 dk'da bir)
+   /api/data yeniden okunur; `updated_at` değiştiyse grafikler de yenilenir.
+   Yenileme kullanıcının odağını korur (K-AX: bpPreserveFocus, tık anında). */
+const PF_RECHECK_MS = 15 * 60 * 1000;
+let _pfLastCheck = Date.now();
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden || Date.now() - _pfLastCheck < PF_RECHECK_MS) return;
+  _pfLastCheck = Date.now();
+  const before = _pfUpdatedAt;
+  await (window.bpPreserveFocus ? window.bpPreserveFocus(fetchLive) : fetchLive)();
+  if (_pfUpdatedAt !== before) (window.bpPreserveFocus ? window.bpPreserveFocus(fetchCharts) : fetchCharts)();
 });
 
 /* ── Cloud Sync ───────────────────────────────── */
@@ -1216,7 +1200,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 </script>
 <script src="/static/bp-search.js?v=8cee77ec" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="/static/stale-banner.js?v=5d95f69f"></script>
 <script>bpStartDataQualityPolling();</script>
 
 <script>
