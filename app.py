@@ -525,7 +525,7 @@ def _fetch_intraday_subprocess(ticker_base, timeout=20):
     return _fetch_daily_subprocess(ticker_base, period="5d", interval="1m", timeout=timeout)
 
 
-_MACRO_PREV_DAILY = {}         # D-49: vadeli (=F) sembol -> (ts, günlük bar önceki kapanış)
+_MACRO_PREV_DAILY = {}         # D-49: vadeli (=F) + BIST endeksi -> (ts, günlük bar önceki kapanış)
 _MACRO_PREV_DAILY_TTL = 1800   # sn; günlük bar günde bir değişir, Yahoo çağrısı azaltılır
 
 _MACRO_SLOW_MS = 2000  # CPO-740 Görev 12c: >2s uyarı (macro baseline ~650ms × 3)
@@ -538,7 +538,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
-    _fut = sym.endswith("=F")
+    _fut = sym.endswith("=F") or sym in ("XU100.IS", "XU030.IS")  # D-49: endeks de /api/data ile ayni gunluk bar tabani
     _cached = _MACRO_PREV_DAILY.get(sym)
     _need_daily = _fut and (not _cached or time.time() - _cached[0] > _MACRO_PREV_DAILY_TTL)
     try:

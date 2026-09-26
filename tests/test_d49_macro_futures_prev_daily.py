@@ -50,3 +50,15 @@ def test_macro_one_non_futures_unchanged(app_module):
         r = app._fetch_macro_one_subprocess("USDTRY", "USDTRY=X")
     assert run.call_args[0][0][-1] == "USDTRY=X"
     assert r["change"] == round((48.92 - 48.878) / 48.878 * 100, 2)
+
+
+def test_macro_one_bist_index_uses_daily_bar(app_module):
+    app = app_module
+    app._MACRO_PREV_DAILY.clear()
+    out = {"sym": "XU100.IS", "price": 12899.4, "prev_close": 12892.79, "prev_daily": 12888.3}
+    with mock.patch.object(app, "_yahoo_cb_blocked", return_value=False), \
+         mock.patch.object(app.subprocess, "run", return_value=_proc(out)) as run:
+        r = app._fetch_macro_one_subprocess("XU100", "XU100.IS")
+    assert run.call_args[0][0][-1] == "daily"
+    assert r["change"] == 0.09          # /api/data xu100_change_pct ile ayni taban
+    app._MACRO_PREV_DAILY.clear()
