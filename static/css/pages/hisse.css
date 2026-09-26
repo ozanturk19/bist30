@@ -943,29 +943,10 @@
 
   /* ── C-19 (25.09): .da-tabs — 4 sekme, ARIA tabs deseni (C-M10 taslagi, O16i=A).
      Eski .bp-segments hap seridi + sembol hapi + AI sekmesi kalkti. Aktif sekme
-     marka rengi alt cizgi; yapiskan (header'in hemen alti). Tek kaynak bu blok. ── */
-  .da-tabs{
-    position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader);
-    display:flex; gap:4px; margin:0 0 18px; background:var(--bp-bg);
-    border-bottom:1px solid var(--bp-border);
-  }
-  .da-tab{
-    position:relative; min-height:44px; padding:0 14px; border:0; background:none; cursor:pointer;
-    font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-md); font-weight:600;
-    color:var(--bp-text3); white-space:nowrap; -webkit-tap-highlight-color:transparent;
-  }
-  @media (hover:hover) and (pointer:fine){ .da-tab:hover{ color:var(--bp-text2); } }
-  .da-tab[aria-selected="true"]{ color:var(--bp-text); }
-  .da-tab[aria-selected="true"]::after{
-    content:''; position:absolute; left:10px; right:10px; bottom:-1px; height:2px;
-    background:var(--bp-brand); border-radius:var(--bp-radius-xs);
-  }
-  .da-tab:focus-visible{ outline:2px solid var(--bp-accent-cyan); outline-offset:-2px; border-radius:var(--bp-radius-md); }
-  @media (max-width:768px){
-    .da-tabs{ margin:0 -12px 14px; padding:0 4px; overflow-x:auto; scrollbar-width:none; }
-    .da-tabs::-webkit-scrollbar{ display:none; }
-    .da-tab{ flex:1 0 auto; padding:0 10px; }
-  }
+     marka rengi alt cizgi; yapiskan (header'in hemen alti). Görünüm C-17'den beri data-art.css'te. ── */
+  /* Görünüm kanonda (data-art.css §7e .da-tabs, C-17); burada yalnız konum. */
+  .da-tabs{ position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader); margin:0 0 18px; }
+  @media (max-width:768px){ .da-tabs{ margin:0 -12px 14px; padding:0 4px; } }
 
   /* C-19: "Ne anlama geliyor? · Kural tabanli" karti (eski AI sekmesinin icerigi). */
   .hx-mean{ padding:16px 18px; margin-bottom:16px; }

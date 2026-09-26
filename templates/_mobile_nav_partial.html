@@ -1,3 +1,4 @@
+{% from '_icons.html' import icon %}
 {# Mobil alt navigasyon — C-31 (26.09): masaüstü menüyle AYNI 5 öğe (O17=A):
    Piyasa · Keşfet · Haberler · Takip · Öğren. Eski "Menü" sayfası (mbn-sheet),
    onun odak tuzağı ve Öğrenme Modu kartı kalktı; ikincil sayfalar footer'da.
@@ -6,23 +7,23 @@
 <nav class="mobile-bottom-nav" aria-label="Ana navigasyon">
   <div class="mbn-inner">
     <a href="/" class="mbn-item" data-route="/ /ozet /gundem /sektor-harita /harita">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3 3v18h18"/><polyline points="7 14 11 10 14 13 20 7"/></svg></span>
+      <span class="mbn-icon">{{ icon('piyasa') }}</span>
       <span class="mbn-label">Piyasa</span>
     </a>
     <a href="/tarama" class="mbn-item" data-route="/tarama /hisse /karsilastir">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <span class="mbn-icon">{{ icon('ara') }}</span>
       <span class="mbn-label">Keşfet</span>
     </a>
     <a href="/haberler" class="mbn-item" data-route="/haberler /takvim /bulten">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 5h13a2 2 0 0 1 2 2v11a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><line x1="8" y1="9" x2="15" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></span>
+      <span class="mbn-icon">{{ icon('haber') }}</span>
       <span class="mbn-label">Haberler</span>
     </a>
     <a href="/portfolio" class="mbn-item" data-route="/portfolio /takip /profil">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+      <span class="mbn-icon">{{ icon('takip') }}</span>
       <span class="mbn-label">Takip</span>
     </a>
     <a href="/blog" class="mbn-item" data-route="/blog /metodoloji">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+      <span class="mbn-icon">{{ icon('ogren') }}</span>
       <span class="mbn-label">Öğren</span>
     </a>
   </div>

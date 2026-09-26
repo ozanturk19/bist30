@@ -1,3 +1,4 @@
+{% from '_icons.html' import icon %}
 {#- KANONIK HEADER — sayfa sablonlarinin tek masaustu header kaynagi:
     logo + .bp-main-nav + arama dugmesi. Sayfa basligi header'da DEGIL,
     <main> icinde gorunur `bpf.pagehead(...)` makrosuyla (_fmt_macros.html,
@@ -21,27 +22,27 @@
   </a>
   <nav class="bp-main-nav" aria-label="Ana navigasyon">
   <a href="/" data-route="/ /ozet /gundem /sektor-harita /harita" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><polyline points="7 14 11 10 14 13 20 7"/></svg>
+    {{ icon('piyasa') }}
     <span>Piyasa</span>
   </a>
   <a href="/tarama" data-route="/tarama /hisse /karsilastir" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    {{ icon('ara') }}
     <span>Keşfet</span>
   </a>
   <a href="/haberler" data-route="/haberler /takvim /bulten" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h13a2 2 0 0 1 2 2v11a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><line x1="8" y1="9" x2="15" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+    {{ icon('haber') }}
     <span>Haberler</span>
   </a>
   <a href="/portfolio" data-route="/portfolio /takip /profil" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    {{ icon('takip') }}
     <span>Takip</span>
   </a>
   <a href="/blog" data-route="/blog /metodoloji" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    {{ icon('ogren') }}
     <span>Öğren</span>
   </a>
 </nav>
-<button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" style="margin-left:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+<button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" style="margin-left:8px">{{ icon('ara', size=16) }}</button>
 </header>
 <script>
 (function(){var p=window.location.pathname;document.querySelectorAll('.bp-main-nav > .bp-nav-item[data-route]').forEach(function(el){if(el.dataset.route.split(' ').some(function(r){return r==='/'?p==='/':p.startsWith(r);}))el.setAttribute('aria-current','page');});})();
