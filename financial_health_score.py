@@ -108,12 +108,42 @@ CATEGORY_LABELS = {
 # kaldıraç metrikleri gerçekten hesaplanabiliyor (mevduat bankası bilanço
 # yapısına sahip değiller). Liste elle tutuluyor çünkü kod tabanında
 # "mevduat bankası" ayrımını yapan başka bir sektör alt-kırılımı yok.
-LEVERAGE_NA_TICKERS = {
+BANK_TICKERS = {
     "AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
     "ALBRK", "KLNMA", "TSKB", "SKBNK",  # mevduat bankaları
+}
+LEVERAGE_NA_TICKERS = BANK_TICKERS | {
     "SAHOL",  # holding, ağırlıklı finansal iştirak yapısı
     "YESIL",  # GYO, bilanço yapısı benzer şekilde uyumsuz
 }
+
+# D-15: sektöre uygun temel metrikler. Sigortada cari oran/hızlı oran/net borç ÷
+# FAVÖK anlamsız (bilanço teknik karşılıklardan oluşur; Yahoo'da bir değer gelse
+# de ANHYT "Kaldıraç 98,6" gibi yanıltıcı bir puan üretiyordu) → Kaldıraç N/A.
+# Bankada ayrıca faaliyet nakit akışı mevduat/kredi hareketini yansıtır, işletme
+# nakit akışı değildir (FCF/satış, pozitif çeyrek, OCF değişkenliği) → Nakit
+# Akışı da N/A. Sektör adı (D-23 KAP kovası) ya da elle liste yeter; GYO'da
+# metrikler hesaplanabildiği için kapsam dışı (EKGYO/ISGYO tamlık 0,93).
+INSURER_TICKERS = {"ANHYT", "AKGRT", "TURSG", "ANSGR", "AGESA", "RAYSG"}
+SECTOR_INSURER, SECTOR_BANK = "Sigorta", "Bankacılık"
+
+# Tamlık bu değerin altındaysa `limited_data` bayrağı; sıralama havuzları
+# (home_fields.featured_pool) aynı eşikle dışlar.
+LIMITED_DATA_BELOW = 0.6
+
+
+def structural_na(ticker, sector):
+    """Bu hisse için yapısal olarak UYGULANAMAZ kategoriler (CATEGORIES sırasıyla).
+
+    Bankada Kaldıraç + Nakit Akışı, sigortada Kaldıraç, LEVERAGE_NA_TICKERS'ta
+    (holding/GYO artığı) Kaldıraç. Diğer hisselerde boş."""
+    if ticker in BANK_TICKERS or sector == SECTOR_BANK:
+        na = {"kaldirac", "nakit_akisi"}
+    elif ticker in INSURER_TICKERS or sector == SECTOR_INSURER or ticker in LEVERAGE_NA_TICKERS:
+        na = {"kaldirac"}
+    else:
+        return []
+    return [c for c in CATEGORIES if c in na]
 
 
 def _band(score):
@@ -151,7 +181,8 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
 
     Çıktı: {"temel_analiz_skoru": int|None, "data_completeness": float,
             "categories_complete": bool, "band": str|None,
-            "categories": {kategori: skor}, "categories_na": [kategori, ...]}
+            "categories": {kategori: skor}, "categories_na": [kategori, ...],
+            "limited_data": bool}  (D-15: tamlık < %60, uygulanabilir metrik payda)
 
     categories_na (CPO-1617), categories dict'inde eksik olan kategorilerden
     hangilerinin GEÇİCİ veri boşluğu değil, ticker'ın sektör/bilanço yapısı
@@ -171,8 +202,11 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     kullanmalı, partial'ı değil."""
     category_scores = {}
     metrics_with_data = 0
+    categories_na = structural_na(ticker_fundamentals.get("ticker"), sector)
 
     for cat_name, cat in CATEGORIES.items():
+        if cat_name in categories_na:
+            continue  # yapısal N/A: veri gelse bile puanlanmaz (D-15)
         metric_scores = []
         for metric, reverse in cat["metrics"]:
             value = ticker_fundamentals.get(metric)
@@ -183,14 +217,11 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         if metric_scores:
             category_scores[cat_name] = sum(metric_scores) / len(metric_scores)
 
-    data_completeness = round(metrics_with_data / TOTAL_METRIC_COUNT, 2)
+    # Payda: bu hisse için UYGULANABİLİR metrikler (D-15) — bankada 14 değil 8;
+    # yapısal N/A veri eksikliği sayılmaz.
+    applicable = sum(len(c["metrics"]) for n, c in CATEGORIES.items() if n not in categories_na)
+    data_completeness = round(metrics_with_data / applicable, 2)
     categories_complete = len(category_scores) == len(CATEGORIES)
-
-    ticker = ticker_fundamentals.get("ticker")
-    categories_na = [
-        c for c in CATEGORIES
-        if c not in category_scores and c == "kaldirac" and ticker in LEVERAGE_NA_TICKERS
-    ]
 
     if not category_scores or metrics_with_data < MIN_METRICS_FOR_SCORE:
         return {
@@ -200,6 +231,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             "band": None,
             "categories": {},
             "categories_na": categories_na,
+            "limited_data": data_completeness < LIMITED_DATA_BELOW,
         }
 
     total_weight = sum(CATEGORIES[c]["weight"] for c in category_scores)
@@ -213,6 +245,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         "band": _band(round(score)),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
         "categories_na": categories_na,
+        "limited_data": data_completeness < LIMITED_DATA_BELOW,
     }
 
 
@@ -338,6 +371,7 @@ def build_score_entry(fdata, sector, stocks_with_fundamentals, teknik_skor, stat
         "band": health.get("band"),
         "categories": health.get("categories"),
         "categories_na": health.get("categories_na") or [],
+        "limited_data": bool(health.get("limited_data")),
     }
     if "trend_payi" in composite:
         entry["bp_trend"] = {"durum": state, "pay": composite["trend_payi"]}

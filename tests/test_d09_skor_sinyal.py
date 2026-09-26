@@ -127,11 +127,54 @@ def test_health_score_known_pool(stock_pool):
 
 
 def test_health_score_leverage_na_bank(stock_pool):
+    # D-15: mevduat bankasında Kaldıraç + Nakit Akışı yapısal N/A — nakit metrikleri
+    # veri olarak gelse de puanlanmaz; payda 14 değil 8 (uygulanabilir metrik).
     rows = [dict(POOL5[0], ticker="GARAN")] + POOL5[1:]
     pool = stock_pool("Bankacılık", rows)
     r = fhs.compute_health_score(pool[0], "Bankacılık", pool)
-    assert r["temel_analiz_skoru"] == 56
-    assert r["categories_na"] == ["kaldirac"]    # mevduat bankası: yapısal olarak yok
+    # Kârlılık 60, Değerleme/Büyüme 60 → (60×30 + 60×15) / 45 = 60
+    assert r["categories"] == {"karlilik": 60.0, "degerleme_buyume": 60.0}
+    assert r["temel_analiz_skoru"] == 60
+    assert r["categories_na"] == ["nakit_akisi", "kaldirac"]
+    assert r["data_completeness"] == 0.62        # 5 / 8 uygulanabilir metrik
+    assert r["limited_data"] is False
+
+
+def test_health_score_insurer_leverage_na_even_with_data(stock_pool):
+    # ANHYT örneği: kaldıraç metrikleri dolu gelse de Sigorta'da Kaldıraç N/A.
+    rows = [dict(POOL5[0], ticker="ANHYT", net_debt_to_ebitda=.1, current_ratio=2.0, quick_ratio=2.0)] + \
+           [dict(r_, current_ratio=1.0 + i, quick_ratio=1.0 + i, net_debt_to_ebitda=1.0 + i)
+            for i, r_ in enumerate(POOL5[1:])]
+    pool = stock_pool("Sigorta", rows)
+    r = fhs.compute_health_score(pool[0], "Sigorta", pool)
+    assert "kaldirac" not in r["categories"] and r["categories_na"] == ["kaldirac"]
+    assert set(r["categories"]) == {"karlilik", "nakit_akisi", "degerleme_buyume"}
+    assert r["data_completeness"] == 0.73        # 8 / 11 uygulanabilir metrik (kaldıraç sayılmaz)
+
+
+def test_health_score_structural_na_by_sector_or_ticker():
+    assert fhs.structural_na("GARAN", "Bankacılık") == ["nakit_akisi", "kaldirac"]
+    assert fhs.structural_na("YENIBANKA", "Bankacılık") == ["nakit_akisi", "kaldirac"]   # sektörden
+    assert fhs.structural_na("ANHYT", "Sigorta") == ["kaldirac"]
+    assert fhs.structural_na("AGESA", "Diğer") == ["kaldirac"]                           # listeden
+    assert fhs.structural_na("SAHOL", "Holding ve Yatırım") == ["kaldirac"]              # eski liste
+    assert fhs.structural_na("THYAO", "Ulaştırma") == []
+    assert fhs.structural_na("EKGYO", "Gayrimenkul") == []                               # GYO kapsam dışı
+    assert fhs.structural_na("ISFIN", "Finansal Hizmetler") == []                        # leasing: hesaplanabilir
+
+
+def test_health_score_limited_data_flag(stock_pool):
+    # 4 metrik / 14 = 0,29 ama ≥ 3 metrik → skor var, limited_data açık
+    pool = stock_pool("Sanayi", [{"profit_margin": .2, "roe": .1, "gross_margin": .3, "pe_ratio": 9}] + POOL5[1:])
+    r = fhs.compute_health_score(pool[0], "Sanayi", pool)
+    assert r["temel_analiz_skoru"] is not None
+    assert r["data_completeness"] < 0.6 and r["limited_data"] is True
+    # POOL5: 8/14 = 0,57 < 0,6 → açık; 9 metrik (0,64) → kapalı
+    pool = stock_pool("Sanayi", POOL5)
+    assert fhs.compute_health_score(pool[0], "Sanayi", pool)["limited_data"] is True
+    pool = stock_pool("Sanayi", [dict(POOL5[0], ebitda_margin=.2)] + POOL5[1:])
+    r = fhs.compute_health_score(pool[0], "Sanayi", pool)
+    assert r["data_completeness"] == 0.64 and r["limited_data"] is False
 
 
 def test_health_score_suppressed_below_min_metrics(stock_pool):
@@ -256,7 +299,7 @@ def test_directional_matches_d10_oracle():
 
 
 ENTRY_KEYS = ["teknik_analiz_skoru", "temel_analiz_skoru", "borsapusula_skoru", "data_completeness",
-              "categories_complete", "partial", "band", "categories", "categories_na"]
+              "categories_complete", "partial", "band", "categories", "categories_na", "limited_data"]
 
 
 def test_build_score_entry_both_flag_states(bp_flag, stock_pool):
