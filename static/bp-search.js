@@ -63,17 +63,10 @@
     + '#statsBar,.stats-bar{min-height:78px}'
     /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
     + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
-    /* ── Unified Logo (replaces .back-btn variants across pages) ── */
-    + '.logo-link{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;padding:0;margin:0;background:none;border:none}'
-    + '.logo-link .bp-logo{display:block;width:260px;height:68px;flex-shrink:0}'
-    + '@media (max-width:1024px){.logo-link .bp-logo{width:230px;height:60px}}'
-    + '@media (max-width:768px){.logo-link .bp-logo{width:200px;height:52px}}'
-    + '@media (max-width:420px){.logo-link .bp-logo{width:170px;height:44px}}'
+    /* Logo boyutu + header{flex,60px} kurallari C-08 (26.09) ile _bp_critical_css.html'e tasindi: defer
+       betik ilk boyamadan SONRA uyguladigi icin nav ikinci satirdan birinciye zipliyordu (takvim CLS 0,19-0,44). */
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
     + 'header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
-    /* ── Unified header dimensions: 60px tall, 12px 20px padding (force across all pages) ── */
-    + 'header{padding:calc(10px + env(safe-area-inset-top)) 20px 10px !important;min-height:calc(60px + env(safe-area-inset-top)) !important;max-height:calc(60px + env(safe-area-inset-top)) !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
-    + 'header > *{max-height:48px}'
     + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
     + 'header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}'
     /* ── Unified Nav (bp-main-nav) — K-CY (22.09): TEK KANON ──

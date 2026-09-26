@@ -16,7 +16,6 @@
   /* ── Header ── */
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
-    padding:12px 24px; display:flex; align-items:center; gap:14px;
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); }

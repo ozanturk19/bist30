@@ -24,11 +24,10 @@ body{margin:0}
    Diğer sayfalarla AYNI opak arkaplan desenine geçirildi, blur kaldırıldı. */
 header{
   background:var(--bp-bg);
-  border-bottom:1px solid var(--bp-border);padding:0 clamp(14px,3vw,24px);height:60px;
-  display:flex;align-items:center;justify-content:space-between;position:sticky;top:var(--bp-anchor-macro);
-  z-index:var(--bp-z-dropdown);gap:12px;transform:translateZ(0);
+  border-bottom:1px solid var(--bp-border);height:60px;justify-content:space-between;position:sticky;top:var(--bp-anchor-macro);
+  z-index:var(--bp-z-dropdown);
 }
-.logo-link{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-link{align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
 /* .bp-nav-item:hover / [aria-current="page"]: KANONIK kaynak artik
    templates/_bp_critical_css.html (bu iki kural onun eksik/eski kopyasiydi ve
    daha asagida yuklendigi icin kanonigi EZIYORDU). */

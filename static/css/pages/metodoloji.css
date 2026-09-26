@@ -22,10 +22,6 @@
   header {
     background: var(--bp-surface);
     border-bottom: 1px solid var(--bp-border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
     position: sticky;
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);

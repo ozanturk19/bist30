@@ -29,9 +29,6 @@
     position: sticky;
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
-    display: flex;
-    min-height: calc(60px + env(safe-area-inset-top));
-    max-height: calc(60px + env(safe-area-inset-top));
   }
 
 
@@ -877,8 +874,7 @@
      Gerekçe orada, ölçümüyle birlikte yazılı. Bu sayfada guard'ın ölçülmüş işi
      `.score-section::before` (inset:-60px dekoratif ışıma) + `.ind-help::after`
      tooltip'in belge-seviyesi taşmasını kesmek; 320px'te 48px, 1280px'te 36px. */
-  @media (max-width: 768px) {
-    header { gap: 6px; padding: 10px 14px; }  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
+  @media (max-width: 768px) {  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }

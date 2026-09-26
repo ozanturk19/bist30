@@ -21,10 +21,7 @@
   header {
     background: var(--bp-bg);
     border-bottom: 1px solid var(--bp-border);
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 14px;
     position: sticky; top: 0; z-index:var(--bp-z-dropdown);
-    min-height: 60px;
   }
   main {
     max-width: var(--bp-container-720);

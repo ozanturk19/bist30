@@ -11,8 +11,8 @@
     background: var(--bp-bg);
     border-bottom: 1px solid var(--bp-border);
     padding: calc(10px + env(safe-area-inset-top)) 20px 10px;
-    display: flex; align-items: center; gap: 10px;
-    min-height: 60px;
+    display: flex; align-items: center; gap: 14px;
+    min-height: calc(60px + env(safe-area-inset-top));
   }
   header a.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--bp-text); }
   header .brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: var(--bp-text-xl); }

@@ -8,11 +8,9 @@
      deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */
   header {
     background: var(--bp-bg);
-    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
-    padding: 0 24px; height: 60px;
-    display:flex; align-items:center; gap:16px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
+    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8); height: 60px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
-  .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+  .logo-link { align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); font-family:'Space Grotesk',system-ui,sans-serif; }
   .page-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); }
   .container  { max-width:var(--bp-container-1200); margin:0 auto; padding:24px; }

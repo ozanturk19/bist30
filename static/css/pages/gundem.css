@@ -7,7 +7,6 @@
   }
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
-    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
     position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
 
@@ -130,7 +129,6 @@
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    header { padding: 12px 16px; }
     .container { padding: 16px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     .stat-num  { font-size: var(--bp-text-28); }
