@@ -11,8 +11,13 @@ import sys
 import json
 
 
-def fetch(sym: str) -> dict:
-    """Tek bir sembol için fast_info çağrısı — subprocess isolated."""
+def fetch(sym: str, daily_prev: bool = False) -> dict:
+    """Tek bir sembol için fast_info çağrısı — subprocess isolated.
+
+    daily_prev=True: vadeli (=F) semboller için fast_info.previous_close bayat/farklı
+    seans değeri veriyor (D-49: Brent -1,3 vs günlük bar -2,14; gümüş +0,24 vs +1,24);
+    günlük barın sondan bir önceki kapanışı `prev_daily` olarak eklenir.
+    """
     import yfinance as yf
 
     tk = yf.Ticker(sym)
@@ -25,11 +30,19 @@ def fetch(sym: str) -> dict:
     if prev is None:
         return {"error": "no_prev_close", "sym": sym}
 
-    return {
+    out = {
         "sym": sym,
         "price": float(price),
         "prev_close": float(prev),
     }
+    if daily_prev:
+        try:
+            closes = tk.history(period="7d", interval="1d")["Close"].dropna()
+            if len(closes) >= 2:
+                out["prev_daily"] = float(closes.iloc[-2])
+        except Exception:
+            pass  # fast_info prev_close'a düşer
+    return out
 
 
 def main():
@@ -40,7 +53,7 @@ def main():
 
     sym = sys.argv[1]
     try:
-        result = fetch(sym)
+        result = fetch(sym, daily_prev=(len(sys.argv) > 2 and sys.argv[2] == "daily"))
         if result.get("error"):
             print(json.dumps(result), file=sys.stderr)
             sys.exit(1)

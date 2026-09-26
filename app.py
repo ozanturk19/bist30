@@ -525,6 +525,9 @@ def _fetch_intraday_subprocess(ticker_base, timeout=20):
     return _fetch_daily_subprocess(ticker_base, period="5d", interval="1m", timeout=timeout)
 
 
+_MACRO_PREV_DAILY = {}         # D-49: vadeli (=F) sembol -> (ts, günlük bar önceki kapanış)
+_MACRO_PREV_DAILY_TTL = 1800   # sn; günlük bar günde bir değişir, Yahoo çağrısı azaltılır
+
 _MACRO_SLOW_MS = 2000  # CPO-740 Görev 12c: >2s uyarı (macro baseline ~650ms × 3)
 
 def _fetch_macro_one_subprocess(label, sym, timeout=10):
@@ -535,10 +538,13 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
+    _fut = sym.endswith("=F")
+    _cached = _MACRO_PREV_DAILY.get(sym)
+    _need_daily = _fut and (not _cached or time.time() - _cached[0] > _MACRO_PREV_DAILY_TTL)
     try:
         result = subprocess.run(
-            [_sys.executable, _YF_MACRO_SCRIPT, sym],
-            capture_output=True, text=True, timeout=timeout,
+            [_sys.executable, _YF_MACRO_SCRIPT, sym] + (["daily"] if _need_daily else []),
+            capture_output=True, text=True, timeout=timeout + (5 if _need_daily else 0),
         )
         _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
@@ -548,6 +554,11 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         data = json.loads(result.stdout)
         price = data.get("price")
         prev = data.get("prev_close")
+        if _fut:
+            if data.get("prev_daily"):
+                _MACRO_PREV_DAILY[sym] = (time.time(), float(data["prev_daily"]))
+            if sym in _MACRO_PREV_DAILY:
+                prev = _MACRO_PREV_DAILY[sym][1]
         if not price or not prev or prev == 0:
             return None
         logger.debug("yf_macro_fetch %s: %.0fms", sym, _ms)
