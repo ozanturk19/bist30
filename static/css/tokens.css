@@ -162,8 +162,6 @@
        #1fe0ff -> --bp-accent-cyan (#22d3ee; token'ın kendi yorumu zaten
                   "Data-Art ana sayfa" diyor, ama o sayfa onu kullanmıyordu)
        #00e6a0 -> --bp-al          (#00e290; %0,2 farkla ayrı yazılmış ikiz) */
-  --bp-art-magenta: #ff37d8;  /* dekoratif blob/node + dalga gradyanı başlangıcı */
-  --bp-art-orange:  #ff9d2e;  /* dekoratif node (2 adet) */
   --bp-stale:     #f5c949;   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
                                  aynı değer 6 yerde, 3 dosyada BAĞIMSIZ yazılıydı ve hiçbiri token
                                  değildi: hisse.html renderFreshness (×3 dal), _stale_banner.html
@@ -220,12 +218,8 @@
      degismeli. Ikisi ayni blokta duruyor ki ayrisamasinlar. */
   --bp-bg-rgb:       14, 14, 18;
   --bp-surface-rgb:  20, 20, 22;
-  --bp-surface2-rgb: 28, 27, 31;
-  --bp-surface3-rgb: 32, 31, 33;
   --bp-border-rgb:   42, 42, 44;
-  --bp-border2-rgb:  70, 70, 77;
   --bp-text-rgb:     229, 225, 228;
-  --bp-text2-rgb:    199, 197, 205;
   --bp-text3-rgb:    144, 144, 151;
   --bp-brand-rgb:    184, 195, 255;
   --bp-al-rgb:       0, 226, 144;
@@ -237,11 +231,9 @@
   --bp-art-violet-rgb: 124, 92, 255;
   --bp-stale-rgb: 245, 201, 73;
   --bp-warn-rgb:  210, 153, 34;
-  --bp-accent-yellow-rgb: 227, 179, 65;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;
-  --bg2:          #141416;
 }
 
 /* CPO-DEV2-042 P1-UX-3: html arka planı yoksa iOS Safari rubber-band
@@ -335,22 +327,6 @@ body {
      Ek olarak 1px "hairline" basamağı (kenarlık hizası ve optik düzeltme;
      yuvarlanırsa 1px'lik kaçıklık üretir, bu yüzden basamaktır).
   */
-  --bp-space-0:   0;
-  --bp-space-px:  1px;
-  --bp-space-2:   2px;
-  --bp-space-4:   4px;
-  --bp-space-6:   6px;
-  --bp-space-8:   8px;
-  --bp-space-10:  10px;
-  --bp-space-12:  12px;
-  --bp-space-14:  14px;
-  --bp-space-16:  16px;
-  --bp-space-18:  18px;
-  --bp-space-20:  20px;
-  --bp-space-24:  24px;
-  --bp-space-28:  28px;
-  --bp-space-32:  32px;
-  --bp-space-40:  40px;
 
   /* ── 2. TİPOGRAFİ ÖLÇEĞİ (font-size) ──────────────────────────
      ÖLÇÜM (1249 kullanım, 28 ayrık değer):
@@ -396,7 +372,6 @@ body {
   --bp-text-xl:   18px;
   --bp-text-2xl:  20px;
   --bp-text-22:   22px;  /* DEV2-078: 2xl(20)/3xl(24) arasi bosluk - 19 kullanim */
-  --bp-text-3xl:  24px;
 
   /* 26-42px "display" ailesi KAPANDI (DEV2-080, 14.08.2026): 3xl(24)
      ustunde 28 ham kullanim, 8 ayrik deger. Iki alt-aile ayirt edildi:
@@ -410,9 +385,7 @@ body {
   --bp-text-26:   26px;  /* DEV2-080: hero-title/stat-deger, 6 kullanim */
   --bp-text-28:   28px;  /* DEV2-080: stat-deger/baslik, 6 kullanim */
   --bp-text-32:   32px;  /* DEV2-080: stat-deger/ikon, 3 kullanim */
-  --bp-text-34:   34px;  /* DEV2-080: stat-deger, 1 kullanim */
   --bp-text-36:   36px;  /* DEV2-080: stat-deger/ikon, 5 kullanim */
-  --bp-text-38:   38px;  /* DEV2-080: premium-modal-icon (2 kopya), 2 kullanim */
   --bp-text-40:   40px;  /* DEV2-080: empty-state ikon, 4 kullanim */
   --bp-text-42:   42px;  /* DEV2-080: JS-injected onay ikonu, 1 kullanim */
 
@@ -428,19 +401,13 @@ body {
   --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
   --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
   --bp-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.60);
-  --bp-shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.55);
   /* FAZ8 kutu-golge konsolidasyonu -- alttan-sabit elemanlar (bottom sheet,
      sticky CTA bar) yukari dogru golge atar, mevcut 4 token'in hicbiri
      negatif y-offset tasimiyor. Iki yon-varyanti: -sm kucuk sticky bar,
      -lg genis bottom sheet. Tier'e yeni buyukluk eklemiyor, yon ekliyor. */
-  --bp-shadow-up-sm: 0 -4px 18px rgba(0, 0, 0, 0.40);
-  --bp-shadow-up-lg: 0 -10px 40px rgba(0, 0, 0, 0.50);
 
   /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
      Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
-  --bp-shadow-focus-al:     0 0 0 6px rgba(var(--bp-al-rgb), 0.55);
-  --bp-shadow-focus-sat:    0 0 0 6px rgba(var(--bp-sat-rgb), 0.18);
-  --bp-shadow-glow-volume:  0 4px 14px rgba(var(--bp-volume-rgb), 0.30);
 
   /* ── 6. KATMAN SIRASI (z-index) ───────────────────────────────
      ÖLÇÜM: 22 AYRIK değer, tavan 10001. Kümeler:
@@ -458,7 +425,6 @@ body {
   --bp-z-modal:    1000;
   --bp-z-toast:    9999;
   --bp-z-tooltip:    9000;
-  --bp-z-modal-top:  9998;
   /* Yerel yigin baglami — .macro-pause-btn (16 sablon), global katmanla yarismaz.
      Deger DEGISTIRILMEDI (3), yalniz isimlendirildi. DEV2-050/053. */
   --bp-z-local-control: 3;
@@ -468,19 +434,11 @@ body {
      isimli basamak olarak tanimlaniyor. 19 ham kullanim / 9 sablon + bp-search.js,
      16 yeni token. Hicbir sayisal deger DEGISTIRILMEDI (T1.4/T5.1/FAZ8 radius ile
      ayni yontem), yalniz merkezi tek kaynaga tasindi. */
-  --bp-z-search-dropdown:   400;  /* .search-ac — index */
   --bp-z-fab-up:            400;  /* .bp-fab-up — hisse */
-  --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
-  --bp-z-alarm-panel:       999;  /* .alarm-panel — index */
-  --bp-z-alarm-fab:         998;  /* .alarm-fab — index */
   --bp-z-page-toast:        999;  /* .hib-toast / .import-toast — hisse+portfolio (2) */
-  --bp-z-local-toast:      1100;  /* #bp-toast (showToast JS) — index */
-  --bp-z-bottom-cta:        450;  /* .bp-bottom-cta — hisse */
   --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
   --bp-z-sheet:             1050;  /* .mbn-sheet — mobile nav partial. bughunt-r109: eskiden 260, sayfa-yerel sabit-alt bilesenlerin (bp-z-bottom-cta 450, bp-z-alarm-fab 998, bp-z-alarm-panel/page-toast 999) USTUNE cikarildi - --bp-z-modal(1000) .ind-help tooltip (hisse.css:544), .ac-dropdown (karsilastir.css) ve #cloudModal (portfolio.html) tarafindan kullaniliyor (bughunt-r113), cakisma yok */
-  --bp-z-sheet-backdrop:    1040;  /* .mbn-sheet-backdrop — mobile nav partial. sheet'in az altinda, ayni sabit-alt bilesenlerin ustunde */
   --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
-  --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
 
   /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
      ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
@@ -490,14 +448,11 @@ body {
      `linear`in baskınlığı yanıltıcı — neredeyse tamamı makro şerit
      kaydırma animasyonundan geliyor (sabit hız DOĞRU seçim orada),
      arayüz geçişi değil. Arayüz varsayılanı standard eğridir. */
-  --bp-dur-fast:   0.12s;
   --bp-dur-base:   0.15s;
   --bp-dur-slow:   0.25s;
   --bp-dur-slower: 0.40s;
 
   --bp-ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
-  --bp-ease-out:       cubic-bezier(0.32, 0.72, 0, 1);
-  --bp-ease-linear:    linear;
 
   /* ── 8. KÖŞE YARIÇAPI (border-radius) ─────────────────────────
      ÖLÇÜM (570 kullanım): 6px:149  8px:127  10px:94  4px:44
@@ -549,10 +504,7 @@ body {
 
      780px (17 kullanım) ve 769px (1) 768'in kopyala-yapıştır
      çatalıdır, 640/720/680 de 600/768'in — T1.5'te dörde indirilecek. */
-  --bp-bp-xs: 480px;
-  --bp-bp-sm: 600px;
   --bp-bp-md: 768px;
-  --bp-bp-lg: 900px;
 
   /* ── 12. KONTEYNER GENISLIGI (container max-width) ─────────────
      OLCUM (22 sablon, .container{} kurali): 1100px:8  820px:4

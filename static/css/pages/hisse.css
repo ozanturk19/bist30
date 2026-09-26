@@ -1,13 +1,5 @@
 /* ==== extracted from templates/hisse.html (T2.5) ==== */
 
-  @font-face {
-    font-family: 'Inter-Fallback';
-    src: local('Arial');
-    size-adjust: 105%;
-    ascent-override: 92%;
-    descent-override: 24%;
-    line-gap-override: 0%;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -807,7 +799,7 @@
   /* K-BQ: Supertrend seviyesinin FIYATA GORE rolu (destek/direnc/stop) —
      sayinin yanindaki ikincil aciklama, deger gibi okunmamali. */
   .qf-row dd .qf-sub {
-    font-family: var(--bp-font); font-size: var(--bp-text-xs);
+    font-size: var(--bp-text-xs);
     font-weight: 500; color: var(--bp-text3); letter-spacing: 0;
   }
   .quickfacts-disclaimer {

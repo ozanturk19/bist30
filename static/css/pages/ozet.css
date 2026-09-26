@@ -20,7 +20,6 @@
   .logo-link { align-items: center; gap: 10px;
     text-decoration: none; flex-shrink: 0;
   }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
   .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
 
   .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }

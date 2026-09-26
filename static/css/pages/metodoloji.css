@@ -26,7 +26,6 @@
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); }
 
   .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
 

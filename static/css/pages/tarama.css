@@ -18,7 +18,6 @@
     background:var(--surface); border-bottom:1px solid var(--border);
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
 
   /* ── Makro bar ── */
