@@ -5155,7 +5155,10 @@ def set_security_headers(response):
     # CF'in EKLEMEDİĞİ header'lar (modern security):
     response.headers["X-DNS-Prefetch-Control"] = "on"
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+    # D-54: paylaşılan ısı haritası görselleri başka sitelerde de <img> ile gösterilebilsin
+    _cp = request.path
+    response.headers["Cross-Origin-Resource-Policy"] = (
+        "cross-origin" if _cp.startswith("/harita/") and _cp.endswith(".png") else "same-site")
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     # Server header'ı temizle (info leak)
     response.headers.pop("Server", None)

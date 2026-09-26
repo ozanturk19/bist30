@@ -152,7 +152,8 @@ def test_png_size_and_all_100_tiles(renders, kind, size):
             assert ox <= 0 or oy <= 0, (p["t"], q["t"])
     labelled = {t["t"] for t in tiles if t["tk"] and t["v"]}
     assert {"ASELS", "GARAN", "KCHOL", "TUPRS", "BIMAS", "THYAO", "DSTKF"} <= labelled
-    assert sum(t["tk"] for t in tiles) >= 40
+    # kare: kod asgari 18 px (P2-b) → küçük kutularda etiket düşer, küçülmez; ilk 30 pay yine okunur
+    assert sum(t["tk"] for t in tiles) >= (40 if kind == "og" else 30)
 
 
 @pytest.mark.parametrize("kind", ["og", "kare"])
@@ -169,6 +170,33 @@ def test_rendered_text_legend_brand_and_language(renders, kind):
     assert not BANNED.search(joined), BANNED.search(joined)
     assert all(BANNED.search(x) for x in ("Güçlü AL", "Kaynak: KAP", "bugün kapanış", "Yahoo", "Ücretsiz"))
     assert "-%" not in joined          # eksi işareti U+2212
+
+
+def test_og_png_within_byte_budget_even_when_all_stale():
+    # D-54 inceleme P2-a: taranmış (bayat) kutulu gün 376 KB'a çıkıyordu; WhatsApp önizleme sınırı ~300 KB
+    stale = _fx()     # fikstür ham hâliyle 100/100 bayat
+    hareketli = _fixed()
+    for i, r in enumerate(hareketli["rows"]):
+        r["ch"]["d1"] = ((i * 37) % 181 - 90) / 10.0
+        r["stale"] = False
+    for snap in (_fixed(), stale, hareketli):
+        data, _ = hi.render_png(snap, "og")
+        assert len(data) <= hi.OG_BYTE_BUDGET, len(data)
+        assert Image.open(io.BytesIO(data)).size == (1200, 630)
+    assert hi.render_png(stale, "og")[0] == hi.render_png(stale, "og")[0]    # deterministik
+
+
+def test_kare_min_label_sizes(renders):
+    # D-54 inceleme P2-b: telefonda kod >=18 px, yüzde >=14 px, grup etiketi >=20 px; sığmayan yüzde düşer
+    _, meta = renders["kare"]
+    tickers = {r["t"] for r in _fixed()["rows"]}
+    kod = [px for s, key, px in meta["text_px"] if s in tickers]
+    assert kod and min(kod) >= 18
+    pct = [px for s, key, px in meta["text_px"] if key == "sans" and re.match(r"^[+−]?%", s)]
+    assert pct and min(pct) >= 14
+    disp = [px for s, key, px in meta["text_px"] if key == "display" and s not in ("BIST100",) and "kapanışı" not in s
+            and s not in ("borsa", "pusula", ".com")]
+    assert disp and min(disp) >= 20
 
 
 def test_stale_rows_get_legend_swatch():
@@ -250,6 +278,8 @@ def test_app_harita_routes(tmp_path, monkeypatch):
     assert app._render_heatmap_images("2026-09-25") == []
     r = c.get("/harita/2026-09-25.png")
     assert r.status_code == 200 and r.mimetype == "image/png" and r.headers["Cache-Control"] == "public, max-age=3600"
+    assert r.headers["Cross-Origin-Resource-Policy"] == "cross-origin"      # D-54 P2-c: başka sitede <img>
+    assert c.get("/").headers["Cross-Origin-Resource-Policy"] == "same-site"
     assert Image.open(io.BytesIO(r.data)).size == (1200, 630)
     r = c.get("/harita/2026-09-24-kare.png")
     assert r.status_code == 200 and r.headers["Cache-Control"] == "public, max-age=31536000, immutable"

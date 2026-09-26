@@ -61,10 +61,10 @@ DIR_RGB = {"up": AL, "dn": SAT, "neu": TEXT2, "na": TEXT2}
 # Çizim ölçüleri (1× px). og: bağlantı önizlemesi, kare: telefon.
 SPEC = {
     "og": dict(pad=40, top=34, title=(34, 44), sent=19, gap_head=18, gap_foot=16, bottom=26,
-               gap_g=6, gap_t=2, label_h=19, label_fs=11, fs=(10.0, 26.0, 5.6), lim_fs=9,
+               gap_g=6, gap_t=2, label_h=19, label_fs=11, fs=(10.0, 26.0, 5.6), pct_min=0, lim_fs=9,
                mark=30, mark_kind="sade", brand_fs=19, disc_fs=13, leg_bar=(200, 8), leg_fs=12),
     "kare": dict(pad=52, top=58, title=(38, 60), sent=26, gap_head=28, gap_foot=26, bottom=50,
-                 gap_g=8, gap_t=3, label_h=26, label_fs=15, fs=(12.0, 34.0, 5.4), lim_fs=12,
+                 gap_g=8, gap_t=3, label_h=26, label_fs=20, fs=(18.0, 34.0, 5.4), pct_min=14.0, lim_fs=12,
                  mark=46, mark_kind="tam", brand_fs=28, disc_fs=18, leg_bar=(280, 12), leg_fs=17),
 }
 
@@ -239,6 +239,7 @@ class _Canvas:
         self.img = Image.new("RGB", (w * S, h * S), BG)
         self.d = ImageDraw.Draw(self.img)
         self.texts = []
+        self.text_px = []      # (metin, yazı tipi, px): asgari okunurluk testi
 
     def text(self, x, y, s, key, px, fill, weight=400, anchor="la", track=0.0):
         """(x, y) 1× px; anchor Pillow anlamında. Çizilen her metin self.texts'e girer (dil taraması)."""
@@ -246,6 +247,7 @@ class _Canvas:
             return 0.0
         f = _font(key, px, weight)
         self.texts.append(s)
+        self.text_px.append((s, key, px))
         if not track:
             self.d.text((x * S, y * S), s, font=f, fill=fill, anchor=anchor)
             return f.getlength(s) / S
@@ -400,7 +402,7 @@ def _draw_tile(c, r, n, sp):
     vt = pct_text(v) if v is not None else ""
     pad = max(6.0, fs * 0.42)
     tkw = _w(tk, "sans", fs, 700)
-    vfs = fs * 0.74
+    vfs = max(fs * 0.74, sp["pct_min"])   # telefonda okunurluk: yüzde asgari boyun altına küçülmez, sığmazsa düşer
     vw = _w(vt, "sans", vfs, 500)
     tk_ok = pad + tkw <= w - 3 and pad * 0.7 + fs * 1.05 <= h - 2
     v_ok = tk_ok and bool(vt) and pad + vw <= w - 3 and pad * 0.7 + fs * 1.05 + 3 + vfs * 1.1 <= h - 3
@@ -590,7 +592,7 @@ def render(snap, kind="og"):
 
     out = c.img.resize((W, H), Image.Resampling.LANCZOS)
     return out, {"kind": kind, "size": (W, H), "texts": c.texts, "tiles": tiles,
-                 "map": (X, Y, MW, MH), "legend": True, "flags": flags}
+                 "map": (X, Y, MW, MH), "legend": True, "flags": flags, "text_px": c.text_px}
 
 
 LEG_CAP, LEG_NOTE = "Gün sonu değişim", "Kutu büyüklüğü: piyasa değeri"
@@ -607,11 +609,32 @@ def _legend_width(sp, flags):
                                               for on, lbl in _SWATCHES(flags) if on)
 
 
-def render_png(snap, kind="og"):
-    img, meta = render(snap, kind)
+OG_BYTE_BUDGET = 280 * 1024   # WhatsApp/X bağlantı önizleme sınırı ~300 KB; pay bırakılır
+_OG_QUANT_STEPS = (256, 192, 128, 96, 64)
+
+
+def _png_bytes(img):
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
-    return buf.getvalue(), meta
+    return buf.getvalue()
+
+
+def render_png(snap, kind="og"):
+    img, meta = render(snap, kind)
+    data = _png_bytes(img)
+    if kind == "og" and len(data) > OG_BYTE_BUDGET:
+        # Bütçe aşılırsa yalnız harita alanı palete indirilir (parıltılı başlık/altbilgi bantlanmaz);
+        # taranmış (bayat) kutulu günler bu yola düşer. Sıra sabit → çıktı deterministik.
+        X, Y, MW, MH = meta["map"]
+        box = (X, Y, X + MW, Y + MH)
+        for n in _OG_QUANT_STEPS:
+            im = img.copy()
+            im.paste(img.crop(box).quantize(colors=n, method=Image.Quantize.MEDIANCUT,
+                                            dither=Image.Dither.NONE).convert("RGB"), box)
+            data = _png_bytes(im)
+            if len(data) <= OG_BYTE_BUDGET:
+                break
+    return data, meta
 
 
 # ── Disk: bir kez üret, atomik yaz, üzerine yazma ────────────────────────────
