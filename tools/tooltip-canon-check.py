@@ -52,7 +52,8 @@ NATIVE_FOCUSABLE = {'a', 'button', 'input', 'select', 'textarea', 'summary'}
 # kapsam tabanlari — dedektor bunlarin altina duserse sessizce korlesmis demektir
 # C-29 (25.09): /sektor-harita sektor kartlari + lejant paneli silindi, onlarla
 # [data-tip] kullanimi 47'ye indi (dedektor korlesmedi: pozitif kontrol 3/3) -> taban 50 -> 45.
-MIN_TIPS      = 45
+# 26.09 merge (C-22b + C-29 birlikte): gercek sayi 41 -> taban 40.
+MIN_TIPS      = 40
 # 21.09 (K-AU): gercek sayi artik 0 oldugu icin ">=1" tabani kapiyi surekli
 # "korlesmis" (cikis 2) yapardi. Sifir bir kapsam yalani OLMASIN diye taban
 # yerine POZITIF KONTROL var: css_attr_tooltips()'in mantigi sentetik bir
