@@ -6,34 +6,43 @@
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
   .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:28px 24px; }
 
-  .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
-  .cat-btn { background:var(--bp-border-subtle); border:1px solid var(--bp-ctl-border); border-radius:var(--bp-radius-20); padding:5px 14px; font-size:var(--bp-text-sm); color:var(--bp-text3); cursor:pointer; transition:all .15s; }
-  .cat-btn.active { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
+  /* C-43 (26.09): Borsa Okulu — en yeni yazı 2/3 + öğrenme yolu; kart ızgarası yerine liste. */
+  .bo-top { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin:8px 0 32px; }
+  .bo-feature { display:flex; flex-direction:column; gap:10px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:28px; text-decoration:none; color:var(--bp-text); min-width:0; }
+  .bo-kicker, .bo-row-cat { font-size:var(--bp-text-xs); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+  .bo-feature-title { margin:0; font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-weight:800; letter-spacing:-.02em; line-height:1.15; font-size:clamp(1.375rem,2.4vw,2rem); overflow-wrap:anywhere; }
+  .bo-feature-desc { margin:0; font-size:var(--bp-text-md); color:var(--bp-text2); line-height:1.6; max-width:68ch; }
+  .bo-meta { font-size:var(--bp-text-xs); color:var(--bp-text3); }
+  .bo-path { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:20px; min-width:0; }
+  .bo-path-title, .bo-sec { margin:0 0 12px; font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-sm); font-weight:700; color:var(--bp-text2); text-transform:uppercase; letter-spacing:.5px; }
+  .bo-path-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .bo-path-list a { display:flex; align-items:center; gap:10px; min-height:40px; padding:4px 6px; border-radius:var(--bp-radius-md); color:var(--bp-text); text-decoration:none; font-size:var(--bp-text-base); font-weight:600; }
+  .bo-step { flex:none; width:24px; height:24px; border-radius:50%; border:1px solid var(--bp-border); display:inline-flex; align-items:center; justify-content:center; font-size:var(--bp-text-xs); color:var(--bp-text3); font-variant-numeric:tabular-nums; }
   @media (hover: hover) and (pointer: fine) {
-    .cat-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
+    .bo-feature:hover, .bo-path-list a:hover, .bo-row:hover { background:var(--bp-surface2); }
+    .bo-feature:hover { border-color:var(--bp-text3); }
   }
-  .blog-search-wrap { position:relative; margin-bottom:20px; }
+
+  .blog-search-wrap { position:relative; margin-bottom:12px; }
   .blog-search {
-    width:100%; background:var(--bp-surface); border:1px solid var(--bp-field-border); border-radius:var(--bp-radius-md); /* K-Q */
+    width:100%; background:var(--bp-surface); border:1px solid var(--bp-field-border); border-radius:var(--bp-radius-md);
     color:var(--bp-text); padding:9px 14px 9px 38px; font-size:var(--bp-text-lg); outline:none;
     transition:border-color .15s; font-family:inherit;
-  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
+  } /* iOS input-zoom onlemi, min 16px */
   .blog-search:focus { border-color:var(--bp-brand); }
   .blog-search::placeholder { color:var(--bp-text3); }
   .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
-  /* 21.09 (K-V): `.no-results` kanonik `.da-empty` katina alindi. */
-  .bc-new { display:inline-block; background:rgba(var(--bp-al-rgb),.12); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al); font-size:var(--bp-text-sm); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
+  .bo-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+  .bo-cnt { color:var(--bp-text3); font-weight:500; font-variant-numeric:tabular-nums; }
+  .bc-new { display:inline-block; background:rgba(var(--bp-al-rgb),.12); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al); font-size:var(--bp-text-2xs); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; letter-spacing:.3px; }
 
-  .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
-  .blog-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:20px; text-decoration:none; display:block; transition:all .15s; }
-  @media (hover: hover) and (pointer: fine) {
-    .blog-card:hover { border-color:var(--bp-text3); background:var(--bp-surface2); transform:translateY(-2px); }
-  }
-  .bc-cat  { font-size:var(--bp-text-xs); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); line-height:1.4; margin-top:0; margin-bottom:8px; }  /* K-AM: artik <h2> */
-  .bc-desc { font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.6; margin-bottom:14px; }
-  .bc-meta { display:flex; align-items:center; gap:12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
-  .bc-meta span { display:flex; align-items:center; gap:4px; }
+  .bo-list { list-style:none; margin:0; padding:0; border-top:1px solid var(--bp-border); }
+  .bo-list > li { border-bottom:1px solid var(--bp-border); }
+  .bo-row { display:grid; grid-template-columns:150px minmax(0,1fr) auto; grid-template-areas:"cat title meta" "cat desc meta"; column-gap:20px; row-gap:4px; padding:14px 8px; text-decoration:none; color:var(--bp-text); }
+  .bo-row-cat { grid-area:cat; padding-top:3px; }
+  .bo-row-title { grid-area:title; margin:0; font-size:var(--bp-text-lg); font-weight:700; line-height:1.35; max-width:75ch; }
+  .bo-row-desc { grid-area:desc; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.5; max-width:75ch; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
+  .bo-row .bo-meta { grid-area:meta; white-space:nowrap; padding-top:3px; }
 
   .blog-loadmore-wrap { text-align:center; margin-top:24px; }
   .blog-loadmore-btn { background:var(--bp-border-subtle); border:1px solid var(--bp-ctl-border); border-radius:var(--bp-radius-md); color:var(--bp-text); padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
@@ -45,7 +54,19 @@
   }
   .blog-loadmore-btn:focus-visible { border-color:var(--bp-brand); }
 
-  @media(max-width:600px) { .container{padding:14px;} .blog-grid{grid-template-columns:1fr;} }
+  @media(max-width:760px) {
+    .bo-top { grid-template-columns:1fr; margin-bottom:24px; }
+    .bo-feature { padding:20px; }
+    /* Telefonda öğrenme yolu ve kategori çipleri tek satır, yatay kaydırma. */
+    .bo-path-list, .bo-chips { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; }
+    .bo-path-list::-webkit-scrollbar, .bo-chips::-webkit-scrollbar { display:none; }
+    .bo-path-list li, .bo-chips > * { flex:none; scroll-snap-align:start; }
+    .bo-path-list a { white-space:nowrap; }
+    .bo-chips { margin-left:-14px; margin-right:-14px; padding:0 14px; }
+    .bo-row { grid-template-columns:minmax(0,1fr); grid-template-areas:"cat" "title" "desc" "meta"; padding:14px 2px; }
+    .bo-row-desc { -webkit-line-clamp:2; }
+  }
+  @media(max-width:600px) { .container{padding:14px;} }
 
   /* Makro Ticker */
   .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }

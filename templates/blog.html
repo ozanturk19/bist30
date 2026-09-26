@@ -1,15 +1,15 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Blog — Teknik Analiz, Borsa Rehberi | BorsaPusula</title>
-<meta name="description" content="BIST100, teknik analiz, Supertrend, ADX, EMA ve risk yönetimi üzerine uzman makaleler. Algoritmik borsa sinyalleri hakkında kapsamlı Türkçe rehber.">
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Borsa Okulu — Temel ve Teknik Analiz Rehberi | BorsaPusula</title>
+<meta name="description" content="Borsa Okulu: bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar. Yeni başlayana öğrenme yolu.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
 <link rel="canonical" href="https://borsapusula.com/blog">
-<meta property="og:title"       content="Blog — Teknik Analiz Rehberi | borsapusula.com">
-<meta property="og:description" content="BIST100, Supertrend, ADX, EMA ve borsa stratejileri hakkında Türkçe makaleler.">
+<meta property="og:title"       content="Borsa Okulu — Temel ve Teknik Analiz Rehberi | borsapusula.com">
+<meta property="og:description" content="Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.">
 <meta property="og:url"         content="https://borsapusula.com/blog">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Blog — Teknik Analiz Rehberi | borsapusula.com">
-<meta name="twitter:description" content="BIST100, Supertrend, ADX, EMA ve borsa stratejileri hakkında Türkçe makaleler.">
+<meta name="twitter:title"       content="Borsa Okulu — Temel ve Teknik Analiz Rehberi | borsapusula.com">
+<meta name="twitter:description" content="Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -17,13 +17,16 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
-  {"@type":"ListItem","position":2,"name":"Blog","item":"https://borsapusula.com/blog"}
+  {"@type":"ListItem","position":2,"name":"Borsa Okulu","item":"https://borsapusula.com/blog"}
 ]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Borsa Okulu","url":"https://borsapusula.com/blog","inLanguage":"tr-TR","description":"Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.","hasPart":[{% for a in (articles|sort(attribute='date', reverse=True))[:10] %}{"@type":"Article","headline":{{ a.title|tojson }},"url":"https://borsapusula.com/blog/{{ a.slug }}","datePublished":{{ a.date|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog.css?v=79d7df32">
+<link rel="stylesheet" href="/static/css/pages/blog.css?v=8996c165">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
@@ -31,54 +34,59 @@
 {% include '_header.html' %}
 
 <main class="container" id="main-content" tabindex="-1">
-{% call bpf.pagehead('Blog') %}<span class="da-num">{{ articles|length }}</span> yazı, <span class="da-num">{{ cat_counts|length }}</span> kategoride: temel analiz, teknik analiz ve yatırım rehberleri.{% endcall %}
-  <!-- Blog search -->
+{% call bpf.pagehead('Borsa Okulu') %}<span class="da-num">{{ articles|length }}</span> yazı: şirket analizi, trend göstergeleri ve yatırım kavramları, sade Türkçeyle.{% endcall %}
+  {% set _sorted = articles|sort(attribute='date', reverse=True) %}{% set f = _sorted|first %}
+  {#- C-43 (26.09): en yeni yazı 2/3 genişlikte, yanında öğrenme yolu; altta kart yerine liste. -#}
+  <div class="bo-top">
+    <a href="/blog/{{ f.slug }}" class="bo-feature">
+      <span class="bo-kicker">En yeni · {{ f.cat }}</span>
+      <h2 class="bo-feature-title">{{ f.title }}</h2>
+      <p class="bo-feature-desc">{{ f.desc }}</p>
+      <span class="bo-meta">{{ f.mins }} dk okuma · {{ f.date_fmt or f.date }}</span>
+    </a>
+    <nav class="bo-path" aria-labelledby="boPathTitle">
+      <h2 class="bo-path-title" id="boPathTitle">Öğrenme yolu</h2>
+      <ol class="bo-path-list">
+        {%- for slug, label in [('bist100-nedir','BIST100 nedir?'),('borsada-lot-ve-pay-nedir','Lot ve pay'),('bilanco-nasil-okunur-temel-analiz','Bilanço nasıl okunur?'),('pe-orani-nedir','F/K oranı'),('bist-temettu-yatirimciligi-rehberi','Temettü'),('supertrend-indikatoru-nedir','Trend: Supertrend')] %}
+        <li><a href="/blog/{{ slug }}"><span class="bo-step">{{ loop.index }}</span>{{ label }}</a></li>
+        {%- endfor %}
+      </ol>
+    </nav>
+  </div>
+
+  <h2 class="bo-sec">Tüm yazılar</h2>
   <div class="blog-search-wrap">
     <svg aria-hidden="true" class="blog-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input class="blog-search" id="blogSearch" type="text" placeholder="Makale ara… (başlık, konu, kategori)" aria-label="Makale ara"
+    <input class="blog-search" id="blogSearch" type="text" placeholder="Yazı ara… (başlık, konu, kategori)" aria-label="Yazı ara"
            oninput="blogSearchInput()" autocomplete="off" spellcheck="false">
   </div>
 
-  <div class="cat-filters">
-    {# CPO 20.09: kategori adi ONCEDEN onclick="filterCat('{{ cat }}', ...)" ile bir JS
-       string literali icine gomuluyordu. Bugunku 6 kategoride kesme isareti yok, yani
-       canli bir hata degildi; ama kesme isaretli TEK bir kategori adi (or. "Yatirimci'nin
-       Rehberi") autoescape'ten &#39; olarak cikip HTML oznitelik ayristirmasindan sonra
-       tekrar ' olacagi icin literali kapatir ve sayfanin TUM filtre JS'ini kirardi.
-       Deger artik data-cat'te tasiniyor, secim delegasyonla yapiliyor — veri hicbir
-       zaman kod baglamina girmiyor. Ayrica aktif filtre durumu YALNIZCA gorseldi;
-       aria-pressed eklendi (ekran okuyucu hangi kategorinin secili oldugunu goremiyordu). #}
-    <button type="button" class="cat-btn active" id="catAll" data-cat="Tümü" aria-pressed="true">Tümü ({{ articles|length }})</button>
+  {# Kategori degeri data-cat'te; secim delegasyonla (veri kod baglamina girmez). #}
+  <div class="bo-chips" role="group" aria-label="Kategori">
+    <button type="button" class="da-chip da-chip--filter" id="catAll" data-cat="Tümü" aria-pressed="true">Tümü</button>
     {% for cat, cnt in cat_counts %}
-    <button type="button" class="cat-btn" data-cat="{{ cat }}" aria-pressed="false">{{ cat }} ({{ cnt }})</button>
+    <button type="button" class="da-chip da-chip--filter" data-cat="{{ cat }}" aria-pressed="false">{{ cat }} <span class="bo-cnt">{{ cnt }}</span></button>
     {% endfor %}
   </div>
 
-  <div class="blog-grid" id="grid">
-    {% for a in articles|sort(attribute='date', reverse=True) %}
-    <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}"
-       data-title="{{ a.title }}" data-desc="{{ a.desc }}">
-      <div class="bc-cat">{{ a.cat }}{% if a.is_new %}<span class="bc-new">Yeni</span>{% endif %}</div>
-      <h2 class="bc-title">{{ a.title }}</h2>
-      <div class="bc-desc">{{ a.desc }}</div>
-      <div class="bc-meta">
-        <span><span role="img" aria-label="Yayın tarihi"><span aria-hidden="true">📅</span></span> {{ a.date_fmt or a.date }}</span>
-        <span><span aria-hidden="true">⏱</span> {{ a.mins }} dk okuma</span>
-      </div>
-    </a>
+  <ol class="bo-list" id="grid">
+    {% for a in _sorted %}
+    <li class="blog-card" data-cat="{{ a.cat }}" data-title="{{ a.title }}" data-desc="{{ a.desc }}">
+      <a href="/blog/{{ a.slug }}" class="bo-row">
+        <span class="bo-row-cat">{{ a.cat }}{% if a.is_new %}<span class="bc-new">Yeni</span>{% endif %}</span>
+        <h3 class="bo-row-title">{{ a.title }}</h3>
+        <span class="bo-row-desc">{{ a.desc }}</span>
+        <span class="bo-meta">{{ a.mins }} dk · {{ a.date_fmt or a.date }}</span>
+      </a>
+    </li>
     {% endfor %}
-  </div>
+  </ol>
   <div class="da-empty" id="noResults" style="display:none" role="status" aria-live="polite">
-    <div class="da-empty-icon"><span aria-hidden="true">🔍</span></div>
-    <span class="da-empty-title">Makale bulunamadı</span>
-    <p>Farklı anahtar kelimeler deneyin veya kategori filtresini kaldırın.</p>
+    <span class="da-empty-title">Yazı bulunamadı</span>
+    <p>Farklı bir kelime deneyin ya da kategori filtresini kaldırın.</p>
   </div>
-  <!-- CPO-DEV2-103: 91 makale sayfalama olmadan tek liste render ediliyordu (masaustu
-       ~7900px, mobil ~57 ekran-boyu kaydirma). "Daha Fazla Yukle" ile ilk yuklemede
-       PAGE_SIZE karta sinirlandirilir; kategori/arama filtresi aktifken sayfalama
-       bypass edilir (filtrelenmis tum sonuclar gosterilir), filtreyle celismez. -->
   <div class="blog-loadmore-wrap" id="loadMoreWrap" style="display:none">
-    <button type="button" id="loadMoreBtn" class="blog-loadmore-btn" onclick="loadMoreBlog()">Daha Fazla Yükle</button>
+    <button type="button" id="loadMoreBtn" class="blog-loadmore-btn" onclick="loadMoreBlog()">Daha fazla yükle</button>
   </div>
 </main>
 
@@ -92,15 +100,14 @@ let _blogShownCount = BLOG_PAGE_SIZE;
 function filterCat(cat, btn) {
   _activeCat = cat;
   _blogShownCount = BLOG_PAGE_SIZE;
-  document.querySelectorAll('.cat-btn').forEach(b => {
+  document.querySelectorAll('.bo-chips .da-chip').forEach(b => {
     const on = b === btn;
-    b.classList.toggle('active', on);
-    b.setAttribute('aria-pressed', String(on));
+        b.setAttribute('aria-pressed', String(on));
   });
   filterBlog();
 }
-document.querySelector('.cat-filters').addEventListener('click', function(e){
-  const btn = e.target.closest('.cat-btn');
+document.querySelector('.bo-chips').addEventListener('click', function(e){
+  const btn = e.target.closest('.da-chip');
   if (btn) filterCat(btn.dataset.cat, btn);
 });
 
@@ -150,7 +157,7 @@ function filterBlog() {
     const isMatch = catMatch && textMatch;
     if (isMatch) matched++;
     const show = isMatch && (filtering || matched <= _blogShownCount);
-    card.style.display = show ? 'block' : 'none';
+    card.style.display = show ? '' : 'none';
     if (show) visible++;
   });
   document.getElementById('noResults').style.display = visible === 0 ? '' : 'none';
@@ -158,7 +165,7 @@ function filterBlog() {
   const remaining = matched - visible;
   if (!filtering && remaining > 0) {
     loadMoreWrap.style.display = '';
-    document.getElementById('loadMoreBtn').textContent = 'Daha Fazla Yükle (' + remaining + ' kalan)';
+    document.getElementById('loadMoreBtn').textContent = 'Daha fazla yükle (' + remaining + ' kalan)';
   } else {
     loadMoreWrap.style.display = 'none';
   }
