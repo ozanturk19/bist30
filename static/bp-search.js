@@ -800,6 +800,22 @@
       }
     }
   };
+  // C-15: makro şeridin TEK zamanlayıcısı. Önceden 12 şablon kendi
+  // setInterval + visibilitychange kopyasını taşıyordu. `#macroBar` olan her
+  // sayfada kendiliğinden başlar; ana sayfa seans kutusu için
+  // `window.bpMacroOnItems` geri çağrısını satır içi betikte tanımlar (defer'li
+  // bu dosya satır içi betiklerden SONRA çalışır). Gizli sekmede yükleme
+  // bpLoadMacroBar'ın kendi guard'ıyla atlanır; görünür olunca tazelenir.
+  function _bpStartMacro() {
+    if (window._bpMacroTimer || !document.getElementById('macroTrack')) return;
+    var run = function() { window.bpLoadMacroBar(window.bpMacroOnItems); };
+    window._bpResumeMacro = run;
+    run();
+    window._bpMacroTimer = setInterval(run, 180000);
+    document.addEventListener('visibilitychange', function() { if (!document.hidden) run(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bpStartMacro);
+  else _bpStartMacro();
 
 
   // ── View Transitions API + perceived performance polish ──

@@ -32,31 +32,8 @@ header{
    templates/_bp_critical_css.html (bu iki kural onun eksik/eski kopyasiydi ve
    daha asagida yuklendigi icin kanonigi EZIYORDU). */
 
-/* ── makro şerit — DOM/id/JS AYNEN, sadece CSS (Madde 2) ──
-   CPO-1558: onaylı mockup'ta makro şerit header'ın ÜSTÜNDE — sıra değişti,
-   şimdi #macroBar top:0'a sabitleniyor, header hemen altına (top:32px).
-   Ayrıca: .macro-live ("Canlı" rozeti) z-index'i yoktu, #macroTrack'in
-   transform:translateX ile kayan marquee'si (yeni stacking context) DOM
-   sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
-   (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
-#macroBar{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
-.macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
-.macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
-.macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
-.macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
-/* C-03: nabız ve camgöbeği ışıma "canlı akış" izlenimi veriyordu (veri EOD) → sabit nötr nokta. */
-.macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text3);flex:none}
-#macroTrack{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
-#macroBar:hover #macroTrack{animation-play-state:paused}
-@keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-#macroBar[data-paused="true"] #macroTrack{animation-play-state:paused !important}
-.macro-item{display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-border);color:var(--bp-text)}
-.macro-item-lbl{font-weight:700;color:var(--bp-text2);letter-spacing:.2px}
+/* makro şerit: kabuk kuralları + ana sayfa çeşidi (.macro-bar--home) shared.css'te (C-15) */
 .mc-pos{color:var(--bp-al)}.mc-neg{color:var(--bp-sat)}.mc-neu{color:var(--bp-text3)}
-/* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
-   24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
-.macro-pause-btn{position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
-.macro-pause-btn:hover,.macro-pause-btn:focus-visible{opacity:1}
 
 /* ── sayfa gövdesi ── */
 #staleBanner{max-width:1360px;margin:14px auto 0;margin-left:clamp(16px,4vw,40px);margin-right:clamp(16px,4vw,40px)}

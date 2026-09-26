@@ -285,3 +285,50 @@ html {
   .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; }
   html body { padding-bottom: calc(52px + 6px + env(safe-area-inset-bottom, 0px)) !important; }
 }
+
+/* ── Makro şerit: TEK KAYNAK (C-15) ──────────────────────────────────────────
+   Önceden 11 sayfa CSS'inde ayrı kopya vardı (yazı boyu/kenarlık/etiket rengi
+   sayfadan sayfaya kayıyordu). Sayfa CSS'inde `.macro-bar`, `.macro-item`,
+   `.macro-pause-btn`, `.header-search-btn` yazılmaz; ana sayfanın "Piyasalar"
+   rozetli çeşidi `.macro-bar--home`. Arama düğmesinin görünümü
+   `_bp_critical_css.html`te, hover'ı `bp-search.js`te (kapı: canon-css-dup-check). */
+.macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
+.macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
+.macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+.macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
+.macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; will-change:transform; height:32px; }
+@media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state:paused; } }
+@keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+/* K-AZ: `top:50%` şeridin safe-area dolgusunu da içeren kutusuna göre ortalıyordu
+   (PWA'da düğmenin üstü çentiğin altında kalıyordu); dolgunun yarısı geri eklendi. */
+.macro-pause-btn { position:absolute; right:2px; top:calc(50% + env(safe-area-inset-top, 0px) / 2); transform:translateY(-50%); z-index:var(--bp-z-local-control); width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; color:inherit; opacity:.55; font-size:var(--bp-text-sm); line-height:1; cursor:pointer; padding:0; }
+.macro-pause-btn::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
+.macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity:1; }
+.macro-bar[data-paused="true"] .macro-track { animation-play-state:paused !important; }
+.macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit; }
+.macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+
+/* ── Ana sayfa çeşidi (.macro-bar--home, eski index.css) ──
+   CPO-1558: onaylı mockup'ta makro şerit header'ın ÜSTÜNDE — sıra değişti,
+   şimdi #macroBar top:0'a sabitleniyor, header hemen altına (top:32px).
+   Ayrıca: .macro-live ("Canlı" rozeti) z-index'i yoktu, #macroTrack'in
+   transform:translateX ile kayan marquee'si (yeni stacking context) DOM
+   sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
+   (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
+.macro-bar--home{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
+.macro-bar--home::before,.macro-bar--home::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
+.macro-bar--home::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
+.macro-bar--home::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
+.macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
+/* C-03: nabız ve camgöbeği ışıma "canlı akış" izlenimi veriyordu (veri EOD) → sabit nötr nokta. */
+.macro-bar--home .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text3);flex:none}
+.macro-bar--home .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
+.macro-bar--home:hover .macro-track{animation-play-state:paused}
+@keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.macro-bar--home[data-paused="true"] .macro-track{animation-play-state:paused !important}
+.macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-border);color:var(--bp-text)}
+.macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text2);letter-spacing:.2px}
+/* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
+   24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
+.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
+.macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{opacity:1}

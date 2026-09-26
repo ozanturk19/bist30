@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=8aedc56a">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=aeeccc98">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -3134,29 +3134,13 @@ async function loadMTF() {
     if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm)">Yüklenemedi</div>';
   }
 }
-/* CPO-DEV2-072 r98: Page Visibility — sekme görünür olunca makro bandı tazele. */
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro();
-});
 
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
-/* ── Makro Ticker Bandı — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
-(function() {
-  function _bpMacroInit() {
-    window.bpLoadMacroBar();
-    setInterval(window.bpLoadMacroBar, 180000);
-    window._bpResumeMacro = window.bpLoadMacroBar; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _bpMacroInit);
-  } else {
-    _bpMacroInit();
-  }
-})();
+/* Makro şerit: bp-search.js'te kendiliğinden başlar (C-15). */
 </script>
 
-<script src="/static/bp-search.js?v=2050edda" defer></script>
+<script src="/static/bp-search.js?v=9e7f07fc" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
 <script src="/static/learning-mode.js?v=56c8577c" defer></script>

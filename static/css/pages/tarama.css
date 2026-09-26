@@ -19,36 +19,6 @@
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
-
-  /* ── Makro bar ── */
-  .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--bp-border-subtle);
-    min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap;
-  }
-  .macro-bar::before,.macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised);
-  }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track {
-    display:inline-flex; align-items:center;
-    animation:macroScroll 40s linear infinite;will-change:transform; height:32px;
-  }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  /* K-AZ: `top:50%` seridin safe-area DOLGUSUNU da iceren kutusuna gore
-     ortaliyordu -> PWA'da dugmenin ust ~24px'i centigin altinda kaliyordu
-     (olculdu, inset=47px). Dolgunun yarisi geri eklendi; inset=0'da deger
-     BIREBIR ayni (50%). */
-  .macro-pause-btn { position: absolute; right: 2px; top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item {
-    display:inline-flex; align-items:center; gap:7px;
-    padding:0 18px; border-right:1px solid var(--bp-border-subtle); font-size:var(--bp-text-xs); height:32px;
-  }
-  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
   .container { max-width:var(--bp-container-1200); margin:0 auto; padding:20px 20px; }
