@@ -4609,6 +4609,8 @@ def _run_official_close_pass(day=None, notify=True):
     official_close.reset_memory()
     _before = {s.get("ticker"): s for s in _stocks_now}
     _rescued, _failed = [], []
+    _t_tur = time.time()
+    logger.info("OFFICIAL_CLOSE: tur başladı — %d hisse", len(_universe))
     # D-04c P1-2: 4 işçili havuz (refresh ile aynı) — sıralı tur 11-18 dk sürüyordu.
     _ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="official_par")
     try:
@@ -4690,9 +4692,9 @@ def _run_official_close_pass(day=None, notify=True):
     except Exception as _e:
         logger.warning("OFFICIAL_CLOSE: snapshot yeniden yazılamadı: %s", _e)
     logger.info("OFFICIAL_CLOSE: SONUC — %s bülten %d pay, %d/%d resmi bara çevrildi, %d fiyat düzeldi, "
-                "yön dönen %d %s, uygulanamayan %s",
+                "yön dönen %d %s, uygulanamayan %s, tur %d sn",
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
-                _flipped[:15], _failed[:15])
+                _flipped[:15], _failed[:15], int(time.time() - _t_tur))
     # D-42: BIST100 ısı haritası bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
     try:
         _build_heatmap_snapshot(day)
