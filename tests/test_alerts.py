@@ -7,7 +7,7 @@ import pytest
 
 # D-09: üretim modülü (depo kökü, tests/conftest.py); tools/ kopyası silindi
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _alerts import _check_api_stale, _format_alert_md, _should_alert_telegram
+from _alerts import _check_api_stale, _format_alert_md, _should_send_alert
 
 
 # ── _check_api_stale ──────────────────────────────────────────────────────────
@@ -75,28 +75,28 @@ def test_format_alert_md_unknown_type():
     assert "WARNING" in line
 
 
-# ── _should_alert_telegram ────────────────────────────────────────────────────
+# ── _should_send_alert ────────────────────────────────────────────────────
 
-def test_telegram_no_prior_alert_should_send():
+def test_alarm_gonderim_no_prior_alert_should_send():
     """No prior alert → should send."""
     alert = {"level": "CRITICAL", "type": "api_stale", "age_min": 15.0, "threshold_min": 10}
-    assert _should_alert_telegram(alert, last_alert_ts=None) is True
+    assert _should_send_alert(alert, last_alert_ts=None) is True
 
 
-def test_telegram_cooldown_active_no_send():
+def test_alarm_gonderim_cooldown_active_no_send():
     """Within 5min cooldown → should NOT send."""
     alert = {"level": "CRITICAL", "type": "api_stale", "age_min": 15.0, "threshold_min": 10}
     recent_ts = time.time() - 2 * 60  # 2 minutes ago
-    assert _should_alert_telegram(alert, last_alert_ts=recent_ts, cooldown_min=5) is False
+    assert _should_send_alert(alert, last_alert_ts=recent_ts, cooldown_min=5) is False
 
 
-def test_telegram_cooldown_expired_should_send():
+def test_alarm_gonderim_cooldown_expired_should_send():
     """Past 5min cooldown → should send."""
     alert = {"level": "CRITICAL", "type": "api_stale", "age_min": 15.0, "threshold_min": 10}
     old_ts = time.time() - 6 * 60  # 6 minutes ago
-    assert _should_alert_telegram(alert, last_alert_ts=old_ts, cooldown_min=5) is True
+    assert _should_send_alert(alert, last_alert_ts=old_ts, cooldown_min=5) is True
 
 
-def test_telegram_empty_alert_no_send():
+def test_alarm_gonderim_empty_alert_no_send():
     """Empty alert dict → no send."""
-    assert _should_alert_telegram({}) is False
+    assert _should_send_alert({}) is False

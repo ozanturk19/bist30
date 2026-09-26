@@ -52,7 +52,6 @@ TARGET_SHA=b1b7e3d ROLLBACK_SHA=$(git rev-parse HEAD) ./tools/deploy-bundle.sh
 
 ## 24h İçinde Yapılacaklar
 - [ ] Phase 3 #2 paket önceliği A/B/C tercih (Ozan karar)
-- [ ] SENTRY_DSN — hesap oluşturma + env set (tools/sentry-dsn-aktivasyon-rehberi.md)
 - [ ] UptimeRobot — monitor URL ekle (tools/setup-uptimerobot.sh)
 - [ ] Son smoke baseline (Cu+Cmt+Paz 3-run median PASS olmalı)
 

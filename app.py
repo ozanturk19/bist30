@@ -75,7 +75,7 @@ def _tr_day_month(d):
 
 
 # ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
-from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
+from _alerts       import _check_api_stale, _format_alert_md, _should_send_alert
 from _health_extras import _extend_health_payload, _check_health_loop_stall
 from _guards       import _is_valid_fundamentals, _is_valid_chart, _is_valid_macro, _is_valid_disk_cache
 
@@ -168,69 +168,20 @@ except ImportError as _fhs_import_err:
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("financial_health_score unavailable: %s", _fhs_import_err)
 
-# ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
-_SENTRY_AVAILABLE = False
-
-# CPO-1690: SENTRY_DSN prod'da hiç set değil (motor hiç çalışmıyor) ve
-# @app.errorhandler(500) hiçbir yere tek satır bile yazmıyordu — kaç 500
-# döndüğü hiçbir yüzeyden görünmüyordu. DSN gerçek bir hesap/kayıt istediği
-# için burada icat edilemez; bunun yerine worker-local, dosyasız bir sayaç
+# CPO-1690: @app.errorhandler(500) hiçbir yere tek satır bile yazmıyordu — kaç 500
+# döndüğü hiçbir yüzeyden görünmüyordu. Worker-local, dosyasız sayaç
 # (news_queue_worker_local ile aynı desen) + errorhandler'da logger.exception.
+# D-13: Sentry kodu silindi (DSN prod'da hiç set değildi); alarm tek kanal: e-posta.
 _5xx_error_stats = {"count": 0, "last_ts": 0.0, "last_path": None}
-
-# CPO-1561 P0: abone auth token'ı (/profil?t=, /unsubscribe/<token>) hem query
-# string hem path segment'i olarak Sentry transaction/event URL'lerine ham
-# haliyle gidiyordu (send_default_pii kapalı olsa da request.url zaten
-# scrub edilmiyordu). Token formatı secrets.token_hex(20/24) -> 32+ karakter
-# hex string; hem "t=<hex>" query param'ı hem "/unsubscribe/<hex>" path
-# segment'ini [REDACTED] ile değiştiriyoruz.
-_SENTRY_TOKEN_QS_RE = re.compile(r"([?&]t=)[0-9a-fA-F]{16,}")
-_SENTRY_TOKEN_PATH_RE = re.compile(r"(/unsubscribe/)[0-9a-fA-F]{16,}")
-
-def _sentry_scrub_url(url: str) -> str:
-    if not url:
-        return url
-    url = _SENTRY_TOKEN_QS_RE.sub(r"\1[REDACTED]", url)
-    url = _SENTRY_TOKEN_PATH_RE.sub(r"\1[REDACTED]", url)
-    return url
-
-def _sentry_before_send(event, hint):
-    try:
-        req = event.get("request")
-        if isinstance(req, dict):
-            if req.get("url"):
-                req["url"] = _sentry_scrub_url(req["url"])
-            if req.get("query_string"):
-                req["query_string"] = _sentry_scrub_url("?" + req["query_string"]).lstrip("?")
-        for bc in (event.get("breadcrumbs") or {}).get("values", []):
-            data = bc.get("data")
-            if isinstance(data, dict) and data.get("url"):
-                data["url"] = _sentry_scrub_url(data["url"])
-    except Exception:
-        pass
-    return event
-
-try:
-    import sentry_sdk as _sentry_sdk
-    _sentry_dsn = os.environ.get("SENTRY_DSN", "")
-    if _sentry_dsn:
-        _sentry_sdk.init(
-            dsn=_sentry_dsn,
-            traces_sample_rate=0.1,
-            environment=os.environ.get("FLASK_ENV", "production"),
-            before_send=_sentry_before_send,
-            before_send_transaction=_sentry_before_send,
-        )
-        _SENTRY_AVAILABLE = True
-except ImportError:
-    pass
 
 # ── Faz 12 P2.4 Multi-tier alerting ──────────────────────────────────────────
 try:
-    from alerting import emit_alert as _dqv_alert
+    from alerting import emit_alert as _dqv_alert, send_ops_email as alerting_send_ops_email
     _ALERTING_AVAILABLE = True
 except ImportError as _alerting_err:
     _ALERTING_AVAILABLE = False
+    def alerting_send_ops_email(subject, text):
+        return False
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("alerting unavailable: %s", _alerting_err)
 
@@ -2210,16 +2161,6 @@ def analyze(ticker_base):
         return None
 
 
-# ── Telegram Bildirim ─────────────────────────────────────────────────────────
-TELEGRAM_BOT_TOKEN  = os.environ.get("TELEGRAM_BOT_TOKEN",  "")
-TELEGRAM_CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID", "")
-if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-    # CPO-1260-B P1: önceden _send_telegram() sessizce return ediyordu — hiçbir
-    # log/exception/sayaç yoktu, aylarca kanalın ölü olduğu fark edilmedi
-    # (journald'da tek bir gönderim/hata satırı yok, sadece bu startup ilanı vardı).
-    # Artık bir KEZ, süreç başlangıcında, açıkça uyarıyoruz (her çağrıda değil — log spam olmasın).
-    logger.warning("Telegram: DEVRE DIŞI — TELEGRAM_BOT_TOKEN/TELEGRAM_CHANNEL_ID tanımsız, "
-                    "bu kanaldan hiçbir alarm/bildirim GİTMEYECEK (Ozan: secrets.env'e token eklenmeli)")
 _prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyalleri
 
 # MSG-019B Adım 3: _prev_signals diske persist (worker restart sonrası state korunsun)
@@ -2227,7 +2168,7 @@ _PREV_SIGNALS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "p
 _prev_signals_lock = threading.Lock()  # disk write atomik
 
 # SPEC-006 Faz 1 (CPO MSG-095): Notify-leader lock — gunicorn -w 4 worker'ın
-# her biri background_refresh çalıştırıyor. Bildirim (Telegram/Email/Push) 4×
+# her biri background_refresh çalıştırıyor. Bildirim (Email) 4×
 # duplikasyonunu önlemek için fcntl.flock ile tek worker "notify leader" olur.
 # refresh_data tüm worker'larda devam eder (in-memory _cache her worker'da güncel kalmalı).
 import fcntl as _fcntl
@@ -2517,44 +2458,17 @@ def _save_prev_signals(sig_map):
 _load_prev_signals()
 
 
-def _send_telegram(text):
-    """Telegram kanalına/gruba mesaj gönderir. Gönderim gerçekten başarılıysa
-    True, aksi halde (token yok / HTTP hata / exception) False döner.
-
-    CPO-1260-B P1: token eksikse startup'ta zaten bir kez WARNING loglandı (yukarıda,
-    modül yüklenirken) — burada sessiz return kasıtlı, her çağrıda tekrar loglanmaz.
-    Gönderim SONUCU (başarı dahil) artık HTTP koduyla loglanıyor — önceden sadece
-    başarısızlık loglanıyordu, başarı ile "hiç denenmedi" ayırt edilemiyordu.
-
-    CPO-1504: dönüş değeri eklendi — çağıranlar (örn. freshness_monitor_loop)
-    önceden sonucu kontrol etmeden "gönderildi" logluyordu; token yokken bile
-    sessizce başarılı görünüyordu."""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return False
-    try:
-        url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        resp = requests.post(url, json={
-            "chat_id":    TELEGRAM_CHANNEL_ID,
-            "text":       text,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": True,
-        }, timeout=10)
-        if not resp.ok:
-            logger.warning("Telegram gönderimi başarısız: HTTP %d %s", resp.status_code, resp.text[:200])
-            return False
-        logger.info("Telegram gönderimi başarılı: HTTP %d", resp.status_code)
-        return True
-    except Exception as e:
-        logger.warning("Telegram hatası: %s", e)
-        return False
+def _send_ops_alert(subject, text):
+    """Sistem alarmı: tek kanal e-posta (ADMIN_MAIL). D-13: Telegram/Sentry silindi.
+    Gönderim gerçekten başarılıysa True, aksi halde False (SMTP eksik / hata)."""
+    return alerting_send_ops_email(subject, text)
 
 
 def _notify_signal_changes(new_results):
     """Önceki döngüye göre sinyal değişimlerini tespit et;
-    Telegram (seans saati + token varsa), Email (her zaman, abone varsa), Web Push (her zaman) — bağımsız rotalar.
+    Email (her zaman, abone varsa) — tek rota (D-13: Telegram silindi).
 
     MSG-019B Adım 3 düzeltmesi:
-    - Bug 1 fix: Telegram disable olsa bile email/push çalışsın (önce 'return' vardı)
     - Bug 2 fix: Seans dışı değişimler de pending buffer'a yazılır (digest sonraki gün gönderir)
     - State persist: _prev_signals diske yazılır → worker restart sonrası state korunur
     """
@@ -2565,7 +2479,7 @@ def _notify_signal_changes(new_results):
 
     # SPEC-006 Faz 1 (CPO MSG-095): Sadece notify-leader worker bildirim gönderir.
     # Non-leader worker'lar state'i günceller (kendi karşılaştırması taze kalsın) ama
-    # Telegram/Email/Push duplikasyonu yapmaz.
+    # Email duplikasyonu yapmaz.
     if not _is_notify_leader():
         with _prev_signals_lock:
             _prev_signals.update(new_sig_map)
@@ -2587,31 +2501,6 @@ def _notify_signal_changes(new_results):
     if changes:
         logger.info("_notify_signal_changes: %d sinyal değişimi tespit edildi [%s]",
                     len(changes), ", ".join(f"{c[0]}({c[1]}→{c[2]})" for c in changes[:5]))
-
-    # Rota 1: Telegram — sadece seans saatinde + token varsa
-    now_utc  = datetime.utcnow()
-    now_tr_min = now_utc.hour * 60 + now_utc.minute + 180  # UTC+3 dakika
-    in_session = 600 <= now_tr_min <= 1110  # 10:00–18:30 TR
-
-    if changes and TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID and in_session:
-        sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
-        # CPO 10.09: `old` (onceki sinyal) ham "AL"/"SAT"/"BEKLE" olarak sizdiriliyordu —
-        # `new`/`lbl` zaten cevriliyordu ama `old` hic etiketlenmemisti (K3 gate'i bunu
-        # yakalamaz, gate template degil burasi). Ayni cevirmeye tabi tutuldu.
-        _sig_lbl = {"AL": "Güçlü Trend ▲", "SAT": "Trend Bozuldu ▼", "BEKLE": "Yatay"}
-        lines = [f"<b>📊 BorsaPusula — Sinyal Değişimi</b>\n"]
-        for t, old, new, stock in changes[:10]:
-            e    = sig_emoji.get(new, "")
-            name = STOCK_NAMES.get(t, t)
-            lbl  = _sig_lbl.get(new, new)
-            old_lbl = _sig_lbl.get(old, old)
-            price = stock.get("price") or ""
-            price_str = f" — {tr_price_filter(price)} ₺" if price else ""
-            lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
-            lines.append(f"   <i>{old_lbl} → {lbl}</i>")
-        lines.append(f"\n<a href='https://borsapusula.com'>borsapusula.com</a>")
-        lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
-        _send_telegram("\n".join(lines))
 
     # Rota 2: Email — her zaman (seans dışı değişimler de digest'e yazılır)
     if changes:
@@ -3254,8 +3143,7 @@ def _notify_email_signal_changes(changes):
             if not _qa["ok"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_EMAIL_QA",
-                               f"flag={_qa.get('flag')} count={_qa.get('count')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"flag={_qa.get('flag')} count={_qa.get('count')}")
                 else:
                     logger.warning("DQV_EMAIL_QA: flag=%s count=%s", _qa.get("flag"), _qa.get("count"))
         except Exception as _e:
@@ -3702,18 +3590,18 @@ _bg_start(threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-c
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
-# ── SPEC-014 B4 — Freshness monitor (market saatinde EOD veri günü eski → Telegram) ──
+# ── SPEC-014 B4 — Freshness monitor (market saatinde EOD veri günü eski → e-posta) ──
 _freshness_alert_state = {"last_alert_ts": 0.0}
 
 def _freshness_monitor_loop():
     """Elimizdeki veri BEKLENEN trading-day'e ait değilse (build_data_freshness().
-    is_stale) Telegram uyarısı gönderir.
+    is_stale) e-posta uyarısı gönderir.
 
     CPO-1508/1512 (EOD-only, Faz 0): eski eşik "veri yaşı > 25dk" idi — cadence
     900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
     background_refresh); dünkü kapanış verisi bugün 10:00-18:00 TR arası HER
     ZAMAN >25dk yaşında ve GEÇERLİ olacağından eski eşik her sabah 10:00'dan
-    itibaren saatte-bir sahte Telegram spam'i üretirdi. is_stale (aynı trading-
+    itibaren saatte-bir sahte alarm spam'i üretirdi. is_stale (aynı trading-
     day karşılaştırması — build_data_freshness/expected_data_date) ile
     değiştirildi: yalnız GERÇEK bir gecikme (bugünün EOD'u beklenenden eski)
     varsa tetiklenir.
@@ -3746,26 +3634,26 @@ def _freshness_monitor_loop():
                     _freshness_alert_state["last_alert_ts"] = now
                     age = fresh.get("stocks_age_seconds")
                     age_txt = f"{age // 60} dakikadır" if age is not None else "bilinmeyen süredir"
-                    sent = _send_telegram(
-                        f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
+                    sent = _send_ops_alert(
+                        "BorsaPusula veri tazeliği uyarısı",
                         f"Hisse verisi beklenen işlem gününe ait değil "
                         f"({age_txt} güncellenmedi).\n"
                         f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
                     )
                     if sent:
-                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram gönderildi", age)
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), e-posta gönderildi", age)
                     else:
-                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), e-posta iletilemedi (SMTP eksik ya da hata) — ops bu uyarıyı GÖRMEDİ", age)
         except Exception as e:
             logger.error("freshness_monitor_loop: %s", e, exc_info=True)
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-# #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker Telegram alarmı
+# #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker e-posta alarmı
 # gönderir (anti-spam state worker-local olduğu için gate şart). CPO-1207 §1:
 # thread artık KOŞULSUZ başlar — leader kontrolü döngü içinde her turda.
 _bg_start(threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor"))
-logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → Telegram)")
+logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → e-posta)")
 
 
 # SPEC-008 L5 — Modül-load-time tanımlama (alarm thread'inden ÖNCE).
@@ -4282,8 +4170,7 @@ def _refresh_data_impl():
             if _br["errors"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_BR",
-                               f"{len(_br['errors'])} violations tickers={_br['failed_tickers']}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_br['errors'])} violations tickers={_br['failed_tickers']}")
                 else:
                     logger.warning("DQV_BR: %d violations, tickers=%s", len(_br["errors"]), _br["failed_tickers"])
         except Exception as _e:
@@ -4318,8 +4205,7 @@ def _refresh_data_impl():
                 _real_failed = list({e["ticker"] for e in _real_errs})
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_CROSS",
-                               f"{len(_real_errs)} inconsistencies tickers={_real_failed}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_real_errs)} inconsistencies tickers={_real_failed}")
                 else:
                     logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
                                    len(_real_errs), _real_failed)
@@ -4361,8 +4247,7 @@ def _refresh_data_impl():
             if _an["errors"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_ANOMALY",
-                               f"{len(_an['errors'])} flags tickers={_an['failed_tickers']}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_an['errors'])} flags tickers={_an['failed_tickers']}")
                 else:
                     logger.warning("DQV_ANOMALY: %d flags, tickers=%s",
                                    len(_an["errors"]), _an["failed_tickers"])
@@ -5070,14 +4955,14 @@ def background_refresh():
                         _f.write(_alert_line + "\n")
                 except OSError as _e:
                     logger.warning("api_stale ALERT.md yazılamadı: %s", _e)
-                # CPO-995/DEV-987: CPO-837 aile — network I/O (_send_telegram) lock
+                # CPO-995/DEV-987: CPO-837 aile — network I/O (_send_ops_alert) lock
                 # dışına alındı, lock sadece _last_stale_alert_ts state kontrolü/güncellemesini korur.
                 with _stale_alert_lock:
-                    _should_send = _should_alert_telegram(_stale, _last_stale_alert_ts)
+                    _should_send = _should_send_alert(_stale, _last_stale_alert_ts, cooldown_min=60)
                     if _should_send:
                         _last_stale_alert_ts = time.time()
                 if _should_send:
-                    _send_telegram(_alert_line)
+                    _send_ops_alert("BorsaPusula API bayat", _alert_line)
         except Exception as _e:
             logger.error("Paket 1 api_stale check hatası: %s", _e)
 
@@ -5440,7 +5325,6 @@ def api_data():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_DATA",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
@@ -5981,7 +5865,6 @@ def api_macro():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_MACRO",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
@@ -10506,7 +10389,6 @@ def api_stock_chart(ticker):
                     _dqv_alert("DQV_SV_CHART",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
                                ticker=ticker,
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
@@ -11061,9 +10943,8 @@ def _compute_health():
             "prefetch_thread_alive": _prefetch_thread.is_alive(),
         },
         # CPO-1260-B P1: alarm kanallarının KENDİSİ de sağlık yüzeyine girsin —
-        # Telegram token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
+        # Alarm kanalı token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
         "alarm_channels": {
-            "telegram": "configured" if (TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID) else "missing",
             "smtp":     "configured" if (SMTP_HOST and SMTP_USER and SMTP_PASS) else "missing",
         },
         # CPO-1504: MOD A (saf Yahoo yavaşlığı) / MOD B (breaker açık) ayrımı önceden
