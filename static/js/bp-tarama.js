@@ -30,7 +30,7 @@
   var CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
   var XIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
-  var ROWS = [], COUNT = { g: 0, y: 0, b: 0 }, SEK = [], ASOF = '', LOADED = false, FAILED = false;
+  var TOPBP = {}, ROWS = [], COUNT = { g: 0, y: 0, b: 0 }, SEK = [], ASOF = '', LOADED = false, FAILED = false;
 
   /* ── "Finansalları nasıl?" betimi: kategori skorlarından, şirkete yargı yok (kanon §2.4) ── */
   var CATN = { karlilik: 'kârlılık', nakit_akisi: 'nakit akışı', kaldirac: 'borç durumu', degerleme_buyume: 'değerleme/büyüme' };
@@ -72,12 +72,13 @@
   /* ── Hazır listeler: her biri paylaşılabilir adres (?liste=…) ── */
   var PRESETS = [
     { id: 'hacim-onayli', l: 'Güçlü Trend + Hacim Onaylı', rule: 'Trend koşullarının hepsi sağlanıyor; 5 günlük ortalama hacim, 20 günlük ortalamanın en az 1,2 katı (RVOL ≥ 1,20).', set: { durum: ['g'] }, x: function (r) { return r.ho; } },
-    { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü; skor finansallardan %60, trendden %40 pay alıyor.', set: { bp: 70 } },
+    { id: 'en-yuksek-bp', l: 'En yüksek BP · ilk 10', rule: 'BorsaPusula Skoru en yüksek 10 hisse; eşik sabit değil, sıralama göreli.', x: function (r) { return !!TOPBP[r.t]; } },
     { id: 'yeni-sinyal', l: 'Yeni sinyal (≤3 seans)', rule: 'Trend durumu son 3 seans içinde değişen hisseler.', x: function (r) { return r.d != null && r.d <= 3; } },
     { id: 'trend-bozuldu-son-seans', l: 'Son seansta Trend Bozuldu', rule: function () { return 'Yükseliş trendi ' + (ASOF || 'son') + ' seansında bozulan hisseler.'; }, set: { durum: ['b'] }, x: function (r) { return r.d != null && r.d <= 1; } },
     { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skor 70 ve üstü, finansal verisi tam; trend henüz Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
   var PRE = {};
   PRESETS.forEach(function (p) { PRE[p.id] = p; });
+  PRE['bp-70'] = PRE['en-yuksek-bp'];  /* C-66: eski paylaşılmış bağlantılar */
 
   /* ── Sütunlar ── */
   function mut(t) { return '<span class="mut">' + t + '</span>'; }
@@ -92,7 +93,7 @@
   }
   function cush(r) { return (r.p && r.sl != null) ? (r.p - r.sl) / r.p * 100 : null; }
   var C = {
-    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40; trend skoru olmayan hissede yalnız finansallar.', v: function (r) { return r.bp; },
+    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40; trend payı Güçlü Trend\'de en az 50, Yatay\'da 50, Trend Bozuldu\'da en çok 50.', v: function (r) { return r.bp; },
       cell: function (r) { return r.bp == null ? mut('Sınırlı veri') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
       cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },
@@ -186,6 +187,7 @@
   function readUrl() {
     var q = new URLSearchParams(location.search), f = blank();
     var li = q.get('liste');
+    if (li === 'bp-70') li = 'en-yuksek-bp';
     if (li && PRE[li]) f = withPreset(li);
     else {
       var inv = {}; Object.keys(SLUG).forEach(function (k) { inv[SLUG[k]] = k; });
@@ -257,7 +259,7 @@
     var f = st.f, h = '';
     if (f.preset) h += '<div class="tv-pp"><span>Hazır liste</span><b>' + esc(PRE[f.preset].l) + '</b><button type="button" class="tv-ppx" data-act="preset" data-id="' + f.preset + '" aria-label="Hazır listeyi kaldır">' + XIC + '</button></div>';
     h += '<div class="tv-pcols"><div>';
-    h += fg('BorsaPusula Skoru', 'finansallar %60 · trend %40', one('bp', [[0, 'Tümü'], [50, '50+'], [60, '60+'], [70, '70+']], f.bp));
+    h += fg('BorsaPusula Skoru', 'finansallar %60 · trend %40 (yönlü)', one('bp', [[0, 'Tümü'], [50, '50+'], [60, '60+'], [70, '70+']], f.bp));
     h += fg('Finansalları nasıl?', 'Temel skor', one('temel', [[0, 'Tümü'], [50, '50+'], [70, '70+']], f.temel));
     h += fg('Trend destekliyor mu?', '', many('durum', [['g', 'Güçlü Trend', COUNT.g], ['y', 'Yatay', COUNT.y], ['b', 'Trend Bozuldu', COUNT.b]], f.durum));
     h += fg('Sırala', '', one('sort', [['bp', 'BP Skoru'], ['c', 'Değişim'], ['te', 'Temel skor'], ['t', 'Ada göre']], st.sort.k), 'tv-fg-sort');
@@ -402,6 +404,8 @@
     Promise.all([tp, mp]).then(function (res) {
       var d = res[0];
       ROWS = mapRows(d.results || [], res[1]);
+      TOPBP = {};
+      ROWS.filter(function (r) { return r.bp != null; }).sort(function (a, b) { return b.bp - a.bp || cmp(a.t, b.t); }).slice(0, 10).forEach(function (r) { TOPBP[r.t] = 1; });
       COUNT = { g: 0, y: 0, b: 0 };
       var sc = {};
       ROWS.forEach(function (r) { COUNT[r.s]++; sc[r.g] = (sc[r.g] || 0) + 1; });

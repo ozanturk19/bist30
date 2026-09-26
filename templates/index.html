@@ -246,7 +246,7 @@
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
     <p>BorsaPusula Skoru en yüksekler · verisi en az %80 tamam · Trend Bozuldu hariç</p>
-    <a href="/tarama?liste=bp-70">Tüm liste →</a>
+    <a href="/tarama?liste=en-yuksek-bp">Tüm liste →</a>
   </div>
   <div class="da-panel hp-pan">
     {%- if _ft %}
@@ -255,7 +255,7 @@
       <li><a class="hp-ft-row" href="/hisse/{{ s.ticker|urlencode }}">
         <span class="hp-ft-co"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}{% if s.sector %} · {{ s.sector }}{% endif %}</span><span class="why">{% if s.fin_answer %}{{ s.fin_answer }}.{% endif %}</span></span>
         <span class="hp-ft-tags"><span class="hp-val{% if v %} hp-val--{{ v[1] }}{% endif %}"><span class="sr-only">Değerleme: </span>{{ v[0] if v else '—' }}</span><span class="da-signal da-signal--{{ 'strong' if s.signal == 'AL' else 'flat' }}"><span class="sr-only">Trend: </span>{{ 'Güçlü Trend' if s.signal == 'AL' else 'Yatay' }}</span></span>
-        <span class="hp-ft-bp"><span class="sr-only">BorsaPusula Skoru </span><b class="da-num">{{ s.borsapusula_skoru|round|int }}</b>{% if s.bps_partial %}<em class="hp-partial" title="Kısmi skor: yalnız finansallardan (Temel)">Kısmi</em>{% endif %}</span>
+        <span class="hp-ft-bp"><span class="sr-only">BorsaPusula Skoru </span><b class="da-num">{{ s.borsapusula_skoru|round|int }}</b>{% if s.bps_partial %}<em class="hp-partial" title="Kısmi skor: trend bilgisi eksik">Kısmi</em>{% endif %}</span>
       </a></li>
       {%- endfor %}
     </ol>

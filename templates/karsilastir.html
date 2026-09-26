@@ -139,7 +139,7 @@ const ROW_LABELS = [
   // CPO-1610: /hisse hero'daki kompozit skorla AYNI alan (hs.borsapusula_skoru) — ayrı,
   // açıkça etiketli satır. "Yatırım Skoru" (üstteki scoreRow) SADECE Teknik Güç'tür,
   // bu ikisi artık aynı sayı gibi karışmıyor.
-  { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Temel Analiz ×%60 + Teknik Güç ×%40 kompozit puan — /hisse sayfasındaki ana skorla birebir aynı kaynak. Yukarıdaki "Teknik Güç" ile karıştırılmamalı.' },
+  { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Finansallar %60 + Trend %40 kompozit puan (trend payı Güçlü Trend\'de en az 50, Yatay\'da 50, Trend Bozuldu\'da en çok 50) — /hisse sayfasındaki ana skorla birebir aynı kaynak. Yukarıdaki "Teknik Güç" ile karıştırılmamalı.' },
   { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'Güçlü Trend sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1,20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },

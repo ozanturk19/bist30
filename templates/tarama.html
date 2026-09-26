@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
-<meta name="description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın. Hazır listeler: Güçlü Trend + Hacim Onaylı, BP ≥ 70, yeni sinyal, kaliteli ve trend bekleyen şirketler.">
+<meta name="description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın. Hazır listeler: Güçlü Trend + Hacim Onaylı, en yüksek BP, yeni sinyal, kaliteli ve trend bekleyen şirketler.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
 <meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
 <meta property="og:description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın.">
@@ -68,7 +68,7 @@
     <span class="tv-vsep tv-js" aria-hidden="true"></span>
     <div class="tv-chips" role="group" aria-label="Hazır listeler">
       <a class="tv-chip" href="/tarama?liste=hacim-onayli" data-act="preset" data-id="hacim-onayli">Güçlü Trend + Hacim Onaylı<span class="cn"></span></a>
-      <a class="tv-chip" href="/tarama?liste=bp-70" data-act="preset" data-id="bp-70">BP ≥ 70<span class="cn"></span></a>
+      <a class="tv-chip" href="/tarama?liste=en-yuksek-bp" data-act="preset" data-id="en-yuksek-bp">En yüksek BP · ilk 10<span class="cn"></span></a>
       <a class="tv-chip" href="/tarama?liste=yeni-sinyal" data-act="preset" data-id="yeni-sinyal">Yeni sinyal (≤3 seans)<span class="cn"></span></a>
       <a class="tv-chip" href="/tarama?liste=trend-bozuldu-son-seans" data-act="preset" data-id="trend-bozuldu-son-seans">Son seansta Trend Bozuldu<span class="cn"></span></a>
       <a class="tv-chip" href="/tarama?liste=kaliteli-trend-bekliyor" data-act="preset" data-id="kaliteli-trend-bekliyor">Kaliteli, trend bekliyor<span class="cn"></span></a>
@@ -132,7 +132,7 @@
 /* CPO-1125 İş Kolu B — kanonik bayat veri bandı (60 sn yoklama) */
 bpStartDataQualityPolling();
 </script>
-<script src="/static/js/bp-tarama.js?v=6e71ccb6" defer></script>
+<script src="/static/js/bp-tarama.js?v=eaa72a80" defer></script>
 <script src="/static/bp-search.js?v=2050edda" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 {% include '_mobile_nav_partial.html' %}
