@@ -67,7 +67,7 @@
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=2315a340">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=2c45ebf1">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 
@@ -250,7 +250,6 @@
   <div class="da-panel hp-pan">
     <p class="hp-rule"><b>Kural:</b> BorsaPusula Skoru en yüksek beş şirket; verisi en az %80 tamam olanlar, Trend Bozuldu hariç.</p>
     {%- if _ft %}
-    <div class="hp-ft-h" aria-hidden="true"><span>Şirket</span><span>Değerleme</span><span>Trend</span><span>BP</span></div>
     <ol class="hp-ft" id="hpFt">
       {%- for s in _ft %}{%- set v = _vl.get(s.valuation) %}
       <li><a class="hp-ft-row" href="/hisse/{{ s.ticker|urlencode }}">
@@ -272,21 +271,20 @@
 {%- set _ns = _gd.new_signals or [] %}
 <section class="da-section hp-blk" id="degisenler" aria-labelledby="hpChT">
   <div class="hp-blk-h">
-    <h2 class="hp-blk-t da-display" id="hpChT">Son seansta değişenler</h2>
+    <h2 class="hp-blk-t da-display" id="hpChT">{% if _ns %}Son kapanışta {{ _ns|length }} hisse durum değiştirdi{% else %}Son seansta değişenler{% endif %}</h2>
+    {%- if _ns and _gd.eod_label %}<p>{{ _gd.eod_label }} kapanışı</p>{% endif %}
     <a href="/gundem">Tüm gündem →</a>
   </div>
-  <div class="da-panel hp-pan hp-chg">
-    {%- if _ns %}
-    <p class="hp-chg-h"><b>Son kapanışta {{ _ns|length }} hisse durum değiştirdi</b>{% if _gd.eod_label %} · <span class="hp-nw1">{{ _gd.eod_label }}</span>{% endif %}</p>
-    {%- for sig, lbl, cls in [('AL', "Güçlü Trend'e geçen", 'strong'), ('SAT', "Trend Bozuldu'ya geçen", 'broken')] %}
-    {%- set _l = _ns|selectattr('signal', 'equalto', sig)|list %}
-    <div class="hp-chg-g hp-chg-g--{{ cls }}"><p class="hp-chg-l">{{ lbl }} <b class="da-num">{{ _l|length }}</b></p>
-      {%- if _l %}<ul class="hp-chips">{% for x in _l[:8] %}<li><a class="hp-chip hp-chip--{{ cls }}" href="/hisse/{{ x.ticker|urlencode }}">{{ x.ticker }}</a></li>{% endfor %}{% if _l|length > 8 %}<li><a class="hp-chip hp-chip--more" href="/gundem">+{{ _l|length - 8 }}</a></li>{% endif %}</ul>{% endif %}</div>
-    {%- endfor %}
-    {%- else %}
-    <p class="hp-chg-h">{{ _gd.closed_message or 'Son seansta trend durumu değişen hisse yok.' }}</p>
-    {%- endif %}
-  </div>
+  {%- if _ns %}
+  {%- for sig, lbl, cls in [('AL', "Güçlü Trend'e geçen", 'strong'), ('SAT', "Trend Bozuldu'ya geçen", 'broken')] %}
+  {%- set _l = _ns|selectattr('signal', 'equalto', sig)|list %}
+  {%- if _l %}
+  <div class="hp-chg-g"><p class="hp-chg-l">{{ lbl }} <b class="da-num">{{ _l|length }}</b></p><ul class="hp-chips">{% for x in _l[:8] %}<li><a class="hp-chip hp-chip--{{ cls }}" href="/hisse/{{ x.ticker|urlencode }}">{{ x.ticker }}</a></li>{% endfor %}{% if _l|length > 8 %}<li><a class="hp-chip hp-chip--more" href="/gundem">+{{ _l|length - 8 }}</a></li>{% endif %}</ul></div>
+  {%- endif %}
+  {%- endfor %}
+  {%- else %}
+  <p class="hp-chg-l">{{ _gd.closed_message or 'Son seansta trend durumu değişen hisse yok.' }}</p>
+  {%- endif %}
 </section>
 
 {#- Son şirket bildirimleri (C-28 6. blok "Haberler özeti"): /api/haberler, her satır
