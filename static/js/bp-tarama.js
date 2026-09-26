@@ -34,11 +34,15 @@
 
   /* ── "Finansalları nasıl?" betimi: kategori skorlarından, şirkete yargı yok (kanon §2.4) ── */
   var CATN = { karlilik: 'kârlılık', nakit_akisi: 'nakit akışı', kaldirac: 'borç durumu', degerleme_buyume: 'değerleme/büyüme' };
+  /* C-22c: Temel v2 (D-40c) 5 eksen; cevap değerlemeyi kullanmaz (arka uç `cevap` ile aynı kural) */
+  var CATN2 = { kalite: 'kalite', buyume: 'büyüme', bilanco: 'bilanço sağlığı', temettu: 'temettü' };
+  var CATL = { kalite: 'kalite', degerleme: 'değerleme', buyume: 'büyüme', bilanco: 'bilanço sağlığı', temettu: 'temettü' };
   function cap(t) { return t.charAt(0).toLocaleUpperCase('tr-TR') + t.slice(1); }
   function finAns(c) {
     if (!c) return null;
-    var a = Object.keys(CATN).filter(function (k) { return c[k] != null; })
-      .map(function (k) { return [CATN[k], c[k]]; }).sort(function (x, y) { return y[1] - x[1]; });
+    var N = c.kalite != null || c.buyume != null ? CATN2 : CATN;
+    var a = Object.keys(N).filter(function (k) { return c[k] != null; })
+      .map(function (k) { return [N[k], c[k]]; }).sort(function (x, y) { return y[1] - x[1]; });
     if (!a.length) return null;
     var st = a.filter(function (x) { return x[1] >= 70; }), wk = a.filter(function (x) { return x[1] < 50; });
     if (st.length && wk.length) return cap(st[0][0]) + ' güçlü, ' + wk[wk.length - 1][0] + ' zayıf';
@@ -81,7 +85,8 @@
     return '<span class="tv-bp' + (cls ? ' ' + cls : '') + (soft ? ' soft' : '') + '" style="--v:' + Math.max(0, Math.min(100, v)) + '"><b>' + v + (sup ? '<sup>*</sup>' : '') + '</b><i></i></span>';
   }
   function catCol(key, h) {
-    return { h: h, num: 1, tip: CATN[key].charAt(0).toLocaleUpperCase('tr-TR') + CATN[key].slice(1) + ' kategorisinin skoru (0–100).',
+    var nm = CATN[key] || CATL[key];
+    return { h: h, num: 1, tip: nm.charAt(0).toLocaleUpperCase('tr-TR') + nm.slice(1) + ' kategorisinin skoru (0–100).',
       v: function (r) { return r.cat ? r.cat[key] : null; },
       cell: function (r) { var v = r.cat ? r.cat[key] : null; if (v != null) return String(Math.round(v)); return mut(r.te == null ? 'Sınırlı veri' : (r.na.indexOf(key) >= 0 ? 'Uygulanmaz' : 'Veri yok')); } };
   }
@@ -105,12 +110,17 @@
     kar: catCol('karlilik', 'Kârlılık'),
     nak: catCol('nakit_akisi', 'Nakit akışı'),
     kal: catCol('kaldirac', 'Borç durumu'),
-    deg: catCol('degerleme_buyume', 'Değerleme / büyüme')
+    deg: catCol('degerleme_buyume', 'Değerleme / büyüme'),
+    kli: catCol('kalite', 'Kalite'),
+    dgr: catCol('degerleme', 'Değerleme'),
+    buy: catCol('buyume', 'Büyüme'),
+    bil: catCol('bilanco', 'Bilanço sağlığı'),
+    tem: catCol('temettu', 'Temettü')
   };
   var COLS = { genel: ['bp', 'tr', 'p', 'c', 'g'], teknik: ['bp', 'adx', 'dist', 'rv', 'd'], temel: ['bp', 'te', 'kar', 'nak', 'kal', 'deg'] };
   var ASC = { t: 1, g: 1 };
-  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'RVOL', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme' };
-  var SSLUG = { t: 'kod', bp: 'bp', tr: 'durum-yasi', d: 'durum-yasi', p: 'fiyat', c: 'degisim', g: 'sektor', adx: 'adx', dist: 'donus-seviyesi', rv: 'rvol', te: 'temel', kar: 'karlilik', nak: 'nakit-akisi', kal: 'borc-durumu', deg: 'degerleme-buyume' };
+  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'RVOL', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme', kli: 'Kalite', dgr: 'Değerleme', buy: 'Büyüme', bil: 'Bilanço sağlığı', tem: 'Temettü' };
+  var SSLUG = { t: 'kod', bp: 'bp', tr: 'durum-yasi', d: 'durum-yasi', p: 'fiyat', c: 'degisim', g: 'sektor', adx: 'adx', dist: 'donus-seviyesi', rv: 'rvol', te: 'temel', kar: 'karlilik', nak: 'nakit-akisi', kal: 'borc-durumu', deg: 'degerleme-buyume', kli: 'kalite', dgr: 'degerleme', buy: 'buyume', bil: 'bilanco', tem: 'temettu' };
   function slug(s) { return bpTrFold(String(s)).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
   /* ── Durum ── */
@@ -397,6 +407,7 @@
       ROWS.forEach(function (r) { COUNT[r.s]++; sc[r.g] = (sc[r.g] || 0) + 1; });
       SEK = Object.keys(sc).sort(function (a, b) { if (a === 'Diğer') return 1; if (b === 'Diğer') return -1; return sc[b] - sc[a] || cmp(a, b); }).map(function (k) { return [k, k, sc[k]]; });
       ASOF = (typeof bpFormatTrDateLong === 'function' && d.updated_at) ? (bpFormatTrDateLong(String(d.updated_at).split(' ')[0]) || '') : '';
+      if (ROWS.some(function (r) { return r.cat && r.cat.kalite != null; })) COLS.temel = ['bp', 'te', 'kli', 'dgr', 'buy', 'bil', 'tem'];
       LOADED = true;
       resolveSectors();
       head();

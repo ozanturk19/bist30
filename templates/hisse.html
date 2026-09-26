@@ -351,7 +351,9 @@
 {#- C-22: "Finansallari nasil?" betimleyici cevabi -- Ozet Q1 ve Temel sekmesi ayni makrodan
     (kategori skorlari; >=70 guclu, <50 zayif: financial_health_score esikleri; sirkete yargi yok). -#}
 {%- macro fin_answer(hs, hs_available) -%}
-{%- if hs_available and hs.categories -%}
+{%- if hs_available and hs.temel_v2 and hs.temel_v2.cevap -%}{{ hs.temel_v2.cevap }}
+{%- elif hs_available and hs.temel_v2 and hs.temel_v2.limited_data -%}Sınırlı veri
+{%- elif hs_available and hs.categories -%}
 {%- set _N = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
 {%- set _ord = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
 {%- set _st = _ord|selectattr('1', 'ge', 70)|list -%}
@@ -362,6 +364,18 @@
 {%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
 {%- else %}Dengeli; belirgin zayıf alan yok{% endif -%}
 {%- else -%}Veri bekleniyor{%- endif -%}
+{%- endmacro -%}
+{#- C-22c: Temel v2 (D-40c `hs.temel_v2`) -- alan yoksa bugunku 4 kategori aynen kalir. -#}
+{%- set _tv2 = hs.temel_v2 if (hs_available and hs.temel_v2) else none -%}
+{%- set _AX = [('kalite', 'Kalite'), ('degerleme', 'Değerleme'), ('buyume', 'Büyüme'), ('bilanco', 'Bilanço sağlığı'), ('temettu', 'Temettü')] if _tv2 else [('karlilik', 'Kârlılık'), ('nakit_akisi', 'Nakit akışı'), ('kaldirac', 'Borç durumu'), ('degerleme_buyume', 'Değerleme ve büyüme')] -%}
+{%- macro tv2_weights(v) -%}
+{%- set _w = v.agirliklar or {} -%}
+Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değerleme %{{ _w.degerleme or 20 }}, büyüme %{{ _w.buyume or 20 }}, bilanço sağlığı %{{ _w.bilanco or 20 }}, temettü %{{ _w.temettu or 10 }}.
+{%- if hs.categories_na and 'bilanco' in hs.categories_na %} Bilanço sağlığı bu şirket türünde hesaplanmadığı için ağırlığı diğer başlıklara dağıtılır.{% endif -%}
+{%- endmacro -%}
+{%- macro tv2_limited(v) -%}
+{%- set _S = {'kap_kaydi_yok': 'Şirketin finansal raporları henüz işlenmedi.', 'rapor_yok': 'Raporlarda okunabilir dönem yok.', 'eksen_yetersiz': 'Beş başlığın en az üçü hesaplanamadığı için skor verilmiyor.', 'tamlik_dusuk': 'Gerekli verinin %60\'ından azı olduğu için skor verilmiyor.'} -%}
+Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
 {%- endmacro -%}
 <div id="panel-ozet" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
   {#- C-20 (25.09): "3 Soruda {HISSE}" (O11b=A) -- eski "2 Saniyede Karar Yardimcisi / Sinyal
@@ -402,7 +416,7 @@
         {% if hs.temel_analiz_skoru is not none %}<p class="hx-ts">Temel skor <b>{{ hs.temel_analiz_skoru }} / 100</b></p>{% endif %}
         {%- set _na = hs.categories_na if (hs.categories_na is defined and hs.categories_na) else [] %}
         <ul class="hx-bars">
-          {%- for _k, _lb in [('karlilik', 'Kârlılık'), ('nakit_akisi', 'Nakit akışı'), ('kaldirac', 'Borç durumu'), ('degerleme_buyume', 'Değerleme ve büyüme')] %}
+          {%- for _k, _lb in _AX %}
           {%- if _k in hs.categories %}
           <li><span>{{ _lb }}</span><svg class="hx-tr" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="hx-tr-bg" width="100" height="6" rx="3"/><rect class="hx-tr-fg" width="{{ '%.1f'|format(hs.categories[_k]) }}" height="6" rx="3"/></svg><b>{{ '%.0f'|format(hs.categories[_k]) }}</b></li>
           {%- elif _k in _na %}
@@ -410,7 +424,10 @@
           {%- endif %}
           {%- endfor %}
         </ul>
-        <p class="hx-qp">{% if 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
+        <p class="hx-qp">{% if _tv2 %}Temel skor {{ tv2_weights(_tv2)|trim|replace('Beş', 'beş', 1) }}{% elif 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
+        {% elif _tv2 and _tv2.limited_data %}
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Sınırlı veri</p>
+        <p class="hx-qp">{{ tv2_limited(_tv2)|replace('Sınırlı veri · ', '', 1) }}</p>
         {% else %}
         <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Veri bekleniyor</p>
         <p class="hx-qp">Bu hisse için son gün sonu turu temel skoru üretmedi.</p>
@@ -480,13 +497,14 @@
     {%- else %} Yatay: beş koşul aynı anda sağlanmıyor, trend yönü belirgin değil. Güçlü Trend için beşinin birlikte sağlanması gerekir (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı).
     {%- endif %}</p>
     {%- if hs_available and hs.categories %}
-    {%- set _mn = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
+    {%- set _mn = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme', 'kalite': 'kalite', 'degerleme': 'değerleme', 'buyume': 'büyüme', 'bilanco': 'bilanço sağlığı', 'temettu': 'temettü'} -%}
     {%- set _mc = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
     <p class="hx-mean-p"><b>Finansallar.</b>
       {%- if _mc|length > 1 %} En güçlü alan {{ _mn.get(_mc[0][0], _mc[0][0]) }} ({{ 'güçlü' if _mc[0][1] >= 70 else ('ortalama' if _mc[0][1] >= 50 else 'zayıf') }}, {{ '%.0f'|format(_mc[0][1]) }} / 100), en zayıf alan {{ _mn.get(_mc[-1][0], _mc[-1][0]) }} ({{ 'güçlü' if _mc[-1][1] >= 70 else ('ortalama' if _mc[-1][1] >= 50 else 'zayıf') }}, {{ '%.0f'|format(_mc[-1][1]) }} / 100).
       {%- else %} {{ _mn.get(_mc[0][0], _mc[0][0])|capitalize }} {{ 'güçlü' if _mc[0][1] >= 70 else ('ortalama' if _mc[0][1] >= 50 else 'zayıf') }} ({{ '%.0f'|format(_mc[0][1]) }} / 100).
       {%- endif %}
-      {%- if hs.categories_na and 'kaldirac' in hs.categories_na %} Borç durumu bu şirketin bilanço yapısında hesaplanmıyor.{% endif %}</p>
+      {%- if hs.categories_na and 'kaldirac' in hs.categories_na %} Borç durumu bu şirketin bilanço yapısında hesaplanmıyor.{% endif %}
+      {%- if hs.categories_na and 'bilanco' in hs.categories_na %} Bilanço sağlığı bu şirket türünde hesaplanmıyor.{% endif %}</p>
     {%- endif %}
   </section>
   {% endif %}
@@ -763,15 +781,21 @@
         <div><div class="tv-lbl">Temel skor</div><div class="tv-sub">100 üzerinden</div></div>
       </div>
       {% endif %}
-      <p class="tv-kind" id="tvKind">{% if 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
+      <p class="tv-kind" id="tvKind">{% if _tv2 and _tv2.limited_data %}{{ tv2_limited(_tv2) }}{% elif _tv2 %}{{ tv2_weights(_tv2) }}{% elif 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
+      {%- if _tv2 and _tv2.veri_notu %}
+      {%- set _VN = {'esas_belirsiz': 'muhasebe esası belirlenemedi', 'yillik_rapor_eski': 'son yıllık rapor güncel değil', 'son_rapor_gecikmis': 'son dönem raporu gecikmiş', 'ceyrek_eksik': 'bazı çeyrek raporları eksik', 'kalem_eksik': 'bazı temel kalemler okunamadı', 'tutarsizlik': 'pay adedi ya da tutarlar tutarsız', 'sigorta_kalemleri_sinirli': 'prim ve hasar kalemleri okunmuyor'} %}
+      <p class="tv-kind" id="tvNote">Veri notu <b>{{ _tv2.veri_notu }}</b>{%- set _vnn = (_tv2.veri_notu_nedenleri or [])|reject('equalto', 'sigorta_kalemleri_sinirli' if _tv2.sablon_notu else '')|list %}{% if _vnn %} · {% for _c in _vnn %}{{ _VN.get(_c, _c) }}{{ ', ' if not loop.last }}{% endfor %}{% elif not _tv2.sablon_notu %} · tüm veri kontrolleri geçti{% endif %}{% if _tv2.sablon_notu %} · {{ _tv2.sablon_notu }}{% endif %}</p>
+      {%- endif %}
       <p class="tv-per" id="tvPer" hidden></p>
     </div>
     {% if hs_available and hs.categories %}
-    <ul class="tv-axes" aria-label="Temel skorun alanları">
-      {%- for _k, _lb in [('karlilik', 'Kârlılık'), ('nakit_akisi', 'Nakit akışı'), ('kaldirac', 'Borç durumu'), ('degerleme_buyume', 'Değerleme ve büyüme')] %}
+    <ul class="tv-axes" aria-label="Temel skorun alanları"{% if _tv2 %} data-v2="1"{% endif %}>
+      {%- for _k, _lb in _AX %}
       {%- if _k in hs.categories %}
       {%- set _v = hs.categories[_k] %}
-      <li class="tv-ax" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><svg class="tv-ax-tr" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="tv-ax-bg" width="100" height="8" rx="4"/><rect class="tv-ax-fg" width="{{ '%.1f'|format(_v) }}" height="8" rx="4"/></svg><b class="tv-ax-v">{{ '%.0f'|format(_v) }}</b><span class="tv-ax-l" id="tvAx-{{ _k }}">{{ 'Güçlü alan' if _v >= 70 else ('Zayıf alan' if _v < 50 else 'Dengeli') }}</span></li>
+      {%- set _cm = ((_tv2.eksenler or {}).get(_k) or {}).get('cumle') if _tv2 else none %}
+      {%- set _cp = _cm.replace('; ', ' · ').split(' · ') if _cm else [] %}
+      <li class="tv-ax" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><svg class="tv-ax-tr" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="tv-ax-bg" width="100" height="8" rx="4"/><rect class="tv-ax-fg" width="{{ '%.1f'|format(_v) }}" height="8" rx="4"/></svg><b class="tv-ax-v">{{ '%.0f'|format(_v) }}</b><span class="tv-ax-l" id="tvAx-{{ _k }}">{% if _cp %}<span>{{ _cp[0] }}</span>{% if _cp|length > 1 %}<span class="tv-ax-x"> · {{ _cp[1:]|join(' · ') }}</span>{% endif %}{% else %}{{ 'Güçlü alan' if _v >= 70 else ('Zayıf alan' if _v < 50 else 'Dengeli') }}{% endif %}</span></li>
       {%- elif _k in _tv_na %}
       <li class="tv-ax tv-ax--na" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><span class="tv-ax-na">bu bilanço yapısında hesaplanmaz</span><b class="tv-ax-v">—</b><span class="tv-ax-l" id="tvAx-{{ _k }}"></span></li>
       {%- endif %}
@@ -2149,6 +2173,9 @@ function _bpRenderOzetFromChart(ch) {
    Alan grafigi (SVG, kutuphane yok), 4 temel gosterge, Q2 degerleme, DI satiri,
    Son haberler. Veri: Ozet'in /chart, /fundamentals, /temettu-takvimi, /kap
    yanitlari (hepsi paylasilan tek istek). Baslik fiyati SSR (#hpPrice) tek kaynak. */
+/* C-22c: D-40c Temel v2 -- degerleme hukmu gun sonu turundan (tek kaynak, istemcide yeniden hesaplanmaz) */
+{%- set _tvd = (_tv2.get('degerleme') or {}) if _tv2 else {} %}
+const HX_TV2 = {{ ({'h': _tvd.get('hukum'), 'kap': _tvd.get('kapsam')} if _tv2 else none)|tojson }};
 const HX_PRICE = (BP_SSR && BP_SSR.price != null && isFinite(+BP_SSR.price)) ? +BP_SSR.price : null;
 const _hxNF2 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const _hxNF1 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -2283,7 +2310,7 @@ function hxFillFund(f, divRow) {
   const note = document.getElementById('q2Note');
   if (note) {
     const basis = k && k.basis === 'yabanci_para' ? 'Şirketin işlevsel para birimi döviz; oranlar TL\'ye çevrilmiş finansallardan.' : null;
-    const noMed = V && rows.length && !V.hasMed ? 'Sektör ortancası olmadığı için yorum yapılmıyor.' : null;
+    const noMed = V && rows.length && !V.hasMed ? (V.v2 ? 'Sektörde karşılaştırma için yeterli şirket yok.' : 'Sektör ortancası olmadığı için yorum yapılmıyor.') : (V && V.wide ? 'Sektörde yeterli şirket olmadığı için piyasa geneline göre.' : null);
     const cur = f.financial_currency || 'TRY';
     const txt = basis || noMed || (cur !== 'TRY' && !rows.length ? 'Şirket finansallarını ' + cur + ' cinsinden raporluyor; F/K ve PD/DD bu yüzden hesaplanmıyor.' : null);
     if (txt) { note.textContent = txt; note.hidden = false; }
@@ -2527,6 +2554,10 @@ function tvValuation(f) {
   });
   const scored = rows.filter(r => r.t !== null);
   let word = null;
+  if (HX_TV2) {
+    const W = { ucuz: 'Ucuz tarafta', makul: 'Makul', pahali: 'Pahalı tarafta', karisik: 'Karışık' };
+    return { rows: rows, word: W[HX_TV2.h] || null, hasMed: !!HX_TV2.h, v2: true, wide: HX_TV2.kap === 'piyasa' };
+  }
   if (scored.length) {
     const s = scored.reduce((a, r) => a + r.t, 0);
     const mixed = scored.length === 2 && scored[0].t * scored[1].t === -1;
@@ -2924,8 +2955,9 @@ function _tvDividend(f, k, divRow) {
   return true;
 }
 
-/* ── Eksen satirlari (Temel skorun 4 alani; D-40c'nin 5 ekseni gelene kadar) ── */
+/* ── Eksen satirlari (Temel skorun 4 alani; v2'de 5 eksen ve cumleleri SSR'dan gelir) ── */
 function _tvAxes(f, k) {
+  if (HX_TV2) return;  /* C-22c: v2 eksen cumleleri SSR'da (D-40c `eksenler[k].cumle`) */
   /* Satir: ilk ifade her zaman, digerleri telefonda gizli (taslak v3: mobilde tek ifade) */
   const set = (key, txt) => {
     const el = _tvEl('tvAx-' + key); if (!el || !txt) return;
