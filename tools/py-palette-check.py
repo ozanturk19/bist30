@@ -71,8 +71,14 @@ def canon_values(css_text):
 def canon_map(css_text):
     """--bp-token -> deger (yorumsuz govdeden)."""
     body = re.sub(r"/\*.*?\*/", "", css_text, flags=re.S)
-    return {m.group(1): m.group(2).lower()
-            for m in re.finditer(r"(--bp-[a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b", body)}
+    out = {m.group(1): m.group(2).lower()
+           for m in re.finditer(r"(--bp-[a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b", body)}
+    # C-14: DEPRECATED alias (`--bp-al: var(--bp-up)`) v1 adinin degerini tasir
+    alias = dict(re.findall(r"(--bp-[a-z0-9-]+)\s*:\s*var\((--bp-[a-z0-9-]+)\)\s*;", body))
+    for k, v in alias.items():
+        if v in out:
+            out.setdefault(k, out[v])
+    return out
 
 
 def strip_py_comments(src):
