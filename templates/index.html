@@ -167,7 +167,8 @@
   </div>
 </section>
 
-<!-- ═══ GÜNDEM & HABERLER — gerçek /api/macro-news + /api/market-news + /api/bilanco-mini,
+<!-- ═══ GÜNDEM & HABERLER — /api/haberler (şirket bildirimleri, site içi) + /api/market-news + /api/bilanco-mini
+     (C-65 26.09: başka sitelerin RSS başlıkları kaynak adı + dış bağlantıyla kalktı, kanon §2.8/§4),
      mevcut index.html'deki gundem-section'ın Data-Art diline taşınmış hali (denetim sonrası
      eklendi — orijinal taslak bu bölümü hiç içermiyordu, Ozan'ın "haberler daha detaylı
      olsun" isteğiyle çelişirdi) ═══ -->
@@ -179,10 +180,10 @@
     </div>
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <div class="da-gnm-tabs" id="daGnmTabs" role="tablist" aria-label="Gündem sekmeleri">
-        <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" tabindex="0" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
+        <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" tabindex="0" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">📰</span> Bildirimler</button>
         <button type="button" class="da-gnm-tab" id="daGnmTabHisse" role="tab" aria-selected="false" aria-controls="daGnmPanelHisse" tabindex="-1" onclick="daSwitchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
       </div>
-      <a href="/gundem" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
+      <a href="/haberler" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
     </div>
   </div>
 
@@ -934,7 +935,7 @@
     if (btn && btn.disabled) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
   });
 
-  // ── Gündem & Haberler (gerçek /api/macro-news + /api/market-news + /api/bilanco-mini) ──
+  // ── Gündem & Haberler (/api/haberler + /api/market-news + /api/bilanco-mini) ──
   var _daGnmMakroLoaded = false, _daGnmHisseLoaded = false;
 
   function daSwitchGnmTab(tab){
@@ -977,30 +978,19 @@
     /* 21.09 (K-W): `r.ok` kapısı YOKTU — sunucu 500'de gövdeyi JSON olarak
        döndürseydi `items` boş çıkar ve kullanıcı BOZUK sistemi "şu an haber
        yok" diye görürdü (K-V'nin boş≠hata bulgusunun aynısı, ana sayfada). */
-    fetch('/api/macro-news').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
+    /* C-65 (26.09): kendi bildirim akışımız (/api/haberler), her satır site içi
+       kalıcı bildirim sayfasına gider; kaynak adı ve dış bağlantı yok. Başlık
+       en yeni bildirimin tarihinden türetilir (göreli zaman yok). */
+    fetch('/api/haberler?adet=8').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
       var items = (d && d.items) || [];
-      if (!items.length) { list.innerHTML = '<div class="da-panel da-empty">Şu an haber yok.</div>'; return; }
-      /* 21.09 (K-AK): baslik "Bugunun haberleri." diye SABIT yaziliydi ama
-         akis donarsa (haber kotasi/feed kesintisi -- gecmiste makro ozet 10 gun
-         donmustu) altindaki her tarih damgasi baska bir gunu gosterirken baslik
-         "bugun" demeye devam ediyordu. Artik veriden turetiliyor: EN YENI
-         haberin date_str'i BIST gunuyle esitse "bugun" denir, degilse o tarih
-         yazilir. Tarih okunamazsa notr statik metin korunur. */
-      (function(){
-        var hEl = document.getElementById('daGnmHeadline');
-        if (!hEl || typeof bpTodayTr !== 'function') return;
-        var ds = (items[0] && items[0].date_str) || '';
-        if (!/^\d{2}\.\d{2}$/.test(ds)) return;
-        var t = bpTodayTr();
-        var todayStr = (t.d < 10 ? '0' : '') + t.d + '.' + (t.m < 10 ? '0' : '') + t.m;
-        hEl.textContent = ds + ' haberleri.';
-      })();
+      if (!items.length) { list.innerHTML = '<div class="da-panel da-empty">Şu an bildirim yok.</div>'; return; }
+      function dm(day){ var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(day || ''); return m ? m[2] + '.' + m[1] : ''; }
+      var hEl = document.getElementById('daGnmHeadline');
+      if (hEl && dm(items[0].day)) hEl.textContent = dm(items[0].day) + ' şirket bildirimleri.';
       list.innerHTML = items.slice(0, 8).map(function(item){
-        var url = (typeof safeHref === 'function') ? safeHref(item.url) : (item.url || '#');
-        return '<a href="' + url + '" target="_blank" rel="noopener" class="da-macro-news-item">' +
-          '<span class="da-macro-news-title">' + esc(item.title || '') + '</span>' +
-          '<span class="da-macro-news-time">' + esc(item.date_str || '') + ' <span aria-hidden="true">↗</span></span>' +
-          '<span class="sr-only"> (yeni sekmede açılır)</span></a>';
+        return '<a href="' + esc(item.href || '/haberler') + '" class="da-macro-news-item">' +
+          '<span class="da-macro-news-title"><b>' + esc(item.ticker || '') + '</b> · ' + esc(item.title || item['class'] || '') + '</span>' +
+          '<span class="da-macro-news-time">' + esc(dm(item.day) + (item.time ? ' ' + item.time : '')) + '</span></a>';
       }).join('');
       _daGnmMakroLoaded = true;
     }).catch(function(){ daShowSectionError('daMacroNewsList', daLoadMacroNews); });

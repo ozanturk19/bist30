@@ -184,14 +184,14 @@
       </div>
     </div>
 
-    <!-- Makro Haberler -->
+    <!-- Şirket bildirimleri (C-65 26.09: RSS başlıkları kaynak adı + dış bağlantıyla kalktı) -->
     <div class="section">
       <div class="section-hdr">
         <h2 class="section-title">
           <span class="dot dot-macro"></span>
-          Makro Haberler
+          Şirket bildirimleri
         </h2>
-        <span class="section-sub" id="macroNewsUpdatedAt">—</span>
+        <a href="/haberler" class="section-sub" style="color:var(--bp-brand);text-decoration:none;font-weight:600">Tümü →</a>
       </div>
       <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
         <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
@@ -412,7 +412,7 @@ async function loadGundem() {
              erken kapatıp kalanı "boş/mükerrer <a>" olarak DOM'a yaziyordu.
              temettu_takvimi.html/bilanco_takvimi.html'deki ayni desen (div
              role=link + inner <a onclick=stopPropagation>) buraya da taşındı. */
-          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="da-tap" aria-label="${escapeHtml(item.ticker)} KAP bildirimi (yeni sekmede açılır)" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const kapHref = `<a href="/haberler?hisse=${encodeURIComponent(item.ticker || '')}" onclick="event.stopPropagation()" class="da-tap" aria-label="${escapeHtml(item.ticker)} bildirimleri" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">Bildirimler →</a>`;  /* C-65: dış KAP bağlantısı yerine site içi akış */
           const etTicker = escapeHtml(item.ticker);
           return `<div class="news-card" data-ticker="${etTicker}" role="link" tabindex="0"
             onclick="window.location.href='/hisse/'+this.dataset.ticker"
@@ -492,33 +492,34 @@ async function loadEconCalendar() {
 
 let _macroNewsSeq = 0;  /* r144: gundem.html ile ayni visibilitychange-race deseni */
 async function loadMacroNewsSection() {
+  /* C-65 (26.09): kendi bildirim akışımız; her satır site içi kalıcı bildirim
+     sayfasına gider, kaynak etiketi ve dış bağlantı yok (kanon §2.8/§4). */
   const grid = document.getElementById('macroNewsGrid');
-  const upEl = document.getElementById('macroNewsUpdatedAt');
   if (!grid) return;
   const mySeq = ++_macroNewsSeq;
   try {
-    const res  = await fetch('/api/macro-news');
+    const res  = await fetch('/api/haberler?adet=8');
     const data = await res.json();
     if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
     if (mySeq !== _macroNewsSeq) return;  // daha yeni bir cagri baslamis, bu yaniti at
-    if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
     const items = data.items || [];
     if (!items.length) {
-      grid.innerHTML = '<div class="da-panel da-empty">Makro haber bekleniyor…</div>';
+      grid.innerHTML = '<div class="da-panel da-empty">Şu an bildirim yok.</div>';
       return;
     }
+    const dm = d => { const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(d || ''); return m ? m[2] + '.' + m[1] : ''; };
     grid.innerHTML = items.slice(0, 8).map(item => {
-      return `<a href="${safeHref(item.url)}" target="_blank" rel="noopener"
+      return `<a href="${escapeHtml(item.href || '/haberler')}"
         style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);padding:10px 14px;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
-        <span style="font-size:9px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;background:rgba(var(--bp-text3-rgb),.1);border:1px solid rgba(var(--bp-text3-rgb),.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.source)}</span>
-        <span style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4;font-weight:500;flex:1">${escapeHtml(item.title)}</span>
-        <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.date_str||item.published||'')} <span aria-hidden="true">↗</span></span><span class="sr-only"> (yeni sekmede açılır)</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:700;color:var(--bp-text2);white-space:nowrap;flex-shrink:0;margin-top:1px">${escapeHtml(item.ticker || '')}</span>
+        <span style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4;font-weight:500;flex:1;min-width:0;overflow-wrap:anywhere">${escapeHtml(item.title || item['class'] || '')}</span>
+        <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(dm(item.day) + (item.time ? ' ' + item.time : ''))}</span>
       </a>`;
     }).join('');
   } catch(e) {
     if (mySeq !== _macroNewsSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
-    grid.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Makro haberler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadMacroNewsSection()">Tekrar dene</button></div>';
+    grid.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadMacroNewsSection()">Tekrar dene</button></div>';
   }
 }
 
