@@ -5402,6 +5402,12 @@ def api_hisse_lite(ticker):
         "sl_level":         stock.get("sl_level"),
         "is_premium":       stock.get("is_premium"),
         "anomaly":          {"flag": anomaly.get("flag", False), "reason": anomaly.get("reason", "")},
+        # D-18: tazelik alanları /api/data ve SSR ssr_signal ile aynı kaynaktan (stock sözlüğü);
+        # hisse sayfası /api/data'dan çıkınca "Güncellenmiyor" rozeti ve kapanış günü bu 4 alanla kurulur.
+        "last_fresh_ts":    stock.get("last_fresh_ts"),
+        "data_quality":     stock.get("data_quality"),
+        "stale_reason":     stock.get("stale_reason"),
+        "close_status":     stock.get("close_status"),
     }
     _resp = safe_json({"stock": out})
     _etag = hashlib.md5(_resp.get_data()).hexdigest()
