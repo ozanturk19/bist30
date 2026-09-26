@@ -101,7 +101,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=c56016e7">
+<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=5c488f39">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
@@ -114,22 +114,12 @@
     <div class="art-cat">{{ article.cat }}</div>
     <h1 class="art-title">{{ article.title }}</h1>
     <div class="art-desc">{{ article.desc }}</div>
-    <div class="art-meta" style="justify-content:space-between">
-      <div style="display:flex;gap:12px;align-items:center">
-        <span><span aria-hidden="true">📅</span> {{ article.date_fmt or article.date }}</span>
-        <span><span aria-hidden="true">⏱</span> {{ article.mins }} dakika okuma</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button onclick="shareBlogWA()" id="blogShareWaBtn" data-tip="WhatsApp'ta paylaş"
-          style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:var(--bp-radius);padding:4px 10px;font-size:var(--bp-text-xs);color:#25D366;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
-          onmouseover="this.style.background='rgba(37,211,102,.2)'" onmouseout="this.style.background='rgba(37,211,102,.1)'">
-          <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="#25D366" style="vertical-align:middle"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Paylaş
-        </button>
-        <button onclick="shareBlogCopy()" id="blogCopyBtn" aria-label="Linki kopyala" data-tip="Linki kopyala"
-          style="background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius);padding:4px 10px;font-size:var(--bp-text-xs);color:var(--bp-brand);cursor:pointer;font-family:inherit;transition:all .15s"
-          onmouseover="this.style.background='rgba(var(--bp-brand-rgb),.15)'" onmouseout="this.style.background='rgba(var(--bp-brand-rgb),.08)'"><span role="img" aria-label="Bağlantıyı kopyala">🔗</span></button>
-      </div>
+    <div class="art-meta">
+      <span>{{ article.date_fmt or article.date }} · {{ article.mins }} dk okuma</span>
+      <span class="art-share">
+        <button type="button" class="art-share-btn" onclick="shareBlogWA()" id="blogShareWaBtn">WhatsApp'ta paylaş</button>
+        <button type="button" class="art-share-btn" onclick="shareBlogCopy()" id="blogCopyBtn">Bağlantıyı kopyala</button>
+      </span>
     </div>
   </div>
 
@@ -140,7 +130,7 @@
   {% if article.faqs %}
   <!-- SSS (Sık Sorulan Sorular) -->
   <div class="faq-section" id="faqSection">
-    <h2 class="faq-section-title"><span aria-hidden="true">❓</span> Sık Sorulan Sorular</h2>
+    <h2 class="faq-section-title">Sık Sorulan Sorular</h2>
     {% for faq in article.faqs %}
     {#- K-AC (21.09): SSS akordeonu sitenin DORDUNCU acilir diliydi ve kendi
         recetesiyle sapmisti (13/16px · 600 · radius-md · zeminsiz · hover .03)
@@ -162,81 +152,27 @@
   </div>
   {% endif %}
 
-  <!-- CTA kutusu -->
-  <div class="cta-box" role="group" aria-labelledby="ctaBoxTitle">
-    <div class="cta-box-text">
-      <strong id="ctaBoxTitle"><span aria-hidden="true">📊</span> BIST Sinyallerini Gör</strong>
-      <span>Bu makalede öğrendiklerinizi gerçek piyasa verisiyle karşılaştırın.<br>
-        BIST100 + ek hisseler için algoritmik Supertrend + ADX sinyalleri.</span>
-    </div>
-    <div class="cta-box-btns">
-      <a href="/" class="cta-btn-primary">
-        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Sinyal Paneline Git
-      </a>
-      <a href="/tarama" class="cta-btn-secondary">
-        <span aria-hidden="true">🔍</span> Tarama Yap
-      </a>
-    </div>
-  </div>
+  {#- C-43 (26.09): sonda TEK modül. Eski CTA kutusu ("Sinyal Paneline Git" +
+      "Tarama Yap"), ilgili hisse kartları ve büyük abonelik kutusu birleşti. -#}
+  {% set rt = article.related_tickers or [] %}{% set live_t = 'THYAO' if ('THYAO' in rt or not rt) else rt[0] %}
+  {% set live_tab = '?tab=grafik' if article.cat == 'Teknik Analiz' else ('?tab=temel' if article.cat == 'Temel Analiz' else '') %}
+  <section class="art-live" aria-labelledby="artLiveTitle">
+    <h2 class="art-live-title" id="artLiveTitle">Bu göstergeyi canlı gör</h2>
+    <a class="art-live-row" href="/hisse/{{ live_t }}{{ live_tab }}" data-ticker="{{ live_t }}">
+      <span class="art-live-t">{{ live_t }}</span>
+      <span class="art-live-v" id="artLiveVal"></span>
+      <span class="art-live-go" aria-hidden="true">→</span>
+    </a>
+    <a class="art-live-rule" href="/metodoloji">Trend nasıl belirleniyor? <b>3 gösterge · 4 koşul</b> →</a>
+    <form class="art-sub" id="artSubForm" onsubmit="event.preventDefault();artSubmitSub()">
+      <label class="art-sub-lbl" for="artSubEmail">Gün sonu özeti e-postayla</label>
+      <input id="artSubEmail" class="da-field" type="email" required autocomplete="email" placeholder="e-posta adresiniz">
+      <button type="submit" id="artSubBtn" class="art-sub-btn">Abone ol</button>
+      <label class="art-sub-kvkk"><input type="checkbox" class="da-check" id="artSubKvkk" required> <span><a href="/gizlilik" class="da-link">Gizlilik Politikası</a>'nı okudum, e-postamın işlenmesini kabul ediyorum.</span></label>
+    </form>
+  </section>
 
-  <div class="disclaimer">
-    <span aria-hidden="true">⚠️</span> <strong>Önemli Uyarı:</strong> Bu makale yalnızca bilgilendirme amaçlıdır. Yatırım tavsiyesi değildir.
-    Geçmiş performans gelecekteki sonuçları garanti etmez. Yatırım kararları kişisel araştırma ve
-    profesyonel danışmanlık gerektirir.
-  </div>
-
-  <!-- E-posta abonelik CTA -->
-  <div id="artSubBar" role="group" aria-labelledby="artSubTitle" style="
-    background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.08),rgba(var(--bp-premium-rgb),.05));
-    border:1px solid rgba(var(--bp-brand-rgb),.25);border-radius:var(--bp-radius-xl);
-    padding:18px 20px;margin:22px 0;display:flex;gap:16px;align-items:center;flex-wrap:wrap;
-    position:relative;">
-    <div style="font-size:var(--bp-text-22);line-height:1"><span aria-hidden="true">📬</span></div>
-    <div style="flex:1;min-width:180px">
-      <div id="artSubTitle" style="font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text);margin-bottom:3px">BIST Sinyalleri Gelen Kutunuzda</div>
-      <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Sinyal değişimi olan işlem günlerinde akşam 19:00 özeti — istediğinizde iptal.</div>
-    </div>
-    <div id="artSubForm" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <input id="artSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
-        style="background:var(--bp-bg);border:1px solid var(--bp-field-border);border-radius:var(--bp-radius-7);padding:8px 12px;
-               color:var(--bp-text);font-size:var(--bp-text-lg);outline:none;width:210px;font-family:inherit;"
-        onkeydown="if(event.key==='Enter')artSubmitSub()"
-        onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-field-border)'">
-      <button onclick="artSubmitSub()" id="artSubBtn"
-        style="background:var(--bp-brand);border:none;border-radius:var(--bp-radius-7);padding:8px 16px;
-               color:var(--bp-bg);font-size:var(--bp-text-base);font-weight:600;cursor:pointer;white-space:nowrap;
-               transition:background .15s,color .15s;font-family:inherit;"
-        onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter='none'">
-        Abone Ol
-      </button>
-      <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);flex-basis:100%;cursor:pointer;line-height:1.4">
-        <input type="checkbox" class="da-check" id="artSubKvkk" required>
-        <span><a href="/gizlilik" target="_blank" rel="noopener" class="da-link">Gizlilik Politikası<span class="sr-only"> (yeni sekmede açılır)</span></a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
-      </label>
-    </div>
-    <button class="da-close" onclick="document.getElementById('artSubBar').style.display='none'" id="artSubCloseBtn"
-      style="position:absolute;top:4px;right:6px;"
-      aria-label="Kapat">×</button>
-  </div>
-
-  {% if article.related_tickers %}
-  <!-- İlgili Hisseler — canlı sinyal kartları -->
-  <aside class="related" id="relatedStocks" aria-labelledby="related-stocks-heading">
-    <h2 class="related-title" id="related-stocks-heading">İlgili Hisseler — Güncel Sinyal</h2>
-    <div id="relStockCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-      {% for t in article.related_tickers %}
-      {# 21.09 (K-W): kutunun tamami inline yazilmisti, `.rel-stock-skeleton`
-         adi tasiyordu ama CSS'te KARSILIGI YOKTU. Kural blog_article.css'e
-         yazildi, seritler kanonik `.da-skel`e gecti. #}
-      <div class="rel-stock-skeleton" data-ticker="{{ t }}">
-        <div class="da-skel" style="height:12px;width:40px;margin-bottom:8px"></div>
-        <div class="da-skel" style="height:16px;width:70px"></div>
-      </div>
-      {% endfor %}
-    </div>
-  </aside>
-  {% endif %}
+  <p class="disclaimer">Bu yazı genel bilgi amaçlıdır, yatırım tavsiyesi değildir. Geçmiş performans gelecekteki sonuçları garanti etmez.</p>
 
   {% if related %}
   <aside class="related" aria-labelledby="related-articles-heading">
@@ -246,7 +182,7 @@
       <a href="/blog/{{ r.slug }}" class="rel-card">
         <div class="rel-cat">{{ r.cat }}</div>
         <div class="rel-title">{{ r.title }}</div>
-        <div class="rel-mins"><span aria-hidden="true">⏱</span> {{ r.mins }} dk</div>
+        <div class="rel-mins">{{ r.mins }} dk</div>
       </a>
       {% endfor %}
     </div>
@@ -256,41 +192,22 @@
 
 {% include '_footer.html' %}
 
-{% if article.related_tickers %}
 <script>
 (async () => {
-  const TICKERS = {{ article.related_tickers | tojson }};
-  if (!TICKERS || !TICKERS.length) return;
+  const row = document.querySelector('.art-live-row'); const out = document.getElementById('artLiveVal');
+  if (!row || !out) return;
   try {
-    const res  = await fetch('/api/data-lite?tickers=' + TICKERS.join(','));
-    const json = await res.json();
-    const map  = {};
-    (json.stocks || []).forEach(s => { map[s.ticker] = s; });
-    const container = document.getElementById('relStockCards');
-    if (!container) return;
-    container.innerHTML = TICKERS.map(t => {
-      const s = map[t];
-      if (!s) return '';
-      const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
-      const sigLbl = s.signal === 'AL' ? '▲ Güçlü Trend' : s.signal === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
-      /* K-BP: yon tek kanon (bp-format.js). Eskiden `>= 0` hem 0,00%'i YESIL
-         yapiyordu hem de change_pct NULL iken (null >= 0 === true) yine YESIL. */
-      const chg    = s.change_pct != null ? bpFormatPct(+s.change_pct, 2) : '';
-      const chgClr = bpDirColor(s.change_pct != null ? +s.change_pct : null, 2);
-      const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—';
-      return `<a href="/hisse/${t}" class="rel-stock-card" data-tip="${escapeHtml(s.name||t)}">
-        <div class="rel-stock-ticker">${t}</div>
-        <div class="rel-stock-price">${price} <span style="color:${chgClr};font-size:var(--bp-text-xs)">${chg}</span></div>
-        <span class="rel-stock-sig ${sig}">${sigLbl}</span>
-      </a>`;
-    }).filter(Boolean).join('');
-  } catch(e) {
-    // Sessizce yut — blok zaten gizlenir
-    document.getElementById('relatedStocks')?.remove();
-  }
+    const t = row.dataset.ticker;
+    const res = await fetch('/api/data-lite?tickers=' + encodeURIComponent(t), { signal: AbortSignal.timeout(8000) });
+    const s = ((await res.json()).stocks || [])[0];
+    if (!s) return;
+    const trend = s.signal === 'AL' ? 'Güçlü Trend' : s.signal === 'SAT' ? 'Trend Bozuldu' : 'Yatay';
+    const price = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
+    out.textContent = [trend, price].filter(Boolean).join(' · ');
+    out.dataset.dir = s.signal === 'AL' ? 'up' : s.signal === 'SAT' ? 'down' : 'flat';
+  } catch (e) { /* bağlantı kalır, değer boş */ }
 })();
 </script>
-{% endif %}
 <script>
 // Makro Ticker
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
@@ -299,7 +216,7 @@
 const _BLOG_TITLE = {{ article.title | tojson }};
 const _BLOG_URL   = 'https://borsapusula.com/blog/' + {{ article.slug | tojson }};
 function shareBlogWA() {
-  const text = _BLOG_TITLE + '\n' + _BLOG_URL + '\n\nborsapusula.com — BIST teknik analiz';
+  const text = _BLOG_TITLE + '\n' + _BLOG_URL + '\n\nborsapusula.com — Borsa Okulu';
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
 }
 function shareBlogCopy() {
@@ -352,13 +269,13 @@ async function artSubmitSub() {
   const kvkkEl = document.getElementById('artSubKvkk');
   if (kvkkEl && !kvkkEl.checked) {
     const btn = document.getElementById('artSubBtn');
-    if (btn) { btn.textContent = 'KVKK onayı gerekli'; setTimeout(() => { btn.textContent = 'Abone Ol'; }, 2500); }
+    if (btn) { btn.textContent = 'Onay kutusunu işaretleyin'; setTimeout(() => { btn.textContent = 'Abone ol'; }, 2500); }
     return;
   }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailEl.style.borderColor = 'var(--bp-sat)';
     emailEl.placeholder = 'Geçerli bir e-posta girin';
-    setTimeout(() => { emailEl.style.borderColor = 'var(--bp-bkl-bd)'; emailEl.placeholder = 'e-posta adresiniz'; }, 2500);
+    setTimeout(() => { emailEl.style.borderColor = ''; emailEl.placeholder = 'e-posta adresiniz'; }, 2500);
     return;
   }
   const btn = formEl.querySelector('button');
@@ -374,12 +291,12 @@ async function artSubmitSub() {
     });
     const data = await res.json();
     if (data.ok) {
-      formEl.innerHTML = '<div style="color:var(--bp-al);font-size:var(--bp-text-base);font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
+      formEl.innerHTML = '<div class="art-sub-msg">' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else {
-      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:var(--bp-text-base)">' + _escSub(data.error || data.message || 'Bir hata oluştu.') + '</div>';
+      formEl.innerHTML = '<div class="art-sub-msg is-err">' + _escSub(data.error || data.message || 'Bir hata oluştu.') + '</div>';
     }
   } catch(e) {
-    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:var(--bp-text-base)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';
+    formEl.innerHTML = '<div class="art-sub-msg is-err">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';
   }
 }
 
@@ -390,7 +307,7 @@ window.addEventListener('pageshow', (ev) => {
   const btn = formEl ? formEl.querySelector('button') : null;
   if (btn && btn.disabled) {
     btn.disabled = false;
-    btn.textContent = 'Abone Ol';
+    btn.textContent = 'Abone ol';
   }
 });
 
