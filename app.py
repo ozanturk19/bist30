@@ -9088,7 +9088,9 @@ def stock_page(ticker):
 
 
 _fundamentals_cache = {}
-_FUND_TTL = 3600 * 4  # 4 saat
+_FUND_TTL = 3600 * 24  # D-40a: 24 saat (eskiden 4 sa); bilanço günleri _fund_earnings_due ile öne çekilir
+_FUND_SCHEMA_MAX_TRIES = 2  # D-40a: şeması eksik kayıt için günlük en çok deneme
+_fund_schema_tries = {}  # {ticker: (gün, sayaç)} — yalnız _lock altında okunur/yazılır (bellek içi)
 
 # ── Temel analiz sanity sınırları (yfinance Türk hisselerinde bozuk değer üretir) ──
 _FUND_SANITY = {
@@ -9256,6 +9258,33 @@ def _fundamentals_schema_ok(data):
     return bool(data.get("statement_trend_quarterly")) and bool(data.get("financial_currency")) and bool(data.get("statement_currency"))
 
 
+def _fund_schema_try_allowed(ticker_base, now):
+    """D-40a (1): şeması eksik kayıt (ya da hiç kaydı olmayan hisse) her 30 dk'lık warmup
+    turunda yeniden çekiliyordu (canlı 26.09: 34/234 kayıt, ~1.600 boş çağrı/gün). Günde en çok
+    _FUND_SCHEMA_MAX_TRIES deneme; hak dolunca eldeki kayıt servis edilir. _lock altında çağrılır."""
+    day = time.strftime("%Y-%m-%d", time.localtime(now))
+    d, n = _fund_schema_tries.get(ticker_base, (day, 0))
+    if d != day:
+        n = 0
+    if n >= _FUND_SCHEMA_MAX_TRIES:
+        return False
+    _fund_schema_tries[ticker_base] = (day, n + 1)
+    return True
+
+
+def _fund_earnings_due(ticker_base, cached, now):
+    """D-40a (2): TTL 24 sa'e çıkınca bilanço açıklanma gününden sonraki 3 gün boyunca
+    (Yahoo gecikmesi) kayıt 12 saatte bir tazelenir. Tarih kaynağı: _earnings_cache tahminleri."""
+    try:
+        est = ((_earnings_cache.get("data") or {}).get("estimates") or {}).get(ticker_base)
+        if not est or not cached:
+            return False
+        gun = (datetime.now(_TZ_TR).date() - datetime.strptime(est, "%Y-%m-%d").date()).days
+        return 0 <= gun <= 3 and (now - cached["ts"]) > 12 * 3600
+    except Exception:
+        return False
+
+
 _BETA_MIN_OVERLAP_DAYS = 60  # CPO-1787: rejim/IPO gibi kısa ortak geçmişte regresyon güvenilmez
 _beta_disk_close = {}  # {anahtar: (mtime, {tarih: kapanış})} — diskten okuma mtime korumalı
 
@@ -9332,13 +9361,13 @@ def _compute_beta_vs_xu030(ticker_base):
         return None, None
 
 
-def _get_fundamentals(ticker_base):
-    """yfinance ile temel analiz verilerini döndürür."""
+def _get_fundamentals(ticker_base, force=False):
+    """yfinance ile temel analiz verilerini döndürür. force=True: TTL'i yok say (D-40a bilanço günü)."""
     now = time.time()
     _is_web = os.environ.get("REFRESH_WORKER") == "web"
     with _lock:
         cached = _fundamentals_cache.get(ticker_base)
-        _fresh = bool(cached) and (now - cached["ts"]) < _FUND_TTL
+        _fresh = bool(cached) and not force and (now - cached["ts"]) < _FUND_TTL
         # CPO-1671: web worker zaten fetch yapamaz (aşağıda cache-only döner), TTL
         # yeterli. Ama leader'da (buradan devam) şema eksikse (statement_trend_quarterly
         # yok — eski kod/yarım fetch kalıntısı) TTL dolmamış olsa bile yeniden çekilsin;
@@ -9350,6 +9379,12 @@ def _get_fundamentals(ticker_base):
         # (30dk) kendiliğinden tazelesin — TTL'in 4 saatini beklemesin.
         _schema_ok = _fundamentals_schema_ok(cached["data"]) if cached else False
         _ret_cached = _fresh and (_is_web or _schema_ok)
+        # D-40a (1): eksik şemalı kayıt günde ≤2 kez yeniden çekilir; hak dolunca eldeki kayıt döner
+        _tries_out = False
+        if not _ret_cached and not _is_web and not force and not _schema_ok:
+            _tries_out = not _fund_schema_try_allowed(ticker_base, now)
+    if _tries_out:
+        return _with_beta(ticker_base, cached["data"]) if cached else {}
     if _ret_cached:
         # D-07: _with_beta _lock alır (threading.Lock, reentrant değil) → kilit dışında
         return _with_beta(ticker_base, cached["data"])
@@ -15066,9 +15101,10 @@ def _fundamentals_warmup_daemon():
             # CPO-1706: artık _fundamentals_schema_ok() ile İÇERİK (truthy) kontrol
             # ediliyor, sadece anahtar varlığı değil — bkz. fonksiyonun docstring'i.
             _stale_schema = bool(_fc) and not _fundamentals_schema_ok(_fc.get("data"))
-            if not _fc or _stale_schema or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
+            _earn_due = _fund_earnings_due(_t, _fc, now)
+            if not _fc or _stale_schema or _earn_due or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
                 try:
-                    _get_fundamentals(_t)
+                    _get_fundamentals(_t, force=_earn_due)
                     _written_this_round += 1
                     if _written_this_round % _FUND_DISK_FLUSH_EVERY_N == 0:
                         _save_fundamentals_cache_to_disk()
