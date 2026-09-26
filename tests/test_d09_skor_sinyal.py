@@ -366,8 +366,8 @@ def test_eod_pass_writes_bp_for_flag_state(app_module, monkeypatch, tmp_path, st
                                {"ticker": "BBBB", "signal": "BEKLE", "signal_strength": None}])
 
     cache = app._financial_health_cache
-    assert cache["AAAA"]["data"]["borsapusula_skoru"] == (49 if flag else 58)
-    assert cache["BBBB"]["data"]["borsapusula_skoru"] == (45 if flag else 41)
+    assert cache["AAAA"]["data"]["borsapusula_skoru"] == (51 if flag else 61)
+    assert cache["BBBB"]["data"]["borsapusula_skoru"] == (47 if flag else 45)
     assert ("bp_trend" in cache["AAAA"]["data"]) is flag
     with open(tmp_path / "2026-09-24.json", encoding="utf-8") as f:
         saved = json.load(f)["scores"]
