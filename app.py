@@ -2834,8 +2834,18 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
 #   eski 3a3a42 -> 30363d (--bp-bkl-bd) -- footer link ayraci. En yakin
 #              kanon (fark 12) ama --bp-bkl-bd de bir kenarlik token'i,
 #              ayni ilk-emsal notu gecerli.
+def _brand_icon_v():
+    """CPO-1796: e-posta başlığı ikonu URL'i dosya md5'iyle sürümlenir (istemci önbelleği yeni işareti görsün)."""
+    try:
+        with open(os.path.join(_APP_DIR, "static", "icon-192.png"), "rb") as _f:
+            return hashlib.md5(_f.read()).hexdigest()[:8]
+    except OSError:
+        return "0"
+
+
 def _email_base(content_html, unsubscribe_url, preheader=""):
     """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer."""
+    _icon_v = _brand_icon_v()
     preheader_html = f'''<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#0e0e12;opacity:0">{preheader}</div>''' if preheader else ""
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -2858,7 +2868,7 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">
             <tr>
               <td style="padding-right:14px;vertical-align:middle">
-                <img src="https://borsapusula.com/static/icon-192.png" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
+                <img src="https://borsapusula.com/static/icon-192.png?v={_icon_v}" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
               </td>
               <td style="vertical-align:middle;text-align:left">
                 <div style="font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;font-family:'Sora','Manrope',Arial,sans-serif;color:#e5e1e4">Borsa<span style="color:#00e290">Pusula</span></div>
@@ -11846,7 +11856,8 @@ def og_image():
   <rect x="0" y="0" width="6" height="630" fill="{c_br}"/>
   <!-- Marka sozcuk-isareti — K-CZ kanonu: vurgulu yari bp-logo-accent token'i
        (XML yorumunda iki tire yan yana YAZILAMAZ: belge iyi-bicimli kalmaz) -->
-  <text x="60" y="120" font-size="64" font-weight="700" fill="{c_tx}">{_svg_title}</text>
+  <image x="60" y="52" width="88" height="88" href="https://borsapusula.com/static/icon-192.png"/>
+  <text x="170" y="120" font-size="64" font-weight="700" fill="{c_tx}">{_svg_title}</text>
   <text x="60" y="165" font-size="26" fill="{c_t3}">{_OG_SUBTITLE}</text>
   <!-- Ayırıcı çizgi -->
   <line x1="60" y1="195" x2="1140" y2="195" stroke="{c_bd}" stroke-width="1"/>
@@ -11862,7 +11873,7 @@ def og_image():
   <text x="840" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
   <!-- Alt slogan -->
   <text x="60" y="480" font-size="30" fill="{c_t2}">Supertrend · ADX · EMA12/99</text>
-  <text x="60" y="525" font-size="22" fill="{c_t3}">Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
+  <text x="60" y="525" font-size="22" fill="{c_t3}">Algoritmik, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
   <!-- Sağ ikon -->
   <rect x="1020" y="230" width="120" height="160" rx="12" fill="{c_sf2}" stroke="{c_bd}" stroke-width="1"/>
   <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
@@ -11908,10 +11919,16 @@ def og_image_png():
     draw.rectangle([0, 0, 6, 630], fill=c["brand"])
 
     # Marka sozcuk-isareti — K-CZ kanonu (vurgulu yari --bp-logo-accent).
+    # CPO-1796: logo v2 isareti (static/icon-192.png, zemini og zeminiyle ayni #0e0e12) sol ustte.
+    try:
+        _mark = Image.open(os.path.join(_APP_DIR, "static", "icon-192.png")).convert("RGB").resize((88, 88), Image.LANCZOS)
+        img.paste(_mark, (60, 52))
+        x = 60 + 88 + 22
+    except OSError:
+        x = 60
     f_title = _og_font(64, bold=True)
-    x = 60
     for text, role in _OG_TITLE_PARTS:
-        draw.text((x, 70), text, font=f_title, fill=c[role])
+        draw.text((x, 64), text, font=f_title, fill=c[role])
         x += draw.textlength(text, font=f_title)
 
     draw.text((60, 150), _OG_SUBTITLE, font=_og_font(26), fill=c["text3"])
@@ -11932,7 +11949,7 @@ def og_image_png():
         draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill=c["text3"])
 
     draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill=c["text2"])
-    draw.text((60, 512), "Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
+    draw.text((60, 512), "Algoritmik, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
                font=_og_font(22), fill=c["text3"])
 
     # Sağ ikon kutusu — mini bar-chart (emoji yerine, font-bağımsız)
