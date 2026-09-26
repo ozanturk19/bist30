@@ -1,4 +1,4 @@
-"""CPO-1217 §2 — backtest_ticker() / _compute_mtf() gevent hub-bloke regresyon testi.
+"""CPO-1217 §2 — _compute_mtf() gevent hub-bloke regresyon testi (backtest_ticker D-12'de silindi).
 
 02 Ağu 2026: yfinance 1.2.0 curl_cffi kullanıyor — ham libcurl syscall'ı gevent
 monkey.patch_all()'ın kapsamı dışında, senkron yf.download() çağrısı worker'ın
@@ -33,17 +33,6 @@ def _extract(name):
     return m.group(0)
 
 
-def test_backtest_ticker_no_direct_yf_download():
-    src = _extract("backtest_ticker")
-    assert "yf.download(" not in src, (
-        "backtest_ticker() tekrar doğrudan yf.download() çağırıyor — "
-        "gevent hub bloke regresyonu (CPO-1217 §2)"
-    )
-    assert "_fetch_daily_subprocess(" in src, (
-        "backtest_ticker() artık subprocess-izole fetch kullanmalı"
-    )
-
-
 def test_compute_mtf_no_direct_yf_download():
     src = _extract("_compute_mtf")
     assert "yf.download(" not in src, (
@@ -54,27 +43,6 @@ def test_compute_mtf_no_direct_yf_download():
         "_compute_mtf() içindeki _tf_signal + _tf_signal_4h çağrılarının ikisi de "
         "subprocess-izole fetch kullanmalı"
     )
-
-
-def test_backtest_ticker_returns_none_on_fetch_failure():
-    """Fonksiyonel regresyon: _fetch_daily_subprocess None dönerse (CB-blocked,
-    timeout, boş veri) backtest_ticker crash etmemeli, None dönmeli."""
-    src = _extract("backtest_ticker")
-    calls = []
-
-    def _fake_fetch(ticker_base, period="2y", interval="1d", timeout=25):
-        calls.append((ticker_base, period, interval, timeout))
-        return None
-
-    ns = {
-        "_fetch_daily_subprocess": _fake_fetch,
-        "logger": logging.getLogger("test_cpo1217"),
-    }
-    exec(src, ns)
-    result = ns["backtest_ticker"]("THYAO")
-
-    assert result is None
-    assert calls == [("THYAO", "2y", "1d", 30)], f"beklenmeyen fetch çağrısı: {calls}"
 
 
 def test_compute_mtf_returns_structure_on_fetch_failure():

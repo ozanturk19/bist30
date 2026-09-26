@@ -888,8 +888,8 @@ INDEX_TICKERS = {"XU030", "XU100"}
 BIST_STOCK_COUNT = len([t for t in BIST100 if t not in INDEX_TICKERS])
 # CPO-1533: gerçek BIST30 endeks bileşenleri (BIST30 adı yukarıda BIST100'e
 # alias'landığı için ayrı isim) — Gemini kotası paylaşan işlerde (health-explain)
-# evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 3 yerde (backtest,
-# earnings-refresh, bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
+# evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 2 yerde (earnings-refresh,
+# bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
 # CPO-1596: 2026 Q3 revizyonuyla gerçek BIST30 28 değil 30 üye (DSTKF/TRALT
 # eklendi, ARCLK/HEKTS/ODAS/OYAKC/SOKM/TKFEN çıktı) — TradingView + Midas
 # çapraz doğrulandı, yfinance veri kaynağı da teyit edildi (2026-09-11).
@@ -1445,7 +1445,6 @@ def _enrich_stock(s: dict) -> dict:
 
 _cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0, "loading": True}  # SPEC-008 v1.2 #39; loading=True cold-start sentinel (G25)
 _lock        = threading.Lock()
-_bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
 # ── Phase 3 #2 Paket 1 — api_stale globals ────────────────────────────────────
@@ -1458,7 +1457,7 @@ _APP_STARTUP_TS = time.time()
 
 # CPO-DEV2-035 P1-INTEGRITY-1: Sinyal Gecmisi her 15dk GUNCEL kodla yeniden
 # hesaplaniyor (kalici log degil) — algoritma degisince gecmis sessizce
-# degisebilir. Bu commit SHA'si /api/health ve backtest_cache.json'a eklenerek
+# degisebilir. Bu commit SHA'si /api/health'e eklenerek
 # "hangi kod anindan hesaplandi" en azindan gorunur olsun diye (tam birlestirme
 # ayri, dikkatli bir turda — bkz CPO-DEV2-035).
 try:
@@ -1641,7 +1640,7 @@ def _weekly_trend(ticker: str) -> int:
 
 
 def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
-    """Backtest ve sinyal-başlangıcı geriye-yürüme için lookahead-free haftalık
+    """Sinyal-başlangıcı geriye-yürüme için lookahead-free haftalık
     EMA20 yön serisi (CPO-1559 P0-1/P0-2). _weekly_trend()'in canlı gate'ini
     (haftalık EMA20 son iki değerin karşılaştırması) her gün için SADECE o güne
     kadarki veriyle taklit eder — gelecek veri sızıntısı (lookahead bias) yok.
@@ -1702,7 +1701,7 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
     tarama/hisse/karsilastir'de SAT'ı görsel olarak "güçlü/kazanan" gibi
     gösteriyordu (Ozan: "trend bozuldu bizim için güçlü bir sinyal olmasın").
     signal_strength (compose_score) ham DEĞERİ değişmedi — sadece bu türetilmiş
-    sunum/rozet bandı SAT için nötrleştirildi, analitik/backtest bütünlüğü ayrı.
+    sunum/rozet bandı SAT için nötrleştirildi, analitik bütünlük ayrı.
     """
     tier = None
     if signal == "AL":
@@ -1988,7 +1987,7 @@ def analyze(ticker_base):
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
-        # >= 1.20 → premium sinyal (backtest: Sharpe 0.01 → 2.35, Win Rate 30.1% → 50.7%)
+        # >= 1.20 → premium sinyal
         # CPO-1457 (30.08.2026): orijinal iddiayı üreten script kod tabanında
         # bulunamamıştı — tools/verify_premium_badge_backtest.py ile bağımsız
         # yeniden üretildi, yön/oran doğrulandı. CPO-1547 (09.09.2026): CPO-1543
@@ -2831,7 +2830,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">⭐</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#ffc850">Hacim Onaylı</strong> sinyaller — hacim teyitli (RVOL ≥ 1.20). Backtest&apos;te %50.7 win rate, Sharpe 2.35.
+              <strong style="color:#ffc850">Hacim Onaylı</strong> sinyaller — hacim teyitli (RVOL ≥ 1.20).
             </td></tr>
         </table>
       </td></tr>
@@ -3767,7 +3766,6 @@ logger.info("Synthetic drift monitor başlatıldı (M6 — her 90s drift analizi
 
 
 _DISK_CACHE_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
-_BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
@@ -10076,7 +10074,7 @@ def _load_mtf_cache_from_disk():
 def _compute_mtf(ticker):
     """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır.
 
-    CPO-1217 §2 ek bulgu: backtest_ticker ile AYNI sınıf hub-bloke bug'ı burada da
+    CPO-1217 §2 ek bulgu: (silinen backtest_ticker ile) AYNI sınıf hub-bloke bug'ı burada da
     vardı — üstelik burada REFRESH_WORKER=="web" guard'ı (api_stock_mtf, aşağıda)
     unset ortamda (prod .env'de REFRESH_WORKER hiç tanımlı değil) hiç devreye
     girmiyor, yani bu senkron doğrudan-yfinance çağrıları herhangi bir kullanıcının
@@ -12534,7 +12532,7 @@ def api_portfolio_delete(token):
         return safe_json({"error": "Sunucu hatası"}), 500
 
 
-# ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
+# ── Bar sinyali (analyze() geriye yürüme) ─────────────────────────────────────
 def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, weekly_dir, i):
     """i. bar için sinyal hesapla.
 
@@ -12549,188 +12547,6 @@ def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, weekly_di
         float(di_plus.iloc[i]), float(di_minus.iloc[i]),
         float(ema12.iloc[i]), float(ema99.iloc[i]),
         int(weekly_dir.iloc[i]))
-
-
-def backtest_ticker(ticker_base, fwd_days=20):
-    """Bir hisse için son 2 yıl AL/SAT sinyal performansını hesapla.
-
-    CPO-1217 §2: eskiden burada doğrudan (subprocess-izolasyonsuz) yfinance
-    indirme çağrısı yapılıyordu — yfinance 1.2.0 curl_cffi kullanıyor (gevent
-    monkey.patch_all()'ın kapsamadığı
-    ham libcurl syscall'ı), bu da run_backtest() sırasında worker'ın TÜM
-    gevent hub'ını (dolayısıyla /api/data, /api/macro dahil aynı worker'daki
-    her istek) yfinance'in gerçek ağ süresi kadar (60s+) bloke ediyordu. G24
-    dalgasında (chart/fundamentals/live-prices) uygulanan subprocess-izolasyon
-    deseni backtest_ticker'a hiç taşınmamıştı — tek eksik çağrı noktası buydu.
-    """
-    try:
-        df = _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=30)
-        if df is None or len(df) < 120:
-            return None
-        df    = df.dropna().sort_index()
-        close = df["Close"].squeeze()
-        high  = df["High"].squeeze()
-        low   = df["Low"].squeeze()
-        n     = len(close)
-        if n < 120:
-            return None
-
-        ema12                  = compute_ema(close, 12)
-        ema99                  = compute_ema(close, 99)
-        adx, di_plus, di_minus = compute_adx(high, low, close)
-        supertrend, _          = compute_supertrend(high, low, close)
-        weekly_dir_hist        = _historical_weekly_dir_series(close)
-
-        # Her bar için sinyal
-        signals = [_bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend,
-                                     weekly_dir_hist, i)
-                   for i in range(n)]
-
-        episodes = []   # {"sig", "entry_i", "entry_price", "exit_i", "exit_price", "ret_pct"}
-        i = 0
-        while i < n:
-            sig = signals[i]
-            if sig in ("AL", "SAT"):
-                entry_i     = i
-                entry_price = float(close.iloc[i])
-                if entry_price <= 0:
-                    # Bozuk/sifir kapanis bari (veri kaynagi glitch'i) - sadece bu
-                    # barı atla, ZeroDivisionError'in tum ticker'in backtest'ini
-                    # (fonksiyon-geneli except Exception uzerinden) sessizce
-                    # dusurmesine izin verme.
-                    logger.warning("backtest_ticker(%s): entry_price<=0 @ %s, bar atlandi",
-                                    ticker_base, close.index[i])
-                    i += 1
-                    continue
-                # Sinyal bitmesini bekle (max fwd_days bar)
-                j = i + 1
-                while j < n and j < i + fwd_days + 1 and signals[j] == sig:
-                    j += 1
-                exit_i     = min(j, n - 1)
-                exit_price = float(close.iloc[exit_i])
-                ret_pct    = (exit_price - entry_price) / entry_price * 100
-                duration_bars = exit_i - entry_i
-                episodes.append({
-                    "sig":           sig,
-                    "date":          close.index[entry_i].strftime("%d.%m.%Y"),
-                    "entry_price":   round(entry_price, 2),
-                    "exit_price":    round(exit_price, 2),
-                    "bars":          duration_bars,
-                    "duration_days": duration_bars,  # günlük bar = işlem günü
-                    "ret_pct":       round(ret_pct, 2),
-                    "win":           (ret_pct > 0 and sig == "AL") or (ret_pct < 0 and sig == "SAT"),
-                })
-                i = j
-            else:
-                i += 1
-        return {"ticker": ticker_base, "episodes": episodes}
-    except Exception as e:
-        logger.warning("backtest_ticker(%s): %s", ticker_base, e)
-        return None
-
-
-def _signed_ret(ep):
-    """Sinyal yönüne göre düzeltilmiş getiri: AL için ham ret_pct, SAT için
-    ters işaretli (kısa pozisyon mantığıyla fiyat düşüşü = kazanç)."""
-    return ep["ret_pct"] if ep["sig"] == "AL" else -ep["ret_pct"]
-
-
-def run_backtest():
-    """BIST30 hisseleri için backtest yürüt ve cache'e kaydet."""
-    # CPO-1559 P1: kasıtlı olarak sadece BIST30 (ilk 30 hisse) — ürün ~217
-    # ticker'ı tarıyor ama tam evrende backtest (217 × yfinance.download,
-    # her biri arasında 0.3s bekleme) hem çok yavaş olur hem Yahoo rate-limit/
-    # circuit-breaker riskini büyütür (bkz. bilinen CB kesinti geçmişi).
-    # Bu yüzden istatistiğin kapsamı /sinyal-performans'ta açıkça belirtilir
-    # (küçük/orta-cap için temsili olmayabilir) — örneklemi genişletmek yerine.
-    bt_tickers = BIST30_LITERAL
-    all_episodes = {"AL": [], "SAT": []}
-    per_ticker   = []
-
-    for t in bt_tickers:
-        res = backtest_ticker(t)
-        time.sleep(0.3)
-        if not res:
-            continue
-        t_al = [e for e in res["episodes"] if e["sig"] == "AL"]
-        t_sa = [e for e in res["episodes"] if e["sig"] == "SAT"]
-        all_episodes["AL"] += t_al
-        all_episodes["SAT"] += t_sa
-        if t_al or t_sa:
-            per_ticker.append({
-                "ticker":   t,
-                "al_count": len(t_al),
-                "al_wins":  sum(1 for e in t_al if e["win"]),
-                "al_avg":   round(sum(_signed_ret(e) for e in t_al) / len(t_al), 2) if t_al else None,
-                "sat_count":len(t_sa),
-                "sat_wins": sum(1 for e in t_sa if e["win"]),
-                "sat_avg":  round(sum(_signed_ret(e) for e in t_sa) / len(t_sa), 2) if t_sa else None,
-            })
-
-    def stats(eps):
-        if not eps: return {
-            "count": 0, "win_rate": 0, "avg_ret": 0, "best": 0, "worst": 0,
-            "sharpe": None, "max_drawdown": None, "profit_factor": None,
-            "avg_duration_days": None,
-        }
-        wins = [e for e in eps if e["win"]]
-        rets = [_signed_ret(e) for e in eps]
-        avg  = sum(rets) / len(rets)
-        std  = (sum((r - avg) ** 2 for r in rets) / len(rets)) ** 0.5
-
-        # Sharpe (günlük getiri % → yıllık ölçekle; her işlem ~bağımsız)
-        sharpe = round(avg / std * (len(rets) ** 0.5), 2) if std > 0 else None
-
-        # Kümülatif max drawdown
-        cum   = 100.0
-        peak  = 100.0
-        max_dd = 0.0
-        for r in rets:
-            cum  *= (1 + r / 100)
-            peak  = max(peak, cum)
-            dd    = (cum - peak) / peak * 100
-            max_dd = min(max_dd, dd)
-
-        # Profit factor = brüt kazanç / brüt kayıp
-        gross_win  = sum(r for r in rets if r > 0)
-        gross_loss = abs(sum(r for r in rets if r < 0))
-        pf = round(gross_win / gross_loss, 2) if gross_loss > 0 else None
-
-        # Ortalama işlem süresi
-        durations = [e.get("duration_days") for e in eps if e.get("duration_days") is not None]
-        avg_dur   = round(sum(durations) / len(durations), 1) if durations else None
-
-        return {
-            "count":             len(eps),
-            "win_rate":          round(len(wins) / len(eps) * 100, 1),
-            "avg_ret":           round(avg, 2),
-            "best":              round(max(rets), 2),
-            "worst":             round(min(rets), 2),
-            "sharpe":            sharpe,
-            "max_drawdown":      round(max_dd, 2),
-            "profit_factor":     pf,
-            "avg_duration_days": avg_dur,
-        }
-
-    result = {
-        "al":          stats(all_episodes["AL"]),
-        "sat":         stats(all_episodes["SAT"]),
-        "per_ticker":  sorted(per_ticker, key=lambda x: (-x["al_count"], -x["sat_count"])),
-        "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
-        "tickers_used": len(bt_tickers),
-        "git_sha":      _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1 — hangi kod aniyla hesaplandigi
-    }
-    with _lock:
-        _bt_cache["data"]        = result
-        _bt_cache["computed_at"] = result["computed_at"]
-    logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
-                result["al"]["count"], result["sat"]["count"])
-    # Diske kaydet — restart sonrası anında yüklenir (atomic write, DEV2-172 bulgusu)
-    try:
-        _atomic_write_json(_BT_DISK_PATH, result)
-        logger.info("Backtest diske kaydedildi: %s", _BT_DISK_PATH)
-    except Exception as e:
-        logger.warning("Backtest disk yazma hatası: %s", e)
 
 
 @app.context_processor
@@ -12766,15 +12582,6 @@ def sinyal_performans():
     # CPO-1585 İş 1: sayfa /tarama'ya birlestirildi, eski bookmark/backlink
     # 404 yemesin diye decorator kaldı, govde kalici redirect'e cevrildi.
     return redirect("/tarama", code=301)
-
-
-@app.route("/api/backtest")
-def api_backtest():
-    with _lock:
-        bt = _bt_cache.get("data")
-    if not bt:
-        return safe_json({"status": "computing", "message": "Backtest hesaplanıyor..."})
-    return safe_json(bt)
 
 
 @app.route("/nasdaq")
@@ -14355,18 +14162,6 @@ def _startup():
         _load_sentiment_cache_from_disk()
     except Exception as e:
         logger.warning("Sentiment disk yükleme hatası: %s", e)
-    # Backtest disk cache'i yükle — restart sonrası hemen sinyal-performans sayfasına veri verir
-    try:
-        if os.path.exists(_BT_DISK_PATH):
-            with open(_BT_DISK_PATH, encoding="utf-8") as f:
-                bt_data = json.load(f)
-            if bt_data and bt_data.get("al"):
-                _bt_cache["data"]        = bt_data
-                _bt_cache["computed_at"] = bt_data.get("computed_at", "")
-                logger.info("Backtest disk cache yüklendi: AL=%s, computed=%s",
-                            bt_data["al"].get("count"), bt_data.get("computed_at"))
-    except Exception as e:
-        logger.warning("Backtest disk cache yükleme hatası: %s", e)
     refresh_chart()
     # XU100 sirali sekilde yukle (CPO-DEV2-065: 10 oksuz varlik-chart rotasi
     # -kripto/emtia/ABD, 19.08 CPO-DEV2-036 sayfa kaldirmasinin unutulmus parcasi-
@@ -14444,15 +14239,6 @@ def _startup():
         time.sleep(30)   # ana sinyal datasının gelmesini bekle
         _do_earnings_refresh()
     threading.Thread(target=_warm_earnings, daemon=True).start()
-    # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
-    def _delayed_backtest():
-        # CPO-558H: web worker'da backtest (28 × yfinance.download) yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_delayed_backtest: REFRESH_WORKER=web — atlandı")
-            return
-        time.sleep(1800)   # 30 dakika sonra
-        run_backtest()
-    threading.Thread(target=_delayed_backtest, daemon=True).start()
     # F5 — AI Sentiment bg worker DURDURULDU (CPO-1781): sıfır tüketici + aktif
     # Gemini kota tüketimi. _compute_sentiment() silinmedi, geri açmak için bu
     # satırı geri aç yeterli.
