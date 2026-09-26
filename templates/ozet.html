@@ -249,9 +249,9 @@ function goToDate(date) {
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺
-          <!-- CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
+          {# CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
                degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
-               CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) -->
+               CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) #}
           <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ bpf.pct_text(ret, 1) }}</span>
         </div>
       {% elif s.signal_price %}
