@@ -1,22 +1,7 @@
-/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
-   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
-   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
-:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
-
-/* ==== extracted from templates/iletisim.html (T2.5) ====
-   20.09 CPO — Data-Art dönüşümü. Bu sayfa dönüşümün başladığı 18.09'dan beri
-   hiç sıraya girmemişti: iki düz kutu (`background:var(--bp-surface)` + 1px
-   kenarlık) + form alanlarının TAMAMI şablon içinde inline `style="..."`
-   olarak yazılmıştı — yani Ozan'ın "amatör görünüyor" dediği desenin ta
-   kendisi, üstelik tek bir alan bile sayfa CSS'inden yönetilemiyordu.
-   Gövde reçetesi (degrade + kenarlık + radius + parıltı) artık paylaşılan
-   static/css/data-art.css `.da-panel` ilkelinden geliyor; burada SADECE bu
-   sayfanın deltası duruyor. */
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
-  header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border); position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
-  .container { max-width: var(--bp-container-680); margin: 0 auto; padding: 40px 24px; }
+/* C-44 (26.09): reset, gövde, header ve kap kuralları prose.css'te (ortak
+   içerik kabuğu); burada yalnız İletişim'in deltası: dar form kabı + form.
+   20.09 CPO Data-Art dönüşümü: gövde reçetesi `.da-panel` ilkelinden. */
+  .container { max-width: var(--bp-container-680); padding: 40px 24px; }
 
   /* ── .da-panel deltaları ─────────────────────────────────────────────── */
   .card { padding: 28px; }
