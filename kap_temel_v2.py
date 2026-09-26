@@ -23,7 +23,7 @@ from datetime import date
 import kap_financials as kf
 
 GYO_SECTOR = "GAYRİMENKUL YATIRIM ORTAKLIKLARI"
-MIN_PEERS = 3          # tarama_fields.MIN_PEERS ile ayni (D-51 "va" hesabi)
+MIN_PEERS_KAP = 5      # sektor ortancasi icin en az akran (CPO 25.09: az sirkette hukum yok)
 SHARE_SANITY = (0.8, 1.25)   # Odenmis Sermaye (1 TL nominal pay) / Yahoo pay adedi
 
 _PERIOD_WORD = {1: "ilk çeyrek", 2: "ilk yarı", 3: "ilk 9 ay"}
@@ -461,33 +461,35 @@ def _positive(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and v > 0
 
 
-def sector_medians(fund_by_ticker, sector_of, sector):
-    """F/K, PD/DD (yalniz pozitif) ve ozsermaye karliligi ortancasi: sektor (gecerli akran
-    >= MIN_PEERS) yoksa BIST geneli -- D-51 'va' hesabiyla ayni kural. Donus metrik basina
-    {deger, n, kapsam: 'sektor'|'bist'} ya da None."""
-    fields = (("fk", "pe_ratio", True), ("pd_dd", "pb_ratio", True), ("ozsermaye_karliligi", "roe", False))
-    sec_vals = {k: [] for k, _, _ in fields}
-    all_vals = {k: [] for k, _, _ in fields}
+def kap_metrics(rec, price, yahoo_shares=None):
+    """Bir hissenin KAP'tan turetilen F/K, PD/DD ve ozsermaye karliligi (valuation_now ile ayni deger);
+    sektor ortancasi sirketin kendi KAP degerleriyle ayni tutarli veriden kurulur (Yahoo karisimi yok)."""
+    if not rec:
+        return None
+    now = valuation_now(rec, template_of(rec), price, yahoo_shares)
+    if not now:
+        return None
+    return {k: now.get(k) for k in ("fk", "pd_dd", "ozsermaye_karliligi")}
+
+
+def sector_medians(kap_by_ticker, sector_of, sector):
+    """F/K, PD/DD (yalniz pozitif) ve ozsermaye karliligi ortancasi, ayni sektor grubundaki
+    sirketlerin KAP degerlerinden (kap_metrics). Grupta gecerli akran < MIN_PEERS_KAP ya da sektor
+    belirsizse (None / 'Diger') hukum yok: BIST geneli yedegi YOK (elma-armut kiyas). Donus metrik
+    basina {deger, n, kapsam: 'sektor'} ya da None."""
+    fields = (("fk", True), ("pd_dd", True), ("ozsermaye_karliligi", False))
+    out = {k: None for k, _ in fields}
     if sector in (None, "", "Diğer"):
-        sector = None      # kovasi belirsiz hisse: BIST geneli
-    for tk, fund in (fund_by_ticker or {}).items():
-        s = sector_of(tk)
-        for k, f, pos in fields:
-            v = (fund or {}).get(f)
+        return out
+    for k, pos in fields:
+        vals = []
+        for tk, m in (kap_by_ticker or {}).items():
+            v = (m or {}).get(k)
             ok = _positive(v) if pos else (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v)
-            if not ok:
-                continue
-            all_vals[k].append(v)
-            if sector is not None and s == sector:
-                sec_vals[k].append(v)
-    out = {}
-    for k, _, _ in fields:
-        if len(sec_vals[k]) >= MIN_PEERS:
-            out[k] = {"deger": round(statistics.median(sec_vals[k]), 2), "n": len(sec_vals[k]), "kapsam": "sektor"}
-        elif all_vals[k]:
-            out[k] = {"deger": round(statistics.median(all_vals[k]), 2), "n": len(all_vals[k]), "kapsam": "bist"}
-        else:
-            out[k] = None
+            if ok and sector_of(tk) == sector:
+                vals.append(v)
+        if len(vals) >= MIN_PEERS_KAP:
+            out[k] = {"deger": round(statistics.median(vals), 2), "n": len(vals), "kapsam": "sektor"}
     return out
 
 

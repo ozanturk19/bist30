@@ -9478,6 +9478,38 @@ def _fundamentals_kap(ticker, data):
         return data
 
 
+_KAP_SECTOR_METRICS = {"ts": 0.0, "data": {}}
+_KAP_SECTOR_METRICS_LOCK = threading.Lock()
+_KAP_SECTOR_METRICS_TTL = 1800
+
+
+def _kap_sector_metrics():
+    """D-40a2: sektor ortancası için evrendeki her hissenin KAP'tan türetilen F/K · PD/DD · özsermaye
+    kârlılığı ({ticker: {...}}). 30 dk önbellek; kayıtlar mtime önbellekli (kap_financials.load_record)."""
+    now = time.time()
+    if now - _KAP_SECTOR_METRICS["ts"] < _KAP_SECTOR_METRICS_TTL and _KAP_SECTOR_METRICS["data"]:
+        return _KAP_SECTOR_METRICS["data"]
+    with _KAP_SECTOR_METRICS_LOCK:
+        if now - _KAP_SECTOR_METRICS["ts"] < _KAP_SECTOR_METRICS_TTL and _KAP_SECTOR_METRICS["data"]:
+            return _KAP_SECTOR_METRICS["data"]
+        with _lock:
+            prices = {s.get("ticker"): s.get("price") for s in (_cache.get("data") or [])}
+            shares = {tk: ((w.get("data") or {}).get("shares")) for tk, w in _fundamentals_cache.items()}
+        out = {}
+        for tk in BIST100:
+            try:
+                m = kap_temel_v2.kap_metrics(kap_financials.load_record(tk), prices.get(tk), shares.get(tk))
+            except Exception as e:
+                logger.warning("_kap_sector_metrics(%s): %s", tk, e)
+                m = None
+            if m:
+                out[tk] = m
+        if out:
+            _KAP_SECTOR_METRICS["data"] = out
+            _KAP_SECTOR_METRICS["ts"] = time.time()
+        return out
+
+
 def _fundamentals_temel_v2(ticker, data):
     """D-40a2: Temel sekmesi v2 alanları (kap_temel_v2.extend) — yalnız /fundamentals ucu.
     kap bloğuna yıllık marj/oran, son 12 ay kârı (O22=B) ile F/K · PD/DD · özsermaye kârlılığı,
@@ -9487,9 +9519,8 @@ def _fundamentals_temel_v2(ticker, data):
         return data
     with _lock:
         price = next((s.get("price") for s in (_cache.get("data") or []) if s.get("ticker") == ticker), None)
-        fund_snap = {tk: (w.get("data") or {}) for tk, w in _fundamentals_cache.items()}
     try:
-        meds = kap_temel_v2.sector_medians(fund_snap, _get_sector, _get_sector(ticker))
+        meds = kap_temel_v2.sector_medians(_kap_sector_metrics(), _get_sector, _get_sector(ticker))
         return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
                                    datetime.now(_TZ_TR).date(), meds)
     except Exception as e:
