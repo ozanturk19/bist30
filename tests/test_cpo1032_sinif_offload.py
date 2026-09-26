@@ -121,6 +121,7 @@ def _load_fn_isolated(func_name, extra_ns=None):
         "_fcntl": real_fcntl,
         "logger": real_logging.getLogger("test_isolated"),
         "_leader_lock_init_guard": real_threading.Lock(),
+        "_IS_SHADOW": False,  # D-16: shadow rolü kilit fonksiyonlarında erken False döner
     }
     ns.update(extra_ns or {})
     exec(body, ns)

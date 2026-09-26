@@ -1526,6 +1526,11 @@ except Exception:
 # Prod servisleri (bist30 / bist30-refresh / bist30-macro) BP_ROLE=batch|shadow taşımaz →
 # davranış birebir aynı (aynı sıra, aynı koşul).
 _NO_BG_THREADS = os.environ.get("BP_ROLE") in ("batch", "shadow")
+# D-16: BP_ROLE=shadow (tools/shadow_compare.py) prod kilitlerini/veri dosyalarını ASLA tutmaz:
+# _is_*_leader_blocking → False, paylaşılan kilit/durum dosyaları süreç-özel geçici dosyaya döner.
+_IS_SHADOW = os.environ.get("BP_ROLE") == "shadow"
+if _IS_SHADOW:  # yfinance/Gemini çağrısı yasak (web worker gibi yalnız disk-yükleme)
+    os.environ["REFRESH_WORKER"] = "web"
 
 
 def _bg_start(th):
@@ -2266,6 +2271,8 @@ def _is_notify_leader_blocking():
     bazı arka plan thread'lerinin (ör. freshness-monitor) kalıcı olarak yanlış
     fd'ye kilitlenip SONSUZA KADAR non-leader kalmasına yol açıyordu."""
     global _notify_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _notify_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2330,6 +2337,8 @@ def _is_bg_leader_blocking():
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not (aynı sınıf
     çok-thread race, tüm 5 leader fonksiyonunda ortak fix)."""
     global _bg_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _bg_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2371,6 +2380,8 @@ def _is_digest_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _digest_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _digest_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2410,6 +2421,8 @@ def _is_gemini_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _gemini_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _gemini_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2457,6 +2470,8 @@ def _is_macro_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _macro_leader_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _macro_leader_fh is None:
             with _leader_lock_init_guard:
@@ -4107,6 +4122,8 @@ def refresh_data():
     # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
     # M2: non-blocking — eş zamanlı ikinci çağrı yinelemeyi önler (watchdog + cron overlap)
+    if _IS_SHADOW:  # D-16: shadow veri dizinine/kilidine dokunmaz
+        return
     if not _refresh_data_lock.acquire(blocking=False):
         logger.warning("refresh_data: önceki çalışma (bu process içinde) devam ediyor, bu çağrı atlandı (M2 concurrency guard)")
         return
@@ -6648,9 +6665,12 @@ _NEWS_INFLIGHT_PATH           = os.environ.get("NEWS_INFLIGHT_PATH",
 _NEWS_INFLIGHT_STALE_S        = 60    # gerçekçi üst sınır: 2×_GEMINI_TIMEOUT_CAP(5s) + rate-wait + marj
 _NEWS_INFLIGHT_FLOCK_BUDGET_S = 8.0   # outer .get(timeout=10) altında kalsın diye 2s marj
 _news_inflight_lock = threading.Lock()
-if not os.path.exists(_NEWS_INFLIGHT_PATH):
-    open(_NEWS_INFLIGHT_PATH, "a").close()
-_news_inflight_fh = open(_NEWS_INFLIGHT_PATH, "r+")
+if _IS_SHADOW:  # D-16: prod claim dosyasına dokunma
+    _news_inflight_fh = tempfile.TemporaryFile("r+")
+else:
+    if not os.path.exists(_NEWS_INFLIGHT_PATH):
+        open(_NEWS_INFLIGHT_PATH, "a").close()
+    _news_inflight_fh = open(_NEWS_INFLIGHT_PATH, "r+")
 
 
 def _news_inflight_claim_blocking(ticker: str) -> bool:
@@ -7144,9 +7164,12 @@ _GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock
 # guard — O_APPEND belirsizliği ve bozuk state'in kalıcılaşması ihtimaline karşı.
 _gemini_rate_lock = threading.Lock()
 _GEMINI_RATE_FLOCK_BUDGET_S = 8.0  # outer .get(timeout=10) altında kalsın diye 2s marj
-if not os.path.exists(_GEMINI_RATE_PATH):
-    open(_GEMINI_RATE_PATH, "a").close()
-_gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
+if _IS_SHADOW:  # D-16: prod oran-sınırı kilit dosyasına dokunma
+    _gemini_rate_fh = tempfile.TemporaryFile("r+")
+else:
+    if not os.path.exists(_GEMINI_RATE_PATH):
+        open(_GEMINI_RATE_PATH, "a").close()
+    _gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
 
 
 def _gemini_rate_acquire_blocking() -> float:
@@ -15056,6 +15079,27 @@ if os.environ.get("NOTIFY_SOCKET"):
     logger.info("CPO-576: systemd watchdog heartbeat başlatıldı (30s ping, WatchdogSec=120)")
 
 _bg_start(threading.Thread(target=_startup, daemon=True))
+
+
+# D-16: shadow thread başlatmaz ama gerçek veriyle karşılaştırılabilmeli → ilk istekte yalnız
+# DİSK yükleyicileri (salt-okur, thread'siz; prod web worker'ının açılış yüklemeleri). Yazma yok.
+if _IS_SHADOW:
+    _shadow_warmed = []
+
+    @app.before_request
+    def _shadow_warm_once():
+        if _shadow_warmed:
+            return
+        _shadow_warmed.append(1)
+        for _fn in (_load_cache_from_disk, _load_macro_from_disk, _load_macro_ai_from_disk,
+                    _load_sentiment_cache_from_disk, _load_news_cache_from_disk,
+                    _load_explain_cache_from_disk, _load_fundamentals_cache_from_disk,
+                    _load_sector_stats_from_disk, _load_xu100_chart_from_disk,
+                    _load_health_scores_from_disk, _load_mtf_cache_from_disk):
+            try:
+                _fn()
+            except Exception as _e:
+                logger.warning("shadow warm [%s]: %s", getattr(_fn, "__name__", _fn), _e)
 
 # CPO-585: MTF warmup daemon — REFRESH_WORKER=1 only, web worker hang önlenir
 # /api/hisse/<ticker>/mtf cache miss → web worker artık blocking call yapmaz (guard var)

@@ -63,8 +63,8 @@ def test_threading_lock_guards_critical_section():
 
 def test_fd_opened_once_at_module_load_before_any_request():
     body = _gemini_rate_block(_read_app())
-    assert re.search(r'^_gemini_rate_fh = open\(_GEMINI_RATE_PATH, "r\+"\)', body, re.MULTILINE), (
-        "_gemini_rate_fh modül seviyesinde koşulsuz (lazy değil) açılmalı"
+    assert re.search(r'^(?:    )?_gemini_rate_fh = open\(_GEMINI_RATE_PATH, "r\+"\)', body, re.MULTILINE), (
+        "_gemini_rate_fh modül seviyesinde (lazy değil; D-16: yalnız shadow rolünde geçici dosya) açılmalı"
     )
 
 
