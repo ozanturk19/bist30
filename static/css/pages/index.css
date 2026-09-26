@@ -235,12 +235,12 @@ header{
 .hp-ring{display:flex;flex-direction:column;align-items:center;gap:3px;flex:none}
 .hp-ring small{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-2xs);letter-spacing:.08em;text-transform:uppercase;color:var(--bp-text3);white-space:nowrap}
 /* ── C-30: Öne çıkan şirketler (O16e hizalama: sabit sütunlar, rozetler tek grup) ── */
-.hp-rule{margin:0 0 8px;font-size:var(--bp-text-base);color:var(--bp-text3)}
-.hp-rule b{color:var(--bp-text2)}
 .hp-ft-row{display:grid;grid-template-columns:minmax(0,1fr) 128px 128px 64px;gap:12px;align-items:center}
 .hp-ft{margin:0;padding:0;list-style:none}
 .hp-ft li{border-top:1px solid var(--bp-border)}
 .hp-ft li:first-child{border-top:0}
+/* taslak "3-5 satır": masaüstü 4, mobil 3 (sayfa bütçesi ≤3.700 / ≤5.000 px) */
+.hp-ft li:nth-child(n+5){display:none}
 .hp-ft-row{padding:8px 0;color:inherit;text-decoration:none}
 .hp-ft-row:hover .tk{text-decoration:underline}
 .hp-ft-row:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
@@ -273,6 +273,7 @@ header{
 @media (max-width:760px){
   .hp-ft-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"co bp" "tags tags";row-gap:6px}
   .hp-ft-co{grid-area:co}
+  .hp-ft li:nth-child(n+4){display:none}
   .hp-ft-bp{grid-area:bp;align-self:start}
   .hp-ft-tags{grid-area:tags;display:flex;flex-wrap:wrap;gap:8px}
   .hp-chip{min-height:36px}

@@ -67,7 +67,7 @@
 <link rel="stylesheet" href="/static/css/data-art.css?v=47ccd9e8">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=2c45ebf1">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=3e32bf47">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 
@@ -245,10 +245,10 @@
 <section class="da-section hp-blk" id="one-cikan" aria-labelledby="hpFtT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
+    <p>BorsaPusula Skoru en yüksekler · verisi en az %80 tamam · Trend Bozuldu hariç</p>
     <a href="/tarama?liste=bp-70">Tüm liste →</a>
   </div>
   <div class="da-panel hp-pan">
-    <p class="hp-rule"><b>Kural:</b> BorsaPusula Skoru en yüksek beş şirket; verisi en az %80 tamam olanlar, Trend Bozuldu hariç.</p>
     {%- if _ft %}
     <ol class="hp-ft" id="hpFt">
       {%- for s in _ft %}{%- set v = _vl.get(s.valuation) %}
@@ -271,7 +271,7 @@
 {%- set _ns = _gd.new_signals or [] %}
 <section class="da-section hp-blk" id="degisenler" aria-labelledby="hpChT">
   <div class="hp-blk-h">
-    <h2 class="hp-blk-t da-display" id="hpChT">{% if _ns %}Son kapanışta {{ _ns|length }} hisse durum değiştirdi{% else %}Son seansta değişenler{% endif %}</h2>
+    <h2 class="hp-blk-t da-display" id="hpChT">{% if _ns %}{{ _ns|length }} hisse durum değiştirdi{% else %}Son seansta değişenler{% endif %}</h2>
     {%- if _ns and _gd.eod_label %}<p>{{ _gd.eod_label }} kapanışı</p>{% endif %}
     <a href="/gundem">Tüm gündem →</a>
   </div>
