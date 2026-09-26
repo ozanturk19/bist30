@@ -27,9 +27,9 @@ def test_lite_source_lists_the_four_fields():
 def test_lite_returns_freshness_fields_from_cache():
     import app
     c = app.app.test_client()
-    row = app._enrich_stock({"ticker": "THYAO", "price": 1.0, "change_pct": 0.0,
-                             "last_fresh_ts": 1789139651, "data_quality": "stale",
-                             "stale_reason": "unknown", "close_status": "resmi"})
+    row = app._enrich_stock({"ticker": "THYAO", "price": 1.0, "change_pct": 0.0})
+    row.update({"last_fresh_ts": 1789139651, "data_quality": "stale",   # _enrich_stock last_fresh_ts'i ezer
+                "stale_reason": "unknown", "close_status": "resmi"})
     with app._lock:
         _old = list(app._cache["data"])
         app._cache["data"] = [row]
@@ -46,6 +46,7 @@ def test_lite_returns_freshness_fields_from_cache():
             app._cache["data"] = [app._enrich_stock({"ticker": "THYAO", "price": 1.0, "change_pct": 0.0})]
         st = c.get("/api/hisse/THYAO/lite").get_json()["stock"]
         assert all(f in st for f in FIELDS)
+        assert st["data_quality"] != "stale" and not st["stale_reason"]
     finally:
         with app._lock:
             app._cache["data"] = _old
