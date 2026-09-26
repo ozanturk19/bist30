@@ -1,8 +1,6 @@
 /* SPEC-015 Öğrenme Modu v1 — SENECA Öneri 1 (Stock Unlock "Learn Mode")
- * Açık iken: sayfada .jargon-term span'lerinin yanına "?" butonu enjekte edilir.
- * Tıklanınca popover ile glossary tanımı gösterilir.
- * Kapalı iken: butonlar görünmez. Mevcut layout/UX değişmez.
- * Durum localStorage'da saklanır.
+ * C-31 (26.09): Öğrenme Modu düğmesi kalktı — açıklama işareti (ⓘ) sözlükte
+ * tanımı olan her .jargon-term'in yanında KALICI görünür; tıklanınca popover.
  */
 (function () {
   'use strict';
@@ -39,14 +37,9 @@
     'sinyal': 'Sinyalin YÖNÜ — yalnızca Güçlü Trend, Trend Bozuldu ya da Yatay olur; sayı değildir. Gücü/kalitesi ayrı anılır: Teknik Güç Skoru ve BorsaPusula Skoru.'
   };
 
-  var STORAGE_KEY = 'bp_learning_mode';
-  var STATE = (function () {
-    try { return localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) { return false; }
-  })();
-
-  function persistState(on) {
-    try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
-  }
+  /* Eski açma/kapama tercihi artık okunmuyor; tarayıcıda kalan kaydı sil
+     (gizlilik tablosundaki bp_learning_mode satırı rev. 4'te düşer). */
+  try { localStorage.removeItem('bp_learning_mode'); } catch (e) { /* private tarama */ }
 
   function ensureStyles() {
     if (document.getElementById('bp-lm-style')) return;
@@ -56,41 +49,15 @@
        o renk urunde "Guclu Trend / AL" ANLAMI tasir (K-CZ), bir ozelligin
        acik olmasini anlatamaz. Nokta artik marka aksani. */
     var css =
-      '.bp-lm-btn{display:none;margin-left:4px;width:16px;height:16px;line-height:14px;text-align:center;' +
+      '.bp-lm-btn{display:inline-block;margin-left:4px;width:16px;height:16px;line-height:14px;text-align:center;' +
       'border:1px solid rgba(var(--bp-brand-rgb),.45);border-radius:50%;background:rgba(var(--bp-brand-rgb),.10);' +
       'color:var(--bp-brand);font-size:10px;font-weight:700;cursor:help;vertical-align:baseline;padding:0;font-family:inherit}' +
       '.bp-lm-btn:hover{background:rgba(var(--bp-brand-rgb),.25)}' +
-      'body.learning-on .bp-lm-btn{display:inline-block}' +
       '.bp-lm-pop{position:absolute;z-index:var(--bp-z-toast);max-width:280px;background:var(--bp-surface2);' +
       'border:1px solid var(--bp-border);' +
       'border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--bp-text);' +
       'box-shadow:0 6px 24px rgba(0,0,0,.5)}' +
-      '.bp-lm-pop b{color:var(--bp-brand);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}' +
-      '.bp-lm-toggle{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bp-ctl-border);' +
-      'color:var(--bp-text2);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}' +
-      '.bp-lm-toggle:hover{border-color:var(--bp-brand);color:var(--bp-text)}' +
-      '.bp-lm-toggle .bp-lm-dot{width:7px;height:7px;border-radius:50%;background:var(--bp-text3);display:inline-block}' +
-      'body.learning-on .bp-lm-toggle .bp-lm-dot{background:var(--bp-brand)}' +
-      /* K-DH: dar ekranda kontrol MOBIL MENU SAYFASINA tasinir.
-         Eskiden yalniz `header .bp-lm-toggle{display:none}` vardi ve baska
-         hicbir yerde kontrol YOKTU -- Ogrenme Modu telefonda hic
-         acilamiyordu (urunun trafigi agirlikli mobil). Basligi daraltip
-         yerinde birakmak DA calismiyor: 320px'te olculdu, baslik sagi
-         (arama + yenile) 300px'te bitiyor, 43px'lik cip `bp-refresh-btn`i
-         ekran disina itiyordu. Bu yuzden kontrol "Menu" sayfasindaki
-         "Daha" izgarasina, sitenin kendi `.mbn-sheet-item` kartiyla ayni
-         dille ekleniyor (mountSheetToggle). */
-      '@media (max-width:600px){header .bp-lm-toggle{display:none}}' +
-      /* Sayfadaki (sheet) varyant: temel .bp-lm-toggle kurallarini ezer,
-         gorunumu sitenin kendi menu kartiyla ayni olur. */
-      '.bp-lm-toggle.bp-lm-sheet{display:flex;flex-direction:column;justify-content:center;' +
-      'gap:7px;background:var(--bp-surface2);border:1px solid var(--bp-border);' +
-      'border-radius:var(--bp-radius-lg);color:var(--bp-text);font-size:var(--bp-text-xs);' +
-      'font-weight:600;padding:14px 6px;min-height:70px;white-space:normal;text-align:center;line-height:1.3}' +
-      '.bp-lm-toggle.bp-lm-sheet:hover{border-color:var(--bp-border);color:var(--bp-text)}' +
-      'body.learning-on .bp-lm-toggle.bp-lm-sheet{border-color:rgba(var(--bp-brand-rgb),.55)}' +
-      '.bp-lm-toggle.bp-lm-sheet .bp-lm-ico{font-size:20px;line-height:1}' +
-      '.bp-lm-toggle.bp-lm-sheet .bp-lm-label{display:block}';
+      '.bp-lm-pop b{color:var(--bp-brand);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}';
     var s = document.createElement('style');
     s.id = 'bp-lm-style';
     s.textContent = css;
@@ -170,8 +137,8 @@
       btn.setAttribute('aria-label', term + ' tanımı');
       btn.setAttribute('aria-haspopup', 'true');
       btn.setAttribute('aria-expanded', 'false');
-      btn.title = term + ' — Öğrenme Modu açıklaması';
-      btn.textContent = '?';
+      btn.title = term + ' — açıklama';
+      btn.textContent = 'i';
       btn.addEventListener('click', function (t, d) {
         return function (ev) {
           ev.preventDefault();
@@ -183,73 +150,9 @@
     }
   }
 
-  function applyBody() {
-    if (STATE) document.body.classList.add('learning-on');
-    else document.body.classList.remove('learning-on');
-  }
-
-  function toggle() {
-    STATE = !STATE;
-    persistState(STATE);
-    applyBody();
-    closePop();
-    var btns = document.querySelectorAll('.bp-lm-toggle');
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].setAttribute('aria-pressed', STATE ? 'true' : 'false');
-    }
-  }
-
-  function createToggleButton(variant) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = variant === 'sheet' ? 'bp-lm-toggle bp-lm-sheet' : 'bp-lm-toggle';
-    b.setAttribute('aria-label', 'Öğrenme Modu');
-    b.setAttribute('aria-pressed', STATE ? 'true' : 'false');
-    b.title = 'Öğrenme Modu — teknik terimlerin yanında ? açıklaması';
-    /* K-DH: ikon ve gorunur metin ayri span'lerde -- sayfadaki (sheet)
-       varyant ikonu buyutup metni alt satira alabiliyor. Eriselebilir ad
-       her iki varyantta da `aria-label`dan gelir (ikon tek basina ad
-       DEGILDIR); durum noktasi dekoratiftir, rengi tek basina anlam
-       tasimaz (a32bfdc dersi) -- `aria-pressed` durumu bildirir. */
-    b.innerHTML = '<span class="bp-lm-dot"></span><span class="bp-lm-ico" aria-hidden="true">📚</span>'
-                + '<span class="bp-lm-label"> Öğrenme Modu</span>';
-    b.addEventListener('click', toggle);
-    return b;
-  }
-
-  function mountToggle() {
-    /* K-DH: eskiden tek bir `if (querySelector('.bp-lm-toggle')) return;`
-       vardi; iki varyant olunca bu erken cikis ikincisini de engellerdi. */
-    if (!document.querySelector('.bp-lm-toggle:not(.bp-lm-sheet)')) {
-      // Header'da arama butonunun yanına eklemeyi dene
-      var anchor = document.querySelector('.header-search-btn');
-      if (anchor && anchor.parentNode) {
-        anchor.parentNode.insertBefore(createToggleButton(), anchor);
-      } else {
-        var header = document.querySelector('header');
-        if (header) header.appendChild(createToggleButton());
-      }
-    }
-    mountSheetToggle();
-  }
-
-  /* Dar ekranin kontrolu: mobil "Menü" sayfasindaki son ("Daha") izgaraya
-     bir kart olarak eklenir. Sayfa `_mobile_nav_partial.html` ile gelir;
-     yoksa sessizce atlanir (masaustu-only sablonlar). */
-  function mountSheetToggle() {
-    var sheet = document.getElementById('mbnSheet');
-    if (!sheet || sheet.querySelector('.bp-lm-sheet')) return;
-    var grids = sheet.querySelectorAll('.mbn-sheet-grid');
-    var grid = grids[grids.length - 1];
-    if (!grid) return;
-    grid.appendChild(createToggleButton('sheet'));
-  }
-
   function init() {
     ensureStyles();
-    mountToggle();
     injectHints();
-    applyBody();
     /* Gec eklenen icerik (JS render) icin observer.
        K-DH: geri cagirma ONCEDEN her mutasyonda dogrudan injectHints()
        kosturuyordu -- her cagri `querySelectorAll('.jargon-term')` demek.
@@ -276,19 +179,4 @@
     init();
   }
 
-  // DEV2-bughunt-r7: cok-sekme senkronu — baska sekmede degisen STORAGE_KEY'i yansit.
-  // persistState() BILEREK cagrilmiyor (zaten diger sekme yazdi, feedback loop olusmasin).
-  window.addEventListener('storage', function (e) {
-    if (e.key !== STORAGE_KEY) return;
-    STATE = e.newValue === '1';
-    applyBody();
-    closePop();
-    var btns = document.querySelectorAll('.bp-lm-toggle');
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].setAttribute('aria-pressed', STATE ? 'true' : 'false');
-    }
-  });
-
-  // Global API
-  window.bpLearningMode = { toggle: toggle, get state() { return STATE; } };
 })();

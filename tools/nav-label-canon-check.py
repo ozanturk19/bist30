@@ -48,16 +48,16 @@ KILL = '--kill-fix' in sys.argv
 
 # ── KANONIK GEZINME SOZLUGU (baglayici) ──────────────────────────────────
 CANON = {
-    '/':                 'Ana Sayfa',
+    '/':                 'Piyasa',           # C-31 (O17=A): 5 öğeli menü adları
     '/ozet':             'Günlük Özet',
     '/gundem':           'Gündem',
-    '/tarama':           'Tarama',
+    '/tarama':           'Keşfet',
     '/karsilastir':      'Karşılaştır',
-    '/portfolio':        'Portföy',
+    '/portfolio':        'Takip',
     '/sektor-harita':    'Sektörler',
     '/hisseler':         'Tüm Hisseler',
     '/takvim':           'Takvim',            # C-36: iki takvim tek sayfada
-    '/blog':             'Blog',
+    '/blog':             'Öğren',
     '/metodoloji':       'Metodoloji',
     '/hakkinda':         'Hakkında',
     '/gizlilik':         'Gizlilik & KVKK',
@@ -169,8 +169,8 @@ def main():
     print(f'  ayri sayilan (sapma DEGIL): {brand} marka isareti · {len(notes)} ses-komutu notu')
     for fn, href, why in notes:
         print(f'      · {fn:28} {href:20} {why}')
-    if checked < 55:
-        print(f'  ✗ KAPSAM TABANI ALTINDA ({checked} < 55) — secici/dosya listesi bozulmus olabilir')
+    if checked < 40:
+        print(f'  ✗ KAPSAM TABANI ALTINDA ({checked} < 40) — secici/dosya listesi bozulmus olabilir')
         return 2
     if bad:
         print(f'  ✗ {len(bad)} SAPMA:')

@@ -4,9 +4,9 @@
     C-18a/b 25.09). Eski hdr_title / hdr_icon / hdr_title_tag / hdr_sub /
     hdr_sub_id parametreleri KALKTI (anti-CLS kurali onlari zaten gizliyordu).
       {% include '_header.html' %}
-    Tek parametre (opsiyonel, {% with %} ile — {% set %} include'a sizmayabilir):
-      hdr_self  str -> sayfanin KENDI nav href'i; o oge menude gizlenir.
-                       {% with hdr_self='/hisseler' %}{% include '_header.html' %}{% endwith %}
+    C-31 (26.09): 5 öğeli menü (O17=A) Piyasa · Keşfet · Haberler · Takip · Öğren + arama;
+    masaüstü = mobil (_mobile_nav_partial.html). "Daha" menüsü kalktı; data-route boşlukla
+    ayrılmış önek listesi, öğe o bölümün tüm sayfalarında aktif.
 -#}
 {% import '_brand.html' as brand %}
 <header>
@@ -20,46 +20,29 @@
     </svg>
   </a>
   <nav class="bp-main-nav" aria-label="Ana navigasyon">
-  <a href="/" data-route="/" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Ana Sayfa</span>
+  <a href="/" data-route="/ /ozet /gundem /sektor-harita /harita" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><polyline points="7 14 11 10 14 13 20 7"/></svg>
+    <span>Piyasa</span>
   </a>
-  <a href="/tarama" data-route="/tarama" class="bp-nav-item">
+  <a href="/tarama" data-route="/tarama /hisse /karsilastir" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <span>Tarama</span>
+    <span>Keşfet</span>
   </a>
-  <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
-    <span>Sektörler</span>
+  <a href="/haberler" data-route="/haberler /takvim /bulten" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h13a2 2 0 0 1 2 2v11a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><line x1="8" y1="9" x2="15" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+    <span>Haberler</span>
   </a>
-  <a href="/blog" data-route="/blog" class="bp-nav-item">
+  <a href="/portfolio" data-route="/portfolio /takip /profil" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span>Takip</span>
+  </a>
+  <a href="/blog" data-route="/blog /metodoloji" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-    <span>Blog</span>
+    <span>Öğren</span>
   </a>
-  <div class="bp-nav-more-wrap">
-    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="bpNavMoreMenu">
-      <span>Daha</span>
-      <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="bp-nav-more-menu" id="bpNavMoreMenu">
-      <div class="bp-nav-cat-label">Araçlar</div>
-      <a href="/portfolio" data-route="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
-      <a href="/karsilastir" data-route="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
-{% if hdr_self is not defined or hdr_self != '/hisseler' %}<a href="/hisseler" data-route="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
-{% endif %}      <a href="/takvim" data-route="/takvim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Takvim</a>
-      <div class="bp-nav-sep"></div>
-      <div class="bp-nav-cat-label">İçerik</div>
-      <a href="/haberler" data-route="/haberler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h13a2 2 0 0 1 2 2v11a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><line x1="8" y1="9" x2="15" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>Haberler</a>
-      <a href="/ozet" data-route="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
-      <a href="/gundem" data-route="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
-      <a href="/metodoloji" data-route="/metodoloji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
-      <a href="/hakkinda" data-route="/hakkinda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
-      <a href="/iletisim" data-route="/iletisim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
-    </div>
-  </div>
 </nav>
 <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" style="margin-left:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
 </header>
 <script>
-(function(){var p=window.location.pathname;document.querySelectorAll('.bp-main-nav > .bp-nav-item[data-route]').forEach(function(el){var r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.setAttribute('aria-current','page');});})();
+(function(){var p=window.location.pathname;document.querySelectorAll('.bp-main-nav > .bp-nav-item[data-route]').forEach(function(el){if(el.dataset.route.split(' ').some(function(r){return r==='/'?p==='/':p.startsWith(r);}))el.setAttribute('aria-current','page');});})();
 </script>

@@ -85,22 +85,6 @@
     + '.bp-nav-item svg{width:13px;height:13px;opacity:0.65;flex-shrink:0}'
     + '.bp-nav-item:hover svg{opacity:1}'
     + '.bp-nav-item[aria-current="page"] svg{opacity:1}'
-    /* Acilir menu kapaliyken de "buradasin" gorunur olsun: kanonik hap dili + nokta */
-    + '.bp-nav-more-btn[data-has-current="true"]{color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.10);border-color:rgba(var(--bp-brand-rgb),.24)}'
-    + '.bp-nav-more-btn[data-has-current="true"]::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--bp-brand);flex-shrink:0}'
-    + '.bp-nav-chev{width:11px !important;height:11px !important;transition:transform .18s ease;opacity:0.6}'
-    + '.bp-nav-more-btn[aria-expanded="true"] .bp-nav-chev{transform:rotate(180deg);opacity:1}'
-    + '.bp-nav-more-btn[aria-expanded="true"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand)}'
-    /* Dropdown rendered as fixed/portal to body to escape stacking context */
-    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:var(--bp-surface2);border:1px solid var(--bp-border2);border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:var(--bp-z-toast)}'
-    + '.bp-nav-more-menu.open{display:block;animation:bpNavMoreIn .15s ease}'
-    + '@keyframes bpNavMoreIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}'
-    + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:var(--bp-text);text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
-    + '.bp-nav-more-menu a:hover{background:var(--bp-surface2)}'
-    + '.bp-nav-more-menu a svg{width:14px;height:14px;opacity:0.7;flex-shrink:0}'
-    + '.bp-nav-more-menu a[aria-current="page"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand);font-weight:700}'
-    + '.bp-nav-more-menu a[aria-current="page"] svg{opacity:1}'
-    + '.bp-nav-sep{height:1px;background:var(--bp-border);margin:5px 8px}'
     /* On wider screens: bump up padding/font slightly */
     + '@media (min-width:1500px){.bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}.bp-main-nav{gap:6px}}'
     /* On tighter screens: shrink */
@@ -404,150 +388,8 @@
     }
   });
 
-  // ---- Nav: auto-activate current route + Daha dropdown ----
-  // K-CY (22.09): TEK DURUM ANAHTARI = `aria-current="page"`.
-  // Onceden burasi `.active` sinifini DA ekliyordu ve enjekte edilen CSS o sinifa
-  // gore boyuyordu; kanonik `_bp_critical_css.html` ise `[aria-current]`e gore
-  // boyuyor -- ayni durum iki anahtar + iki renk sozlugu demekti (canli olculdu:
-  // metin AL yesili, kenarlik brand). `.active` artik YAZILMIYOR; tek okuyucu
-  // `aria-current`. Ek: acilir menudeki bir oge gecerli sayfaysa kapali "Daha"
-  // dugmesi de isaretlenir -- 14 hedeften 10'u masaustunde hicbir "buradasin"
-  // gostermiyordu (menu kapaliyken vurgu gorunmez kaliyordu).
-  function activateNav() {
-    var path = location.pathname;
-    var items = document.querySelectorAll('.bp-nav-item[data-route], .bp-nav-more-menu a[data-route]');
-    var hiddenCurrent = false;
-    items.forEach(function(el){
-      var route = el.getAttribute('data-route');
-      if (route === '/' ? path === '/' : path.indexOf(route) === 0) {
-        el.setAttribute('aria-current', 'page');
-        if (el.closest('.bp-nav-more-menu')) hiddenCurrent = true;
-      }
-    });
-    var moreBtn = document.querySelector('.bp-nav-more-btn');
-    if (moreBtn) {
-      if (hiddenCurrent) moreBtn.setAttribute('data-has-current', 'true');
-      else moreBtn.removeAttribute('data-has-current');
-    }
-  }
-
-  function positionMenu() {
-    var menu = document.querySelector('.bp-nav-more-menu');
-    var btn = document.querySelector('.bp-nav-more-btn');
-    if (!menu || !btn) return;
-    var br = btn.getBoundingClientRect();
-    // Position below button, right-aligned with button's right edge
-    menu.style.top = (br.bottom + 8) + 'px';
-    menu.style.left = '';
-    menu.style.right = (window.innerWidth - br.right) + 'px';
-  }
-
-  function bindNavMore() {
-    // Portal: move menu to body (escapes stacking contexts/backdrop-filter clipping)
-    var menu = document.querySelector('.bp-nav-more-menu');
-    if (menu && menu.parentElement !== document.body) {
-      document.body.appendChild(menu);
-    }
-
-    function closeMenu(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (!m) return;
-      var hadFocusInside = m.contains(document.activeElement);
-      m.classList.remove('open');
-      var b = document.querySelector('.bp-nav-more-btn');
-      if (b) {
-        b.setAttribute('aria-expanded', 'false');
-        if (hadFocusInside) b.focus();
-      }
-    }
-
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest && e.target.closest('.bp-nav-more-btn');
-      var menu = document.querySelector('.bp-nav-more-menu');
-      if (btn && menu) {
-        e.preventDefault();
-        var open = menu.classList.contains('open');
-        if (!open) positionMenu();
-        menu.classList.toggle('open', !open);
-        btn.setAttribute('aria-expanded', !open);
-        if (!open) {
-          var firstLink = menu.querySelector('a');
-          if (firstLink) firstLink.focus();
-        }
-        return;
-      }
-      // Outside click → close (must NOT include menu itself or its descendants)
-      if (menu && menu.classList.contains('open')
-          && !(e.target.closest && (e.target.closest('.bp-nav-more-wrap') || e.target.closest('.bp-nav-more-menu')))) {
-        closeMenu();
-      }
-    });
-    // Close on Esc
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') {
-        var menu = document.querySelector('.bp-nav-more-menu');
-        if (menu && menu.classList.contains('open')) closeMenu();
-      }
-    });
-    // r103 bug-hunt: klavye ile Tab ederek menuden cikinca (fare disi-tik olmadan)
-    // menu acik kaliyordu — outside-click korumasi Tab-out'u kapsamiyordu.
-    document.addEventListener('focusout', function(e){
-      var menu = document.querySelector('.bp-nav-more-menu');
-      if (!menu || !menu.classList.contains('open')) return;
-      setTimeout(function(){
-        var next = document.activeElement;
-        var insideWrapOrMenu = next && next.closest &&
-          (next.closest('.bp-nav-more-wrap') || next.closest('.bp-nav-more-menu'));
-        if (!insideWrapOrMenu) closeMenu();
-      }, 0);
-    });
-    /* 21.09 K-S: "Daha" menusu stacking-context kacisi icin document.body'ye
-       PORTALLANIYOR (yukarida) — boylece DOM sirasinda sayfanin EN SON dugumu
-       oluyor. Tab sirasi DOM sirasini izledigi icin canli olcum (2 sayfa, iki
-       yon, deterministik):
-         · son linkten ileri Tab -> odak <body>'ye, yani HICBIR YERE dusuyor
-           (sonraki Tab tarayici cubuguna gider; kullanici nav'a donmek icin
-           butun sayfayi bastan Tab'lamak zorunda)
-         · ilk linkten Shift+Tab -> odak FOOTER'in son linkine ("Iletisim")
-           atliyor — sayfa basindaki bir menuden sayfanin en altina.
-       WCAG 2.4.3. APG menu-button davranisi: Tab menuyu kapatir ve odagi
-       BUTONDAN SONRAKI ogeye tasir. Kenar ogedeyken Tab'i biz ele aliyoruz. */
-    function tabSeq() {
-      var sel = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-      var m = document.querySelector('.bp-nav-more-menu');
-      return Array.prototype.filter.call(document.querySelectorAll(sel), function(el){
-        if (m && m.contains(el)) return false;
-        if (el.closest('[inert],[aria-hidden="true"]')) return false;
-        var r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      });
-    }
-    document.addEventListener('keydown', function(e){
-      if (e.key !== 'Tab') return;
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (!m || !m.classList.contains('open')) return;
-      var links = Array.prototype.slice.call(m.querySelectorAll('a'));
-      var i = links.indexOf(document.activeElement);
-      if (i < 0) return;
-      var atEdge = e.shiftKey ? (i === 0) : (i === links.length - 1);
-      if (!atEdge) return;
-      e.preventDefault();
-      var btn = document.querySelector('.bp-nav-more-btn');
-      closeMenu();                       // odagi once butona iade eder
-      var seq = tabSeq(), bi = seq.indexOf(btn);
-      var next = (bi < 0) ? null : seq[bi + (e.shiftKey ? -1 : 1)];
-      (next || btn).focus();
-    });
-    // Reposition on resize/scroll while open
-    window.addEventListener('resize', function(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (m && m.classList.contains('open')) positionMenu();
-    });
-    window.addEventListener('scroll', function(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (m && m.classList.contains('open')) positionMenu();
-    }, { passive: true });
-  }
+  // ---- Nav: aktif oge _header.html / _mobile_nav_partial.html satir-ici betiginde
+  // (tek anahtar aria-current). C-31 (26.09): "Daha" acilir menusu kalkti.
 
   // ---- Trend Strip removed (Strategy 1: Hareketliler widget anasayfada bunun yerini alıyor) ----
   // Bu fonksiyon artik CSS uretmiyor (dead .bp-trend-strip/.bp-trend-chip kurallari temizlendi,
@@ -1006,8 +848,6 @@
   // ---- Init: ensure overlay on DOM ready (so Cmd+K works even before button click) ----
   function init() {
     ensureOverlay();
-    activateNav();
-    bindNavMore();
     ensureTrendStrip();
     ensureHeaderRight();
     recognizeUser();
