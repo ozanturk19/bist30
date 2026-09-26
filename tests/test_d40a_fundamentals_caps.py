@@ -69,3 +69,9 @@ def test_bilanco_gunu_tazeleme(monkeypatch):
     assert A._fund_earnings_due("ZZZU", eski, now) is False  # 3 günden eski
     assert A._fund_earnings_due("ZZZV", eski, now) is False  # henüz açıklanmadı
     assert A._fund_earnings_due("YOK", eski, now) is False
+
+
+def test_warmup_daemon_acilista_diski_yukler():
+    import inspect
+    kaynak = inspect.getsource(A._fundamentals_warmup_daemon)
+    assert kaynak.index("_load_fundamentals_cache_from_disk()") < kaynak.index("while True")

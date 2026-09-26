@@ -15087,6 +15087,9 @@ def _fundamentals_warmup_daemon():
     hep {} dönüyordu. MTF warmup daemon paterniyle aynı: tüm BIST listesini döner, periyodik diske yazar.
     """
     time.sleep(120)  # MTF daemon'dan sonra başla — startup I/O ile çakışma önlenir
+    # D-40a: lider açılışta diski YÜKLEMİYORDU (yalnız web/non-leader yüklüyor) → her restart
+    # 233 hissenin tamamını Yahoo'dan yeniden çektiriyordu (canlı 26.09: restart +710 sn'de 180 kayıt).
+    _load_fundamentals_cache_from_disk()
     while True:
         now = time.time()
         _written_this_round = 0
