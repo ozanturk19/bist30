@@ -11846,32 +11846,32 @@ def llms_txt():
     yazılmış özet."""
     body = """# BorsaPusula
 
-> BIST (Borsa İstanbul) hisseleri için algoritmik teknik analiz sinyalleri.
-> Supertrend(10,3) + ADX + EMA12/EMA99 tabanlı, kural-temelli, gün sonu güncellenen.
+> Her akşam kapanıştan sonra BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?
+> Finansallar şirketin KAP'ta açıkladığı rakamlardan, trend Supertrend(10,3) + ADX + EMA12/EMA99 kurallarından gelir; kural-temelli, yapay zekâ rakam üretmez.
 > Yatırım tavsiyesi değildir.
 
 ## Ana Sayfalar
-- [Sinyal Paneli](https://borsapusula.com/): BIST100 güncel Güçlü Trend/Trend Bozuldu sinyalleri, BIST100 endeks durumu
-- [Hisse Tarayıcı](https://borsapusula.com/tarama): sinyal/sektör/fiyat/ADX filtreli tarama, Teknik ve Temel Analiz modları
-- [Sektör Haritası](https://borsapusula.com/sektor-harita): BIST100 hisselerinin günlük değişimi, piyasa değerine göre kutular ve sektör grupları
-- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta sinyal değiştiren hisseler
-- [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
-- [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
+- [Piyasa](https://borsapusula.com/): "Üç soruda BIST" — son kapanışta BIST100, öne çıkan şirketler, durum değiştirenler, sektör ısı haritası
+- [Keşfet (Hisse Tarayıcı)](https://borsapusula.com/tarama): BorsaPusula Skoru, finansal skor, trend, sektör, fiyat ve değerleme filtreleriyle tarama
+- [Sektörler](https://borsapusula.com/sektor-harita): hisselerin kapanış günü değişimi, piyasa değerine göre kutular ve KAP sektör grupları
+- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta trend durumu değişen hisseler
+- [Günlük Özet](https://borsapusula.com/ozet): Güçlü Trend / Trend Bozuldu / Yatay dağılımı
+- [Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
 - [Takvim](https://borsapusula.com/takvim): şirketlerin temettü ve finansal rapor tarihleri, Türkiye ve ABD veri günleri
-- [Blog](https://borsapusula.com/blog): teknik analiz eğitim içerikleri (okumalar)
+- [Borsa Okulu (Blog)](https://borsapusula.com/blog): teknik ve temel analiz kavramları, eğitim içerikleri
 
 ## Hisse Sayfaları
 - Format: https://borsapusula.com/hisse/{TICKER} — örn. /hisse/THYAO
-- Her sayfada: güncel fiyat, sinyal, ADX/RSI, teknik ve temel analiz skoru, SSS
+- Her sayfada: kapanış fiyatı ve kapanış günü, "3 soruda" kartı (finansallar, değerleme, trend), BorsaPusula Skoru, KAP'a dayalı finansal göstergeler, grafik, KAP bildirimleri, SSS
 
 ## Metodoloji
-- [Metodoloji](https://borsapusula.com/metodoloji): sinyal üretim kuralları
+- [Metodoloji](https://borsapusula.com/metodoloji): skorlar ve trend durumu nasıl hesaplanır
 - [Hakkında](https://borsapusula.com/hakkinda)
 
 ## Önemli Notlar
-- Veri kaynağı: gün sonu (EOD) BIST verisi, günlük güncelleme
-- Sinyal terminolojisi: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
+- Veri: her işlem günü kapanışından sonra güncellenen resmi kapanış fiyatları ve şirketlerin KAP'ta açıkladığı finansal raporlar
+- Trend durumu terimleri: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
 - Tüm sayfalar Türkçe (tr)
 
 ## İletişim
