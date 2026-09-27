@@ -97,7 +97,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=46502ebb">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=022b646f">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -122,7 +122,10 @@
 <div class="hib-toast" id="hibToast" role="status" aria-live="polite"></div>
 
 
-<main id="main-content" class="container container--wide" tabindex="-1">
+{#- C-25a: ilk sekme sunucuda secili gelir (D-18b `initial_tab`, dogrulanmis ?tab=). Gorunurluk
+    tek kanon: <main data-hx-tab> + hisse.css kurali; applyTab yalniz bu niteligi degistirir. -#}
+{%- set _it = initial_tab if (initial_tab is defined and initial_tab) else 'ozet' -%}
+<main id="main-content" class="container container--wide" tabindex="-1" data-hx-tab="{{ _it }}">
 
   {% include '_stale_banner.html' %}
 
@@ -254,10 +257,10 @@
       tasir, Enter/Bosluk etkinlestirir (elle etkinlestirme: sekme acilisi fetch
       baslatir). Gorunurluk tek kanondan: applyTab + data-tab-content (K-CP). -#}
   <div class="da-tabs" role="tablist" aria-label="{{ ticker }} sekmeleri">
-    <button type="button" class="da-tab" role="tab" id="tab-ozet" data-segment="ozet" aria-selected="true" aria-controls="panel-ozet hxChart" tabindex="0">Özet</button>
-    <button type="button" class="da-tab" role="tab" id="tab-grafik" data-segment="grafik" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</button>
-    <button type="button" class="da-tab" role="tab" id="tab-temel" data-segment="temel" aria-selected="false" aria-controls="panel-temel" tabindex="-1">Temel</button>
-    <button type="button" class="da-tab" role="tab" id="tab-haberler" data-segment="haberler" aria-selected="false" aria-controls="panel-haberler" tabindex="-1">Haberler</button>
+    <button type="button" class="da-tab{{ ' active' if _it == 'ozet' }}" role="tab" id="tab-ozet" data-segment="ozet" aria-selected="{{ 'true' if _it == 'ozet' else 'false' }}" aria-controls="panel-ozet hxChart" tabindex="{{ '0' if _it == 'ozet' else '-1' }}">Özet</button>
+    <button type="button" class="da-tab{{ ' active' if _it == 'grafik' }}" role="tab" id="tab-grafik" data-segment="grafik" aria-selected="{{ 'true' if _it == 'grafik' else 'false' }}" aria-controls="chart-section" tabindex="{{ '0' if _it == 'grafik' else '-1' }}">Grafik</button>
+    <button type="button" class="da-tab{{ ' active' if _it == 'temel' }}" role="tab" id="tab-temel" data-segment="temel" aria-selected="{{ 'true' if _it == 'temel' else 'false' }}" aria-controls="panel-temel" tabindex="{{ '0' if _it == 'temel' else '-1' }}">Temel</button>
+    <button type="button" class="da-tab{{ ' active' if _it == 'haberler' }}" role="tab" id="tab-haberler" data-segment="haberler" aria-selected="{{ 'true' if _it == 'haberler' else 'false' }}" aria-controls="panel-haberler" tabindex="{{ '0' if _it == 'haberler' else '-1' }}">Haberler</button>
   </div>
 
   <!-- SPEC-017 v2 — Tab-Switch + Fixed Sticky (28 May 2026 gece, Ozan direktifi)
@@ -3243,12 +3246,9 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     opts = opts || {};
     tab = _normTab(tab);
     // SPEC-017 v2 Faz A — data-tab-content attribute (true tab-switch)
-    var panes = document.querySelectorAll('[data-tab-content]');
-    panes.forEach(function(p){
-      var owners = (p.getAttribute('data-tab-content') || '').split(/\s+/);
-      var visible = owners.indexOf(tab) !== -1 || owners.indexOf('always') !== -1;
-      p.style.display = visible ? '' : 'none';
-    });
+    /* C-25a: gorunurluk hisse.css'teki [data-hx-tab] kuralindan; ilk deger SSR'da gelir. */
+    var _main = document.getElementById('main-content');
+    if (_main) _main.setAttribute('data-hx-tab', tab);
     segments.forEach(function(s){
       var isActive = s.dataset.segment === tab;
       s.classList.toggle('active', isActive);
@@ -3263,8 +3263,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
         else if (r > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = r - bar.clientWidth;
       }
     });
-    // Persist + URL state (SPEC-017 v2 Faz A P0-1)
-    try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) { /* sekme bu oturumda zaten degisti, sadece bir sonraki ziyarette hatirlanmayabilir (private mod/kota) */ }
+    // URL state (SPEC-017 v2 Faz A P0-1)
     if (!opts.skipUrl) {
       try {
         /* K-CR (22.09): VARSAYILAN SEKME URL'DE GORUNMEZ. Onceki hal her sekme
@@ -3335,13 +3334,10 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     } catch(e) { console.warn('popstate sekme geri yukleme basarisiz', e); }
   });
 
-  // İlk yükleme: URL ?tab=X > localStorage > 'ozet'
-  var initial = 'ozet';
-  try {
-    var urlTab = new URL(window.location.href).searchParams.get('tab');
-    initial = urlTab ? _normTab(urlTab) : _normTab(localStorage.getItem('bp_hisse_tab') || 'ozet');
-  } catch(e) { console.warn('baslangic sekme tespiti basarisiz, ozet varsayilanina donuluyor', e); }
-  applyTab(_normTab(initial), {skipUrl: false});
+  /* Ilk yukleme: sekme SSR'da secili gelir (C-25a, ?tab= > 'ozet'). Eski localStorage
+     hatirlama kalkti: sunucu onu bilemez, ilk boyamadan sonra sekme degistirip kayma uretiyordu. */
+  var _m0 = document.getElementById('main-content');
+  applyTab(_normTab((_m0 && _m0.getAttribute('data-hx-tab')) || 'ozet'), {skipUrl: false});
 })();
 </script>
 

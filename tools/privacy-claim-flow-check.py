@@ -78,7 +78,6 @@ LOCAL_KEYS = {
     'bp_ga_consent':         dict(server_mirror=False, note='GA4 onayi'),
     'bp_learning_mode':      dict(server_mirror=False, note='Ogrenme Modu acik/kapali'),
     'bp_show_tooltips':      dict(server_mirror=False, note='ipucu balonlari'),
-    'bp_hisse_tab':          dict(server_mirror=False, note='son acik sekme'),
     'bp_tarama_tab':         dict(server_mirror=False, note='son acik sekme'),
     'bp_ls_warn_dismissed':  dict(server_mirror=False, note='localStorage uyari bandi'),
     'bp_search_cache_v1':    dict(server_mirror=False, note='arama onbellegi'),

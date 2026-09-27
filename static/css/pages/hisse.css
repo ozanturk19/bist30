@@ -647,8 +647,8 @@
     --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.12;
   }
   /* Temel Analiz verisi hic yoksa panel gizlenir. Inline style.display DEGIL
-     sinif kullaniliyor: applyTab() her sekme gecisinde [data-tab-content]
-     panellerinin inline display'ini '' yapiyor, yani inline gizleme bir
+     sinif kullaniliyor: applyTab() eskiden her sekme gecisinde [data-tab-content]
+     panellerinin inline display'ini '' yapiyordu (C-25a'dan beri [data-hx-tab] kurali), yani inline gizleme bir
      sekme gidip-gelisinde geri aciliyordu (canlida olculdu: none -> block)
      ve icerigi olmayan bos bir "Temel Analiz" basligi ortaya cikiyordu. */
   .da-fund-panel.da-fund-empty { display: none !important; }
@@ -1440,3 +1440,10 @@
   .tv-ax { grid-template-columns: 92px minmax(0, 1fr) 28px; }
   .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 76px 76px; }
 }
+
+/* C-25a: sekme -> panel gorunurlugu tek kanon. <main data-hx-tab> SSR'da secili sekmeyle
+   gelir (?tab=), applyTab yalniz niteligi degistirir; ilk boyamada yanlis panel gorunmez. */
+[data-hx-tab="ozet"] [data-tab-content]:not([data-tab-content~="ozet"]):not([data-tab-content~="always"]),
+[data-hx-tab="grafik"] [data-tab-content]:not([data-tab-content~="grafik"]):not([data-tab-content~="always"]),
+[data-hx-tab="temel"] [data-tab-content]:not([data-tab-content~="temel"]):not([data-tab-content~="always"]),
+[data-hx-tab="haberler"] [data-tab-content]:not([data-tab-content~="haberler"]):not([data-tab-content~="always"]) { display: none; }
