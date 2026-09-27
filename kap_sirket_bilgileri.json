@@ -1055,10 +1055,11 @@
   "kisa_ad": "Pegasus Hava Taşımacılığı",
   "kap_ana_sektor": "ULAŞTIRMA VE DEPOLAMA",
   "kap_alt_sektor": "ULAŞTIRMA VE DEPOLAMA",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Yurt içi ve yurt dışında tarifeli ve tarifesiz uçak seferleriyle yolcu, yük ve posta taşımacılığı yapılmasıdır.",
   "oid": "4028e4a2422d9a78014232e751bc22a4",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a2422d9a78014232e751bc22a4",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "29/07/2016"
  },
  "SASA": {
   "unvan": "SASA POLYESTER SANAYİ A.Ş.",
@@ -1075,10 +1076,11 @@
   "kisa_ad": "Türkiye Şişe ve Cam Fabrikaları",
   "kap_ana_sektor": "MALİ KURULUŞLAR",
   "kap_alt_sektor": "HOLDİNGLER VE YATIRIM ŞİRKETLERİ",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Her türlü cam ve cam eşya sanayii ile bu sanayie yardımcı ve tamamlayıcı sınai ve ticari faaliyetlerin yürütülmesidir.",
   "oid": "4028e4a140f2ed710140f385d5690102",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a140f2ed710140f385d5690102",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "12/04/2021"
  },
  "THYAO": {
   "unvan": "TÜRK HAVA YOLLARI A.O.",
@@ -1105,10 +1107,11 @@
   "kisa_ad": "Türk Telekom",
   "kap_ana_sektor": "BİLGİ VE İLETİŞİM",
   "kap_alt_sektor": "TELEKOMÜNİKASYON",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Fiber, telli ve telsiz altyapılar dahil her türlü sabit ve mobil telekomünikasyon tesisinin kurulması ve işletilmesidir.",
   "oid": "4028e4a241e538ab0141ea9c96912c8b",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a241e538ab0141ea9c96912c8b",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "28/06/2016"
  },
  "ALBRK": {
   "unvan": "ALBARAKA TÜRK KATILIM BANKASI A.Ş.",
@@ -1933,10 +1936,11 @@
   "kisa_ad": "Petkim Petrokimya",
   "kap_ana_sektor": "İMALAT",
   "kap_alt_sektor": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Petrokimya, kimya ve diğer sanayi alanlarında yurt içinde ve yurt dışında fabrika ve tesisler kurulması, işletilmesi ve petrokimyasal ürünlerin üretim ve ticaretidir.",
   "oid": "4028e4a240f2ef470141165c566a03e4",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a240f2ef470141165c566a03e4",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "05/06/2026"
  },
  "TAVHL": {
   "unvan": "TAV HAVALİMANLARI HOLDİNG A.Ş.",
@@ -2046,10 +2050,11 @@
   "kisa_ad": "Mavi Giyim",
   "kap_ana_sektor": "TOPTAN VE PERAKENDE TİCARET",
   "kap_alt_sektor": "PERAKENDE TİCARET",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Her türlü hazır giyim eşyası ve tekstil ürününün tasarımı, imalatı, ithalatı, ihracatı ve pazarlamasıdır.",
   "oid": "4028e4a141733b5101417ea9aae11fec",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a141733b5101417ea9aae11fec",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "07/05/2019"
  },
  "OTKAR": {
   "unvan": "OTOKAR OTOMOTİV VE SAVUNMA SANAYİ A.Ş.",
@@ -2107,10 +2112,11 @@
   "kisa_ad": "Aygaz",
   "kap_ana_sektor": "İMALAT",
   "kap_alt_sektor": "KİMYA İLAÇ PETROL LASTİK VE PLASTİK ÜRÜNLER",
-  "faaliyet_konusu": null,
+  "faaliyet_konusu": "Sıvılaştırılmış petrol gazı (LPG) ve benzeri yakıtlar ile kimyevi maddelerin ithali, toptan alımı ve satışıdır.",
   "oid": "4028e4a140e95be70140ee03bd6000e0",
   "kaynak_idx_or_url": "https://www.kap.org.tr/tr/sirket-bilgileri/genel/4028e4a140e95be70140ee03bd6000e0",
-  "faaliyet_notu": "KAP metni akış referansı ($xx) — sonraki turda çözülecek"
+  "faaliyet_notu": "elle özetlendi (KAP Esas Sözleşme 'Amaç ve Konu' maddesinin özeti, otomatik alan sektör zinciri/akış referansı verdiği için)",
+  "faaliyet_tarihi": "27/06/2016"
  },
  "GMTAS": {
   "unvan": "GİMAT MAĞAZACILIK SANAYİ VE TİCARET A.Ş.",
