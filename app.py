@@ -45,6 +45,7 @@ import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
 import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /harita gün sayfası bağlamı
+import bulten           # D-45(c): Akşam Bülteni (gün sonu, donmuş; /api/bulten/<tarih>)
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import home_fields      # D-53: ana sayfa SSR alanları (öne çıkan şirketler, Finansallar betimi, değerleme hükmü)
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
@@ -4504,11 +4505,14 @@ def _run_official_close_pass(day=None, notify=True):
                 if ((_before.get(r["ticker"]) or {}).get("change_pct") or 0) * (r.get("change_pct") or 0) < 0]
     _merge_rescued_into_cache(_rescued, notify=notify)
     # D-04b: 18:10 geçici sinyali resmi barla geri dönen değişimler digest'e girmez.
+    _signal_changes = []   # D-45(c): bülten "durum_degisimleri" — {ticker, old, new} (resmi sinyal)
     try:
         _rt = {r["ticker"] for r in _rescued}
         # D-04c P1-1: girdiler resmi sinyalden yeniden kurulur (EOD öncesi sinyal = önceki gün snapshot'ı).
         _pre = _prev_day_signals(day)
         _off_sig = {r["ticker"]: r.get("signal") for r in _rescued}
+        _signal_changes = [{"ticker": t, "old": _pre.get(t), "new": g}
+                           for t, g in _off_sig.items() if g and _pre.get(t) and _pre.get(t) != g]
         _by_t = {r["ticker"]: r for r in _rescued}
         _mk = lambda t, old, new: _serialize_change((t, old, new, _by_t[t]))
         _rest = {t for t in _rt if t not in _pre}
@@ -4553,10 +4557,16 @@ def _run_official_close_pass(day=None, notify=True):
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
                 _flipped[:15], _failed[:15], int(time.time() - _t_tur))
     # D-42: BIST100 ısı haritası bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
+    _heatmap_snap = None
     try:
-        _build_heatmap_snapshot(day)
+        _heatmap_snap = _build_heatmap_snapshot(day)
     except Exception as _e:
         logger.warning("HEATMAP: görüntü üretilemedi: %s", _e)
+    # D-45(c): Akşam Bülteni bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
+    try:
+        _build_bulten_snapshot(day, _signal_changes, _heatmap_snap)
+    except Exception as _e:
+        logger.warning("BULTEN: görüntü üretilemedi: %s", _e)
     return True
 
 
@@ -4625,6 +4635,53 @@ def _render_heatmap_images(day_iso):
     except Exception as _e:
         logger.warning("HEATMAP: %s görsel üretilemedi: %s", day_iso, _e)
         return []
+
+
+# ── D-45(c): Akşam Bülteni (gün sonu görüntüsü, data/bulten/<gün>.json, dondurulur) ──
+_BULTEN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "bulten")
+
+
+def _bulten_next_trading_day(day):
+    d = day
+    for _ in range(7):
+        d = d + timedelta(days=1)
+        if is_trading_day(d):
+            return d.isoformat()
+    return (day + timedelta(days=1)).isoformat()
+
+
+def _build_bulten_snapshot(day, signal_changes, heatmap_snap):
+    """Resmi kapanış turundan sonra çağrılır (heatmap'ten hemen sonra — sektör özeti
+    ondan okunur). Girdiler: resmi arşiv (BIST100), o günün ranked satırları (hareketliler),
+    resmi sinyal değişimleri (çağıran), ısı haritası görüntüsü, KAP akışı (rutin dışı),
+    D-24 takvimi (ertesi işlem günü). Kalite kapısı yok (heatmap'in aksine); o gün zaten
+    donmuşsa dokunulmaz."""
+    rec = official_close.load_archive(day)
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    bist = [s for s in stocks if s.get("ticker") not in ("XU030", "XU100")]
+    ranked = [s for s in bist if not s.get("stale_reason") and s.get("data_quality") != "stale"]
+    movers = home_fields.movers(ranked)
+    kap_items = []
+    if _KAP_STORE.available():
+        _res = kap_feed.query(_KAP_STORE.all_items(), page=1, per_page=200,
+                              include_rutin=False, day=day.isoformat())
+        kap_items = [kap_feed.public_item(it, STOCK_NAMES) for it in _res["items"]]
+    try:
+        takvim_events = (_takvim_payload() or {}).get("events") or []
+    except Exception as _e:
+        logger.warning("BULTEN: takvim okunamadı: %s", _e)
+        takvim_events = []
+    next_day_iso = _bulten_next_trading_day(day)
+    snap = bulten.build(day.isoformat(), rec, movers, signal_changes, heatmap_snap, kap_items,
+                        takvim_events, next_day_iso,
+                        datetime.now(_TZ_TR).isoformat(timespec="seconds"))
+    path = bulten.save_frozen(snap, _BULTEN_DIR)
+    logger.info("BULTEN: %s %s — hareketli %d/%d, durum değişimi %d, bildirim %d, yarın %d",
+               day, "donduruldu " + path if path else "zaten donmuş, dokunulmadı",
+               len(snap["hareketliler"]["up"]), len(snap["hareketliler"]["down"]),
+               len(snap["durum_degisimleri"]), len(snap["onemli_bildirimler"]), len(snap["yarin_takvim"]))
+    return snap
 
 
 _heatmap_mem = {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []}
@@ -5521,6 +5578,45 @@ def api_heatmap():
     if request.headers.get("If-None-Match") == _etag:
         return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
     return _resp
+
+
+_BULTEN_DAY = re.compile(r"^\d{4}-\d{2}-\d{2}\Z")
+
+
+def _bulten_read(path):
+    try:
+        with open(path, encoding="utf-8") as _f:
+            return json.load(_f)
+    except (OSError, ValueError) as _e:
+        logger.warning("BULTEN: %s okunamadı: %s", path, _e)
+        return None
+
+
+@app.route("/api/bulten/latest")
+@limiter.limit("60 per minute")
+def api_bulten_latest():
+    """D-45(c): son donmuş Akşam Bülteni. Görüntü yoksa 503."""
+    path = bulten.latest_path(_BULTEN_DIR)
+    snap = _bulten_read(path) if path else None
+    if not snap:
+        return safe_json({"error": "bulten_unavailable"}), 503
+    return safe_json(snap)
+
+
+@app.route("/api/bulten/<tarih>")
+@limiter.limit("60 per minute")
+def api_bulten_gun(tarih):
+    """D-45(c): o günün donmuş Akşam Bülteni (yalnız katı YYYY-AA-GG). Anlık görüntüsü
+    olmayan gün (haftasonu, resmi tatil, henüz üretilmemiş) → 404."""
+    if not _BULTEN_DAY.match(tarih):
+        abort(404)
+    path = os.path.join(_BULTEN_DIR, tarih + ".json")
+    if not os.path.isfile(path):
+        abort(404)
+    snap = _bulten_read(path)
+    if not snap:
+        abort(404)
+    return safe_json(snap)
 
 
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
