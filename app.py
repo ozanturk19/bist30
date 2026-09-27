@@ -5408,6 +5408,10 @@ def api_hisse_lite(ticker):
         "data_quality":     stock.get("data_quality"),
         "stale_reason":     stock.get("stale_reason"),
         "close_status":     stock.get("close_status"),
+        # D-18b: sayısal DI/ADX (hisse sayfası Q3 DI satırı /chart özetini beklemesin)
+        "di_plus":          stock.get("di_plus"),
+        "di_minus":         stock.get("di_minus"),
+        "adx":              stock.get("adx"),
     }
     _resp = safe_json({"stock": out})
     _etag = hashlib.md5(_resp.get_data()).hexdigest()
@@ -8620,6 +8624,45 @@ def build_signal_summary(stock):
     }
 
 
+# D-18b: hisse sayfası SSR bağlamı — ilk sekme + son 30 EOD kapanışı (fetch beklemeden ilk çizim).
+# Sekme adları hisse.html `VALID_TABS` ile aynı tek kanon; eski `ai` adı Özet'e düşer (C-19).
+_HISSE_VALID_TABS = ("ozet", "grafik", "temel", "haberler")
+_HISSE_TAB_ALIAS = {"ai": "ozet"}
+
+
+def _hisse_initial_tab(raw):
+    t = _HISSE_TAB_ALIAS.get(raw or "", raw or "")
+    return t if t in _HISSE_VALID_TABS else "ozet"
+
+
+def _closes_30(ticker, stock):
+    """Son 30 EOD kapanışı `[[YYYY-MM-DD, close], ...]` (grafik önbelleğindeki günlük barlardan).
+
+    Grafik ucu ana sinyalin resmi kapanış gününden geride kalmışsa ve o kapanış resmiyse
+    (close_status=="resmi") son nokta olarak eklenir: şablon kapanış gününü bu listenin son
+    tarihinden okur, bayat grafik "dünün kapanışı" yazdırmasın. Veri yoksa None (şablon geri düşer)."""
+    data, _ = _load_chart_from_disk_per_ticker(ticker)
+    rows = []
+    for b in ((data or {}).get("ohlc") or [])[-30:]:
+        try:
+            t, c = str(b["time"])[:10], float(b["close"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if c > 0:
+            rows.append([t, round(c, 2)])
+    if not rows:
+        return None
+    st = stock or {}
+    try:
+        _bd = datetime.strptime(str(st.get("bar_date") or ""), "%d.%m.%Y").strftime("%Y-%m-%d")
+        _px = float(st.get("price"))
+    except (TypeError, ValueError):
+        _bd, _px = None, 0.0
+    if _bd and _px > 0 and st.get("close_status") == "resmi" and _bd > rows[-1][0]:
+        rows = (rows + [[_bd, round(_px, 2)]])[-30:]
+    return rows
+
+
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
@@ -8780,7 +8823,9 @@ def stock_page(ticker):
                            seo_signal=sig,
                            seo_score=score,
                            seo_adx=adx_val,
-                           seo_rsi=rsi_val)
+                           seo_rsi=rsi_val,
+                           initial_tab=_hisse_initial_tab(request.args.get("tab")),
+                           closes_30=_closes_30(ticker, ssr_signal))
 
 
 _fundamentals_cache = {}
