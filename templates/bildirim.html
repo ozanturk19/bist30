@@ -88,7 +88,7 @@
       <span><b>{{ mc.t }}</b><span>{{ mc.name }}</span></span>
       {% if mc.price is not none %}<span class="px">{{ mc.price|tr_price }} ₺<small class="{{ dir_class(mc.ch) }}">{{ pct_text(mc.ch) }}{% if close_label %} · {{ close_label }} kapanışı{% endif %}</small></span>{% endif %}
     </span>
-    {% if mc.st %}<span class="t2">{% if mc.bp is not none %}<span class="hb-bp">{{ ring(mc.bp) }}{{ mc.bp }} <small>BorsaPusula Skoru</small></span>{% endif %}<span class="hb-st {{ mc.st }}">{{ mc.stn }}</span></span>{% endif %}
+    {% if mc.st %}<span class="t2">{% if mc.bp is not none %}<span class="hb-bpl"><span class="hb-rg">{{ ring(mc.bp) }}<b>{{ mc.bp }}</b></span><small>BorsaPusula Skoru</small></span>{% endif %}<span class="hb-st {{ mc.st }}">{{ mc.stn }}</span></span>{% endif %}
     <span class="go">{{ mc.t }} hisse sayfası →</span>
   </a>
 

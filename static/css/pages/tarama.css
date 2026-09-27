@@ -112,6 +112,7 @@
   .tv-bp i { position: relative; display: block; width: 64px; height: 6px; border-radius: var(--bp-radius-pill); background: var(--bp-border); overflow: hidden; }
   .tv-bp i::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v, 0) * 1%); border-radius: var(--bp-radius-pill); background: var(--bp-al); }
   .tv-bp.soft b { color: var(--bp-text2); }
+  .tv-tb .tv-bp { pointer-events: none; } /* halka/çubuk tıklaması satır bağlantısına düşsün (C-P0-2809 K05) */
   .tv-bp.soft i::after { background: rgba(var(--bp-ok-rgb), .38); }
   .tv-bp.cy i::after { background: var(--bp-accent-cyan); }
   .tv-tb td.c-te { text-align: left; }
@@ -218,7 +219,7 @@
     .tv-tb td.c-p { grid-area: p; align-self: end; font-weight: 600; }
     .tv-tb td.c-c { grid-area: c; align-self: start; font-size: 13px; font-weight: 600; }
     .tv-tb tr.r td.c-tr, .tv-tb tr.r td.c-g { display: none; }
-    .tv-tb .c-bp .tv-bp { position: relative; display: grid; place-items: center; width: 40px; height: 40px; gap: 0; }
+    .tv-tb .c-bp .tv-bp { position: relative; display: grid; place-items: center; place-content: center; width: 40px; height: 40px; gap: 0; }
     .tv-tb .c-bp .tv-bp::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(var(--bp-al) calc(var(--v, 0) * 1%), var(--bp-border) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), var(--bp-bg) calc(100% - 3.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), var(--bp-bg) calc(100% - 3.5px)); }
     .tv-tb .c-bp .tv-bp.soft::before { background: conic-gradient(rgba(var(--bp-ok-rgb), .4) calc(var(--v, 0) * 1%), var(--bp-border) 0); }
     .tv-tb .c-bp .tv-bp b { position: relative; min-width: 0; text-align: center; font-size: 14px; font-weight: 800; }
