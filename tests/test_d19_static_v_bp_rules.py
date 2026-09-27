@@ -2,8 +2,13 @@
 import hashlib
 import os
 import re
+import sys
+
+import pytest
 
 import business_rules as br
+
+_APP_YOK = pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")
 
 
 def _old_adx(a):
@@ -59,6 +64,7 @@ def test_bp_rules_tablolardan_turer():
     assert not br.TRADE_LANG_RE.search(repr(r))
 
 
+@_APP_YOK
 def test_static_v_ozet_ve_guvenlik():
     import app as appmod
     got = appmod.static_v("css/tokens.css")
@@ -71,6 +77,7 @@ def test_static_v_ozet_ve_guvenlik():
     assert "?v=" not in appmod.static_v("../app.py")
 
 
+@_APP_YOK
 def test_jinja_global_ve_baglam():
     import app as appmod
     with appmod.app.test_request_context("/"):
