@@ -4463,7 +4463,7 @@ def _run_official_close_pass(day=None, notify=True):
     except Exception as _e:
         logger.warning("OFFICIAL_CLOSE: endeks dosyası alınamadı: %s", _e)
         _idx_parsed = None
-    official_close.save_archive(parsed, got.get("last_modified"), indices=_idx_parsed)
+    official_close.save_archive(parsed, got.get("last_modified"), indices=_idx_parsed, etag=got.get("etag"))
     official_close.reset_memory()
     _before = {s.get("ticker"): s for s in _stocks_now}
     _rescued, _failed = [], []
@@ -4568,6 +4568,49 @@ def _run_official_close_pass(day=None, notify=True):
     except Exception as _e:
         logger.warning("BULTEN: görüntü üretilemedi: %s", _e)
     return True
+
+
+_MORNING_VERIFY_START_MIN = 9 * 60 + 30   # D-04b(4): seans öncesi doğrulama
+_MORNING_VERIFY_GIVEUP_MIN = 9 * 60 + 55  # 10:00 açılışından önce bırakılır
+
+
+def _morning_verify_window(now_tr=None):
+    """09:30 ertesi gün doğrulama penceresi: işlem günü 09:30-09:55 TR (açılıştan önce)."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    m = now_tr.hour * 60 + now_tr.minute
+    return _MORNING_VERIFY_START_MIN <= m < _MORNING_VERIFY_GIVEUP_MIN
+
+
+def _run_morning_verify_pass(today_tr=None):
+    """D-04b(4): 09:30 sabah doğrulaması, önceki işlem gününün resmi kapanışı için.
+    Arşiv varsa aynı bülten ETag'iyle koşullu istek atılır (`If-None-Match`):
+    değişmemişse (304) iş yok. Bülten revize edilmişse (nadir) tam kesinleştirme
+    turu (`_run_official_close_pass`) o gün için yeniden koşar — zaten test edilmiş
+    aynı yol. Arşiv hiç yoksa (dünkü kesinleştirme tamamen başarısız oldu) aynı
+    turu yeniden dener; o da olmazsa fiyat geçici kalır ve bir sonraki pencerede
+    (09:55'e kadar) yeniden denenir — kaynağı belirsiz bir yamayla canlı veri
+    kirletilmez (P0 aday, log'da izlenir).
+    True → pencerede bu gün için iş bitti (flag yazılır); False → yeniden denenecek."""
+    today_tr = today_tr or datetime.now(_TZ_TR).date()
+    day = last_trading_day_on_or_before(today_tr - timedelta(days=1))
+    rec = official_close.load_archive(day)
+    if rec is None:
+        logger.warning("MORNING_VERIFY: %s için resmi kapanış arşivi yok, kesinleştirme yeniden deneniyor", day)
+        return _run_official_close_pass(day, notify=False)
+    etag = rec.get("etag")
+    try:
+        changed = official_close.fetch_bulletin_conditional(day, etag)
+    except Exception as _e:
+        logger.warning("MORNING_VERIFY: bülten kontrolü hatası: %s", _e)
+        return False
+    if changed is None:
+        logger.info("MORNING_VERIFY: %s bülteni değişmemiş (ETag)", day)
+        return True
+    logger.warning("MORNING_VERIFY: %s bülteni revize edilmiş görünüyor, yeniden uygulanıyor", day)
+    official_close.reset_memory()
+    return _run_official_close_pass(day, notify=False)
 
 
 # ── D-42: BIST100 ısı haritası (gün sonu görüntüsü, data/heatmap/<gün>.json, dondurulur) ──
@@ -4945,6 +4988,18 @@ def background_refresh():
                 logger.warning("chart reverify marker yazılamadı: %s", _e)
 
         if not _should_run_eod:
+            # D-04b(4): 09:30 sabah doğrulaması — dünkü resmi kapanışı bülten ETag'iyle
+            # yeniden kontrol eder (açılıştan önce, _already_done_today'den bağımsız).
+            _morning_verify_path = os.path.join(
+                _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_morning_verify.flag"
+            )
+            if _morning_verify_window(datetime.now(_TZ_TR)) and not os.path.exists(_morning_verify_path):
+                if _run_morning_verify_pass(_today_tr):
+                    try:
+                        with open(_morning_verify_path, "w", encoding="utf-8") as _f:
+                            _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+                    except OSError as _e:
+                        logger.warning("morning_verify flag yazılamadı: %s", _e)
             # CPO-1703: ana EOD turu bugün için zaten çalıştıysa (_already_done_today)
             # ve prev_cache fallback'e düşen ticker'lar varsa, günde BİR kez daha
             # (19:30 TR'den itibaren) catch-up dene. Yeni thread/process yok — bu

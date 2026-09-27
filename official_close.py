@@ -145,7 +145,50 @@ def fetch_bulletin(d, timeout=30):
     r = requests.get(bulletin_url(d), timeout=timeout, headers={"User-Agent": "Mozilla/5.0"})
     if r.status_code != 200 or not r.content:
         return None
-    return {"raw": r.content, "last_modified": r.headers.get("Last-Modified")}
+    return {"raw": r.content, "last_modified": r.headers.get("Last-Modified"), "etag": r.headers.get("ETag")}
+
+
+def fetch_bulletin_conditional(d, etag, timeout=30):
+    """D-04b(4): 09:30 sabah doğrulaması. `etag` (arşivdeki kayıttan) varsa
+    `If-None-Match` ile koşullu GET; sunucu 304 dönerse bülten dünden beri
+    DEĞİŞMEMİŞ → None. Değiştiyse ya da etag yoksa fetch_bulletin ile aynı
+    biçimde veri döner. Ağ hatası fırlatır."""
+    if not etag:
+        return fetch_bulletin(d, timeout=timeout)
+    import requests
+    headers = {"User-Agent": "Mozilla/5.0", "If-None-Match": etag}
+    r = requests.get(bulletin_url(d), timeout=timeout, headers=headers)
+    if r.status_code == 304:
+        return None
+    if r.status_code != 200 or not r.content:
+        return None
+    return {"raw": r.content, "last_modified": r.headers.get("Last-Modified"), "etag": r.headers.get("ETag")}
+
+
+def fetch_isyatirim_hisse_tekil(ticker, d, timeout=15):
+    """D-04b(4) son çare yedeği: bülten sabah da alınamazsa İş Yatırım
+    `HisseTekil` ucundan d gününün günlük kapanışı (belgesiz uç; yalnız yedek/
+    çapraz kontrol — kaynak notu §1.B). (close, prev_close) ya da veri yoksa
+    None döner. Ağ hatası fırlatır."""
+    import requests
+    url = ("https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/Common/"
+           "Data.aspx/HisseTekil")
+    ds = d.strftime("%d-%m-%Y")
+    r = requests.get(url, params={"hisse": ticker, "startdate": ds, "enddate": ds},
+                      timeout=timeout, headers={"User-Agent": "Mozilla/5.0"})
+    if r.status_code != 200:
+        return None
+    try:
+        rows = r.json().get("value") or []
+    except ValueError:
+        return None
+    for row in rows:
+        if str(row.get("HGDG_TARIH", "")).startswith(d.strftime("%d-%m-%Y")):
+            close = _num(row.get("HG_KAPANIS"))
+            if close is None:
+                return None
+            return {"close": close}
+    return None
 
 
 def archive_path(d):
@@ -183,10 +226,11 @@ def _with_index_prev(idx_parsed, d):
     return out
 
 
-def save_archive(parsed, last_modified=None, source=SOURCE_LABEL, indices=None):
+def save_archive(parsed, last_modified=None, source=SOURCE_LABEL, indices=None, etag=None):
     os.makedirs(ARCHIVE_DIR, exist_ok=True)
     d = date.fromisoformat(parsed["date"])
     payload = {"date": parsed["date"], "source": source, "last_modified": last_modified,
+               "etag": etag,
                "saved_at": datetime.now().isoformat(timespec="seconds"), "stocks": parsed["stocks"]}
     if indices and indices.get("date") == parsed["date"]:
         payload["indices"] = _with_index_prev(indices, d)
