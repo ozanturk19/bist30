@@ -99,6 +99,8 @@ def scan(templates, shared):
     pages_checked = 0
     for t in templates:
         txt = open(t, encoding='utf-8').read()
+        # C-26: `{{ static_v('x.js') }}` -> `/static/x.js` (satir sayisi degismez)
+        txt = re.sub(r"\{\{\s*static_v\(['\"]([^'\"]+)['\"]\)\s*\}\}", r'/static/\1', txt)
         loaded = []
         for m in SRC_RE.finditer(txt):
             u = m.group(1).split('?')[0].lstrip('/')

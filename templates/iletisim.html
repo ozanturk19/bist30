@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>İletişim | BorsaPusula</title>
 <meta name="description" content="borsapusula.com iletişim sayfası. Öneri, hata bildirimi veya genel sorularınız için bize ulaşın.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/iletisim">
 <meta property="og:title"       content="İletişim — borsapusula.com">
 <meta property="og:description" content="borsapusula.com iletişim sayfası. Öneri, hata bildirimi veya genel sorularınız için bize ulaşın.">
@@ -20,10 +20,10 @@
   {"@type":"ListItem","position":2,"name":"İletişim","item":"https://borsapusula.com/iletisim"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<link rel="stylesheet" href="/static/css/pages/prose.css?v=1a5a368a">
-<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=f487c008">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/prose.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/iletisim.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -234,10 +234,10 @@ window.addEventListener('pageshow', (ev) => {
 {% with ftr_self='/iletisim' %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

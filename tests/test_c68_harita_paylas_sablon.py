@@ -67,6 +67,7 @@ def _env():
                            undefined=jinja2.ChainableUndefined)
     e.filters.update(tr_price=lambda v: str(v), tr_num=lambda v: str(v), signal_label=lambda s: s,
                      signal_age_text=lambda s: "", signal_age_phrase=lambda s: "", signal_age_days=lambda s: 0)
+    e.globals["static_v"] = lambda p: "/static/" + p  # C-26
     return e
 
 

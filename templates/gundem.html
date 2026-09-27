@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{#- C-63: tek açıklama metni (3 meta); tarih D-06 eod_label'dan, yoksa "Son seansta". -#}{%- set _gdesc -%}{% if ssr_signal_summary %}{{ (ssr_eod_label ~ ' kapanışında') if ssr_eod_label else 'Son seansta' }} BIST'te {{ ssr_signal_summary.al }} güçlü trend var; {% if ssr_new_signals %}{{ ssr_new_signals|length }} hissenin trend durumu değişti.{% else %}trend durumu değişen hisse yok.{% endif %}{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}{%- endset -%}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
 <meta name="description" content="{{ _gdesc }}">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/gundem">
 <meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
 <meta property="og:description" content="{{ _gdesc }}">
@@ -20,10 +20,10 @@
   {"@type":"ListItem","position":2,"name":"Piyasa Gündem Merkezi","item":"https://borsapusula.com/gundem"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=b45848e9">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/gundem.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -215,7 +215,7 @@
      renderCard `bpIndNum`/`bpSignalAgeText`i cagiriyor ve `loadGundem()` parse
      aninda basliyor — cagri async devamda oldugu icin pratikte yetisiyordu, ama
      bu sadece agin betikten yavas olmasina dayanan bir SIRA SANSI idi. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 
 <script>
 /* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,
@@ -550,11 +550,11 @@ document.addEventListener('visibilitychange', () => {
 /* ── Makro Ticker ── */
 /* makro şerit bp-search.js'te kendiliğinden başlar (C-15) */
 </script>
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 <!-- K-BU: bp-format.js YUKARI tasindi (satir ~229) — stale-banner.js TR takvim
      gunu icin onun kanonunu cagirir, sirasi hala ONCE. -->
-<script src="/static/stale-banner.js?v=5d95f69f"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

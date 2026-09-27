@@ -15,7 +15,7 @@
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
 <meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} trend dönüş seviyesi, {{ ticker }} RSI ADX">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 {# Open Graph #}
 <meta property="og:type"        content="website">
@@ -94,10 +94,10 @@
 </script>
 {% endif %}
 {# lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir #}
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=811d0aa3">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/hisse.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -903,20 +903,20 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/stale-banner.js?v=5d95f69f"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 {%- set _tvd = (_tv2.get('degerleme') or {}) if _tv2 else {} %}
 {%- set _bp = {'ticker': ticker, 'name': name, 'ssr': (ssr_signal or {}), 'tv2': ({'h': _tvd.get('hukum'), 'kap': _tvd.get('kapsam')} if _tv2 else none), 'sig': {'s': (ssr_signal.signal if ssr_signal else none), 'd': (ssr_signal.signal_date if ssr_signal else none)}} %}
 <script>window.BP = {{ _bp|tojson }};</script>
 
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/js/hisse.js?v=9f782cd0"></script>
-<script src="/static/learning-mode.js?v=56c8577c" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
+<script src="{{ static_v('js/bp-chart-common.js') }}"></script>
+<script src="{{ static_v('js/hisse.js') }}"></script>
+<script src="{{ static_v('learning-mode.js') }}" defer></script>
 
 
-<script src="/static/js/toast.js?v=50187172" defer></script>
+<script src="{{ static_v('js/toast.js') }}" defer></script>
 
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

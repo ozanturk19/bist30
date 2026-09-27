@@ -19,11 +19,11 @@
   {"@type":"ListItem","position":2,"name":"Hisse Tarayıcı","item":"https://borsapusula.com/tarama"}
 ]}
 </script>
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=bdfae19f">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/tarama.css') }}">
 {#- C-34: JS kapaliyken (tarayici botu, JS'siz okuyucu) yalniz JS'le calisan denetimler
     gizlenir, SSR'daki Yatay satirlari gorunur, veri gelmeden bos kalacak BP sutunu kalkar. #}
 <noscript><style>.tv-js,.tv .c-bp{display:none!important}.tv tr.tv-nojs{display:table-row!important}</style></noscript>
@@ -107,15 +107,15 @@
 
 {% with ftr_self='/tarama', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/stale-banner.js?v=5d95f69f"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 <script>
 /* Makro şerit: bp-search.js'te kendiliğinden başlar (C-15). */
 /* CPO-1125 İş Kolu B — kanonik bayat veri bandı (60 sn yoklama) */
 bpStartDataQualityPolling();
 </script>
-<script src="/static/js/bp-tarama.js?v=6e71ccb6" defer></script>
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('js/bp-tarama.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

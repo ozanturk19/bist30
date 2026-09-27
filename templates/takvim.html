@@ -18,11 +18,11 @@
   {"@type":"ListItem","position":2,"name":"Takvim"}
 ]}
 </script>
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/takvim.css?v=aeda1826">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/takvim.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<script>document.documentElement.classList.add('js');</script>
 <a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -174,7 +174,7 @@
 
 {% with ftr_self='/takvim', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <script>
 (function(){
   'use strict';
@@ -311,7 +311,7 @@
   }
 })();
 </script>
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

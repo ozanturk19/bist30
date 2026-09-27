@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Borsa Okulu — Temel ve Teknik Analiz Rehberi | BorsaPusula</title>
 <meta name="description" content="Borsa Okulu: bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar. Yeni başlayana öğrenme yolu.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/blog">
 <meta property="og:title"       content="Borsa Okulu — Temel ve Teknik Analiz Rehberi | borsapusula.com">
 <meta property="og:description" content="Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.">
@@ -23,10 +23,10 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"Borsa Okulu","url":"https://borsapusula.com/blog","inLanguage":"tr-TR","description":"Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.","hasPart":[{% for a in (articles|sort(attribute='date', reverse=True))[:10] %}{"@type":"Article","headline":{{ a.title|tojson }},"url":"https://borsapusula.com/blog/{{ a.slug }}","datePublished":{{ a.date|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
-<link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog.css?v=539a5bd9">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/blog.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
@@ -174,8 +174,8 @@ function filterBlog() {
 /* makro şerit bp-search.js'te kendiliğinden başlar (C-15) */ if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', filterBlog); } else { filterBlog(); }
 </script>
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/bp-search.js?v=27fa6a35" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

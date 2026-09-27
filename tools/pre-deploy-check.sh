@@ -171,23 +171,17 @@ else
   FAIL=$((FAIL + 1))
 fi
 
-# 11. cachebust-check (K-J, CPO 20.09.2026) -- her `/static/...?v=<md5-8>`
-# referansi diskteki dosyanin gercek hash'iyle ESLESMEK zorunda. Iki ayri
-# sessiz basarisizligi kapatir: (1) static/sw.js precache listesi ile
-# templates/offline.html'in ELLE tasidigi hash'ler kopmustu -> `caches.match`
-# query string'i anahtarin parcasi saydigi icin /offline tam da ise
-# yarayacagi anda STILSIZ aciliyordu; (2) CSS degisip sablondaki ?v=
-# guncellenmezse Cloudflare ESKI dosyayi servis eder, deploy "basarili"
-# gorunur ama fix canliya CIKMAZ. Ustteki 10 kat dosyanin ICINE bakar,
-# hicbiri REFERANSA bakmaz. Taban SIFIR (118 referans). Elle artirilan
-# surum etiketleri (?v=75, ?v=4, ?v=20260915A) kasitli kapsam disi.
+# 11. sw_manifest (C-26, 27.09.2026; eski K-J cachebust-check'in yerine) --
+# sablonlar `?v=` yazmaz, `{{ static_v('<yol>') }}` kullanir (D-19). Elle hash
+# tasiyan tek iki dosya (static/sw.js precache listesi + surumu,
+# static/manifest.json ikonlari) burada OTOMATIK yeniden uretilir; sablonda
+# elle `?v=` kalirsa kirmizi.
 echo ""
-echo "11/80 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
-if python3 tools/cachebust-check.py > /dev/null 2>&1; then
-  echo "  ✓ cachebust-check PASS"
+echo "11/80 sw_manifest (sw.js + manifest.json uretimi; sablonda elle ?v= 0)..."
+if python3 tools/sw_manifest.py; then
+  echo "  ✓ sw_manifest PASS"
 else
-  echo "  ✗ K-J KIRIK: bir cache-bust referansi bayat -> canliya eski dosya gider."
-  echo "    Detay için: python3 tools/cachebust-check.py"
+  echo "  ✗ sablonda elle ?v= var -> {{ static_v('<yol>') }} kullan."
   FAIL=$((FAIL + 1))
 fi
 
@@ -1030,7 +1024,7 @@ fi
 
 # K-CI (22.09) -- 76/83. DERSIN DORDUNCU UYGULAMASI: PWA MANIFEST'I
 # `static/manifest.json` 53 kapidan YALNIZ BIRI tarafindan okunuyordu
-# (cachebust-check) -- o da metni degil ikon hash'ini. Oysa manifest'in metni
+# (sw_manifest, eski cachebust-check) -- o da metni degil ikon hash'ini. Oysa manifest'in metni
 # kullaniciya ISLETIM SISTEMI KABUGUNDA ulasir: yukleme diyalogu, ana ekran
 # adi, uzun basinca acilan kisayol menusu. 3 ihlal bulundu:
 #   1) "Güçlü Trend Sinyalleri" kisayolu /?filter=al'a gidiyordu -- `filter`

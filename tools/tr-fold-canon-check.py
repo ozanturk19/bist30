@@ -178,6 +178,8 @@ def scan_tree(read, listdir):
                                      '%s() bpTrFold cagiriyor ama govdesi saf delege degil' % name))
         # R4 / R5
         if rel.startswith('templates/'):
+            # C-26: `{{ static_v('x.js') }}` -> `/static/x.js?v=`
+            src = re.sub(r"\{\{\s*static_v\(['\"]([^'\"]+)['\"]\)\s*\}\}", r'/static/\1?v=', src)
             has_vocab = 'bp-vocab.js' in src
             calls_canon = CANON_FN in clean
             if calls_canon and not has_vocab:

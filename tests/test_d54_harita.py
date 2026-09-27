@@ -95,6 +95,7 @@ def test_share_text_and_day_context():
 def _site_html(snap):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(ROOT, "templates")))
     env.filters["signal_age_days"] = lambda s: 0   # _fmt_macros'taki kullanılmayan makro için
+    env.globals["static_v"] = lambda p: "/static/" + p  # C-26
     groups, tiles = hm.layout(snap["rows"])
     return env.get_template("_heatmap.html").render(heatmap=snap, heatmap_groups=groups, heatmap_tiles=tiles)
 

@@ -66,7 +66,8 @@ ENGINE = 'learning-mode.js'
 MIN_ANCHOR_TEMPLATES = 2  # C-11 (24.09): sinyal rozeti capasi kalkti, 5 sayfa motoru birakti; C-34 (24.09): /tarama ADX filtre etiketi (tek capa) kalkti, motor header kontrolu icin yuklenmeye devam eder
 
 RE_ANCHOR = re.compile(r'class="[^"]*\bjargon-term\b|sigLabelTooltip\s*\(')
-RE_ENGINE_TAG = re.compile(r'src="/static/' + re.escape(ENGINE) + r'\?')
+# C-26: sablonlar `{{ static_v('learning-mode.js') }}` yazar; eski `/static/...?v=` bicimi de taninir.
+RE_ENGINE_TAG = re.compile(r'src="(?:/static/' + re.escape(ENGINE) + r'\?|\{\{\s*static_v\([\'"]' + re.escape(ENGINE) + r'[\'"]\))')
 RE_HIDE_TOGGLE = re.compile(r'\.bp-lm-toggle\s*\{[^}]*display\s*:\s*none')
 # Dar ekranda baslik varyanti gizlenebilir -- AMA yalnizca baska bir varyant
 # MOUNT EDILIYORSA. "Kontrolu gizlemek" ile "kontrolu tasimak" farkli seylerdir;
