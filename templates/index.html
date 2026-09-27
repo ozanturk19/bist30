@@ -227,9 +227,18 @@
     <h2 class="hp-blk-t da-display" id="hpMvT">Son seansın hareketlileri</h2>
     <p>Tüm kapsam · <span class="hp-asof">{{ _asl }}</span></p>
   </div>
+  {#- D-53: hareketliler SSR (ssr_movers; JS aynı seçimle yeniler) -#}
+  {%- set _mv = ssr_movers if (ssr_movers and (ssr_movers.up or ssr_movers.down)) else none -%}
+  {%- macro mv_rows(rows, none_txt) -%}
+    {%- for s in rows -%}
+    {%- set _l = s.lim if s.lim in ('tavan', 'taban') else none -%}
+    <li><a href="/hisse/{{ s.ticker|urlencode }}"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}</span><span class="p da-num">{{ s.price|tr_price }} ₺</span><span class="chg da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span>{% if _l %}<span class="hp-lim hp-lim--{{ _l }}">{{ _l|upper }}</span>{% else %}<span class="hp-lim" aria-hidden="true"></span>{% endif %}</a></li>
+    {%- else -%}<li class="hp-row-none">{{ none_txt }}</li>
+    {%- endfor -%}
+  {%- endmacro %}
   <div class="hp-mv">
-    <div class="da-panel hp-pan"><h3>En çok yükselenler</h3><ol class="hp-rows" id="hpMvUp">{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}</ol></div>
-    <div class="da-panel hp-pan"><h3>En çok düşenler</h3><ol class="hp-rows" id="hpMvDn">{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}</ol></div>
+    <div class="da-panel hp-pan"><h3>En çok yükselenler</h3><ol class="hp-rows" id="hpMvUp">{% if _mv %}{{ mv_rows(_mv.up, "Son seansta yükselen hisse yok.") }}{% else %}{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}{% endif %}</ol></div>
+    <div class="da-panel hp-pan"><h3>En çok düşenler</h3><ol class="hp-rows" id="hpMvDn">{% if _mv %}{{ mv_rows(_mv.down, "Son seansta düşen hisse yok.") }}{% else %}{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}{% endif %}</ol></div>
   </div>
   {%- if heatmap and heatmap.rows %}
   {%- set _lim = {} -%}{%- for r in heatmap.rows if r.lim -%}{%- set _ = _lim.update({r.t: r.lim}) -%}{%- endfor %}

@@ -427,7 +427,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
           {%- endif %}
           {%- endfor %}
         </ul>
-        <p class="hx-qp">{% if _tv2 %}Temel skor {{ tv2_weights(_tv2)|trim|replace('Beş', 'beş', 1) }}{% elif 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
+        <p class="hx-qp">{% if _tv2 %}Temel skor {{ tv2_weights(_tv2)|trim|replace('Beş', 'beş', 1) }}{% elif 'nakit_akisi' in _na %}Temel skor iki alanın ağırlıklı ortalaması: kârlılık %67, değerleme ve büyüme %33.{% elif 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
         {% elif _tv2 and _tv2.limited_data %}
         <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Sınırlı veri</p>
         <p class="hx-qp">{{ tv2_limited(_tv2)|replace('Sınırlı veri · ', '', 1) }}</p>
@@ -784,7 +784,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
         <div><div class="tv-lbl">Temel skor</div><div class="tv-sub">100 üzerinden</div></div>
       </div>
       {% endif %}
-      <p class="tv-kind" id="tvKind">{% if _tv2 and _tv2.limited_data %}{{ tv2_limited(_tv2) }}{% elif _tv2 %}{{ tv2_weights(_tv2) }}{% elif 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
+      <p class="tv-kind" id="tvKind">{% if _tv2 and _tv2.limited_data %}{{ tv2_limited(_tv2) }}{% elif _tv2 %}{{ tv2_weights(_tv2) }}{% elif 'nakit_akisi' in _tv_na %}İki alanın ağırlıklı ortalaması: kârlılık %67, değerleme ve büyüme %33.{% elif 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
       {%- if _tv2 and _tv2.veri_notu %}
       {%- set _VN = {'esas_belirsiz': 'muhasebe esası belirlenemedi', 'yillik_rapor_eski': 'son yıllık rapor güncel değil', 'son_rapor_gecikmis': 'son dönem raporu gecikmiş', 'ceyrek_eksik': 'bazı çeyrek raporları eksik', 'kalem_eksik': 'bazı temel kalemler okunamadı', 'tutarsizlik': 'pay adedi ya da tutarlar tutarsız', 'sigorta_kalemleri_sinirli': 'prim ve hasar kalemleri okunmuyor'} %}
       <p class="tv-kind" id="tvNote">Veri notu <b>{{ _tv2.veri_notu }}</b>{%- set _vnn = (_tv2.veri_notu_nedenleri or [])|reject('equalto', 'sigorta_kalemleri_sinirli' if _tv2.sablon_notu else '')|list %}{% if _vnn %} · {% for _c in _vnn %}{{ _VN.get(_c, _c) }}{{ ', ' if not loop.last }}{% endfor %}{% elif not _tv2.sablon_notu %} · tüm veri kontrolleri geçti{% endif %}{% if _tv2.sablon_notu %} · {{ _tv2.sablon_notu }}{% endif %}</p>
