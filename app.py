@@ -6186,8 +6186,8 @@ def get_chart_data():
                 "bear_score": bear_score,
                 "sl_level":   sl_val,
                 "adx":        round(adx_val, 1),
-                "e12":        round(e12_val, 1),
-                "e99":        round(e99_val, 1),
+                "e12":        round(e12_val, 2),  # D-04b #3: analyze() ile aynı hassasiyet (CPO-1741)
+                "e99":        round(e99_val, 2),
                 "st_bull":    st_bull,  "st_bear":  st_bear,
                 "adx_bull":   adx_bull, "adx_bear": adx_bear,
                 "e12_bull":   e12_bull, "e12_bear": e12_bear,
@@ -8296,8 +8296,8 @@ def _compute_chart_data(ticker_base, period="2y"):
                 "adx":        round(adx_val, 1),
                 "di_plus":    round(di_p, 1),
                 "di_minus":   round(di_m, 1),
-                "e12":        round(e12_val, 1),
-                "e99":        round(e99_val, 1),
+                "e12":        round(e12_val, 2),  # D-04b #3: analyze() ile aynı hassasiyet (CPO-1741)
+                "e99":        round(e99_val, 2),
                 "st_bull":    st_bull,  "st_bear":  st_bear,
                 "adx_bull":   adx_bull, "adx_bear": adx_bear,
                 "e12_bull":   e12_bull, "e12_bear": e12_bear,
