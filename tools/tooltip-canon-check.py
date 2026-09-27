@@ -32,6 +32,7 @@ Olctugu uc eksen:
 Cikis: 0 temiz · 1 sapma · 2 kapsam tabani altinda (dedektor korlesmis).
 """
 import os, re, sys
+from _page_js import with_page_js
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TPL  = os.path.join(ROOT, 'templates')
@@ -173,7 +174,7 @@ def main():
     for fn in sorted(os.listdir(TPL)):
         if not fn.endswith('.html'):
             continue
-        src = open(os.path.join(TPL, fn), encoding='utf-8').read()
+        src = with_page_js(fn, open(os.path.join(TPL, fn), encoding='utf-8').read())
 
         # eski oznitelik geri gelmis mi? (K-AU'dan beri ISTISNASIZ)
         for m in re.finditer(r'data-tooltip\s*=', src):

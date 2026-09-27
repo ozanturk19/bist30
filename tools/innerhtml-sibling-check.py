@@ -30,6 +30,7 @@ Kullanim:
 """
 import os, re, sys, io, subprocess, tempfile, tarfile
 from html.parser import HTMLParser
+from _page_js import with_page_js
 
 TPL_DIR = 'templates'
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
@@ -154,7 +155,7 @@ def check_tree(root):
             path = os.path.join(dp, f)
             rel = os.path.relpath(path, root)
             try:
-                raw = io.open(path, encoding='utf-8').read()
+                raw = with_page_js(f, io.open(path, encoding='utf-8').read(), root=root)
             except (UnicodeDecodeError, OSError):
                 continue
             containers = overwritten_containers(raw)
