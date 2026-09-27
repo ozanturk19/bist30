@@ -55,31 +55,3 @@ def test_save_news_cache_merges_with_existing_disk_copy():
     )
 
 
-def test_prefetch_round_gated_by_disk_timestamp_not_process_sleep():
-    """madde 3: tur artık disk'teki son-tur damgasına bağlı, process sleep'ine değil."""
-    src = _read_app()
-    body = _extract_function_body(src, "_prefetch_news_worker")
-    assert body, "_prefetch_news_worker() bulunamadı"
-    assert "_prefetch_last_run_ts()" in body, (
-        "prefetch turu disk'teki son-tur zaman damgasını kontrol etmiyor — "
-        "--max-requests recycle'ında process sleep'i sıfırlanır, tur zamanı korunmaz"
-    )
-    assert "_prefetch_mark_run(now)" in body, (
-        "tamamlanan tur sonunda zaman damgası diske yazılmıyor — yeni PID'de "
-        "6 saatlik gate hiç uygulanmaz"
-    )
-    assert "time.sleep(_NEWS_CACHE_TTL)" not in body, (
-        "tur hâlâ process ömrüne bağlı 6 saatlik sleep kullanıyor — disk-gate "
-        "eklendiyse bu tam çözüm değil, eski davranış hâlâ etkin"
-    )
-
-
-def test_prefetch_last_run_helpers_are_disk_backed():
-    src = _read_app()
-    ts_body = _extract_function_body(src, "_prefetch_last_run_ts")
-    mark_body = _extract_function_body(src, "_prefetch_mark_run")
-    assert ts_body and mark_body, "_prefetch_last_run_ts/_prefetch_mark_run bulunamadı"
-    assert "_PREFETCH_LAST_RUN_PATH" in ts_body and "_PREFETCH_LAST_RUN_PATH" in mark_body, (
-        "helper'lar aynı disk yoluna okuyup yazmıyor"
-    )
-    assert "_atomic_write_json" in mark_body, "_prefetch_mark_run atomic yazmıyor (yarı yazılmış dosya riski)"

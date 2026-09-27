@@ -54,10 +54,10 @@ def test_news_endpoint_short_circuits_head_and_monitor_ua():
     assert "uptimerobot" in body.lower(), (
         "UptimeRobot User-Agent kısa devresi yok — monitör kendi kota devresini besliyor"
     )
-    # Kısa devre, cache/queue mantığından ÖNCE olmalı (queue'ya add edilmeden dönmeli)
+    # Kısa devre, cache mantığından ÖNCE olmalı
     head_idx = body.index('request.method == "HEAD"')
-    queue_idx = body.index('_news_fetch_queue[ticker] = ("stock_news"')
-    assert head_idx < queue_idx, "HEAD/monitor kısa devresi queue.add()'den SONRA geliyor"
+    miss_idx = body.index("# 4. CACHE MISS")
+    assert head_idx < miss_idx, "HEAD/monitor kısa devresi cache-miss dalından SONRA geliyor"
 
 
 def test_news_endpoint_deterministic_when_quota_degraded_even_after_cache_expiry():
@@ -69,10 +69,10 @@ def test_news_endpoint_deterministic_when_quota_degraded_even_after_cache_expiry
         "loading:true'ya (flapping) dönebilir"
     )
     degraded_idx = body.index("if _gemini_news_degraded():")
-    queue_idx = body.index('_news_fetch_queue[ticker] = ("stock_news"')
-    assert degraded_idx < queue_idx, (
-        "kota-tükendi kontrolü queue'ya eklemeden ÖNCE olmalı — "
-        "aksi halde doomed bir bg-fetch israf ediliyor"
+    miss_idx = body.index("# 4. CACHE MISS")
+    assert degraded_idx < miss_idx, (
+        "kota-tükendi kontrolü cache-miss dalından ÖNCE olmalı — "
+        "aksi halde doomed bir yanıt üretiliyor"
     )
 
 

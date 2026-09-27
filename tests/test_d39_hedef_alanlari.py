@@ -146,13 +146,6 @@ def test_app_generated_strings_have_no_trade_language():
     assert hits == [], f"hedef/işlem yönetimi dili üreten metin: {hits}"
 
 
-def test_explain_prompt_and_validation():
-    strings = " ".join(_strings("_enrich_signal_explanation"))
-    assert "Stop-Loss" not in strings and "Trend dönüş seviyesi (Supertrend): " in strings
-    # AI yine de üretirse commentary'ye düşer
-    assert "_TRADE_LANG_RE.search(text)" in _func_src("_enrich_signal_explanation")
-
-
 # ── VPS (py3.12): gerçek import — DQV import bloğu yedeğe düşmemiş olmalı ────
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")

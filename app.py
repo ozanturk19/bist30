@@ -6426,92 +6426,6 @@ def _news_ttl_for(ticker: str) -> int:
     return _NEWS_CACHE_TTL
 
 
-# CPO-1350 §2b Sec.1 — cross-process in-flight dedup. Kök neden (CPO-1350/DEV-1659
-# ölçümü): _prefetch_news_worker ve _on_demand_news_worker kararlarını kendi
-# process-local _news_cache'ine göre veriyor; 90s'lik gemini-cache-sync diski bu
-# yarışı kapatamayacak kadar yavaş. Reset anındaki gibi çoklu worker aynı ticker'ı
-# aynı ~saniyelerde miss görürse ikisi de bağımsızca Gemini'ye soruyor (canlı kanıt:
-# aynı 5 hisse, 84s pencerede, 2 farklı PID, 2x gerçek çağrı = %50 israf).
-# _gemini_rate_acquire ile BİREBİR AYNI SINIF: tek paylaşımlı dosya + flock
-# (LOCK_EX|LOCK_NB) + sınırlı poll bütçesi + gevent hub threadpool offload + 10s
-# sert tavan. Kilit alınamazsa (budget/timeout) GÜVENLİ VARSAYILAN "claim başarılı"
-# döner — worker hiçbir koşulda asılı kalmaz/bloklanmaz, en kötü ihtimalle eski
-# (dedup'suz) davranışa döner, asla yeni bir hang sınıfı eklemez.
-_NEWS_INFLIGHT_PATH           = os.environ.get("NEWS_INFLIGHT_PATH",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_inflight.json"))
-_NEWS_INFLIGHT_STALE_S        = 60    # gerçekçi üst sınır: 2×_GEMINI_TIMEOUT_CAP(5s) + rate-wait + marj
-_NEWS_INFLIGHT_FLOCK_BUDGET_S = 8.0   # outer .get(timeout=10) altında kalsın diye 2s marj
-_news_inflight_lock = threading.Lock()
-if _IS_SHADOW:  # D-16: prod claim dosyasına dokunma
-    _news_inflight_fh = tempfile.TemporaryFile("r+")
-else:
-    if not os.path.exists(_NEWS_INFLIGHT_PATH):
-        open(_NEWS_INFLIGHT_PATH, "a").close()
-    _news_inflight_fh = open(_NEWS_INFLIGHT_PATH, "r+")
-
-
-def _news_inflight_claim_blocking(ticker: str) -> bool:
-    """True → bu ticker'ı BU worker fetch edebilir (claim alındı).
-    False → başka process aynı ticker'ı <_NEWS_INFLIGHT_STALE_S sn içinde claim
-    etmiş — Gemini çağrısı ATLANMALI (sonuç disk-sync/queue retry ile gelecek)."""
-    with _news_inflight_lock:
-        _t0 = time.time()
-        while True:
-            try:
-                _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
-                break
-            except (BlockingIOError, OSError):
-                if time.time() - _t0 > _NEWS_INFLIGHT_FLOCK_BUDGET_S:
-                    logger.error(
-                        "_news_inflight_claim: %.1fs içinde flock alınamadı — "
-                        "dedup atlanıyor (güvenli varsayılan)", _NEWS_INFLIGHT_FLOCK_BUDGET_S)
-                    return True
-                time.sleep(0.05)
-        try:
-            _news_inflight_fh.seek(0)
-            raw = _news_inflight_fh.read().strip()
-            try:
-                state = json.loads(raw) if raw else {}
-                if not isinstance(state, dict):
-                    state = {}
-            except ValueError:
-                state = {}
-            now = time.time()
-            claimed_at = state.get(ticker)
-            if claimed_at and (now - claimed_at) < _NEWS_INFLIGHT_STALE_S:
-                return False
-            # Bayat kayıtları temizle (dosya süresiz şişmesin) + bu ticker'ı claim et
-            state = {t: ts for t, ts in state.items() if (now - ts) < _NEWS_INFLIGHT_STALE_S}
-            state[ticker] = now
-            _news_inflight_fh.seek(0)
-            _news_inflight_fh.truncate()
-            _news_inflight_fh.write(json.dumps(state))
-            _news_inflight_fh.flush()
-            return True
-        finally:
-            _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_UN)
-
-
-def _news_inflight_claim(ticker: str) -> bool:
-    """`_gemini_rate_acquire` ile birebir aynı offload deseni — 10s sert tavan,
-    timeout'ta güvenli varsayılan (claim başarılı sayılır, dedup atlanır, hang YOK)."""
-    if _WS_AVAILABLE:
-        try:
-            return _gevent.get_hub().threadpool.spawn(_news_inflight_claim_blocking, ticker).get(timeout=10)
-        except _gevent.Timeout:
-            logger.error("_news_inflight_claim: 10s threadpool timeout — dedup atlanıyor (güvenli varsayılan)")
-            return True
-    return _news_inflight_claim_blocking(ticker)
-
-
-# On-demand news fetch kuyruğu — iki farklı HTTP endpoint'i besler (CPO-1206 §3):
-# api_stock_news (tekil hisse sayfası) ve api_market_news (piyasa haber şeridi).
-# Kuyruk artık ticker->origin eşlemesi tutuyor ki _on_demand_news_worker gerçek
-# kökeni etiketleyebilsin — önceden ikisi de sabit source="user" ile işleniyordu,
-# "kim çağırdı" hep _on_demand_news_worker'a atfediliyordu, gerçek üretici kayboluyordu.
-_news_fetch_queue     = {}         # {ticker: (origin, ua_class)} — origin: "stock_news" | "market_news"
-_news_queue_lock      = threading.Lock()
-
 # CPO-1208 §1(d): "kotayı kim yiyor" zincirinin son doğrulanmamış halkası —
 # recycle-sonrası her poll gerçekten Gemini çağrısına mı dönüşüyor. 24s toplanıp
 # NEWS_MEASURE log satırlarından [ua_class]×[cache hit/miss]×[gemini_call] tablosu
@@ -6696,17 +6610,6 @@ _SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliy
 _SIG_EXPLAIN_TTL_JITTER = 3600 * 2  # CPO-1008: ±2h jitter — toplu yazılan cache'lerin aynı anda thundering-herd bitişini önler
 _SIG_FAIL_TTL         = 300        # 5 dakika
 
-# CPO-1008 — /news'teki cache-or-queue pattern'e taşındı. Request path'inde Gemini
-# çağrısı YOK: cache-miss → bg thread kuyruğuna at, algoritmik commentary anında dön.
-_signal_explain_queue      = {}   # {ticker: signal_data} — bg enrichment bekleyen
-_signal_explain_queue_lock = threading.Lock()
-
-# CPO-1531 Faz 3 — Temel Analiz Skoru doğal-dil açıklaması. AYNI on-demand worker'ı
-# (_on_demand_signal_explain_worker) paylaşır — ikinci bir paralel Gemini tüketici
-# EKLENMEDİ, mevcut 15s rate-limit'li kuyruğa katılıyor (Gemini kotası ikiye katlanmaz).
-_health_explain_queue      = {}   # {ticker: entry} — bg enrichment bekleyen
-_health_explain_queue_lock = threading.Lock()
-
 # SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
 # Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
 # burst = gevent hub 40-50s donar → K6 v2 quorum tetik. Çözüm:
@@ -6759,10 +6662,6 @@ def _load_explain_cache_from_disk():
 # Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
 # (use_search=False olan denemeler grounding olmadan gider → daha stabil)
 # D-P0-2409 (maliyet): grounding kapalı, önce ucuz model (flash-lite $0,10/$0,40 · flash $0,30/$2,50).
-_GEMINI_NEWS_ATTEMPTS = [
-    ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite, grounding yok
-    ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
-]
 _GEMINI_EXPLAIN_ATTEMPTS = [
     ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite
     ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
@@ -7041,167 +6940,6 @@ def _gemini_rate_acquire() -> float:
     return _gemini_rate_acquire_blocking()
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# IMPLICIT CACHING — Gemini 2.5 sabit prefix sistem prompt'ları (1024+ token)
-# Aynı prefix tekrar gönderildiğinde input token maliyeti %75 düşer.
-# Bu prompt'lar değişmemeli — her değişiklik cache invalidate eder.
-# ═══════════════════════════════════════════════════════════════════════════
-
-_SYS_NEWS = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun haber özet asistanısın. Borsa İstanbul'da işlem gören şirketler hakkındaki resmi açıklamaları, finansal sonuçları, KAP bildirimlerini ve önemli kurumsal gelişmeleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — TARİH KISITI:
-YALNIZCA görev mesajında belirtilen tarih aralığındaki olayları yaz. Bu tarih aralığı dışındaki herhangi bir gelişmeyi DAHIL ETME. Bugünün tarihinden sonraki tarihler için ASLA "olacak, planlanıyor, açıklanacak" gibi ifadeler kullanma — gelecek bilinmez.
-
-KURAL 2 — GELECEK YASAĞI:
-Bugünden sonraki tarihlerde olacak olaylar HAKKINDA SPEKÜLASYON YAPMA. Eğer arama sonuçlarında "X şirket yarın bilanço açıklayacak" gibi bir haber bulursan, bunu özete DAHIL ETME. Sadece zaten gerçekleşmiş olayları rapor et. Tahminler, beklentiler ve "olabilir" denenen şeyler de yasaktır.
-
-KURAL 3 — BOŞ KAYNAK YANITI:
-Eğer belirtilen tarih aralığında doğrulanmış bir gelişme bulamadıysan, SADECE şunu yaz: "Son 7 günde kayda değer bir gelişme bulunmuyor." Başka bir ek metin yazma, "bilgim sınırlı" gibi bahane sunma, alternatif öneri sunma.
-
-KURAL 4 — UYDURMA YASAĞI:
-Tarih uydurma, rakam uydurma, isim uydurma, KAP referans numarası uydurma. Spekülasyon yapma. "Olabilir, muhtemelen, görünüyor, sanırım" gibi belirsiz ifadeler kullanma. Sadece arama kaynaklarında doğrulayabildiğin bilgileri yaz. Emin değilsen yazma.
-
-KURAL 5 — GİRİŞ/KAPANIŞ YASAĞI:
-"Aşağıda X şirketinin özetlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur, başka sorunuz olursa..." gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun, gereksiz dolgu metni ekleme.
-
-═══ FORMAT ═══
-
-• Her madde "•" (madde imi) ile başlasın.
-• Her madde tek konuya odaklansın (1-2 cümle, 30-40 kelimeyi geçmesin).
-• Sayıları Türkçe formatla yaz: 1.234,56 TL (binlik ayraç nokta, ondalık virgül).
-• Yüzdeleri Türkçe formatla yaz: %12,5 büyüme.
-• Tarihleri "DD MMMM YYYY" formatında yaz (örn: 8 Mayıs 2026).
-• En önemli haberi en üste koy (KAP açıklamalarında genelde en yeni tarihli).
-• Teknik finansal jargonu sade dile çevir:
-  - "tahvil itfası" yerine "tahvil geri ödemesi"
-  - "ihraç" yerine "satış / çıkarma"
-  - "iştirak" yerine "bağlı şirket"
-  - "konsolide gelir" yerine "şirket grubunun toplam geliri"
-  - "FAVÖK" yerine "esas faaliyet kârı (FAVÖK)"
-  - "esas faaliyet" yerine "ana iş kolu"
-  - "sermaye artırımı" → açıklayarak yaz: "şirket yeni hisse çıkararak sermayesini artırdı"
-
-═══ İYİ ÖRNEK (referans çıktı) ═══
-
-• 8 Mayıs 2026: Akbank, 2025 yılına ait sürdürülebilirlik raporunu yayınladı. Çevresel ve sosyal hedeflerine ilişkin performansı paylaştı.
-
-• 7 Mayıs 2026: Akbank, vadesi gelen 250 milyon dolarlık tahvilin geri ödemesini tamamladı. Yatırımcılara anapara ve son faiz ödendi.
-
-═══ KÖTÜ ÖRNEKLER (yapma) ═══
-
-❌ "Bilgi sahibi olduğum kadarıyla..." — bilgi yetersizse Kural 3'teki boş kaynak yanıtı kullan.
-❌ "Akbank yarın bilanço açıklayacak" — Kural 2 gelecek yasağı.
-❌ "Hisse fiyatı yükselebilir" — spekülasyon yasağı, sen analist değil özetçisin.
-❌ "Aşağıdaki özetler size yardımcı olacaktır" — Kural 5 giriş yasağı.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
-_SYS_EXPLAIN = """KIMLIK: Sen BorsaPusula platformunun teknik sinyal açıklama asistanısın. Algoritmik olarak üretilmiş hisse sinyal yorumlarını sade Türkçe ile yeniden ifade edersin. Görevini "bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslupla yaparsın. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — ALGORİTMİK METİN KESINLIKLE DOĞRUDUR:
-Sana verilen "DOĞRU ALGORİTMİK ANALİZ" bölümündeki bilgiler matematiksel olarak hesaplanmıştır ve doğrudur. Bu analize ASLA itiraz ETME, "ama bir yandan da" diyerek ters yön belirtme, "fakat dikkat edilmeli" gibi şüphe ekleme. Görevin bu analizi desteklemek ve sade dille açıklamak — yorumlamak değil.
-
-KURAL 2 — SİNYALİN YÖNÜNE SADIK KAL:
-Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Trend Bozuldu" ise DÜŞÜŞ yönünde. "Yatay" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
-
-KURAL 3 — ÜÇ CÜMLE KURALI:
-Yorumun TAM olarak 3 cümle olsun. Birinci cümle teknik durumu özetlesin, ikinci cümle bu durumun ne anlama geldiğini söylesin, üçüncü cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin. Daha fazla veya daha az cümle yazma.
-
-KURAL 4 — SADE DİL ZORUNLU:
-Teknik göstergeleri sıradan yatırımcı diline çevir:
-  - Supertrend → fiyat trendi göstergesi / trend yönü
-  - ADX → trend gücü
-  - EMA → hareketli ortalama
-  - DI+ / DI- → yön göstergeleri
-  - Trend dönüş seviyesi (Supertrend) → fiyat bu çizginin öbür yanına geçerse trend yönü değişmiş sayılır
-  - RSI → momentum göstergesi
-  - Hacim oranı → işlem hacmi karşılaştırması
-
-KURAL 5 — SAYI YAZIM KURALI:
-- Fiyat: TL cinsinden, virgülle ondalık (örn: 32,45 ₺).
-- ADX: tam sayı + parantezle açıklama (örn: "28 - güçlü trend").
-- Yön: net ifade ("yukarı yönlü", "aşağı yönlü", "kararsız").
-- Süre: "X gündür", "yeni başladı".
-- Yüzde: virgülle ondalık (%5,3).
-
-KURAL 6 — YASAKLI İFADELER:
-- ❌ "Bence", "düşünüyorum", "tahminim" → algoritmik metni anlat, kendi görüşünü ekleme.
-- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
-- ❌ "Al/sat tavsiyesi", "almalısınız", "satın" → tavsiye yasağı.
-- ❌ Başlık, alt başlık (## veya **bold**) → düz paragraf yaz.
-- ❌ Madde işaretleri (- veya •) → düz paragraf, virgüllerle bağla.
-- ❌ 1. çoğul fiil ("belirtelim", "ifade edelim", "söyleyebiliriz", "anlayalım") →
-     3. tekil / nesnel kullan ("görünüyor", "durumunda", "seviyesinde",
-     "olarak hesaplanmış"). Mesafeli + bilgilendirici ton (SPEC-014 polish #1).
-- ❌ "Bu durumda yatırımcılar..." → genel tavsiye yok.
-- ❌ Hedef fiyat, kâr al, stop/zarar durdurma, giriş bölgesi, risk/ödül → işlem yönetimi dili yok.
-
-═══ İYİ ÖRNEK ═══
-
-"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu dört koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; trend dönüş seviyesi (Supertrend) 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
-
-═══ KÖTÜ ÖRNEKLER ═══
-
-❌ "Akbank hissesinde yükseliş trendi var, ancak dikkatli olunmalı..." (Kural 1 — itiraz yasağı)
-❌ "Bence şu an alım fırsatı olabilir" (Kural 6 — kişisel görüş)
-❌ "**AKBNK Analizi**" başlık (Kural 6 — formatlama yok)
-❌ "- Trend: Güçlü\n- Yön: Yukarı" (Kural 6 — düz paragraf)
-
-═══ EK BAĞLAM ═══
-
-Algoritmik sinyal motoru üç gösterge kombinasyonu kullanır:
-1. Supertrend — fiyatın trend bandının üstünde mi altında mı?
-2. ADX (14) ≥ 25 — trend ne kadar güçlü?
-3. DI+ / DI− — trendin yönü hangi tarafta?
-4. EMA12 vs EMA99 — kısa vade uzun vade hareketli ortalamasının üstünde mi?
-
-Dört koşul da AYNI yönde olursa sinyal aktif olur. Bu nedenle açıklamalar
-çelişkisiz, tek yönde olmalı. Yatırımcıya "bu üç gösterge nedir?" sorusunun
-cevabını sade dille verebilirsin.
-
-Hacim Onaylı sinyal: Eğer hisse "Hacim Onaylı" olarak işaretliyse, bu AL sinyali +
-hacim teyidinin de olduğu anlamına gelir (RVOL ≥ 1.20). Bunu yorumda
-"hacimle desteklenmiş güçlü sinyal" şeklinde belirtmek serbest ama zorunlu değil.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
-_SYS_EXPLAIN_FUNDAMENTAL = """KIMLIK: Sen BorsaPusula platformunun Temel Analiz Skoru açıklama asistanısın. Python'da deterministik olarak hesaplanmış, kategori bazlı bir gerekçe cümlesini sade Türkçe ile yeniden ifade edersin. "Bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslup kullan. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — ŞABLON CÜMLE KESİNLİKLE DOĞRUDUR:
-Sana verilen "DOĞRU ŞABLON CÜMLE" matematiksel olarak hesaplanmıştır. Bu cümlenin anlamına ASLA itiraz ETME, yeni kategori/skor uydurma, "ama bir yandan da" diyerek ters yön ekleme. Görevin bu cümleyi anlamını değiştirmeden akıcı Türkçe nesire çevirmek — yeni analiz/yorum yapmak değil.
-
-KURAL 2 — BANDA SADIK KAL:
-Bant "yesil" ise ton olumlu/güçlü, "kirmizi" ise ton temkinli/zayıf, "sari" ise dengeli olsun. Bantla çelişen kelimeler kullanma (yeşil bantta 'zayıf/riskli', kırmızı bantta 'güçlü/sağlam' gibi).
-
-KURAL 3 — İKİ-ÜÇ CÜMLE KURALI:
-Yorumun 2-3 cümle olsun. Son cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin.
-
-KURAL 4 — YASAKLI İFADELER:
-- ❌ "Bence", "düşünüyorum", "tahminim" → şablon cümleyi anlat, kendi görüşünü ekleme.
-- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
-- ❌ "Al/sat tavsiyesi", "almalısınız", "satın alın" → tavsiye yasağı.
-- ❌ Başlık, alt başlık (## veya **bold**), madde işaretleri (- veya •) → düz paragraf yaz.
-- ❌ 1. çoğul fiil ("belirtelim", "söyleyebiliriz") → 3. tekil / nesnel kullan ("görünüyor", "hesaplanmış").
-
-═══ İYİ ÖRNEK ═══
-
-Şablon: "Kârlılık kategorisinde güçlü bir görünüm var (skor: 78), Kaldıraç kategorisinde ise zayıf sonuçlar öne çıkıyor (skor: 42)."
-Çıktı: "Şirketin kârlılık tarafı sektörüne göre güçlü bir performans sergiliyor, ancak kaldıraç (borçluluk) kategorisinde aynı gücü göstermiyor. Bu ikisi arasındaki fark, temel analiz skorunun neden orta seviyede kaldığını açıklıyor. Yatırım tavsiyesi değildir."
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
 def _gemini_cap_alert_mail():
     """D-P0-2409: aylık harcama tavanı dolduğunda tek uyarı e-postası (ay başına bir kez)."""
     try:
@@ -7350,83 +7088,6 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     return None, None
 
 
-def get_ai_news(ticker, source="user", ua_class=None):
-    """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
-
-    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite (bkz. _GEMINI_NEWS_ATTEMPTS;
-    gemini-1.5-flash v1beta'da 404 döndüğü için zincirden çıkarılmıştı).
-    Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
-
-    source: "prefetch" (_prefetch_news_worker) veya _on_demand_news_worker'ın kuyruktan
-    aldığı gerçek köken — "stock_news" (api_stock_news, tekil hisse sayfası) ya da
-    "market_news" (api_market_news, piyasa haber şeridi). CPO-1205 §4(1) — log
-    satırında ve günlük sayaçlarda (ok_<src>/fail_<src>) ayrı izlenir. CPO-1206 §3 —
-    önceden ikisi de sabit "user" ile etiketleniyordu ("hangi worker çağırdı" yerine
-    "hangi HTTP endpoint kuyruğa ekledi" bilgisi kayıptı); artık kuyruk kendisi
-    {ticker: origin} tutuyor, "user" etiketi gerçek kökeni yansıtmıyordu.
-
-    ua_class: CPO-1208 §1(d) ölçümü için kuyruğa eklendiği andaki istek UA sınıfı
-    ("uptimerobot" | "headless_chrome" | "qa_bot" | "other_bot" | "human_or_unclassified"
-    | "prefetch" | None). Yalnız NEWS_MEASURE log satırında kullanılır, davranışı etkilemez.
-    """
-    if not GEMINI_API_KEY:
-        return None
-    now = time.time()
-    with _lock:
-        cached = _news_cache.get(ticker)
-    if cached:
-        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) —
-        # burada _lock tutulurken çağrılırsa kalıcı self-deadlock olur, o yüzden
-        # lock bloğunun dışına taşındı.
-        ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-        if (now - cached["ts"]) < ttl:
-            # CPO-1208 §1(d) ölçüm: kuyruğa girdiğinde miss'ti, işlenene kadar
-            # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
-            logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
-            return cached.get("text")   # başarısız cache → None döner
-    if not gemini_budget.GROUNDING:
-        # D-P0-2409: haber özeti "gerçek KAP bildirimi" ister; Google Search grounding olmadan
-        # model bildirim UYDURUR. Grounding maliyet gerekçesiyle kapalıyken çağrı atılmaz,
-        # mevcut başarısızlık yolu (negatif cache → dürüst "kullanılamıyor") kullanılır.
-        logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=no (grounding kapalı)", ticker, ua_class)
-        with _lock:
-            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
-        return None
-    logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
-
-    name       = STOCK_NAMES.get(ticker, ticker)
-    _news_now  = datetime.now(_TZ_TR)
-    today_str  = f"{_news_now.strftime('%d')} {_tr_month(_news_now)} {_news_now.strftime('%Y')}"   # ör: "01 Mayıs 2026"
-    today_iso  = _news_now.strftime("%Y-%m-%d")   # ör: "2026-05-01"
-    week_ago   = (_news_now - timedelta(days=7)).strftime("%Y-%m-%d")
-    prompt = _SYS_NEWS + (
-        f"\nHisse: {ticker} ({name})\n"
-        f"Tarih aralığı: {week_ago} → {today_iso} (son 7 gün)\n"
-        f"Bugün: {today_str}\n\n"
-        f"Yukarıdaki kurallara göre bu hisse için belirtilen tarih aralığındaki "
-        f"gerçek KAP bildirimleri, finansal sonuçlar veya önemli şirket açıklamalarını "
-        f"madde madde özetle."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25, max_tokens=400, temperature=0.2)
-
-    with _lock:
-        if text:
-            logger.info("get_ai_news(%s): OK [model=%s] src=%s", ticker, model_used, source)
-            _news_cache[ticker] = {"text": text, "ts": now, "failed": False}
-        else:
-            logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk src=%s", ticker, source)
-            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
-    # CPO-1208 §1e-1: köprü tek yönlüydü — yalnız gemini-cache-sync leader'ı 90s'de
-    # bir yazıyordu, non-leader'ın kendi fetch'lediği ticker diske hiç düşmüyordu.
-    # Worker recycle o ticker'ı sıfırlıyor, sıradaki poll garantili miss. Fetch'i
-    # yapan worker (leader olsun olmasın) kendi sonucunu hemen yazar — çift yönlü.
-    _save_news_cache_to_disk()
-    _news_daily_stats_incr("ok" if text else "fail")
-    _news_daily_stats_incr(f"{'ok' if text else 'fail'}_{source}")
-    return text
-
-
 def _compute_signal_commentary(ticker, signal_data):
     """İndikatörleri çıkarır + algoritmik commentary üretir (Gemini YOK, her zaman hızlı/senkron).
 
@@ -7502,20 +7163,15 @@ def _compute_signal_commentary(ticker, signal_data):
 
 
 def get_ai_signal_explanation(ticker, signal_data):
-    """Sinyal açıklaması — request path'i ASLA Gemini çağırmaz (CPO-1008).
+    """Sinyal açıklaması — request path'i Gemini çağırmaz (D-22b: bg zenginleştirme
+    kaldırıldı, algoritmik commentary tek kaynak).
 
-    Strateji (SPEC-AI-EXPLANATION-FIX + CPO-1008 cache-or-queue):
-    - Cache hit → cache'teki metni (AI zenginleştirilmiş veya commentary) dön
-    - Cache miss → algoritmik commentary'yi ANINDA dön, Gemini zenginleştirmeyi
-      bg thread kuyruğuna at (_on_demand_signal_explain_worker, /news ile aynı desen)
-    - AI tab ASLA boş/takılı kalmaz; Gemini cache gelince üzerine yazar (glass-box)
+    - Cache hit → önceki (Gemini zenginleştirilmiş ya da algoritmik) metni dön
+      (geçmişte yazılmış cache kayıtları TTL'leri dolana kadar geçerli kalır)
+    - Cache miss → algoritmik commentary hesaplanır, ANINDA dön
 
-    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
-    Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
-
-    Returns: (text, source) — CPO-1756 Bulgu 1: source ARTIK "GEMINI_API_KEY var mı"
-    konfig kontrolü değil, dönen metnin gerçek kökeni (cache hit + failed=False
-    → "gemini", her diğer yol — cache miss, non-leader, fallback — → "algorithmic").
+    Returns: (text, source) — "gemini" yalnız eski cache kayıtlarından gelir,
+    yeni üretim her zaman "algorithmic".
     """
     now = time.time()
     sig = signal_data.get("signal", "BEKLE")
@@ -7529,7 +7185,6 @@ def get_ai_signal_explanation(ticker, signal_data):
                 return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
-    # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
     _load_explain_cache_from_disk()
     with _lock:
         cached = _signal_explain_cache.get(ticker)
@@ -7539,217 +7194,16 @@ def get_ai_signal_explanation(ticker, signal_data):
                 return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
-    # AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
+    # AI tab ASLA boş/takılı kalmaz.
     fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"] + " Yatırım tavsiyesi değildir."
-
-    # Non-leader worker → Gemini call YOK, direkt commentary dön (Glass-box + K8 data-trust)
-    if not _is_gemini_leader():
-        return fallback_text, "algorithmic"
-
-    # AI yoksa direkt algoritmik metni döndür
-    if not GEMINI_API_KEY:
-        return fallback_text, "algorithmic"
-
-    # CPO-1008 — ARCHITECTURAL FIX: /news'teki cache-or-queue pattern'e taşındı.
-    # ÖNCEKİ DAVRANIŞ: request handler İÇİNDE senkron Gemini call → _gemini_rate_acquire
-    # thundering herd'de saniyelerce sleep döndürüyor → gunicorn worker o süre boyunca
-    # bloke (12-25s response, DEV-1005 log kanıtı). YENİ DAVRANIŞ: request path'inde
-    # Gemini çağrısı SIFIR — commentary anında dön, zenginleştirme bg thread kuyruğunda.
-    with _signal_explain_queue_lock:
-        _signal_explain_queue[ticker] = signal_data
     return fallback_text, "algorithmic"
-
-
-def _enrich_signal_explanation(ticker, signal_data):
-    """Bg thread: Gemini çağrısı yapıp cache'i AI metniyle zenginleştirir.
-
-    Yalnızca _on_demand_signal_explain_worker tarafından çağrılır (leader-only,
-    _gemini_rate_acquire üzerinden global rate-limited). Request path'ini bloke etmez.
-    """
-    # CPO-1496: piyasa kapalıyken (hafta sonu/tatil) yeni açıklama ÜRETME —
-    # CPO-1494 ile aynı kusur: Gemini'ye piyasa durumu söylenmediği için donmuş
-    # fiyatla "şu an X ₺ seviyesinde işlem görüyor" gibi şimdiki-zaman metni
-    # üretiyordu. Piyasa kapalıyken mevcut cache (varsa) korunur, yoksa
-    # request path zaten algoritmik commentary dönüyor (tense-safe).
-    if not _market_open():
-        return None
-    now = time.time()
-    ctx = _compute_signal_commentary(ticker, signal_data)
-    sig, name, commentary, sig_lbl = ctx["sig"], ctx["name"], ctx["commentary"], ctx["sig_lbl"]
-    adx, di_plus, di_minus = ctx["adx"], ctx["di_plus"], ctx["di_minus"]
-    e12, e99, st_bull      = ctx["e12"], ctx["e99"], ctx["st_bull"]
-    price, sl, bars        = ctx["price"], ctx["sl"], ctx["bars"]
-
-    # ── Sinyalin yönü (validation için) ──────────────────────────────────────
-    if sig == "AL":
-        direction_tr   = "yükseliş"
-        opposite_words = ["düşüş", "satış", "negatif", "aşağı", "zayıf trend", "bear", "sat ", "kayıp"]
-    elif sig == "SAT":
-        direction_tr   = "düşüş"
-        opposite_words = ["yükseliş", "alım", "pozitif", "yukarı", "güçlü trend", "bull", "al ", "kazanç"]
-    else:
-        direction_tr   = "belirsiz"
-        opposite_words = []
-
-    # ── Trend dönüş seviyesi satırı (D-39: "Stop-Loss" dili yok, kanon §2.2) ──
-    sl_line = f"\n- Trend dönüş seviyesi (Supertrend): {tr_price_filter(sl)} ₺" if sl else ""
-
-    # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
-    prompt = _SYS_EXPLAIN + (
-        f"\n=== DOĞRU ALGORİTMİK ANALİZ ===\n"
-        f"{commentary}\n\n"
-        f"=== ARKA PLAN ===\n"
-        f"Hisse: {ticker} ({name})\n"
-        f"Sinyal: {sig_lbl} — 3 göstergenin TAMAMI {direction_tr} yönünü işaret ediyor\n"
-        f"Göstergeler:\n"
-        f"  • Supertrend: {'YUKARI ✓' if st_bull else 'AŞAĞI ✓'}\n"
-        f"  • ADX: {adx:.0f} ({'güçlü trend ✓' if derive_adx_label(adx) in ('Güçlü', 'Çok Güçlü') else derive_adx_label(adx).lower()}), "
-        f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
-        f"  • EMA12 {tr_price_filter(e12)} {'>' if e12 > e99 else '<'} EMA99 {tr_price_filter(e99)} ✓\n"
-        f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
-        f"Yukarıdaki rakamlar/göstergeler zaten kullanıcıya ayrıca gösteriliyor — onları tekrarlama. "
-        f"SADECE bu sinyalde neden şu an dikkat çekici olduğunu tek cümlede, en fazla 15 kelimeyle vurgula."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=60, temperature=0.3)
-
-    # ── Validation: sinyalle çelişen metin ürettiyse commentary'ye fall back ─
-    if text and opposite_words:
-        text_lower = text.lower()
-        if any(w in text_lower for w in opposite_words):
-            logger.warning(
-                "_enrich_signal_explanation(%s): AI sinyalle çelişti [%s→%s], commentary kullanılıyor",
-                ticker, sig, text[:60]
-            )
-            text = None
-
-    if text and _TRADE_LANG_RE.search(text):   # D-39: hedef/işlem yönetimi dili → commentary
-        logger.warning("_enrich_signal_explanation(%s): AI işlem yönetimi dili üretti, commentary kullanılıyor",
-                       ticker)
-        text = None
-
-    final_text = text if text else (commentary + " Yatırım tavsiyesi değildir.")
-
-    with _lock:
-        # AI başarılıysa uzun TTL (+jitter, thundering-herd önleme), fallback ise kısa TTL
-        ai_ok = bool(text)
-        _signal_explain_cache[ticker] = {
-            "text":   final_text,
-            "sig":    sig,
-            "ts":     now,
-            "failed": not ai_ok,
-            "ttl":    _SIG_EXPLAIN_TTL + random.uniform(-_SIG_EXPLAIN_TTL_JITTER, _SIG_EXPLAIN_TTL_JITTER),
-        }
-        if ai_ok:
-            logger.info("_enrich_signal_explanation(%s): OK [model=%s]", ticker, model_used)
-        else:
-            logger.info("_enrich_signal_explanation(%s): commentary fallback kullanıldı", ticker)
-
-    # SPEC-020 Faz 1 — Leader yazımı sonrası disk cache senkronu
-    # Non-leader workers _load_explain_cache_from_disk ile mtime guard'a göre
-    # bu güncellemeyi okur, ikinci Gemini call yapmaz.
-    if ai_ok:  # Sadece gerçek AI başarısı disk'e (fallback noise olmaz)
-        _save_explain_cache_to_disk()
-
-    return final_text
-
-
-def _enrich_health_score_explanation(ticker, entry):
-    """Bg thread: Faz 3 (CPO-1531) — Temel Analiz Skoru kategorilerinden
-    _fhs.build_rationale() ile üretilen deterministik Türkçe gerekçe cümlesini
-    Gemini'yle akıcı nesire çevirir. _enrich_signal_explanation ile birebir desen
-    (önce-hesapla-sonra-Türkçeleştir-sonra-doğrula) — Gemini SADECE stilize eder,
-    yeni analiz yapmaz. _on_demand_signal_explain_worker üzerinden AYNI kuyruk/
-    rate-limit'i paylaşır (bkz. _health_explain_queue tanımı).
-    """
-    categories        = entry.get("categories") or {}
-    band              = entry.get("band")
-    data_completeness = entry.get("data_completeness")
-    categories_na     = entry.get("categories_na") or []
-    rationale         = _fhs.build_rationale(categories, data_completeness, categories_na)
-    fallback_text     = rationale + " Yatırım tavsiyesi değildir."
-
-    # ── Bandın yönüne göre çelişki-kontrol kelimeleri (validation için) ──────
-    if band == "yesil":
-        opposite_words = ["zayıf", "kötü", "riskli", "endişe verici", "başarısız", "düşük performans"]
-    elif band == "kirmizi":
-        opposite_words = ["güçlü", "sağlam", "başarılı", "yüksek performans", "sağlıklı görünüm", "parlak"]
-    else:
-        opposite_words = []   # "sari" bant için nötr — çelişki tanımı belirsiz
-
-    prompt = _SYS_EXPLAIN_FUNDAMENTAL + (
-        f"\n=== DOĞRU ŞABLON CÜMLE ===\n{rationale}\n\n"
-        f"=== ARKA PLAN ===\nHisse: {ticker}\nBant: {band or 'bilinmiyor'}\n\n"
-        f"Yukarıdaki şablon cümleyi anlamını DEĞİŞTİRMEDEN, akıcı ve doğal Türkçe nesire çevir."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=250, temperature=0.3)
-
-    # ── Validation: bantla çelişen metin ürettiyse şablona fall back ─────────
-    if text and opposite_words:
-        text_lower = text.lower()
-        if any(w in text_lower for w in opposite_words):
-            logger.warning(
-                "_enrich_health_score_explanation(%s): AI bantla çelişti [%s→%s], şablon kullanılıyor",
-                ticker, band, text[:60]
-            )
-            text = None
-
-    final_text = text if text else fallback_text
-    ai_ok = bool(text)
-
-    with _lock:
-        cached = _financial_health_cache.get(ticker)
-        if cached and isinstance(cached.get("data"), dict):
-            cached["data"]["temel_analiz_aciklamasi"] = final_text
-
-    if ai_ok:
-        logger.info("_enrich_health_score_explanation(%s): OK [model=%s]", ticker, model_used)
-        _save_health_scores_to_disk()
-    else:
-        logger.info("_enrich_health_score_explanation(%s): şablon fallback kullanıldı", ticker)
-
-    return final_text
-
-
-# ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
-_PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
-_PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
-_PREFETCH_STARTUP_GRACE_S = 300  # SPEC-016 K1 — restart sonrası prefetch bekleme (soğuk-start storm fix)
-_PREFETCH_POLL_S = 300  # tur-arası disk-zaman-damgası kontrol periyodu
-
-# CPO-1205 §4-3: tur, `time.sleep(_NEWS_CACHE_TTL)` ile PROSES ömrüne bağlıydı.
-# `--max-requests 500` recycle'ı worker'ı 6 saatten çok daha sık öldürdüğü için
-# bu sleep neredeyse hiç dolmuyor, her yeni PID sıfırdan başlayıp 8 hissenin
-# tamamını yeniden istiyordu. Son-tur zaman damgasını diske yazıp yeni PID'de
-# oradan okuyarak turu prosesten bağımsız, gerçek saate bağlıyoruz.
-_PREFETCH_LAST_RUN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_prefetch_run.json")
-
-
-def _prefetch_last_run_ts():
-    try:
-        if os.path.exists(_PREFETCH_LAST_RUN_PATH):
-            with open(_PREFETCH_LAST_RUN_PATH, "r", encoding="utf-8") as f:
-                return float(json.load(f).get("ts", 0))
-    except Exception as e:
-        logger.warning("_prefetch_last_run_ts hatası: %s", e)
-    return 0.0
-
-
-def _prefetch_mark_run(ts):
-    try:
-        _atomic_write_json(_PREFETCH_LAST_RUN_PATH, {"ts": ts})
-    except Exception as e:
-        logger.warning("_prefetch_mark_run hatası: %s", e)
 
 
 def _market_box_candidates(stocks):
     """Ana sayfa Gündem kutusu adayları: top5 AL + top2 SAT (endeks hariç).
 
-    CPO-1353 §4 — kanonik tek kaynak: hem _prefetch_news_worker (yalnızca
-    cache ISITMA amaçlı, listeyi DONDURMAZ) hem api_market_news (serve-time,
-    ticker listesini burada HER ÇAĞRIDA TAZE türetir) aynı seçim mantığını
-    kullanır. Aday listesi hiçbir yerde cache'lenmez — her okuyucu kendi
+    api_market_news (serve-time) ticker listesini burada HER ÇAĞRIDA TAZE
+    türetir — aday listesi hiçbir yerde cache'lenmez, her okuyucu kendi
     anındaki _cache["data"] üzerinden hesaplar.
     """
     al_stocks  = [s for s in stocks
@@ -7759,106 +7213,6 @@ def _market_box_candidates(stocks):
                   if s.get("signal") == "SAT"
                   and s.get("ticker") not in ("XU030", "XU100")][:2]
     return al_stocks + sat_stocks
-
-
-def _prefetch_news_worker():
-    """Gündem kutusu adaylarının (top5 AL + top2 SAT, _market_box_candidates) haberlerini 6 saatte bir cache'e önceden yükler (istekler arası 30s); tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts), worker recycle turu atlamaz."""
-    # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
-    # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
-    time.sleep(_PREFETCH_STARTUP_GRACE_S)
-    while True:
-        # CPO-1207 §1: leader kontrolü artık HER TURDA burada — önceden yalnız
-        # modül-yükleme anında (thread'in hiç başlatılıp başlatılmayacağı
-        # kararında) kontrol ediliyordu. Reload race'inde kaybeden worker'ın
-        # thread'i hiç doğmuyordu; kilit sonradan boşalsa (eski leader ölse)
-        # bile o worker bir daha asla denemiyordu (kanıt: lsof ile kilit
-        # sahibi 871107 iken, o worker'ın prefetch thread'i hiç yoktu).
-        if not _is_gemini_leader():
-            time.sleep(_PREFETCH_POLL_S)
-            continue
-
-        now = time.time()
-
-        last_run = _prefetch_last_run_ts()
-        if last_run and (now - last_run) < _NEWS_CACHE_TTL:
-            # 6 saat henüz dolmadı (başka bir PID'de veya bu PID'de yakın
-            # zamanda tur yapılmış) — kısa aralıklarla tekrar kontrol et.
-            time.sleep(min(_PREFETCH_POLL_S, max(1, _NEWS_CACHE_TTL - (now - last_run))))
-            continue
-
-        # CPO-1353 §4 — Gündem kutusu adaylarını (top5 AL + top2 SAT) kanonik
-        # kaynaktan seç; önceden yalnız AL sinyalli hisseler prefetch
-        # ediliyordu, SAT dalı hep reaktif yola düşüyordu.
-        with _lock:
-            stocks = list(_cache.get("data") or [])
-        candidate_tickers = [
-            s["ticker"] for s in _market_box_candidates(stocks)
-        ][:_PREFETCH_MAX]
-
-        if not candidate_tickers:
-            # Henüz veri yüklenmemiş — bu bir tamamlanmış tur DEĞİL, damga yazılmaz
-            time.sleep(_PREFETCH_POLL_S)
-            continue
-
-        to_fetch = []
-        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) — bu
-        # yüzden snapshot _lock altında alınır, TTL hesabı lock dışında yapılır
-        # (aksi halde kalıcı self-deadlock).
-        with _lock:
-            cached_snapshot = {ticker: _news_cache.get(ticker) for ticker in candidate_tickers}
-        for ticker in candidate_tickers:
-            cached = cached_snapshot[ticker]
-            if not cached:
-                to_fetch.append(ticker)          # hiç denenmemiş
-            elif cached.get("failed"):
-                to_fetch.append(ticker)          # başarısız cache süresi dolmuş
-            elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
-                to_fetch.append(ticker)          # cache sona ermek üzere
-
-        logger.info("Prefetch: %d/%d Gündem-kutusu hissesi (AL+SAT) için haber yüklenecek", len(to_fetch), len(candidate_tickers))
-        fetched = 0
-        attempted = 0
-        for ticker in to_fetch:
-            # SPEC-016 K2 — sıralı + leader teyidi: storm sırasında leader
-            # değişirse prefetch'i durdur (çift worker Gemini yükü engellenir).
-            if not _is_gemini_leader():
-                logger.info("Prefetch: leader değil — tur durduruldu")
-                break
-            if _gemini_news_degraded():  # CPO-1340 S1: kota kapalıyken çağrı garantili fail, atla
-                logger.info("Prefetch: kota kapalı (retry_after_s=%ds) — %s atlandı", _gemini_cb_retry_after_s(), ticker)
-                _news_daily_stats_incr("prefetch_skipped_quota")
-                continue
-            if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
-                logger.info("Prefetch: %s başka process az önce claim etti — atlandı (dedup)", ticker)
-                _news_daily_stats_incr("dedup_skip")
-                _news_daily_stats_incr("dedup_skip_prefetch")
-                continue
-            attempted += 1
-            try:
-                result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
-                if result:
-                    fetched += 1
-            except Exception as e:
-                logger.error("Prefetch hatası [%s]: %s", ticker, e)
-            time.sleep(_PREFETCH_DELAY)   # İstekler arası 30 saniye — rate-limit koruması
-
-        logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
-        if attempted or not to_fetch:  # CPO-1340 S1: tam-atlanan tur damgalanmaz — 6h gate erken tetiklenmesin
-            _prefetch_mark_run(now)   # tur zaman damgasını diske yaz — process ömründen bağımsız 6h gate
-        time.sleep(_PREFETCH_POLL_S)
-
-
-_prefetch_thread = threading.Thread(
-    target=_prefetch_news_worker,
-    daemon=True,
-    name="gemini-prefetch"
-)
-# SPEC-009 Gemini Faz 1: yalnız leader worker prefetch çalıştırır — 4× Gemini
-# maliyet multiplier fix (non-leader 3 worker prefetch yapmaz, on-demand
-# cache'ten okur). CPO-1207 §1: thread artık KOŞULSUZ başlar — leader
-# kontrolü döngü içinde her turda (_prefetch_news_worker üstünde).
-_bg_start(_prefetch_thread)
-logger.info("gemini-prefetch: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
 # SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
@@ -7895,104 +7249,6 @@ def _gemini_cache_sync_loop():
         time.sleep(90)
 
 _bg_start(threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync"))
-
-
-def _on_demand_news_worker():
-    """İki HTTP endpoint'inden (api_stock_news, api_market_news) gelen kuyruğu
-    arka planda doldurur. Kuyruk artık {ticker: origin} — her ticker gerçek
-    çağıran endpoint'iyle etiketli (CPO-1206 §3), sabit source="user" DEĞİL.
-
-    Kuyrukta bekleyen her ticker için get_ai_news() çağırır; istekler arası
-    15 saniye bekler (Gemini rate-limit koruması). Kuyruk boşsa 5s polling.
-
-    CPO-1206 §5 — kota devresi açıkken (quota tükenmiş) kuyrukta bekleyen
-    ticker'ları çekmeye devam etmek getirisi sıfır bir israftı; devre açıkken
-    kuyruğu tüketmeden bekle (kuyruk BOŞALTILMAZ, birikir — devre kapanınca işlenir).
-    """
-    while True:
-        if _gemini_news_degraded():
-            time.sleep(30)
-            continue
-        ticker = None
-        origin = "stock_news"
-        ua_class = "unknown"
-        with _news_queue_lock:
-            if _news_fetch_queue:
-                ticker, (origin, ua_class) = _news_fetch_queue.popitem()
-        if ticker:
-            try:
-                if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
-                    logger.info("On-demand news [%s]: dedup atlandı (başka process az önce claim etti) [origin=%s]", ticker, origin)
-                    _news_daily_stats_incr("dedup_skip")
-                    _news_daily_stats_incr(f"dedup_skip_{origin}")
-                    time.sleep(15)
-                    continue
-                result = get_ai_news(ticker, source=origin, ua_class=ua_class)
-                _news_queue_stats["last_processed_ts"] = time.time()
-                _news_queue_stats["total_processed"] += 1
-                logger.info("On-demand news [%s]: %s [origin=%s]", ticker, "OK" if result else "FAIL", origin)
-                # CPO-1165 D-NEWS-2 — sayaç artık get_ai_news() içinde tekil kaynaktan
-                # artıyor (CPO-1205 §4(1)); burada tekrar artırmak çift-sayım yapardı.
-            except Exception as exc:
-                logger.error("On-demand news hatası [%s, origin=%s]: %s", ticker, origin, exc)
-                _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2 — get_ai_news'e hiç girilemedi
-                _news_daily_stats_incr(f"fail_{origin}")
-            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
-        else:
-            time.sleep(5)    # Kuyruk boşsa 5s bekle
-
-
-_on_demand_thread = threading.Thread(
-    target=_on_demand_news_worker,
-    daemon=True,
-    name="news-ondemand"
-)
-_bg_start(_on_demand_thread)
-
-
-def _on_demand_signal_explain_worker():
-    """CPO-1008: signal-explanation cache-miss talepleri arka planda işlenir.
-
-    _on_demand_news_worker ile birebir desen — kuyruk yalnızca Gemini leader
-    tarafından doldurulur (get_ai_signal_explanation), 15s rate-limited,
-    kuyruk boşsa 5s polling.
-
-    CPO-1531 Faz 3: Temel Analiz Skoru açıklaması (_health_explain_queue) da
-    AYNI döngüyü/rate-limit'i paylaşır — ikinci paralel Gemini tüketici
-    EKLENMEDİ. Sinyal açıklaması (kullanıcı-odaklı, on-demand) önceliklidir;
-    health-explain kuyruğu yalnızca sinyal kuyruğu boşken tüketilir.
-    """
-    while True:
-        item = None
-        with _signal_explain_queue_lock:
-            if _signal_explain_queue:
-                ticker = next(iter(_signal_explain_queue))
-                item = ("signal", ticker, _signal_explain_queue.pop(ticker))
-        if not item:
-            with _health_explain_queue_lock:
-                if _health_explain_queue:
-                    ticker = next(iter(_health_explain_queue))
-                    item = ("health", ticker, _health_explain_queue.pop(ticker))
-        if item:
-            kind, ticker, payload = item
-            try:
-                if kind == "signal":
-                    _enrich_signal_explanation(ticker, payload)
-                else:
-                    _enrich_health_score_explanation(ticker, payload)
-            except Exception as exc:
-                logger.error("On-demand %s-explanation hatası [%s]: %s", kind, ticker, exc)
-            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
-        else:
-            time.sleep(5)    # Kuyruk boşsa 5s bekle
-
-
-_signal_explain_ondemand_thread = threading.Thread(
-    target=_on_demand_signal_explain_worker,
-    daemon=True,
-    name="signal-explain-ondemand"
-)
-_bg_start(_signal_explain_ondemand_thread)
 
 
 def _tr1(value):
@@ -9497,14 +8753,6 @@ def _run_eod_scoring_pass(results: list):
             scores_out[tk] = entry
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}
-            # CPO-1533: Gemini zenginleştirmesi BIST30 ile sınırlı — kota haber
-            # prefetch'iyle paylaşılıyor (~20-40 istek/gün tavanı), 215 ticker'ın
-            # tamamı bu kuyruğa girerse kota anında tükenir. Deterministik şablon
-            # metni (yukarıda) yine TÜM ticker'lara yazılıyor, hiçbir alan boş
-            # kalmaz — sadece doğal-dile çevirme BIST30'a odaklanıyor.
-            if tk in BIST30_LITERAL and entry["categories"] and GEMINI_API_KEY and _is_gemini_leader():
-                with _health_explain_queue_lock:
-                    _health_explain_queue[tk] = entry
 
         _save_health_scores_to_disk()
 
@@ -9524,10 +8772,8 @@ def _run_eod_scoring_pass(results: list):
         logger.error("_run_eod_scoring_pass hatası: %s", e)
 
 
-# ─── News endpoint queue pattern ───
-# Pattern: cache hit → return. Miss → push to _news_fetch_queue → return null.
-# _on_demand_news_worker (mevcut, 15s rate-limited) kuyruğu işler.
-# THREAD SPAWN YOK → worker capacity korunur.
+# D-22b: bg enrichment kuyruğu kaldırıldı — sayaçlar artık hep 0, /api/health
+# geriye dönük uyumluluk için alanı okumaya devam ediyor.
 _news_queue_stats = {"last_added_ts": 0, "last_processed_ts": 0, "total_added": 0, "total_processed": 0}
 
 
@@ -9662,13 +8908,7 @@ def api_stock_news(ticker):
             "kap_url": kap_url,
         })
 
-    # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
-    with _news_queue_lock:
-        _news_fetch_queue[ticker] = ("stock_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
-    _news_queue_stats["last_added_ts"] = time.time()
-    _news_queue_stats["total_added"] += 1
-
-    # Return placeholder — frontend zaten retry yapacak (loadNews 8s sonra)
+    # 4. CACHE MISS — D-22b: Gemini üretimi kaldırıldı, doldurulacak worker yok.
     return safe_json({"news": None, "loading": True, "kap_url": kap_url})
 
 
@@ -11034,9 +10274,8 @@ def _compute_health():
         # onun kendi leader/thread durumu, global değil (news_queue_note ile
         # aynı uyarı geçerli).
         "leaders": {
-            "gemini":                _is_gemini_leader(),
-            "notify":                _is_notify_leader(),
-            "prefetch_thread_alive": _prefetch_thread.is_alive(),
+            "gemini": _is_gemini_leader(),
+            "notify": _is_notify_leader(),
         },
         # CPO-1260-B P1: alarm kanallarının KENDİSİ de sağlık yüzeyine girsin —
         # Alarm kanalı token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
@@ -13150,18 +12389,8 @@ def api_market_news():
             source = "explanation"
 
         if not text:
-            # Haber cache yok → on-demand kuyruğuna ekle (eğer başarısız cache yoksa
-            # VE gerçek kullanıcıysa — CPO-1320: izleme/QA trafiği bu kuyruğu asla
-            # beslemez, Gemini çağrısı tetiklemez, algoritmik fallback'e düşer).
-            failed_recently = news_c and news_c.get("failed") and \
-                              (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
-            if not failed_recently and not is_synthetic_client(request):
-                with _news_queue_lock:
-                    _news_fetch_queue[t] = ("market_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
-                # CPO-1206 §4 — bu üretici önceden _news_queue_stats'e hiç dokunmuyordu,
-                # health.news_queue "toplam eklenen" sayısı bu yüzden eksik ölçüyordu.
-                _news_queue_stats["last_added_ts"] = time.time()
-                _news_queue_stats["total_added"] += 1
+            # D-22b: Gemini üretimi kaldırıldı — haber cache yoksa doğrudan
+            # algoritmik fallback'e düşülür, doldurulacak bg kuyruk yok.
 
             # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
             if sig == "AL":
