@@ -175,6 +175,8 @@
   .ch-l-date { color: var(--bp-text2); font-weight: 600; }
   .ch-l-ev { color: var(--bp-text2); }
   .ch-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 6px 18px 0; font-size: var(--bp-text-xs); color: var(--bp-text3); }
+  /* C-25a: veri gelmeden de satirin yeri ayrilir (gorunmez, erisilebilirlik agacinda yok) -- grafik govdesi sonradan asagi kaymaz. */
+  .ch-keys[hidden] { display: flex; visibility: hidden; }
   .ch-keys[hidden], .ch-returns[hidden] { display: none; }
   .ch-key { display: inline-flex; align-items: center; gap: 6px; }
   .ch-key b { color: var(--bp-text); font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -875,6 +877,8 @@
     .chart-header { padding: 12px 14px; }
     .week52-bar   { padding: 12px 14px 14px; }
     #chartLoading { height: 360px; }
+    .ch-legend { min-height: 42px; }  /* C-25a: telefonda lejant iki satir; yer onceden ayrilir */
+    .ch-keys { min-height: 62px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; } /* C-61: 3 kart */
     .chart-section { overflow: hidden; }
