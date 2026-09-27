@@ -21,7 +21,6 @@
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
-  .container { max-width:var(--bp-container-1200); margin:0 auto; padding:20px 20px; }
 
   /* ══ C-34 — Tarama v2 (onaylı taslak O16c=A): tek tablo, sütun seti, hazır listeler ══
      Renkler yalnız token: Güçlü Trend yeşil dolu hap · Yatay arduvaz (--bp-bkl-bd) ·

@@ -10,7 +10,6 @@
     position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
 
-  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
   /* ── Stats Row ── */
   .stats-row {
@@ -129,7 +128,6 @@
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    .container { padding: 16px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     .stat-num  { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: 1fr; }

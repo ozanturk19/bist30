@@ -7,7 +7,6 @@
 
   /* C-43: sutun = govde metninin okuma olcusu. Space Grotesk'te 68ch ~712px = satirda ~90 karakter
      (olculdu 26.09); 17px x 34em ~578px = satirda <=75 karakter. Baslik, modul ve SSS ayni sutunda. */
-  .container { max-width:calc(578px + 48px); margin:0 auto; padding:32px 24px; }
 
   .article-header { margin-bottom:28px; }
   .art-cat  { font-size:var(--bp-text-sm); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
@@ -89,7 +88,7 @@
   .art-sub-kvkk { flex-basis:100%; display:flex; align-items:flex-start; gap:6px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
   .art-sub-msg { font-size:var(--bp-text-md); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-sat); }
 
-  @media(max-width:600px) { .container{padding:16px;} .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
+  @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 
   /* Reading progress bar */

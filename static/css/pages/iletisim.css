@@ -1,7 +1,6 @@
 /* C-44 (26.09): reset, gövde, header ve kap kuralları prose.css'te (ortak
    içerik kabuğu); burada yalnız İletişim'in deltası: dar form kabı + form.
    20.09 CPO Data-Art dönüşümü: gövde reçetesi `.da-panel` ilkelinden. */
-  .container { max-width: var(--bp-container-680); padding: 40px 24px; }
 
   /* ── .da-panel deltaları ─────────────────────────────────────────────── */
   .card { padding: 28px; }
@@ -119,7 +118,7 @@
   }
   .disclaimer strong { color: var(--bp-text); }
 
-  @media (max-width: 600px) { .container { padding: 16px; } .card { padding: 20px; } }
+  @media (max-width: 600px) { .card { padding: 20px; } }
   @media (max-width: 500px) { .cf-grid { grid-template-columns: 1fr; } }
 
   /* r155 gorsel denetim: WCAG 2.5.5 - .btn-action emsaliyle ayni desen, gorunum degismez */

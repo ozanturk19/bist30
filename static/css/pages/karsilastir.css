@@ -11,7 +11,6 @@
   }
   .page-sub   { font-size: var(--bp-text-base); color: var(--bp-text3); }
 
-  .container { max-width: var(--bp-container-1200); margin: 0 auto; padding: 24px; }
 
   /* ── Search Bar ── */
   /* 20.09 Data-Art: yüzey + kenar + parıltı .da-panel'den geliyor (şablonda
@@ -333,7 +332,6 @@
 
   /* ── Responsive ── */
   @media (max-width: 600px) {
-    .container { padding: 16px; }
     .search-bar { padding: 12px; }
     .ticker-input { width: 80px; }
     .ac-dropdown { min-width: 200px; }

@@ -22,7 +22,6 @@
   }
   .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
 
-  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
   /* ── Sayaç kartları ── */
   .counter-grid {
@@ -140,7 +139,6 @@
   .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
   @media (max-width: 600px) {
-    .container { padding: 12px; }
     .counter-num { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: repeat(2, 1fr); }
   }

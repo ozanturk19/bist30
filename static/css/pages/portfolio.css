@@ -5,7 +5,6 @@
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
   .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }
-  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
   .sum-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
@@ -161,7 +160,7 @@
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
-  @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
+  @media(max-width:600px) { thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
   /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html
      #mobileResultCards ile ayni desen).

@@ -1,6 +1,6 @@
 /* C-44 (26.09): 404/410/429/500 ortak kabuk. Başlık `.da-pagehead`, bağlantılar `.da-chip`
    (data-art.css); burada yalnız hata koduna, arama kutusuna ve bağlantı sırasına özgü kurallar. */
-.err-main { max-width: var(--bp-container-640); margin: 0 auto; padding: 0 16px 48px; }
+.err-main { max-width: var(--bp-container-read); margin: 0 auto; padding: 0 16px 48px; }
 .err-code { margin-top: clamp(24px, 5vw, 48px); color: var(--bp-accent-cyan); }
 .err-search { padding: 20px; margin: 8px 0 20px; }
 .err-search label { display: block; font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 8px; }

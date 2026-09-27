@@ -4,7 +4,6 @@
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body { font-size:var(--bp-text-md); min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
-  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:28px 24px; }
 
   /* C-43 (26.09): Borsa Okulu — en yeni yazı 2/3 + öğrenme yolu; kart ızgarası yerine liste. */
   .bo-top { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin:8px 0 32px; }
@@ -66,6 +65,5 @@
       .bo-row { grid-template-columns:minmax(0,1fr); grid-template-areas:"cat" "title" "desc" "meta"; padding:14px 2px; }
     .bo-row-desc { -webkit-line-clamp:2; }
   }
-  @media(max-width:600px) { .container{padding:14px;} }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 

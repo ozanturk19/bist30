@@ -4,9 +4,9 @@
 <title>{{ title }} | BorsaPusula</title>
 <meta name="description" content="{{ desc }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
-<link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
+<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
-<link rel="stylesheet" href="/static/css/pages/err.css?v=28059dd8">
+<link rel="stylesheet" href="/static/css/pages/err.css?v=23960edb">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {%- endmacro -%}
 
@@ -14,7 +14,7 @@
 {%- import '_fmt_macros.html' as bpf -%}
 <a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
-<main class="container err-main" id="main-content" tabindex="-1">
+<main class="container container--read err-main" id="main-content" tabindex="-1">
 <span class="da-label err-code">Hata {{ code }}</span>
 {%- set _lede = caller() -%}
 {% call bpf.pagehead(title) %}{{ _lede }}{% endcall %}

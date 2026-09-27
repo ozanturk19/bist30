@@ -98,10 +98,10 @@
 }
 </script>
 {% endif %}
-<link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
+<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=eca0a941">
+<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=86ba7e89">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
@@ -109,7 +109,7 @@
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% include '_header.html' %}
 
-<main class="container" id="main-content" tabindex="-1">
+<main class="container container--read" id="main-content" tabindex="-1">
   <div class="article-header">
     <div class="art-cat">{{ article.cat }}</div>
     <h1 class="art-title">{{ article.title }}</h1>

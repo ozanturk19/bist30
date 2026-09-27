@@ -408,14 +408,6 @@ body {
   --bp-radius-14: 14px;
   --bp-radius-16: 16px;
   --bp-radius-20: var(--bp-r-lg);
-  --bp-container-640: 640px;
-  --bp-container-680: 680px;
-  --bp-container-720: 720px;
-  --bp-container-820: 820px;
-  --bp-container-860: 860px;
-  --bp-container-1100: 1100px;
-  --bp-container-1200: var(--bp-container-app);
-  --bp-container-1400: 1400px;
 }
 
 /* bughunt-r28: T7.5.6 nav/footer "kismi" rozeti kurali kaldirildi — hedefledigi

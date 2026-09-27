@@ -23,10 +23,10 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"Borsa Okulu","url":"https://borsapusula.com/blog","inLanguage":"tr-TR","description":"Bilanço okuma, F/K oranı, temettü, BIST100 ve trend göstergeleri üzerine sade Türkçe yazılar.","hasPart":[{% for a in (articles|sort(attribute='date', reverse=True))[:10] %}{"@type":"Article","headline":{{ a.title|tojson }},"url":"https://borsapusula.com/blog/{{ a.slug }}","datePublished":{{ a.date|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
+<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog.css?v=1e89944c">
+<link rel="stylesheet" href="/static/css/pages/blog.css?v=539a5bd9">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->

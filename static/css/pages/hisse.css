@@ -106,7 +106,6 @@
     font-size: var(--bp-text-xs); font-weight: 600; cursor: default;
   }
   /* ── Container ── */
-  .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
 
   /* ── Grafik bölümü (20.09 — Data-Art denetimi, Grafik sekmesi) ──
      Panel gövdesi bilinçli olarak DÜZ var(--bp-surface) kalıyor: lightweight-charts
@@ -866,7 +865,6 @@
   @media (max-width: 768px) {  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
-    .container { padding: 10px 12px; }
     #chartMain    { height: 360px; margin: 4px 14px 6px; }
     .ch-chips { order: 5; margin-left: 0; width: 100%; display: flex; }
     .ch-chips button { flex: 1; min-height: 44px; }

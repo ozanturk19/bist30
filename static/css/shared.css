@@ -332,3 +332,12 @@ html {
    24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
 .macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
 .macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{opacity:1}
+/* ── Sayfa kabı: TEK KAYNAK (C-15) ───────────────────────────────────────────
+   Önceden 14 sayfa CSS'inde ayrı `.container` vardı (578/680/820/860/1100/
+   1200/1400 genişlik, 10-40px iç boşluk karışık). Sayfa CSS'inde `.container`
+   yazılmaz; genişlik 3 token: varsayılan uygulama 1200, `container--read`
+   (metin sayfaları) 760, `container--wide` (hisse, ısı haritası) 1360. */
+.container { max-width: var(--bp-container-app); margin: 0 auto; padding: 24px; }
+.container--read { max-width: var(--bp-container-read); }
+.container--wide { max-width: var(--bp-container-wide); }
+@media (max-width: 600px) { .container { padding: 16px; } }

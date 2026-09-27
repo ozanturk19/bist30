@@ -19,11 +19,7 @@
     top: 0;
     z-index:var(--bp-z-dropdown);
   }
-  .container { max-width: var(--bp-container-860); margin: 0 auto; padding: 36px 24px 48px; }
 
-  @media (max-width: 600px) {
-    .container { padding: 16px 16px 32px; }
-  }
 
   .hh-alpha-bar {
     background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);

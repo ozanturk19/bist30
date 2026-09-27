@@ -57,11 +57,11 @@
 ]}|tojson }}</script>
 {%- endif %}
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
-<link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
+<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <link rel="stylesheet" href="/static/css/heatmap.css?v=547396ab">
-<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=5e5e74a4">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=7bbd9476">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı (sayfa kabuğu /sektor-harita ile aynı: pages/sektor_harita.css) -->
@@ -69,7 +69,7 @@
 
 {% include '_header.html' %}
 
-<main class="container hg" id="main-content" tabindex="-1">
+<main class="container container--wide hg" id="main-content" tabindex="-1">
 {%- if _hm_ok %}
   {% with hm_h1=(_uni ~ ' ısı haritası', _lbl) %}{% include '_heatmap.html' %}{% endwith %}
   {%- if _hg.prev or _hg.next %}

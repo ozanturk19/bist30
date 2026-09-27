@@ -27,7 +27,6 @@
     z-index:var(--bp-z-dropdown);
   }
 
-  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
 
   .prose h2 {
     font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
@@ -151,9 +150,6 @@
     --da-glow-size: 260px; --da-glow-a: .12;
   }
 
-  @media (max-width: 600px) {
-    .container { padding: 16px; }
-  }
   .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:var(--bp-text3);}
 
   /* Terimler — Karıştırılmaması Gerekenler (CPO-1682 terim netleştirmesi) */

@@ -11,9 +11,8 @@
 body { font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
 header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border); position: sticky; top: 0; z-index: var(--bp-z-dropdown); }
 
-.container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px 48px; }
 /* C-18b: görünür başlık <main> dışında (hukuki metin kapısı <main>'i izler) */
-.container.lg-head { padding-top: 0; padding-bottom: 0; }
+.lg-head { padding-top: 0; padding-bottom: 0; }
 
 .prose h2 {
   font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
@@ -40,4 +39,3 @@ header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border
 
 .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 24px; }
 
-@media (max-width: 600px) { .container { padding: 16px 16px 32px; } }

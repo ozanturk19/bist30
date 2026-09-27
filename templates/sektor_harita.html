@@ -43,11 +43,11 @@
 <script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'Dataset', 'name': (heatmap.universe or 'BIST100') ~ ' ısı haritası · ' ~ heatmap.asof_label ~ ' kapanışı', 'description': 'BIST100 hisselerinin sektörlere göre gün sonu görüntüsü: piyasa değeri, 1 gün / 1 hafta / 1 ay / yılbaşından beri / 1 yıl değişim, BorsaPusula Skoru ve trend durumu.', 'url': 'https://borsapusula.com/sektor-harita', 'temporalCoverage': heatmap.asof, 'inLanguage': 'tr', 'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'}, 'variableMeasured': ['Piyasa değeri', 'Değişim', 'BorsaPusula Skoru', 'Trend durumu']}|tojson }}</script>
 {%- endif %}
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
-<link rel="stylesheet" href="/static/css/tokens.css?v=14d3b6f9">
+<link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <link rel="stylesheet" href="/static/css/heatmap.css?v=547396ab">
-<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=5e5e74a4">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=7bbd9476">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -55,7 +55,7 @@
 
 {% include '_header.html' %}
 
-<main class="container" id="main-content" tabindex="-1">
+<main class="container container--wide" id="main-content" tabindex="-1">
 {%- if _hm_ok %}
   {% with hm_full=true, hm_mode=_mode, hm_per=_per, hm_path='/sektor-harita' %}{% include '_heatmap.html' %}{% endwith %}
 {%- else %}
