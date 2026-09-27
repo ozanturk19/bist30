@@ -330,6 +330,42 @@ def signal_from_indicators(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir)
     return classify_signal(trend_flags(st_dir, adx, di_plus, di_minus, e12, e99), weekly_dir)[0]
 
 
+# D-47: sinyal kuralları tak-çıkar — 5 koşulun okunabilir kaydı (id, Türkçe
+# etiket). API `conditions` alanı ve ileride /metodoloji (C-42) aynı kayıttan
+# okur; yeni koşul eklemek bu listeye 1 satır demek. trend_flags/classify_signal
+# DEĞİŞMEZ — motorun zaten hesapladığı oyları etiketleyip dışa açar.
+SIGNAL_CONDITIONS = [
+    {"id": "supertrend",   "label": "Supertrend yönü"},
+    {"id": "adx",          "label": f"ADX ≥ {TREND_ADX_MIN:.0f}"},
+    {"id": "di",           "label": "DI+ > DI-"},
+    {"id": "ema1299",      "label": "EMA12 > EMA99"},
+    {"id": "weekly_ema20", "label": "Haftalık EMA20 yönü"},
+]
+
+
+def build_signal_conditions(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir):
+    """5 koşulun `{id, label, ok, value, threshold}` listesi (D-47).
+
+    `ok` her koşulun YUKARI (bull) okunuşudur — trend_flags()'in zaten
+    hesapladığı karşılaştırmalardan türer, ikinci bir sinyal kanonu açmaz.
+    """
+    adx_ok = adx >= TREND_ADX_MIN
+    labels = {c["id"]: c["label"] for c in SIGNAL_CONDITIONS}
+    return [
+        {"id": "supertrend", "label": labels["supertrend"], "ok": st_dir == 1,
+         "value": "Yukarı" if st_dir == 1 else ("Aşağı" if st_dir == -1 else None),
+         "threshold": None},
+        {"id": "adx", "label": labels["adx"], "ok": bool(adx_ok),
+         "value": round(float(adx), 1), "threshold": TREND_ADX_MIN},
+        {"id": "di", "label": labels["di"], "ok": di_plus > di_minus,
+         "value": f"{di_plus:.1f}/{di_minus:.1f}", "threshold": None},
+        {"id": "ema1299", "label": labels["ema1299"], "ok": e12 > e99,
+         "value": round(float(e12 - e99), 2), "threshold": 0},
+        {"id": "weekly_ema20", "label": labels["weekly_ema20"], "ok": weekly_dir == 1,
+         "value": weekly_dir, "threshold": None},
+    ]
+
+
 def compose_score(adx, vol_ratio, bull_score, confirmed, rsi, signal="AL"):
     """Teknik Güç (0-100) — tek skor kaynağı. CPO-535 spec.
 

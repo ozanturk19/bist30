@@ -416,3 +416,33 @@ def test_eod_pass_writes_bp_for_flag_state(app_module, monkeypatch, tmp_path, st
         saved = json.load(f)["scores"]
     assert {t: e["borsapusula_skoru"] for t, e in saved.items()} == \
         {t: w["data"]["borsapusula_skoru"] for t, w in cache.items()}
+
+
+# ── D-47: sinyal kuralları tak-çıkar — build_signal_conditions() ────────────
+# Kabul: 5 öğe (haftalık dahil), id'ler sabit, `ok` trend_flags()/weekly_dir
+# ile birebir aynı (ikinci kanon açılmadığının kanıtı) — sinyal HESAPLANMAZ,
+# yalnızca zaten var olan karar değişkenleri etiketlenir.
+def test_d47_signal_conditions_besli_liste():
+    ids = [c["id"] for c in br.SIGNAL_CONDITIONS]
+    assert ids == ["supertrend", "adx", "di", "ema1299", "weekly_ema20"]
+
+
+@pytest.mark.parametrize("st_dir, adx, di_p, di_m, e12, e99, weekly_dir", [
+    (1, 30, 20, 10, 12.0, 10.0, 1),      # Güçlü Trend adayı: 5/5 yukarı
+    (-1, 30, 10, 20, 9.0, 10.0, -1),     # Trend Bozuldu adayı: 5/5 aşağı
+    (1, 18, 20, 10, 12.0, 10.0, 0),      # ADX eşik altı + haftalık hesaplanamadı
+    (-1, 25, 25, 25, 10.0, 10.0, 1),     # DI+ == DI- (eşitlik hiçbir yöne oy vermez), EMA eşit
+])
+def test_d47_signal_conditions_flags_ile_birebir(st_dir, adx, di_p, di_m, e12, e99, weekly_dir):
+    flags = br.trend_flags(st_dir, adx, di_p, di_m, e12, e99)
+    conds = br.build_signal_conditions(st_dir, adx, di_p, di_m, e12, e99, weekly_dir)
+    assert len(conds) == 5
+    by_id = {c["id"]: c for c in conds}
+    assert by_id["supertrend"]["ok"] is (st_dir == 1) is flags["st_bull"]
+    assert by_id["adx"]["ok"] == (adx >= br.TREND_ADX_MIN)
+    assert by_id["di"]["ok"] == (di_p > di_m)
+    # adx_bull (motorun tek oyu) tam olarak adx.ok AND di.ok olmalı — ikinci kanon yok
+    assert flags["adx_bull"] == (by_id["adx"]["ok"] and by_id["di"]["ok"])
+    assert by_id["ema1299"]["ok"] == (e12 > e99) == flags["e12_bull"]
+    assert by_id["weekly_ema20"]["ok"] == (weekly_dir == 1)
+    assert by_id["weekly_ema20"]["value"] == weekly_dir

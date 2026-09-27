@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 from indicators import compute_ema, compute_adx, compute_rsi, compute_atr, compute_supertrend
 # D-09: Teknik Güç ve sinyal kuralı tek kaynak (yerelde test edilir; zorunlu import)
-from business_rules import compose_score, trend_flags, classify_signal, signal_from_indicators
+from business_rules import compose_score, trend_flags, classify_signal, signal_from_indicators, build_signal_conditions
 from datetime import datetime, date, timedelta, timezone
 
 # Türkiye saati: UTC+3, DST yok (2016'dan beri sabit)
@@ -2146,6 +2146,9 @@ def analyze(ticker_base):
                     "deadband": ema_deadband,   # True => "kararsızlık bölgesi", sinyal siniflandirmasi degismez
                 },
             },
+            # D-47: sinyal kuralları tak-çıkar — kanonun 5 koşulu, business_rules.
+            # SIGNAL_CONDITIONS kaydından (indicators'ı DEĞİŞTİRMEZ, ek alan).
+            "conditions":      build_signal_conditions(st_val, adx_val, di_p, di_m, e12, e99, weekly_dir),
             "rsi":             rsi_val,
             "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
             "earnings_warning": earnings_warning,  # Faz 1 #5: 7 gün içinde bilanço uyarısı
