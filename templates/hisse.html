@@ -659,14 +659,14 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
     </summary>
     <div class="bp-detail-toggle-body">
   {% if company_summary %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): Gemini'nin
-     ürettiği ~500+ karakterlik nesir artık İLK paragraf hemen görünür, kalanı
+  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): sunucunun
+     önbellekteki ~500+ karakterlik şirket nesri artık İLK paragraf hemen görünür, kalanı
      mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
      prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
      aynı davranışı template tarafında elde ediyoruz. #}
   {% set _cs_paras = [] %}
   {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
-  {# SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) #}
+  {# SPEC-011 L4 — Şirket Hakkında (sunucu önbelleğindeki şirket açıklaması; kaynak D-46b) #}
   <section class="da-panel content-card" aria-labelledby="company-summary-heading">
     <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
     {% if _cs_paras %}

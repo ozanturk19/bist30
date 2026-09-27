@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=465856d0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=aea8d3e6">
 <script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=6419259a">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=b45848e9">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -70,18 +70,6 @@
       kutu 0x0) ve `aria-live` da olu aliyordu. Artik <main> icinde,
       gorunur. Yazan JS DEGISMEDI -- ayni id. -#}
   <p class="da-updated" id="updatedAt" role="status" aria-live="polite">{% if ssr_updated_at %}Güncellendi: {{ ssr_updated_at }}{% else %}Yükleniyor…{% endif %}</p>
-
-  <!-- AI Makro Özeti -->
-  <div id="macroSummaryBox" class="da-panel da-panel--accent ai-summary-box" role="status" aria-live="polite" style="display:none">
-    <div class="ai-sum-row">
-      <span class="ai-sum-icon"><span aria-hidden="true">🤖</span></span>
-      <div>
-        <div class="ai-sum-eyebrow">AI Piyasa Özeti</div>
-        <div id="macroSummaryText" class="ai-sum-text"></div>
-        <div id="macroSummaryTime" class="ai-sum-time"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- Stats -->
   <div class="stats-row" id="statsRow" role="status" aria-live="polite">
@@ -523,42 +511,9 @@ async function loadMacroNewsSection() {
   }
 }
 
-async function loadMacroSummary() {
-  try {
-    const res  = await fetch('/api/macro-summary');
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    const txt  = (data.summary || '').trim();
-    if (!txt) return;
-    const box  = document.getElementById('macroSummaryBox');
-    const el   = document.getElementById('macroSummaryText');
-    const tm   = document.getElementById('macroSummaryTime');
-    /* 20.09 CPO: `hidden` (ozet 48 saatten eski) dalinda panel GORUNUR kalip
-       "Ozet hazirlanamadi, gundem basliklarina bakin." basiyordu. Canlida cache
-       10.09 10:22'de donmus durumda, yani sayfanin EN UST icerigi 10 gundur
-       "AI PIYASA OZETI" baslikli bos bir vaat kutusuydu. Bilgi tasimayan panel
-       gosterilmez (Maksimum Sadelik); kullanici asagidaki gercek gundem
-       basliklarini zaten goruyor. Backend tazeleme sorunu CPO-1676 ile DEV1'de. */
-    if (data.hidden) {
-      console.info('makro ozet 48s+ bayat (uretim: ' + (data.generated_date||'?') + '), panel gizli');
-      return;
-    }
-    if (el) el.textContent = txt;
-    if (tm) {
-      if (data.stale_warning && data.generated_date && data.generated_at) {
-        tm.textContent = '⚠️ Bu özet ' + data.generated_date + ' saat ' + data.generated_at + '\'de üretildi';
-      } else if (data.generated_at) {
-        tm.textContent = 'Oluşturuldu: ' + data.generated_at;
-      }
-    }
-    if (box) box.style.display = '';
-  } catch(e) { console.error('makro ozet yuklenemedi', e); }
-}
-
 loadGundem();
 loadEconCalendar();
 loadMacroNewsSection();
-loadMacroSummary();
 // 5 dakikada bir otomatik yenile
 /* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
    Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`

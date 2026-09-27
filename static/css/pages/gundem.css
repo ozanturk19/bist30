@@ -241,39 +241,6 @@
          `.da-panel`den geliyor, burada yalniz GRID DELTASI kaliyor. */
   .stock-grid > .da-empty { grid-column: 1 / -1; }
 
-  /* 5 ── AI Piyasa Özeti paneli: şablondaki uzun inline style buraya taşındı
-         (token'suz ham mor rgba() değeri kanonik --bp-art-violet-rgb'ye alındı —
-         style-guard ham renkleri ancak burada görüyor) ve .da-recap-panel dilinde
-         sol aksan şeridi + radius-20 kazandı. */
-  /* 20.09: `.da-panel.da-panel--accent` ilkeli gövdeyi + sol şeridi veriyor;
-     buradaki DELTA panelin kendi cyan→violet tintli zemini, kenarlık rengi ve
-     iç boşluğu. Şerit rengi artık --da-accent ile (elle border-left DEĞİL). */
-  .ai-summary-box {
-    --da-accent: var(--bp-accent-cyan);
-    --da-glow-rgb: var(--bp-accent-cyan-rgb);
-    --da-glow-a: .10;
-    --da-glow-size: 200px;
-    background: linear-gradient(135deg, rgba(var(--bp-accent-cyan-rgb),.07) 0%, rgba(var(--bp-art-violet-rgb),.05) 100%);
-    /* DİKKAT: düz `border-color` yazılırsa SOL kenarı da ezer ve
-       `.da-panel--accent`in 3px cyan şeridini soluklaştırır (gundem.css
-       data-art.css'ten SONRA yükleniyor). Yalnızca 3 kenar. */
-    border-top-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    border-right-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    border-bottom-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    padding: 14px 18px;
-    margin-bottom: 16px;
-  }
-  .ai-sum-row  { display: flex; align-items: flex-start; gap: 10px; position: relative; }
-  .ai-sum-icon { font-size: var(--bp-text-xl); flex-shrink: 0; margin-top: 1px; }
-  .ai-sum-eyebrow {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-xs); font-weight: 700;
-    color: var(--bp-accent-cyan);
-    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px;
-  }
-  .ai-sum-text { font-size: var(--bp-text-base); color: var(--bp-text2); line-height: 1.6; }
-  .ai-sum-time { font-size: var(--bp-text-2xs); color: var(--bp-text3); margin-top: 4px; }
-
   /* 6 ── Sinyal rozeti: ana sayfanın .da-badge tipografisi (Space Grotesk,
          .08em tracking). Renk semantiği (yeşil/kırmızı/nötr) DEĞİŞMEDİ. */
   .badge {
