@@ -11752,66 +11752,6 @@ _OG_TITLE_PARTS = (("Borsa", "text"), ("Pusula", "logo"))
 _OG_SUBTITLE    = "borsapusula.com · BIST100 + ek hisseler · Algoritmik Trend Sinyalleri"
 
 
-@app.route("/og-image.svg")
-@limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL/SVG render her istekte tekrarlaniyor
-def og_image():
-    """Eski SVG OG image — geri uyumluluk için tutulur (eski paylaşılan linkler).
-    CPO-1107 madde 10: yeni sayfalar /og-image.png kullanır — çoğu sosyal medya
-    platformu (Facebook/WhatsApp/LinkedIn) og:image için SVG render etmiyor."""
-    # K-CL (22.09): 4. deger BILEREK KULLANILMIYOR. Eskiden alt basliga
-    # `datetime.now()` tarihi basiliyordu; veri ise bir onceki EOD turundan
-    # geliyor (olculdu 22.09 09:3x: gorsel "22.09.2026", veri 21.09 18:22).
-    # Ustelik og:image URL'i versiyonsuz -- Facebook/WhatsApp/X kartı URL'e
-    # gore onbelleklediginden HERHANGI bir tarih onbellekte kalici yalana
-    # doner (86. ders: kuralin sertligi kanalin yeniden-degerlendirme
-    # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
-    al_count, sat_count, total, _today_unused = _og_image_stats()
-    c = _OG_PALETTE
-    c_bg, c_sf, c_sf2, c_bd = c["bg"], c["surface"], c["surface2"], c["border"]
-    c_tx, c_t2, c_t3 = c["text"], c["text2"], c["text3"]
-    c_br, c_lg, c_al, c_sat = c["brand"], c["logo"], c["al"], c["sat"]
-
-    # Baslik IKI rotada da _OG_TITLE_PARTS'tan turer (head-meta-check R6:
-    # tek urun, tek metin kanonu). Ilk parca kapsayici elemanin kendi
-    # fill'ini alir; kalanlar tspan ile kendi token'larindan boyanir.
-    # (Bu yorumda SVG etiketi YAZILMAZ: kapinin metin ayristiricisi
-    #  ham kaynaga bakar, yorum govdeyi uzatip sahte-pozitif uretir.)
-    _svg_title = "".join(
-        p if i == 0 else f'<tspan fill="{c[role]}">{p}</tspan>'
-        for i, (p, role) in enumerate(_OG_TITLE_PARTS))
-
-    svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
-     xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
-  <rect width="1200" height="630" fill="{c_bg}"/>
-  <rect x="0" y="0" width="6" height="630" fill="{c_br}"/>
-  <!-- Marka sozcuk-isareti — K-CZ kanonu: vurgulu yari bp-logo-accent token'i
-       (XML yorumunda iki tire yan yana YAZILAMAZ: belge iyi-bicimli kalmaz) -->
-  <image x="60" y="52" width="88" height="88" href="https://borsapusula.com/static/icon-192.png"/>
-  <text x="170" y="120" font-size="64" font-weight="700" fill="{c_tx}">{_svg_title}</text>
-  <text x="60" y="165" font-size="26" fill="{c_t3}">{_OG_SUBTITLE}</text>
-  <!-- Ayırıcı çizgi -->
-  <line x1="60" y1="195" x2="1140" y2="195" stroke="{c_bd}" stroke-width="1"/>
-  <!-- İstatistik kutular -->
-  <rect x="60"  y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="200" y="305" font-size="72" font-weight="800" fill="{c_al}" text-anchor="middle">{al_count}</text>
-  <text x="200" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▲ GÜÇLÜ TREND</text>
-  <rect x="380" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="520" y="305" font-size="72" font-weight="800" fill="{c_sat}" text-anchor="middle">{sat_count}</text>
-  <text x="520" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▼ TREND BOZULDU</text>
-  <rect x="700" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="840" y="305" font-size="72" font-weight="800" fill="{c_br}" text-anchor="middle">{total}</text>
-  <text x="840" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
-  <!-- Alt slogan -->
-  <text x="60" y="480" font-size="30" fill="{c_t2}">Supertrend · ADX · EMA12/99</text>
-  <text x="60" y="525" font-size="22" fill="{c_t3}">Algoritmik, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
-  <!-- Sağ ikon -->
-  <rect x="1020" y="230" width="120" height="160" rx="12" fill="{c_sf2}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
-</svg>'''
-    return Response(svg, mimetype="image/svg+xml",
-                    headers={"Cache-Control": "public, max-age=3600"})
-
-
 _OG_FONT_DIR = "/usr/share/fonts/truetype/dejavu"
 _og_font_cache = {}
 
