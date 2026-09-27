@@ -7,7 +7,12 @@
   F/K ile PD/DD ters yonde ise karisik; ortanca yoksa hukum yok (None).
 - featured_pool: "One cikan sirketler" havuzu — Trend Bozuldu ve donuk hisse haric, BP + veri
   tamligi >=0,8, BP azalan / esitlikte kod artan.
+- movers: D-53(a) "Son seansin hareketlileri" (5 yukselen + 5 dusen) — eski JS
+  daRenderMovers'la BIREBIR ayni secim/siralama; tavan/taban D-51 ile ayni hesap
+  (tarama_fields.limit_flag_from_change — Flask'tan bagimsiz, py3.9 testlerinde de calisir).
 """
+
+import tarama_fields
 
 TV_CUT = 0.80
 TV_EXP = 1.25
@@ -108,3 +113,23 @@ def featured_pool(stocks, n=FEATURED_N):
     ]
     pool.sort(key=lambda s: (-s["borsapusula_skoru"], s.get("ticker") or ""))
     return pool[:n]
+
+
+def movers(ranked, n=5):
+    """ranked: donuk hisse zaten elenmis satirlar (JS'in `ranked` suzgeciyle ayni havuz).
+    JS'in eski daRenderMovers'iyla BIREBIR ayni secim: price + change_pct sayisal,
+    degisim azalan (yukselen) / artan (dusen), esitlikte ticker artan. lim (tavan/taban)
+    D-51 ile ayni hesap, ayni istekteki satirdan — heatmap goruntusuyle tarih
+    uyusmazligi riski yok (eski JS'in asof kontrolune gerek kalmaz)."""
+    rows = [s for s in ranked if _num(s.get("price")) and _num(s.get("change_pct"))]
+
+    def pick(positive):
+        pool = [s for s in rows if (s["change_pct"] > 0 if positive else s["change_pct"] < 0)]
+        pool.sort(key=lambda s: (-s["change_pct"] if positive else s["change_pct"], s.get("ticker") or ""))
+        return [{
+            "ticker": s.get("ticker"), "name": s.get("name"),
+            "price": s.get("price"), "change_pct": s.get("change_pct"),
+            "lim": tarama_fields.limit_flag_from_change(s.get("price"), s.get("change_pct")),
+        } for s in pool[:n]]
+
+    return {"up": pick(True), "down": pick(False)}

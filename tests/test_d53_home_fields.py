@@ -117,6 +117,29 @@ def test_featured_pool_kurallari():
     assert len(hf.featured_pool([_s("T%02d" % i, i) for i in range(20)], 5)) == 5
 
 
+# ── movers (D-53(a)) ─────────────────────────────────────────────────────────
+def _m(t, price, chg):
+    return {"ticker": t, "name": t + " A.Ş.", "price": price, "change_pct": chg}
+
+
+def test_movers_secim_ve_sira():
+    rows = [_m("AAA", 100, 5.0), _m("BBB", 50, 10.0), _m("CCC", 10, 10.0),
+            _m("DDD", 20, -12.0), _m("EEE", 30, -3.0), _m("FFF", None, 1.0),
+            _m("GGG", 40, 0.0)]
+    out = hf.movers(rows)
+    assert [s["ticker"] for s in out["up"]] == ["BBB", "CCC", "AAA"]   # azalan, esitlikte ticker artan
+    assert [s["ticker"] for s in out["down"]] == ["DDD", "EEE"]        # artan (en cok dusen once)
+    assert out["up"][0]["lim"] == "tavan" and out["up"][2]["lim"] is None
+    assert out["down"][0]["lim"] == "taban" and out["down"][1]["lim"] is None
+    assert out["up"][0]["price"] == 50 and out["up"][0]["name"] == "BBB A.Ş."
+
+
+def test_movers_havuz_sinirlari():
+    assert hf.movers([]) == {"up": [], "down": []}
+    assert hf.movers([_m("AAA", 100, 0.0)]) == {"up": [], "down": []}   # 0 ne yukselen ne dusen
+    assert len(hf.movers([_m("T%02d" % i, 10, i + 1.0) for i in range(20)])["up"]) == 5
+
+
 # ── app.py ince baglanti (yerelde 3.9'da atlanir, VPS venv'de kosar) ─────────
 def _row(t, bp, sig="AL", **kw):
     d = {"ticker": t, "name": t + " A.S.", "sector": "Sanayi", "signal": sig, "signal_strength": 80,
@@ -157,6 +180,11 @@ def test_ssr_baglami_featured_ve_gundem(home_state):
     assert set(ctx["gundem"]) == {"new_signals", "eod_date", "eod_label", "closed_message"}
     assert all(t["fin_answer"] and t["borsapusula_skoru"] is not None for t in ctx["top_signals"])
     assert "date" in ctx["bist_level"]
+    # D-53(a): movers — SAT (CCC) haric tutulmaz (featured_pool'dan farkli, yalniz fiyat/degisim bakar);
+    # tumu +1.0 (EEE +10.0 haric) oldugu icin 5 yukselen dolar, dusen bos.
+    assert [r["ticker"] for r in ctx["movers"]["up"]] == ["EEE", "AAA", "BBB", "CCC", "DDD"]
+    assert ctx["movers"]["down"] == []
+    assert ctx["movers"]["up"][0]["lim"] == "tavan"
 
 
 def test_api_data_alanlari(home_state):

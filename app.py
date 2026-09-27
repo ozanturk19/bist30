@@ -5179,6 +5179,7 @@ def _compute_index_ssr_context():
         "top_signals":   _top,
         "spotlight":     spotlight,
         "featured":      _home_featured_rows(bist, _hs_snap, home_fields.FEATURED_N),
+        "movers":        home_fields.movers(_ranked),   # D-53(a): "Son seansın hareketlileri" (5 yükselen + 5 düşen)
         "gundem": {     # D-53: "Son seansta değişenler" (BEKLE'ye dönüş listelenmez; /api/gundem ile aynı kaynak)
             "new_signals":    [{k: s.get(k) for k in ("ticker", "name", "signal", "signal_date")}
                                for s in _g["new_signals"]],
@@ -5203,6 +5204,7 @@ def index():
         ssr_top_signals=_ssr["top_signals"],
         ssr_spotlight=_ssr["spotlight"],
         ssr_featured=_ssr["featured"],      # D-53: öne çıkan şirketler (5 satır; valuation + fin_answer dolu)
+        ssr_movers=_ssr["movers"],          # D-53(a): son seansın hareketlileri (5 yükselen + 5 düşen)
         ssr_gundem=_ssr["gundem"],          # D-53: son kapanışta durum değiştirenler
         **_heatmap_ssr_context(),   # D-42: heatmap / heatmap_groups / heatmap_tiles (yoksa None/[]/[])
         heatmap_og_image=_heatmap_og_image(),   # D-54: og:image = son günün haritası (yoksa None)
