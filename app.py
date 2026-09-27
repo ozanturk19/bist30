@@ -5881,11 +5881,10 @@ def api_macro():
     return safe_json(_resp_macro)
 
 
-# ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
+# ── Günlük Makro AI Özeti (D-22b: üretim kodu silindi, disk cache gemini-cache-sync
+# tarafından hâlâ okunuyor/yazılıyor — kalıntı veri kalıcı STALE, /api/health bunu
+# bekliyor: "Gemini kota bağımlı — STALE beklenir") ─────────────────────────────
 _macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
-_MACRO_AI_TTL   = 21600      # SPEC-009 Faz 2 B3: 4h→12h; SPEC-011 paketi: 12h→6h
-                             # (makro hızlı değişir — freshness; KPI 245 req/gün stabil)
-_macro_ai_refreshing = False  # arka plan yenileme kilidi
 
 # SPEC-009 Faz 2 B2: macro-ai shared disk cache — leader Gemini çağrısını yapıp
 # diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
@@ -5938,113 +5937,6 @@ def _load_macro_ai_from_disk():
             _macro_ai_cache.update(data)
     except Exception as e:
         logger.warning("_load_macro_ai_from_disk hatası: %s", e)
-
-
-def _do_macro_ai_refresh():
-    """Makro özet Gemini çağrısını arka planda yapar — endpoint'i bloklamaz."""
-    global _macro_ai_refreshing
-    if _macro_ai_refreshing:
-        return
-    _macro_ai_refreshing = True
-    try:
-        # CPO-1494: piyasa kapalıyken (hafta sonu/tatil) yeni özet ÜRETME —
-        # prompt'a "bugün X" deyip piyasa durumunu hiç söylemediğimiz için
-        # Gemini donmuş Cuma verisiyle "şu an işlem görüyor" gibi şimdiki-zaman
-        # dili üretiyordu. Piyasa kapalıyken mevcut (açıkken üretilmiş) özet
-        # zaten stale_warning/hidden (24h/48h) mekanizmasıyla gösteriliyor.
-        if not _market_open():
-            return
-        with _lock:
-            macro_items = _macro_cache.get("data") or []
-        if not macro_items:
-            macro_items = _fetch_macro()
-
-        def _lbl(label):
-            return next((m["price"] for m in macro_items if m.get("label") == label), None)
-
-        xu100  = _lbl("XU100")
-        xu100c = next((m.get("change") for m in macro_items if m.get("label") == "XU100"), None)
-        usdtry = _lbl("USDTRY")
-        gold   = _lbl("ALTIN")
-        oil    = _lbl("PETROL")
-        btc    = _lbl("BTC")
-
-        lines = []
-        if xu100:
-            chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
-            lines.append(f"BIST100: {xu100:,.0f} ({chg_str})")
-        if usdtry: lines.append(f"USD/TRY: {usdtry:.4f}")
-        if gold:   lines.append(f"Altın (XAU/USD): {gold:,.2f} USD/ons")
-        if oil:    lines.append(f"Ham Petrol (Brent): {oil:.2f} USD")
-        if btc:    lines.append(f"BTC: {btc:,.0f} USD")
-
-        if not lines:
-            return
-
-        prompt = (
-            "Türk piyasaları son kapanış verileri:\n"
-            + "\n".join(f"• {ln}" for ln in lines)
-            + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma. "
-            "Tarih belirtme; 'bugün', 'şu an', 'şu anda', 'şu sıralar' gibi zamana "
-            "bağlı ifadeler KULLANMA — veriyi tarihsiz/zamansız yorumla.\n"
-            "GÖREV: Bireysel yatırımcı için TEK SATIR Türkçe piyasa özeti, en fazla 220 karakter. "
-            "Tam cümle kurma; kısa ifadeleri ' · ' ile ayır (örnek biçim: "
-            "'BIST100 %62 yükselişte · Dolar/TL yatay · Altın hafif değer kaybediyor'). "
-            "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
-        )
-        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12, max_tokens=120, temperature=0.3)
-        if text:
-            now = time.time()
-            today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
-            _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
-                                    "generated_at": datetime.now(_TZ_TR).strftime("%H:%M")})
-            logger.info("_do_macro_ai_refresh: tamamlandi")
-    except Exception as e:
-        logger.warning("_do_macro_ai_refresh: hata — %s", e)
-    finally:
-        _macro_ai_refreshing = False
-
-
-@app.route("/api/macro-summary")
-@limiter.limit("30 per minute")
-def api_macro_summary():
-    """Günlük makro ekonomi özeti — Gemini ile üretilir, 4 saat cache'lenir.
-    Stale-while-revalidate: cache varsa anında döner, arka planda yeniler."""
-    now     = time.time()
-    today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
-    # Snapshot (dict() kopya) — arka plan refresh thread'i _macro_ai_cache'i
-    # .update() ile mutate ederken bu request'in yarısı eski/yarısı yeni alan
-    # okumasın (torn read: eski text + yeni generated_at gibi tutarsız yanıt).
-    cached  = dict(_macro_ai_cache)
-
-    cache_fresh = (cached.get("date") == today_s
-                   and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
-
-    # Stale + bu worker gemini-leader ise → arka planda yenile (4× çağrı fix).
-    # Non-leader yenilemez; gemini-cache-sync timer thread'i diskteki leader
-    # cache'ini periyodik (90s) yükler → in-memory'den serve eder (inline I/O YOK, #38).
-    if not cache_fresh and not _macro_ai_refreshing and _is_gemini_leader():
-        threading.Thread(target=_do_macro_ai_refresh, daemon=True,
-                         name="macro-ai-refresh").start()
-
-    if cached.get("text"):
-        age_h = (now - cached.get("ts", 0)) / 3600.0
-        gen_date = ""
-        try:
-            if cached.get("date"):
-                gen_date = datetime.strptime(cached["date"], "%Y-%m-%d").strftime("%d.%m")
-        except Exception:
-            gen_date = ""
-        # DEV2-r103 (bughunt): stale_warning yalnizca saat farkina bakiyordu, takvim
-        # gunu degistiginde (ornegin cumartesi/pazar sonrasi pazartesi sabahi, 24s
-        # esigi henuz dolmadan) "Bugun ..." diyen metin sessizce "taze" isaretleniyordu.
-        date_changed = bool(cached.get("date")) and cached.get("date") != today_s
-        return safe_json({"summary": cached["text"], "cached": cache_fresh,
-                          "generated_at": cached.get("generated_at", ""),
-                          "generated_date": gen_date,
-                          "stale_warning": (24 <= age_h < 48) or date_changed,
-                          "hidden": age_h >= 48})
-    return safe_json({"summary": "", "cached": False})
 
 
 def _safe_float(val):
@@ -14171,15 +14063,6 @@ def _startup():
             _macro_cache["ts"]   = time.time()
         logger.info("_warm_macro: %d sembol hazır", len(items))
     threading.Thread(target=_warm_macro, daemon=True).start()
-    # Makro AI özetini başlangıçta ısıt (arka planda — _warm_macro bittikten sonra)
-    def _warm_macro_summary():
-        # CPO-558E: web worker'da Gemini/yfinance yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_macro_summary: REFRESH_WORKER=web — atlandı")
-            return
-        time.sleep(10)   # macro fiyatlarının gelmesini bekle
-        _do_macro_ai_refresh()
-    threading.Thread(target=_warm_macro_summary, daemon=True).start()
     # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
     def _warm_earnings():
         # CPO-558B: web worker'da yfinance yasak — refresh service günceller, disk-reload yeter
