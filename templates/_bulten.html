@@ -1,0 +1,89 @@
+{#- C-57 v2 (27.09): Akşam Bülteni gövdesi — /haberler kartı (bl_full=false) ve /bulten/<gün> sayfası
+    (bl_full=true) aynı parçayı çizer. Bağlam `bulten` = data/bulten/<gün>.json (D-45(c) sözleşmesi:
+    tarih, bist100{kapanis,degisim_pct}, hareketliler{up,down}, durum_degisimleri[{ticker,onceki,yeni}],
+    isi_haritasi_ozet[{sektor,ortalama_degisim_pct}], onemli_bildirimler[{ticker,company,title,href,onem}],
+    yarin_takvim[{kind,ticker,title,period,time}]). Eksik alan bölümü gizler; kesin tarih, göreli zaman yok. -#}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+{%- set _MO = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] -%}
+{%- macro bl_date(iso) -%}
+{%- set p = (iso or '')[:10].split('-') -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MO[p[1]|int - 1] }} {{ p[0] }}{%- else -%}{{ iso }}{%- endif -%}
+{%- endmacro -%}
+{%- set B = bulten -%}
+{%- set _full = bl_full is defined and bl_full -%}
+{%- set _ST = {'Güçlü Trend': 'g', 'Yatay': 'y', 'Trend Bozuldu': 'b'} -%}
+{%- set _ix = B.bist100 or {} -%}
+{%- set _mv = B.hareketliler or {} -%}
+{%- set _dd = B.durum_degisimleri or [] -%}
+{%- set _sk = B.isi_haritasi_ozet or [] -%}
+{%- set _kb = B.onemli_bildirimler or [] -%}
+{%- set _tk = B.yarin_takvim or [] -%}
+<div class="bl-top">
+  <div class="bl-ix">
+    <span>BIST100</span>
+    {%- if _ix.kapanis is not none and _ix.kapanis is defined %}<b>{{ '{:,.2f}'.format(_ix.kapanis)|replace(',', ' ')|replace('.', ',')|replace(' ', '.') }}</b>{% endif %}
+    {%- if _ix.degisim_pct is not none and _ix.degisim_pct is defined %}<span class="c {{ dir_class(_ix.degisim_pct) }}">{{ pct_text(_ix.degisim_pct) }}</span>{% endif %}
+  </div>
+  <a class="bl-hm" href="/harita/{{ B.tarih }}">Isı haritası <span aria-hidden="true">→</span></a>
+</div>
+
+{%- if (_mv.up or _mv.down) %}
+<div class="bl-sec">
+  <h3>Hareketliler</h3>
+  {%- for key, lbl in [('up', 'Yükselenler'), ('down', 'Düşenler')] %}{% if _mv[key] %}
+  <div class="bl-row"><span class="bl-rl">{{ lbl }}</span><div class="bl-chips">
+    {%- for m in _mv[key] %}<a class="bl-chip" href="/hisse/{{ m.ticker }}"><b>{{ m.ticker }}</b><span class="{{ dir_class(m.change_pct) }}">{{ pct_text(m.change_pct) }}</span></a>{% endfor -%}
+  </div></div>
+  {%- endif %}{% endfor %}
+</div>
+{%- endif %}
+
+<div class="bl-sec">
+  <h3>Durumu değişenler <i>{{ _dd|length }}</i></h3>
+  {%- if _dd %}
+  {%- for g in _dd|groupby('yeni') %}
+  <div class="bl-row"><span class="bl-rl"><span aria-hidden="true">→</span> <span class="hb-st {{ _ST.get(g.grouper, 'y') }}">{{ g.grouper }}</span></span><div class="bl-chips">
+    {%- for d in g.list %}<a class="bl-chip" href="/hisse/{{ d.ticker }}" title="Önceki durum: {{ d.onceki }}"><b>{{ d.ticker }}</b><small>{{ d.onceki }}</small></a>{% endfor -%}
+  </div></div>
+  {%- endfor %}
+  {%- else %}
+  <p class="bl-none">Bu kapanışta trend durumu değişen hisse yok.</p>
+  {%- endif %}
+</div>
+
+{%- if _sk %}
+<div class="bl-sec">
+  <h3>Sektörler</h3>
+  {%- set _sks = _sk if _full else (_sk[:3] + (_sk[-3:] if _sk|length > 6 else _sk[3:])) %}
+  <ul class="bl-sk">
+    {%- for s in _sks %}<li><span>{{ s.sektor }}</span><b class="{{ dir_class(s.ortalama_degisim_pct) }}">{{ pct_text(s.ortalama_degisim_pct) }}</b></li>{% endfor %}
+  </ul>
+  {%- if not _full and _sk|length > 6 %}<p class="bl-foot">En güçlü ve en zayıf üçer sektör; ortalama günlük değişim.</p>{% endif %}
+</div>
+{%- endif %}
+
+{%- if _kb %}
+<div class="bl-sec">
+  <h3>Öne çıkan bildirimler</h3>
+  <ul class="bl-kb">
+    {%- for k in _kb %}<li><a href="{{ k.href or ('/hisse/' ~ k.ticker) }}"><b>{{ k.ticker }}</b><span>{{ k.title }}</span>{% if k.onem %}<small>Önem oranı {{ k.onem }}</small>{% endif %}</a></li>{% endfor %}
+  </ul>
+</div>
+{%- endif %}
+
+<div class="bl-sec">
+  <h3>Sonraki işlem günü takvimi</h3>
+  {%- if _tk %}
+  <ul class="bl-cal">
+    {%- for e in _tk %}<li>
+      <span class="bl-ct">{{ e.time or ({'temettu': 'Temettü', 'bilanco': 'Rapor', 'makro': 'Veri'}[e.kind] if e.kind in ['temettu', 'bilanco', 'makro'] else '') }}</span>
+      <span>{%- if e.title %}{{ e.title }}{% if e.period and e.period not in e.title %} <small>{{ e.period }}</small>{% endif %}
+      {%- elif e.kind == 'temettu' and e.ticker %}<a href="/hisse/{{ e.ticker }}">{{ e.ticker }}</a> temettü hak kullanımı
+      {%- elif e.kind == 'bilanco' and e.ticker %}<a href="/hisse/{{ e.ticker }}">{{ e.ticker }}</a> finansal rapor (tahmini tarih)
+      {%- else %}{{ e.ticker or '' }}{% endif %}</span>
+    </li>{% endfor %}
+  </ul>
+  {%- else %}
+  <p class="bl-none">Takvimde kayıtlı bilanço, temettü ya da makro veri yok. <a href="/takvim">Takvim</a></p>
+  {%- endif %}
+</div>
