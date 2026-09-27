@@ -12675,66 +12675,6 @@ def sektor():
     return redirect("/sektor-harita", 301)
 
 
-def _compute_sector_heatmap():
-    """Sektör bazlı AL/SAT/BEKLE toplamı + skor + ort. RVOL — /sektor-harita
-    (SSR) ve /api/sector-heatmap (canlı JS) tarafından ortak kullanılır
-    (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
-    with _lock:
-        stocks = list(_cache["data"])
-        upd = _cache.get("updated_at")
-    sec_map = {}
-    for s in stocks:
-        tk = s.get("ticker", "")
-        if tk == "XU030":
-            continue
-        sec = s.get("sector") or _get_sector(tk)
-        if sec not in sec_map:
-            sec_map[sec] = {"al": 0, "sat": 0, "bekle": 0, "premium": 0, "rvol_vals": []}
-        d = sec_map[sec]
-        sig = s.get("signal", "BEKLE")
-        if sig == "AL":
-            d["al"] += 1
-        elif sig == "SAT":
-            d["sat"] += 1
-        else:
-            d["bekle"] += 1
-        # CPO-1668 #8: JS'in ⭐ Hacim Onaylı rozeti (pill-prem, sec.premium.length)
-        # is_premium'a bağlı ama SSR bunu hiç toplamıyordu — ilk boyada rozet
-        # eksik kalıp JS re-render'da "beliriyordu".
-        if s.get("is_premium"):
-            d["premium"] += 1
-        rv = s.get("rvol")
-        if rv is not None:
-            d["rvol_vals"].append(float(rv))
-    result = []
-    for name, d in sec_map.items():
-        total = d["al"] + d["sat"] + d["bekle"]
-        score = round((d["al"] - d["sat"]) / total * 100) if total > 0 else 0
-        rvol_vals = d["rvol_vals"]
-        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
-        result.append({"name": name, "al": d["al"], "sat": d["sat"], "bekle": d["bekle"],
-                        "total": total, "score": score, "avg_rvol": avg_rvol,
-                        "premium": d["premium"]})
-    # CPO-1668 #7: JS'in tiebreak'iyle (b.score - a.score || a.name.localeCompare(b.name,'tr'))
-    # AYNI ikincil sıralama — eskiden eşit skorlu sektörler için tiebreak yoktu,
-    # Python dict insertion-order'a düşüyordu; JS yüklenince eşit skorlu kartlar
-    # ad-alfabetik sıraya "atlıyordu" (görünür yer değiştirme). Çıplak string
-    # karşılaştırması Unicode kod noktası sırasına düşer ve "İlaç/Sağlık" (tek
-    # İ-baslayan sektör) gibi adları TR alfabesindeki gerçek yerine (H-K arası)
-    # değil en sona koyar (İ'nin kod noktası Z'den büyük) — küçük, sabit bir TR
-    # alfabe tablosuyla gerçek collation taklit ediliyor. locale.setlocale()
-    # KULLANILMIYOR (process-global, gevent'te thread-safe değil, VPS'te
-    # tr_TR.UTF-8 kurulu olmayabilir).
-    _tr_order_str = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
-    _tr_order = {ch: i for i, ch in enumerate(_tr_order_str)}
-
-    def _tr_sort_key(name):
-        return [_tr_order.get(ch, 1000 + ord(ch)) for ch in name]
-
-    result.sort(key=lambda x: (-x["score"], _tr_sort_key(x["name"])))
-    return result, upd
-
-
 @app.route("/sektor-harita")
 def sektor_harita():
     # D-52: C-29 şablonu yalnız ısı haritası bağlamını tüketir (ssr_sectors/ssr_updated_at kalktı).
@@ -12798,29 +12738,6 @@ def sektor_karsilastir():
     if qs:
         target += "&" + qs
     return redirect(target, code=301)
-
-
-def _overlay_live_prices(stocks):
-    """CPO-1632 fix: bilanco/temettu takvimi cache'leri 12s TTL'li yfinance
-    hesaplamasi anindaki fiyati donduruyordu — hesaplama genelde seans
-    ACILISINDA (bist30-refresh baslangicinda) tetiklendigi icin buyuk gun-ici
-    hareketlerde ana /api/data fiyatindan %10'a varan sapma olusuyordu.
-    yfinance tarih/donem alanlari degismez oldugu icin cache TTL'i aynen
-    kalir; sadece sunum aninda fiyat/sinyal _cache'ten (zaten 90s'de bir
-    disk'ten tazelenen ana snapshot) ucuza overlay edilir, yfinance
-    cagrisi gerekmez."""
-    with _lock:
-        live = {s["ticker"]: s for s in _cache["data"]}
-    out = []
-    for s in stocks:
-        live_s = live.get(s.get("ticker"))
-        if live_s:
-            s = dict(s)
-            s["price"]      = live_s.get("price", s.get("price"))
-            s["signal"]     = live_s.get("signal", s.get("signal"))
-            s["is_premium"] = live_s.get("is_premium", s.get("is_premium"))
-        out.append(s)
-    return out
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────

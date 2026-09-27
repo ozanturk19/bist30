@@ -1,9 +1,8 @@
 """CPO-1587 Faz 2 — /sektor-harita, /gundem, anasayfa icin backend SSR extraction.
 
 Ayni /tarama desenini (_compute_tarama_results, bkz. test_cpo1587_tarama_ssr.py)
-3 sayfaya daha uygular:
-  - _compute_sector_heatmap(): sektor_harita() (SSR) ve api_sector_heatmap()
-    (canli JS) artik ayni fonksiyonu cagirir.
+diger sayfalara da uygular (D-11: _compute_sector_heatmap D-52/D-54 heatmap
+gecisiyle yetim kaldi, /api/sector-heatmap silinince 27.09 kaldirildi):
   - _compute_gundem_data(): gundem_page() (SSR) ve api_gundem() (canli JS)
     artik ayni fonksiyonu cagirir.
   - _get_xu100_level() + _compute_index_ssr_context(): index() (SSR) ve
@@ -42,56 +41,6 @@ def _extract(func_name):
     m = re.search(r"def " + re.escape(func_name) + r"\(.*?\n\n\n", _SRC, re.DOTALL)
     assert m, f"{func_name} not found / boundary regex needs updating"
     return m.group(0)
-
-
-# ── _compute_sector_heatmap ──────────────────────────────────────────────────
-
-_SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
-
-_SECTOR_STOCKS = [
-    {"ticker": "XU030", "signal": "AL", "rvol": 5.0},
-    {"ticker": "AKBNK", "signal": "AL", "sector": "Bankacılık", "rvol": 1.5},
-    {"ticker": "GARAN", "signal": "SAT", "sector": "Bankacılık", "rvol": 0.8},
-    {"ticker": "THYAO", "signal": "AL", "sector": "Ulaştırma", "rvol": 2.0},
-    {"ticker": "ASELS", "signal": "BEKLE", "sector": "Savunma", "rvol": None},
-]
-
-
-def _fresh_sector_heatmap():
-    ns = {
-        "_lock": _FakeLockCtx(),
-        "_cache": {"data": _SECTOR_STOCKS, "updated_at": "11.09.2026 18:00"},
-        "_get_sector": lambda ticker: _SECTORS.get(ticker, "Diğer"),
-    }
-    exec(_extract("_compute_sector_heatmap"), ns)
-    return ns["_compute_sector_heatmap"]
-
-
-def test_sector_heatmap_excludes_xu030():
-    fn = _fresh_sector_heatmap()
-    result, upd = fn()
-    names = [r["name"] for r in result]
-    assert "XU030" not in names
-    assert upd == "11.09.2026 18:00"
-
-
-def test_sector_heatmap_scores_and_sorts_desc():
-    fn = _fresh_sector_heatmap()
-    result, _ = fn()
-    # Bankacilik: 1 AL, 1 SAT -> score 0; Ulastirma: 1 AL, 0 SAT -> score 100
-    by_name = {r["name"]: r for r in result}
-    assert by_name["Ulaştırma"]["score"] == 100
-    assert by_name["Bankacılık"]["score"] == 0
-    assert by_name["Savunma"]["score"] == 0  # tek hisse BEKLE -> al=sat=0, score=(0-0)/1*100=0
-    # sirali (score desc) oldugunu dogrula
-    assert [r["score"] for r in result] == sorted([r["score"] for r in result], reverse=True)
-
-
-def test_sector_heatmap_avg_rvol_ignores_none():
-    fn = _fresh_sector_heatmap()
-    result, _ = fn()
-    by_name = {r["name"]: r for r in result}
-    assert by_name["Savunma"]["avg_rvol"] is None  # tek hissenin rvol'u None
 
 
 # ── _compute_gundem_data ─────────────────────────────────────────────────────
