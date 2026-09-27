@@ -909,10 +909,10 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
 {%- set _bp = {'ticker': ticker, 'name': name, 'ssr': (ssr_signal or {}), 'tv2': ({'h': _tvd.get('hukum'), 'kap': _tvd.get('kapsam')} if _tv2 else none), 'sig': {'s': (ssr_signal.signal if ssr_signal else none), 'd': (ssr_signal.signal_date if ssr_signal else none)}} %}
 <script>window.BP = {{ _bp|tojson }};</script>
 
-<script src="/static/bp-search.js?v=9e7f07fc" defer></script>
+<script src="/static/bp-search.js?v=c83fe77b" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/js/hisse.js?v=61ce7691"></script>
+<script src="/static/js/hisse.js?v=9f782cd0"></script>
 <script src="/static/learning-mode.js?v=56c8577c" defer></script>
 
 

@@ -1229,6 +1229,16 @@ function _bpGetJSON(key, url, ms) {
 const _bpFundJSON = () => _bpGetJSON('fund', '/api/hisse/' + TICKER + '/fundamentals');
 const _bpDivJSON  = () => _bpGetJSON('div', '/api/temettu-takvimi', 8000);
 const _bpKapJSON  = () => _bpGetJSON('kap', '/api/hisse/' + TICKER + '/kap');
+/* C-25c (27.09): /api/temettu-takvimi (tum evrenin takvimi) yalniz KAP temettu
+   verisi (fundamentals.kap.temettu) yoksa istenir; varsa divRow kullanilmaz.
+   fj: basarisizlikta null; dj: istenmediyse null, alinamadiysa undefined. */
+function _bpFundDivJSON() {
+  return _bpFundJSON().catch(() => null).then(fj => {
+    const f = fj && fj.fundamentals;
+    if (f && f.kap_durum === 'var' && f.kap && f.kap.temettu) return [fj, null];
+    return _bpDivJSON().catch(() => undefined).then(dj => [fj, dj]);
+  });
+}
 
 let _bpChartP = null;
 function _bpChartJSON() {
@@ -1424,16 +1434,22 @@ function hxFillNews(data) {
 }
 
 function loadOzetExtras() {
-  Promise.all([_bpFundJSON().catch(() => null), _bpDivJSON().catch(() => undefined)]).then(([fj, dj]) => {
+  _bpFundDivJSON().then(([fj, dj]) => {
     const f = fj && fj.fundamentals && Object.keys(fj.fundamentals).length ? fj.fundamentals : null;
     const row = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
     hxFillFund(f, row);
     if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Veri yok'; }
   });
-  _bpKapJSON().then(hxFillNews).catch(() => {
-    const ul = document.getElementById('hxNewsL');
+  /* C-25c: "Son haberler" ilk ekranin altinda -- /kap blok yaklasinca istenir */
+  const ul = document.getElementById('hxNewsL');
+  const load = () => _bpKapJSON().then(hxFillNews).catch(() => {
     if (ul) ul.innerHTML = '<li class="hx-news-e">Bildirimler yüklenemedi.</li>';
   });
+  if (!ul || !('IntersectionObserver' in window)) { load(); return; }
+  const io = new IntersectionObserver(es => {
+    if (es.some(e => e.isIntersecting)) { io.disconnect(); load(); }
+  }, { rootMargin: '200px 0px' });
+  io.observe(ul);
 }
 
 function loadOzetChart() {
@@ -2137,7 +2153,8 @@ async function loadFundamentals() {
   if (_tvDone) return;
   _tvWire();
   try {
-    const [fj, dj] = await Promise.all([_bpFundJSON(), _bpDivJSON().catch(() => undefined)]);
+    const [fj, dj] = await _bpFundDivJSON();
+    if (!fj) throw new Error('fundamentals');
     const f = fj && fj.fundamentals;
     const divRow = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
     if (!f || !Object.keys(f).length) {       /* hisse icin temel veri yok: hata degil, sessiz not */

@@ -6,7 +6,7 @@
    • Trigger: any element with class "header-search-btn" OR
               any element with onclick="bpOpenSearch()"
    • Keyboard: Cmd/Ctrl+K opens, Esc closes, ↑↓ Enter navigate
-   • Data: /api/data → sessionStorage 5min cache
+   • Data: /api/stocks/list (~4 KB) → sessionStorage 5min cache
    • Idempotent: safe to load multiple times (no-op if mounted)
    ============================================================ */
 (function(){
@@ -39,12 +39,9 @@
     + '.bp-search-results{flex:1;overflow-y:auto;padding:6px 6px 12px}'
     + '.bp-search-empty{padding:24px;text-align:center;color:#909097;font-size:13px}'
     + '.bp-search-section-title{font-family:"Space Grotesk",system-ui,sans-serif;font-size:10px;font-weight:700;color:#909097;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px 6px}'
-    + '.bp-search-result{display:grid;grid-template-columns:64px 14px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;transition:background .12s;font-size:13px}'
+    + '.bp-search-result{display:grid;grid-template-columns:64px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;transition:background .12s;font-size:13px}'
     + '.bp-search-result:hover,.bp-search-result.bp-sel{background:#1c1b1f}'
     + '.bp-sr-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:#e5e1e4;font-size:13px}'
-    + '.bp-sr-sig.bp-al{color:#00e290;font-weight:700}'
-    + '.bp-sr-sig.bp-sat{color:#f85149;font-weight:700}'
-    + '.bp-sr-sig.bp-bekle{color:#909097}'
     + '.bp-sr-name{color:#c7c5cd;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}'
     + '.bp-sr-price{font-variant-numeric:tabular-nums;font-size:12px;color:#c7c5cd}'
     + '.bp-sr-chg{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;min-width:56px;text-align:right}'
@@ -57,7 +54,7 @@
        ikisi de %100 guvensiz bolgede). Sonuc listesi de ev gostergesinin altina
        tasiyordu. 100vh -> 100dvh: iOS'ta URL cubugu kadar TASIYORDU (ayni ders
        unsubscribe.css'te yazili), vh satiri dvh desteklemeyen tarayici yedegi. */
-    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 14px 1fr auto}.bp-sr-price{display:none}}'
+    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 1fr auto}.bp-sr-price{display:none}}'
     /* ── Anti-CLS: reserve space for async-loaded sections ── */
     + '#gundemSec{min-height:230px}'
     + '#statsBar,.stats-bar{min-height:78px}'
@@ -124,18 +121,17 @@
         return Promise.resolve(_syms);
       }
     } catch(e) { /* best-effort onbellek okuma (private tarama/quota hata verebilir) - fetch fallback altta devam eder */ }
-    return fetch('/api/data', { cache: 'no-store', signal: AbortSignal.timeout(10000) })
+    /* C-25c (27.09): kaynak /api/data (~40 KB gzip, 216 hissenin tamamı) yerine
+       /api/stocks/list (~4 KB: kod + ad). Sektör/fiyat/değişim alanları uç
+       eklerse kendiliğinden görünür; yoksa satır kod + ad. Eski ▲/▼ sinyal
+       oku kalktı (AL/SAT terimine bağlıydı). Boş liste önbelleğe yazılmaz. */
+    return fetch('/api/stocks/list', { signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         var syms = (d.stocks || [])
           .filter(function(s){ return s.ticker && s.ticker !== 'XU030' && s.ticker !== 'XU100'; })
-          .map(function(s){ return { t:s.ticker, n:s.name||'', sec:s.sector||'', sig:s.signal, p:s.price, c:s.change_pct }; });
-        if (d.loading) {
-          /* soguk-baslangic: backend _cache["data"] henuz dolmadi (app.py "loading": len(stocks)==0),
-             bu stocks=[] gercek bir "sonuc yok" durumu degil - _syms/sessionStorage'a yazma,
-             bir sonraki loadSyms() cagrisi (5dk TTL'i beklemeden) tekrar fetch etsin */
-          return syms;
-        }
+          .map(function(s){ return { t:s.ticker, n:s.name||'', sec:s.sector||'', p:s.price, c:s.change_pct }; });
+        if (!syms.length) return syms;
         _syms = syms;
         try {
           sessionStorage.setItem('bp_search_cache_v1', JSON.stringify(_syms));
@@ -255,8 +251,6 @@
     }
     var html = '<div class="bp-search-section-title">Hisseler</div>';
     m.forEach(function(s, i){
-      var arr = s.sig === 'AL' ? '▲' : s.sig === 'SAT' ? '▼' : '●';
-      var sigCls = s.sig === 'AL' ? 'bp-al' : s.sig === 'SAT' ? 'bp-sat' : 'bp-bekle';
       var c = (typeof s.c === 'number') ? s.c : null;
       var cCls = c == null ? 'bp-neu' : c > 0 ? 'bp-pos' : c < 0 ? 'bp-neg' : 'bp-neu';
       /* CPO 20.09: ayni satirda fiyat toLocaleString('tr-TR') ile "321,75 ₺"
@@ -267,7 +261,6 @@
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
       html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
-            + '<span class="bp-sr-sig ' + sigCls + '">' + arr + '</span>'
             + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
             + '<span class="bp-sr-price">' + priceStr + '</span>'
             + '<span class="bp-sr-chg ' + cCls + '">' + cSign + '</span>'
