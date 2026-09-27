@@ -3030,6 +3030,16 @@ def _build_signal_email(changes, unsubscribe_url, follow=None):
     </table>'''
 
     _now_tr = datetime.now(_TZ_TR)
+    # CPO-1802: 19:00 digest'inde günün Akşam Bülteni'ne tek bağlantı (görüntü + şablon hazırsa)
+    _bulten_day = _now_tr.date().isoformat()
+    _bulten_link_html = ""
+    if _bulten_page_ready() and os.path.isfile(os.path.join(_BULTEN_DIR, _bulten_day + ".json")):
+        _bulten_link_html = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px">
+      <tr><td align="center">
+        <a href="https://borsapusula.com/bulten/{_bulten_day}" style="color:#b8c3ff;font-size:12.5px;font-weight:600;text-decoration:none">📰 Akşam Bülteni'ni oku →</a>
+      </td></tr>
+    </table>'''
     content = f'''
     <!-- Header -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
@@ -3055,6 +3065,7 @@ def _build_signal_email(changes, unsubscribe_url, follow=None):
         </a>
       </td></tr>
     </table>
+    {_bulten_link_html}
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
@@ -5672,6 +5683,51 @@ def api_bulten_gun(tarih):
     if not snap:
         abort(404)
     return safe_json(snap)
+
+
+def _bulten_page_ready():
+    """bulten.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /bulten ve
+    /bulten/<gün> 404 döner (500 yok); /api/bulten/* şablondan bağımsız çalışır."""
+    try:
+        app.jinja_env.get_template("bulten.html")
+        return True
+    except Exception:
+        return False
+
+
+@app.route("/bulten")
+def bulten_son():
+    """C-57 v2: son donmuş Akşam Bülteni'ne 302. Görüntü yoksa 404."""
+    d = bulten.days(_BULTEN_DIR)
+    if not d or not _bulten_page_ready():
+        abort(404)
+    resp = redirect("/bulten/" + d[-1], code=302)
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/bulten/<tarih>")
+def bulten_gun(tarih):
+    """/bulten/<YYYY-AA-GG> kalıcı Akşam Bülteni sayfası (SSR, CPO-1802). Katı biçim,
+    o günün donmuş görüntüsü yoksa ya da şablon henüz yayında değilse 404 (500 yok)."""
+    if not _BULTEN_DAY.match(tarih):
+        abort(404)
+    if not _bulten_page_ready():
+        abort(404)
+    path = os.path.join(_BULTEN_DIR, tarih + ".json")
+    if not os.path.isfile(path):
+        abort(404)
+    snap = _bulten_read(path)
+    if not snap:
+        abort(404)
+    d = bulten.days(_BULTEN_DIR)
+    i = d.index(tarih) if tarih in d else -1
+    onceki = d[i - 1] if i > 0 else None
+    sonraki = d[i + 1] if 0 <= i < len(d) - 1 else None
+    resp = app.make_response(render_template(
+        "bulten.html", bulten=snap, onceki=onceki, sonraki=sonraki, gunler=d[-7:]))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
 
 
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
@@ -9214,11 +9270,14 @@ def haberler_page():
             for c in it.get("chips") or []:
                 if c.get("k") == "tk" and c.get("t") in smap:
                     c["ch"] = smap[c["t"]].get("change_pct")
+    # CPO-1802: son donmuş Akşam Bülteni (yoksa None; sayfa bloğu gizler)
+    _bp = bulten.latest_path(_BULTEN_DIR)
+    bulten_ctx = _bulten_read(_bp) if _bp else None
     return render_template("haberler.html", gundem=gundem, feed_days=days, feed_page=res["page"],
                            feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
                            feed_ticker=hisse, feed_counts=counts, feed_available=bool(items),
                            feed_updated=_KAP_STORE.meta().get("updated_at"),
-                           coverage=len(smap), close_label=close_label)
+                           coverage=len(smap), close_label=close_label, bulten=bulten_ctx)
 
 
 @app.route("/hisse/<ticker>/bildirim/<int:idx>")
@@ -10662,6 +10721,12 @@ def sitemap():
     if _harita_page_ready():
         for d in reversed(heatmap.days(_HEATMAP_DIR)[-90:]):
             pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
+    # CPO-1802: /bulten/<gün> kalıcı Akşam Bülteni sayfaları (şablon yayındaysa)
+    if _bulten_page_ready():
+        for d in reversed(bulten.days(_BULTEN_DIR)[-90:]):
+            _snap = _bulten_read(os.path.join(_BULTEN_DIR, d + ".json"))
+            _lastmod = (_snap or {}).get("updated_at", d)[:10]
+            pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
@@ -10846,6 +10911,10 @@ def llms_txt():
         body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
                             "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
                             "/hisse/{TICKER}/bildirim/{NO}\n- [Blog]", 1)
+        if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
+            body = body.replace("- [Blog]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
+                                "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "
+                                "sayfa: /bulten/YYYY-AA-GG\n- [Blog]", 1)
     return Response(body, mimetype="text/plain")
 
 
