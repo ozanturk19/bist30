@@ -126,6 +126,9 @@ def test_fill_no_change_when_no_gap():
 
 def test_petrol_is_brent():
     src = open(_APP_PY, encoding="utf-8").read()
-    assert '("PETROL", "BZ=F")' in src
+    # D-17: makro sembol listesi pipeline/intraday.py'de tek kaynak; app.py oradan içe aktarır
+    from pipeline.intraday import MACRO_TICKERS
+    assert ("PETROL", "BZ=F") in MACRO_TICKERS
+    assert "MACRO_TICKERS as _MACRO_TICKERS" in src
     assert '"PETROL":   "BZ=F"' in src
     assert "Ham Petrol (WTI)" not in src
