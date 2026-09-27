@@ -34,7 +34,7 @@
   .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
   .bo-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
   .bo-cnt { color:var(--bp-text3); font-weight:500; font-variant-numeric:tabular-nums; }
-  .bc-new { display:inline-block; background:rgba(var(--bp-al-rgb),.12); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al); font-size:var(--bp-text-2xs); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; letter-spacing:.3px; }
+  .bc-new { display:inline-block; background:rgba(var(--bp-ok-rgb),.12); border:1px solid rgba(var(--bp-ok-rgb),.3); color:var(--bp-ok); font-size:var(--bp-text-2xs); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; letter-spacing:.3px; }
 
   .bo-list { list-style:none; margin:0; padding:0; border-top:1px solid var(--bp-border); }
   .bo-list > li { border-bottom:1px solid var(--bp-border); }

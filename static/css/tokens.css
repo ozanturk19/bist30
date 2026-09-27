@@ -130,7 +130,6 @@
                                  Eşik kanonu da tek: sitenin ilan ettiği RVOL >= 1,20. */
   --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
-  --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
   /* C-16a (25.09): kanon §5.2-5.3 durum ve halka renkleri — .da-signal / .da-ring
      tek tüketici. Yatay arduvaz; Trend Bozuldu kırmızı DEĞİL (koyu zemin + sessiz metin). */
   --bp-state-flat:        #343a48;
@@ -149,7 +148,9 @@
        #1fe0ff -> --bp-accent-cyan (#22d3ee; token'ın kendi yorumu zaten
                   "Data-Art ana sayfa" diyor, ama o sayfa onu kullanmıyordu)
        #00e6a0 -> --bp-al          (#00e290; %0,2 farkla ayrı yazılmış ikiz) */
-  --bp-stale:     #f5c949;   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
+  --bp-stale:     var(--bp-caution);  /* C-48 (27.09): 5 sarı → 2 (--bp-volume hacim · --bp-caution dikkat); bu ad takma ad.
+                                 Aşağıdaki not tarihsel. */
+  /* eski değer #f5c949 = --bp-caution */   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
                                  aynı değer 6 yerde, 3 dosyada BAĞIMSIZ yazılıydı ve hiçbiri token
                                  değildi: hisse.html renderFreshness (×3 dal), _stale_banner.html
                                  (metin + zemin/kenar rgb), static/stale-banner.js (stale +
@@ -164,10 +165,10 @@
                                  (premium · sarı aksan/EMA99 · değerlendirme · veri durumu), ama
                                  HACİM ekseni üç yerde onlardan ÖDÜNÇ RENK ALIYORDU — bkz.
                                  --bp-volume notu. */
-  --bp-warn:      #d29922;   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
+  --bp-warn:      var(--bp-caution);  /* C-48 takma ad (eski #d29922) */   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
                                  amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
                                  orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
-  --bp-accent-yellow: #e3b341;   /* CPO 20.09: sarı aksan. Fiilen zaten KANONİKTİ — aynı değer 7 ayrı
+  --bp-accent-yellow: var(--bp-caution);  /* C-48 takma ad (eski #e3b341) */   /* CPO 20.09: sarı aksan. Fiilen zaten KANONİKTİ — aynı değer 7 ayrı
                                  yüzeyde birbirinden BAĞIMSIZ yazılıydı, tek kaynağı yoktu:
                                    (1) bp-chart-common.js  EMA99 çizgi rengi
                                    (2) hisse.html          EMA99 grafik göstergesi
@@ -207,13 +208,15 @@
   --bp-brand-rgb:    184, 195, 255;
   --bp-al-rgb:       0, 226, 144;
   --bp-sat-rgb:      248, 81, 73;
-  --bp-gold-rgb:     245, 158, 11;
+  --bp-gold-rgb:     var(--bp-caution-rgb);
   --bp-volume-rgb:   255, 200, 80;
-  --bp-premium-rgb:  168, 85, 247;
   --bp-accent-cyan-rgb: 34, 211, 238;
   --bp-art-violet-rgb: 124, 92, 255;
-  --bp-stale-rgb: 245, 201, 73;
-  --bp-warn-rgb:  210, 153, 34;
+  --bp-caution-rgb: 245, 201, 73;
+  --bp-stale-rgb: var(--bp-caution-rgb);
+  --bp-warn-rgb:  var(--bp-caution-rgb);
+  --bp-ok-rgb:     0, 226, 144;
+  --bp-danger-rgb: 248, 81, 73;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
 }
@@ -318,7 +321,11 @@ body {
   --bp-down-tint: rgba(var(--bp-sat-rgb), 0.08);
   --bp-down-line: rgba(var(--bp-sat-rgb), 0.32);
   --bp-down-on-tint: #ff7b72;
-  --bp-caution: #f59e0b;
+  --bp-caution: #f5c949;  /* C-48: tek dikkat sarısı (değerlendirme, veri durumu, EMA99); hacim ayrı: --bp-volume */
+  /* C-48 rol ayrımı: --bp-up/--bp-down (=--bp-al/--bp-sat) YALNIZ yön ve sinyal.
+     Form başarısı/aktif durum --bp-ok, hata --bp-danger, BP skor kimliği --bp-score-bp (O12). */
+  --bp-ok: var(--bp-logo-accent);
+  --bp-score-bp: var(--bp-logo-accent);
   --bp-danger: #f85149;
   --bp-danger-line: #da3633;
   --bp-art-cyan: #22d3ee;

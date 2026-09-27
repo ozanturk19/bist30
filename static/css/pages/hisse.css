@@ -39,7 +39,7 @@
     background: rgba(var(--bp-brand-rgb),0.14); border-color: rgba(var(--bp-brand-rgb),0.55); color: var(--bp-brand);
   }
   .hib-action-btn.active-bell {
-    background: rgba(var(--bp-al-rgb),0.14); border-color: rgba(var(--bp-al-rgb),0.55); color: var(--bp-al);
+    background: rgba(var(--bp-ok-rgb),0.14); border-color: rgba(var(--bp-ok-rgb),0.55); color: var(--bp-ok);
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
@@ -61,7 +61,7 @@
     transition: opacity .25s, transform .25s;
   }
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .hib-toast.success { border-color: rgba(var(--bp-al-rgb),0.4); }
+  .hib-toast.success { border-color: rgba(var(--bp-ok-rgb),0.4); }
   .hib-toast.warn { border-color: rgba(var(--bp-volume-rgb),0.4); }
   /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
      sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
@@ -360,52 +360,6 @@
   @media (max-width: 480px) {
     .entry-analysis-grid { grid-template-columns: 1fr; }
   }
-  .eq-badge {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius:var(--bp-radius);
-    font-size: var(--bp-text-base);
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .eq-safe  { background: rgba(var(--bp-al-rgb),0.12);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
-  .eq-risky { background: rgba(var(--bp-warn-rgb),0.12); color: var(--bp-warn); border: 1px solid rgba(var(--bp-warn-rgb),0.3); }
-  .eq-note {
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    line-height: 1.5;
-  }
-  /* R/R bar */
-  .rr-card-label {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  .rr-bar {
-    display: flex;
-    height: 10px;
-    border-radius: var(--bp-radius-5);
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
-  .rr-risk-seg   { background: var(--bp-sat); border-radius: 5px 0 0 5px; }
-  .rr-reward-seg { background: linear-gradient(90deg, var(--bp-al), var(--bp-brand)); border-radius: 0 5px 5px 0; }
-  .rr-level-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: var(--bp-text-xs);
-  }
-  .rr-lvl {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    color: var(--bp-text3);
-  }
-  .rr-lvl strong { font-size: var(--bp-text-base); font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .vol-status-lbl {
     font-size: var(--bp-text-xs);
     color: var(--bp-text3);
@@ -952,7 +906,7 @@
   .hx-acts .hx-act{ height:40px; padding:0 13px; border-radius:var(--bp-radius-lg); font-size:var(--bp-text-base); text-decoration:none; background:var(--bp-surface2); border-color:var(--bp-border); color:var(--bp-text); }
   .hx-acts .hx-act svg{ width:16px; height:16px; }
   .hx-acts .hx-act--pri{ background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
-  .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-al-rgb),0.14); border-color:rgba(var(--bp-al-rgb),0.55); color:var(--bp-al); }
+  .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-ok-rgb),0.14); border-color:rgba(var(--bp-ok-rgb),0.55); color:var(--bp-ok); }
   .hx-acts .hx-act--ico .hib-action-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hx-acts .hx-act--ico{ position:relative; width:40px; padding:0; justify-content:center; }
   /* C-21c: 🔔 "Takip et" altindaki e-posta paneli (girissiz kullanici; eski sayfa sonu kutusunun yerine) */
@@ -962,7 +916,7 @@
   .hx-sub-row{ display:flex; gap:8px; }
   .hx-sub-row input{ flex:1 1 auto; min-width:0; height:40px; padding:0 12px; background:var(--bp-bg); border:1px solid var(--bp-field-border); border-radius:var(--bp-radius-lg); color:var(--bp-text); font:inherit; font-size:var(--bp-text-base); }
   .hx-sub-row input:focus-visible{ outline:2px solid var(--bp-brand); outline-offset:1px; }
-  .hx-sub-row input[aria-invalid="true"]{ border-color:var(--bp-sat); }
+  .hx-sub-row input[aria-invalid="true"]{ border-color:var(--bp-danger); }
   .hx-sub-row button{ height:40px; padding:0 14px; border:0; border-radius:var(--bp-radius-lg); background:var(--bp-brand); color:var(--bp-bg); font:inherit; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; white-space:nowrap; }
   .hx-sub-kvkk{ display:flex; align-items:flex-start; gap:6px; margin-top:8px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
   .hx-sub-ok{ margin:0; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); }
@@ -995,7 +949,7 @@
   .hx-ring b{ position:absolute; inset:0; display:grid; place-items:center; font-size:var(--bp-text-22); font-weight:800; letter-spacing:-.02em; }
   .hx-ring-bg{ fill:none; stroke:var(--bp-border); stroke-width:7; }
   .hx-ring-fg{ fill:none; stroke-width:7; stroke-linecap:round; }
-  .hx-ring-fg--bp{ stroke:var(--bp-al); }
+  .hx-ring-fg--bp{ stroke:var(--bp-score-bp); }
   .hx-bp-l{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-xs); font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--bp-text3); }
   .hx-bp-f{ font-size:var(--bp-text-sm); color:var(--bp-text3); }
   .hx-qs{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -1175,38 +1129,6 @@
        ediyordu. Paylaş .hib-action-bar'a üçüncü buton olarak taşındı. Her sayfa
        görüntülemesinde kalıcı ~60-90px (safe-area dahil) dikey alan geri kazanıldı. */
 
-    .bp-detail-cta-wrap {
-      margin-bottom: 20px; padding: 16px;
-      background: linear-gradient(135deg, rgba(var(--bp-al-rgb),0.06), rgba(var(--bp-al-rgb),0.02));
-      border: 1px solid rgba(var(--bp-al-rgb),0.18);
-      border-radius:var(--bp-radius-xl);
-    }
-    .bp-detail-cta-label {
-      font-size: var(--bp-text-xs); color: var(--bp-text3); font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 10px; text-align: center;
-    }
-    .bp-detail-cta-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    }
-    .bp-detail-cta-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 12px 6px; border-radius:var(--bp-radius-lg);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--bp-text); cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bp-detail-cta-btn:hover { background: rgba(var(--bp-al-rgb),0.10); border-color: rgba(var(--bp-al-rgb),0.32); }
-    .bp-detail-cta-btn:active { transform: scale(0.97); }
-    .bp-detail-cta-icon { font-size: var(--bp-text-22); line-height: 1; }
-    .bp-detail-cta-text {
-      font-size: var(--bp-text-base); font-weight: 700; letter-spacing: 0.2px;
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .bp-detail-cta-arrow { color: var(--bp-al); font-weight: 800; }
   
 
 /* a11y: #signalSummaryDetails > summary'nin outline:none'i klavye odak

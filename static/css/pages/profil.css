@@ -145,20 +145,20 @@
     font-size: var(--bp-text-base);
   }
   .alert-error {
-    background: rgba(var(--bp-sat-rgb),0.10);
-    border: 1px solid rgba(var(--bp-sat-rgb),0.40);
-    color: var(--bp-sat);
+    background: rgba(var(--bp-danger-rgb),0.10);
+    border: 1px solid rgba(var(--bp-danger-rgb),0.40);
+    color: var(--bp-danger);
   }
   .alert-success {
-    background: rgba(var(--bp-al-rgb),0.08);
-    border: 1px solid rgba(var(--bp-al-rgb),0.30);
-    color: var(--bp-al);
+    background: rgba(var(--bp-ok-rgb),0.08);
+    border: 1px solid rgba(var(--bp-ok-rgb),0.30);
+    color: var(--bp-ok);
   }
   /* Form ici dogrulama/hata mesaji — eskiden `alert()` idi (tarayici modali,
      odagi calar, mobilde sayfa baglamindan kopariyordu). */
   .profile-msg { display: none; margin-top: 14px; text-align: center; font-size: var(--bp-text-base); }
   .profile-msg--on  { display: block; }
-  .profile-msg--err { color: var(--bp-sat); }
+  .profile-msg--err { color: var(--bp-danger); }
 
   /* Basari paneli — eskiden formun KENDI ici innerHTML ile eziliyordu ve
      form kalici bir role="status" canli bolgesiydi (bkz. sablondaki not). */
@@ -166,11 +166,11 @@
     padding: 34px 28px;
     text-align: center;
     margin-bottom: 18px;
-    --da-glow-rgb: var(--bp-al-rgb);
+    --da-glow-rgb: var(--bp-ok-rgb);
     --da-glow-size: 340px; --da-glow-a: .12;
   }
-  .profile-result-mark  { font-size: var(--bp-text-42); color: var(--bp-al); margin-bottom: 10px; line-height: 1; }
-  .profile-result-title { font-size: var(--bp-text-xl); font-weight: 800; color: var(--bp-al); margin-bottom: 8px; }
+  .profile-result-mark  { font-size: var(--bp-text-42); color: var(--bp-ok); margin-bottom: 10px; line-height: 1; }
+  .profile-result-title { font-size: var(--bp-text-xl); font-weight: 800; color: var(--bp-ok); margin-bottom: 8px; }
   .profile-result-body  { font-size: var(--bp-text-base); color: var(--bp-text2); margin-bottom: 24px; }
 
   /* ── K-CU eki: alarm listesi ────────────────────────────────────────
@@ -195,7 +195,7 @@
     margin-bottom: 10px;
   }
   /* Bos durum ile HATA durumu ayri okunur ([[K-BK]]: bos != bilinmiyor). */
-  .pf-alerts-state--err { color: var(--bp-sat); }
+  .pf-alerts-state--err { color: var(--bp-danger); }
   .pf-alerts-list { list-style: none; margin: 0; padding: 0; }
   .pf-alert-row {
     display: flex;
@@ -237,9 +237,9 @@
                 background var(--bp-dur-base) var(--bp-ease-standard);
   }
   .pf-alert-off:hover:not(:disabled) {
-    color: var(--bp-sat);
-    border-color: rgba(var(--bp-sat-rgb), 0.45);
-    background: rgba(var(--bp-sat-rgb), 0.08);
+    color: var(--bp-danger);
+    border-color: rgba(var(--bp-danger-rgb), 0.45);
+    background: rgba(var(--bp-danger-rgb), 0.08);
   }
   .pf-alert-off:disabled { opacity: .55; cursor: default; }
 

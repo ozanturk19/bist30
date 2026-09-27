@@ -77,7 +77,7 @@
     background:none; border:none; color:var(--bp-text3); cursor:pointer;
     font-size:var(--bp-text-md);
   }
-  .btn-del:hover  { color:var(--bp-sat); }
+  .btn-del:hover  { color:var(--bp-danger); }
   .btn-edit:hover { color:var(--bp-brand); }
 
   /* Export / Import toolbar */
@@ -98,8 +98,8 @@
   /* 19.09: "Temizle" (kalıcı silme) diğer zararsız aksiyon butonlarıyla (JSON/CSV/
      İçe Aktar) rest state'de görsel olarak birebir aynıydı — sadece hover'da
      kırmızıya dönüyordu, yani kullanıcı tıklamadan önce ayrımı hiç görmüyordu. */
-  .btn-action.danger { border-color: rgba(var(--bp-sat-rgb),.72); color: var(--bp-sat); }
-  .btn-action.danger:hover { border-color: var(--bp-sat); color: var(--bp-sat-on-tint); background: rgba(var(--bp-sat-rgb),.08); }
+  .btn-action.danger { border-color: rgba(var(--bp-danger-rgb),.72); color: var(--bp-danger); }
+  .btn-action.danger:hover { border-color: var(--bp-danger); color: var(--bp-down-on-tint); background: rgba(var(--bp-danger-rgb),.08); }
   /* 21.09 (K-AT): `display:none` bir <input type="file">'i SEKME SIRASINDAN
      tamamen cikarir. Tetikleyici sadece onu SARAN <label> oldugu ve label da
      odaklanabilir olmadigi icin "İçe Aktar" YALNIZCA FAREYLE calisiyordu —
@@ -120,8 +120,8 @@
     padding: 10px 20px; font-size: var(--bp-text-base); color: var(--bp-text);
     z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
   }
-  .import-toast.ok  { border-color: var(--bp-al-bd); color: var(--bp-al); }
-  .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
+  .import-toast.ok  { border-color: rgba(var(--bp-ok-rgb),.32); color: var(--bp-ok); }
+  .import-toast.err { border-color: var(--bp-danger-line); color: var(--bp-danger); }
   @media (max-width: 900px) {
     .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
@@ -149,16 +149,16 @@
   /* T7.4: canlı veri/grafik fetch hatası banner'ı */
   .pf-fetch-error {
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-    background:rgba(var(--bp-sat-rgb),.08); border:1px solid var(--bp-sat-bd);
+    background:rgba(var(--bp-danger-rgb),.08); border:1px solid var(--bp-danger-line);
     border-radius:var(--bp-radius-lg); padding:12px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:var(--bp-sat);
+    font-size:var(--bp-text-base); color:var(--bp-danger);
   }
   .pf-fetch-error-retry {
-    background:none; border:1px solid var(--bp-sat-bd); color:var(--bp-sat);
+    background:none; border:1px solid var(--bp-danger-line); color:var(--bp-danger);
     border-radius:var(--bp-radius); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
     cursor:pointer; transition:background .15s;
   }
-  .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
+  .pf-fetch-error-retry:hover { background:rgba(var(--bp-danger-rgb),.12); }
 
   @media(max-width:600px) { thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
@@ -201,10 +201,10 @@
   .btn-entry {
     display:inline-block; padding:2px 7px; border-radius:var(--bp-radius-4); margin-left:5px;
     font-size:var(--bp-text-2xs); font-weight:700; cursor:pointer; vertical-align:middle;
-    background:rgba(var(--bp-al-rgb),.1); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al);
+    background:rgba(var(--bp-ok-rgb),.1); border:1px solid rgba(var(--bp-ok-rgb),.3); color:var(--bp-ok);
     white-space:nowrap; transition:all .15s;
   }
-  .btn-entry:hover { background:rgba(var(--bp-al-rgb),.2); border-color:var(--bp-al); }
+  .btn-entry:hover { background:rgba(var(--bp-ok-rgb),.2); border-color:var(--bp-ok); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 
   /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + ekleme çubuğu;

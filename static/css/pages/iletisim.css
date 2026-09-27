@@ -65,8 +65,8 @@
      `style.borderColor` ile basılıyordu; inline stil stylesheet'i yendiği
      için alan düzeltildikten sonra bile KALICI kırmızı kalıyordu. */
   .cf-input.cf-invalid {
-    border-color: var(--bp-sat);
-    box-shadow: 0 0 0 3px rgba(var(--bp-sat-rgb), .14);
+    border-color: var(--bp-danger);
+    box-shadow: 0 0 0 3px rgba(var(--bp-danger-rgb), .14);
   }
   .cf-consent-row { margin-bottom: 14px; }
   .cf-consent {
@@ -100,8 +100,8 @@
   .cf-submit:disabled { opacity: .55; cursor: not-allowed; transform: rotate(0deg); box-shadow: none; }
   .cf-msg { display: none; margin-top: 14px; font-size: var(--bp-text-base); line-height: 1.6; }
   .cf-msg--on  { display: block; }
-  .cf-msg--err { color: var(--bp-sat); }
-  .cf-msg--ok  { color: var(--bp-al); }
+  .cf-msg--err { color: var(--bp-danger); }
+  .cf-msg--ok  { color: var(--bp-ok); }
   .cf-msg-sub  { font-size: var(--bp-text-base); color: var(--bp-text3); }
 
   /* Uyarı şeridi — düz kutu yerine sol aksanlı Data-Art şeridi. `.da-panel`
@@ -109,9 +109,9 @@
      yani paylaşılan katmanın bilinen sınırına (`> *` yalnız element
      çocuklarını parıltının üstüne çıkarır) takılırdı. */
   .disclaimer {
-    background: linear-gradient(135deg, rgba(var(--bp-sat-rgb),.07) 0%, rgba(var(--bp-sat-rgb),.02) 100%);
-    border: 1px solid rgba(var(--bp-sat-rgb),.2);
-    border-left: 3px solid var(--bp-sat);
+    background: linear-gradient(135deg, rgba(var(--bp-danger-rgb),.07) 0%, rgba(var(--bp-danger-rgb),.02) 100%);
+    border: 1px solid rgba(var(--bp-danger-rgb),.2);
+    border-left: 3px solid var(--bp-danger);
     border-radius: var(--bp-radius-md);
     padding: 14px 16px; color: var(--bp-text2);
     font-size: var(--bp-text-base); margin-top: 24px;

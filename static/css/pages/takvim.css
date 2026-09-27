@@ -103,7 +103,7 @@ a.tk-ev:hover{background:rgba(var(--bp-text-rgb),.03)}
 .tk-mc .up{color:var(--bp-al)}.tk-mc .down{color:var(--bp-sat)}.tk-mc .neu{color:var(--bp-text3)}
 .tk-bp{display:inline-flex;align-items:center;gap:4px;font:700 13px var(--tk-num);color:var(--bp-text);font-variant-numeric:tabular-nums}
 .tk-bp svg{transform:rotate(-90deg);flex:none}
-.tk-bp .rg0{stroke:var(--bp-border)}.tk-bp .rg1{stroke:var(--bp-al)}
+.tk-bp .rg0{stroke:var(--bp-border)}.tk-bp .rg1{stroke:var(--bp-score-bp)}
 .tk-st{display:inline-block;font:600 11.5px/1.5 var(--tk-num);border-radius:99px;padding:1px 8px;white-space:nowrap}
 .tk-st.g{background:var(--bp-al);color:var(--bp-bg)}
 .tk-st.y{background:var(--bp-surface3);color:var(--bp-text);box-shadow:inset 0 0 0 1px var(--bp-border2)}

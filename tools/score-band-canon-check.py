@@ -7,7 +7,7 @@ Kusur (22.09 canli olculdu):
   Ayni sayi (Teknik Guc Skoru) sitede IKI ayri renk sozlugune gore boyaniyordu.
     * /tarama scoreCell() ve /hisse skor halkasi ve /karsilastir TIER_META:
       kanonik `tier` alanindan (app.py _derive_tier) -> guclu_sinyal = mor
-      (--bp-premium), standart = periwinkle (--bp-brand), rozet-yok = notr.
+      (--bp-art-violet), standart = periwinkle (--bp-brand), rozet-yok = notr.
     * index.html scoreColorVar(): HAM SKORU 70/56 esigine sokup
       --bp-al / --bp-volume / --bp-sat donduruyordu.
   Olcum (22.09 canli, getComputedStyle):
@@ -25,7 +25,7 @@ Kusur (22.09 canli olculdu):
 
 Kurallar:
   R1  `guclu_sinyal` / `standart` literaline dallanan her RENK atamasi kanonik
-      sozlukten olmali (guclu_sinyal -> --bp-premium, standart -> --bp-brand;
+      sozlukten olmali (guclu_sinyal -> --bp-art-violet, standart -> --bp-brand;
       CSS sinif adlari beyaz listede).
   R2  Teknik Guc Skoru bandi HAM SKOR esiginden turetilemez: ayni fonksiyon
       govdesinde `56` esigi + renk donusu = tier kanonunu atlayan ikinci sozluk.
@@ -48,12 +48,12 @@ TARGETS = [
     'templates/sektor_harita.html', 'templates/takvim.html',
 ]
 
-CANON = {'guclu_sinyal': '--bp-premium', 'standart': '--bp-brand'}
+CANON = {'guclu_sinyal': '--bp-art-violet', 'standart': '--bp-brand'}
 # tarama.html tier -> CSS sinif adlari (renk CSS'te, token degil): ic isimlendirme,
 # kullaniciya gorunmez (CPO-DEV2-053/055 notu). Beyaz liste SATIR NUMARASI DEGIL,
 # ifadenin kendisi (K-BD dersi: beyaz liste anahtari satir numarasi olamaz).
 CLASS_ALIAS = {'guclu_sinyal': {'premium'}, 'standart': {'plus'}}
-COLOR_TOKEN = re.compile(r'--bp-(?:premium|brand|al|sat|volume|text3|bkl)\b')
+COLOR_TOKEN = re.compile(r'--bp-(?:premium|art-violet|brand|al|sat|volume|text3|bkl)\b')
 BANNED_BAND = re.compile(r'Güçlü\s+Sinyal', re.I)
 # renk kutusu (lejant swatch) ile ayni satirda bant adi
 SWATCH_LINE = re.compile(r'class="sw"')
@@ -173,9 +173,9 @@ SELF = [
     ("R3 Guclu Sinyal",
      '<span class="score-verdict">Güçlü Sinyal</span>', 'R3'),
     ("NEGATIF: kanonik kod ihlal DEGIL",
-     "const c = tier === 'guclu_sinyal' ? 'var(--bp-premium)' : tier === 'standart' ? 'var(--bp-brand)' : 'var(--bp-text3)';", None),
+     "const c = tier === 'guclu_sinyal' ? 'var(--bp-art-violet)' : tier === 'standart' ? 'var(--bp-brand)' : 'var(--bp-text3)';", None),
     ("NEGATIF: yorumdaki kusur sayilmaz",
-     "// eski hali: tier === 'guclu_sinyal' ? 'var(--bp-al)' : x  -- Güçlü Sinyal\nconst c = 'var(--bp-premium)';", None),
+     "// eski hali: tier === 'guclu_sinyal' ? 'var(--bp-al)' : x  -- Güçlü Sinyal\nconst c = 'var(--bp-art-violet)';", None),
 ]
 
 

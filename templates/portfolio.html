@@ -130,7 +130,7 @@
           <button onclick="copyCloudToken()" aria-label="Token’ı panoya kopyala" style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-md)" data-tip="Token’ı panoya kopyala"><span aria-hidden="true">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-al-rgb),.1);border:1px solid rgba(var(--bp-al-rgb),.2);color:var(--bp-al);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-ok-rgb),.1);border:1px solid rgba(var(--bp-ok-rgb),.2);color:var(--bp-ok);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
           <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(var(--bp-accent-cyan-rgb),.08);border:1px solid rgba(var(--bp-accent-cyan-rgb),.15);color:var(--bp-accent-cyan);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
@@ -162,7 +162,7 @@
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-border)">İptal</button>
-    <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
+    <span id="addErr" role="alert" style="color:var(--bp-danger);font-size:var(--bp-text-sm)"></span>
   </div>
 
   <!-- Tablo -->
@@ -1026,13 +1026,13 @@ async function createCloudToken() {
     const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
     if (!data.token) throw new Error('no token');
-    if (!_safeSetToken(data.token)) { _setCloudMsg('Token oluşturuldu ama bu cihazda saklanamadı (gizli mod?).', 'var(--bp-sat)'); return; }
+    if (!_safeSetToken(data.token)) { _setCloudMsg('Token oluşturuldu ama bu cihazda saklanamadı (gizli mod?).', 'var(--bp-danger)'); return; }
     _showActiveToken(data.token);
     // Auto-save current portfolio
     const saved = await saveToCloud(true);
-    if (saved) _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', 'var(--bp-al)');
+    if (saved) _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', 'var(--bp-ok)');
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1041,16 +1041,16 @@ async function createCloudToken() {
 async function loadCloudToken() {
   const input = document.getElementById('cloudTokenInput');
   const token = (input.value || '').trim();
-  if (!token) { _setCloudMsg('Token girin.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Token girin.', 'var(--bp-danger)'); return; }
   const btn = document.getElementById('cloudLoadTokenBtn');
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
-    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
     const data = await res.json();
-    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
-    if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', 'var(--bp-sat)'); return; }
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-danger)'); return; }
+    if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', 'var(--bp-danger)'); return; }
     _showActiveToken(token);
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi —
     // eski-format/eksik kayitlar (yalniz buy_price/quantity, ya da lot/price
@@ -1072,7 +1072,7 @@ async function loadCloudToken() {
       + (skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''), 'var(--bp-al)');
     input.value = '';
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1080,7 +1080,7 @@ async function loadCloudToken() {
 
 async function saveToCloud(silent) {
   const token = _safeGetToken();
-  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-danger)'); return; }
   if (!silent && !confirm('Bu, sunucudaki mevcut veriyi değiştirecek, devam edilsin mi?')) return;
   const btn = document.getElementById('cloudSaveBtn');
   if (btn) btn.disabled = true;
@@ -1096,15 +1096,15 @@ async function saveToCloud(silent) {
     if (data.ok) {
       if (!silent) {
         const skippedMsg = (data.skipped && data.skipped.length) ? ` (${data.skipped.length} bilinmeyen sembol atlandı: ${data.skipped.join(', ')})` : '';
-        _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.${skippedMsg}`, skippedMsg ? 'var(--bp-warn)' : 'var(--bp-al)');
+        _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.${skippedMsg}`, skippedMsg ? 'var(--bp-warn)' : 'var(--bp-ok)');
       }
       return true;
     } else {
-      _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), 'var(--bp-sat)');
+      _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), 'var(--bp-danger)');
       return false;
     }
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
     return false;
   } finally {
     if (btn) btn.disabled = false;
@@ -1113,19 +1113,19 @@ async function saveToCloud(silent) {
 
 async function loadFromCloud() {
   const token = _safeGetToken();
-  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-danger)'); return; }
   if (portfolio.length && !confirm(`Bulut kopyası yerel portföyünüzün (${portfolio.length} pozisyon) üzerine yazılacak. Devam edilsin mi?`)) return;
   const btn = document.getElementById('cloudLoadFromCloudBtn');
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
-    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
     const data = await res.json();
     /* K-BI es-yazim taramasi: ayni zayif kontrol IKINCI bir bulut yolunda da
        vardi. Obje donerse `.length` undefined, `.map` patlar ve kullaniciya
        ham JS hata metni gosterilirdi. */
-    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-danger)'); return; }
     // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
     // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi — eski-
@@ -1138,9 +1138,9 @@ async function loadFromCloud() {
       .filter(p => p.ticker && bpIsValidLot(p.lot) && bpIsValidPrice(p.price));
     save(); render();
     const skipped = rawCount - portfolio.length;
-    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-al)');
+    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-ok)');
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1169,10 +1169,10 @@ function copyCloudToken() {
       ta.select();
       const ok = document.execCommand('copy');
       document.body.removeChild(ta);
-      if (ok) _setCloudMsg('✓ Token kopyalandı', 'var(--bp-al)');
-      else _setCloudMsg('Kopyalama başarısız.', 'var(--bp-sat)');
+      if (ok) _setCloudMsg('✓ Token kopyalandı', 'var(--bp-ok)');
+      else _setCloudMsg('Kopyalama başarısız.', 'var(--bp-danger)');
     } catch (e) {
-      _setCloudMsg('Kopyalama başarısız.', 'var(--bp-sat)');
+      _setCloudMsg('Kopyalama başarısız.', 'var(--bp-danger)');
     }
   }
   if (!navigator.clipboard || !navigator.clipboard.writeText) {
@@ -1180,7 +1180,7 @@ function copyCloudToken() {
     return;
   }
   navigator.clipboard.writeText(token).then(
-    () => _setCloudMsg('✓ Token kopyalandı', 'var(--bp-al)'),
+    () => _setCloudMsg('✓ Token kopyalandı', 'var(--bp-ok)'),
     () => fallbackCopy()
   );
 }

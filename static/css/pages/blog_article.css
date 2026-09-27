@@ -86,7 +86,7 @@
   .art-sub-btn { min-height:44px; padding:0 16px; background:var(--bp-brand); color:var(--bp-bg); border:0; border-radius:var(--bp-radius-lg); font:inherit; font-size:var(--bp-text-md); font-weight:600; cursor:pointer; white-space:nowrap; }
   .art-sub-btn:hover { filter:brightness(1.1); }
   .art-sub-kvkk { flex-basis:100%; display:flex; align-items:flex-start; gap:6px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
-  .art-sub-msg { font-size:var(--bp-text-md); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-sat); }
+  .art-sub-msg { font-size:var(--bp-text-md); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-danger); }
 
   @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }

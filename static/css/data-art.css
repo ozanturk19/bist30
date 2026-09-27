@@ -436,14 +436,14 @@ label:has(> .da-check){min-height:24px}
    (.12 hover tint'te bile 4.84:1). Tint'i koyulaştıran biri çıkarsa eşik
    yeniden ölçülmeli. */
 .da-empty--error{
-  background:rgba(var(--bp-sat-rgb),.08);
-  border:1px solid var(--bp-sat-bd);
+  background:rgba(var(--bp-danger-rgb),.08);
+  border:1px solid var(--bp-danger-line);
   border-radius:var(--bp-radius-lg);
-  color:var(--bp-sat);
+  color:var(--bp-danger);
 }
 .da-empty--error h2,
-.da-empty--error .da-empty-title{color:var(--bp-sat)}
-.da-empty--error p,.da-empty--error .da-empty-body{color:var(--bp-sat)}
+.da-empty--error .da-empty-title{color:var(--bp-danger)}
+.da-empty--error p,.da-empty--error .da-empty-body{color:var(--bp-danger)}
 
 /* Hata kutusunun eylem düğmesi. Metin + düğme tek satıra sığıyorsa yan yana,
    sığmıyorsa alta sarar (`.pf-fetch-error`in yerleşimi genelleştirildi).
@@ -457,13 +457,13 @@ label:has(> .da-check){min-height:24px}
 .da-retry{
   display:inline-flex;align-items:center;justify-content:center;
   min-height:32px;padding:5px 12px;
-  background:none;border:1px solid var(--bp-sat-bd);color:var(--bp-sat);
+  background:none;border:1px solid var(--bp-danger-line);color:var(--bp-danger);
   border-radius:var(--bp-radius);
   font-size:var(--bp-text-sm);font-weight:600;font-family:inherit;
   cursor:pointer;flex-shrink:0;
   transition:background .15s;
 }
-.da-retry:hover{background:rgba(var(--bp-sat-rgb),.12)}
+.da-retry:hover{background:rgba(var(--bp-danger-rgb),.12)}
 
 /* ── 7. AÇILIR KATMAN — native <details> akordeon ─────────────────────────
    21.09 (CPO, K-W) BULGU — ÜÇ KOPYA, BİRİ SESSİZCE SAPMIŞ:
@@ -582,7 +582,7 @@ label:has(> .da-check){min-height:24px}
 .da-ring--md{--da-ring-s:64px}
 .da-ring--lg{--da-ring-s:88px}
 .da-ring--xl{--da-ring-s:120px}
-.da-ring--bp{--da-ring-c:var(--bp-al)}
+.da-ring--bp{--da-ring-c:var(--bp-score-bp)}
 .da-ring--temel{--da-ring-c:var(--bp-accent-cyan)}
 .da-ring--teknik{--da-ring-c:var(--bp-art-violet)}
 
@@ -716,7 +716,7 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
 .da-notice > .da-close{margin:-6px -8px -6px auto}
 .da-notice--info{--da-notice-c:var(--bp-brand)}
 .da-notice--caution{--da-notice-c:var(--bp-warn)}
-.da-notice--danger{--da-notice-c:var(--bp-sat)}
+.da-notice--danger{--da-notice-c:var(--bp-danger)}
 .da-notice--stale{--da-notice-c:var(--bp-stale)}
 
 /* .da-table: yapışkan başlık (.da-label dili), sayısal sütun sağa + tabular,

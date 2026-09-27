@@ -282,7 +282,7 @@ header{
 @media(max-width:560px){.da-mosaic{grid-template-columns:repeat(2,1fr)}.da-tile-lg{grid-column:span 2;grid-row:span 1}}
 
 /* ── abonelik ── */
-.da-sub-panel{background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.08),rgba(var(--bp-premium-rgb),.05));border:1px solid rgba(var(--bp-brand-rgb),.25);border-radius:var(--bp-radius-20);padding:clamp(18px,2.4vw,24px) clamp(18px,2.6vw,28px);display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px}
+.da-sub-panel{background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.08),rgba(var(--bp-art-violet-rgb),.05));border:1px solid rgba(var(--bp-brand-rgb),.25);border-radius:var(--bp-radius-20);padding:clamp(18px,2.4vw,24px) clamp(18px,2.6vw,28px);display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px}
 .da-sub-copy{flex:1;min-width:220px}
 .da-sub-title{font-weight:800;font-size:clamp(1.3rem,2.4vw,1.8rem);margin-bottom:6px}
 .da-sub-desc{color:var(--bp-text3);font-size:var(--bp-text-base)}
@@ -295,7 +295,7 @@ header{
 .da-sub-kvkk{display:flex;align-items:flex-start;gap:7px;font-size:var(--bp-text-xs);color:var(--bp-text3);cursor:pointer;line-height:1.45}
 /* onay kutusu -> .da-check, link -> .da-link (data-art.css, 21.09 tek-kaynak) */
 .da-sub-msg{font-size:var(--bp-text-xs);min-height:1em}
-.da-sub-done{display:flex;align-items:center;gap:10px;font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-al)}
+.da-sub-done{display:flex;align-items:center;gap:10px;font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-ok)}
 
 /* footer stilleri -> static/css/data-art.css (20.09 tek-kaynak) */
 
