@@ -103,6 +103,21 @@ def test_garan_banka_oranlari_ve_5_madde():
     assert (ck2["puan"], ck2["toplam"], ck2["eksik"]) == (2, 4, ["ozsermaye_karliligi_ortanca_ustu"])
 
 
+def test_garan_saglamlik_ok_basliktaki_son12ay_ile_ayni():
+    """D-P0-2809b: bank_checks'in ozsermaye karliligi build_v2 icinde ARTIK
+    Yahoo (data.get('roe')) DEGIL, ayni fonksiyonun urettigi degerleme_simdi
+    (son 12 ay) ile ayni kaynaktan -- GARAN'da uc farkli ÖK (%28,1/%28,4/%24,7)
+    ayni sayfada gorunmesin diye."""
+    rec = _rec("GARAN")
+    r = kt.ratios_by_year(rec, "banka")["2025"]
+    med = {"ozsermaye_karliligi": {"deger": 23.3, "n": 6, "kapsam": "sektor"}}
+    v2 = kt.build_v2(rec, price=133.9, today=TODAY, yahoo_shares=4200000000.0, medians=med)
+    assert v2["degerleme_simdi"]["ozsermaye_karliligi"] == 24.72
+    it = _items(v2["saglamlik"])
+    assert it["ozsermaye_karliligi_ortanca_ustu"]["cur"] == v2["degerleme_simdi"]["ozsermaye_karliligi"]
+    assert it["ozsermaye_karliligi_ortanca_ustu"]["cur"] != r["ozsermaye_karliligi"]  # yillik oran (28,38) DEGIL
+
+
 def test_piotroski_9_madde_tek_yillik_rapordan():
     ck = kt.checks(_rec("TUPRS"), "sanayi")
     it = _items(ck)

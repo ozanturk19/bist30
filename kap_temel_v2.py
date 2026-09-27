@@ -495,7 +495,7 @@ def sector_medians(kap_by_ticker, sector_of, sector):
 
 # ----------------------------------------------------------------------------- servis (app.py ince baglanti)
 
-def build_v2(rec, price=None, today=None, yahoo_shares=None, roe=None, medians=None):
+def build_v2(rec, price=None, today=None, yahoo_shares=None, medians=None):
     """kap blogunun Temel v2 ekleri (kaynak izi yok)."""
     today = today or date.today()
     tpl = template_of(rec)
@@ -520,7 +520,12 @@ def build_v2(rec, price=None, today=None, yahoo_shares=None, roe=None, medians=N
         "degerleme_simdi": now,
         "degerleme_bandi_v2": band,
         "bilanco": balance(rec, tpl),
-        "saglamlik": checks(rec, tpl, roe, bank_med.get("deger") if bank_med.get("kapsam") == "sektor" else None),
+        # D-P0-2809b: ÖK kârlılığı KAP'ın kendi son-12-ay değerinden (now, başlıktaki
+        # degerleme_simdi ile AYNI) — eskiden data.get("roe") (Yahoo) banka ortancasıyla
+        # (KAP kaynaklı) kıyaslanıyordu, GARAN'da üç farklı ÖK (%28,1/%28,4/%24,7) aynı
+        # sayfada görünmesine yol açıyordu.
+        "saglamlik": checks(rec, tpl, now.get("ozsermaye_karliligi") if now else None,
+                            bank_med.get("deger") if bank_med.get("kapsam") == "sektor" else None),
         "temettu_yillar": dividend_years(rec, today),
     }
 
@@ -538,6 +543,6 @@ def extend(data, rec, price=None, today=None, medians=None):
     out["kap_durum"] = "var"
     kap = dict(out["kap"])
     kap.update(kf._strip(build_v2(rec, price=price, today=today, yahoo_shares=data.get("shares"),
-                                  roe=data.get("roe"), medians=medians)))
+                                  medians=medians)))
     out["kap"] = kap
     return out

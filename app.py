@@ -11329,7 +11329,23 @@ def api_karsilastir():
         # /api/data ve /api/tarama'nın da kaynağı) — doğrudan onu kullan.
         adx_val = s.get("adx")
         # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
-        fund = _fundamentals_kap(ticker, _get_fundamentals(ticker)) if ticker in BIST100 and bool(s) else {}
+        # D-P0-2809b: /hisse'nin Temel v2 zinciriyle AYNI kaynak (app.py:8702 ile
+        # simetrik) — eskiden yalnız _fundamentals_kap çağrılıyordu, KAP zincirinin
+        # F/K·PD/DD·ÖK kârlılığı (kap_temel_v2) hiç görünmüyordu; hisse.js:1656/
+        # tvValuation ile AYNI seçim mantığı (bkz. aşağıdaki kap_now bloğu).
+        fund = _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, _get_fundamentals(ticker))) if ticker in BIST100 and bool(s) else {}
+        # kap_durum=='var' ise F/K·PD/DD pay_uyumsuz değilse degerleme_simdi'den,
+        # pay_uyumsuz'sa (ya da kayıt yoksa) None/Yahoo yedeği — hisse.js tvValuation()
+        # ile birebir aynı dallanma (KAP kaydı varken uyumsuzsa Yahoo'ya DÜŞMEZ).
+        # ÖK kârlılığı pay adedinden bağımsız hesaplandığı için pay_uyumsuz'dan etkilenmez.
+        _kap = fund.get("kap") if fund.get("kap_durum") == "var" else None
+        _kap_now = (_kap or {}).get("degerleme_simdi")
+        if _kap_now and not _kap_now.get("pay_uyumsuz"):
+            pe_val, pb_val = _kap_now.get("fk"), _kap_now.get("pd_dd")
+        else:
+            pe_val = None if _kap else fund.get("pe_ratio")
+            pb_val = None if _kap else fund.get("pb_ratio")
+        roe_val = _kap_now.get("ozsermaye_karliligi") if (_kap_now and _kap_now.get("ozsermaye_karliligi") is not None) else fund.get("roe")
         results.append({
             "ticker":         ticker,
             "name":           STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
@@ -11376,10 +11392,10 @@ def api_karsilastir():
             # bir hisse icin sahte/tiklanabilir KAP linki gosteriyordu.
             "kap_url":        kap_url_for(ticker) if bool(s) else None,
             # ── Temel analiz ───────────────────────────────
-            "pe_ratio":       fund.get("pe_ratio"),
-            "pb_ratio":       fund.get("pb_ratio"),
+            "pe_ratio":       pe_val,
+            "pb_ratio":       pb_val,
             "market_cap":     fund.get("market_cap"),
-            "roe":            fund.get("roe"),
+            "roe":            roe_val,
             "dividend_yield": fund.get("dividend_yield"),
             "eps":            fund.get("eps"),
             "profit_margin":  fund.get("profit_margin"),
