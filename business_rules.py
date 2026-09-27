@@ -159,6 +159,11 @@ def validate_stocks_list(stocks):
 
 # bug-hunt r66: bu esikler (18/25/40) app.py:~96 icindeki ImportError-fallback kopyasi
 # ve templates/hisse.html:~1880 icindeki JS ilk-render fallback'iyle BIREBIR AYNI kalmali.
+# D-19: BP_RULES için tablo; K-AR kapısı fonksiyon gövdesini ayrıştırdığından fonksiyon if-zinciri kalır,
+# eşitliği tests/test_d19_static_v_bp_rules.py sınır değerleriyle kilitler.
+ADX_LABEL_BANDS = ((40, "Çok Güçlü"), (25, "Güçlü"), (18, "Orta"))  # >= eşik; altı "Zayıf"
+
+
 def derive_adx_label(adx):
     """ADX değerinden tek kaynaklı trend-gücü etiketi (Site Contract v1.2).
 
@@ -193,6 +198,10 @@ def derive_adx_label(adx):
 # Frontend zaten bpRsiZoneText() ile bu ismi signal!='AL' iken "Nötr bölge"ye
 # çeviriyordu (bp-format.js) — aynı düzeltme artık kaynakta da var, ham
 # /api/data tüketicileri (frontend'in üzerinden geçmeyenler) de doğru metni alır.
+RSI_ZONE_BANDS = ((30, "Aşırı Satım"), (45, "Dip Toparlanması"), (60, "Sağlıklı Momentum"),
+                  (70, "Trend Güçleniyor"), (80, "Dikkatli"))  # < üst sınır; 80 ve üstü "Aşırı Alım"
+
+
 def derive_rsi_zone(rsi, signal=None):
     """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
 
@@ -533,3 +542,16 @@ def derive_signal_date_key(signal_date, today=None):
     if age == 1:
         return "yesterday"
     return "older"
+
+
+# ── D-19: window.BP_RULES — şablon/JS'in okuyacağı eşiklerin tek JSON'u ───────
+# app.py `bp_rules` bağlam değişkeni olarak verir; şablon göçü C-26'da (CPO).
+# Yalnız yukarıdaki sabit/tablolardan türer — burada ayrı sayı tutulmaz.
+BP_RULES = {
+    "adx_min": TREND_ADX_MIN,
+    "adx_bands": [[e, l] for e, l in ADX_LABEL_BANDS],
+    "rsi_bands": [[u, l] for u, l in RSI_ZONE_BANDS],
+    "ema_deadband_pct": EMA_DEADBAND_THRESHOLD_PCT,
+    "daily_limit_pct": BIST_DAILY_LIMIT_PCT,
+    "signal_labels": dict(SIGNAL_LABELS),
+}

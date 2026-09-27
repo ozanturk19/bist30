@@ -12563,6 +12563,48 @@ def _inject_og_image_url():
     return dict(og_image_url=url)
 
 
+_static_v_cache = {}
+
+
+def static_v(path):
+    """D-19: '/static/<path>?v=<md5[:8]>' — içerik özeti sürüm anahtarı (el ile yazılan
+    `?v=` kopyalarının yerine; şablon göçü C-26). Özet süreç başına bir kez hesaplanır
+    (deploy = restart → yeni içerik yeni özet). Dosya yoksa/yol static dışına çıkıyorsa
+    sürümsüz yol döner, istek hata vermez."""
+    path = str(path or "").lstrip("/")
+    if path.startswith("static/"):
+        path = path[len("static/"):]
+    hit = _static_v_cache.get(path)
+    if hit is not None:
+        return hit
+    url = "/static/" + path
+    try:
+        root = os.path.realpath(app.static_folder)
+        full = os.path.realpath(os.path.join(root, path))
+        if full.startswith(root + os.sep) and os.path.isfile(full):
+            with open(full, "rb") as fh:
+                url += "?v=" + hashlib.md5(fh.read()).hexdigest()[:8]
+    except Exception as e:
+        logger.warning("static_v(%s): %s", path, e)
+    _static_v_cache[path] = url
+    return url
+
+
+app.jinja_env.globals["static_v"] = static_v
+
+
+@app.context_processor
+def _inject_bp_rules():
+    """D-19: business_rules eşikleri tek JSON → şablonda
+    `<script>window.BP_RULES = {{ bp_rules|tojson }};</script>` (göç C-26)."""
+    try:
+        from business_rules import BP_RULES
+    except Exception as e:
+        logger.warning("_inject_bp_rules: %s", e)
+        BP_RULES = {}
+    return dict(bp_rules=BP_RULES)
+
+
 @app.route("/sinyaller")
 def redirect_sinyaller():
     return redirect("/tarama", 301)
