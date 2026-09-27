@@ -488,7 +488,8 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
-    _fut = sym.endswith("=F") or sym in ("XU100.IS", "XU030.IS")  # D-49: endeks de /api/data ile ayni gunluk bar tabani
+    _is_fut_contract = sym.endswith("=F")  # D-P0-2809a: gercek vadeli kontrat (devir riski)
+    _fut = _is_fut_contract or sym in ("XU100.IS", "XU030.IS")  # D-49: endeks de /api/data ile ayni gunluk bar tabani
     _cached = _MACRO_PREV_DAILY.get(sym)
     _need_daily = _fut and (not _cached or time.time() - _cached[0] > _MACRO_PREV_DAILY_TTL)
     try:
@@ -504,12 +505,30 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         data = json.loads(result.stdout)
         price = data.get("price")
         prev = data.get("prev_close")
-        if _fut:
-            if data.get("prev_daily"):
-                _MACRO_PREV_DAILY[sym] = (time.time(), float(data["prev_daily"]))
+        pct = data.get("pct")  # D-P0-2809a: yalniz =F icin dolu, regularMarketChangePercent
+        if _is_fut_contract and data.get("prev_pct") is not None:
+            # Birincil kaynak: Yahoo'nun aynı-kontrat hesabı — sürekli seri devrinden etkilenmez
+            prev = data["prev_pct"]
+        elif _fut:
+            if data.get("prev_daily") is not None:
+                # =F icin yalniz ayni kontrat testi (same_contract) gecerse guncelle;
+                # anahtar yoksa (eski cagri seklikli mock/test) guven — geriye uyumluluk.
+                if not _is_fut_contract or data.get("same_contract", True):
+                    _MACRO_PREV_DAILY[sym] = (time.time(), float(data["prev_daily"]))
             if sym in _MACRO_PREV_DAILY:
                 prev = _MACRO_PREV_DAILY[sym][1]
         if not price or not prev or prev == 0:
+            return None
+        change = round((float(price) - float(prev)) / float(prev) * 100, 2)
+        if _is_fut_contract and pct is not None and abs(change) > 6 and abs(change - pct) > 1:
+            # Kontrat devri belirsizliği: hesaplanan degisim buyuk ve Yahoo'nun kendi
+            # pct'siyle uyusmuyor — guvenilmez, eski cache degeri korunur.
+            logger.warning("yf_macro_fetch %s implausible change=%.2f%% vs pct=%.2f%% — cache korunur",
+                            sym, change, pct)
+            with _lock:
+                for _it in (_macro_cache.get("data") or []):
+                    if _it.get("label") == label:
+                        return dict(_it)
             return None
         logger.debug("yf_macro_fetch %s: %.0fms", sym, _ms)
         if _ms > _MACRO_SLOW_MS:
@@ -517,7 +536,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         return {
             "label": label,
             "price": round(float(price), 2),
-            "change": round((float(price) - float(prev)) / float(prev) * 100, 2),
+            "change": change,
         }
     except subprocess.TimeoutExpired:
         _yahoo_cb_record(False, timeout=True)

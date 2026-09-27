@@ -62,3 +62,57 @@ def test_macro_one_bist_index_uses_daily_bar(app_module):
     assert run.call_args[0][0][-1] == "daily"
     assert r["change"] == 0.09          # /api/data xu100_change_pct ile ayni taban
     app._MACRO_PREV_DAILY.clear()
+
+
+# ── D-P0-2809a: vadeli kontrat devri regresyonu ─────────────────────────────
+# gorsel denetim K02 — Brent devir gunu iloc[-2] Kasim kontratindan okuyordu
+# (106,6 -> 97,44 = -8,59%), Yahoo'nun kendi hesabi -2,77% idi.
+
+def test_macro_one_futures_uses_pct_not_spliced_daily_bar(app_module):
+    """prev_pct (regularMarketChangePercent kaynakli) varsa prev_daily'e bakilmaz —
+    devir gunu iloc[-2] farkli kontrattan gelse bile sonuc Yahoo'nun pct'si olur."""
+    app = app_module
+    app._MACRO_PREV_DAILY.clear()
+    out = {
+        "sym": "BZ=F", "price": 97.44, "prev_close": 105.69,
+        "prev_daily": 106.6, "same_contract": False,   # devir gunu: guvenilmez
+        "pct": -2.77, "prev_pct": 97.44 / (1 - 0.0277),
+    }
+    with mock.patch.object(app, "_yahoo_cb_blocked", return_value=False), \
+         mock.patch.object(app.subprocess, "run", return_value=_proc(out)):
+        r = app._fetch_macro_one_subprocess("PETROL", "BZ=F")
+    assert r["change"] == -2.77
+    assert "BZ=F" not in app._MACRO_PREV_DAILY   # same_contract=False -> guncellenmedi
+    app._MACRO_PREV_DAILY.clear()
+
+
+def test_macro_one_futures_falls_back_to_daily_bar_when_pct_missing_and_same_contract(app_module):
+    """pct yoksa (info cagrisi basarisiz) ve ayni kontrat testi gecerse eski davranis korunur."""
+    app = app_module
+    app._MACRO_PREV_DAILY.clear()
+    out = {"sym": "BZ=F", "price": 104.32, "prev_close": 105.69, "prev_daily": 106.6, "same_contract": True}
+    with mock.patch.object(app, "_yahoo_cb_blocked", return_value=False), \
+         mock.patch.object(app.subprocess, "run", return_value=_proc(out)):
+        r = app._fetch_macro_one_subprocess("PETROL", "BZ=F")
+    assert r["change"] == -2.14
+    app._MACRO_PREV_DAILY.clear()
+
+
+def test_macro_one_futures_implausible_change_keeps_cached_value(app_module):
+    """pct mevcut ama prev_pct hesaplanamamis (ornegin veri hatasi) ve prev_daily/prev_close
+    buyuk + tutarsiz bir sapma veriyorsa: eski cache degeri korunur, yeni deger atilmaz."""
+    app = app_module
+    app._MACRO_PREV_DAILY.clear()
+    with app._lock:
+        app._macro_cache["data"] = [{"label": "PETROL", "price": 105.5, "change": -0.2}]
+    out = {
+        "sym": "BZ=F", "price": 97.44, "prev_close": 105.69,
+        "pct": -2.77,   # info degeri var ama prev_pct alani yok (kismi/eski subprocess ciktisi)
+    }
+    with mock.patch.object(app, "_yahoo_cb_blocked", return_value=False), \
+         mock.patch.object(app.subprocess, "run", return_value=_proc(out)):
+        r = app._fetch_macro_one_subprocess("PETROL", "BZ=F")
+    assert r == {"label": "PETROL", "price": 105.5, "change": -0.2}
+    app._MACRO_PREV_DAILY.clear()
+    with app._lock:
+        app._macro_cache["data"] = None
