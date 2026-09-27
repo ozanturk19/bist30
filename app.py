@@ -5875,61 +5875,32 @@ def bulten_arsiv():
 
 
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
-import feedparser as _feedparser
+from pipeline.intraday import (  # D-17: makro sembol/RSS tek kaynak (app'i import etmez)
+    MACRO_TICKERS as _MACRO_TICKERS,
+    MACRO_RSS_SOURCES as _MACRO_RSS_SOURCES,
+    fetch_rss_once as _fetch_macro_rss_once,
+)
 
-_MACRO_RSS_SOURCES = [
-    ("Reuters TR",  "https://tr.reuters.com/rssFeed/businessNews"),
-    ("Bloomberg HT", "https://www.bloomberght.com/rss"),
-    ("Dünya",        "https://www.dunya.com/rss/ekonomi.xml"),
-    ("Haberler.com", "https://www.haberler.com/ekonomi/rss/"),
-    ("AA Ekonomi",   "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"),
-]
+# D-17 / A1 bayrağı: 1 → makro + RSS dosyaları bp-intraday.timer yazar; app yalnız diskten okur
+MACRO_FROM_TIMER = os.environ.get("MACRO_FROM_TIMER") == "1"
+_MACRO_TIMER_RELOAD_S = 20      # writer 60 sn + reload 20 sn → /api/macro age_s ≤ ~90
+_MACRO_NEWS_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_news.json")
 
 _macro_news_cache: list = []
 _macro_news_ts: float   = 0.0
 _MACRO_NEWS_TTL         = 1800  # 30 dk
 
-def _fetch_macro_rss_once() -> list:
-    results = []
-    cutoff  = datetime.now() - timedelta(hours=24)
-    for source_name, url in _MACRO_RSS_SOURCES:
-        try:
-            feed = _feedparser.parse(url)
-            for entry in (feed.entries or [])[:6]:
-                try:
-                    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
-                    if parsed:
-                        pub = datetime(*parsed[:6])
-                    else:
-                        pub = datetime.now()
-                    if pub < cutoff:
-                        continue
-                    title = (entry.get("title") or "").strip()
-                    link  = (entry.get("link")  or "").strip()
-                    if not title:
-                        continue
-                    pub_tr = pub.replace(tzinfo=timezone.utc).astimezone(_TZ_TR)
-                    results.append({
-                        "title":     title,
-                        "url":       link,
-                        "source":    source_name,
-                        "published": pub_tr.strftime("%H:%M"),
-                        "date_str":  pub_tr.strftime("%d.%m"),
-                        "pub_ts":    pub.timestamp(),   # gerçek timestamp → doğru sıralama
-                        "category":  "makro",
-                    })
-                except Exception:
-                    continue
-        except Exception as e:
-            logger.debug("RSS fetch [%s]: %s", source_name, e)
-    # pub_ts ile sırala — sadece saat string'i değil, tam tarih+saat kullanılır
-    results.sort(key=lambda x: x.get("pub_ts", 0), reverse=True)
-    return results[:20]
-
 def _macro_news_bg_loop():
     global _macro_news_cache, _macro_news_ts
     while True:
         try:
+            if MACRO_FROM_TIMER:   # D-17: RSS'i bp-intraday.timer saatte bir dosyaya yazar
+                _d = _tp_read_json(_MACRO_NEWS_DISK_PATH) if os.path.exists(_MACRO_NEWS_DISK_PATH) else None
+                if isinstance(_d, dict) and _d.get("items"):
+                    _macro_news_cache = _d["items"]
+                    _macro_news_ts    = _d.get("ts", 0) or 0
+                time.sleep(60)
+                continue
             news = _fetch_macro_rss_once()
             if news:
                 _macro_news_cache = news
@@ -6057,6 +6028,10 @@ def _write_macro_heartbeat():
 
 def _read_macro_heartbeat():
     """web worker (REFRESH_WORKER=web) tarafından okunur — best-effort, dosya yoksa None."""
+    if MACRO_FROM_TIMER:   # D-17: nabız = bp-intraday.timer'ın son başarılı yazımı (dosyadaki ts)
+        _ts = _macro_cache.get("ts", 0)
+        return {"ts": _ts, "cycles": 0, "successes": 0, "exceptions": 0,
+                "last_error": None, "pid": None, "source": "bp-intraday.timer"} if _ts else None
     try:
         with open(_MACRO_HEARTBEAT_PATH) as f:
             return json.load(f)
@@ -6085,6 +6060,15 @@ def _macro_bg_loop():
     Non-leader worker'lar hafif disk-reload modunda (90s aralık).
     """
     _rw = os.environ.get("REFRESH_WORKER", "")
+    if MACRO_FROM_TIMER:
+        # D-17 / A1: yazıcı bp-intraday.timer (pipeline/intraday.py); hiçbir rol Yahoo'ya gitmez.
+        logger.info("_macro_bg_loop: MACRO_FROM_TIMER=1 — yalnız disk-reload (%ds)", _MACRO_TIMER_RELOAD_S)
+        while True:
+            try:
+                _load_macro_from_disk()
+            except Exception as e:
+                logger.error("_macro_bg_loop disk-reload hatası: %s", e)
+            time.sleep(_MACRO_TIMER_RELOAD_S)
     if _rw == "web":
         # CPO-591: PID*7%90 stagger — 4 worker aynı anda reload yapmasın (anti-storm).
         # Önceki: stagger yoktu → tüm worker'lar eş zamanlı json.load() → GIL burst → 15s blok.
@@ -6161,18 +6145,6 @@ _load_macro_from_disk()
 
 _MACRO_TTL   = 21600  # CPO-690: 6h — off-hours false-stale bastırılır (18:45→10:30 arası kimse macro refresh yapmıyor)
 
-_MACRO_TICKERS = [
-    ("XU100",  "XU100.IS"),
-    ("XU030",  "XU030.IS"),
-    ("USDTRY", "USDTRY=X"),
-    ("EURTRY", "EURTRY=X"),
-    ("BTC",    "BTC-USD"),
-    ("ALTIN",  "GC=F"),
-    ("GUMUS",  "SI=F"),
-    ("PETROL", "BZ=F"),   # D-49: Türkiye için referans Brent (WTI CL=F değil); anahtar PETROL kalır (bp-vocab)
-    ("SP500",  "^GSPC"),
-    ("NASDAQ", "^IXIC"),
-]
 
 def _fetch_macro():
     """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri.
@@ -6217,6 +6189,7 @@ def api_macro():
         "items": cached_items,
         "cached": True,
         "stale": stale,
+        "age_s": int(time.time() - cached_ts) if cached_ts else None,   # D-17 kabul: seans içi ≤90
     }
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
     if _DQV_AVAILABLE:
@@ -14148,8 +14121,8 @@ def _startup():
     # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
     def _warm_macro():
         # CPO-558B: web worker'da yfinance yasak — disk-reload yeterli
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_macro: REFRESH_WORKER=web — disk-reload only, yfinance atlandı")
+        if os.environ.get("REFRESH_WORKER") == "web" or MACRO_FROM_TIMER:
+            logger.info("_warm_macro: disk-reload only (web ya da MACRO_FROM_TIMER), yfinance atlandı")
             _load_macro_from_disk()
             return
         items = _fetch_macro()

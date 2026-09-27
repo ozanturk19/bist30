@@ -1,0 +1,13 @@
+[Unit]
+Description=BorsaPusula makro şerit + RSS (D-17 / A1)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/bist30
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/root/bist30/venv/bin/python3 -m pipeline.intraday
+TimeoutStartSec=45
+StandardOutput=append:/var/log/bp-intraday.log
+StandardError=append:/var/log/bp-intraday.log

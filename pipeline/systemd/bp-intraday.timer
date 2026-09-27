@@ -1,0 +1,10 @@
+[Unit]
+Description=BorsaPusula makro şerit zamanlayıcı (her dakika; kapı betikte: seans 60 sn, dışı 5 dk)
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=false
+
+[Install]
+WantedBy=timers.target
