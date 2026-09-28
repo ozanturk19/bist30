@@ -220,8 +220,8 @@
 {% endif %}
 
 {#- Hareketliler (5 + 5, tüm kapsam): eski kayan şerit + küratörlü liste tek blokta.
-    /api/data'dan JS doldurur; iskelet satırları aynı yükseklikte (CLS yok).
-    TAVAN/TABAN etiketi yalnız ısı haritası satırında `lim` olan (BIST100) hissede. -#}
+    /api/data'dan JS doldurur; iskelet satırları aynı yükseklikte (CLS yok). Yüzdenin yanında
+    TAVAN/TABAN rozeti yok (Ozan 27.09; C-P0-2709). -#}
 <section class="da-section hp-blk" id="hareketliler" aria-labelledby="hpMvT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpMvT">Son seansın hareketlileri</h2>
@@ -231,8 +231,7 @@
   {%- set _mv = ssr_movers if (ssr_movers and (ssr_movers.up or ssr_movers.down)) else none -%}
   {%- macro mv_rows(rows, none_txt) -%}
     {%- for s in rows -%}
-    {%- set _l = s.lim if s.lim in ('tavan', 'taban') else none -%}
-    <li><a href="/hisse/{{ s.ticker|urlencode }}"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}</span><span class="p da-num">{{ s.price|tr_price }} ₺</span><span class="chg da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span>{% if _l %}<span class="hp-lim hp-lim--{{ _l }}">{{ _l|upper }}</span>{% else %}<span class="hp-lim" aria-hidden="true"></span>{% endif %}</a></li>
+    <li><a href="/hisse/{{ s.ticker|urlencode }}"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}</span><span class="p da-num">{{ s.price|tr_price }} ₺</span><span class="chg da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span></a></li>
     {%- else -%}<li class="hp-row-none">{{ none_txt }}</li>
     {%- endfor -%}
   {%- endmacro %}
@@ -240,10 +239,6 @@
     <div class="da-panel hp-pan"><h3>En çok yükselenler</h3><ol class="hp-rows" id="hpMvUp">{% if _mv %}{{ mv_rows(_mv.up, "Son seansta yükselen hisse yok.") }}{% else %}{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}{% endif %}</ol></div>
     <div class="da-panel hp-pan"><h3>En çok düşenler</h3><ol class="hp-rows" id="hpMvDn">{% if _mv %}{{ mv_rows(_mv.down, "Son seansta düşen hisse yok.") }}{% else %}{% for _ in range(5) %}<li class="hp-row-sk" aria-hidden="true"><span class="da-skel"></span></li>{% endfor %}{% endif %}</ol></div>
   </div>
-  {%- if heatmap and heatmap.rows %}
-  {%- set _lim = {} -%}{%- for r in heatmap.rows if r.lim -%}{%- set _ = _lim.update({r.t: r.lim}) -%}{%- endfor %}
-  <script type="application/json" id="hpLim">{{ {'asof': heatmap.asof, 'lim': _lim}|tojson }}</script>
-  {%- endif %}
 </section>
 
 {#- ═══ C-30: Öne çıkan şirketler (orta-uzun vade; C-56 listelerinin ilk hali) — SSR (D-53 `ssr_featured`)
@@ -254,7 +249,7 @@
 <section class="da-section hp-blk" id="one-cikan" aria-labelledby="hpFtT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
-    <p>BorsaPusula Skoru en yüksekler · verisi en az %80 tamam · Trend Bozuldu hariç</p>
+    <p>BorsaPusula Skoru en yüksek şirketler</p>
     <a href="/tarama?liste=bp-70">Tüm liste →</a>
   </div>
   <div class="da-panel hp-pan">
@@ -264,7 +259,7 @@
       <li><a class="hp-ft-row" href="/hisse/{{ s.ticker|urlencode }}">
         <span class="hp-ft-co"><b class="tk">{{ s.ticker }}</b><span class="nm">{{ s.name or '' }}{% if s.sector %} · {{ s.sector }}{% endif %}</span><span class="why">{% if s.fin_answer %}{{ s.fin_answer }}.{% endif %}</span></span>
         <span class="hp-ft-tags"><span class="hp-val{% if v %} hp-val--{{ v[1] }}{% endif %}"><span class="sr-only">Değerleme: </span>{{ v[0] if v else '—' }}</span><span class="da-signal da-signal--{{ 'strong' if s.signal == 'AL' else 'flat' }}"><span class="sr-only">Trend: </span>{{ 'Güçlü Trend' if s.signal == 'AL' else 'Yatay' }}</span></span>
-        <span class="hp-ft-bp"><span class="sr-only">BorsaPusula Skoru </span><b class="da-num">{{ s.borsapusula_skoru|round|int }}</b>{% if s.bps_partial %}<em class="hp-partial" title="Kısmi skor: yalnız finansallardan (Temel)">Kısmi</em>{% endif %}</span>
+        <span class="hp-ft-bp"><span class="sr-only">BorsaPusula Skoru </span><b class="da-num">{{ s.borsapusula_skoru|round|int }}</b></span>
       </a></li>
       {%- endfor %}
     </ol>
@@ -482,27 +477,14 @@
   }
 
   /* Hareketliler: tüm kapsam, son seans değişimi (change_pct = tamamlanmış günün
-     kapanış-kapanış değişimi, K-CE). Tavan/taban yalnız bilinen (BIST100) hissede. */
-  /* Etiket yalnız ısı haritası görüntüsünün günü /api/data'nın günüyle aynıysa
-     (donmuş görüntü bir önceki güne ait olabilir) ve değişim ≥ %9 ise basılır. */
-  function daLimMap(updatedAt){
-    var el = document.getElementById('hpLim'), m = /^(\d{2})\.(\d{2})\.(\d{4})/.exec(updatedAt || '');
-    if (!el || !m) return {};
-    try {
-      var j = JSON.parse(el.textContent) || {};
-      return (j.asof === m[3] + '-' + m[2] + '-' + m[1]) ? (j.lim || {}) : {};
-    } catch(e) { console.warn('hpLim okunamadı', e); return {}; }
-  }
+     kapanış-kapanış değişimi, K-CE). */
   function daRenderMovers(real, updatedAt){
     var up = document.getElementById('hpMvUp'), dn = document.getElementById('hpMvDn');
     if (!up || !dn) return;
-    var lim = daLimMap(updatedAt);
     var rows = real.filter(function(s){ return typeof s.change_pct === 'number' && typeof s.price === 'number'; });
     function row(s){
-      var l = Math.abs(s.change_pct) >= 9 ? lim[s.ticker] : null;
       return '<li><a href="/hisse/' + encodeURIComponent(s.ticker) + '"><b class="tk">' + esc(s.ticker) + '</b><span class="nm">' + esc(s.name || '') + '</span>' +
-        '<span class="p da-num">' + fmtPrice(s.price) + ' ₺</span><span class="chg da-num ' + bpDirClass(s.change_pct, 2) + '">' + fmtPct(s.change_pct) + '</span>' +
-        (l === 'tavan' || l === 'taban' ? '<span class="hp-lim hp-lim--' + l + '">' + (l === 'tavan' ? 'TAVAN' : 'TABAN') + '</span>' : '<span class="hp-lim" aria-hidden="true"></span>') + '</a></li>';
+        '<span class="p da-num">' + fmtPrice(s.price) + ' ₺</span><span class="chg da-num ' + bpDirClass(s.change_pct, 2) + '">' + fmtPct(s.change_pct) + '</span></a></li>';
     }
     var byUp = rows.slice().sort(function(a, b){ return b.change_pct - a.change_pct || (a.ticker < b.ticker ? -1 : 1); }).filter(function(s){ return s.change_pct > 0; }).slice(0, 5);
     var byDn = rows.slice().sort(function(a, b){ return a.change_pct - b.change_pct || (a.ticker < b.ticker ? -1 : 1); }).filter(function(s){ return s.change_pct < 0; }).slice(0, 5);

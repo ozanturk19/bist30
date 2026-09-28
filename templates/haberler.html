@@ -98,7 +98,7 @@
   </section>
   {%- endif %}
 
-  <section class="hb-fd" aria-labelledby="hbFdH">
+  <section class="hb-fd" id="bildirimler" aria-labelledby="hbFdH">
     <div class="hb-fd-h">
       <div>
         <h2 id="hbFdH">Şirket bildirimleri{% if feed_ticker %}: {{ feed_ticker }}{% endif %}</h2>
@@ -108,11 +108,11 @@
     {%- set base = '/haberler' ~ ('?hisse=' ~ feed_ticker if feed_ticker else '') -%}
     {%- set sep = '&' if feed_ticker else '?' -%}
     <nav class="hb-flt" aria-label="Bildirim türü">
-      <a href="{{ base }}"{% if not feed_filter %} aria-current="true"{% endif %}>Tümü</a>
+      <a href="{{ base }}#bildirimler"{% if not feed_filter %} aria-current="true"{% endif %}>Tümü</a>
       <button type="button" data-f="takip" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Takip listem <i data-takip-n>0</i></button>
-      <a href="{{ base }}{{ sep }}tur=bilanco"{% if feed_filter == 'bilanco' %} aria-current="true"{% endif %}>Bilanço</a>
-      <a href="{{ base }}{{ sep }}tur=temettu"{% if feed_filter == 'temettu' %} aria-current="true"{% endif %}>Temettü</a>
-      <a href="{{ base }}{{ sep }}tur=ozel"{% if feed_filter == 'ozel' %} aria-current="true"{% endif %}>Özel durum</a>
+      <a href="{{ base }}{{ sep }}tur=bilanco#bildirimler"{% if feed_filter == 'bilanco' %} aria-current="true"{% endif %}>Bilanço</a>
+      <a href="{{ base }}{{ sep }}tur=temettu#bildirimler"{% if feed_filter == 'temettu' %} aria-current="true"{% endif %}>Temettü</a>
+      <a href="{{ base }}{{ sep }}tur=ozel#bildirimler"{% if feed_filter == 'ozel' %} aria-current="true"{% endif %}>Özel durum</a>
     </nav>
     <p class="hb-fnote" id="hbTakipNote" hidden>Takip listendeki hisselerin bu sayfadaki bildirimleri gösteriliyor.</p>
     <div class="hb-empty" id="hbTakipEmpty" hidden><b>Takip listendeki hisselerin bu sayfada bildirimi yok</b><span>Daha eski sayfalara bakabilir ya da hisse sayfasındaki Haberler sekmesini açabilirsin.</span></div>
@@ -137,8 +137,8 @@
     <div class="hb-pg">
       <span>Sayfa {{ feed_page }} / {{ feed_pages }}</span>
       <span>
-        {% if feed_page > 1 %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page - 1 }}">← Daha yeni</a>{% endif %}
-        {% if feed_page < feed_pages %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page + 1 }}">Daha eski bildirimler →</a>{% endif %}
+        {% if feed_page > 1 %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page - 1 }}#bildirimler">← Daha yeni</a>{% endif %}
+        {% if feed_page < feed_pages %}<a href="{{ base }}{{ sep if (feed_filter or feed_ticker) else '?' }}{% if feed_filter %}tur={{ feed_filter }}&{% endif %}sayfa={{ feed_page + 1 }}#bildirimler">Daha eski bildirimler →</a>{% endif %}
       </span>
     </div>
     {% elif feed_available %}
@@ -156,42 +156,73 @@
 <script>
 (function(){
   'use strict';
-  var feed = document.getElementById('hbFeed');
-  var btn = document.querySelector('.hb-flt [data-f="takip"]');
-  if (!feed || !btn) return;
-  /* Takip listem: hisse sayfasindaki yerel liste (bp_watchlist_v2). Yalniz okunur; bossa dugme gizli kalir. */
-  function readWatch(){
-    try {
-      var w = JSON.parse(localStorage.getItem('bp_watchlist_v2') || '[]');
-      return Array.isArray(w) ? w.filter(function(x){ return typeof x === 'string'; }) : [];
-    } catch (e) {
-      console.warn('takip listesi okunamadi, Takip listem filtresi gizli:', e);
-      return [];
+  function initTakip(){
+    var feed = document.getElementById('hbFeed');
+    var btn = document.querySelector('.hb-flt [data-f="takip"]');
+    if (!feed || !btn) return;
+    /* Takip listem: hisse sayfasindaki yerel liste (bp_watchlist_v2). Yalniz okunur; bossa dugme gizli kalir. */
+    function readWatch(){
+      try {
+        var w = JSON.parse(localStorage.getItem('bp_watchlist_v2') || '[]');
+        return Array.isArray(w) ? w.filter(function(x){ return typeof x === 'string'; }) : [];
+      } catch (e) {
+        console.warn('takip listesi okunamadi, Takip listem filtresi gizli:', e);
+        return [];
+      }
     }
-  }
-  var W = readWatch();
-  if (!W.length) return;
-  var STAR = '<svg class="hb-wst" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
-  var rows = [].slice.call(feed.querySelectorAll('.hb-row'));
-  var n = 0;
-  rows.forEach(function(r){
-    if (W.indexOf(r.dataset.t) >= 0) { n++; var b = r.querySelector('.hb-mc b'); if (b) b.insertAdjacentHTML('afterbegin', STAR); }
-  });
-  btn.hidden = false;
-  btn.querySelector('[data-takip-n]').textContent = n;
-  var cur = document.querySelector('.hb-flt a[aria-current="true"]');
-  var note = document.getElementById('hbTakipNote');
-  var empty = document.getElementById('hbTakipEmpty');
-  btn.addEventListener('click', function(){
-    var on = btn.getAttribute('aria-pressed') !== 'true';
-    btn.setAttribute('aria-pressed', String(on));
-    if (cur) { if (on) cur.removeAttribute('aria-current'); else cur.setAttribute('aria-current', 'true'); }
-    rows.forEach(function(r){ r.hidden = on && W.indexOf(r.dataset.t) < 0; });
-    feed.querySelectorAll('.hb-day').forEach(function(d){
-      d.hidden = on && !d.querySelector('.hb-row:not([hidden])');
+    var W = readWatch();
+    if (!W.length) return;
+    var STAR = '<svg class="hb-wst" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
+    var rows = [].slice.call(feed.querySelectorAll('.hb-row'));
+    var n = 0;
+    rows.forEach(function(r){
+      if (W.indexOf(r.dataset.t) >= 0) { n++; var b = r.querySelector('.hb-mc b'); if (b) b.insertAdjacentHTML('afterbegin', STAR); }
     });
-    note.hidden = !on || n === 0;
-    empty.hidden = !on || n > 0;
+    btn.hidden = false;
+    btn.querySelector('[data-takip-n]').textContent = n;
+    var cur = document.querySelector('.hb-flt a[aria-current="true"]');
+    var note = document.getElementById('hbTakipNote');
+    var empty = document.getElementById('hbTakipEmpty');
+    btn.addEventListener('click', function(){
+      var on = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(on));
+      if (cur) { if (on) cur.removeAttribute('aria-current'); else cur.setAttribute('aria-current', 'true'); }
+      rows.forEach(function(r){ r.hidden = on && W.indexOf(r.dataset.t) < 0; });
+      feed.querySelectorAll('.hb-day').forEach(function(d){
+        d.hidden = on && !d.querySelector('.hb-row:not([hidden])');
+      });
+      note.hidden = !on || n === 0;
+      empty.hidden = !on || n > 0;
+    });
+  }
+  initTakip();
+  /* Tur filtresi ve sayfalama yerinde (C-P0-2809c): tam sayfa yukleme yerine bildirim bolumu
+     fetch ile degisir, URL replaceState ile guncellenir, kaydirma korunur. JS yoksa baglanti
+     #bildirimler capasina iner. */
+  var busy = false;
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('.hb-flt a, .hb-pg a');
+    if (!a || busy || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    var sec = document.getElementById('bildirimler');
+    if (!sec || !window.fetch || !window.DOMParser) return;
+    e.preventDefault();
+    busy = true; sec.setAttribute('aria-busy', 'true');
+    var url = a.href.split('#')[0], pg = a.closest('.hb-pg');
+    fetch(url, {credentials: 'same-origin'}).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(html){
+      var ns = new DOMParser().parseFromString(html, 'text/html').getElementById('bildirimler');
+      if (!ns) throw new Error('bildirimler bolumu yok');
+      var y = window.scrollY;
+      sec.parentNode.replaceChild(document.importNode(ns, true), sec);
+      history.replaceState(null, '', url);
+      initTakip();
+      if (pg) document.getElementById('bildirimler').scrollIntoView({block: 'start'}); else window.scrollTo(0, y);
+    }).catch(function(err){
+      console.warn('bildirim filtresi yerinde uygulanamadi, sayfa yukleniyor:', err);
+      location.href = a.href;
+    }).then(function(){ busy = false; sec.removeAttribute('aria-busy'); });
   });
 })();
 </script>
