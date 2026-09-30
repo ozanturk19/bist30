@@ -161,7 +161,7 @@ header{
 .hp-fin{display:flex;gap:10px;align-items:center;margin-top:auto;padding-top:10px;border-top:1px solid var(--bp-border)}
 .hp-fin .da-ring--sm{--da-ring-s:40px}
 /* betim JS ile gelir: etiket + 2 satırlık yer baştan ayrılır (CLS 0); dar kartta 4 satır */
-.hp-fin-tx{min-height:calc(1.35em * 2 + 14px);font-size:var(--bp-text-base);line-height:1.35;color:var(--bp-text2)}
+.hp-fin-tx{min-width:0;overflow-wrap:break-word;min-height:calc(1.35em * 2 + 14px);font-size:var(--bp-text-base);line-height:1.35;color:var(--bp-text2)}
 .hp-fin-tx small{display:block;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-2xs);letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3)}
 /* Hareketliler 5 + 5 */
 .hp-mv{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -171,11 +171,11 @@ header{
 .hp-nw{margin:0;padding:4px 16px;list-style:none}
 .hp-nw li{border-top:1px solid var(--bp-border)}
 .hp-nw li:first-child{border-top:0}
-.hp-nw a{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:44px;color:inherit;text-decoration:none;font-size:var(--bp-text-md)}
+.hp-nw a{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:44px;padding:6px 0;color:inherit;text-decoration:none;font-size:var(--bp-text-md)}
 .hp-nw a:hover .t{text-decoration:underline}
 .hp-nw a:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
 .hp-nw .tk{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700}
-.hp-nw .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35;padding:6px 0}
+.hp-nw .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35}
 .hp-nw .d{color:var(--bp-text3);font-size:var(--bp-text-sm)}
 .hp-nw-e{padding:12px 0;color:var(--bp-text3)}
 .hp-rows li{border-top:1px solid var(--bp-border)}
@@ -201,6 +201,11 @@ header{
   .hp-fin-tx{min-height:calc(1.35em * 4 + 14px)}
   .hp-card{padding:12px}
   .hp-pr b{font-size:var(--bp-text-lg)}
+}
+/* K08: çok dar kartta halka üstte, betim tam genişlik (FİNANSALLAR taşmaz) */
+@media (max-width:374px){
+  .hp-fin{flex-direction:column;align-items:flex-start;gap:6px}
+  .hp-fin-tx{min-height:calc(1.35em * 3 + 14px)}
 }
 
 /* ── C-30: BP halkası etiketi dışarıda ("BP SKORU") ── */
