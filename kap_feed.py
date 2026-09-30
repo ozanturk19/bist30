@@ -462,14 +462,22 @@ def group_by_day(items):
     return days
 
 
-def day_counts(items, day):
+def day_counts(items, day, filt=None, tickers=None):
     """Bir gunun toplam / rutin sayisi (sayfadaki 'N bildirim · M rutin gizli' satiri).
-    Borsa/kurum duyurulari (DUY/DKB: devre kesici, Takasbank, MKK) sirket bildirimi sayilmaz."""
+    Borsa/kurum duyurulari (DUY/DKB: devre kesici, Takasbank, MKK) sirket bildirimi sayilmaz.
+    `filt`/`tickers` aktif sayfa filtresiyle ayni anlamda (bkz. `query()`) — yoksa gunun
+    toplami aktif ?tur=/?hisse= filtresinden bagimsiz, yanlis buyuk bir sayi gosterir (K40)."""
+    tset = set(t.upper() for t in tickers) if tickers else None
     total = rut = 0
     for it in items:
-        if it["ts"][:10] == day and it.get("kap_class") in COMPANY_CLASSES:
-            total += 1
-            rut += 1 if it.get("rutin") else 0
+        if it["ts"][:10] != day or it.get("kap_class") not in COMPANY_CLASSES:
+            continue
+        if tset and not (tset & set(it.get("tickers") or [it["ticker"]])):
+            continue
+        if filt and it.get("filter") != filt:
+            continue
+        total += 1
+        rut += 1 if it.get("rutin") else 0
     return {"total": total, "routine": rut}
 
 

@@ -9277,7 +9277,7 @@ def haberler_page():
     days = []
     counts = {"all": 0, "bilanco": 0, "temettu": 0, "ozel": 0}   # görünen sayfanın satırları (filtre çipleri)
     for d in kap_feed.group_by_day(res["items"]):
-        cnt = kap_feed.day_counts(items, d["day"])
+        cnt = kap_feed.day_counts(items, d["day"], filt=tur, tickers=[hisse] if hisse else None)
         days.append({"day": d["day"], "label": d["label"], "total": cnt["total"], "routine": cnt["routine"],
                      "rows": [dict(kap_feed.public_item(x, STOCK_NAMES), mc=_haber_mini(x["ticker"], smap))
                               for x in d["items"]]})
@@ -9304,7 +9304,8 @@ def haberler_page():
                            feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
                            feed_ticker=hisse, feed_counts=counts, feed_available=bool(items),
                            feed_updated=_KAP_STORE.meta().get("updated_at"),
-                           coverage=len(smap), close_label=close_label, bulten=bulten_ctx)
+                           coverage=len([t for t in smap if t not in INDEX_TICKERS]),
+                           close_label=close_label, bulten=bulten_ctx)
 
 
 @app.route("/hisse/<ticker>/bildirim/<int:idx>")
@@ -9346,7 +9347,10 @@ def _haber_print_now(now):
     _load_cache_from_disk()
     _load_macro_from_disk()
     with _lock:
-        stocks = list(_cache.get("data") or [])
+        # K40: XU030 endeks satırı _cache["data"]'da bir hisse gibi durur; Gündem
+        # "Kapsamdaki N hisse" sayımına ve yükselen/düşen sıralamasına (top[0]/top[-1])
+        # sızmasın diye burada elenir (BIST_STOCK_COUNT'un aynı kuralı, D-45 hattı için).
+        stocks = [s for s in (_cache.get("data") or []) if s.get("ticker") not in INDEX_TICKERS]
         updated = _cache.get("updated_at") or ""
         macro = list(_macro_cache.get("data") or [])
     try:

@@ -267,6 +267,22 @@ def test_day_counts_company_classes_only(tmp_path):
     assert c["routine"] == len([x for x in raw if x["kap_class"] in kf.COMPANY_CLASSES and x["rutin"]])
 
 
+def test_day_counts_respects_active_filt_and_tickers(tmp_path):
+    # K40: '?hisse=THYAO' sayfasinda gun basligi butun akisin toplamini degil,
+    # o hissenin (ve aktif ?tur= filtresinin) o gunku satir sayisini gostermeli.
+    st, _ = _store(tmp_path)
+    allx = st.all_items()
+    day = next(x["ts"][:10] for x in allx if x["kap_class"] in kf.COMPANY_CLASSES)
+    unfiltered = kf.day_counts(allx, day)
+    only_ahgaz = kf.day_counts(allx, day, tickers=["AHGAZ"])
+    expect = len([x for x in allx if x["ts"][:10] == day and x["kap_class"] in kf.COMPANY_CLASSES
+                  and "AHGAZ" in (x.get("tickers") or [x["ticker"]])])
+    assert only_ahgaz["total"] == expect < unfiltered["total"]
+    only_temettu = kf.day_counts(allx, day, filt="temettu")
+    assert only_temettu["total"] == len([x for x in allx if x["ts"][:10] == day
+                                         and x["kap_class"] in kf.COMPANY_CLASSES and x["filter"] == "temettu"])
+
+
 def test_day_labels_absolute_dates():
     assert kf.day_label("2026-09-24") == "24 Eylül Perşembe"
     assert kf.date_long("2026-09-23T09:15:00") == "23 Eylül 2026"
