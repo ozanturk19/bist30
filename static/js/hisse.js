@@ -1144,7 +1144,7 @@ function renderHistory(history, currentPrice, liveSignal) {
     let exitPrice = null, activeTag = '';
     if (isReallyActive) {
       exitPrice = parseFloat(currentPrice) || 0;
-      activeTag = ' <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span>';
+      activeTag = ' <span class="hist-active">(aktif)</span>';
     } else if (h.closed_at_price != null) {
       exitPrice = h.closed_at_price;
     } else if (idx > 0) {
@@ -1156,13 +1156,12 @@ function renderHistory(history, currentPrice, liveSignal) {
 
     if (exitPrice != null && h.price) {
       const ret  = ((exitPrice - h.price) / h.price * 100);
-      const sign = bpDirSign(ret, 1);   /* K-BP: "+" yalniz gercekten pozitifte */
       if (h.signal === 'SAT') {
-        retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1).replace('.', ',')}%${activeTag}</td>`;
+        retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${bpFormatPct(ret, 1)}${activeTag}</td>`;
       } else {
         const isGain = ret > 0;
         const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1).replace('.', ',')}%${activeTag}</td>`;
+        retHtml = `<td style="color:${clr};font-weight:600;font-size:var(--bp-text-sm)">${bpFormatPct(ret, 1)}${activeTag}</td>`;
       }
     } else if (idx === 0) {
       // Hâlâ aktif olmayan (liveSignal'e uymuyor) ama kapanış fiyatı da yok
@@ -1173,7 +1172,7 @@ function renderHistory(history, currentPrice, liveSignal) {
     return `<tr>
       <td>${h.date}</td>
       <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabel(h.signal)}</span></td>
-      <td style="font-variant-numeric:tabular-nums;font-family:var(--bp-font-mono)">${fmt(h.price)} ₺</td>
+      <td>${fmt(h.price)}&nbsp;₺</td>
       ${retHtml}
     </tr>`;
   }).join('');

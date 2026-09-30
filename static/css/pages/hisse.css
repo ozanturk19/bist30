@@ -555,11 +555,14 @@
     border-bottom: 1px solid var(--bp-surface2);
     font-size: var(--bp-text-base);
     color: var(--bp-text2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;   /* C-70 K13: "₺", yuzde ve rozet tek satirda */
   }
+  .hist-active { font-size: var(--bp-text-2xs); color: var(--bp-text3); }
   .history-table tr:last-child td { border-bottom: none; }
   /* Dar ekranda 4 sutunun yatay dolgusu 80px yer kapliyordu; 16px'lik tasmayi
      kapatmak icin 32px serbest birakmak yetiyor (olculdu: 305px -> 273px). */
-  @media (max-width: 380px) {
+  @media (max-width: 480px) {
     .history-table th,
     .history-table td { padding-left: 6px; padding-right: 6px; }
   }
@@ -678,7 +681,6 @@
   .kap-n { color: var(--bp-text3); font-size: var(--bp-text-sm); white-space: nowrap; }
   .kap-all { margin-top: 12px; min-height: 44px; }
   .kap-empty { margin: 0; font-size: var(--bp-text-sm); color: var(--bp-text3); }
-  @media (max-width: 420px) { .kap-item { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; } }
 
   /* ── Metodoloji notu ── */
   .methodology {
