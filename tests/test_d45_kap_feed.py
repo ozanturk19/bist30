@@ -59,6 +59,9 @@ def test_encoding_apostrophe_and_trailing_newline():
     assert kf.clean_text("Türkiye?de yatırım") == "Türkiye'de yatırım"
     assert kf.clean_text("Görüşüldü mü? Evet") == "Görüşüldü mü? Evet"   # gercek soru isareti kalir
     assert kf.clean_text("24.09.2026 Tarihli Pay Geri Alım İşlemleri\n") == "24.09.2026 Tarihli Pay Geri Alım İşlemleri"
+    # K20(c): KAP'ın en-tiresi bazı basliklarda "?" olarak geliyor (ARENA/GARAN, 21.120 kayittan 2'si)
+    assert kf.clean_title("Finansal Rapor Dönemi: 1 Nisan 2025 ? 31 Mart 2026 hk.") == \
+        "Finansal Rapor Dönemi: 1 Nisan 2025 – 31 Mart 2026 hakkında"
 
 
 # ----------------------------------------------------------------------------- uye esleme
@@ -148,6 +151,18 @@ def test_pick_amount(idx, subject, title, exp):
         assert got is None                     # belirsiz (ORGE: 3 tutar) ya da tutarsiz -> tahmin yok
     else:
         assert (round(got["value"], 2), got["cur"], got["kind"]) == exp
+
+
+def test_pick_amount_prefers_toplam_over_nominal_beher():
+    # K20(b): Nominal/Beher/Sermaye alanlari toplam tutarin onune gecmemeli (BERA %0,0 -> %1,3 vakasi).
+    detail = {"fields": [["Nominal Bedeli", "10 TL"], ["Beher Pay Fiyatı", "12,50 TL"],
+                          ["Toplam Tutar", "228.000.000 TL"]], "text": ""}
+    got = kf.pick_amount("Yeni İş İlişkisi", "x", detail)
+    assert (got["value"], got["cur"]) == (228000000.0, "TRY")
+    # Toplam alani yoksa Nominal/Beher HARIC ilk uygun alana duser (once buldugu duzeltilmis)
+    detail2 = {"fields": [["Nominal Bedeli", "10 TL"], ["İhale Bedeli", "31.900.000 TL"]], "text": ""}
+    got2 = kf.pick_amount("İhale Süreci / Sonucu", "x", detail2)
+    assert (got2["value"], got2["cur"]) == (31900000.0, "TRY")
 
 
 def test_onem_ratio_try_fx_and_missing():
@@ -385,6 +400,12 @@ def test_gundem_print_own_data_no_sources_no_relative_time(tmp_path):
     assert doc["next_label"] == "24 Eylül Perşembe 08:30"
     assert hg.next_print_label(datetime(2026, 9, 25, 19, 30), "aksam") == "28 Eylül Pazartesi 08:30"
     assert hg.next_print_label(datetime(2026, 9, 25, 8, 30), "sabah") == "25 Eylül Cuma 19:30"
+    # K19: hafta sonu ilk kurulum baskısı "sabah" edition'ıyla gelebilir (app.py
+    # load_latest() is None dalı takvim kontrolsüz basar) — aynı gün 19:30 hiç
+    # gelmeyeceği için sonraki hafta içi 08:30'a düşmeli.
+    assert hg.next_print_label(datetime(2026, 9, 26, 8, 56), "sabah") == "28 Eylül Pazartesi 08:30"  # cumartesi
+    assert hg.next_print_label(datetime(2026, 9, 27, 10, 0), "sabah") == "28 Eylül Pazartesi 08:30"  # pazar
+    assert hg.next_print_label(datetime(2026, 9, 27, 10, 0), "aksam") == "28 Eylül Pazartesi 08:30"  # pazar
     hg.save_print(doc, str(tmp_path))
     assert hg.load_latest(str(tmp_path))["edition"] == "aksam"
     assert hg.printed_keys(str(tmp_path)) == {"2026-09-23-aksam"}
@@ -398,6 +419,14 @@ def test_gundem_central_bank_item_both_calendar_shapes():
         it = hg._item_cb(cal, date(2026, 9, 25))
         assert it["p"] == "Fed'in sonraki faiz kararı 28 Ekim; TCMB'nin sonraki faiz kararı 22 Ekim."
     assert hg._item_cb([], date(2026, 9, 25)) is None
+
+
+def test_gundem_commod_weekend_wording():
+    # K19: hafta sonu "gün içinde" değil "son kapanışta" (piyasa kapalı).
+    it_wd = hg._item_commod(MACRO, datetime(2026, 9, 25, 19, 30))   # cuma
+    it_we = hg._item_commod(MACRO, datetime(2026, 9, 26, 8, 56))    # cumartesi
+    assert it_wd["h"].startswith("Brent petrol gün içinde")
+    assert it_we["h"].startswith("Brent petrol son kapanışta")
 
 
 def test_gundem_due_slot():

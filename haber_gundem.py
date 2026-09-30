@@ -355,7 +355,8 @@ def _item_commod(macro, now):
     if not br:
         return None
     c = br.get("change") or 0
-    h = "Brent petrol gün içinde %s %s" % (_pct(c, False), "yükseldi" if c > 0 else ("düştü" if c < 0 else "yatay seyretti"))
+    zaman = "son kapanışta" if now.weekday() >= 5 else "gün içinde"
+    h = "Brent petrol %s %s %s" % (zaman, _pct(c, False), "yükseldi" if c > 0 else ("düştü" if c < 0 else "yatay seyretti"))
     p = "Brent varil başına %s $ (%s)" % (_num(br["price"]), _pct(c))
     if au:
         p += "; ons altın %s $ (%s)" % (_num(au["price"]), _pct(au.get("change") or 0))
@@ -416,9 +417,13 @@ def build_print(stocks, macro, xu100, feed_items, names, calendar, now, close_da
 
 
 def next_print_label(now, edition):
-    """Sonraki baski: sabah -> ayni gun 19:30; aksam -> sonraki hafta ici 08:30 ('25 Eylül Cuma 08:30')."""
+    """Sonraki baski: sabah (hafta ici) -> ayni gun 19:30; aksam ya da hafta sonu baskisi
+    (ör. ilk kurulum) -> sonraki hafta ici 08:30 ('25 Eylül Cuma 08:30').
+    K19: 'sabah' baskisi hafta sonu ilk kurulumda da olusabiliyor (app.py
+    load_latest() is None dalinda takvim kontrolsuz basiliyor) — o durumda
+    ayni gun 19:30 hic gelmeyecegi icin hafta ici kontrolu burada yapilir."""
     d = now.date()
-    if edition == "sabah":
+    if edition == "sabah" and d.weekday() < 5:
         return "%s 19:30" % day_label(d)
     d += timedelta(days=1)
     while d.weekday() >= 5:

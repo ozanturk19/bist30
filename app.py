@@ -2153,8 +2153,8 @@ def analyze(ticker_base):
                     "bull":  st_bull,  "bear": st_bear,
                 },
                 "adx": {
-                    "label": f"ADX {adx_val:.0f}",
-                    "value": f"DI+{di_p:.0f}/DI-{di_m:.0f}",
+                    "label": f"ADX {_tr1(adx_val)}",
+                    "value": f"DI+{_tr1(di_p)}/DI-{_tr1(di_m)}",
                     "bull":  adx_bull, "bear": adx_bear,
                 },
                 "ema1299": {
@@ -8167,7 +8167,7 @@ def stock_page(ticker):
     if adx_val is not None or score is not None:
         _parts = []
         if adx_val is not None:
-            _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
+            _parts.append(f"ADX {_tr1(adx_val)} (trend gücü)")
         if score is not None:
             _parts.append(f"Teknik Güç Skoru {score}/100")
         # D-02 (O8): getiri vaadi gibi duran "prim potansiyeli" sorusu kalktı; R/R oranı
@@ -9287,6 +9287,11 @@ def haberler_page():
                 counts[x["filter"]] += 1
     close_label = _haber_close_label()
     gundem = haber_gundem.load_latest()
+    if gundem:
+        # K19: dosyaya donan next_label basim aninda dondugu icin hafta sonu
+        # boyunca gecmis/yanlis bir saat gosterebiliyordu — her yuklemede
+        # guncel saatten yeniden hesaplanir (ekstra basim yok, yalniz etiket).
+        gundem["next_label"] = haber_gundem.next_print_label(datetime.now(_TZ_TR).replace(tzinfo=None), gundem.get("edition"))
     for g in (gundem or {}).get("groups") or []:
         for it in g.get("items") or []:
             for c in it.get("chips") or []:

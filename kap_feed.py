@@ -67,6 +67,9 @@ def clean_title(s):
     """Bildirim basligi: temiz metin + 'Hk.' kisaltmasi acilir."""
     s = clean_text(s)
     s = re.sub(r"\s+(?:Hk\.?|hk\.?|Hk\.da|hk\.da|Hak\.)$", " hakkında", s)
+    # K20(c): KAP kaynağındaki en-tire ("–") bazı başlıklarda kodlama hatasıyla
+    # düz "?" olarak geliyor (ör. "1 Nisan 2025 ? 31 Mart 2026") — tire geri konur.
+    s = re.sub(r"(?<=\S) \? (?=\S)", " – ", s)
     return s
 
 
@@ -658,13 +661,18 @@ ONEM_SUBJECTS = {
 }
 _CONTRACT_WORDS = ("sözleşme", "sipariş", "ihale", "iş ilişkisi", "anlaşma")
 _AMOUNT_FIELD_RE = re.compile(r"(Bedeli|Tutarı|Değeri|Fiyatı)\b")
+_AMOUNT_FIELD_SKIP_RE = re.compile(r"\b(Nominal|Beher|Sermaye)\b", re.I)  # K20(b): birim/nominal alan degil
+_AMOUNT_FIELD_TOPLAM_RE = re.compile(r"Toplam\s+(Tutar\w*|Bedel\w*)", re.I)
 
 
 def pick_amount(subject, title, detail):
     """Bildirimin tek parasal tutari -> {value, cur, kind, raw} ya da None (belirsizse None).
 
-    Sira: (1) yapilandirilmis tutar alani (Ihale Bedeli) (2) sirketin verdigi TL karsiligi
-    (3) 'Sirket Payi' tutari (4) metinde 'tutar/bedel/toplam' yakininda TEK farkli tutar."""
+    Sira: (1) yapilandirilmis tutar alani — once 'Toplam Tutar/Bedel', sonra Nominal/Beher/
+    Sermaye HARIC diger Bedeli/Tutari/Degeri/Fiyati alanlari (K20(b): nominal/beher-pay
+    alanlari toplam tutarin yerine gecip oran hesabini kucuk gosteriyordu) (2) sirketin
+    verdigi TL karsiligi (3) 'Sirket Payi' tutari (4) metinde 'tutar/bedel/toplam'
+    yakininda TEK farkli tutar."""
     if subject not in ONEM_SUBJECTS or not detail:
         return None
     text = detail.get("text") or ""
@@ -672,7 +680,15 @@ def pick_amount(subject, title, detail):
         low = _lower_tr(title + " " + text)
         if not any(w in low for w in _CONTRACT_WORDS):
             return None
-    for label, value in detail.get("fields") or []:
+    fields = detail.get("fields") or []
+    for label, value in fields:
+        if _AMOUNT_FIELD_TOPLAM_RE.search(label) and "Oran" not in label:
+            am = find_amounts(value)
+            if len(am) >= 1:
+                return {"value": am[0][0], "cur": am[0][1], "kind": "alan", "raw": value}
+    for label, value in fields:
+        if _AMOUNT_FIELD_SKIP_RE.search(label):
+            continue
         if _AMOUNT_FIELD_RE.search(label) and "Oran" not in label:
             am = find_amounts(value)
             if len(am) >= 1:
