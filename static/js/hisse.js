@@ -1075,7 +1075,8 @@ function renderSummary(s, signalData) {
     }
   }
 
-  document.getElementById('indRow').innerHTML = indHtml;
+  const indRowEl = document.getElementById('indRow');
+  if (indRowEl) indRowEl.innerHTML = indHtml;
   window._bpApplyTooltips && window._bpApplyTooltips();
 
   /* C-20: AI sekmesiyle birlikte cakisma notu (#sigConflictNote) kalkti. */
@@ -2182,7 +2183,6 @@ async function loadMTF() {
     if (!grid) return;
 
     const tfs = [
-      { key: 'h4',      label: '⏱️ 4 Saatlik', short: '4H' },
       { key: 'daily',   label: '📅 Günlük',    short: '1D' },
       { key: 'weekly',  label: '📆 Haftalık',  short: '1W' },
       { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
@@ -2225,7 +2225,7 @@ async function loadMTF() {
             `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
           ).join('')}</div>`
         : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'var(--bp-sat)':'var(--bp-border)'}"></div>`
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?col:'var(--bp-border)'}"></div>`
           ).join('')}</div>`;
 
       return `

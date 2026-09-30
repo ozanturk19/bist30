@@ -472,7 +472,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
         <ul class="hx-conds" aria-label="Trend koşulları">
           <li class="{{ 'ok' if _c1 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c1 else '–' }}</i><span>Fiyat trend dönüş seviyesinin üstünde<span class="sr-only">{{ ': sağlanıyor' if _c1 else ': sağlanmıyor' }}</span></span><b>{{ _sl|tr_price }} ₺</b></li>
           <li class="{{ 'ok' if _c2 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c2 else '–' }}</i><span>Trend gücü yeterli (ADX ≥ 25)<span class="sr-only">{{ ': sağlanıyor' if _c2 else ': sağlanmıyor' }}</span></span><b>{{ ('%.1f'|format(_q.adx))|replace('.', ',') if _q.adx is not none else '—' }}</b></li>
-          <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _e12|tr_price }} / {{ _e99|tr_price }}</b></li>
+          <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; EMA 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _e12|tr_price }} / {{ _e99|tr_price }}</b></li>
           <li class="{{ 'ok' if _c4 else ('no' if _c4 is sameas false else 'unk') }}" id="q3Di"><i aria-hidden="true">{{ '✓' if _c4 else ('–' if _c4 is sameas false else '·') }}</i><span>Yön alıcılardan yana (DI+ &gt; DI−)<span class="sr-only" id="q3DiSr">{{ ': sağlanıyor' if _c4 else (': sağlanmıyor' if _c4 is sameas false else '') }}</span></span><b id="q3DiV">—</b></li>
           <li class="{{ 'ok' if _c5 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c5 else '–' }}</i><span>Haftalık trend yukarı<span class="sr-only">{{ ': sağlanıyor' if _c5 else ': sağlanmıyor' }}</span></span><b>{{ 'yukarı' if _q.weekly_trend == 1 else ('aşağı' if _q.weekly_trend == -1 else 'belirsiz') }}</b></li>
         </ul>
@@ -497,7 +497,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
     <p class="hx-mean-p"><b>Trend.</b>
     {%- if _ms == 'AL' %} Güçlü Trend: beş koşulun beşi de aynı anda sağlanıyor (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı). Kapanış trend dönüş seviyesinin altına inerse bu durum sona erer.
     {%- elif _ms == 'SAT' %} Trend Bozuldu: koşullar tersine dönmüş durumda (fiyat trend dönüş seviyesinin altında, ADX ≥ 25 ve DI− &gt; DI+, EMA 12 &lt; EMA 99, haftalık trend aşağı). Kapanış trend dönüş seviyesinin üstüne çıkmadan trend desteklemiyor.
-    {%- else %} Yatay: beş koşul aynı anda sağlanmıyor, trend yönü belirgin değil. Güçlü Trend için beşinin birlikte sağlanması gerekir (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı).
+    {%- else %} Yatay: beş koşul aynı anda sağlanmıyor. Güçlü Trend için beşinin birlikte sağlanması gerekir (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı).
     {%- endif %}</p>
     {%- if hs_available and hs.categories %}
     {%- set _mn = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme', 'kalite': 'kalite', 'degerleme': 'değerleme', 'buyume': 'büyüme', 'bilanco': 'bilanço sağlığı', 'temettu': 'temettü'} -%}
@@ -566,45 +566,6 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
     </div>
   </div>
   {% endif %}
-
-  {# İndikatörler #}
-  <div class="indicators-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
-      <div style="display:flex;gap:6px;align-items:center">
-        {# K-AO (21.09): iki durumlu bir acma/kapama dugmesi; durumu YALNIZCA
-             goruneN metinden ("? Acikla" / "? Kapat") ve renkten okunuyordu.
-             Kanonik oznitelik aria-pressed — asagida _applyTooltipVisibility
-             her uygulamada guncelliyor. #}
-        <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                aria-pressed="true"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
-                data-tip="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
-        {# K-AO (21.09): bu dugme gizli bir bolge acip kapatiyordu ama ekran
-             okuyucuya bunu SOYLEMIYORDU — aria-expanded/aria-controls yoktu,
-             sira­dan bir buton gibi duyuruluyordu. (Kusur K-AN sayi-bicimi
-             taramasinda ORTAYA CIKTI: dedektorun "acilir olani ac" adimi bu
-             dugmeyi taniyamadi, cunku taniyacagi oznitelik yoktu; icerideki
-             "EMA12: 130.4" hatasi bu yuzden bir tur gizli kaldi.) #}
-        <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                aria-expanded="false" aria-controls="indTechDetails"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
-          Detaylı göster ▾
-        </button>
-      </div>
-    </div>
-    <div class="ind-row" id="indRow">
-      <span class="ind-badge ind-neutral">Yükleniyor…</span>
-    </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',system-ui,sans-serif">
-      <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
-      <span id="indTechContent">—</span>
-    </div>
-  </div>
 
   {# Çoklu Zaman Dilimi #}
   <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
@@ -699,7 +660,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
   <div class="da-panel da-techsum-panel">
     <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
     <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
-      Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong>, <strong>DI yönü (DI+/DI−)</strong> ve <strong>EMA12/EMA99</strong> kriterlerinin AYNI ANDA uyum sağlamasıyla oluşur.
+      Güçlü Trend, beş koşul aynı anda sağlandığında oluşur: fiyat <strong>Supertrend(10,3)</strong> trend dönüş seviyesinin üstünde, <strong>ADX ≥ 25</strong>, <strong>DI+ &gt; DI−</strong>, <strong>EMA 12 &gt; EMA 99</strong> ve <strong>haftalık trend yukarı</strong> (haftalık EMA 20).
     </p>
   </div>
 
@@ -728,7 +689,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
          2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
          adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
          o. "Stop" kelimesi yalnız AL + band altta iken. #}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— trend dönüş seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Trend dönüş seviyesi (Supertrend)</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %} <span class="qf-sub">— fiyatın {{ 'üzerinde' if ssr_signal.sl_level > ssr_signal.price else 'altında' }}</span>{% endif %}</dd></div>{% endif %}
     </dl>
   </div>
   {% endif %}
@@ -749,10 +710,10 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
   {# Metodoloji #}
   <div class="methodology">
     <strong>Sinyal Metodolojisi:</strong>
-    Trend sinyali 4 kriterin tamamının karşılanmasıyla oluşur:
-    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
-    <strong>DI+ / DI−</strong> yönü + <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
-    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
+    Güçlü Trend beş koşulun birlikte sağlanmasıyla oluşur:
+    fiyat <strong>Supertrend(10,3)</strong> seviyesinin üstünde + <strong>ADX ≥ 25</strong> (trend gücü) +
+    <strong>DI+ &gt; DI−</strong> + <strong>EMA 12 &gt; EMA 99</strong> + <strong>haftalık trend yukarı</strong> (haftalık EMA 20).
+    Trend Bozuldu bunların tersidir; diğer her durum Yatay'dır. Sinyal en az 3 bar devam edince "onaylı" sayılır.
   </div>
     </div>
   </details>

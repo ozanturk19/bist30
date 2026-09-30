@@ -129,15 +129,15 @@ RE_SIGNAL_CTX = re.compile(
 def _count_re(cnt):
     ind = r'(?:ba\u011f\u0131ms\u0131z\s*)?(?:teknik\s*)?'
     return re.compile(
-        r'(?:\b3\s*/\s*3\s*' + cnt + r'|\b3\s*' + ind + cnt +
-        r'|\b\u00fc\u00e7\s*' + ind + cnt +
+        r'(?:\b([34])\s*/\s*\1\s*' + cnt + r'|\b[34]\s*' + ind + cnt +
+        r'|\b(?:\u00fc\u00e7|d\u00f6rt)\s*' + ind + cnt +
         r'|\b\u00fc\u00e7l\u00fc\s*' + cnt + r')', re.I | re.U)
 RE_COUNT = _count_re(r'(?:kriter|ko\u015ful|test|\u015fart|onay)')
 # GOSTERGE sayimi 3'tur ve DOGRUdur: "3 teknik gosterge", "uclu filtre
 # sistemi", "ucunun ayni anda ayni yonu gostermesi" serbesttir -- kapi
 # yalnizca KRITER/KOSUL sozcugu ile yapilan 3'lu sayimi yasaklar (4 kosul var).
 # "3 teknik gosterge" / "3 indikator" sayimi DOGRUdur: kapi bunlari saymaz.
-RE_COUNT_OK = re.compile(r'\b(?:3|üç)\s*(?:teknik\s*)?(?:gösterge|gosterge|indikatör|indikator)', re.I | re.U)
+RE_COUNT_OK = re.compile(r'\b(?:3|4|üç|dört)\s*(?:teknik\s*)?(?:gösterge|gosterge|indikatör|indikator)', re.I | re.U)
 
 # --- blok sinirlari ----------------------------------------------------------
 RE_BLOCK_SPLIT = re.compile(
@@ -226,7 +226,7 @@ def scan_text(rel, text):
             cm = RE_COUNT.search(blk)
             if cm and not RE_COUNT_OK.search(cm.group(0)):
                 bad.append((rel, ln + blk.count('\n', 0, cm.start()), 'R2',
-                            'kosul sayimi yanlis: "%s" -- 4 kosul var' % cm.group(0).strip()))
+                            'kosul sayimi yanlis: "%s" -- 5 kosul var (C-70 K12)' % cm.group(0).strip()))
     if not rel.endswith('.py') and rel.replace(os.sep, '/') not in BANNED_EXEMPT:
         for i, line in enumerate(text.split('\n'), 1):
             _ln = RE_BANNED_LOGIC.sub('', line)
@@ -299,6 +299,10 @@ FIX = [
     ("sayim tek basina (sinyal baglami)",
      '<meta property="og:description" content="teknik temel: 3 kriter ayn\u0131 anda '
      'ye\u015fil oldu\u011funda trend sinyali \u00fcretilir.">', 1),
+    ("C-70 K12 dort kriter",
+     "<p>Güçlü Trend sinyali 4 kriterin tamamıyla oluşur.</p>", 1),
+    ("C-70 K12 dort kosul",
+     "<p>Trend durumu dört koşulla belirlenir, sinyal buna göre.</p>", 1),
     ("sayim sinyal disi baglamda muaf",
      '<p>Portf\u00f6y kurarken 3 kriter kullan\u0131n: sekt\u00f6r, b\u00fcy\u00fckl\u00fck, likidite.</p>', 0),
     ("JS blok yorumu muaf",
@@ -391,8 +395,8 @@ def main():
     for rel, ln, kind, msg in sorted(bad):
         print("  [%s] %s:%s  %s" % (kind, rel, ln, msg))
     print("\n  Kanon (app.py _bar_signal_fast): Supertrend yonu + ADX >= 25 +")
-    print("  DI yonu (DI+ vs DI-) + EMA12/EMA99 -> 3 gosterge, 4 KOSUL.")
-    print("  /metodoloji formul kutusu bu dordunu birlikte yaziyor.")
+    print("  DI yonu (DI+ vs DI-) + EMA12/EMA99 + haftalik EMA20 -> 5 KOSUL (kanon §3).")
+    print("  /metodoloji formul kutusu besini birlikte yaziyor.")
     return 1
 
 
