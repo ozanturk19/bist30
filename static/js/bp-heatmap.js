@@ -204,7 +204,7 @@
     root.classList.toggle('hm-stack', stack);
     /* C-28: ana sayfada (tam sayfa değil) dar kapta önizleme — piyasa değeri
        sırasıyla büyük sektörler ~820 px'e sığdığı kadar, gerisi "Tüm harita →". */
-    var PREV = stack && !FULL, used = 0, cut = false;
+    var PREV = stack && !FULL && !root.hasAttribute('data-hm-all'), used = 0, cut = false;
     if (!stack) {
       groups.forEach(function (g) { g.el.style.display = ''; });
       var H = map.clientHeight || Math.round(Wi / 1.6);
@@ -648,6 +648,7 @@
     } catch (e) { /* eski tarayıcı: adres değişmez, harita yine boyanır */ }
   }
   function setState(m, p) {
+    if (m !== 'chg') p = 'd1'; /* K11: dönem yalnız Değişim modunda anlamlı */
     if (m === st.mode && p === st.per) return;
     st.mode = m; st.per = p;
     hideCard(true);
@@ -669,6 +670,7 @@
     try {
       var q = new URLSearchParams(location.search);
       var qm = MR[(q.get('renk') || '').toLowerCase()] || 'chg', qp = PR[(q.get('donem') || '').toLowerCase()] || 'd1';
+      if (qm !== 'chg') qp = 'd1';
       if (qm !== st.mode || qp !== st.per) { st.mode = qm; st.per = qp; }
     } catch (e) { /* URLSearchParams yok: SSR durumu kalır */ }
     repaint();

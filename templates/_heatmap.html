@@ -150,7 +150,7 @@
 {#- ── C-29 tam sayfa durumu ── -#}
 {%- set _full = (hm_full is defined) and hm_full -%}
 {%- set _mode = hm_mode if (_full and hm_mode is defined and hm_mode in ('chg', 'bp', 'tr')) else 'chg' -%}
-{%- set _per = hm_per if (_full and hm_per is defined and hm_per in ('d1', 'w1', 'm1', 'ytd', 'y1')) else 'd1' -%}
+{%- set _per = hm_per if (_full and _mode == 'chg' and hm_per is defined and hm_per in ('d1', 'w1', 'm1', 'ytd', 'y1')) else 'd1' -%}
 {%- if _full -%}
   {#- (kod, düğme, okunan ad, lejant adı, açıklama cümlesi, cümle öneki, sıralama cümlesi) — bp-heatmap.js PER ile aynı -#}
   {%- set _PER = [('d1', '1G', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'), ('w1', '1H', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'), ('m1', '1A', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'), ('ytd', 'YB', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'), ('y1', '1Y', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime')] -%}
@@ -180,7 +180,7 @@
 {%- endif -%}
 {%- set _h1 = hm_h1 if ((hm_h1 is defined) and hm_h1 and not _full) else none -%}
 <section class="da-section" id="sektorler" aria-labelledby="hmTitle">
-  <div class="da-panel hm{{ ' hm-full hm-m-' ~ _mode ~ (' hm-lim-on' if _limon else '') if _full }}" data-hm{% if _full %} data-hm-full data-mode="{{ _mode }}" data-per="{{ _per }}"{% endif %}>
+  <div class="da-panel hm{{ ' hm-full hm-m-' ~ _mode ~ (' hm-lim-on' if _limon else '') if _full }}" data-hm{% if _h1 %} data-hm-all{% endif %}{% if _full %} data-hm-full data-mode="{{ _mode }}" data-per="{{ _per }}"{% endif %}>
     {%- if not _full %}
     <div class="hm-head">
       {%- if _sh.on %}
@@ -322,7 +322,9 @@
         {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>{% endif %}
       </div>
       <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
+      {%- if not _h1 %}
       <a class="hm-more da-tap" href="/sektor-harita">Tüm harita →</a>
+      {%- endif %}
     {%- else %}
       {%- set _half = _cap / 2 -%}{%- set _hf = 1 if (_half != (_half|int)) else 0 %}
       <div class="hm-legend" data-lg="chg"{% if _mode != 'chg' %} hidden{% endif %}>

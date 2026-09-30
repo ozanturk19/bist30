@@ -12,7 +12,7 @@
 {%- set _hm_ok = (heatmap is defined) and heatmap and heatmap.rows and heatmap_groups and heatmap_tiles -%}
 {%- set _q = request.args if ((request is defined) and request and request.args) else {} -%}
 {%- set _mode = {'degisim': 'chg', 'bp': 'bp', 'trend': 'tr'}.get(((_q.get('renk') or '') ~ '')|lower, 'chg') -%}
-{%- set _per = {'1g': 'd1', '1h': 'w1', '1a': 'm1', 'yb': 'ytd', '1y': 'y1'}.get(((_q.get('donem') or '') ~ '')|lower, 'd1') -%}
+{%- set _per = {'1g': 'd1', '1h': 'w1', '1a': 'm1', 'yb': 'ytd', '1y': 'y1'}.get(((_q.get('donem') or '') ~ '')|lower, 'd1') if _mode == 'chg' else 'd1' -%}
 {% block head %}<title>BIST100 Isı Haritası: Sektörler ve Hisseler | BorsaPusula</title>
 <meta name="description" content="BIST100 hisselerinin sektörlere göre gün sonu ısı haritası. Kutu büyüklüğü piyasa değeri; renk değişim, BorsaPusula Skoru ya da trend durumu.">
 <link rel="canonical" href="https://borsapusula.com/sektor-harita">
