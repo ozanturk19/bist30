@@ -802,15 +802,14 @@ def compute_onem(amount, revenue, subject, fx_rate=None, fx_date=None):
 
 
 def summary_sentence(item, company, onem=None):
-    """Kural tabanli tek cumle (AI yok). Betim; yargi yok."""
+    """Kural tabanli tek cumle (AI yok). Betim; yargi yok.
+
+    K20(d): baslik zaten sayfa H1'inde gorunur oldugu icin burada yinelenmez (aksi halde
+    ayni metin H1 + ozette art arda iki kez okunuyordu)."""
     cls = item["class"]
-    title = item["title"]
     when = date_long(item["ts"])
     kind = _lower_tr(cls[:1]) + cls[1:]
-    s = "%s, %s tarihinde %s bildirimi yayımladı" % (company, when, kind)
-    if _lower_tr(title) not in (_lower_tr(cls), _lower_tr(item.get("subject"))):
-        s += ": “%s”" % title.rstrip(".")
-    s += "."
+    s = "%s, %s tarihinde %s bildirimi yayımladı." % (company, when, kind)
     if onem:
         ratio = onem["txt"].replace("~", "yaklaşık ")
         s += " Bildirilen %s %s; şirketin %d hasılatına oranı %s." % (

@@ -9216,6 +9216,23 @@ def api_haberler():
     return safe_json(res)
 
 
+_TR_UPPER_TRANS = str.maketrans({"i": "İ", "ı": "I"})
+
+
+def _kap_title_for_headline(title, ticker):
+    """K20(d): baslik yayinlayanin tam (resmi) unvaniyla basliyorsa o kisim kirpilir —
+    H1 zaten '<kisa ad>: <baslik>' bicimindeyken sirket adi iki kez gorunmesin diye
+    (ornek: AKCNS 'Akçansa Çimento: Akçansa Çimento Sanayi ve Ticaret A.Ş. ...')."""
+    unvan = (KAP_INFO.get(ticker) or {}).get("unvan")
+    if not unvan or not title:
+        return title
+    n = len(unvan)
+    if title[:n].translate(_TR_UPPER_TRANS).upper() != unvan.translate(_TR_UPPER_TRANS).upper():
+        return title
+    rest = title[n:].lstrip(" ,.-–")
+    return (rest[:1].upper() + rest[1:]) if rest else title
+
+
 def _bildirim_payload(idx):
     it = _KAP_STORE.get(idx)
     if not it:
@@ -9225,9 +9242,12 @@ def _bildirim_payload(idx):
             if not x.get("rutin") and x["id"] != it["id"]][:4]
     pub = kap_feed.public_item(it, STOCK_NAMES)
     company = STOCK_NAMES.get(it["ticker"], it["ticker"])
-    pub["summary"] = it.get("ozet") or kap_feed.summary_sentence(it, company, it.get("onem"))
-    same_as_class = kap_feed._lower_tr(it["title"]) in (kap_feed._lower_tr(it["class"]), kap_feed._lower_tr(it["subject"]))
-    return {"item": pub, "headline": "%s: %s" % (company, it["class"] if same_as_class else it["title"]),
+    title = _kap_title_for_headline(it["title"], it["ticker"])
+    # K20(d): ozet H1'i tekrar etmesin diye burada her zaman taze uretilir (onbellekteki
+    # eski 'ozet' alani gecmis akista yinelemeliydi; backfill gerekmez).
+    pub["summary"] = kap_feed.summary_sentence(it, company, it.get("onem"))
+    same_as_class = kap_feed._lower_tr(title) in (kap_feed._lower_tr(it["class"]), kap_feed._lower_tr(it["subject"]))
+    return {"item": pub, "headline": "%s: %s" % (company, it["class"] if same_as_class else title),
             "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
             "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
                      "lines": doc.get("lines") or [], "resp": doc.get("resp")},

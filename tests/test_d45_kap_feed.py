@@ -194,9 +194,11 @@ def test_summary_sentence_rule_based_descriptive():
     assert s.startswith("Astor Enerji, 23 Eylül 2026 tarihinde yeni iş ilişkisi bildirimi yayımladı.")
     assert "1.646.250.192,45 ₺" in s and "2025 hasılatına oranı %4,7" in s
     assert not FORBIDDEN.search(s)
+    # K20(d): baslik sayfa H1'inde zaten gorundugu icin ozette yinelenmez
     th = kf.normalize(_row(1667339), UNIVERSE)
     s2 = kf.summary_sentence(th, "Türk Hava Yolları")
-    assert "“Ortaklığımızın Stratejik Planı Çerçevesindeki Uçak Siparişleri”" in s2 and not FORBIDDEN.search(s2)
+    assert s2 == "Türk Hava Yolları, 23 Eylül 2026 tarihinde özel durum bildirimi yayımladı."
+    assert "Ortaklığımızın Stratejik Planı" not in s2 and not FORBIDDEN.search(s2)
 
 
 # ----------------------------------------------------------------------------- depo + sorgu + eski bicim
