@@ -295,15 +295,16 @@ html {
 .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
 .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
 .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-.macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
+.macro-bar::after  { right:32px; background:linear-gradient(to left,var(--bp-bg),transparent); }
 .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; will-change:transform; height:32px; }
 @media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state:paused; } }
 @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 /* K-AZ: `top:50%` şeridin safe-area dolgusunu da içeren kutusuna göre ortalıyordu
    (PWA'da düğmenin üstü çentiğin altında kalıyordu); dolgunun yarısı geri eklendi. */
-.macro-pause-btn { position:absolute; right:2px; top:calc(50% + env(safe-area-inset-top, 0px) / 2); transform:translateY(-50%); z-index:var(--bp-z-local-control); width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; color:inherit; opacity:.55; font-size:var(--bp-text-sm); line-height:1; cursor:pointer; padding:0; }
-.macro-pause-btn::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
-.macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity:1; }
+.macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1; cursor:pointer; padding:0; }
+.macro-pause-btn:hover, .macro-pause-btn:focus-visible { color:var(--bp-text); }
+.macro-pause-btn svg { width:12px; height:12px; }
+.macro-pause-btn[aria-pressed="true"] .mp-pause, .macro-pause-btn:not([aria-pressed="true"]) .mp-play { display:none; }
 .macro-bar[data-paused="true"] .macro-track { animation-play-state:paused !important; }
 .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit; }
 .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
@@ -330,8 +331,8 @@ html {
 .macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text2);letter-spacing:.2px}
 /* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
    24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
-.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
-.macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{opacity:1}
+.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text3);font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
+.macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
 /* ── Sayfa kabı: TEK KAYNAK (C-15) ───────────────────────────────────────────
    Önceden 14 sayfa CSS'inde ayrı `.container` vardı (578/680/820/860/1100/
    1200/1400 genişlik, 10-40px iç boşluk karışık). Sayfa CSS'inde `.container`

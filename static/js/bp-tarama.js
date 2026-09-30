@@ -337,6 +337,7 @@
     if (!LOADED) { $('tvPanelB').innerHTML = '<div class="tv-empty">Veriler yükleniyor…</div>'; $('tvPanelF').innerHTML = ''; }
     var sh = $('tvPanel').querySelector('.tv-sheet');
     release = window.bpTrapFocus ? window.bpTrapFocus(sh, closePanel) : null;
+    if (!release) sh.onkeydown = function (e) { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } };  // focus-trap.js yüklenmezse Esc yedeği
     var x = sh.querySelector('.tv-xbtn'); if (x) x.focus();
   }
   function closePanel() {

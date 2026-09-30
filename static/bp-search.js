@@ -716,7 +716,7 @@
       // aciklama hover/odak/dokunma ile erisilebilir hale geldi.
       badge.setAttribute('data-tip', 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)');
       badge.tabIndex = 0;
-      badge.textContent = '⏱';
+      badge.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.8V8l2 1.4"/></svg>';
       badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit';
       bar.appendChild(badge);
     }
@@ -809,6 +809,17 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bpStartMacro);
   else _bpStartMacro();
+  // Şerit duraklat/oynat: 12 şablondaki satır içi onclick yerine tek delege (K04).
+  // Simge SVG'dir; hangisinin görüneceğini aria-pressed üzerinden CSS seçer.
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest && e.target.closest('.macro-pause-btn');
+    var bar = b && b.closest('.macro-bar');
+    if (!bar) return;
+    var p = bar.getAttribute('data-paused') !== 'true';
+    bar.setAttribute('data-paused', String(p));
+    b.setAttribute('aria-pressed', String(p));
+    b.setAttribute('aria-label', p ? 'Haber şeridini devam ettir' : 'Haber şeridini duraklat');
+  });
 
 
   // ── View Transitions API + perceived performance polish ──

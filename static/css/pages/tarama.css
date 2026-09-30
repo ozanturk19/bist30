@@ -146,6 +146,7 @@
   .tv-sh-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--bp-border); }
   .tv-sh-h h2 { margin: 0; font: 700 18px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); }
   .tv-esc { margin-left: auto; font: 500 12.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); white-space: nowrap; }
+  @media (hover: none), (pointer: coarse) { .tv-esc { display: none; } }
   .tv-esc kbd { font: 600 11px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); background: var(--bp-surface3); border: 1px solid var(--bp-border2); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; }
   .tv-xbtn { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; border: 1px solid var(--bp-border2); background: var(--bp-surface3); color: var(--bp-text); cursor: pointer; }
   .tv-xbtn svg { width: 16px; height: 16px; }
