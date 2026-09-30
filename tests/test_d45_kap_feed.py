@@ -134,6 +134,36 @@ def test_parse_detail_fields_text_and_turkish_only():
     assert not kar["fields"] and "Nakit Kar Payı Ödeme Şekli" in kar["lines"]
 
 
+def test_parse_detail_inlines_data_tables_and_merges_bullets():
+    # K20(a): oda_ alani olmayan bildirimlerde (Pay Alim Teklifi/Birlesme/Sermaye Artirimi)
+    # gelen <table border="1"> govdesi flat() ile once tum basliklar sonra tum degerler
+    # olarak tek tek satira dusuyordu (BERA/AKCNS 30.09 canli ornekleri). Artik "Baslik:
+    # Deger" tek satira cevrilir; coklu veri satirlari '•' ile ayrilir.
+    html = (
+        '<div>Özet Bilgi</div><div>x</div>'
+        '<table border="1"><tbody>'
+        '<tr><td><div>Pay Grup Bilgileri</div></td><td><div>Nevi</div></td>'
+        '<td><div>Fiyat</div></td></tr>'
+        '<tr><td><div>AKCNS</div></td><td><div>Nâma</div></td><td><div>274,24</div></td></tr>'
+        '</tbody></table>'
+        '<div>Sermaye Artırımı</div>'
+        '<table class="totalTableStyle mTB20"><tbody>'
+        '<tr><td><div></div></td><td><div>Mevcut Sermaye</div></td><td><div>Ulaşılacak</div></td></tr>'
+        '<tr><td><div>TOPLAM</div></td><td><div>1.400.000.000</div></td><td><div>3.780.000.000</div></td></tr>'
+        '</tbody></table>'
+        '<div>•</div><div>Bağlayıcı Sözleşme uyarınca fiyat belirlenmiştir.</div>'
+        '<div>Kamuoyuna saygıyla duyurulur.</div>'
+    )
+    d = kf.parse_detail(html)
+    assert not d["fields"]                              # oda_ alani yok -> "lines" yolu
+    assert "Pay Grup Bilgileri: AKCNS; Nevi: Nâma; Fiyat: 274,24" in d["lines"]
+    assert "TOPLAM; Mevcut Sermaye: 1.400.000.000; Ulaşılacak: 3.780.000.000" in d["lines"]
+    assert "• Bağlayıcı Sözleşme uyarınca fiyat belirlenmiştir." in d["lines"]
+    # eski davranista her hucre ayri satirdi (baslik/deger karisik) -- artik tek basina yok
+    assert "Pay Grup Bilgileri" not in d["lines"]
+    assert "Nevi" not in d["lines"]
+
+
 @pytest.mark.parametrize("idx,subject,title,exp", [
     (1666965, "Yeni İş İlişkisi", "Yeni İş İlişkisi", (1646250192.45, "TRY", "tl_karsiligi")),
     (1667396, "Özel Durum Açıklaması (Genel)", "İstanbul Eyüpsultan Hasdal 2. Etap İhalesi 2. Oturum Sonucu",

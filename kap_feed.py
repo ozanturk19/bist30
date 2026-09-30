@@ -561,12 +561,88 @@ def _flat(page_html):
     return kf_flat(page_html)
 
 
+# K20(a): oda_ alani OLMAYAN bildirimlerde (Pay Alim Teklifi, Birlesme, Sermaye Artirimi,
+# Geri Alim, Temettu bildirim sayfasi) govde <table border="1"> ile geliyor; genel etiket
+# stripleme (_flat) satir/sutun sinirini kaybedip once tum basliklari sonra tum degerleri
+# tek tek token yapiyordu. Bu tablolari _flat'e vermeden once "Baslik: Deger" duz metnine
+# ceviririz (oda_ alanlarinin kucuk "taxonomy-title-panel" etiket tablolarina dokunmaz,
+# onlarda border="1" yok).
+_DATA_TABLE_RE = re.compile(
+    r'<table\s+(?:border="1"|class="totalTableStyle[^"]*")>((?:(?!</?table\b).)*?)</table>', re.S | re.I)
+_TR_ROW_RE = re.compile(r"<tr\b[^>]*>(.*?)</tr>", re.S | re.I)
+_TD_CELL_RE = re.compile(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", re.S | re.I)
+_BULLET_RE = re.compile(r"^[•o○●▪♦]$")
+
+
+def _cell_text(cell_html):
+    t = re.sub(r"<[^>]+>", " ", cell_html)
+    t = _html.unescape(t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _table_rows(table_inner):
+    rows = []
+    for rm in _TR_ROW_RE.finditer(table_inner):
+        cells = [_cell_text(c) for c in _TD_CELL_RE.findall(rm.group(1))]
+        if any(cells):
+            rows.append(cells)
+    return rows
+
+
+def _table_to_text(table_inner):
+    """Coksutunlu tablo -> 'Baslik: Deger' metni; coklu veri satiri '•' ile ayrilir."""
+    rows = _table_rows(table_inner)
+    if not rows:
+        return ""
+    header, data_rows = rows[0], rows[1:]
+    if not data_rows:
+        return "; ".join(c for c in header if c)
+    out = []
+    for row in data_rows:
+        lead = row[0] if row and row[0] and not (header and header[0]) else None
+        pairs = ["%s: %s" % (h, v) for h, v in zip(header, row) if h and v and v != "-"]
+        if lead:
+            pairs = [lead] + pairs
+        if pairs:
+            out.append("; ".join(pairs))
+    return " • ".join(out)
+
+
+def _inline_data_tables(page_html):
+    from kap_financials import unesc as kf_unesc
+    h = kf_unesc(page_html)
+
+    def repl(m):
+        txt = _table_to_text(m.group(1))
+        return _html.escape(txt) if txt else ""
+    prev = None
+    while h != prev:
+        prev = h
+        h = _DATA_TABLE_RE.sub(repl, h)
+    return h
+
+
+def _merge_bullets(lines):
+    """Tek basina '•'/'o' satirini bir sonraki satirla birlestirir (madde isareti icerikten
+    kopmasin diye)."""
+    out = []
+    i = 0
+    while i < len(lines):
+        if _BULLET_RE.match(lines[i]) and i + 1 < len(lines):
+            out.append("%s %s" % (lines[i], lines[i + 1]))
+            i += 2
+        else:
+            out.append(lines[i])
+            i += 1
+    return out
+
+
 def parse_detail(page_html):
     """KAP bildirim sayfasi -> {'fields': [[etiket, deger]], 'text': str, 'resp': str|None, 'lines': []}.
 
     Iki bicim: (1) 'oda_*' alanli form (etiket/deger TR+EN), (2) alansiz form (temettu vb.):
     satirlar sirayla. Ingilizce kisim atilir (Turkce metin esastir)."""
-    s = _flat(page_html)
+    s = _flat(_inline_data_tables(page_html))
     toks = [t.strip() for t in s.split("|")]
     toks = [t for t in toks if t]
     try:
@@ -609,7 +685,7 @@ def parse_detail(page_html):
             if v and v != "-":
                 fields.append([label, v])
     else:
-        lines = _turkish_part(body)
+        lines = _merge_bullets(_turkish_part(body))
     text = " ".join(x for x in text_segs if x)
     text = re.sub(r"\s+([.,;:])", r"\1", text)
     return {"fields": fields, "text": text, "resp": resp, "lines": lines}
