@@ -247,3 +247,5 @@
   @media (max-width: 480px) { .tv .tv-bar { flex-wrap: nowrap; } .tv .tv-chip { white-space: nowrap; } }
   @media (max-width: 400px) { .tv-stamp .n { display: none; } }
   @media (prefers-reduced-motion: reduce) { .tv-sheet { animation: none; } }
+  /* C-70 K07: 320'de en uzun ön ayar çipi kaydırıcıya tam sığar */
+  @media (max-width: 359.98px) { .tv .tv-chip { padding: 8px 10px; gap: 6px; } .tv .tv-bar { gap: 6px; } }
