@@ -202,7 +202,10 @@
     .tv-leg, .tv-stat, .tv-vsep { display: none; }
     .tv-bar { position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-sticky-subheader); gap: 8px; margin: 0 calc(-1 * var(--tv-gut)); padding: 5px 0 5px var(--tv-gut); background: rgba(var(--bp-bg-rgb), .97); border-bottom: 1px solid var(--bp-border); }
     .tv-fbtn, .tv-chip { min-height: 44px; }
-    .tv-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-right: var(--tv-gut); scroll-padding-inline: 0 32px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+    /* C-70 K07: telefonda Filtre düğmesi ikon + rozet; çip satırına yer kalır (erişilebilir ad JS'te aria-label). */
+    .tv-fl { display: none; }
+    .tv-fbtn { padding-left: 13px; padding-right: 13px; }
+    .tv-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-right: 28px; scroll-padding-inline: 0 32px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
     .tv-chips::-webkit-scrollbar { display: none; }
     .tv-tbw { margin: 0 calc(-1 * var(--tv-gut)); border: 0; border-radius: 0; background: none; overflow: visible; }
     .tv-tb, .tv-tb tbody, .tv-tb tr.gh, .tv-tb tr.gh th, .tv-tb tr.more, .tv-tb tr.more td, .tv-tb tr.none, .tv-tb tr.none td { display: block; }

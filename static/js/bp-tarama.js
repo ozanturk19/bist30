@@ -292,9 +292,12 @@
   function keepInView(bar, el) {
     if (!bar || bar.scrollWidth <= bar.clientWidth) return;
     var l = el.getBoundingClientRect().left - bar.getBoundingClientRect().left + bar.scrollLeft, r = l + el.offsetWidth, pad = 32;
-    if (l < bar.scrollLeft) bar.scrollLeft = Math.max(0, l - 8);
+    if (r - l > bar.clientWidth - pad) bar.scrollLeft = l;
+    else if (l < bar.scrollLeft) bar.scrollLeft = Math.max(0, l - 8);
     else if (r > bar.scrollLeft + bar.clientWidth - pad) bar.scrollLeft = r - bar.clientWidth + pad;
   }
+  /* Yazı tipi yüklenince çip genişliği değişir; etkin çip yeniden hizalanır. */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { var a = document.querySelector('.tv-chip.on'); if (a) keepInView(a.parentElement, a); });
   function bar2(rows) {
     var f = st.f, n = nAct(f);
     [].forEach.call(document.querySelectorAll('.tv-chip'), function (a) {
