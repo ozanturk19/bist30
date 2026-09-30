@@ -1,5 +1,9 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
-{% if ssr_signal and ssr_signal.signal == 'AL' %}
+{% if kapsam_disi %}
+  {#- C-70 K16: kapsam dışı pay — dürüst başlık/açıklama, dizine girmez (sitemap'te de yok). -#}
+  {% set _st = ticker ~ ' — ' ~ name ~ ' · analiz kapsamı dışında | BorsaPusula' %}
+  {% set _sd = kapsam_disi.metin %}
+{% elif ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
@@ -12,6 +16,7 @@
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Gün sonu güncelleme.' %}
 {% endif %}
+{% if kapsam_disi %}<meta name="robots" content="noindex, follow">{% endif %}
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
 <meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} trend dönüş seviyesi, {{ ticker }} RSI ADX">
@@ -128,6 +133,29 @@
 <main id="main-content" class="container container--wide" tabindex="-1" data-hx-tab="{{ _it }}">
 
   {% include '_stale_banner.html' %}
+{% if kapsam_disi %}
+  {#- C-70 K16: kapsam dışı payda sekme, fiyat ve API çağrısı yok; tek not kartı + SSS. -#}
+  <section class="hx-top hx-oos" aria-label="{{ ticker }} kapsam notu">
+    <div class="hx-head">
+      <div class="hx-id">
+        <h1 class="hx-tk">{{ ticker }}</h1>
+        <span class="hx-nm" title="{{ name }}">{{ name }}</span>
+        <span class="hx-chip">{{ kapsam_disi.etiket }}</span>
+      </div>
+    </div>
+  </section>
+  <div class="da-panel hx-oos-note" role="note">
+    <h2 class="section-title">Neden analiz yok?</h2>
+    <p>{{ kapsam_disi.metin }}</p>
+    <p class="hx-oos-links"><a href="/tarama">Kapsamdaki hisseleri tara</a> · <a href="/">Piyasa haritası</a></p>
+  </div>
+  {% if company_summary %}
+  <div class="da-panel hx-oos-note">
+    <h2 class="section-title">{{ ticker }} ne yapan şirket?</h2>
+    <p>{{ company_summary }}</p>
+  </div>
+  {% endif %}
+{% else %}
 
   {#- C-P0-2309: hisseye özel donuk-veri uyarısı SSR'da (JS kapalıyken de görünür).
       Tarih last_fresh_ts'ten TR gününe (UTC+3) Jinja içinde çevrilir (Hinnant civil_from_days). -#}
@@ -858,6 +886,7 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
   </div>
   {% endif %}
 
+{% endif %}{# /kapsam_disi #}
   {# SPEC-017 Faz B Bonus: "Tüm BIST100 Hisseleri" yatay scroll alt bar kaldırıldı (Ozan feedback K7 — amatör, sayfa şişiriyor). #}
 
 </main>
@@ -871,10 +900,12 @@ Sınırlı veri · {{ _S.get(v.sebep, 'Temel skor için yeterli veri yok.') }}
 <script>window.BP = {{ _bp|tojson }};</script>
 
 <script src="{{ static_v('bp-search.js') }}" defer></script>
+{% if not kapsam_disi %}
 <script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 <script src="{{ static_v('js/bp-chart-common.js') }}"></script>
 <script src="{{ static_v('js/hisse.js') }}"></script>
 <script src="{{ static_v('learning-mode.js') }}" defer></script>
+{% endif %}
 
 
 <script src="{{ static_v('js/toast.js') }}" defer></script>

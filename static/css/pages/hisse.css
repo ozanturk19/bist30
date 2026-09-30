@@ -1375,3 +1375,10 @@
 [data-hx-tab="grafik"] [data-tab-content]:not([data-tab-content~="grafik"]):not([data-tab-content~="always"]),
 [data-hx-tab="temel"] [data-tab-content]:not([data-tab-content~="temel"]):not([data-tab-content~="always"]),
 [data-hx-tab="haberler"] [data-tab-content]:not([data-tab-content~="haberler"]):not([data-tab-content~="always"]) { display: none; }
+/* C-70 K16: kapsam dışı pay — tek sütun kimlik + not kartları */
+.hx-top.hx-oos{ grid-template-columns:1fr; margin-bottom:16px; }
+.hx-oos-note{ max-width:720px; margin-bottom:14px; padding:16px 18px; }
+.hx-oos .hx-chip{ display:inline-block; }
+.hx-oos-note p{ margin:0; line-height:1.6; color:var(--bp-text2); }
+.hx-oos-note .section-title{ margin:0 0 8px; }
+.hx-oos-links{ margin-top:10px !important; }
