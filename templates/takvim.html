@@ -230,7 +230,16 @@
   var FILTERS = ['all', 'bilanco', 'temettu', 'makro', 'takip'];
   function setF(f, push){
     if (FILTERS.indexOf(f) < 0 || (f === 'takip' && !W.length)) f = 'all';
-    root.querySelectorAll('.tk-flt button').forEach(function(x){ x.setAttribute('aria-pressed', String(x.dataset.f === f)); });
+    root.querySelectorAll('.tk-flt button').forEach(function(x){
+      x.setAttribute('aria-pressed', String(x.dataset.f === f));
+      /* C-70 K07: dar ekranda kayan filtre satırında basılı çip tam görünür (hisse.js C-07 deseni) */
+      var bar = x.parentElement;
+      if (x.dataset.f === f && bar.scrollWidth > bar.clientWidth) {
+        var l = x.getBoundingClientRect().left - bar.getBoundingClientRect().left + bar.scrollLeft, r = l + x.offsetWidth;
+        if (l < bar.scrollLeft) bar.scrollLeft = Math.max(0, l - 8);
+        else if (r > bar.scrollLeft + bar.clientWidth - 32) bar.scrollLeft = r - bar.clientWidth + 32;
+      }
+    });
     rows.forEach(function(r){ r.hidden = !match(r, f); });
     ag.querySelectorAll('[data-note-day]').forEach(function(n){ n.hidden = !(f === 'all' || f === 'makro'); });
     var anyVisible = false;

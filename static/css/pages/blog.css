@@ -58,7 +58,7 @@
     .bo-top { grid-template-columns:1fr; margin-bottom:24px; }
     .bo-feature { padding:20px; }
     /* Telefonda öğrenme yolu ve kategori çipleri tek satır, yatay kaydırma. */
-    .bo-path-list, .bo-chips { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; }
+    .bo-path-list, .bo-chips { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; padding-right:28px; scroll-padding-inline:0 32px; -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); }
     .bo-path-list::-webkit-scrollbar, .bo-chips::-webkit-scrollbar { display:none; }
     .bo-path-list li, .bo-chips > * { flex:none; scroll-snap-align:start; }
     .bo-path-list a { white-space:nowrap; }

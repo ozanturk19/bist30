@@ -288,12 +288,20 @@
     var hl = $('tvLegHl');
     if (hl) hl.innerHTML = any ? '<i class="k on"></i><b>' + rows.length + '</b> hisse filtreyle eşleşiyor' : 'Her çizgi bir hisse; sıralama tablodaki gibi';
   }
+  /* C-70 K07: dar ekranda çip satırı kayarsa etkin çip solma bölgesinin dışında, tam görünür kalır (hisse.js C-07 deseni). */
+  function keepInView(bar, el) {
+    if (!bar || bar.scrollWidth <= bar.clientWidth) return;
+    var l = el.getBoundingClientRect().left - bar.getBoundingClientRect().left + bar.scrollLeft, r = l + el.offsetWidth, pad = 32;
+    if (l < bar.scrollLeft) bar.scrollLeft = Math.max(0, l - 8);
+    else if (r > bar.scrollLeft + bar.clientWidth - pad) bar.scrollLeft = r - bar.clientWidth + pad;
+  }
   function bar2(rows) {
     var f = st.f, n = nAct(f);
     [].forEach.call(document.querySelectorAll('.tv-chip'), function (a) {
       var on = f.preset === a.getAttribute('data-id');
       a.classList.toggle('on', on);
       if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      if (on) keepInView(a.parentElement, a);
     });
     var fn = $('tvFn');
     fn.hidden = !n; fn.textContent = n || '';
