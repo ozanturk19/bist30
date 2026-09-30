@@ -121,7 +121,7 @@ def test_home_block_with_og_image_has_one_share_control():
     ("chg", "d1", PERMA),
     ("bp", "d1", "https://borsapusula.com/sektor-harita?renk=bp"),
     ("chg", "m1", "https://borsapusula.com/sektor-harita?donem=1a"),
-    ("tr", "y1", "https://borsapusula.com/sektor-harita?renk=trend&amp;donem=1y"),
+    ("tr", "y1", "https://borsapusula.com/sektor-harita?renk=trend"),  # C-70 K11: BP/Trend modunda dönem 1G sabit
 ])
 def test_full_page_share_link_is_view_url_when_not_default(mode, per, href):
     out = _partial(heatmap_og_image="/harita/%s.png" % DAY, hm_full=True, hm_mode=mode, hm_per=per, hm_path="/sektor-harita")
