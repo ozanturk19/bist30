@@ -1358,6 +1358,7 @@ _KAP_CACHE_TTL = 1800          # 30 dakika
 # D-45: tüm analiz evreninin KAP akışı (tek kaynak) + Gündem. Mantık modüllerde, burada ince bağlantı.
 import kap_feed  # noqa: E402
 import haber_gundem  # noqa: E402
+import haber_v2  # noqa: E402  D-56: Haberler v2 (sekmeler, /haberler/bildirimler, gunun hikayesi)
 _KAP_STORE = kap_feed.Store()
 
 
@@ -9253,12 +9254,17 @@ def _haber_stock_map():
     return {s["ticker"]: s for s in stocks if isinstance(s, dict) and s.get("ticker")}
 
 
-def _haber_mini(ticker, smap):
+def _haber_mini(ticker, smap, with_spark=False):
     s = smap.get(ticker) or {}
     code, label = _HABER_STATE.get(s.get("signal"), ("y", "Yatay"))
-    return {"t": ticker, "name": STOCK_NAMES.get(ticker, ticker), "price": s.get("price"),
-            "ch": s.get("change_pct"), "bp": s.get("borsapusula_skoru"),
-            "st": code if s else None, "stn": label if s else None}
+    m = {"t": ticker, "name": STOCK_NAMES.get(ticker, ticker), "price": s.get("price"),
+         "ch": s.get("change_pct"), "bp": s.get("borsapusula_skoru"),
+         "st": code if s else None, "stn": label if s else None}
+    if with_spark:
+        # D-56: hisse mini kartinin 30 islem gunluk cizgisi (data/charts/chart_<T>.json, mtime onbellekli)
+        m["sp"] = haber_v2.spark(haber_v2.closes_from_chart_file(
+            os.path.join(_PHASE3_CHART_DIR, "chart_%s.json" % ticker))) if re.match(r"^[A-Z0-9]{3,6}$", ticker) else None
+    return m
 
 
 def _haber_close_label():
@@ -9365,11 +9371,58 @@ def api_gundem_girdi():
     return resp
 
 
+def _gundem_haber_ctx():
+    """D-57 sözleşmesi (Gündem basın derlemesi, O27=A): /api/gundem-haber ile aynı sözlük ya da
+    None. D-57 dalı `_gundem_haber_payload()` tanımlar; tanımlı değilse/boşsa None ve Gündem
+    kural tabanlı v1 maddeleriyle çizilir. Bozuk madde haber_v2.clean_gundem_haber'de elenir."""
+    fn = globals().get("_gundem_haber_payload")
+    if not callable(fn):
+        return None
+    try:
+        return haber_v2.clean_gundem_haber(fn())
+    except Exception as e:
+        logger.warning("gundem_haber okunamadı: %s", e)
+        return None
+
+
+def _haber_v2_ctx(smap, items):
+    """D-56: Gündem sekmesi (C-72) bağlamı — günün hikâyesi (BIST100 donmuş ısı haritası, Bülten'le
+    aynı sektör özeti), şirket kartları (kural tabanlı), D-57 basın derlemesi, hisse mini kartları."""
+    hm = _heatmap_latest()
+    snap = (hm or {}).get("snap")
+    lead = None
+    if snap:
+        try:
+            lead = haber_v2.lead_story(snap, bulten.isi_haritasi_ozet(snap), _get_xu100_level().get("spark") or [])
+        except Exception as e:
+            logger.warning("haberler: günün hikâyesi kurulamadı: %s", e)
+    day = (lead or {}).get("day") or datetime.now(_TZ_TR).date().isoformat()
+    hot = [m["t"] for m in (lead or {}).get("movers") or []]
+    cards = haber_v2.company_cards(items, day, STOCK_NAMES, n=6, hot_tickers=hot) if items else []
+    gh = _gundem_haber_ctx()
+    tick = set(hot)
+    tick.update(c["ticker"] for c in cards)
+    for m in (gh or {}).get("maddeler") or []:
+        tick.update(m["hisseler"])
+    mini = {t: _haber_mini(t, smap, with_spark=True) for t in sorted(tick) if t in smap}
+    ctx = {"sekme": "gundem", "gundem_lead": lead, "gundem_sirket": cards, "gundem_haber": gh, "mini": mini}
+    ctx.update(_heatmap_ssr_context())
+    return ctx
+
+
 @app.route("/haberler")
 def haberler_page():
-    """C-57 sayfası (SSR). Şablon yoksa 404 — D-45 tek başına canlıda güvenli."""
+    """C-57/C-72 sayfası (SSR). Şablon yoksa 404 — D-45 tek başına canlıda güvenli."""
     if not _tpl_ready("haberler.html"):
         abort(404)
+    # D-56: v1 bildirim filtresi adresleri (?tur=bilanco|temettu|ozel, ?sayfa=) yeni
+    # "Şirket bildirimleri" sekmesine taşınır (şablonu yayındaysa).
+    if _tpl_ready("haberler_bildirimler.html") and (request.args.get("tur") or request.args.get("sayfa")):
+        _k, _slug = haber_v2.tur_from_arg(request.args.get("tur"))
+        _q = []
+        if _k:
+            _q.append("tur=" + (_slug or haber_v2.TYPE_SLUG[_k]))
+        return redirect("/haberler/bildirimler" + ("?" + "&".join(_q) if _q else ""), code=301)
     tur = request.args.get("tur")
     tur = tur if tur in ("bilanco", "temettu", "ozel") else None
     hisse = (request.args.get("hisse") or "").upper()
@@ -9404,12 +9457,49 @@ def haberler_page():
     # CPO-1802: son donmuş Akşam Bülteni (yoksa None; sayfa bloğu gizler)
     _bp = bulten.latest_path(_BULTEN_DIR)
     bulten_ctx = _bulten_read(_bp) if _bp else None
+    v2 = _haber_v2_ctx(smap, items) if _tpl_ready("haberler_bildirimler.html") else {}
     return render_template("haberler.html", gundem=gundem, feed_days=days, feed_page=res["page"],
                            feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
                            feed_ticker=hisse, feed_counts=counts, feed_available=bool(items),
                            feed_updated=_KAP_STORE.meta().get("updated_at"),
                            coverage=len([t for t in smap if t not in INDEX_TICKERS]),
-                           close_label=close_label, bulten=bulten_ctx)
+                           close_label=close_label, bulten=bulten_ctx, **v2)
+
+
+@app.route("/haberler/bildirimler")
+def haberler_bildirimler_page():
+    """D-56/C-72 "Şirket bildirimleri" sekmesi (SSR, dizinlenir). Son 30 takvim gününün rutin-dışı
+    bildirimleri; ?tur=<tür> (8 tür, haber_v2.TYPES), ?sayfa=N (30'luk), ?tarih=YYYY-AA-GG&rutin=1
+    (o günün rutin duyuruları dahil). Eski v1 tür adı 301 ile yeni adına. Şablon yoksa 404."""
+    if not _tpl_ready("haberler_bildirimler.html"):
+        abort(404)
+    tur_arg = request.args.get("tur")
+    tur, legacy = haber_v2.tur_from_arg(tur_arg)
+    if legacy:
+        return redirect("/haberler/bildirimler?tur=" + legacy, code=301)
+    if tur_arg and not tur:
+        return redirect("/haberler/bildirimler", code=301)
+    tarih = request.args.get("tarih")
+    tarih = tarih if tarih and re.match(r"^\d{4}-\d{2}-\d{2}$", tarih) else None
+    rutin = bool(tarih) and request.args.get("rutin") == "1"
+    page = _haber_page_int(request.args.get("sayfa"))
+    smap = _haber_stock_map()
+    items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
+    today = datetime.now(_TZ_TR).date().isoformat()
+    fd = haber_v2.feed(items, today, tur=tur, page=page, day=tarih, include_rutin=rutin, names=STOCK_NAMES)
+    tick = set()
+    for d in fd["days"]:
+        for r in d["rows"]:
+            tick.add(r["ticker"])
+    mini = {t: _haber_mini(t, smap, with_spark=True) for t in sorted(tick)}
+    resp = app.make_response(render_template(
+        "haberler_bildirimler.html", sekme="bildirimler", feed=fd, tur=tur,
+        tur_slug=haber_v2.TYPE_SLUG.get(tur) if tur else None, types=haber_v2.TYPES,
+        tarih=tarih, rutin=rutin, mini=mini, feed_available=bool(items),
+        coverage=len([t for t in smap if t not in INDEX_TICKERS]), close_label=_haber_close_label()))
+    if tarih or page > fd["pages"]:
+        resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
 
 
 @app.route("/hisse/<ticker>/bildirim/<int:idx>")
@@ -9463,8 +9553,14 @@ def _haber_print_now(now):
         close_day = now.date()
     lvl = _get_xu100_level()
     slot = "sabah" if now.hour < 12 else "aksam"
+    # D-56: Gundem ile Bulten AYNI hisse kumesi (BIST100) ve ayni sektor ozeti (donmus isi haritasi)
+    _hm = _heatmap_day(close_day.isoformat())
+    _snap = (_hm or {}).get("snap")
     doc = haber_gundem.build_print(stocks, macro, {"close": lvl.get("close"), "change_pct": lvl.get("change_pct")},
-                                   _KAP_STORE.all_items(), STOCK_NAMES, _haber_calendar(), now, close_day, slot)
+                                   _KAP_STORE.all_items(), STOCK_NAMES, _haber_calendar(), now, close_day, slot,
+                                   members=BIST100_MEMBERS or None,
+                                   sectors=bulten.isi_haritasi_ozet(_snap) if _snap else None,
+                                   counts=(_snap or {}).get("counts"))
     if doc:
         haber_gundem.save_print(doc)
     return doc
@@ -10866,6 +10962,8 @@ def sitemap():
     # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
     if _tpl_ready("haberler.html"):
         pages.append({"loc": "/haberler",           "priority": "0.8", "changefreq": "daily"})
+        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
+            pages.append({"loc": "/haberler/bildirimler", "priority": "0.7", "changefreq": "daily"})
         if _tpl_ready("bildirim.html") and _KAP_STORE.available():
             _cut = (datetime.now(_TZ_TR).date() - timedelta(days=180)).isoformat()
             for _it in _KAP_STORE.all_items():
@@ -11045,6 +11143,10 @@ def llms_txt():
         body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
                             "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
                             "/hisse/{TICKER}/bildirim/{NO}\n- [Blog]", 1)
+        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
+            body = body.replace("- [Blog]", "  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): "
+                                "şirket bildirimleri türe göre (?tur=finansal-rapor, temettu, sermaye, genel-kurul, "
+                                "ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar\n- [Blog]", 1)
         if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
             body = body.replace("- [Blog]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
                                 "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "

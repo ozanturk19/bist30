@@ -227,33 +227,48 @@ def _chip_tk(s):
     return {"k": "tk", "t": s["ticker"], "ch": round(s.get("change_pct") or 0.0, 2), "href": "/hisse/%s" % s["ticker"]}
 
 
-def _item_market(stocks, xu100, close_day):
+def _item_market(stocks, xu100, close_day, counts=None):
+    """D-56: sayim BIST100 hisseleri (Bulten ve isi haritasiyla ayni kume). counts verilirse
+    (donmus isi haritasi goruntusunun up/down/flat'i) o kullanilir; yoksa `stocks` (cagiran
+    BIST100 uyeleriyle suzer) sayilir."""
     ch = [s for s in stocks if isinstance(s.get("change_pct"), (int, float))]
-    up = sum(1 for s in ch if s["change_pct"] > 0)
-    dn = sum(1 for s in ch if s["change_pct"] < 0)
-    flat = len(ch) - up - dn
+    if counts:
+        up, dn, flat = int(counts.get("up") or 0), int(counts.get("down") or 0), int(counts.get("flat") or 0)
+    else:
+        up = sum(1 for s in ch if s["change_pct"] > 0)
+        dn = sum(1 for s in ch if s["change_pct"] < 0)
+        flat = len(ch) - up - dn
     close, chg = xu100.get("close"), xu100.get("change_pct")
     if not close or chg is None:
         return None
     verb = "yükselişle" if chg > 0 else ("düşüşle" if chg < 0 else "değişmeden")
     h = "BIST100 %s %s puanda kapandı" % ((_pct(chg, False) + " " + verb) if chg else verb, _num(close))
-    p = "%s kapanışı: BIST100 %s puan (%s). Kapsamdaki %d hisse: %d yükselen, %d düşen, %d değişmeyen." % (
-        _dm(close_day), _num(close), _pct(chg), len(ch), up, dn, flat)
+    p = "%s kapanışı: BIST100 %s puan (%s). BIST100 hisselerinden %d yükselen, %d düşen, %d değişmeyen." % (
+        _dm(close_day), _num(close), _pct(chg), up, dn, flat)
     top = sorted(ch, key=lambda s: s["change_pct"], reverse=True)
     chips = [{"k": "hm", "l": "Isı haritası", "href": "/sektor-harita"}]
     if top:
         chips.append(_chip_tk(top[0]))
         chips.append(_chip_tk(top[-1]))
-    return {"id": "bist", "h": h, "p": p, "chips": chips}
+    return {"id": "bist", "cat": "piyasa", "h": h, "p": p, "chips": chips,
+            "v": {"k": "breadth", "up": up, "down": dn, "flat": flat}}
 
 
-def _item_sectors(stocks):
-    by = {}
-    for s in stocks:
-        if s.get("sector") and isinstance(s.get("change_pct"), (int, float)):
-            by.setdefault(s["sector"], []).append(s["change_pct"])
-    avg = sorted(((sum(v) / len(v), k, len(v)) for k, v in by.items() if len(v) >= 3 and k != "Diğer"),
-                 reverse=True)
+def _item_sectors(stocks, sectors=None):
+    """D-56: `sectors` verilirse Bulten'in sektor ozeti (bulten.isi_haritasi_ozet, BIST100,
+    donmus isi haritasi) AYNEN kullanilir — 28.09'da Gundem 234 hisseden, Bulten BIST100'den
+    farkli en zayif sektor gosteriyordu. Yoksa `stocks` (BIST100 uyeleri) ortalamasi."""
+    if sectors:
+        avg = sorted(((float(x["ortalama_degisim_pct"]), x["sektor"], 0) for x in sectors
+                      if x.get("sektor") and isinstance(x.get("ortalama_degisim_pct"), (int, float))),
+                     reverse=True)
+    else:
+        by = {}
+        for s in stocks:
+            if s.get("sector") and isinstance(s.get("change_pct"), (int, float)):
+                by.setdefault(s["sector"], []).append(s["change_pct"])
+        avg = sorted(((sum(v) / len(v), k, len(v)) for k, v in by.items() if len(v) >= 3 and k != "Diğer"),
+                     reverse=True)
     if len(avg) < 2:
         return None
     hi, lo = avg[0], avg[-1]
@@ -266,11 +281,13 @@ def _item_sectors(stocks):
     else:
         h = "Sektörlerde en güçlü %s, en zayıf %s" % (hi[1], lo[1])
     parts = ["%s %s" % (k, _pct(a)) for a, k, n in avg[:2]] + ["%s %s" % (k, _pct(a)) for a, k, n in avg[-2:]]
-    p = "Hisselerin eşit ağırlıklı ortalama değişimine göre: %s." % " · ".join(dict.fromkeys(parts))
+    p = "BIST100 hisselerinin sektör içi ortalama değişimine göre: %s." % " · ".join(dict.fromkeys(parts))
     chips = [{"k": "sec", "l": hi[1], "href": "/sektor-harita?tab=compare&s=%s" % hi[1]},
              {"k": "sec", "l": lo[1], "href": "/sektor-harita?tab=compare&s=%s" % lo[1]},
              {"k": "hm", "l": "Isı haritası", "href": "/sektor-harita"}]
-    return {"id": "sektor", "h": h, "p": p, "chips": chips}
+    return {"id": "sektor", "cat": "piyasa", "h": h, "p": p, "chips": chips,
+            "v": {"k": "bars", "rows": [{"l": k, "ch": round(a, 2)} for a, k, n in
+                                        list(dict.fromkeys(avg[:2] + avg[-2:]))]}}
 
 
 def _macro(macro, label):
@@ -291,7 +308,13 @@ def _item_fx(macro):
     if gold:
         parts.append("ons altın %s $ (%s)" % (_num(gold["price"]), _pct(gold.get("change") or 0)))
         h += ", ons altın %s $" % _num(gold["price"])
-    return {"id": "kur", "h": h, "p": "; ".join(parts) + ".", "chips": []}
+    rows = [{"l": "Dolar/TL", "v": _num(usd["price"]), "ch": round(usd.get("change") or 0, 2)}]
+    if eur:
+        rows.append({"l": "Euro/TL", "v": _num(eur["price"]), "ch": round(eur.get("change") or 0, 2)})
+    if gold:
+        rows.append({"l": "Ons altın", "v": _num(gold["price"]) + " $", "ch": round(gold.get("change") or 0, 2)})
+    return {"id": "kur", "cat": "doviz", "h": h, "p": "; ".join(parts) + ".", "chips": [],
+            "v": {"k": "fx", "rows": rows}}
 
 
 def _item_states(stocks, close_day):
@@ -307,7 +330,9 @@ def _item_states(stocks, close_day):
     pick = sorted(cnt["AL"], key=lambda s: -(s.get("borsapusula_skoru") or 0))[:3] or \
         sorted(moved, key=lambda s: -(s.get("borsapusula_skoru") or 0))[:3]
     chips = [_chip_tk(s) for s in pick]
-    return {"id": "durum", "h": h, "p": p, "chips": chips}
+    rows = [{"st": st, "l": STATE[k], "n": len(cnt[k])} for k, st in (("AL", "g"), ("BEKLE", "y"), ("SAT", "b"))
+            if cnt[k]]
+    return {"id": "durum", "cat": "piyasa", "h": h, "p": p, "chips": chips, "v": {"k": "states", "rows": rows}}
 
 
 _LEAD_CLASSES = ("Finansal rapor", "Yeni iş ilişkisi", "İhale", "Pay alım teklifi", "Birleşme", "Temettü",
@@ -330,7 +355,12 @@ def _item_kap(feed_items, names, day):
     p += "."
     chips = [{"k": "tk", "t": lead["ticker"], "ch": None, "href": "/hisse/%s" % lead["ticker"]},
              {"k": "doc", "l": "Bildirim sayfası", "href": "/hisse/%s/bildirim/%d" % (lead["ticker"], lead["id"])}]
-    return {"id": "bildirim", "h": h, "p": p, "chips": chips}
+    v = {"k": "spark", "t": lead["ticker"]}
+    o = lead.get("onem") or {}
+    if isinstance(o.get("pct"), (int, float)):
+        v = {"k": "ratio", "pct": o["pct"], "big": o.get("txt") or _pct(o["pct"], False),
+             "lab": o.get("formula") or ""}
+    return {"id": "bildirim", "cat": "sirket", "h": h, "p": p, "chips": chips, "v": v}
 
 
 def _item_us(macro, now):
@@ -345,9 +375,11 @@ def _item_us(macro, now):
         return "%s %s" % (_pct(c, False), "yükseldi" if c > 0 else ("düştü" if c < 0 else "yatay"))
     h = "ABD borsaları %s: S&P 500 %s" % (when, mv(sp))
     p = "S&P 500 %s puan (%s)" % (_num(sp["price"]), _pct(sp.get("change") or 0))
+    rows = [{"l": "S&P 500", "v": _num(sp["price"]), "ch": round(sp.get("change") or 0, 2)}]
     if nq:
         p += ", Nasdaq %s puan (%s)" % (_num(nq["price"]), _pct(nq.get("change") or 0))
-    return {"id": "abd", "h": h, "p": p + ".", "chips": []}
+        rows.append({"l": "Nasdaq", "v": _num(nq["price"]), "ch": round(nq.get("change") or 0, 2)})
+    return {"id": "abd", "cat": "dunya", "h": h, "p": p + ".", "chips": [], "v": {"k": "fx", "rows": rows}}
 
 
 def _item_commod(macro, now):
@@ -360,9 +392,13 @@ def _item_commod(macro, now):
     p = "Brent varil başına %s $ (%s)" % (_num(br["price"]), _pct(c))
     if au:
         p += "; ons altın %s $ (%s)" % (_num(au["price"]), _pct(au.get("change") or 0))
+    rows = [{"l": "Brent", "v": _num(br["price"]) + " $", "ch": round(c, 2)}]
+    if au:
+        rows.append({"l": "Ons altın", "v": _num(au["price"]) + " $", "ch": round(au.get("change") or 0, 2)})
     if ag:
         p += "; gümüş %s $ (%s)" % (_num(ag["price"]), _pct(ag.get("change") or 0))
-    return {"id": "emtia", "h": h, "p": p + ".", "chips": []}
+        rows.append({"l": "Gümüş", "v": _num(ag["price"]) + " $", "ch": round(ag.get("change") or 0, 2)})
+    return {"id": "emtia", "cat": "doviz", "h": h, "p": p + ".", "chips": [], "v": {"k": "fx", "rows": rows}}
 
 
 def _item_cb(calendar, today):
@@ -391,12 +427,23 @@ def _item_cb(calendar, today):
         parts.append("Fed'in sonraki faiz kararı %s" % _dm(nxt["Fed"]))
     if "TCMB" in nxt:
         parts.append("TCMB'nin sonraki faiz kararı %s" % _dm(nxt["TCMB"]))
-    return {"id": "mb", "h": "Merkez bankası takvimi", "p": "; ".join(parts) + ".", "chips": []}
+    rows = [{"d": nxt[k].day, "m": _TR_MONTHS[nxt[k].month - 1][:3], "l": k, "s": "Faiz kararı"}
+            for k in sorted(nxt, key=lambda z: nxt[z])]
+    return {"id": "mb", "cat": "takvim", "h": "Merkez bankası takvimi", "p": "; ".join(parts) + ".", "chips": [],
+            "v": {"k": "dates", "rows": rows}}
 
 
-def build_print(stocks, macro, xu100, feed_items, names, calendar, now, close_day, edition):
-    """Gundem baskisi (tum rakamlar sitenin kendi verisinden). -> dict ya da None."""
-    tr = [x for x in (_item_market(stocks, xu100, close_day), _item_sectors(stocks), _item_fx(macro),
+def build_print(stocks, macro, xu100, feed_items, names, calendar, now, close_day, edition,
+                members=None, sectors=None, counts=None):
+    """Gundem baskisi (tum rakamlar sitenin kendi verisinden). -> dict ya da None.
+    D-56: members (BIST100 uyeleri) verilirse piyasa sayimi ve sektor ortalamasi yalniz bu
+    kumeden; sectors/counts (donmus isi haritasi; Bulten'le ayni) verilirse aynen kullanilir."""
+    if members:
+        mset = set(members)
+        bist = [s for s in stocks if s.get("ticker") in mset]
+    else:
+        bist = stocks
+    tr = [x for x in (_item_market(bist, xu100, close_day, counts), _item_sectors(bist, sectors), _item_fx(macro),
                       _item_states(stocks, close_day), _item_kap(feed_items, names, close_day.isoformat())) if x]
     world = [x for x in (_item_us(macro, now), _item_commod(macro, now), _item_cb(calendar, now.date())) if x]
     if len(tr) + len(world) < 3:
