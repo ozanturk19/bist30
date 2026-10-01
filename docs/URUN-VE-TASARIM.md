@@ -280,6 +280,7 @@ Taslak kodu bu depoya girmez: taslaklar ops deposunda durur, uygulama bu belgeye
 | O18 | 23.09 | Kapsam kademeli BIST TÜM; riskli pazarlar hariç. |
 | O21 / O16b | 23.09 | Ana sayfa başlığı "Üç soruda BIST.". Taslak değişiklikle: endeks eğrisinde hafif yön tonları; göreli zaman yok (menü "Piyasa"); seans içi BIST100/BIST30 satırı; "Ücretsiz" yazılmaz. |
 | O19 | 23.09 | Şimdilik Yahoo + KAP; lisanslı sağlayıcı teklifi ve BIST fiyat lisansı Ozan'da. |
+| O24 / O25 / O26 | 24–25.09 | Hesap: şifresiz e-posta koduyla giriş (O24=A); önce PWA, mağaza uygulaması sonra aynı API (O25=A); gizlilik metni rev. 4 olduğu gibi yayımlanır (O26=A, canlı 02.10 C-41 ile). Takip listesi/portföy hesaba bağlı (O16g=B). |
 
 ## 8. Bu belge nasıl güncellenir
 - Ozan'dan yeni bir karar gelince önce §7'ye satır eklenir, sonra ilgili bölüm düzeltilir, sonra plana (ops `MASTER-PLAN` §8) işlenir.
