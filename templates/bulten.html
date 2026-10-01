@@ -44,11 +44,13 @@
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
 <script src="{{ static_v('bp-vocab.js') }}" defer></script>
 <link rel="stylesheet" href="{{ static_v('css/pages/haberler.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/haber-sekmeler.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Haberler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
 <main class="hb bl-page" id="main-content" tabindex="-1">
-  <nav class="bl-crumb" aria-label="Konum"><a href="/haberler">Haberler</a> <span aria-hidden="true">/</span> <span>Akşam Bülteni</span></nav>
+  {%- from '_haber_ui.html' import tabs as hv_tabs %}
+  {{ hv_tabs('bulten') }}
   <article class="bl-card bl-card--page" aria-labelledby="blH">
     <p class="bl-ey">Akşam Bülteni</p>
     <h1 id="blH">{{ _lbl }} kapanışı</h1>

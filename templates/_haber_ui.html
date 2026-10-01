@@ -1,0 +1,81 @@
+{#- C-72 Haberler v2 ortak parçaları (onaylı taslak plans/mockups/haberler-v2.html, O28=A).
+    /haberler (Gündem), /haberler/bildirimler, /takvim ve /bulten aynı sekme çubuğunu taşır.
+    Görseller yalnız veriden (çizgi, oran çubuğu, ısı haritası); fotoğraf ve logo yok.
+    Mini çizgi noktaları arka uçtan (haber_v2.spark): 100×100 kutu, preserveAspectRatio=none. -#}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+
+{%- macro ico(n) -%}
+<svg class="hv-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if n == 'chart' -%}<path d="M4 19h16"/><path d="m5 15 4-4 3 3 6-7"/>
+{%- elif n == 'building' -%}<path d="M4 21V5.5L12 3v18M12 8l8 2.2V21"/><path d="M7.5 8.5h1.5M7.5 12.5h1.5M7.5 16.5h1.5M15.5 13.5h1.5M15.5 17.5h1.5"/>
+{%- elif n == 'coins' -%}<ellipse cx="9.5" cy="7" rx="5.5" ry="2.6"/><path d="M4 7v4.2c0 1.4 2.5 2.6 5.5 2.6s5.5-1.2 5.5-2.6V7"/><path d="M9.5 16.4c.9 1.2 3 2 5.5 2 3 0 5-1.2 5-2.6v-4.2c0-1.3-1.9-2.4-4.6-2.6"/>
+{%- elif n == 'globe' -%}<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.5 3.5 5.3 3.5 8.5s-1.1 6-3.5 8.5c-2.4-2.5-3.5-5.3-3.5-8.5s1.1-6 3.5-8.5z"/>
+{%- elif n == 'cal' -%}<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>
+{%- elif n == 'report' -%}<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 17.5v-3M13 17.5v-5.5M16 17.5v-2"/>
+{%- elif n == 'coin' -%}<circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.4c-.6-.8-1.6-1.3-2.8-1.3-1.6 0-2.7.9-2.7 2s1 1.6 2.7 1.9 2.8.9 2.8 2.1-1.2 2-2.8 2c-1.3 0-2.4-.5-3-1.4M12 6.4v1.7M12 15.9v1.7"/>
+{%- elif n == 'layers' -%}<path d="M12 3.5 3.5 8 12 12.5 20.5 8z"/><path d="m3.5 12.2 8.5 4.5 8.5-4.5"/><path d="m3.5 16.4 8.5 4.5 8.5-4.5"/>
+{%- elif n == 'people' -%}<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5.2 5.5-5.2s4.9 2 5.5 5.2"/><circle cx="17.2" cy="9" r="2.5"/><path d="M16 14.3c2.3.2 4 2 4.6 5"/>
+{%- elif n == 'contract' -%}<path d="M6 3h9l4 4v14H6z"/><path d="M9 9h6M9 12.5h6"/><path d="M9 17.5c1-1.3 1.8-1.3 2.4 0s1.5 1.2 2.7-.3"/>
+{%- elif n == 'shield' -%}<path d="M12 3 5 6v5.2c0 4.3 3 8.1 7 9.8 4-1.7 7-5.5 7-9.8V6z"/><path d="m9 12 2.2 2.2L15.2 10"/>
+{%- elif n == 'scales' -%}<path d="M12 4v16M8 20h8M5 7h14"/><path d="M5 7 2.6 13h4.8zM19 7l-2.4 6h4.8z"/>
+{%- elif n == 'megaphone' -%}<path d="M4 10v4h3l6 4V6L7 10z"/><path d="M16.5 9.2a4 4 0 0 1 0 5.6M19 6.7a7.5 7.5 0 0 1 0 10.6"/>
+{%- elif n == 'grid' -%}<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>
+{%- elif n == 'news' -%}<path d="M5 5h11v14H6.5A1.5 1.5 0 0 1 5 17.5z"/><path d="M16 9h3v8.5a1.5 1.5 0 0 1-3 0"/><path d="M8 9h5M8 12.5h5M8 16h3"/>
+{%- elif n == 'bank' -%}<path d="M3.5 9 12 4l8.5 5"/><path d="M5 9.5h14M6.5 10v7M10 10v7M14 10v7M17.5 10v7M4 19.5h16"/>
+{%- elif n == 'pin' -%}<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>
+{%- elif n == 'ext' -%}<path d="M14 5h5v5"/><path d="m19 5-8 8"/><path d="M17 14v5H5V7h5"/>
+{%- elif n == 'arrow' -%}<path d="M5 12h14M13 6l6 6-6 6"/>
+{%- elif n == 'chevron' -%}<path d="m6 9 6 6 6-6"/>
+{%- elif n == 'spark4' -%}<path d="M12 2.5l2.4 7.1 7.1 2.4-7.1 2.4-2.4 7.1-2.4-7.1L2.5 12l7.1-2.4z" fill="currentColor" stroke="none"/>
+{%- endif -%}
+</svg>
+{%- endmacro -%}
+
+{#- Bildirim türleri: anahtar -> simge (arka uç haber_v2.TYPES ile aynı anahtarlar) -#}
+{%- set TY_ICO = {'finansal': 'report', 'temettu': 'coin', 'sermaye': 'layers', 'yonetim': 'people', 'is': 'contract', 'kredi': 'shield', 'dava': 'scales', 'ozel': 'megaphone'} -%}
+{#- Gündem kategorileri: v1 madde 'cat' alanı ve D-57 'kategori' adı -> (sınıf, etiket, simge) -#}
+{%- set CAT = {
+  'piyasa': ('piyasa', 'Piyasa', 'chart'), 'Piyasa': ('piyasa', 'Piyasa', 'chart'),
+  'sirket': ('sirket', 'Şirketler', 'building'), 'Şirketler': ('sirket', 'Şirketler', 'building'),
+  'doviz': ('doviz', 'Döviz ve emtia', 'coins'), 'Emtia': ('doviz', 'Emtia', 'coins'),
+  'dunya': ('dunya', 'Dünya', 'globe'), 'Dünya': ('dunya', 'Dünya', 'globe'),
+  'takvim': ('takvim', 'Takvim', 'cal'), 'Merkez bankaları': ('takvim', 'Merkez bankaları', 'bank'),
+  'Türkiye': ('turkiye', 'Türkiye', 'pin')} -%}
+{%- set V1_CAT = {'bist': 'piyasa', 'sektor': 'piyasa', 'durum': 'piyasa', 'bildirim': 'sirket', 'kur': 'doviz', 'emtia': 'doviz', 'abd': 'dunya', 'mb': 'takvim'} -%}
+
+{%- macro tabs(active) -%}
+<nav class="hv-tabs" aria-label="Haberler bölümleri">
+  {%- for k, u, l, s, i in [('gundem', '/haberler', 'Gündem', 'Gündem', 'news'), ('bildirimler', '/haberler/bildirimler', 'Şirket bildirimleri', 'Bildirimler', 'megaphone'), ('takvim', '/takvim', 'Takvim', 'Takvim', 'cal'), ('bulten', '/bulten', 'Akşam Bülteni', 'Bülten', 'grid')] %}
+  <a href="{{ u }}"{% if active == k %} aria-current="page"{% endif %}>{{ ico(i) }}<span class="l">{{ l }}</span><span class="s" aria-hidden="true">{{ s }}</span></a>
+  {%- endfor %}
+</nav>
+{%- endmacro -%}
+
+{%- macro spk(sp, cls='') -%}
+{%- if sp -%}<svg class="hv-spk {{ cls }} {{ 'u' if sp.up else 'd' }}" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="{{ sp.pts }}" vector-effect="non-scaling-stroke"/></svg>{%- endif -%}
+{%- endmacro -%}
+
+{%- macro spk_big(sp, cls='') -%}
+{%- if sp -%}<span class="hv-spb {{ cls }} {{ 'u' if sp.up else 'd' }}"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="{{ sp.area }}"/><polyline points="{{ sp.pts }}" vector-effect="non-scaling-stroke"/></svg><i style="left:{{ sp.lx }}%;top:{{ sp.ly }}%" aria-hidden="true"></i></span>{%- endif -%}
+{%- endmacro -%}
+
+{%- macro ring(v) -%}{%- set c = 37.7 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="rg0" cx="8" cy="8" r="6" fill="none" stroke-width="2.2"/><circle class="rg1" cx="8" cy="8" r="6" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}" transform="rotate(-90 8 8)"/></svg>{%- endmacro -%}
+
+{#- hisse çipi: kod + 30 günlük çizgi + günlük değişim -#}
+{%- macro tk(m) -%}
+{%- if m -%}<a class="hv-tk" href="/hisse/{{ m.t }}"><b>{{ m.t }}</b>{{ spk(m.sp, 'sm') }}{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</a>{%- endif -%}
+{%- endmacro -%}
+
+{#- satırdaki hisse mini kartı -#}
+{%- macro mc(m) -%}
+{%- if m -%}<a class="hv-mc" href="/hisse/{{ m.t }}" aria-label="{{ m.t }} hisse sayfası{% if m.ch is not none %}, günlük değişim {{ pct_text(m.ch) }}{% endif %}{% if m.stn %}, {{ m.stn }}{% endif %}">
+  <span class="l1"><b>{{ m.t }}</b>{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</span>
+  {{ spk(m.sp, 'mc') }}
+  {%- if m.st %}<span class="l2"><span class="hv-st {{ m.st }}">{{ m.stn }}</span>{% if m.bp is not none %}<span class="hv-bp" title="BorsaPusula Skoru {{ m.bp }} / 100">{{ ring(m.bp) }}{{ m.bp }}</span>{% endif %}</span>{% endif %}
+</a>{%- else -%}<span class="hv-mc hv-mc--0" aria-hidden="true"></span>{%- endif -%}
+{%- endmacro -%}
+
+{#- önem oranı çubuğu (satır) -#}
+{%- macro onem_bar(o) -%}
+{%- if o and o.pct >= 0.05 -%}<div class="hv-on"><span class="hv-bar"><i style="width:{{ o.w }}%"></i></span><span>{{ o.lab }} <b>{{ o.big }}</b></span></div>{%- endif -%}
+{%- endmacro -%}
