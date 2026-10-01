@@ -371,6 +371,9 @@
   .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:var(--bp-text-sm); margin-top:4px; line-height:1.4; flex-wrap:wrap; }
   .hacim-profili .hp-row-icon { font-size:var(--bp-text-xs); flex-shrink:0; }
   .hacim-profili .hp-row-text { color:var(--bp-text2); flex-shrink:0; }
+  /* C-71 K28: RVOL ipucu 17 px yüksekti; isabet alanı ~27 px, görünüm ve satır aynı */
+  .hacim-profili .hp-row-text abbr[tabindex] { position:relative; cursor:help; }
+  .hacim-profili .hp-row-text abbr[tabindex]::after { content:''; position:absolute; inset:-5px -2px; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
   /* K-BO (21.09): Hacim Profili'nin IKI satiri da (RVOL 5g/20g + sinyal gunu
      signal_vol_ratio) YON-BAGIMSIZ buyukluklerdir — yuksek hacim cokuste de

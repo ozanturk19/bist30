@@ -138,7 +138,9 @@ header{
 .hp-nw1{white-space:nowrap}
 .hp-blk-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px;margin-bottom:14px}
 .hp-blk-h p{margin:0;color:var(--bp-text3);font-size:var(--bp-text-md)}
-.hp-blk-h a{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-base);color:var(--bp-brand);text-decoration:none}
+.hp-blk-h a{position:relative;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-base);color:var(--bp-brand);text-decoration:none}
+/* C-71 K28: "Tüm liste →" telefonda 18 px yüksekti; dokunmatikte isabet alanı ~42 px (görünüm ve düzen aynı) */
+@media (pointer:coarse){.hp-blk-h a::after{content:'';position:absolute;inset:-12px -8px}}
 .hp-blk-h a:hover{text-decoration:underline}
 .hp-blk-t{margin:0;font-weight:800;font-size:clamp(1.35rem,2.4vw,1.8rem);line-height:1.1;letter-spacing:-.025em;color:var(--bp-text)}
 .hp-empty,.hp-more{margin:10px 0 0;color:var(--bp-text3);font-size:var(--bp-text-md)}
