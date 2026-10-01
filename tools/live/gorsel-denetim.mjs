@@ -2,7 +2,9 @@
 // C-71 — Kalıcı görsel sonda (görsel denetim 27.09 RAPOR §2). Canlı sitede, ölçerek:
 //   K1  halka/gösterge metni merkezde mi (Range kutusu ↔ halka merkezi, |dx|,|dy| ≤ 1,5 px, iç yarıçap içinde)
 //   K2  kırpık ve kutu dışı metin: (a) kartın/ekranın dışına taşan metin, (b) üç noktasız kırpma,
-//       (c) line-clamp penceresinde yarım satır, (d) "…" ile gizlenen kısımda rakam/%/₺/gün
+//       (c) line-clamp penceresinde yarım satır, (d) "…" ile gizlenen kısımda (text-overflow ya da line-clamp'in
+//       tamamen gizlediği satırlar) rakam/%/₺/gün/olay türü FAIL, sayfa başı cümlesi (.da-pagehead-lede, K24) FAIL,
+//       anlamsız kesik WARN
 //   K3  üst üste binen metin kutuları (farklı öğeler, em kutusu kesişimi > 2×2 px)
 //   K4  kayan çip satırında (a) kenarda yarım kalmış çip (görünen oran 0–0,6, solma yok),
 //       (b) etkin çip tam görünmüyor, (d) sarılan çip satırında son satırda tek çip (WARN)
@@ -276,6 +278,10 @@ const PROBE = (opt) => {
 
   // ── K2 kırpık ve kutu dışı metin ──
   if (has('K2')) guard('K2', () => {
+    const MEANINGFUL = /[\d%₺]|\bgün\b|temettü|bilanço|genel kurul/i; // (d) gizli kısımda anlamlı içerik
+    // Tasarım gereği kesilen özet metinleri (sayfalar.json k2_kesik_serbest; ör. blog listesindeki makale özeti):
+    // gizli kısım bir tık ötede, veri değil → (d) bulgusu üretmez.
+    const serbest = (el) => !!opt.k2Serbest && !!el.closest(opt.k2Serbest);
     const contC = new Map();
     const visualBox = (el) => { // en yakın görsel kap: arka plan, kenarlık ya da gölge; inline değil
       if (!el || el === document.body || el === de) return null;
@@ -325,7 +331,7 @@ const PROBE = (opt) => {
             let lo = 0, hi = txt.length;
             while (lo < hi) { const m = (lo + hi) >> 1; rg.setStart(it.n, 0); rg.setEnd(it.n, m + 1); if (rg.getBoundingClientRect().right > c.r + 0.5) hi = m; else lo = m + 1; }
             const hidden = txt.slice(lo).trim();
-            if (/[\d%₺]|\bgün\b|temettü|bilanço|genel kurul/i.test(hidden)) add('K2d', 'FAIL', it.el, r, { gizli: hidden.slice(0, 40), kap: desc(clipEl) });
+            if (MEANINGFUL.test(hidden) && !serbest(it.el)) add('K2d', 'FAIL', it.el, r, { gizli: hidden.slice(0, 40), kap: desc(clipEl) });
             continue;
           }
           add('K2b', 'FAIL', it.el, r, { kenar: side, tasma: r1(side === 'r' ? r.right - c.r : side === 'l' ? c.l - r.left : side === 'b' ? r.bottom - c.b : c.t - r.top), kap: desc(clipEl) });
@@ -347,9 +353,32 @@ const PROBE = (opt) => {
         }
       }
     }
-    // (c) line-clamp penceresi: kırpılan ilk satırın padding kutusunda görünen kısmı
+    // line-clamp'li her görünür öğe: tamamen gizlenen satırlar hiçbir kenarı yarıp geçmediği için yukarıdaki
+    // döngüye düşmez (RAPOR K24: /hakkinda lede'sinin 3. satırı). Tetik, K24 kabul ölçüsü: scrollHeight > clientHeight+1.
+    const clampOf = (el) => { const s = cs(el); const v = s.webkitLineClamp && s.webkitLineClamp !== 'none' ? s.webkitLineClamp : s.lineClamp; return parseInt(v, 10) || 0; };
+    for (const el of allEls) {
+      if (!clampOf(el) || el.scrollHeight <= el.clientHeight + 1 || !visible(el)) continue;
+      const b = el.getBoundingClientRect();
+      if (b.width > 2 && b.height > 2 && !animated(el)) clampEls.add(el);
+    }
+    // y'nin altına düşen metin (karakter düzeyinde; [0, i] aralığının alt kenarı i ile monoton artar)
+    const hiddenBelow = (el, y) => {
+      let s = '';
+      const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let tn;
+      while ((tn = tw.nextNode())) {
+        const t = tn.nodeValue;
+        if (!t.trim()) continue;
+        rg.selectNodeContents(tn);
+        if (rg.getBoundingClientRect().bottom <= y) continue;
+        let lo = 0, hi = t.length;
+        while (lo < hi) { const m = (lo + hi) >> 1; rg.setStart(tn, 0); rg.setEnd(tn, m + 1); if (rg.getBoundingClientRect().bottom > y) hi = m; else lo = m + 1; }
+        s += t.slice(lo);
+      }
+      return s.replace(/\s+/g, ' ').trim();
+    };
     for (const el of clampEls) {
-      const n = parseInt(cs(el).webkitLineClamp, 10);
+      const n = clampOf(el);
       if (!n) continue;
       rg.selectNodeContents(el);
       const tops = [];
@@ -357,8 +386,17 @@ const PROBE = (opt) => {
       tops.sort((a, b) => a - b);
       if (tops.length <= n) continue;
       const b = el.getBoundingClientRect();
+      // (c) line-clamp penceresi: kırpılan ilk satırın padding kutusunda görünen kısmı
       const vis = (b.bottom - parseFloat(cs(el).borderBottomWidth)) - tops[n];
       if (vis > 0.5) add('K2c', 'FAIL', el, b, { gorunenFazlaSatir: r1(vis), satir: n });
+      // (d) "…" altında tamamen gizlenen satırlar: anlamlı içerik (rakam/%/₺/gün/olay türü) ya da sayfa başı
+      // cümlesi (K24: lede hiç kesilmez) FAIL; gizli kısmı anlamsız kesik WARN (RAPOR §2.4 K2 WARN listesi).
+      if (el.scrollHeight <= el.clientHeight + 1 || serbest(el)) continue;
+      const hidden = hiddenBelow(el, tops[n] + (parseFloat(cs(el).fontSize) || 14) * 0.5);
+      if (!hidden) continue;
+      const lede = el.matches('.da-pagehead-lede');
+      add('K2d', MEANINGFUL.test(hidden) || lede ? 'FAIL' : 'WARN', el, b,
+        { gizli: hidden.slice(0, 40), kap: 'line-clamp ' + n, ...(lede ? { kural: 'K24 sayfa başı cümlesi' } : {}) });
     }
   });
 
@@ -622,6 +660,7 @@ const INJECT = (mobile) => {
     + '<div id="__gd_inj_k2a" style="width:120px;background:#223;padding:4px;margin-top:8px"><span style="white-space:nowrap">FİNANSALLAR DEĞERLEME UZUN</span></div>'
     + '<div id="__gd_inj_k2b" style="width:120px;overflow:hidden;white-space:nowrap;margin-top:8px">Kesik metin üç noktasız uzun satır</div>'
     + '<div id="__gd_inj_k2c" style="display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;padding:6px 0;width:150px;line-height:16px;font-size:14px;margin-top:8px">Bir iki üç dört beş altı yedi sekiz dokuz on on bir on iki on üç on dört on beş on altı on yedi</div>'
+    + '<div id="__gd_inj_k2d" style="display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;width:150px;line-height:20px;font-size:14px;margin-top:8px">Genel kurul toplantısı yapılacak · 12 Kasım 2026 · temettü %18</div>'
     + '<div style="position:relative;height:24px;margin-top:8px"><span id="__gd_inj_k3" style="position:absolute;left:0;top:0">28 Ağustos</span><span style="position:absolute;left:30px;top:2px">Özel durum</span></div>'
     + '<div id="__gd_inj_k4" style="display:flex;gap:8px;overflow-x:auto;width:200px;margin-top:8px">'
     + '<span style="flex:none;width:90px;background:#333">Birinci</span><span style="flex:none;width:90px;background:#333">İkinci</span>'
@@ -633,9 +672,9 @@ const INJECT = (mobile) => {
   const main = document.querySelector('main') || document.body;
   main.insertBefore(host, main.firstChild);
   console.error('__gd_inj_k7 pozitif kontrol konsol hatası');
-  return ['K1', 'K2a', 'K2b', 'K2c', 'K3', 'K4a', 'K4b', ...(mobile ? ['K6'] : []), 'K7', 'K8', 'K9', 'K11'];
+  return ['K1', 'K2a', 'K2b', 'K2c', 'K2d', 'K3', 'K4a', 'K4b', ...(mobile ? ['K6'] : []), 'K7', 'K8', 'K9', 'K11'];
 };
-const INJ_ID = { K1: '__gd_inj_k1', K2a: '__gd_inj_k2a', K2b: '__gd_inj_k2b', K2c: '__gd_inj_k2c', K3: '__gd_inj_k3', K4a: '__gd_inj_k4', K4b: '__gd_inj_k4', K6: '__gd_inj_k6', K8: '__gd_inj_k8', K9: '__gd_inj_k9', K11: '__gd_inj_k11' };
+const INJ_ID = { K1: '__gd_inj_k1', K2a: '__gd_inj_k2a', K2b: '__gd_inj_k2b', K2c: '__gd_inj_k2c', K2d: '__gd_inj_k2d', K3: '__gd_inj_k3', K4a: '__gd_inj_k4', K4b: '__gd_inj_k4', K6: '__gd_inj_k6', K8: '__gd_inj_k8', K9: '__gd_inj_k9', K11: '__gd_inj_k11' };
 
 // ── Yapılandırma ──────────────────────────────────────────────────────────────────────────────────────────
 function loadJson(p, fallback) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { if (fallback !== undefined) return fallback; throw e; } }
@@ -750,7 +789,7 @@ async function measure(browser, o, pg, st, width, outDir, apiCache) {
     await page.evaluate(() => { try { document.getAnimations().forEach((a) => a.pause()); } catch (e) { /* yok */ } window.scrollTo(0, 0); });
     await sleep(200);
     const pr = await Promise.race([
-      page.evaluate(PROBE, { kontrol: o.kontrol.filter((k) => !(st.kontrol_haric || []).includes(k)), halkalar: o.cfg.halkalar || [], jargon: JARGON }),
+      page.evaluate(PROBE, { kontrol: o.kontrol.filter((k) => !(st.kontrol_haric || []).includes(k)), halkalar: o.cfg.halkalar || [], jargon: JARGON, k2Serbest: (o.cfg.k2_kesik_serbest || []).join(',') }),
       sleep(90000).then(() => ({ timeout: true })),
     ]);
     if (pr.timeout) { rec.olculemedi = 'ölçüm zaman aşımı'; return rec; }
@@ -773,7 +812,7 @@ async function measure(browser, o, pg, st, width, outDir, apiCache) {
     }
     if (o.inject) {
       rec.pozitif = {};
-      for (const k of expect) rec.pozitif[k] = rec.findings.some((f) => f.k === k && f.inj && (k === 'K7' || f.inj === INJ_ID[k]));
+      for (const k of expect) rec.pozitif[k] = rec.findings.some((f) => f.k === k && f.inj && (k === 'K7' || f.inj === INJ_ID[k]) && (k === 'K8' || f.sev === 'FAIL'));
     }
     // FAIL kırpıntıları (grup başına ilk örnek)
     const groups = group(rec.findings.filter((f) => !f.inj && !f.muaf && f.sev === 'FAIL' && f.rect));

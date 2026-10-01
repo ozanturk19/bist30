@@ -1,5 +1,5 @@
 {
-  "_aciklama": "C-71 gorsel-denetim.mjs sayfa × durum matrisi (RAPOR 27.09 §2.3) ve halka kaydı (§2.4 K1). yol içinde {api:<GET yolu>|<alan>} çalışma anında çözülür (items[?onem] = onem alanı dolu ilk öğe). adimlar: tikla, tikla_hepsi (seçici kalmayana dek, ≤12), ac_details, kaydir, bekle (ms). geciktir: {desen, ms} API'yi geciktirir (iskelet durumu; networkidle beklenmez). beklenen_durum: HTTP kodu (404 sayfası). ilk_ziyaret: çerez tercihi boş (bant görünür); varsayılan bp_ga_consent=denied. kontrol_haric: o durumda koşmayan kontroller (iskelet bilerek görünür).",
+  "_aciklama": "C-71 gorsel-denetim.mjs sayfa × durum matrisi (RAPOR 27.09 §2.3) ve halka kaydı (§2.4 K1). yol içinde {api:<GET yolu>|<alan>} çalışma anında çözülür (items[?onem] = onem alanı dolu ilk öğe). adimlar: tikla, tikla_hepsi (seçici kalmayana dek, ≤12), ac_details, kaydir, bekle (ms). geciktir: {desen, ms} API'yi geciktirir (iskelet durumu; networkidle beklenmez). beklenen_durum: HTTP kodu (404 sayfası). ilk_ziyaret: çerez tercihi boş (bant görünür); varsayılan bp_ga_consent=denied. kontrol_haric: o durumda koşmayan kontroller (iskelet bilerek görünür). k2_kesik_serbest: tasarım gereği \"…\" ile kesilen özet metinleri (gizli kısım bir tık ötede, veri değil) — K2d bulgusu üretmez; veri/olay taşıyan metin buraya eklenmez.",
   "halkalar": [
     { "secici": ".da-ring", "metin": ".da-ring-num" },
     { "secici": ".hx-ring", "metin": "b" },
@@ -7,6 +7,7 @@
     { "secici": ".hb-rg", "metin": "b" }
   ],
   "k6_muaf": [".hm-t"],
+  "k2_kesik_serbest": [".bo-row-desc"],
   "sayfalar": [
     { "ad": "anasayfa", "yol": "/", "durumlar": [
       { "ad": "varsayilan" },

@@ -23,6 +23,13 @@
    "son_tarih": "2026-10-15"
   },
   {
+   "kontrol": "K2d",
+   "sayfa": "*",
+   "secici": "p.da-pagehead-lede",
+   "gerekce": "RAPOR 27.09 K24 (P1) sayfa başı cümlesi line-clamp:2 ile '…' altında (/hakkinda, 404 × 390/320; /metodoloji 320) — açık, C-70 K24 (data-art.css:558 clamp kalkınca bu kayıt silinir)",
+   "son_tarih": "2026-10-15"
+  },
+  {
    "kontrol": "K6",
    "sayfa": "^ozet:",
    "secici": "span.sc-ret",
