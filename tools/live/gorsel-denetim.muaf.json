@@ -1,4 +1,96 @@
 {
-  "_aciklama": "C-71 gorsel-denetim muafiyetleri (ratchet). Her kayit: kontrol (K1..K11, onek eslesir: K2 -> K2a/K2b), sayfa (sayfa:durum regex ya da *), secici (bulgu seci alt dizesi), metin (istege bagli alt dize), azami (istege bagli: esleşen sayi bunu asarsa FAIL), gerekce, son_tarih (YYYY-MM-DD; gecince uygulanmaz). Yeni kayit yalniz acik bir RAPOR/plan maddesine baglanarak eklenir.",
-  "muaf": []
+ "_aciklama": "C-71 gorsel-denetim muafiyetleri (ratchet). Her kayit: kontrol (K1..K11; onek eslesir: K2 -> K2a/K2b), sayfa (sayfa:durum regex ya da *), secici (bulgu secicisinin alt dizesi), metin (istege bagli alt dize), azami (istege bagli: eslesen sayi bunu asarsa FAIL), gerekce (acik RAPOR/plan maddesi), son_tarih (YYYY-MM-DD; gecince uygulanmaz, bulgu yeniden FAIL olur). Ilk liste 01.10 canli tam matris kosusundan (C-71 dalinda duzeltilenler HARIC: K25 serit/cip, K28 hp-blk-h/bp-lm-btn/RVOL/hm-sr-g).",
+ "muaf": [
+  {
+   "kontrol": "K2",
+   "sayfa": "^metodoloji:",
+   "secici": "span.tldr-formula",
+   "gerekce": "RAPOR 27.09 K23 (P1) TL;DR formülü 320'de kutuyu 9,7 px aşıyor — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K2d",
+   "sayfa": "^takvim:",
+   "secici": "span.tk-ev-s",
+   "gerekce": "RAPOR 27.09 K18 (P1) takvim satırı olay saati/türü '…' altında — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K2d",
+   "sayfa": "^takvim:",
+   "secici": "span.cd",
+   "gerekce": "RAPOR 27.09 K18 (P1) temettü geri sayımı kesik ('· 3…') — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^ozet:",
+   "secici": "span.sc-ret",
+   "gerekce": "RAPOR 27.09 K28 (P2) /ozet getiri ipucu 20 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^karsilastir:",
+   "secici": "span.help-icon",
+   "gerekce": "RAPOR 27.09 K28 (P2) /karsilastir .help-icon 16 px — açık (K21 yeniden tasarımıyla)",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^karsilastir:",
+   "secici": "a.col-kap",
+   "gerekce": "RAPOR 27.09 K28 (P2) /karsilastir .col-kap 18 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^gundem:",
+   "secici": "div > a",
+   "gerekce": "RAPOR 27.09 K28 (P2) /gundem kart hisse kodu bağlantısı 18 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^gundem:",
+   "secici": "a.section-sub",
+   "gerekce": "RAPOR 27.09 K28 (P2) /gundem 'Tümü →' 14 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^gundem:",
+   "secici": "a.da-tap",
+   "gerekce": "RAPOR 27.09 K28 (P2) /gundem 'Bildirimler →' 16 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^bildirim:",
+   "secici": "li > a",
+   "gerekce": "RAPOR 27.09 K28 (P2) bildirim sayfası kırıntı bağlantıları 16 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^bildirim:",
+   "secici": "a.hb-all",
+   "gerekce": "RAPOR 27.09 K28 (P2) 'Tüm <T> bildirimleri →' 18 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^haberler:",
+   "secici": "a.bl-hm",
+   "gerekce": "RAPOR 27.09 K28 (P2) /haberler 'Isı haritası →' 18 px — açık",
+   "son_tarih": "2026-10-15"
+  },
+  {
+   "kontrol": "K6",
+   "sayfa": "^hisse-kapsam-disi:",
+   "secici": "p.hx-oos-links > a",
+   "gerekce": "RAPOR 27.09 K28 (P2) kapsam dışı not kartı bağlantıları 19 px — açık",
+   "son_tarih": "2026-10-15"
+  }
+ ]
 }

@@ -306,6 +306,12 @@ const PROBE = (opt) => {
         let clipped = false;
         for (const [side, hit, clipEl, ax] of edges) {
           if (!hit || !clipEl || scrolls(clipEl, ax)) continue;
+          // Arada gerçekten kayan bir kap varsa içerik erişilebilir (yarım çip K4'ün işi).
+          let reach = false;
+          for (let p = it.el; p && p !== clipEl; p = p.parentElement) {
+            if (scrolls(p, ax) && (ax === 'x' ? p.scrollWidth > p.clientWidth + 1 : p.scrollHeight > p.clientHeight + 1)) { reach = true; break; }
+          }
+          if (reach) { clipped = true; continue; }
           const cb = clipEl.getBoundingClientRect();
           if (cb.width <= 2 || cb.height <= 2) continue; // sr-only kutusu
           clipped = true;
@@ -418,6 +424,18 @@ const PROBE = (opt) => {
       }
       return false;
     };
+    // Kenarda yarıp geçen metin var mı (ör. "3 Bila", "St"); hücre sınırından temiz kesilen grup (takvim haftası) yarım parça değildir.
+    const rgc = document.createRange();
+    const cutText = (k, L, R) => {
+      const tw = document.createTreeWalker(k, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = tw.nextNode())) {
+        if (!n.nodeValue.trim()) continue;
+        rgc.selectNodeContents(n);
+        for (const r of rgc.getClientRects()) if ((r.left < L - 1 && r.right > L + 1) || (r.left < R - 1 && r.right > R + 1)) return true;
+      }
+      return false;
+    };
     for (const el of allEls) {
       const s = cs(el);
       if (/auto|scroll/.test(s.overflowX) && el.scrollWidth > el.clientWidth + 1 && el.clientHeight < 140 && visible(el)) {
@@ -431,9 +449,14 @@ const PROBE = (opt) => {
           const kb = k.getBoundingClientRect();
           if (kb.width < 4) continue;
           const frac = Math.max(0, Math.min(kb.right, R) - Math.max(kb.left, L)) / kb.width;
-          const active = k.matches(ACT) || !!k.querySelector(ACT);
-          if (active && frac < 0.98) add('K4b', 'FAIL', k, kb, { gorunen: Math.round(frac * 100) + '%', kap: desc(el) });
-          else if (frac > 0 && frac < 0.6 && !fade) add('K4a', 'FAIL', k, kb, { gorunen: Math.round(frac * 100) + '%', kap: desc(el) });
+          const act = k.matches(ACT) ? k : k.querySelector(ACT);
+          let afrac = 1, ab = null;
+          if (act && visible(act)) {
+            ab = act.getBoundingClientRect();
+            if (ab.width >= 4) afrac = Math.max(0, Math.min(ab.right, R) - Math.max(ab.left, L)) / ab.width;
+          }
+          if (act && afrac < 0.98) add('K4b', 'FAIL', act, ab, { gorunen: Math.round(afrac * 100) + '%', kap: desc(el) });
+          else if (frac > 0 && frac < 0.6 && !fade && cutText(k, L, R)) add('K4a', 'FAIL', k, kb, { gorunen: Math.round(frac * 100) + '%', kap: desc(el) });
         }
       } else if (s.display.includes('flex') && s.flexWrap === 'wrap' && el.children.length >= 3 && visible(el)) {
         const kids = [...el.children].filter((k) => visible(k) && k.getBoundingClientRect().height < 60 && cs(k).position !== 'absolute');
@@ -553,7 +576,8 @@ const TAP = async (opt) => {
     window.scrollTo(0, y);
     await raf();
     for (const el of cands) {
-      if (res.has(el)) continue;
+      const prev = res.get(el);
+      if (prev && Math.min(prev.w, prev.h) >= 40) continue; // en iyi konum yeterli; yoksa her kaydırma konumunda yeniden ölç
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       if (cy < 1 || cy >= innerHeight - 1 || cx < 1 || cx >= innerWidth - 1) continue;
@@ -568,6 +592,7 @@ const TAP = async (opt) => {
         return i - 1;
       };
       const w = walk(-1, 0) + walk(1, 0) + 1, h = walk(0, -1) + walk(0, 1) + 1;
+      if (prev && Math.min(prev.w, prev.h) >= Math.min(w, h)) continue;
       res.set(el, { w, h, rect: { x: Math.round(r.left), y: Math.round(r.top + scrollY), vy: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) } });
     }
     if (y + innerHeight >= H) break;
@@ -663,7 +688,12 @@ async function measure(browser, o, pg, st, width, outDir, apiCache) {
     if (!st.ilk_ziyaret) await ctx.addInitScript(() => { try { localStorage.setItem('bp_ga_consent', 'denied'); } catch (e) { /* yok */ } });
     const page = await ctx.newPage();
     const origin = new URL(o.base).origin;
-    page.on('console', (m) => { if (m.type() === 'error') rec.k7.push({ tur: 'console', metin: m.text().slice(0, 200) }); });
+    page.on('console', (m) => {
+      if (m.type() !== 'error') return;
+      // Beklenen hata belgesinin (404 sayfası) kendi "Failed to load resource" satırı bulgu değildir.
+      if (st.beklenen_durum && /^Failed to load resource/.test(m.text()) && (m.location() || {}).url === rec.url) return;
+      rec.k7.push({ tur: 'console', metin: (m.text() + ' @' + ((m.location() || {}).url || '').replace(o.base, '')).slice(0, 220) });
+    });
     page.on('pageerror', (e) => rec.k7.push({ tur: 'pageerror', metin: String(e).slice(0, 200) }));
     page.on('response', (r) => {
       const u = r.url();
@@ -680,7 +710,7 @@ async function measure(browser, o, pg, st, width, outDir, apiCache) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try { const r = await page.goto(rec.url, { waitUntil: 'load', timeout: 45000 }); rec.status = r ? r.status() : null; }
       catch (e) { rec.status = 'ERR ' + String(e.message || e).slice(0, 80); }
-      if (rec.status === 429) { rec.k7 = []; await sleep(20000 * (attempt + 1)); continue; }
+      if (rec.status === 429 || rec.status === 502 || rec.status === 503 || rec.status === 504) { rec.k7 = []; rec.notlar.push('HTTP ' + rec.status + ', yeniden deneme'); await sleep(15000 * (attempt + 1)); continue; }
       break;
     }
     const okStatus = st.beklenen_durum || 200;
