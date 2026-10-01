@@ -337,3 +337,68 @@ def test_gundem_kap_item_has_no_internal_rule_wording():
     n = sum(1 for x in items if x["ts"][:10] == "2026-10-01" and not x.get("rutin"))
     assert kap["p"].startswith("1 Ekim tarihinde %d şirket bildirimi. " % n)
     assert not re.search(r"kapsam|rutin|hariç|elendi|gizli", json.dumps(doc, ensure_ascii=False), re.I)
+
+
+# ----------------------------------------------------------------------------- inceleme P1-6 (taslak gorselleri)
+
+def _kredi_docs():
+    with open(os.path.join(FX, "kredi_docs.json"), encoding="utf-8") as f:
+        return {int(k): v for k, v in json.load(f).items()}
+
+
+def test_rating_view_from_filing_text():
+    """Kredi notu basamaklari bildirimin kendi metninden (kod; 28.09-01.10 canli KAP metinleri)."""
+    docs = _kredi_docs()
+    z = hv.rating_view(docs[1669189]["text"])            # ZOREN Fitch B- revize + RWN
+    assert z["agency"] == "Fitch" and z["at"] == "B−" and z["scale"][z["at_i"]] == "B−" and len(z["scale"]) == 7
+    assert z["tag"] == "Negatif izleme" and z["tag_dir"] == "down" and z["changed"] is True
+    assert z["dir"] is None and z["prev"] is None        # yon metinde yok -> yazilmaz
+    v = hv.rating_view(docs[1671026]["text"])            # VESTL Moody's Caa3 -> Ca
+    assert v["agency"] == "Moody's" and (v["prev"], v["at"], v["dir"]) == ("Caa3", "Ca", "down")
+    assert v["scale"][v["prev_i"]] == "Caa3" and v["tag"] == "Görünüm negatif" and v["changed"] is True
+    g = hv.rating_view(docs[1670455]["text"])            # GARAN JCR AAA (tr) teyit
+    assert g["at"] == "AAA (tr)" and g["national"] and g["at_i"] == 0 and g["changed"] is False
+    assert g["lab"] == "JCR · ulusal not basamakları" and g["tag"] == "Görünüm stabil"
+    assert hv.rating_view(docs[1670442]["text"]) is None  # not yalniz ekte (PDF)
+    assert hv.rating_view("") is None and hv.rating_view("Fitch notu hakkında") is None
+
+
+def test_company_cards_kredi_rating_and_hot_rule():
+    docs = _kredi_docs()
+    items = [_it("Kredi Derecelendirmesi", "Fitch Ratings Kredi Derecelendirme Notu", id=1669189, ticker="ZOREN",
+                 tickers=["ZOREN"], ts="2026-09-28T19:32:16"),
+             _it("Kredi Derecelendirmesi", "JCR Kredi Derecelendirme Notu Hakkında", id=1670455, ticker="GARAN",
+                 tickers=["GARAN"], ts="2026-09-28T18:23:30")]
+    cards = hv.company_cards(items, "2026-09-28", {}, n=6, doc_fn=lambda i: docs.get(i))
+    by = {c["ticker"]: c for c in cards}
+    assert by["ZOREN"]["rating"]["at"] == "B−" and by["ZOREN"]["hot"] is True     # degisiklik -> Öne çıkan
+    assert by["GARAN"]["rating"]["at"] == "AAA (tr)" and by["GARAN"]["hot"] is False  # teyit
+    # metin okunamazsa kart yine cikar (cizgiyle)
+    cards2 = hv.company_cards(items, "2026-09-28", {}, n=6, doc_fn=lambda i: 1 / 0)
+    assert all(c["rating"] is None and c["hot"] is False for c in cards2)
+
+
+def test_onem_two_bar_view_when_ratio_exceeds_scale():
+    o = {"pct": 290.4, "approx": False, "basis": "Sözleşme tutarı / 2025 hasılatı", "amount_txt": "1.000.000.000 ₺",
+         "amount_try": 1.0e9, "rev_year": 2025, "rev": 344.4e6, "fx": None}
+    v = hv.onem_view(o)
+    assert v["vis"] == "bars" and [b["l"] for b in v["bars"]] == ["Sözleşme tutarı", "2025 hasılatı"]
+    assert v["bars"][0]["w"] == 100.0 and v["bars"][1]["w"] == 34.4 and v["bars"][1]["t"] == "344,4 Mn ₺"
+    assert hv.onem_view(dict(o, pct=16.1, amount_try=137.7e6, rev=855.1e6))["vis"] == "ratio"
+
+
+def test_gundem_states_flow_from_bulten_transitions():
+    trans = [{"ticker": "THYAO", "onceki": "Güçlü Trend", "yeni": "Trend Bozuldu"},
+             {"ticker": "TSKB", "onceki": "Güçlü Trend", "yeni": "Trend Bozuldu"},
+             {"ticker": "AHGAZ", "onceki": "Güçlü Trend", "yeni": "Yatay"},
+             {"ticker": "ASELS", "onceki": "Yatay", "yeni": "Güçlü Trend"},
+             {"ticker": "X", "onceki": "Yatay", "yeni": "Yatay"}]
+    stocks = [{"ticker": "ASELS", "change_pct": 3.1, "borsapusula_skoru": 70}]
+    it = hg._item_states(stocks, date(2026, 9, 28), trans)
+    assert it["v"]["k"] == "flow" and it["h"] == "28 Eylül kapanışında 4 hissenin trend durumu değişti"
+    assert it["v"]["rows"][0] == {"a": "Güçlü Trend", "as": "g", "b": "Trend Bozuldu", "bs": "b", "n": 2}
+    assert sum(r["n"] for r in it["v"]["rows"]) == 4 and it["chips"][0]["t"] == "ASELS"
+    assert "Güçlü Trend'e geçen: 1 · Yatay'a dönen: 1 · Trend Bozuldu'ya geçen: 2." == it["p"]
+    assert not FORBIDDEN.search(it["h"] + it["p"])
+    # degisim yoksa eski (sinyal tarihli) madde
+    assert hg._item_states([], date(2026, 9, 28), []) is None

@@ -276,6 +276,15 @@ def onem_view(onem):
         calc = big_try(onem["amount_try"])
     if onem.get("rev"):
         calc += " ÷ %s (%s hasılatı)" % (big_try(onem["rev"]), year)
+    # iki cubuklu karsilastirma (tutar ve dayanak): oran %0-%50 olcegini asinca (>= %50) oran cubugu
+    # dolu kalir; o zaman iki tutar yan yana cizilir (taslak 'bars').
+    bars = None
+    a_try, rev = onem.get("amount_try"), onem.get("rev")
+    if isinstance(a_try, (int, float)) and isinstance(rev, (int, float)) and a_try > 0 and rev > 0:
+        mx = float(max(a_try, rev))
+        bars = [{"l": basis, "t": big_try(a_try), "w": round(max(1.5, a_try / mx * 100.0), 1)},
+                {"l": "%s hasılatı" % year if year else "Hasılat", "t": big_try(rev),
+                 "w": round(max(1.5, rev / mx * 100.0), 1)}]
     return {
         "pct": round(pct, 2),
         "big": big,
@@ -285,6 +294,8 @@ def onem_view(onem):
         "lab": "%s, %s hasılatına oranı" % (basis, year) if year else basis,
         "calc": calc,
         "amount": amount,
+        "bars": bars,
+        "vis": "bars" if bars and pct >= 50.0 else "ratio",
     }
 
 
@@ -532,14 +543,103 @@ def lead_story(snap, sectors, xu_closes):
     }
 
 
+# ----------------------------------------------------------------------------- kredi notu basamaklari
+
+_SCALE_SP = ("AAA", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BBB-", "BB+", "BB", "BB-", "B+", "B",
+             "B-", "CCC+", "CCC", "CCC-", "CC", "C", "RD", "D")
+_SCALE_MOODYS = ("Aaa", "Aa1", "Aa2", "Aa3", "A1", "A2", "A3", "Baa1", "Baa2", "Baa3", "Ba1", "Ba2", "Ba3", "B1",
+                 "B2", "B3", "Caa1", "Caa2", "Caa3", "Ca", "C")
+_AGENCIES = (("Fitch", re.compile(r"\bFitch\b", re.I), _SCALE_SP),
+             ("Moody's", re.compile(r"\bMoody", re.I), _SCALE_MOODYS),
+             ("S&P", re.compile(r"\bS&P\b|Standard\s*(?:&|and)\s*Poor", re.I), _SCALE_SP),
+             ("JCR", re.compile(r"\bJCR\b", re.I), _SCALE_SP))
+_Q = "[\"'‘’“”`´]"
+_RTOK = re.compile(_Q + r"{1,2}\s*([A-Za-z]{1,4}[0-9]?\s*[+\-−–]?)\s*(\((?:tr|TR|Trk)\))?\s*" + _Q + r"{1,2}")
+_RMOVE = re.compile(_Q + r"{1,2}\s*([A-Za-z]{1,4}[0-9]?[+\-−–]?)\s*(?:\((?:tr|TR)\))?\s*" + _Q +
+                    r"{1,2}\s*'?(?:t|d)[ae]n\s+" + _Q + r"{1,2}\s*([A-Za-z]{1,4}[0-9]?[+\-−–]?)\s*(?:\((?:tr|TR)\))?\s*" +
+                    _Q + r"{1,2}")
+# KAP derecelendirme metinlerindeki edilgen kaliplar ("revize edilmiştir", "düşürülmüştür",
+# "izlemeye alınmıştır"); "teyit" degisiklik degildir. Yon yalniz acik fiilden (izleme etiketi yon soylemez).
+_RCHANGE = re.compile(r"revize ed|düşürül|indiril|yükseltil|izlemeye alın|izleme listesine alın|Rating Watch", re.I)
+_RDOWN = re.compile(r"düşürül|indiril", re.I)
+_RUP = re.compile(r"yükseltil", re.I)
+_OUTLOOK = {"negatif": "negatif", "pozitif": "pozitif", "stabil": "stabil", "durağan": "durağan",
+            "gelişen": "gelişen", "negative": "negatif", "positive": "pozitif", "stable": "stabil"}
+
+
+def _rnorm(tok):
+    return re.sub(r"\s+", "", tok or "").replace("−", "-").replace("–", "-")
+
+
+def rating_view(text):
+    """KAP kredi derecelendirme bildirimi metni -> not basamaklari gorunumu ya da None.
+    Yalniz bildirimin kendi metninden (kod; AI yok): kurulus (Fitch/Moody's/S&P/JCR), kurulusun
+    olcegindeki ilk tirnakli not, 'X'ten Y'ye' gecisi, izleme/gorunum etiketi, degisiklik var mi.
+    -> {agency, lab, scale[7], at, prev, dir, tag, tag_dir, changed, national}"""
+    t = re.sub(r"\s+", " ", text or "")
+    if not t:
+        return None
+    ag = next(((name, scale) for name, rx, scale in _AGENCIES if rx.search(t)), None)
+    if not ag:
+        return None
+    name, scale = ag
+    prev = at = None
+    national = False
+    mv = _RMOVE.search(t)
+    if mv and _rnorm(mv.group(1)) in scale and _rnorm(mv.group(2)) in scale:
+        prev, at = _rnorm(mv.group(1)), _rnorm(mv.group(2))
+        national = "(tr" in mv.group(0).lower()
+    else:
+        for m in _RTOK.finditer(t):
+            tok = _rnorm(m.group(1))
+            if tok in scale:
+                at, national = tok, bool(m.group(2))
+                break
+    if not at:
+        return None
+    i = scale.index(at)
+    lo = max(0, min(i - 3, len(scale) - 7))
+    win = list(scale[lo:lo + 7])
+    d = None
+    if prev and prev != at:
+        d = "down" if scale.index(prev) < i else "up"
+    tag, tag_dir = None, None
+    if re.search(r"Rating Watch Negative|\bRWN\b|negatif izleme", t, re.I):
+        tag, tag_dir = "Negatif izleme", "down"
+    elif re.search(r"Rating Watch Positive|\bRWP\b|pozitif izleme", t, re.I):
+        tag, tag_dir = "Pozitif izleme", "up"
+    else:
+        om = re.search(r"[Gg]örünüm\w*[^.]{0,80}?" + _Q + r"?\s*(Negatif|Pozitif|Stabil|Durağan|Gelişen|Negative|"
+                       r"Positive|Stable)\b", t, re.I)
+        if om:
+            w = _OUTLOOK.get(_lower_tr(om.group(1)), _lower_tr(om.group(1)))
+            tag = "Görünüm " + w
+            tag_dir = "down" if w == "negatif" else ("up" if w == "pozitif" else None)
+    changed = bool(d) or bool(_RCHANGE.search(t))
+    if d is None and changed:
+        d = "down" if _RDOWN.search(t) and not _RUP.search(t) else ("up" if _RUP.search(t) and not _RDOWN.search(t)
+                                                                   else None)
+    disp = lambda x: x.replace("-", "−")  # noqa: E731
+    pv = prev if prev and prev != at else None
+    return {"agency": name,
+            "lab": "%s · %snot basamakları" % (name, "ulusal " if national else ""),
+            "scale": [disp(x) for x in win], "at_i": win.index(at),
+            "prev_i": win.index(pv) if pv in win else None,
+            "at": disp(at) + (" (tr)" if national else ""), "prev": disp(pv) + (" (tr)" if national else "") if pv else None,
+            "dir": d, "tag": tag, "tag_dir": tag_dir, "changed": changed, "national": national}
+
+
 # ----------------------------------------------------------------------------- gundem sirket kartlari
 
 _CARD_TYPES = ("is", "sermaye", "kredi", "temettu", "finansal", "dava")
 
 
-def company_cards(items, day_iso, names=None, n=6, hot_tickers=()):
+def company_cards(items, day_iso, names=None, n=6, hot_tickers=(), doc_fn=None):
     """Gunun (day_iso ve oncesindeki son islem gununun) rutin-disi bildirimlerinden kartlar.
-    Sira: onem orani azalan, sonra haber niteligindeki turler, sonra en yeni. Ayni hisse bir kez."""
+    Sira: onem orani azalan, sonra haber niteligindeki turler, sonra en yeni. Ayni hisse bir kez.
+    doc_fn(id) -> bildirim metni sozlugu (kap_feed.Store.doc): kredi notu kartinda not basamaklari.
+    'Öne çıkan' (taslak kurali): onem orani %5 ve ustu, kredi notu ya da gorunum degisikligi,
+    sitedeki en cok yukselen/dusen hissenin bildirimi."""
     names = names or {}
     days = sorted(set(it["ts"][:10] for it in items if it["ts"][:10] <= day_iso and is_listed(it)),
                   reverse=True)[:2]
@@ -561,7 +661,14 @@ def company_cards(items, day_iso, names=None, n=6, hot_tickers=()):
             continue
         seen.add(it["ticker"])
         r = row_view(it, names)
-        r["hot"] = bool((r["onem"] and r["onem"]["pct"] >= 5.0) or it["ticker"] in set(hot_tickers or ()))
+        r["rating"] = None
+        if k == "kredi" and doc_fn:
+            try:
+                r["rating"] = rating_view((doc_fn(it["id"]) or {}).get("text"))
+            except Exception:  # noqa: BLE001 — metin okunamazsa kart 30 gunluk cizgiyle
+                r["rating"] = None
+        r["hot"] = bool((r["onem"] and r["onem"]["pct"] >= 5.0) or it["ticker"] in set(hot_tickers or ())
+                        or (r["rating"] and r["rating"]["changed"]))
         r["time_label"] = "%s · %s" % (day_label(r["day"]), r["time"])
         out.append(r)
         if len(out) >= n:

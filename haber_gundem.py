@@ -317,7 +317,39 @@ def _item_fx(macro):
             "v": {"k": "fx", "rows": rows}}
 
 
-def _item_states(stocks, close_day):
+_STATE_CODE = {"Güçlü Trend": "g", "Yatay": "y", "Trend Bozuldu": "b"}
+
+
+def _item_flow(stocks, close_day, transitions):
+    """D-56/C-72: Bulten'in durum degisimleri ({ticker, onceki, yeni}; resmi kapanis sinyali, onceki
+    gune gore) -> 'önceki → yeni' akis gorseli. Sayim Bulten'le ayni."""
+    moved = [t for t in transitions or [] if isinstance(t, dict) and t.get("ticker")
+             and t.get("onceki") in _STATE_CODE and t.get("yeni") in _STATE_CODE and t["onceki"] != t["yeni"]]
+    if not moved:
+        return None
+    by_new = {lbl: [t for t in moved if t["yeni"] == lbl] for lbl in ("Güçlü Trend", "Yatay", "Trend Bozuldu")}
+    h = "%s kapanışında %d hissenin trend durumu değişti" % (_dm(close_day), len(moved))
+    bits = ["Güçlü Trend'e geçen: %d" % len(by_new["Güçlü Trend"]), "Yatay'a dönen: %d" % len(by_new["Yatay"]),
+            "Trend Bozuldu'ya geçen: %d" % len(by_new["Trend Bozuldu"])]
+    p = "%s." % " · ".join(bits)
+    smap = {s.get("ticker"): s for s in stocks or []}
+    bp = lambda t: -(smap.get(t["ticker"], {}).get("borsapusula_skoru") or 0)  # noqa: E731
+    pick = sorted(by_new["Güçlü Trend"], key=bp)[:3] or sorted(moved, key=bp)[:3]
+    chips = [_chip_tk(smap.get(t["ticker"]) or {"ticker": t["ticker"]}) for t in pick]
+    groups = {}
+    for t in moved:
+        groups.setdefault((t["onceki"], t["yeni"]), []).append(t["ticker"])
+    order = list(_STATE_CODE)
+    rows = [{"a": a, "as": _STATE_CODE[a], "b": b, "bs": _STATE_CODE[b], "n": len(v)}
+            for (a, b), v in sorted(groups.items(), key=lambda kv: (-len(kv[1]), order.index(kv[0][1])))][:4]
+    return {"id": "durum", "cat": "piyasa", "h": h, "p": p, "chips": chips, "v": {"k": "flow", "rows": rows}}
+
+
+def _item_states(stocks, close_day, transitions=None):
+    if transitions:
+        flow = _item_flow(stocks, close_day, transitions)
+        if flow:
+            return flow
     tag = close_day.strftime("%d.%m.%Y")
     moved = [s for s in stocks if s.get("signal_date") == tag and s.get("signal") in STATE]
     if not moved:
@@ -435,17 +467,18 @@ def _item_cb(calendar, today):
 
 
 def build_print(stocks, macro, xu100, feed_items, names, calendar, now, close_day, edition,
-                members=None, sectors=None, counts=None):
+                members=None, sectors=None, counts=None, transitions=None):
     """Gundem baskisi (tum rakamlar sitenin kendi verisinden). -> dict ya da None.
     D-56: members (BIST100 uyeleri) verilirse piyasa sayimi ve sektor ortalamasi yalniz bu
-    kumeden; sectors/counts (donmus isi haritasi; Bulten'le ayni) verilirse aynen kullanilir."""
+    kumeden; sectors/counts (donmus isi haritasi; Bulten'le ayni) verilirse aynen kullanilir.
+    transitions (Bulten durum_degisimleri) verilirse durum maddesi 'önceki → yeni' akisiyla."""
     if members:
         mset = set(members)
         bist = [s for s in stocks if s.get("ticker") in mset]
     else:
         bist = stocks
     tr = [x for x in (_item_market(bist, xu100, close_day, counts), _item_sectors(bist, sectors), _item_fx(macro),
-                      _item_states(stocks, close_day), _item_kap(feed_items, names, close_day.isoformat())) if x]
+                      _item_states(stocks, close_day, transitions), _item_kap(feed_items, names, close_day.isoformat())) if x]
     world = [x for x in (_item_us(macro, now), _item_commod(macro, now), _item_cb(calendar, now.date())) if x]
     if len(tr) + len(world) < 3:
         return None

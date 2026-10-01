@@ -9393,7 +9393,8 @@ def _haber_v2_ctx(smap, items):
             logger.warning("haberler: günün hikâyesi kurulamadı: %s", e)
     day = (lead or {}).get("day") or datetime.now(_TZ_TR).date().isoformat()
     hot = [m["t"] for m in (lead or {}).get("movers") or []]
-    cards = haber_v2.company_cards(items, day, STOCK_NAMES, n=6, hot_tickers=hot) if items else []
+    cards = haber_v2.company_cards(items, day, STOCK_NAMES, n=6, hot_tickers=hot,
+                                   doc_fn=_KAP_STORE.doc) if items else []
     gh = _gundem_haber_ctx()
     tick = set(hot)
     tick.update(c["ticker"] for c in cards)
@@ -9554,11 +9555,14 @@ def _haber_print_now(now):
     # D-56: Gundem ile Bulten AYNI hisse kumesi (BIST100) ve ayni sektor ozeti (donmus isi haritasi)
     _hm = _heatmap_day(close_day.isoformat())
     _snap = (_hm or {}).get("snap")
+    # C-72: durum maddesi 'önceki → yeni' akışı, Bülten'in durum değişimleriyle (aynı sayım)
+    _bp = os.path.join(_BULTEN_DIR, "%s.json" % close_day.isoformat())
+    _trans = ((_bulten_read(_bp) or {}).get("durum_degisimleri") if os.path.exists(_bp) else None) or None
     doc = haber_gundem.build_print(stocks, macro, {"close": lvl.get("close"), "change_pct": lvl.get("change_pct")},
                                    _KAP_STORE.all_items(), STOCK_NAMES, _haber_calendar(), now, close_day, slot,
                                    members=BIST100_MEMBERS or None,
                                    sectors=bulten.isi_haritasi_ozet(_snap) if _snap else None,
-                                   counts=(_snap or {}).get("counts"))
+                                   counts=(_snap or {}).get("counts"), transitions=_trans)
     if doc:
         haber_gundem.save_print(doc)
     return doc
