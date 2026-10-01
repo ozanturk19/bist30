@@ -1,0 +1,86 @@
+{
+"maddeler": [
+{
+"kategori": "Merkez bankaları",
+"baslik": "Merkez Bankası, KOBİ kredilerine daha geniş büyüme alanı tanıdı",
+"baslik_kanit": [
+"H1"
+],
+"cumleler": [
+{
+"metin": "Merkez Bankası, zorunlu karşılık düzenlemesi kapsamında KOBİ kredilerinin büyüme sınırını %4,5'ten %5'e yükseltti.",
+"kanit": [
+"H1"
+]
+},
+{
+"metin": "Türk lirası zorunlu karşılıklarda bloke tesis oranları da düşürüldü.",
+"kanit": [
+"H1"
+]
+}
+],
+"hisseler": []
+},
+{
+"kategori": "Türkiye",
+"baslik": "SPK, fahiş kazançların gönüllü iadesi için hesap açtı",
+"baslik_kanit": [
+"H3"
+],
+"cumleler": [
+{
+"metin": "Sermaye Piyasası Kurulu, tasfiye kararı öncesi fon satışlarından fahiş kazanç elde edenlerin bu tutarı gönüllü olarak geri ödeyebilmesi için TMSF adına hesaplar açıldığını duyurdu.",
+"kanit": [
+"H3"
+]
+},
+{
+"metin": "Hesaplara bugüne kadar 2,5 milyar lira yatırıldı.",
+"kanit": [
+"H3"
+]
+}
+],
+"hisseler": []
+},
+{
+"kategori": "Merkez bankaları",
+"baslik": "Lagarde, yapay zeka kaynaklı finansal risklere dikkat çekti",
+"baslik_kanit": [
+"H4"
+],
+"cumleler": [
+{
+"metin": "ECB Başkanı Christine Lagarde, yapay zekanın finans sektöründe güvenle kullanılması için politika yapıcıların sistem genelindeki riskleri önceden görmesi gerektiğini söyledi.",
+"kanit": [
+"H4"
+]
+},
+{
+"metin": "Lagarde bu konuda bugün yeni bir uyarı yaptı.",
+"kanit": [
+"H4"
+]
+}
+],
+"hisseler": []
+},
+{
+"kategori": "Merkez bankaları",
+"baslik": "Fed faizi 25 baz puan indirdi",
+"baslik_kanit": [
+"F6"
+],
+"cumleler": [
+{
+"metin": "Fed Başkanı Powell, politika faizini %0,25 düşürdüklerini açıkladı.",
+"kanit": [
+"F6"
+]
+}
+],
+"hisseler": []
+}
+]
+}

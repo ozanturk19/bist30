@@ -1,0 +1,63 @@
+{
+"maddeler": [
+{
+"kategori": "Şirketler",
+"baslik": "Otokar'a zırhlı araç ihracatı için 1,5 milyar dolarlık sözleşme",
+"baslik_kanit": [
+"H6"
+],
+"cumleler": [
+{
+"metin": "Otokar, tekerlekli zırhlı araçların tedariki ve lojistik desteğini kapsayan 1 milyar 472 milyon 80 bin 360 dolarlık bir ihracat sözleşmesi imzaladı.",
+"kanit": [
+"H6"
+]
+},
+{
+"metin": "Sözleşmenin tutarı şirketin yıllık hasılatının yaklaşık %41,6'sına denk geliyor.",
+"kanit": [
+"K1"
+]
+}
+],
+"hisseler": [
+"OTKAR"
+]
+},
+{
+"kategori": "Türkiye",
+"baslik": "Kredi hacmi 25 Eylül haftasında 164,6 milyar lira arttı",
+"baslik_kanit": [
+"H9"
+],
+"cumleler": [
+{
+"metin": "BDDK verilerine göre bankaların toplam kredi büyüklüğü 28,4 trilyon liraya çıktı.",
+"kanit": [
+"H9"
+]
+}
+],
+"hisseler": [
+"AKBNK",
+"GARAN"
+]
+},
+{
+"kategori": "Dünya",
+"baslik": "Euro Bölgesi'nde imalat PMI'ı 52 ayın zirvesinde",
+"baslik_kanit": [
+"H12"
+],
+"cumleler": [
+{
+"metin": "Euro Bölgesi'nin imalat sanayi PMI'ı Eylül'de 52,9 puana yükselerek son 52 ayın en yüksek düzeyine çıktı.",
+"kanit": [
+"H12"
+]
+}
+],
+"hisseler": []
+}
+]
+}

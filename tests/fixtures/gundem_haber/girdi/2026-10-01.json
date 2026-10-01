@@ -1,0 +1,520 @@
+{
+"date": "2026-10-01",
+"items": [
+{
+"id": "70e4c37367ea",
+"title": "TCMB, KOBİ kredilerinde büyüme sınırını yüzde 5'e çıkardı",
+"desc": "TCMB, makrofinansal istikrarı ve bankaların likidite yönetimini desteklemek amacıyla KOBİ kredilerinde büyüme sınırını yüzde 4,5'ten yüzde 5'e yükseltirken, Türk lirası zorunlu karşılıklarda bloke tesis oranlarını düşürdü.",
+"group": "turkiye",
+"ts": "2026-10-01T18:33:05Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/tcmb-den-zorunlu-karsilik-duzenlemesi-3790044",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "ade35f9ef9e1",
+"title": "Merkez Bankası zorunlu karşılık uygulamasında değişikliğe gitti",
+"desc": "Merkez Bankası zorunlu karşılık uygulamasında değişikliğe gitti. KOBİ kredilerinde yüzde 4,5 olan büyüme sınırı yüzde 5’e yükseltildi.",
+"group": "turkiye",
+"ts": "2026-10-01T18:29:00Z",
+"sources": [
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/merkez-bankasi-zorunlu-karsilik-uygulamasinda-degisiklige-gitti-958825.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "85f32b0b1546",
+"title": "TCMB, KOBİ kredileri için yüzde 4,5 olan büyüme sınırını yüzde 5’e yükseltti",
+"desc": "TCMB, zorunlu karşılık uygulamasında yaptığı değişiklikler kapsamında KOBİ kredileri için yüzde 4,5 olan büyüme sınırının yüzde 5’e yükseltildiğini, Türk lirası zorunlu karşılıklarda bloke tesis oranlarının düşürüldüğünü duyurdu.",
+"group": "turkiye",
+"ts": "2026-10-01T18:26:11Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/tcmb-kobi-kredileri-icin-yuzde-4-5-olan-buyume-sinirini-yuzde-5-e-yukseltti/4075452",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "a9b417aa0b2e",
+"title": "TCMB'den zorunlu karşılık düzenlemesi: KOBİ kredilerinde büyüme sınırı yükseltildi",
+"desc": "Türkiye Cumhuriyet Merkez Bankası (TCMB), makrofinansal istikrarı ve bankaların likidite yönetimini desteklemek amacıyla zorunlu karşılık uygulamasında değişiklik yaptı.",
+"group": "turkiye",
+"ts": "2026-10-01T18:25:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/tcmbden-zorunlu-karsilik-duzenlemesi-kobi-kredilerinde-buyume-siniri-yukseltildi-haberi-842262",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "edca2195d1a6",
+"title": "IMF'den kritik uyarı: Manşet enflasyonu besleyen enerji şoku henüz bitmedi",
+"desc": "IMF Sözcüsü Julie Kozack, petrol ve gaz fiyatlarının yüksek seyretmeye devam ettiğini belirterek, manşet enflasyonu besleyen enerji şokunun henüz sona ermediğini ve bazı ülkelerde dezenflasyon sürecinin duraksadığını ifade etti.",
+"group": "turkiye",
+"ts": "2026-10-01T17:25:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/imfden-kritik-uyari-manset-enflasyonu-besleyen-enerji-soku-henuz-bitmedi-haberi-842259",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "d2bbb6f90148",
+"title": "Şimşek: Sorunlu portföy yönetim şirketlerini ve fonları karantinaya aldık",
+"desc": "Hazine ve Maliye Bakanı Mehmet Şimşek, sorunlu portföy yönetim şirketleri ve ilgili fonların karantinaya alındığını açıkladı. Şimşek, tasfiye sürecinin başladığını belirterek, fon piyasalarında sistemik bir problem bulunmadığını ifade etti.",
+"group": "turkiye",
+"ts": "2026-10-01T16:15:32Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/simsek-sorunlu-portfoy-yonetim-sirketlerini-ve-fonlari-karantinaya-aldik-3790018",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "1ed40ac675f1",
+"title": "Bakan Şimşek'ten fon soruşturması açıklaması: Sistematik bir problem yok",
+"desc": "Hazine ve Maliye Bakanı Mehmet Şimşek, fon piyasalarındaki gelişmelere hızlı müdahale ettiklerini belirterek, sorunlu şirketlerin karantinaya alındığını ve sistemik bir problem bulunmadığını açıkladı.",
+"group": "turkiye",
+"ts": "2026-10-01T16:02:00Z",
+"sources": [
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/bakan-simsekten-fon-sorusturmasi-aciklamasi-sistematik-bir-problem-yok-958816.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "d1ab9631e66f",
+"title": "Bakan Şimşek'ten fon piyasalarına ilişkin açıklama: Tasfiye ve çözümlenme süreci başladı",
+"desc": "Hazine ve Maliye Bakanı Mehmet Şimşek, fon piyasalarında yaşanan gelişmelerin ardından sorunlu portföy yönetim şirketleri ile ilgili fonların karantinaya alındığını ve tasfiye sürecinin başlatıldığını bildirdi. Şimşek, müdahalelerle sorunların finansal…",
+"group": "turkiye",
+"ts": "2026-10-01T16:01:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/bakan-simsekten-fon-piyasalarina-iliskin-aciklama-tasfiye-ve-cozumlenme-sureci-basladi-haberi-842240",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "9ded64d57d1d",
+"title": "Bakan Şimşek: Fon piyasalarında \"sistemik problem yok\"",
+"desc": "Hazine ve Maliye Bakanı Şimşek, fon piyasaları ile ilgili, \"Çok hızlı hareket ettik ve sorunlu portföy yönetim şirketlerini ve ilgili fonları karantinaya aldık. Elbette sınırlı bir etki oldu, ancak sistemik bir problemden bahsetmiyoruz.\" dedi.",
+"group": "turkiye",
+"ts": "2026-10-01T15:50:21Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/bakan-simsek-fon-piyasalarinda-sistemik-problem-yok/4075301",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "9113c720b505",
+"title": "ABD'de ISM imalat endeksi eylülde hafif geriledi",
+"desc": "ABD&#039;de Tedarik Yönetim Enstitüsünün (ISM) imalat sanayi Satınalma Yöneticileri Endeksi (PMI), eylülde 54,5&#039;e gerileyerek imalat sektöründeki büyümenin hafif yavaşladığına işaret etti.",
+"group": "dunya",
+"ts": "2026-10-01T15:11:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/abdde-ism-imalat-endeksi-eylulde-hafif-geriledi-haberi-842227",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "6f4969c30e1e",
+"title": "Lagarde'dan yapay zeka uyarısı",
+"desc": "Avrupa Merkez Bankası (AMB) ve Avrupa Sistemik Risk Kurulu (ESRB) Başkanı Christine Lagarde, yapay zekanın finans sektöründe güvenli kullanılabilmesi için politika yapıcıların finansal sistemin bütününe yönelik riskleri öngörmesi gerektiğini vurguladı.",
+"group": "dunya",
+"ts": "2026-10-01T14:40:30Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/lagardedan-yapay-zeka-uyarisi-3790014",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "56647331f377",
+"title": "ECB Başkanı Christine Lagarde’dan yapay zeka uyarısı",
+"desc": "ECB Başkanı Christine Lagarde, \"Yapay zekanın finans sektöründe güvenli kullanılabilmesi için politika yapıcıların finansal sistemin bütününe yönelik riskleri öngörmesi gerekir.\" dedi.",
+"group": "dunya",
+"ts": "2026-10-01T14:39:31Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/ecb-baskani-christine-lagarde-dan-yapay-zeka-uyarisi/4075247",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "4f3bd40bcc94",
+"title": "Lagarde'dan yapay zeka uyarısı: Finans sistemini tehdit edebilir",
+"desc": "Avrupa Merkez Bankası (ECB) ve Avrupa Sistemik Risk Kurulu (ESRB) Başkanı Christine Lagarde, yapay zekanın finans sektöründe güvenli kullanılabilmesi için politika yapıcıların finansal sistemin bütününe yönelik riskleri öngörmesi gerektiğini vurguladı.",
+"group": "dunya",
+"ts": "2026-10-01T14:39:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/lagardedan-yapay-zeka-uyarisi-finans-sistemini-tehdit-edebilir-haberi-842222",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "293c1cbb787c",
+"title": "ABD imalat sektöründeki büyüme Eylül'de de sürdü",
+"desc": "ABD'deki imalat faaliyeti, fabrikaların güçlü talebi yeniden artan maliyetler ve nakliye gecikmeleriyle dengelemesiyle, Eylül ayında biraz daha yavaş bir hızla arttı.",
+"group": "dunya",
+"ts": "2026-10-01T14:30:58Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/abd-imalat-sektorundeki-buyume-eylul-de-de-surdu-3790013",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "a4529d8a2c07",
+"title": "Avrupa Birliği'nden enerjide fiyat krizi uyarısı",
+"desc": "Avrupa Birliği (AB) Komisyonu Sözcüsü Anna-Kaisa Itkonen, \"Şu anda, sadece AB'yi değil herkesi etkileyen küresel bir enerji fiyatı krizinin içindeyiz.\" dedi.",
+"group": "dunya",
+"ts": "2026-10-01T13:19:00Z",
+"sources": [
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/avrupa-birliginden-enerjide-fiyat-krizi-uyarisi-958804.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "26eb8017c431",
+"title": "AB’den küresel enerji alarmı: Fiyat krizi uyarısı",
+"desc": "AB Komisyonu, enerji fiyatlarının &quot;son derece yüksek&quot; seviyelere çıktığını belirterek küresel bir enerji fiyatı krizi yaşandığı uyarısında bulundu. AB&#039;de dizel veya doğal gazda somut bir kıtlık olmadığını açıklayan Komisyon, IEA&#039;nın…",
+"group": "dunya",
+"ts": "2026-10-01T12:47:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/abden-kuresel-enerji-alarmi-fiyat-krizi-uyarisi-haberi-842211",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "7b9999141557",
+"title": "Bankacılıkta kredi hacmi büyüdü: 28,4 trilyon lirayı aştı",
+"desc": "BDDK verilerine göre bankacılık sektörünün toplam kredi hacmi 25 Eylül haftasında 164,6 milyar lira artarak 28,4 trilyon liraya yükseldi. Tüketici kredileri ve kredi kartı alacaklarında da artış kaydedildi.",
+"group": "turkiye",
+"ts": "2026-10-01T12:31:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/bankacilikta-kredi-hacmi-buyudu-284-trilyon-lirayi-asti-haberi-842207",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "cf105b43c364",
+"title": "Merkez'in rezervlerinde düşüş sürüyor",
+"desc": "Türkiye Cumhuriyet Merkez Bankası&#039;nın (TCMB) rezervlerindeki düşüş beşinci haftaya taşındı. Brüt rezervler 3,2 milyar dolar azalarak 171,2 milyar dolarla iki ayın en düşük seviyesine inerken, swap hariç net rezervler 39,9 milyar dolara geriledi. Swap…",
+"group": "turkiye",
+"ts": "2026-10-01T12:19:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/merkezin-rezervlerinde-dusus-suruyor-haberi-842204",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "42fb49644dba",
+"title": "AB'den enerjide fiyat krizi uyarısı",
+"desc": "Avrupa Birliği (AB) Komisyonu Sözcüsü Anna-Kaisa Itkonen, \"Şu anda, sadece AB'yi değil herkesi etkileyen küresel bir enerji fiyatı krizinin içindeyiz.\" dedi.",
+"group": "dunya",
+"ts": "2026-10-01T11:48:37Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/abden-enerjide-fiyat-krizi-uyarisi/4074905",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "21aaf6549cb7",
+"title": "TCMB rezervlerinde düşüş ivmesi devam ediyor",
+"desc": "Türkiye Cumhuriyet Merkez Bankası'nın (TCMB) brüt rezervleri 171,2 milyar dolara geriledi ve düşüş serisi beşinci haftasını tamamlamış oldu.",
+"group": "turkiye",
+"ts": "2026-10-01T11:42:57Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/tcmb-rezervlerinde-dusus-ivmesi-suruyor-3789997",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "a07f7b3a4fe3",
+"title": "Bankacılık sektörünün kredi hacmi 28,4 trilyon liraya çıktı",
+"desc": "Bankacılık sektörünün toplam kredi hacmi 25 Eylül itibarıyla 28,4 trilyon liraya yükseldi.",
+"group": "turkiye",
+"ts": "2026-10-01T11:27:19Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/bankacilik-sektorunun-kredi-hacmi-28-4-trilyon-liraya-cikti/4074854",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "3c91a2fd9657",
+"title": "Çin yakıt ihracatını durdurdu: Petrol yeniden 100 doların üzerine çıktı",
+"desc": "Çinli rafinerilerin benzin, motorin ve jet yakıtı ihracatını askıya alması küresel akaryakıt piyasasında yeni arz baskısı yarattı. Kararın ardından Brent petrol yeniden 100 doların üzerine çıkarken motorin piyasasında sıkışma endişesi arttı.",
+"group": "dunya",
+"ts": "2026-10-01T10:28:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/cin-yakit-ihracatini-durdurdu-petrol-yeniden-100-dolarin-uzerine-cikti-haberi-842188",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+},
+{
+"name": "Dünya Dünya",
+"url": "https://www.dunya.com/ekonomi/cin-yakit-ihracatini-durdurdu-petrol-yeniden-100-dolarin-uzerine-cikti-haberi-842188",
+"feed": "https://www.dunya.com/rss/dunya.xml"
+}
+]
+},
+{
+"id": "5487fc997aba",
+"title": "ABD-İran müzakerelerine ilişkin belirsizlik Brent petrolü 100 doların üzerine taşıdı",
+"desc": "Brent petrolün varil fiyatı, ABD ile İran arasındaki müzakerelerin tıkandığına yönelik haber akışının çatışmaların süreceği ve petrol arzının sekteye uğrayabileceği endişelerini artırmasıyla yüzde 2'den fazla yükselerek 100 doların üzerine çıktı.",
+"group": "dunya",
+"ts": "2026-10-01T10:25:44Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/abd-iran-muzakerelerine-iliskin-belirsizlik-brent-petrolu-100-dolarin-uzerine-tasidi/4074755",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+},
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/abd-iran-muzakerelerine-iliskin-belirsizlik-brent-petrolu-100-dolarin-uzerine-tasidi-958795.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "e1e9369ce036",
+"title": "Petrol piyasasında Çin şoku: Brent yeniden 100 doların üzerinde",
+"desc": "Çinli rafinerilerin ekim ayında yakıt ihracatını askıya aldığı haberleri, savaş nedeniyle arz sıkıntısı yaşayan küresel enerji piyasalarında yeni bir dalgalanma yarattı. Brent petrol yeniden 100 doların üzerine çıkarken, PetroChina&#039;nın planlanan…",
+"group": "dunya",
+"ts": "2026-10-01T10:06:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/petrol-piyasasinda-cin-soku-brent-yeniden-100-dolarin-uzerinde-haberi-842189",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "42ed969e9f6e",
+"title": "Euro Bölgesi imalat sektörü Eylül'de ivme kazandı",
+"desc": "Euro Bölgesi'nde imalat sanayi Satınalma Yöneticileri Endeksi (PMI), Eylülde 52,9 puana çıkarak son 52 ayın en yüksek seviyesine ulaştı.",
+"group": "dunya",
+"ts": "2026-10-01T09:15:19Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/euro-bolgesi-imalat-sektoru-eylul-de-ivme-kazandi-3789968",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "b851f8e8ac15",
+"title": "Euro Bölgesi'nde imalat sanayi PMI eylülde yükseldi",
+"desc": "Euro Bölgesi&#039;nde imalat sanayi Satınalma Yöneticileri Endeksi (PMI), eylülde 52,9 puana çıkarak son 52 ayın en yüksek seviyesine ulaştı.",
+"group": "dunya",
+"ts": "2026-10-01T09:03:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/euro-bolgesinde-imalat-sanayi-pmi-eylulde-yukseldi-haberi-842174",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "7e3c43b8447d",
+"title": "Otokar'dan yaklaşık 1,5 milyar dolarlık ihracat sözleşmesi",
+"desc": "Otokar Otomotiv ve Savunma Sanayi AŞ, çeşitli tiplerde tekerlekli zırhlı araçların tedariki ile bu araçların entegre lojistik destek hizmetlerini kapsayan 1 milyar 472 milyon 80 bin 360 dolar bedelli ihracat sözleşmesi imzaladığını açıkladı.",
+"group": "turkiye",
+"ts": "2026-10-01T07:49:05Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/otokardan-yaklasik-1-5-milyar-dolarlik-ihracat-sozlesmesi-/4074527",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "5bd455806e71",
+"title": "SPK, fonlardan elde edilen fahiş kazancın iadesi için \"İsteğe Bağlı İade Hesapları\" açtı",
+"desc": "SPK, yatırım fonlarında tasfiye kararı öncesindeki satışlardan elde edilen fahiş kazançları gönüllü olarak ilgili fona iade etmek isteyenler için Birleşik Fon Bankası nezdinde TMSF adına \"İsteğe Bağlı İade Hesapları\" açıldığını bildirdi.",
+"group": "turkiye",
+"ts": "2026-10-01T07:29:25Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/spk-fonlardan-elde-edilen-fahis-kazancin-iadesi-icin-istege-bagli-iade-hesaplari-acti/4074500",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "09a289c08835",
+"title": "Otokar'dan 1,5 milyar dolarlık ihracat sözleşmesi",
+"desc": "Otokar, çeşitli tiplerde tekerlekli zırhlı araçların tedariki ile bu araçların entegre lojistik destek hizmetlerini kapsayan 1,5 milyar dolar bedelli ihracat sözleşmesi imzaladı.",
+"group": "turkiye",
+"ts": "2026-10-01T07:07:08Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/otokar-dan-1-5-milyar-dolarlik-ihracat-sozlesmesi-3789949",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "1ad913636e51",
+"title": "SPK isteğe bağlı iade hesapları açıldığını duyurdu",
+"desc": "Sermaye Piyasası Kurulu (SPK) Birleşik Fon Bankası nezdinde Tasarruf Mevduat Sigorta Fonu (TMSF) adına \"İsteğe Bağlı İade Hesapları\" açıldığını duyurdu.",
+"group": "turkiye",
+"ts": "2026-10-01T06:50:09Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/spk-istege-bagli-iade-hesaplari-acildigini-duyurdu-3789938",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "1e19cb96c2cc",
+"title": "SPK: İsteğe bağlı iade hesapları açıldı",
+"desc": "SPK, fonlardan fahiş kazanç elde edenlerin kendi isteği ile bu kazancı fona iade etmesi için \"İsteğe Bağlı İade Hesaplarının\" açıldığını duyurdu.",
+"group": "turkiye",
+"ts": "2026-10-01T06:49:00Z",
+"sources": [
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/spk-istege-bagli-iade-hesaplari-acildi-958735.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "0460125b31a9",
+"title": "SPK’den fon yatırımcıları için yeni adım: Fahiş kazançların iadesi için hesaplar açıldı",
+"desc": "Sermaye Piyasası Kurulu (SPK), tasfiye kapsamındaki yatırım fonlarında tasfiye kararından önce katılma payı satışlarından “fahiş kazanç” elde edenlerin bu kazançları gönüllü olarak geri ödeyebilmesi için özel hesaplar açıldığını duyurdu. Borsada işlem…",
+"group": "turkiye",
+"ts": "2026-10-01T06:45:00Z",
+"sources": [
+{
+"name": "Dünya Ekonomi",
+"url": "https://www.dunya.com/ekonomi/spkden-fon-yatirimcilari-icin-yeni-adim-fahis-kazanclarin-iadesi-icin-hesaplar-acildi-haberi-842157",
+"feed": "https://www.dunya.com/rss/ekonomi.xml"
+}
+]
+},
+{
+"id": "f4e7bfd13e59",
+"title": "Aselsan'dan yeni iş sözleşmesi",
+"desc": "Aselsan, Cumhurbaşkanlığı Savunma Sanayii Başkanlığı arasında Uzun Menzilli Hava Savunma Sistemlerinin devam eden seri üretim projeleri kapsamında 1 milyar 8 milyon 500 bin euroluk sözleşme imzaladığını duyurdu.",
+"group": "turkiye",
+"ts": "2026-10-01T06:44:33Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/aselsan-dan-yeni-is-sozlesmesi-3789932",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+},
+{
+"id": "2577e5890db0",
+"title": "ASELSAN ile Savunma Sanayii Başkanlığı arasında 1 milyar avroluk sözleşmeler imzalandı",
+"desc": "ASELSAN ile Cumhurbaşkanlığı Savunma Sanayii Başkanlığı arasında uzun menzilli hava savunma sistemlerinin devam eden seri üretim projeleri kapsamında toplam 1 milyar 8 milyon 500 bin avroluk sözleşmeler imzalandı.",
+"group": "turkiye",
+"ts": "2026-10-01T06:43:19Z",
+"sources": [
+{
+"name": "AA Ekonomi",
+"url": "https://www.aa.com.tr/tr/ekonomi/aselsan-ile-savunma-sanayii-baskanligi-arasinda-1-milyar-avroluk-sozlesmeler-imzalandi/4074424",
+"feed": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+}
+]
+},
+{
+"id": "66071f6454fb",
+"title": "Merkez Bankası rezervleri 174,4 milyar dolar oldu",
+"desc": "Türkiye Cumhuriyet Merkez Bankasının (TCMB) toplam rezervleri, 18 Eylül haftasında bir önceki haftaya göre 4 milyar 319 milyon dolar azalışla 174 milyar 405 milyon dolar oldu.",
+"group": "turkiye",
+"ts": "2026-09-24T11:51:00Z",
+"sources": [
+{
+"name": "TRT Haber Ekonomi",
+"url": "https://www.trthaber.com/haber/ekonomi/merkez-bankasi-rezervleri-1744-milyar-dolar-oldu-958004.html",
+"feed": "https://www.trthaber.com/ekonomi_articles.rss"
+}
+]
+},
+{
+"id": "seo000000001",
+"title": "Dolar bugün ne kadar? 1 Ekim 2026 güncel döviz kurları",
+"desc": "Dolar ve euro kurunda güncel rakamlar.",
+"group": "turkiye",
+"ts": "2026-10-01T09:00:00Z",
+"sources": [
+{
+"name": "Bloomberg HT",
+"url": "https://www.bloomberght.com/doviz-ornek-1",
+"feed": "https://www.bloomberght.com/rss"
+}
+]
+}
+],
+"updated_at": "2026-10-01T22:01"
+}
