@@ -52,6 +52,7 @@ import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sekt
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
 import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bayrağıyla
+import kesfet           # D-59: Keşfet orta-uzun vade listeleri (C-56): 4 kural tabanlı liste, KAP verisiyle
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
@@ -8838,6 +8839,83 @@ def api_stock_fundamentals(ticker):
     return safe_json({"fundamentals": data})
 
 
+# ── D-59: Keşfet — orta-uzun vade listeleri (C-56'nın arka ucu) ──────────────
+# Kural ve hesap kesfet.py'de (saf, py3.9); burada yalnız veri toplama + önbellek + uçlar.
+# Değerleme hükmü hisse sayfasındaki "Fiyatı makul mu?" ile aynı zincir (KAP F/K, PD/DD /
+# aynı D-23 kovasının KAP ortancası; TEMEL_V2 açıkken skor kaydındaki temel_v2 hükmü).
+_KESFET = {"ts": 0.0, "data": None}
+_KESFET_LOCK = threading.Lock()
+_KESFET_TTL = 600   # sn: veri gün sonunda bir kez değişir; 10 dk bayatlık kabul
+
+
+def _kesfet_lists():
+    """kesfet.build sonucu ({tarih, listeler}); 10 dk önbellek. Evren boşsa (soğuk açılış)
+    önbelleğe yazılmaz, boş listeler döner (sayfa 500 vermez)."""
+    now = time.time()
+    hit = _KESFET["data"]
+    if hit is not None and now - _KESFET["ts"] < _KESFET_TTL:
+        return hit
+    with _KESFET_LOCK:
+        if _KESFET["data"] is not None and time.time() - _KESFET["ts"] < _KESFET_TTL:
+            return _KESFET["data"]
+        with _lock:
+            stocks = [dict(s) for s in (_cache.get("data") or [])
+                      if isinstance(s, dict) and s.get("ticker") not in INDEX_TICKERS]
+            entries = {tk: (w.get("data") or {}) for tk, w in _financial_health_cache.items()
+                       if isinstance(w, dict)}
+            shares = {tk: ((w.get("data") or {}).get("shares")) for tk, w in _fundamentals_cache.items()
+                      if isinstance(w, dict)}
+        records = {}
+        for s in stocks:
+            try:
+                records[s["ticker"]] = kap_financials.load_record(s["ticker"])
+            except Exception as e:
+                logger.warning("_kesfet_lists load_record(%s): %s", s.get("ticker"), e)
+        try:
+            out = kesfet.build(stocks, entries, records, shares, _get_sector, STOCK_NAMES,
+                               datetime.now(_TZ_TR).date())
+        except Exception as e:
+            logger.warning("_kesfet_lists: %s", e)
+            return _KESFET["data"] or kesfet.build([], {}, {})
+        if stocks:
+            _KESFET["data"], _KESFET["ts"] = out, time.time()
+        return out
+
+
+@app.route("/api/kesfet")
+@limiter.limit("60 per minute")
+def api_kesfet():
+    """D-59: dört listenin özeti (başlık, kural cümlesi, satır sayısı) + kapanış tarihi."""
+    res = _kesfet_lists()
+    return safe_json({"tarih": res.get("tarih"), "listeler": kesfet.summary(res), "kurallar": kesfet.rules()})
+
+
+@app.route("/api/kesfet/<liste>")
+@limiter.limit("60 per minute")
+def api_kesfet_liste(liste):
+    """D-59: tek liste — /kesfet/<liste> SSR bağlamıyla aynı sözlük (slug ya da iç anahtar)."""
+    key = kesfet.resolve(liste)
+    if not key:
+        return safe_json({"error": "Liste bulunamadı"}), 404
+    return safe_json(kesfet.view(_kesfet_lists(), key))
+
+
+@app.route("/kesfet")
+@app.route("/kesfet/<liste>")
+def kesfet_page(liste=None):
+    """D-59/C-56: Keşfet sayfası (SSR). /kesfet varsayılan listeyi gösterir; iç anahtar
+    (kaliteli_makul) kanonik adrese 301. Şablon henüz yayında değilse 404 (500 yok)."""
+    if not _tpl_ready("kesfet.html"):
+        abort(404)
+    key = kesfet.resolve(liste) if liste is not None else kesfet.VARSAYILAN
+    if not key:
+        abort(404)
+    if liste is not None and liste != kesfet.SLUG[key]:
+        return redirect("/kesfet/" + kesfet.SLUG[key], code=301)
+    return render_template("kesfet.html", kesfet=kesfet.view(_kesfet_lists(), key),
+                           kesfet_kok=liste is None)
+
+
 # ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────
 # _save_daily_snapshot deseniyle simetrik: seans sonrası (hour>=14 UTC), günde
 # bir kez, idempotent. SADECE leader process'te çalışır — refresh_data() zaten
@@ -11116,6 +11194,11 @@ def sitemap():
             pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
+    # D-59/C-56: Keşfet listeleri (şablon yayındaysa); her liste kendi paylaşılabilir adresinde
+    if _tpl_ready("kesfet.html"):
+        pages.append({"loc": "/kesfet", "priority": "0.9", "changefreq": "daily"})
+        for _k in kesfet.LISTS:
+            pages.append({"loc": f"/kesfet/{kesfet.SLUG[_k]}", "priority": "0.8", "changefreq": "daily"})
     # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
     if _tpl_ready("haberler.html"):
         pages.append({"loc": "/haberler",           "priority": "0.8", "changefreq": "daily"})
@@ -11296,6 +11379,12 @@ def llms_txt():
         body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
                             "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
                             "kapanış günü kalıcı sayfa: /harita/YYYY-AA-GG\n- [Takvim](", 1)
+    if _tpl_ready("kesfet.html"):   # D-59/C-56: orta-uzun vade listeleri (kurallar sayfada tek cümle)
+        body = body.replace("- [Keşfet (Hisse Tarayıcı)]", "- [Keşfet: orta-uzun vade listeleri]"
+                            "(https://borsapusula.com/kesfet): KAP'ta açıklanan finansallara göre dört kural "
+                            "tabanlı liste — " + ", ".join(
+                                "[%s](https://borsapusula.com/kesfet/%s)" % (kesfet.BASLIK[k], kesfet.SLUG[k])
+                                for k in kesfet.LISTS) + "\n- [Hisse Tarayıcı]", 1)
     if _tpl_ready("haberler.html"):  # D-45/C-57: sayfa canlıysa listelenir
         body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
                             "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
@@ -12035,7 +12124,8 @@ def gucu_yuksek():
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
 @app.route("/metodoloji")
 def metodoloji():
-    return render_template("metodoloji.html")
+    # D-59: Keşfet listelerinin kural cümleleri (sayfadakiyle aynı metin, tek kaynak kesfet.KURAL)
+    return render_template("metodoloji.html", kesfet_kurallari=kesfet.rules())
 
 
 @app.route("/offline")
