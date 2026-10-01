@@ -1,0 +1,92 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-73 (01.10) /bulten/arsiv — tüm Akşam Bültenleri (D-56 rotası). Bağlam:
+      arsiv  [{tarih, kapanis, degisim_pct, ozet_cumlesi}] yeniden eskiye (bulten.arsiv)
+    Aylara göre gruplu; her ay soru başlığı ("Eylül 2026'da borsa nasıl kapandı?"), her gün tek satır:
+    tarih + günün cümlesi + BIST100 değişimi (kutularla aynı renk ölçeği). Göreli zaman yok. -#}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
+{%- set _MO = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] -%}
+{%- set _MOK = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'] -%}
+{%- set _WD = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'] -%}
+{%- macro _wdi(iso) -%}
+{%- set p = (iso or '0000-01-01')[:10].split('-') -%}{%- set m = p[1]|int -%}{%- set d = p[2]|int -%}
+{%- set y = p[0]|int - (1 if m < 3 else 0) -%}
+{{- (y + y // 4 - y // 100 + y // 400 + [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4][m - 1] + d) % 7 -}}
+{%- endmacro -%}
+{%- macro _loc(n) -%}
+{%- set u = n % 10 -%}{%- set t = (n // 10) % 10 -%}
+{%- if u -%}'{{ ['', 'de', 'de', 'te', 'te', 'te', 'da', 'de', 'de', 'da'][u] }}
+{%- elif t -%}'{{ ['', 'da', 'de', 'da', 'ta', 'de', 'ta', 'te', 'de', 'da'][t] }}
+{%- else -%}'de{%- endif -%}
+{%- endmacro -%}
+{%- macro _n2(v) -%}{{ ('{:,.2f}'.format(v))|replace(',', ' ')|replace('.', ',')|replace(' ', '.') }}{%- endmacro -%}
+{%- macro _k(v) -%}
+{%- set t = [(v|round(2))|abs / 3.0, 1.0]|min -%}{{ '%.3f'|format((0.16 + 0.84 * (t ** 0.72)) if (v|round(2)) != 0 else 0) }}
+{%- endmacro -%}
+{%- set A = arsiv or [] -%}
+{%- set _url = 'https://borsapusula.com/bulten/arsiv' -%}
+{%- set _ttl = 'Akşam Bülteni arşivi' -%}
+{%- set _items = [] -%}
+{%- for it in A[:60] -%}{%- set _ = _items.append({'@type': 'ListItem', 'position': loop.index, 'url': 'https://borsapusula.com/bulten/' ~ it.tarih, 'name': 'Akşam Bülteni · ' ~ (it.tarih[8:10]|int) ~ ' ' ~ _MO[it.tarih[5:7]|int - 1] ~ ' ' ~ it.tarih[:4]}) -%}{%- endfor -%}
+{%- set _desc = 'Borsa İstanbul her işlem günü nasıl kapandı? BIST100 kapanışı ve değişimi, günün tek cümlelik özeti; her günün bülteni kalıcı sayfada.' -%}
+{% block head %}<title>{{ _ttl }} | BorsaPusula</title>
+<meta name="description" content="{{ _desc }}">
+<link rel="canonical" href="{{ _url }}">
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ _ttl }}">
+<meta property="og:description" content="{{ _desc }}">
+<meta property="og:url"         content="{{ _url }}">
+<meta property="og:site_name"   content="borsapusula.com">
+<meta property="og:locale"      content="tr_TR">
+{%- if A %}
+<meta property="og:image"       content="https://borsapusula.com/harita/{{ A[0].tarih }}.png">
+{%- endif %}
+<meta name="twitter:card"        content="summary_large_image">
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': [
+  {'@type': 'CollectionPage', '@id': _url ~ '#arsiv', 'url': _url, 'name': _ttl, 'description': _desc, 'inLanguage': 'tr',
+   'mainEntity': {'@type': 'ItemList', 'numberOfItems': A|length, 'itemListElement': _items},
+   'breadcrumb': {'@id': _url ~ '#yol'}},
+  {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
+    {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': 'https://borsapusula.com/'},
+    {'@type': 'ListItem', 'position': 2, 'name': 'Haberler', 'item': 'https://borsapusula.com/haberler'},
+    {'@type': 'ListItem', 'position': 3, 'name': _ttl, 'item': _url}]}
+]}|tojson }}</script>
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/bulten.css') }}">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% with hdr_title = 'Haberler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+<main class="container container--wide blv" id="main-content" tabindex="-1">
+  <nav class="blv-crumb" aria-label="Konum"><a href="/haberler">Haberler</a><span aria-hidden="true">/</span><span>Akşam Bülteni</span></nav>
+  <section class="blv-hero blv-arh" aria-labelledby="arH">
+    <div class="blv-lead">
+      <p class="blv-ey">Akşam Bülteni <b>· Arşiv</b></p>
+      <h1 id="arH">Borsa her gün nasıl kapandı?</h1>
+      <p>Her işlem günü kapanıştan sonra hazırlanan bültenler: BIST100 kapanışı, ısı haritası, en çok hareket eden hisseler, durumu değişenler, sektörler ve takvim. Bir güne dokun, o günün bültenini aç.</p>
+    </div>
+  </section>
+  {%- set _months = [] %}{%- set _by = {} %}
+  {%- for it in A %}{% set key = it.tarih[:7] %}{% if key not in _by %}{% set _ = _by.update({key: []}) %}{% set _ = _months.append(key) %}{% endif %}{% set _ = _by[key].append(it) %}{% endfor %}
+  {%- for key in _months %}
+  {%- set y = key[:4]|int %}{%- set mo = _MO[key[5:7]|int - 1] %}
+  <section class="blv-mo" aria-labelledby="ay-{{ key }}">
+    <h2 id="ay-{{ key }}">{{ mo }} {{ y }}{{ _loc(y) }} borsa nasıl kapandı?</h2>
+    <ol class="blv-arl">
+      {%- for it in _by[key] %}
+      {%- set v = it.degisim_pct %}
+      <li><a class="blv-ar" href="/bulten/{{ it.tarih }}"><time datetime="{{ it.tarih }}">{{ it.tarih[8:10]|int }} {{ _MOK[it.tarih[5:7]|int - 1] }}<small>{{ _WD[_wdi(it.tarih)|int] }}</small></time>
+        <span class="s">{% if it.ozet_cumlesi %}{{ it.ozet_cumlesi }}{% elif it.kapanis is number %}BIST100 <b>{{ _n2(it.kapanis) }}</b> puanda kapandı.{% endif %}</span>
+        <span class="x">{% if v is number %}<b class="{{ dir_class(v, 2, 'up,dn,neu') }}">{{ pct_text(v) }}</b><span class="bar" aria-hidden="true"><i class="{{ dir_class(v, 2, 'up,dn,neu') }}" style="width:{{ '%.1f'|format([(v|abs) / 3.0, 1.0]|min * 50) }}%;--k:{{ _k(v) }}"></i></span>{% endif %}</span></a></li>
+      {%- endfor %}
+    </ol>
+  </section>
+  {%- endfor %}
+  <p class="blv-disc">Bülten her işlem günü kapanıştan sonra bir kez hazırlanır ve sonradan değişmez. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+{% with ftr_self='/haberler' %}{% include '_footer.html' %}{% endwith %}
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

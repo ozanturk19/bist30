@@ -212,3 +212,22 @@ main.container > #sektorler.da-section{padding:0}
 .hg-about p + p{margin-top:10px}
 .hg-about a{color:var(--bp-brand)}
 .hg-about a:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
+
+/* ═══ C-73 (01.10): Akşam Bülteni v2 gömme (_heatmap.html hm_bare) — yalnız .hm-bare altında ═══
+   Bölüm başlığı sayfada; burada kısa sayım satırı + nabız şeridi (100 hisse, en çok düşenden en
+   çok yükselene). Çubuk rengi kutularla aynı: nötr zemin (--hm-n) + yön tonu, oran --k (SSR). */
+.hm-bare .hm-head--bare{margin-bottom:12px}
+.hm-bare .hm-cnt{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);color:var(--bp-text3);font-variant-numeric:tabular-nums}
+.hm-pulse{position:relative;padding-top:17px;margin-top:10px}
+.hm-pulse svg{display:block;width:100%;height:36px}
+.hm-pulse rect{fill:var(--hm-n)}
+.hm-pulse rect.up{fill:color-mix(in srgb,rgb(var(--bp-al-rgb)) calc(var(--k,0) * 100%),var(--hm-n))}
+.hm-pulse rect.dn{fill:color-mix(in srgb,rgb(var(--bp-sat-rgb)) calc(var(--k,0) * 100%),var(--hm-n))}
+@supports not (color:color-mix(in srgb,currentColor 50%,transparent)){
+  .hm-pulse rect.up{fill:rgb(var(--bp-al-rgb));fill-opacity:var(--k,0)}
+  .hm-pulse rect.dn{fill:rgb(var(--bp-sat-rgb));fill-opacity:var(--k,0)}
+}
+.hm-pulse line{stroke:var(--bp-border2);stroke-width:1;vector-effect:non-scaling-stroke}
+.hm-pl{position:absolute;top:0;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-2xs);line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--bp-text3);white-space:nowrap}
+.hm-pl.l{left:0}
+.hm-pl.r{right:0}

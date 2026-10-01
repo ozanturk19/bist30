@@ -1,19 +1,73 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
-{#- C-57 v2 (27.09): /bulten/<YYYY-AA-GG> kalıcı Akşam Bülteni sayfası. Rota (CPO-1802) bağlamı:
-    bulten (o tarihin donmuş json'u), onceki / sonraki (komşu bülten günü | None), gunler (son 7 gün, artan).
-    Gövde _bulten.html (Haberler kartıyla aynı parça, tam hali). Sayfa sonradan değişmez. -#}
-{%- from '_fmt_macros.html' import pct_text -%}
+{#- C-73 (01.10) Akşam Bülteni v2 (O28=A, taslak plans/mockups/bulten-v2.html) — /bulten/<YYYY-AA-GG>.
+    Rota bağlamı (CPO-1802 + D-56):
+      bulten    o günün donmuş json'u. D-56 alanları: ozet_cumlesi/ozet_parcalar (günün tek cümlesi,
+                kural tabanlı), bist100.seri (30 kapanış) / bist100.esik, sayim, durum_degisimleri[].ad/
+                fiyat/degisim_pct, isi_haritasi_ozet[].hisse_sayisi (piyasa değeriyle ağırlıklı — harita
+                grup etiketiyle TEK tanım; rota haritanın satırlarından yeniden hesaplar),
+                onemli_bildirimler[].onem_alanlar, takvim_gunu, yarin_takvim (zengin), yaklasan
+      onceki / sonraki   komşu bülten günü | None
+      gunler    son 7 bülten günü (artan) — D-56 öncesi rota
+      arsiv     [{tarih, kapanis, degisim_pct, ozet_cumlesi}] yeniden eskiye (D-56; yoksa gunler)
+      heatmap / heatmap_groups / heatmap_tiles   günün donmuş ısı haritası (D-56; yoksa bölüm gizli)
+    Eksik alan bölümü ya da satırı gizler (açıklama yazılmaz); kesin tarih, göreli zaman yok;
+    AL/SAT ve işlem dili yok; durum renkleri trend tokenlarından (kırmızı yok); yüzdenin yanında
+    tavan/taban rozeti yok. Sayfa sonradan değişmez. -#}
+{%- from '_fmt_macros.html' import pct_text, dir_class -%}
 {%- set _MO = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] -%}
-{%- macro _dl(iso) -%}
+{%- set _MOLOC = ["Ocak'ta", "Şubat'ta", "Mart'ta", "Nisan'da", "Mayıs'ta", "Haziran'da", "Temmuz'da", "Ağustos'ta", "Eylül'de", "Ekim'de", "Kasım'da", "Aralık'ta"] -%}
+{%- set _MOK = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'] -%}
+{%- set _WD = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'] -%}
+{%- set _WDK = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'] -%}
+{%- macro _dl(iso, y=true) -%}
 {%- set p = (iso or '')[:10].split('-') -%}
-{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MO[p[1]|int - 1] }} {{ p[0] }}{%- else -%}{{ iso }}{%- endif -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MO[p[1]|int - 1] }}{% if y %} {{ p[0] }}{% endif %}{%- else -%}{{ iso }}{%- endif -%}
 {%- endmacro -%}
-{%- set _day = bulten.tarih -%}
+{%- macro _ds(iso) -%}
+{%- set p = (iso or '')[:10].split('-') -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MOK[p[1]|int - 1] }}{%- else -%}{{ iso }}{%- endif -%}
+{%- endmacro -%}
+{#- Haftanın günü (0 = Pazar), Sakamoto -#}
+{%- macro _wdi(iso) -%}
+{%- set p = (iso or '0000-01-01')[:10].split('-') -%}{%- set m = p[1]|int -%}{%- set d = p[2]|int -%}
+{%- set y = p[0]|int - (1 if m < 3 else 0) -%}
+{{- (y + y // 4 - y // 100 + y // 400 + [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4][m - 1] + d) % 7 -}}
+{%- endmacro -%}
+{%- macro _wd(iso) -%}{{ _WD[_wdi(iso)|int] }}{%- endmacro -%}
+{%- macro _wdk(iso) -%}{{ _WDK[_wdi(iso)|int] }}{%- endmacro -%}
+{#- Yıla bulunma eki: 2026'da, 2025'te -#}
+{%- macro _loc(n) -%}
+{%- set u = n % 10 -%}{%- set t = (n // 10) % 10 -%}
+{%- if u -%}'{{ ['', 'de', 'de', 'te', 'te', 'te', 'da', 'de', 'de', 'da'][u] }}
+{%- elif t -%}'{{ ['', 'da', 'de', 'da', 'ta', 'de', 'ta', 'te', 'de', 'da'][t] }}
+{%- else -%}'de{%- endif -%}
+{%- endmacro -%}
+{%- macro _tl(v) -%}{%- if v is number -%}{{ ('{:,.2f}'.format(v))|replace(',', ' ')|replace('.', ',')|replace(' ', '.') }} ₺{%- else -%}—{%- endif -%}{%- endmacro -%}
+{%- macro _n2(v) -%}{{ ('{:,.2f}'.format(v))|replace(',', ' ')|replace('.', ',')|replace(' ', '.') }}{%- endmacro -%}
+{%- macro _n1(v) -%}{{ ('{:,.1f}'.format(v))|replace(',', ' ')|replace('.', ',')|replace(' ', '.') }}{%- endmacro -%}
+{#- Kutularla aynı renk ölçeği (±%3, --k) -#}
+{%- macro _k(v) -%}
+{%- set t = [(v|round(2))|abs / 3.0, 1.0]|min -%}{{ '%.3f'|format((0.16 + 0.84 * (t ** 0.72)) if (v|round(2)) != 0 else 0) }}
+{%- endmacro -%}
+{%- set B = bulten -%}
+{%- set _day = B.tarih -%}
+{%- set _yr = _day[:4]|int -%}
 {%- set _lbl = _dl(_day) -%}
 {%- set _url = 'https://borsapusula.com/bulten/' ~ _day -%}
-{%- set _ix = bulten.bist100 or {} -%}
-{%- set _ttl = 'Akşam Bülteni · ' ~ _lbl -%}
-{%- set _desc = 'Borsa İstanbul ' ~ _lbl ~ ' kapanışı: BIST100' ~ (' ' ~ pct_text(_ix.degisim_pct) if _ix.degisim_pct is not none and _ix.degisim_pct is defined else '') ~ ', en çok yükselen ve düşen hisseler, trend durumu değişenler, sektörler, öne çıkan şirket bildirimleri ve sonraki işlem gününün takvimi.' -%}
+{%- set _ix = B.bist100 or {} -%}
+{%- set _h1 = _lbl ~ _loc(_yr) ~ ' borsa nasıl kapandı?' -%}
+{%- set _ttl = _h1 ~ ' · Akşam Bülteni' -%}
+{%- set _desc = B.ozet_cumlesi if B.ozet_cumlesi else ('Borsa İstanbul ' ~ _lbl ~ ' kapanışı: BIST100' ~ (' ' ~ pct_text(_ix.degisim_pct) if _ix.degisim_pct is number else '') ~ ', en çok yükselen ve düşen hisseler, trend durumu değişenler, sektörler, öne çıkan şirket bildirimleri ve takvim.') -%}
+{%- set _img = 'https://borsapusula.com/harita/' ~ _day ~ '.png' -%}
+{%- set _hm_ok = (heatmap is defined) and heatmap and heatmap.rows and heatmap_groups and heatmap_tiles -%}
+{%- set _arc = (arsiv if (arsiv is defined and arsiv) else none) -%}
+{%- set _art = {'@type': 'Article', '@id': _url ~ '#bulten', 'url': _url, 'headline': _h1|string, 'description': _desc|string, 'inLanguage': 'tr',
+   'datePublished': B.updated_at or _day, 'dateModified': B.updated_at or _day,
+   'about': {'@type': 'Thing', 'name': 'BIST100 ' ~ _lbl ~ ' kapanışı'},
+   'author': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'},
+   'publisher': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'},
+   'image': _img, 'breadcrumb': {'@id': _url ~ '#yol'}} -%}
+{%- if _arc %}{% set _ = _art.update({'isPartOf': {'@type': 'CollectionPage', 'name': 'Akşam Bülteni arşivi', 'url': 'https://borsapusula.com/bulten/arsiv'}}) %}{% endif -%}
 {% block head %}<title>{{ _ttl }} | BorsaPusula</title>
 <meta name="description" content="{{ _desc }}">
 <link rel="canonical" href="{{ _url }}">
@@ -23,52 +77,275 @@
 <meta property="og:url"         content="{{ _url }}">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:locale"      content="tr_TR">
-<meta property="og:image"       content="https://borsapusula.com/harita/{{ _day }}.png">
+<meta property="og:image"       content="{{ _img }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ _ttl }}">
 <meta name="twitter:description" content="{{ _desc }}">
-<meta name="twitter:image"       content="https://borsapusula.com/harita/{{ _day }}.png">
+<meta name="twitter:image"       content="{{ _img }}">
 <script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': [
-  {'@type': 'Article', '@id': _url ~ '#bulten', 'url': _url, 'headline': _ttl, 'description': _desc, 'inLanguage': 'tr',
-   'datePublished': bulten.updated_at or _day, 'dateModified': bulten.updated_at or _day,
-   'author': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'},
-   'publisher': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': 'https://borsapusula.com/'},
-   'image': 'https://borsapusula.com/harita/' ~ _day ~ '.png', 'breadcrumb': {'@id': _url ~ '#yol'}},
+  _art,
   {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
     {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': 'https://borsapusula.com/'},
     {'@type': 'ListItem', 'position': 2, 'name': 'Haberler', 'item': 'https://borsapusula.com/haberler'},
-    {'@type': 'ListItem', 'position': 3, 'name': _ttl, 'item': _url}]}
+    {'@type': 'ListItem', 'position': 3, 'name': 'Akşam Bülteni · ' ~ _lbl, 'item': _url}]}
 ]}|tojson }}</script>
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
 <script src="{{ static_v('bp-vocab.js') }}" defer></script>
-<link rel="stylesheet" href="{{ static_v('css/pages/haberler.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/heatmap.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/bulten.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/haber-sekmeler.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Haberler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<main class="hb bl-page" id="main-content" tabindex="-1">
+<main class="container container--wide blv" id="main-content" tabindex="-1">
   {%- from '_haber_ui.html' import tabs as hv_tabs %}
   {{ hv_tabs('bulten') }}
-  <article class="bl-card bl-card--page" aria-labelledby="blH">
-    <p class="bl-ey">Akşam Bülteni</p>
-    <h1 id="blH">{{ _lbl }} kapanışı</h1>
-    {% with bl_full = true %}{% include '_bulten.html' %}{% endwith %}
-  </article>
-  {%- if onceki or sonraki %}
-  <nav class="bl-pager" aria-label="Diğer bültenler">
-    {%- if onceki %}<a rel="prev" href="/bulten/{{ onceki }}"><span aria-hidden="true">←</span> {{ _dl(onceki) }}</a>{% else %}<span></span>{% endif %}
-    {%- if sonraki %}<a rel="next" href="/bulten/{{ sonraki }}">{{ _dl(sonraki) }} <span aria-hidden="true">→</span></a>{% endif %}
+
+  {#- ── Kahraman: soru başlığı + günün cümlesi + BIST100 kapanışı ve 30 seans çizgisi ── #}
+  <section class="blv-hero" aria-labelledby="blH">
+    <div class="blv-hero-top">
+      <p class="blv-ey">Akşam Bülteni <b>· {{ _wd(_day) }}</b></p>
+      <details class="hm-share blv-share" data-hm-share data-url="{{ _url }}" data-kare="/harita/{{ _day }}-kare.png" data-text="{{ _desc }}" data-title="Akşam Bülteni · {{ _lbl }}">
+        <summary class="hm-share-btn"><svg class="hm-share-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Paylaş</summary>
+        <div class="hm-share-menu">
+          <a class="hm-share-it" href="{{ _url }}" data-share-copy>Bağlantıyı kopyala</a>
+          {%- if _hm_ok %}
+          <a class="hm-share-it" href="/harita/{{ _day }}.png" download="borsapusula-bulten-{{ _day }}.png">Görseli indir</a>
+          {%- endif %}
+        </div>
+        <span class="sr-only" role="status" data-share-st></span>
+      </details>
+    </div>
+    <div class="blv-lead">
+      <h1 id="blH">{{ _h1 }}</h1>
+      {%- if B.ozet_parcalar %}
+      <p class="blv-story">{% for p in B.ozet_parcalar %}{% if p[1] %}<b{% if p[1] in ('up', 'dn') %} class="{{ p[1] }}"{% endif %}>{{ p[0] }}</b>{% else %}{{ p[0] }}{% endif %}{% endfor %}</p>
+      {%- elif _ix.kapanis is number %}
+      <p class="blv-story">BIST100 {% if _ix.degisim_pct is number and (_ix.degisim_pct|round(2)) != 0 %}<b class="{{ 'dn' if _ix.degisim_pct < 0 else 'up' }}">%{{ _n2(_ix.degisim_pct|abs) }}</b> {{ 'düşüşle' if _ix.degisim_pct < 0 else 'yükselişle' }} {% endif %}<b>{{ _n2(_ix.kapanis) }}</b> puanda kapandı.</p>
+      {%- endif %}
+    </div>
+    {%- if _ix.kapanis is number %}
+    {%- set S = (_ix.seri or [])|selectattr('1', 'number')|list %}
+    <div class="blv-ix">
+      <div class="blv-ix-h"><span class="blv-ix-l">BIST100 kapanış</span>
+        {%- if S|length > 1 %}<span class="blv-ix-c">{{ S|length }} işlem günü <b class="{{ dir_class((S[-1][1] / S[0][1] - 1) * 100, 2, 'up,dn,neu') }}">{{ pct_text((S[-1][1] / S[0][1] - 1) * 100) }}</b></span>{% endif %}</div>
+      <div class="blv-ix-v"><strong>{{ _n2(_ix.kapanis) }}</strong>{% if _ix.degisim_pct is number %}<span class="blv-chip {{ dir_class(_ix.degisim_pct, 2, 'up,dn,neu') }}">{{ pct_text(_ix.degisim_pct) }}</span>{% endif %}</div>
+      {%- if S|length > 1 %}
+      {%- set vs = S|map(attribute='1')|list %}
+      {%- set mn = vs|min %}{%- set mx = vs|max %}{%- set rg = (mx - mn) or 1 %}{%- set n = S|length %}
+      {#- y: 104 birimlik kutuda üst 14, alt 8 boşluk; x: yüzde -#}
+      {%- macro _y(v) -%}{{ '%.2f'|format(14 + (1 - (v - mn) / rg) * 82) }}{%- endmacro -%}
+      {%- macro _x(i) -%}{{ '%.3f'|format(i / (n - 1) * 100) }}{%- endmacro -%}
+      {%- set hk = vs.index(mx) %}{%- set lk = n - 1 - (vs|reverse|list).index(mn) %}
+      <div class="blv-spk">
+        <svg viewBox="0 0 100 104" preserveAspectRatio="none" role="img" aria-label="BIST100 son {{ n }} işlem günü kapanışları, {{ _dl(S[0][0]) }} ile {{ _dl(S[-1][0]) }} arası; en yüksek {{ _n1(mx) }} ({{ _dl(S[hk][0], false) }}), en düşük {{ _n1(mn) }} ({{ _dl(S[lk][0], false) }})">
+          {%- for i in range(1, n) %}
+          <path class="{{ 'up' if S[i][1] >= S[i - 1][1] else 'dn' }}" d="M{{ _x(i - 1) }} {{ _y(S[i - 1][1]) }}L{{ _x(i) }} {{ _y(S[i][1]) }}L{{ _x(i) }} 104L{{ _x(i - 1) }} 104Z"/>
+          {%- endfor %}
+          <line class="mid" x1="0" x2="100" y1="55" y2="55"/>
+          <path class="ln" d="{% for p in S %}{{ 'M' if loop.first else 'L' }}{{ _x(loop.index0) }} {{ _y(p[1]) }}{% endfor %}"/>
+        </svg>
+        {%- set hx = (hk / (n - 1) * 100) %}
+        <i class="blv-dot" style="left:{{ '%.3f'|format(hx) }}%;top:{{ _y(mx) }}px" aria-hidden="true"></i>
+        <span class="blv-spk-t {{ 'e' if hx > 70 else ('s' if hx < 30 else 'm') }}" style="left:{{ '%.3f'|format(hx) }}%;top:{{ _y(mx) }}px" aria-hidden="true">{{ _n1(mx) }} · {{ _ds(S[hk][0]) }}</span>
+        {%- if lk != n - 1 %}<i class="blv-dot" style="left:{{ _x(lk) }}%;top:{{ _y(mn) }}px" aria-hidden="true"></i>{% endif %}
+        <i class="blv-dot last {{ 'up' if S[-1][1] >= S[-2][1] else 'dn' }}" style="left:100%;top:{{ _y(S[-1][1]) }}px" aria-hidden="true"></i>
+      </div>
+      <div class="blv-spk-x" aria-hidden="true"><span>{{ _ds(S[0][0]) }}</span><span>{{ _ds(S[-1][0]) }}</span></div>
+      {%- endif %}
+    </div>
+    {%- endif %}
+  </section>
+
+  {#- ── Isı haritası (merkez) ── #}
+  {%- if _hm_ok %}
+  <section class="blv-sec" aria-labelledby="hmH">
+    <div class="blv-sec-h"><div><h2 id="hmH">Endeksteki hisseler nasıl kapandı?</h2><p class="blv-sub">BIST100 hisseleri sektörlerine göre. Kutu büyüklüğü piyasa değeri, renk {{ _dl(_day, false) }} değişimi.</p></div><a class="blv-more" href="/harita/{{ _day }}">Tam harita <span aria-hidden="true">→</span></a></div>
+    {% with hm_bare = true, hm_more = '/harita/' ~ _day %}{% include '_heatmap.html' %}{% endwith %}
+  </section>
+  {%- endif %}
+
+  {#- ── Hareketliler: sıralı çubuk listesi (çubuğun tamamı günlük sınır %10) ── #}
+  {%- set _mv = B.hareketliler or {} %}
+  {%- if _mv.up or _mv.down %}
+  <section class="blv-sec" aria-labelledby="mvH">
+    <div class="blv-sec-h"><div><h2 id="mvH">En çok hangi hisseler hareket etti?</h2><p class="blv-sub">Sitedeki tüm hisseler arasında, {{ _dl(_day, false) }} kapanışına göre. Çubuğun tamamı günlük sınır olan %10.</p></div></div>
+    <div class="blv-mv">
+      {%- for key, lbl in [('up', 'En çok yükselen'), ('down', 'En çok düşen')] %}{% if _mv[key] %}
+      <div>
+        <h3 class="blv-h3"><i class="{{ 'up' if key == 'up' else 'dn' }}" aria-hidden="true"></i>{{ lbl }}</h3>
+        <ol class="blv-mvl">
+          {%- for m in _mv[key] %}
+          {%- set c = dir_class(m.change_pct, 2, 'up,dn,neu') %}
+          <li><a class="blv-mr" href="/hisse/{{ m.ticker }}"><span class="r" aria-hidden="true">{{ loop.index }}</span><span class="who"><span class="l1"><b>{{ m.ticker }}</b><em>{{ _tl(m.price) }}</em></span>{% if m.name %}<span class="nm">{{ m.name }}</span>{% endif %}</span><span class="bar" aria-hidden="true"><i class="{{ c }}" style="width:{{ '%.1f'|format([((m.change_pct or 0)|abs) / 10 * 100, 100]|min) }}%;--k:{{ _k(m.change_pct or 0) }}"></i></span><span class="pv {{ c }}">{{ pct_text(m.change_pct) }}</span></a></li>
+          {%- endfor %}
+        </ol>
+      </div>
+      {%- endif %}{% endfor %}
+    </div>
+  </section>
+  {%- endif %}
+
+  <div class="blv-duo">
+    {#- ── Sektörler: sıfır eksenli ıraksak çubuk (kesikli çizgi BIST100) ── #}
+    {%- set _sk = (B.isi_haritasi_ozet or [])|selectattr('ortalama_degisim_pct', 'number')|list %}
+    {%- if _sk %}
+    {%- set _xu = _ix.degisim_pct if _ix.degisim_pct is number else none %}
+    {%- set _vals = _sk|map(attribute='ortalama_degisim_pct')|list + [0] + ([_xu] if _xu is not none else []) %}
+    {%- set _lo0 = _vals|min %}{%- set _hi0 = _vals|max %}{%- set _sp = (_hi0 - _lo0) or 1 %}
+    {%- set _lo = (_lo0 - _sp * 0.04) if _lo0 < 0 else (-_sp * 0.04) %}{%- set _hi = (_hi0 + _sp * 0.04) if _hi0 > 0 else (_sp * 0.04) %}
+    {%- macro _sx(v) -%}{{ '%.2f'|format((v - _lo) / (_hi - _lo) * 100) }}{%- endmacro -%}
+    {%- set _z = (0 - _lo) / (_hi - _lo) * 100 %}
+    <section class="blv-sec" aria-labelledby="skH">
+      <div class="blv-sec-h"><div><h2 id="skH">Sektörler nasıl kapandı?</h2><p class="blv-sub">Sektördeki BIST100 hisselerinin piyasa değeriyle ağırlıklı ortalama değişimi{% if _xu is not none %}; kesikli çizgi BIST100{% endif %}.</p></div></div>
+      <div class="blv-sk">
+        <div class="blv-sk-ax" aria-hidden="true"><span></span><span class="pa">
+          {%- if _xu is not none %}{% set _rf = (_xu - _lo) / (_hi - _lo) * 100 %}
+          {%- if (_rf - _z)|abs >= 18 %}<span class="z" style="left:{{ '%.2f'|format(_z) }}%">0</span>{% endif %}
+          <span class="ref {{ 'e' if _rf > 70 else ('s' if _rf < 30 else 'm') }}" style="left:{{ '%.2f'|format(_rf) }}%">BIST100 {{ pct_text(_xu) }}</span>
+          {%- else %}<span class="z" style="left:{{ '%.2f'|format(_z) }}%">0</span>{% endif %}
+        </span><span></span></div>
+        <ul class="blv-skl">
+          {%- for s in _sk %}
+          {%- set v = s.ortalama_degisim_pct %}{%- set x = ((v - _lo) / (_hi - _lo) * 100) %}
+          <li class="blv-skr"><span class="nm"><span>{{ s.sektor }}</span>{% if s.hisse_sayisi %}<small aria-label="{{ s.hisse_sayisi }} hisse">{{ s.hisse_sayisi }}</small>{% endif %}</span><span class="pa" aria-hidden="true">{% if _xu is not none %}<span class="rf" style="left:{{ _sx(_xu) }}%"></span>{% endif %}<span class="zl" style="left:{{ '%.2f'|format(_z) }}%"></span><i class="{{ dir_class(v, 1, 'up,dn,neu') }}" style="left:{{ '%.2f'|format([x, _z]|min) }}%;width:{{ '%.2f'|format([(x - _z)|abs, 0.6]|max) }}%;--k:{{ _k(v) }}"></i></span><span class="v {{ dir_class(v, 1, 'up,dn,neu') }}">{{ pct_text(v, 1) }}</span></li>
+          {%- endfor %}
+        </ul>
+      </div>
+    </section>
+    {%- endif %}
+
+    {#- ── Durumu değişenler: geçişe göre kartlar (trend renkleri) ── #}
+    {%- set _dd = B.durum_degisimleri or [] %}
+    {%- set _RANK = {'Güçlü Trend': 0, 'Yatay': 1, 'Trend Bozuldu': 2} %}
+    {%- set _ST = {'Güçlü Trend': 'g', 'Yatay': 'y', 'Trend Bozuldu': 'b'} %}
+    <section class="blv-sec" aria-labelledby="ddH">
+      <div class="blv-sec-h"><div><h2 id="ddH">Hangi hisselerin durumu değişti?</h2><p class="blv-sub">{% if _dd %}{{ _dl(_day, false) }} kapanışıyla {{ _dd|length }} hissenin durumu değişti.{% else %}{{ _dl(_day, false) }} kapanışında durumu değişen hisse yok.{% endif %} Durum beş teknik koşuldan çıkar; <a href="/metodoloji">nasıl hesaplanıyor</a>.</p></div></div>
+      {%- if _dd %}
+      {%- set _grp = {} %}{%- set _ord = [] %}
+      {%- for x in _dd if x.onceki in _RANK and x.yeni in _RANK %}
+        {%- set key = x.onceki ~ '→' ~ x.yeni %}
+        {%- if key not in _grp %}{% set _ = _grp.update({key: {'o': x.onceki, 'y': x.yeni, 'r': _RANK[x.yeni], 'list': []}}) %}{% set _ = _ord.append(key) %}{% endif %}
+        {%- set _ = _grp[key].list.append(x) %}
+      {%- endfor %}
+      {%- set _cards = [] %}
+      {%- for key in _ord %}{% set _ = _cards.append({'k': key, 'n': _grp[key].list|length, 'r': _grp[key].r}) %}{% endfor %}
+      <div class="blv-dgs">
+        {%- for cd in _cards|sort(attribute='r')|sort(attribute='n', reverse=true) %}
+        {%- set g = _grp[cd.k] %}{%- set a = _RANK[g.o] %}{%- set b = _RANK[g.y] %}
+        <div class="blv-dg">
+          <div class="blv-dg-h">
+            <svg class="blv-lad" viewBox="0 0 20 40" aria-hidden="true">
+              {%- set Y = [6, 20, 34] %}
+              <line class="rail" x1="10" y1="6" x2="10" y2="34"/>
+              <line class="go {{ _ST[g.y] }}" x1="10" y1="{{ Y[a] }}" x2="10" y2="{{ Y[b] }}"/>
+              {%- for k in [0, 1, 2] if k != a and k != b %}<circle class="off" cx="10" cy="{{ Y[k] }}" r="2"/>{% endfor %}
+              <circle class="from {{ _ST[g.o] }}" cx="10" cy="{{ Y[a] }}" r="3.6"/>
+              <circle class="to {{ _ST[g.y] }}" cx="10" cy="{{ Y[b] }}" r="4.6"/>
+            </svg>
+            <div class="blv-dg-t"><span class="blv-st {{ _ST[g.o] }}">{{ g.o }}</span><span class="ar" aria-label="durumundan">→</span><span class="blv-st {{ _ST[g.y] }}">{{ g.y }}</span></div>
+            <span class="blv-dg-n" aria-label="{{ g.list|length }} hisse">{{ g.list|length }}</span>
+          </div>
+          <ul>
+            {%- for x in g.list %}
+            <li><a class="blv-dr" href="/hisse/{{ x.ticker }}"><b>{{ x.ticker }}</b><span>{{ x.ad or '' }}</span>{% if x.fiyat is number %}<em>{{ _tl(x.fiyat) }}</em>{% else %}<em></em>{% endif %}{% if x.degisim_pct is number %}<i class="{{ dir_class(x.degisim_pct, 2, 'up,dn,neu') }}">{{ pct_text(x.degisim_pct) }}</i>{% else %}<i></i>{% endif %}</a></li>
+            {%- endfor %}
+          </ul>
+        </div>
+        {%- endfor %}
+      </div>
+      {%- endif %}
+    </section>
+  </div>
+
+  <div class="blv-duo">
+    {#- ── Şirket bildirimleri ── #}
+    {%- set _kb = B.onemli_bildirimler or [] %}
+    {%- if _kb %}
+    <section class="blv-sec" aria-labelledby="kbH">
+      <div class="blv-sec-h"><div><h2 id="kbH">Şirketler ne açıkladı?</h2><p class="blv-sub">{{ _day[8:10]|int }} {{ _MOLOC[_day[5:7]|int - 1] }} şirketlerin yayımladığı bildirimlerden öne çıkanlar; tutarı şirketin yıllık hasılatına göre büyük olanlar önde.</p></div><a class="blv-more" href="/haberler">Tüm bildirimler <span aria-hidden="true">→</span></a></div>
+      <ul class="blv-kb">
+        {%- for k in _kb %}
+        {%- set al = k.onem_alanlar %}
+        <li><a class="blv-kr" href="{{ k.href or ('/hisse/' ~ k.ticker) }}"><b>{{ k.ticker }}</b><span>{% if k.company %}<span class="kc">{{ k.company }}</span>{% endif %}<span class="kt">{{ k.title }}</span></span>
+          {%- if al and al.yuzde is number and al.yil %}<span class="on"><span class="ob" aria-hidden="true"><i style="width:{{ '%.1f'|format([al.yuzde / 50 * 100, 100]|min) }}%"></i></span><span>{{ al.temel }} {{ al.tutar }}, şirketin {{ al.yil }} hasılatının <b>{{ al.oran_txt }}</b></span></span>{% endif %}</a></li>
+        {%- endfor %}
+      </ul>
+    </section>
+    {%- endif %}
+
+    {#- ── Takvim: tarihli başlık; gün boşsa sonraki beş işlem günü ── #}
+    {%- set _tg = B.takvim_gunu %}
+    {%- set _yt = B.yarin_takvim or [] %}
+    {%- set _ya = B.yaklasan or [] %}
+    {%- macro _ev(e, gun) -%}
+    {%- set d = e.date or gun -%}
+    <li><time datetime="{{ d }}">{{ _ds(d) }}<small>{{ _wdk(d) }}</small>{% if e.time %}<small>{{ e.time }}</small>{% endif %}</time><div>
+      {%- if e.kind == 'temettu' -%}
+      <b><span class="ck tm">Temettü</span>{% if e.name %}{{ e.name }} · {% endif %}{{ e.ticker }}</b>
+      <p>Hak kullanım günü.{% if e.brut_tl is number %} Hisse başına brüt <span>{{ _tl(e.brut_tl) }}</span>{% if e.net_tl is number %}, net <span>{{ _tl(e.net_tl) }}</span>{% endif %}{% if e.yield_pct is number %}; verim <span>%{{ _n2(e.yield_pct) }}</span>{% endif %}.{% endif %}{% if e.pay_date %} Ödeme {{ _dl(e.pay_date) }}{% if e.taksit and e.taksit != 'tek' %}, taksit {{ e.taksit }}{% endif %}.{% endif %}</p>
+      {%- elif e.kind == 'bilanco' -%}
+      <b><span class="ck bi">Bilanço</span>{% if e.ticker %}{% if e.name %}{{ e.name }} · {% endif %}{{ e.ticker }}{% else %}{{ e.title or 'Finansal raporlar' }}{% endif %}</b>
+      {%- if e.donem %}<p>{{ e.donem }} dönemi finansal raporu.</p>{% endif %}
+      {%- else -%}
+      <b><span class="ck mk">{{ (e.region ~ ' verisi') if e.region else 'Veri' }}</span>{{ e.title }}{% if e.period %} · {{ e.period }}{% endif %}</b>
+      {%- if e.detail %}<p>{{ e.detail }}</p>{% endif %}
+      {%- endif -%}
+    </div></li>
+    {%- endmacro -%}
+    {%- if _tg %}
+    <section class="blv-sec" aria-labelledby="tkH">
+      <div class="blv-sec-h"><div><h2 id="tkH">{{ _dl(_tg, _tg[:4] != _day[:4]) }} {{ _wd(_tg) }} takvimde ne var?</h2><p class="blv-sub">Bilanço, temettü ve veri açıklamaları.</p></div><a class="blv-more" href="/takvim">Takvim <span aria-hidden="true">→</span></a></div>
+      {%- if _yt %}
+      <ul class="blv-cal">{% for e in _yt %}{{ _ev(e, _tg) }}{% endfor %}</ul>
+      {%- else %}
+      <p class="blv-empty">{{ _dl(_tg, false) }} için takvimde bilanço, temettü ya da veri açıklaması yok.</p>
+      {%- if _ya %}
+      <h3 class="blv-cal-h">Sonraki beş işlem günü</h3>
+      <ul class="blv-cal">{% for e in _ya %}{{ _ev(e, _tg) }}{% endfor %}</ul>
+      {%- endif %}
+      {%- endif %}
+    </section>
+    {%- elif _yt %}
+    <section class="blv-sec" aria-labelledby="tkH">
+      <div class="blv-sec-h"><div><h2 id="tkH">Sonraki işlem günü takvimde ne var?</h2><p class="blv-sub">Bilanço, temettü ve veri açıklamaları.</p></div><a class="blv-more" href="/takvim">Takvim <span aria-hidden="true">→</span></a></div>
+      <ul class="blv-cal">{% for e in _yt %}{{ _ev(e, e.date) }}{% endfor %}</ul>
+    </section>
+    {%- endif %}
+  </div>
+
+  {#- ── Gezinme: önceki / sonraki + arşiv şeridi ── #}
+  <nav class="blv-pager" aria-label="Diğer bültenler">
+    {%- if onceki %}<a class="blv-pg" rel="prev" href="/bulten/{{ onceki }}"><small><span aria-hidden="true">←</span> Önceki bülten</small><b>{{ _dl(onceki, false) }} {{ _wd(onceki) }}</b></a>
+    {%- else %}<span class="blv-pg off"><small><span aria-hidden="true">←</span> Önceki bülten</small><b>İlk bülten bu</b></span>{% endif %}
+    {%- if sonraki %}<a class="blv-pg nx" rel="next" href="/bulten/{{ sonraki }}"><small>Sonraki bülten <span aria-hidden="true">→</span></small><b>{{ _dl(sonraki, false) }} {{ _wd(sonraki) }}</b></a>
+    {%- elif _tg %}<span class="blv-pg nx off"><small>Sonraki bülten <span aria-hidden="true">→</span></small><b>{{ _dl(_tg, false) }} kapanışından sonra</b></span>
+    {%- else %}<span class="blv-pg nx off" aria-hidden="true"></span>{% endif %}
   </nav>
+  {%- set _strip = (_arc[:7] if _arc else ((gunler or [])|reverse|list)[:7]) %}
+  {%- if _strip|length > 1 %}
+  <div class="blv-arc">
+    <span class="blv-arc-l">Arşiv</span>
+    <ul>
+      {%- for it in _strip %}
+      {%- set g = it.tarih if it.tarih is defined else it %}
+      <li><a class="blv-ad" href="/bulten/{{ g }}"{% if g == _day %} aria-current="page"{% endif %}><span>{{ _ds(g) }} {{ _wdk(g) }}</span>{% if it.degisim_pct is defined and it.degisim_pct is number %}<b class="{{ dir_class(it.degisim_pct, 2, 'up,dn,neu') }}">{{ pct_text(it.degisim_pct) }}</b>{% endif %}</a></li>
+      {%- endfor %}
+    </ul>
+    {%- if _arc %}<a class="blv-more" href="/bulten/arsiv">Tüm bültenler <span aria-hidden="true">→</span></a>{% endif %}
+  </div>
   {%- endif %}
-  {%- if gunler and gunler|length > 1 %}
-  <p class="bl-arch">Son bültenler: {% for g in gunler|reverse %}{% if g == _day %}<b>{{ _dl(g) }}</b>{% else %}<a href="/bulten/{{ g }}">{{ _dl(g) }}</a>{% endif %}{% if not loop.last %} · {% endif %}{% endfor %}</p>
-  {%- endif %}
-  <p class="hb-disc">Bülten her işlem günü kapanıştan sonra bir kez hazırlanır ve sonradan değişmez. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+  <p class="blv-disc">Bülten her işlem günü kapanıştan sonra bir kez hazırlanır ve sonradan değişmez. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
 </main>
 {% with ftr_self='/haberler', ftr_note=('Bu sayfadaki değişimler ' ~ _lbl ~ ' kapanışına aittir; sayfa sonradan güncellenmez.') %}{% include '_footer.html' %}{% endwith %}
 <script src="{{ static_v('bp-format.js') }}"></script>
 <script src="{{ static_v('bp-search.js') }}" defer></script>
+{%- if not _hm_ok %}
+<script src="{{ static_v('js/bp-heatmap.js') }}" defer></script>
+{%- endif %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

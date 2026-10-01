@@ -45,6 +45,14 @@
     veriyorsa. Nötr=--bp-surface3 üzerinde kesişim yükselişte k≈0,55, düşüşte
     k≈0,83 (en kötü nokta 4,38:1). Palet değişirse bu iki eşik yeniden hesaplanır.
 
+    C-73 (01.10) Akşam Bülteni v2 gömme: hm_bare=true (yalnız /bulten/<gün> verir; hm_full ile
+      birlikte yok sayılır). Başlık/eyebrow/Paylaş/"Tüm harita" çıkmaz (bölüm başlığı ve "Tam
+      harita" sayfanın kendisinde); yerine kısa sayım satırı + nabız şeridi (100 hisse, en çok
+      düşenden en çok yükselene, kutularla aynı renk ölçeği). Kök <section class="hm-bare">
+      (aria-labelledby yok: başlık dış bölümde).
+      hm_more (ek): telefon yığınında harita kısaltılınca altta "Tam harita →" hedefi (ör. /harita/<gün>).
+      Verilmezse çıktı öncekiyle BİREBİR aynı.
+
     `notes` iç alandır: sayfaya ve gömülü JSON'a GİRMEZ.
     ═══════════════════════════════════════════════════════════════════════ -#}
 {%- import '_fmt_macros.html' as bpf -%}
@@ -179,9 +187,32 @@
   {%- set _sh.href = ('https://borsapusula.com' ~ _href(_path, _mode, _per, _MQ, _PQ)) if (_sh.view and (_mode != 'chg' or _per != 'd1')) else _sh.perma -%}
 {%- endif -%}
 {%- set _h1 = hm_h1 if ((hm_h1 is defined) and hm_h1 and not _full) else none -%}
-<section class="da-section" id="sektorler" aria-labelledby="hmTitle">
+{%- set _bare = (hm_bare is defined) and hm_bare and not _full -%}
+<section class="{{ 'hm-bare' if _bare else 'da-section' }}" id="sektorler"{% if not _bare %} aria-labelledby="hmTitle"{% endif %}>
   <div class="da-panel hm{{ ' hm-full hm-m-' ~ _mode ~ (' hm-lim-on' if _limon else '') if _full }}" data-hm{% if _h1 %} data-hm-all{% endif %}{% if _full %} data-hm-full data-mode="{{ _mode }}" data-per="{{ _per }}"{% endif %}>
-    {%- if not _full %}
+    {%- if _bare %}
+    <div class="hm-head hm-head--bare">
+      <p class="hm-thesis hm-cnt"><b class="up">{{ _up }}</b> yükseldi · <b class="dn">{{ _dn }}</b> düştü{% if _fl %} · <b class="neu">{{ _fl }}</b> değişmedi{% endif %}{% if _tv %} · <b class="neu">{{ _tv }}</b> tavan{% endif %}{% if _tb %} · <b class="neu">{{ _tb }}</b> taban{% endif %}</p>
+      {%- set _pr = _hmrows|selectattr('ch')|selectattr('ch.d1', 'number')|sort(attribute='ch.d1')|list %}
+      {%- if _pr|length > 1 %}
+      {%- set _bw = 1000.0 / (_pr|length) %}
+      <div class="hm-pulse">
+        <span class="hm-pl l" aria-hidden="true">En çok düşen</span><span class="hm-pl r" aria-hidden="true">En çok yükselen</span>
+        <svg viewBox="0 0 1000 36" preserveAspectRatio="none" role="img" aria-label="Endeksteki {{ _pr|length }} hisse, en çok düşenden en çok yükselene: {{ _dn }} düştü, {{ _up }} yükseldi">
+          {%- for r in _pr %}
+          {%- set v = r.ch.d1|round(2) -%}
+          {%- set cls = bpf.dir_class(v, 2, 'up,dn,neu') -%}
+          {%- set t = [v|abs / 3.0, 1.0]|min -%}
+          {%- set k = (0.16 + 0.84 * (t ** 0.72)) if cls != 'neu' else 0 -%}
+          {%- set h = [1.5, (t ** 0.5) * 16]|max -%}
+          <rect class="{{ cls }}" x="{{ '%.1f'|format(loop.index0 * _bw + 0.8) }}" y="{{ '%.1f'|format(18 - h if v >= 0 else 18) }}" width="{{ '%.1f'|format([_bw - 1.6, 0.6]|max) }}" height="{{ '%.1f'|format(h) }}" rx="1.2" style="--k:{{ '%.3f'|format(k) }}"/>
+          {%- endfor %}
+          <line x1="0" x2="1000" y1="18" y2="18"/>
+        </svg>
+      </div>
+      {%- endif %}
+    </div>
+    {%- elif not _full %}
     <div class="hm-head">
       {%- if _sh.on %}
       <div class="hm-top">
@@ -321,8 +352,11 @@
         {%- if _na.any %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Değişim verisi yok</span>{% endif %}
         {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Kapanış verisi gelmedi</span>{% endif %}
       </div>
-      <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
-      {%- if not _h1 %}
+      <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.{% if _bare %} Sektör adının yanındaki yüzde, sektördeki hisselerin piyasa değeriyle ağırlıklı ortalaması.{% endif %}</p>
+      {%- if _bare and (hm_more is defined) and hm_more %}
+      <a class="hm-more da-tap" href="{{ hm_more }}">Tam harita →</a>
+      {%- endif %}
+      {%- if not _h1 and not _bare %}
       <a class="hm-more da-tap" href="/sektor-harita">Tüm harita →</a>
       {%- endif %}
     {%- else %}
