@@ -4812,7 +4812,9 @@ def _build_bulten_snapshot(day, signal_changes, heatmap_snap):
     ondan okunur). Girdiler: resmi arşiv (BIST100), o günün ranked satırları (hareketliler),
     resmi sinyal değişimleri (çağıran), ısı haritası görüntüsü, KAP akışı (rutin dışı),
     D-24 takvimi (ertesi işlem günü). Kalite kapısı yok (heatmap'in aksine); o gün zaten
-    donmuşsa dokunulmaz."""
+    donmuşsa dokunulmaz. D-56 (Bülten v2): XU100 30 kapanış serisi + eşik tarihi
+    (chart_xu100.json geçmişi + günün resmi kapanışı), durum değişimlerinde ad/fiyat/%
+    (hareketlilerle aynı satırlar), boş takvim gününde sonraki beş işlem günü, günün cümlesi."""
     rec = official_close.load_archive(day)
     with _lock:
         stocks = list(_cache.get("data") or [])
@@ -4830,14 +4832,23 @@ def _build_bulten_snapshot(day, signal_changes, heatmap_snap):
         logger.warning("BULTEN: takvim okunamadı: %s", _e)
         takvim_events = []
     next_day_iso = _bulten_next_trading_day(day)
+    _load_xu100_chart_from_disk()
+    with _lock:
+        xu100_ohlc = list(((_xu100_chart_cache.get("data") or {}).get("ohlc") or []))
+    by_t = {s.get("ticker"): s for s in bist if s.get("ticker")}
+    gunler = bulten.sonraki_islem_gunleri(day.isoformat(), bulten.YAKLASAN_GUN, is_trading_day)
     snap = bulten.build(day.isoformat(), rec, movers, signal_changes, heatmap_snap, kap_items,
                         takvim_events, next_day_iso,
-                        datetime.now(_TZ_TR).isoformat(timespec="seconds"))
+                        datetime.now(_TZ_TR).isoformat(timespec="seconds"),
+                        xu100_ohlc=xu100_ohlc, stocks=by_t, takvim_gunleri=gunler)
     path = bulten.save_frozen(snap, _BULTEN_DIR)
-    logger.info("BULTEN: %s %s — hareketli %d/%d, durum değişimi %d, bildirim %d, yarın %d",
+    logger.info("BULTEN: %s %s — hareketli %d/%d, durum değişimi %d, bildirim %d, yarın %d, yaklaşan %d, "
+               "seri %d, eşik %s, cümle %s",
                day, "donduruldu " + path if path else "zaten donmuş, dokunulmadı",
                len(snap["hareketliler"]["up"]), len(snap["hareketliler"]["down"]),
-               len(snap["durum_degisimleri"]), len(snap["onemli_bildirimler"]), len(snap["yarin_takvim"]))
+               len(snap["durum_degisimleri"]), len(snap["onemli_bildirimler"]), len(snap["yarin_takvim"]),
+               len(snap["yaklasan"]), len(snap["bist100"].get("seri") or []), snap["bist100"].get("esik"),
+               "var" if snap.get("ozet_cumlesi") else "yok")
     return snap
 
 
@@ -5788,11 +5799,12 @@ def api_bulten_gun(tarih):
     return safe_json(snap)
 
 
-def _bulten_page_ready():
+def _bulten_page_ready(name="bulten.html"):
     """bulten.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /bulten ve
-    /bulten/<gün> 404 döner (500 yok); /api/bulten/* şablondan bağımsız çalışır."""
+    /bulten/<gün> 404 döner (500 yok); /api/bulten/* şablondan bağımsız çalışır.
+    D-56: /bulten/arsiv aynı desenle bulten_arsiv.html'e bakar."""
     try:
-        app.jinja_env.get_template("bulten.html")
+        app.jinja_env.get_template(name)
         return True
     except Exception:
         return False
@@ -5827,8 +5839,34 @@ def bulten_gun(tarih):
     i = d.index(tarih) if tarih in d else -1
     onceki = d[i - 1] if i > 0 else None
     sonraki = d[i + 1] if 0 <= i < len(d) - 1 else None
+    # D-56 (Bülten v2): günün donmuş ısı haritası sayfanın ortasında (templates/_heatmap.html).
+    # Sektör özeti TEK TANIM: haritanın çizdiği (güncel taksonomiyle yeniden gruplanmış) aynı
+    # satırlardan, aynı kuralla (piyasa değeriyle ağırlıklı) — haritadaki grup etiketi ile çubuk
+    # grafikteki yüzde aynı sayı olur. Görüntü yoksa harita bölümü gizlenir, özet donmuş hâliyle.
+    hm = _heatmap_day(tarih)
+    hm_ctx = {"heatmap": None, "heatmap_groups": [], "heatmap_tiles": []}
+    if hm and hm.get("snap"):
+        hm_ctx = {"heatmap": hm["snap"], "heatmap_groups": hm["groups"], "heatmap_tiles": hm["tiles"]}
+        _ozet = bulten.isi_haritasi_ozet(hm["snap"])
+        if _ozet:
+            snap = dict(snap, isi_haritasi_ozet=_ozet)
     resp = app.make_response(render_template(
-        "bulten.html", bulten=snap, onceki=onceki, sonraki=sonraki, gunler=d[-7:]))
+        "bulten.html", bulten=snap, onceki=onceki, sonraki=sonraki, gunler=d[-7:],
+        arsiv=bulten.arsiv(_BULTEN_DIR), **hm_ctx))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/bulten/arsiv")
+def bulten_arsiv():
+    """D-56: tüm Akşam Bültenleri (yeniden eskiye; gün, BIST100 kapanışı ve değişimi, günün
+    cümlesi). Şablon yayında değilse ya da hiç bülten yoksa 404 (500 yok)."""
+    if not _bulten_page_ready("bulten_arsiv.html"):
+        abort(404)
+    a = bulten.arsiv(_BULTEN_DIR)
+    if not a:
+        abort(404)
+    resp = app.make_response(render_template("bulten_arsiv.html", arsiv=a))
     resp.headers["Cache-Control"] = "public, max-age=300"
     return resp
 
@@ -10954,6 +10992,8 @@ def sitemap():
         for d in reversed(heatmap.days(_HEATMAP_DIR)[-90:]):
             pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     # CPO-1802: /bulten/<gün> kalıcı Akşam Bülteni sayfaları (şablon yayındaysa)
+    if _bulten_page_ready() and _bulten_page_ready("bulten_arsiv.html") and bulten.days(_BULTEN_DIR):
+        pages.append({"loc": "/bulten/arsiv", "priority": "0.6", "changefreq": "daily"})   # D-56
     if _bulten_page_ready():
         for d in reversed(bulten.days(_BULTEN_DIR)[-90:]):
             _snap = _bulten_read(os.path.join(_BULTEN_DIR, d + ".json"))
@@ -11152,7 +11192,9 @@ def llms_txt():
         if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
             body = body.replace("- [Blog]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
                                 "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "
-                                "sayfa: /bulten/YYYY-AA-GG\n- [Blog]", 1)
+                                "sayfa: /bulten/YYYY-AA-GG" + (
+                                    "; tüm bültenler: https://borsapusula.com/bulten/arsiv"
+                                    if _bulten_page_ready("bulten_arsiv.html") else "") + "\n- [Blog]", 1)
     return Response(body, mimetype="text/plain")
 
 

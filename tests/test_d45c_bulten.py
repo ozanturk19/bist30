@@ -53,17 +53,20 @@ def test_durum_degisimleri_bos_liste():
     assert bulten.durum_degisimleri([]) == []
 
 
-def test_isi_haritasi_ozet_sektor_ortalamasi_ve_bayat_disi():
+def test_isi_haritasi_ozet_piyasa_degeriyle_agirlikli_harita_ile_ayni_tanim():
+    # D-56: templates/_heatmap.html grup etiketiyle aynı kural — mcap'li satırlar sayılır,
+    # d1'i olanlar mcap ile tartılır (bayat satır haritada da ortalamaya girer).
     snap = {"rows": [
-        {"g": "Bankacılık", "ch": {"d1": 2.0}, "stale": False},
-        {"g": "Bankacılık", "ch": {"d1": 4.0}, "stale": False},
-        {"g": "Bankacılık", "ch": {"d1": 100.0}, "stale": True},   # bayat — dışarıda
-        {"g": "Holding", "ch": {"d1": -1.0}, "stale": False},
-        {"g": None, "ch": {"d1": 5.0}, "stale": False},             # grupsuz — dışarıda
+        {"g": "Bankacılık", "mcap": 300.0, "ch": {"d1": 2.0}, "stale": False},
+        {"g": "Bankacılık", "mcap": 100.0, "ch": {"d1": 4.0}, "stale": False},
+        {"g": "Bankacılık", "mcap": 100.0, "ch": {"d1": None}, "stale": True},   # değişimsiz: sayılır, tartılmaz
+        {"g": "Holding", "mcap": 50.0, "ch": {"d1": -1.0}, "stale": False},
+        {"g": "Holding", "mcap": None, "ch": {"d1": 9.0}, "stale": False},       # mcap yok: haritada da yok
+        {"g": None, "mcap": 10.0, "ch": {"d1": 5.0}, "stale": False},            # grupsuz — dışarıda
     ]}
     out = bulten.isi_haritasi_ozet(snap)
-    assert out[0] == {"sektor": "Bankacılık", "ortalama_degisim_pct": 3.0}
-    assert out[1] == {"sektor": "Holding", "ortalama_degisim_pct": -1.0}
+    assert out[0] == {"sektor": "Bankacılık", "ortalama_degisim_pct": 2.5, "hisse_sayisi": 3}
+    assert out[1] == {"sektor": "Holding", "ortalama_degisim_pct": -1.0, "hisse_sayisi": 1}
     assert len(out) == 2
 
 
@@ -84,6 +87,7 @@ def test_onemli_bildirimler_onem_orani_azalan():
     out = bulten.onemli_bildirimler(items, n=2)
     assert [x["ticker"] for x in out] == ["B", "A"]
     assert out[0]["onem"] == "%40"
+    assert out[0]["onem_alanlar"]["oran_txt"] == "%40'ı"
 
 
 def test_onemli_bildirimler_hepsi_onemsiz_zamana_gore_sirali():
@@ -127,7 +131,10 @@ def test_build_sozlesme_sema():
     assert set(snap.keys()) == {
         "tarih", "bist100", "hareketliler", "durum_degisimleri", "isi_haritasi_ozet",
         "onemli_bildirimler", "yarin_takvim", "updated_at", "frozen",
+        # D-56 (Bülten v2) ek alanları
+        "ozet_cumlesi", "ozet_parcalar", "sayim", "takvim_gunu", "yaklasan",
     }
+    assert snap["takvim_gunu"] == "2026-09-28"
     assert snap["tarih"] == "2026-09-27"
     assert snap["frozen"] is True
     assert snap["hareketliler"] == movers
