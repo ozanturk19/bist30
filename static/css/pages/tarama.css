@@ -199,7 +199,7 @@
     .tv-stamp { font-size: 12.5px; }
     .tv-strip { height: 8px; gap: 0; margin-top: 8px; border-radius: 3px; }
     .tv-leg, .tv-stat, .tv-vsep { display: none; }
-    .tv-bar { position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-sticky-subheader); gap: 8px; margin: 0 calc(-1 * var(--tv-gut)); padding: 5px 0 5px var(--tv-gut); background: rgba(var(--bp-bg-rgb), .97); border-bottom: 1px solid var(--bp-border); }
+    .tv-bar { position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-sticky-subheader); gap: 8px; margin: 0 calc(-1 * var(--tv-gut)); padding: 5px 0 5px var(--tv-gut); background: var(--bp-bg); border-bottom: 1px solid var(--bp-border); } /* C-71 K37: opak — altından kayan satırlar görünmez */
     .tv-fbtn, .tv-chip { min-height: 44px; }
     /* C-70 K07: telefonda Filtre düğmesi ikon + rozet; çip satırına yer kalır (erişilebilir ad JS'te aria-label). */
     .tv-fl { display: none; }

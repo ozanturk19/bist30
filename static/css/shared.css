@@ -32,7 +32,7 @@ textarea {
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index:var(--bp-z-sticky);
-    background: rgba(var(--bp-bg-rgb),0.99);
+    background: var(--bp-bg); /* C-71 K37: opak yapışkan yüzey (0,99 alfa + blur yok = sızıntı) */
     border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
