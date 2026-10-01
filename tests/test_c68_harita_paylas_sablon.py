@@ -207,7 +207,8 @@ def test_day_page_footer_note_is_dated():
     # Kalıcı sayfa ertesi kapanıştan sonra geçmiş gündür: tarihsiz "son kapanışa aittir" rozeti yanlış olur.
     out = _day()
     foot = re.search(r'<footer class="da-footer">.*?</footer>', out, re.S).group(0)
-    assert "Bu sayfadaki değişimler 23 Eylül 2026 kapanışına aittir; sayfa sonradan güncellenmez." in foot
+    # C-74 K2 (O29): "sayfa sonradan güncellenmez" süreç dili kalktı; tarih başlıkta.
+    assert "sonradan güncellenmez" not in foot and "23 Eylül 2026" in out
     assert "son kapanış" not in foot and "EOD" not in foot
     empty = E.get_template("harita_gun.html").render(**BASE, request=_req("/harita/x"))
     efoot = re.search(r'<footer class="da-footer">.*?</footer>', empty, re.S).group(0)

@@ -1625,9 +1625,8 @@ const TV_LBL = { revenue: 'Hasılat', gross_profit: 'Brüt kâr', operating_prof
 const TV_GROWTH = { sanayi: ['revenue', 'net_income_parent', 'fcf'], gyo: ['revenue', 'net_income_parent', 'fcf'],
   banka: ['net_interest_income', 'net_fees', 'net_income_parent', 'loans', 'deposits'],
   sigorta: ['net_income_parent', 'equity_parent', 'total_assets'] };
-const TV_BASIS = { tms29: 'enflasyon düzeltmeli TL', nominal: 'nominal TL', banka: 'nominal TL', sigorta: 'nominal TL',
+const TV_BASIS = { tms29: 'enflasyon düzeltmeli TL', nominal: 'TL', banka: 'TL', sigorta: 'TL',
   yabanci_para: 'TL\'ye çevrilmiş' };
-const TV_SABLON = { sanayi: 'Sanayi şablonu', gyo: 'GYO şablonu', banka: 'Banka şablonu', sigorta: 'Sigorta şablonu' };
 const TV_CUT = 0.80, TV_EXP = 1.25;                  /* kanon §5.6 (C-M1): ucuz / pahali esigi */
 const TV = { f: null, k: null, per: 'y', met: null, wired: false };
 
@@ -2110,7 +2109,8 @@ function _tvRender(f, divRow) {
   const show = (id, ok) => { const el = _tvEl(id); if (el) el.hidden = !ok; };
   if (k) {
     const per = _tvEl('tvPer');
-    per.textContent = (TV_SABLON[k.sablon] || '') + ' · ' + (TV_BASIS[k.basis] || 'TL') + ' · son finansallar ' + (k.son_rapor_etiket || '');
+    const _b = TV_BASIS[k.basis] || 'TL';   /* C-74 K2: şablon adı + 'nominal' iç dil, gösterilmez */
+    per.textContent = 'Son rapor: ' + (k.son_rapor_etiket || '') + (_b !== 'TL' ? ' · ' + _b : '');
     per.hidden = false;
     _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + (k.son_rapor_etiket || '') + ' dönemine kadar. Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.';
   } else {

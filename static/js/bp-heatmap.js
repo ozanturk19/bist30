@@ -264,7 +264,7 @@
   function dirCls(v, frac) { return bpDirClass(v, frac, ['up', 'dn', 'neu']); }
   function trLabel(tr) {
     var sig = TR_SIG[tr];
-    if (!sig) return 'Kapsam dışı';
+    if (!sig) return 'Trend durumu yok';
     return (typeof sigLabel === 'function') ? sigLabel(sig) : '—';
   }
   function money(bn) {

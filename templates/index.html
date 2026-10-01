@@ -225,7 +225,7 @@
 <section class="da-section hp-blk" id="hareketliler" aria-labelledby="hpMvT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpMvT">Son seansın hareketlileri</h2>
-    <p>Tüm kapsam · <span class="hp-asof">{{ _asl }}</span></p>
+    <p>{% if _sc and _sc.total %}{{ _sc.total }} hisse · {% endif %}<span class="hp-asof">{{ _asl }}</span></p>
   </div>
   {#- D-53: hareketliler SSR (ssr_movers; JS aynı seçimle yeniler) -#}
   {%- set _mv = ssr_movers if (ssr_movers and (ssr_movers.up or ssr_movers.down)) else none -%}
