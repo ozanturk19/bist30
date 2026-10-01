@@ -2,7 +2,8 @@
 """D-56 (Bülten v2): D-56 öncesi dondurulmuş Akşam Bültenlerine yeni alanları bir kez ekler.
 
 Ne ekler (bulten.eksikleri_tamamla — var olan değere dokunmaz):
-  bist100.seri/esik   chart_xu100.json geçmişi + günün donmuş resmi kapanışı
+  bist100.seri/esik   chart_xu100.json geçmişi + günün donmuş resmi kapanışı (geçmiş yok/boş ya da
+                      önceki işlem gününe ulaşmıyorsa yazılmaz, cümle de beklenir: sonraki koşu doldurur)
   sayim               günün donmuş ısı haritası görüntüsü (data/heatmap/<gün>.json)
   isi_haritasi_ozet   aynı görüntüden, piyasa değeriyle ağırlıklı (harita etiketiyle tek tanım)
                       + hisse_sayisi — TEK değiştirilen alan (toplama kuralı değişti, gün verisi değil)
@@ -111,8 +112,10 @@ def main(argv=None):
             print(day, "okunamadı, atlandı")
             continue
         hm = _read(os.path.join(a.root, "data", "heatmap", day + ".json"))
+        onceki = bulten.onceki_islem_gunu(day, is_trading_day) if is_trading_day else None
         changed = bulten.eksikleri_tamamla(snap, heatmap_snap=hm, xu100_ohlc=ohlc,
-                                           stocks=_stocks(a.root, day, hm), kap_by_href=kap)
+                                           stocks=_stocks(a.root, day, hm), kap_by_href=kap,
+                                           onceki_gun=onceki)
         if snap.get("takvim_gunu") is None and is_trading_day:
             snap["takvim_gunu"] = bulten.sonraki_islem_gunleri(day, 1, is_trading_day)[0]
             changed.append("takvim_gunu")

@@ -12,7 +12,9 @@ D-56 (Bülten v2, O28=A) ek alanlar — hepsi dondurma anında, kural tabanlı (
   bist100.seri                  son 30 kapanış [[gün, kapanış]] (günün kendisi resmi kapanış)
   bist100.esik                  {yon: 'dusuk'|'yuksek', tarih|None, seans} — kapanış en az 20
                                 seansın en düşüğü/en yükseğiyse; tarih = daha düşük/yüksek
-                                kapanışın görüldüğü son gün ("15 Ocak'tan bu yana")
+                                kapanışın görüldüğü son gün ("15 Ocak'tan bu yana"); yön resmi
+                                değişimin işaretinden. Grafik geçmişi bir önceki işlem gününe
+                                (tarih + resmi önceki kapanış ±%0,5) ulaşmıyorsa seri [] ve eşik None.
   sayim                         {n, up, down, flat} — ısı haritası görüntüsünün sayımı (harita
                                 cümlesiyle aynı sayı)
   durum_degisimleri[].ad/fiyat/degisim_pct
@@ -42,6 +44,7 @@ _AY_ABL = ("Ocak'tan", "Şubat'tan", "Mart'tan", "Nisan'dan", "Mayıs'tan", "Haz
 SERI_N = 30            # hero çizgisi: son 30 işlem günü
 ESIK_MIN_SEANS = 20    # "X'ten bu yana en düşük/yüksek" en az bu kadar seansı geçerse yazılır
 ESIK_YIL_SEANS = 250   # seride daha düşük/yüksek yoksa ve bu kadar seans varsa "son bir yılın"
+SUREKLILIK_TOL = 0.005 # grafik geçmişinin son kapanışı resmi önceki kapanıştan en çok %0,5 sapabilir
 ONEM_MIN_PCT = 0.1     # bunun altındaki önem oranı gösterilmez (%0,0 anlamsız)
 YAKLASAN_GUN = 5
 YAKLASAN_MAX = 5
@@ -125,9 +128,20 @@ def _index_row(rec, code):
     return {"kapanis": close, "degisim_pct": chg}
 
 
-def endeks_gecmisi(ohlc, day_iso, close):
+def onceki_kapanis(close, degisim_pct):
+    """Resmi kapanış + resmi % değişimden önceki kapanış (D-56 öncesi görüntüde prev_close yok;
+    2 ondalık yüzde yuvarlaması ~%0,005 hata — süreklilik payının çok altında)."""
+    if not (_num(close) and close > 0 and _num(degisim_pct)) or degisim_pct <= -100:
+        return None
+    return close / (1 + degisim_pct / 100.0)
+
+
+def endeks_gecmisi(ohlc, day_iso, close, onceki_kapanis=None, onceki_gun=None):
     """Grafik barlarından (Yahoo, chart_xu100.json) günden ÖNCEKİ kapanışlar + günün resmi
-    kapanışı: [(gün, kapanış)] artan. Günün kapanışı yoksa günden önceki barlar."""
+    kapanışı: [(gün, kapanış)] artan. Günün kapanışı yoksa günden önceki barlar.
+    Süreklilik: günün kapanışı eklenecekse geçmişin son barı bir önceki işlem günü olmalı
+    (onceki_gun verilirse) ve resmi önceki kapanışa %0,5 içinde yakın olmalı (onceki_kapanis
+    verilirse); değilse [] — grafik dosyası bayat/eksikse çizgi ve eşik iddiası hiç yazılmaz."""
     pts = []
     for p in ohlc or []:
         t = str(p.get("time") or "")[:10]
@@ -136,6 +150,10 @@ def endeks_gecmisi(ohlc, day_iso, close):
             pts.append((t, float(c)))
     pts.sort()
     if _num(close) and close > 0:
+        if pts and ((onceki_gun and pts[-1][0] != onceki_gun) or
+                    (_num(onceki_kapanis) and onceki_kapanis > 0 and
+                     abs(pts[-1][1] / onceki_kapanis - 1) > SUREKLILIK_TOL)):
+            return []
         pts.append((day_iso, float(close)))
     return pts
 
@@ -147,17 +165,18 @@ def endeks_serisi(pts, day_iso, n=SERI_N):
     return [[d, round(c, 2)] for d, c in pts[-n:]]
 
 
-def endeks_esik(pts, day_iso, min_seans=ESIK_MIN_SEANS):
-    """Günün kapanışı en az min_seans seansın en düşüğü/en yükseği mi? Yön önceki kapanışa göre.
-    -> {yon, tarih, seans} | None. tarih: daha düşük (yükseliş günü: daha yüksek) kapanışın
-    görüldüğü son gün; seride hiç yoksa None (o zaman ≥ESIK_YIL_SEANS seans şartı)."""
+def endeks_esik(pts, day_iso, degisim_pct, min_seans=ESIK_MIN_SEANS):
+    """Günün kapanışı en az min_seans seansın en düşüğü/en yükseği mi? Yön RESMİ değişimin
+    işaretinden (grafikteki komşu bardan değil — cümlenin kendi yüzdesiyle çelişmesin).
+    -> {yon, tarih, seans} | None. tarih: daha düşük (düşüş günü) / daha yüksek (yükseliş günü)
+    kapanışın görüldüğü son gün; seride hiç yoksa None (o zaman ≥ESIK_YIL_SEANS seans şartı)."""
     if not pts or pts[-1][0] != day_iso or len(pts) < 2:
         return None
-    i = len(pts) - 1
-    c, prev = pts[i][1], pts[i - 1][1]
-    if c == prev:
+    if not _num(degisim_pct) or round(degisim_pct, 2) == 0:
         return None
-    down = c < prev
+    i = len(pts) - 1
+    c = pts[i][1]
+    down = degisim_pct < 0
     j = i - 1
     while j >= 0 and (pts[j][1] > c if down else pts[j][1] < c):
         j -= 1
@@ -378,6 +397,16 @@ def yarin_takvim(events, next_day_iso):
     return [_takvim_olay(e) for e in (events or []) if e.get("date") == next_day_iso and _kesin(e)]
 
 
+def onceki_islem_gunu(day_iso, is_trading_day):
+    """day_iso'dan ÖNCEKİ işlem günü (iso) — grafik geçmişi süreklilik denetimi için."""
+    d = date.fromisoformat(day_iso)
+    for _ in range(14):
+        d = d - timedelta(days=1)
+        if is_trading_day(d):
+            return d.isoformat()
+    return None
+
+
 def sonraki_islem_gunleri(day_iso, n, is_trading_day):
     """day_iso'dan SONRAKİ n işlem günü (iso, artan)."""
     d = date.fromisoformat(day_iso)
@@ -400,11 +429,14 @@ def yaklasan_takvim(events, gunler, n=YAKLASAN_MAX):
 
 # ── Görüntü ──────────────────────────────────────────────────────────────────
 def build(day_iso, rec, movers, changes, heatmap_snap, kap_items, takvim_events, next_day_iso, updated_at,
-          xu100_ohlc=None, stocks=None, takvim_gunleri=None):
-    """takvim_gunleri: next_day_iso'dan başlayan sonraki beş işlem günü (yaklaşan olaylar için)."""
+          xu100_ohlc=None, stocks=None, takvim_gunleri=None, onceki_gun=None):
+    """takvim_gunleri: next_day_iso'dan başlayan sonraki beş işlem günü (yaklaşan olaylar için).
+    onceki_gun: bir önceki işlem günü (grafik geçmişi süreklilik denetimi)."""
     ix = _index_row(rec, "XU100")
-    pts = endeks_gecmisi(xu100_ohlc, day_iso, ix["kapanis"]) if xu100_ohlc else []
-    esik = endeks_esik(pts, day_iso)
+    prev = (((rec or {}).get("indices") or {}).get("XU100") or {}).get("prev_close")
+    pts = endeks_gecmisi(xu100_ohlc, day_iso, ix["kapanis"], onceki_kapanis=prev,
+                         onceki_gun=onceki_gun) if xu100_ohlc else []
+    esik = endeks_esik(pts, day_iso, ix["degisim_pct"])
     ix["seri"] = endeks_serisi(pts, day_iso)
     ix["esik"] = esik
     say = sayim(heatmap_snap)
@@ -429,19 +461,25 @@ def build(day_iso, rec, movers, changes, heatmap_snap, kap_items, takvim_events,
     }
 
 
-def eksikleri_tamamla(snap, heatmap_snap=None, xu100_ohlc=None, stocks=None, kap_by_href=None):
+def eksikleri_tamamla(snap, heatmap_snap=None, xu100_ohlc=None, stocks=None, kap_by_href=None,
+                      onceki_gun=None):
     """D-56 öncesi dondurulmuş görüntüye yeni alanları EKLER (tools/bulten_v2_tamamla.py).
     Var olan değerlere dokunmaz; tek istisna isi_haritasi_ozet — tanım ağırlıklıya geçtiği için
     aynı donmuş ısı haritası görüntüsünden yeniden hesaplanır (gün verisi değişmez, yalnız
-    toplama kuralı). Değişen anahtar listesini döner."""
+    toplama kuralı). Grafik geçmişi yok/boş ya da güne kesintisiz ulaşmıyorsa seri/eşik (ve
+    onlara bağlı cümle) YAZILMAZ — sonraki koşu doldurur. Değişen anahtar listesini döner."""
     day = snap["tarih"]
     changed = []
     ix = snap.setdefault("bist100", {"kapanis": None, "degisim_pct": None})
-    if xu100_ohlc is not None and ("seri" not in ix or "esik" not in ix):
-        pts = endeks_gecmisi(xu100_ohlc, day, ix.get("kapanis"))
-        ix["seri"] = endeks_serisi(pts, day)
-        ix["esik"] = endeks_esik(pts, day)
-        changed.append("bist100.seri/esik")
+    if xu100_ohlc and ("seri" not in ix or "esik" not in ix):
+        pts = endeks_gecmisi(xu100_ohlc, day, ix.get("kapanis"),
+                             onceki_kapanis=onceki_kapanis(ix.get("kapanis"), ix.get("degisim_pct")),
+                             onceki_gun=onceki_gun)
+        seri = endeks_serisi(pts, day)
+        if seri:
+            ix["seri"] = seri
+            ix["esik"] = endeks_esik(pts, day, ix.get("degisim_pct"))
+            changed.append("bist100.seri/esik")
     if heatmap_snap is not None:
         if "sayim" not in snap:
             snap["sayim"] = sayim(heatmap_snap)

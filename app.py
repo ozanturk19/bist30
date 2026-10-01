@@ -4840,7 +4840,8 @@ def _build_bulten_snapshot(day, signal_changes, heatmap_snap):
     snap = bulten.build(day.isoformat(), rec, movers, signal_changes, heatmap_snap, kap_items,
                         takvim_events, next_day_iso,
                         datetime.now(_TZ_TR).isoformat(timespec="seconds"),
-                        xu100_ohlc=xu100_ohlc, stocks=by_t, takvim_gunleri=gunler)
+                        xu100_ohlc=xu100_ohlc, stocks=by_t, takvim_gunleri=gunler,
+                        onceki_gun=bulten.onceki_islem_gunu(day.isoformat(), is_trading_day))
     path = bulten.save_frozen(snap, _BULTEN_DIR)
     logger.info("BULTEN: %s %s — hareketli %d/%d, durum değişimi %d, bildirim %d, yarın %d, yaklaşan %d, "
                "seri %d, eşik %s, cümle %s",

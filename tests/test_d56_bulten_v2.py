@@ -68,7 +68,7 @@ def test_endeks_gecmisi_gunun_resmi_kapanisi_ile_biter():
 def test_endeks_serisi_gun_yoksa_bos():
     pts = bulten.endeks_gecmisi([{"time": "2026-09-25", "close": 1.0}], "2026-09-28", None)
     assert bulten.endeks_serisi(pts, "2026-09-28") == []
-    assert bulten.endeks_esik(pts, "2026-09-28") is None
+    assert bulten.endeks_esik(pts, "2026-09-28", -1.0) is None
 
 
 def _seri(vals):
@@ -77,24 +77,72 @@ def _seri(vals):
 
 def test_endeks_esik_dusuk_tarih_son_daha_dusuk_gun():
     pts = _seri([50] + [100] * 25 + [60])                    # 25 seans boyunca en düşük
-    e = bulten.endeks_esik(pts, pts[-1][0])
+    e = bulten.endeks_esik(pts, pts[-1][0], -40.0)
     assert e == {"yon": "dusuk", "tarih": pts[0][0], "seans": 25}
 
 
 def test_endeks_esik_yuksek_ve_kisa_seri_yazilmaz():
     pts = _seri([200] + [100] * 21 + [150])
-    assert bulten.endeks_esik(pts, pts[-1][0])["yon"] == "yuksek"
+    assert bulten.endeks_esik(pts, pts[-1][0], 50.0)["yon"] == "yuksek"
     pts = _seri([50] + [100] * 10 + [60])                     # yalnız 10 seans: yazılmaz
-    assert bulten.endeks_esik(pts, pts[-1][0]) is None
+    assert bulten.endeks_esik(pts, pts[-1][0], -40.0) is None
     pts = _seri([100] * 30 + [100])                           # değişmeyen gün: yön yok
-    assert bulten.endeks_esik(pts, pts[-1][0]) is None
+    assert bulten.endeks_esik(pts, pts[-1][0], 0.0) is None
+    assert bulten.endeks_esik(_seri([50] + [100] * 25 + [60]), "x", None) is None
+
+
+def test_endeks_esik_yonu_resmi_degisimden():
+    """Komşu bar düşüş dese de resmi değişim yükselişse 'en düşük' yazılmaz (cümle kendi
+    yüzdesiyle çelişmez); yükseliş günü yalnız 'en yüksek' iddiası olabilir."""
+    pts = _seri([50] + [100] * 25 + [60])
+    assert bulten.endeks_esik(pts, pts[-1][0], 0.5) is None
+    pts = _seri([200] + [100] * 21 + [99] + [150])
+    assert bulten.endeks_esik(pts, pts[-1][0], -0.3) is None
 
 
 def test_endeks_esik_seride_yoksa_yil_kosulu():
     pts = [("d%03d" % i, 100.0 + i % 3) for i in range(300)] + [("e", 50.0)]
-    assert bulten.endeks_esik(pts, "e") == {"yon": "dusuk", "tarih": None, "seans": 300}
+    assert bulten.endeks_esik(pts, "e", -50.0) == {"yon": "dusuk", "tarih": None, "seans": 300}
     pts = [("d%03d" % i, 100.0) for i in range(100)] + [("e", 50.0)]
-    assert bulten.endeks_esik(pts, "e") is None               # 1 yıldan kısa geçmiş: iddia yok
+    assert bulten.endeks_esik(pts, "e", -50.0) is None        # 1 yıldan kısa geçmiş: iddia yok
+
+
+def _rec(close, prev):
+    return {"indices": {"XU100": {"close": close, "prev_close": prev}}}
+
+
+def test_yukselis_gunu_grafikte_bosluk_varsa_seri_ve_esik_yok():
+    """İnceleme P1: grafik geçmişi 29.09'da bitiyor (30.09 yok), 01.10 resmi +%2,53. Eskiden
+    komşu bar (29.09, 12.290) düşüş sanılıp '9 Ocak'tan bu yana en düşük kapanış' yazılıyordu."""
+    fx = _fx()
+    assert fx["xu100"][-1]["time"] == "2026-09-29"
+    rec = _rec(12249.04, 11947.18)
+    for kw in ({"onceki_gun": "2026-09-30"}, {}):            # tarih denetimi ya da yalnız resmi önceki kapanış
+        snap = bulten.build("2026-10-01", rec, None, None, None, None, None, "2026-10-02", None,
+                            xu100_ohlc=fx["xu100"], **kw)
+        assert snap["bist100"]["seri"] == [] and snap["bist100"]["esik"] is None
+        assert snap["ozet_cumlesi"] == "BIST100 %2,53 yükselişle 12.249,04 puanda kapandı."
+    snap = bulten.build("2026-10-01", {"indices": {"XU100": {"close": 12249.04}}}, None, None, None, None,
+                        None, "2026-10-02", None, xu100_ohlc=fx["xu100"], onceki_gun="2026-09-30")
+    assert snap["bist100"]["seri"] == []                                  # resmi önceki kapanış yoksa da tarih yeter
+    # 30.09 küçük hareketli olsaydı da (değer payı içinde) tarih denetimi boşluğu yakalar
+    pts = bulten.endeks_gecmisi(fx["xu100"], "2026-10-01", 12300.0, onceki_kapanis=12291.0,
+                                onceki_gun="2026-09-30")
+    assert pts == []
+    # tam geçmiş: seri 30, son iki nokta 30.09 ve 01.10; yükseliş günü, 29.09 daha yüksek → eşik yok
+    ohlc = fx["xu100"] + [{"time": "2026-09-30", "close": 11947.2}]
+    snap = bulten.build("2026-10-01", rec, None, None, None, None, None, "2026-10-02", None,
+                        xu100_ohlc=ohlc, onceki_gun="2026-09-30")
+    ix = snap["bist100"]
+    assert len(ix["seri"]) == 30 and ix["seri"][-2:] == [["2026-09-30", 11947.2], ["2026-10-01", 12249.04]]
+    assert ix["esik"] is None and "en düşük" not in snap["ozet_cumlesi"]
+
+
+def test_onceki_islem_gunu_ve_onceki_kapanis():
+    assert bulten.onceki_islem_gunu("2026-09-28", _tdays()) == "2026-09-25"
+    assert bulten.onceki_islem_gunu("2026-10-30", _tdays("2026-10-29")) == "2026-10-28"
+    assert abs(bulten.onceki_kapanis(12249.04, 2.53) - 11947.18) < 1
+    assert bulten.onceki_kapanis(None, 1.0) is None and bulten.onceki_kapanis(100.0, None) is None
 
 
 # ── Günün cümlesi ────────────────────────────────────────────────────────────
@@ -102,7 +150,7 @@ def test_ozet_28_eylul_taslaktaki_cumle():
     fx = _fx()
     b = fx["bulten"]
     pts = bulten.endeks_gecmisi(fx["xu100"], "2026-09-28", b["bist100"]["kapanis"])
-    esik = bulten.endeks_esik(pts, "2026-09-28")
+    esik = bulten.endeks_esik(pts, "2026-09-28", b["bist100"]["degisim_pct"])
     parts = bulten.ozet_parcalar("2026-09-28", b["bist100"], esik, bulten.sayim(fx["heatmap"]))
     assert bulten.ozet_cumlesi(parts) == (
         "BIST100 %2,38 düşüşle 12.592,76 puanda kapandı, 15 Ocak'tan bu yana en düşük kapanış; "
@@ -253,6 +301,22 @@ def test_eksikleri_tamamla_ekler_var_olana_dokunmaz_ve_tekrar_degismez():
     assert bulten.eksikleri_tamamla(again, heatmap_snap=fx["heatmap"], xu100_ohlc=fx["xu100"], stocks=stocks,
                                     kap_by_href=fx["kap"]) == []
     assert again == snap
+
+
+def test_eksikleri_tamamla_grafik_yok_ya_da_bayatsa_seriyi_yazmaz_sonra_doldurur():
+    """İnceleme P1: chart_xu100.json yok/boş ya da güne ulaşmıyorsa seri/eşik/cümle kalıcı boş
+    yazılmaz; grafik düzelince sonraki koşu doldurur."""
+    fx = _fx()
+    for ohlc in ([], None, [p for p in fx["xu100"] if p["time"] <= "2026-09-24"]):   # 25.09 eksik
+        snap = json.loads(json.dumps(fx["bulten"]))
+        ch = bulten.eksikleri_tamamla(snap, heatmap_snap=fx["heatmap"], xu100_ohlc=ohlc,
+                                      onceki_gun="2026-09-25")
+        assert "seri" not in snap["bist100"] and "esik" not in snap["bist100"]
+        assert "bist100.seri/esik" not in ch and "ozet" not in ch and "ozet_cumlesi" not in snap
+    ch = bulten.eksikleri_tamamla(snap, heatmap_snap=fx["heatmap"], xu100_ohlc=fx["xu100"],
+                                  onceki_gun="2026-09-25")
+    assert {"bist100.seri/esik", "ozet"} <= set(ch) and len(snap["bist100"]["seri"]) == 30
+    assert snap["bist100"]["esik"] == {"yon": "dusuk", "tarih": "2026-01-15", "seans": 173}
 
 
 def test_tamamla_araci_kuru_ve_uygula(tmp_path, capsys):
