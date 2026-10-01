@@ -133,10 +133,12 @@ _OPINION_RE = re.compile(r"\biddia|\bkulis|öğrenildi|söylenti|\bünlü\b|krit
 _CONSUMER_RE = re.compile(r"emekli|maaş|memur|asgari ücret|\bkira|ikramiye|bayram|tatil|bedelli|vergi iadesi|"
                           r"\bzam\b|zammı|akaryakıt|benzin|motorin|\blpg\b|\bsgk\b|bağ-kur|kpss|ösym|\bokul")
 _MARKET_RE = re.compile(
-    r"borsa|endeks|hisse|faiz|merkez bankas|\bfed\b|\becb\b|enflasyon|petrol|brent|altın|gümüş|emtia|dolar|"
+    r"borsa|endeks|hisse|faiz|merkez bankas|\bfed\b|\becb\b|enflasyon|petrol|brent|\baltın(?:ı|ın|a)?\b|"
+    r"altın fiyat|ons altın|gümüş|emtia|dolar|"
     r"\beuro\b|avro|tahvil|\bpmi\b|büyüme|gsyh|istihdam|işsizlik|ticaret|gümrük|tarife|opec|döviz|piyasa|ihracat|"
     r"ithalat|bütçe|cari açık|kredi|resesyon|nasdaq|s&p|dow jones|\bdax\b|nikkei|bitcoin|doğal gaz|bakır|"
-    r"\btcmb\b|\bspk\b|\bbddk\b|hazine|tüik|rezerv|fon|halka arz|yatırım|şirket|banka|imf|dünya bankası|"
+    r"\btcmb\b|\bspk\b|\bbddk\b|hazine|tüik|rezerv|\bfon(?!ksiyon|etik)|halka arz|"
+    r"yatırım|şirket|banka|imf|dünya bankası|"
     r"yaptırım|enerji|sanayi|imalat|üretim|ihale|sözleşme|satın al|birleşme|tmsf")
 
 # Yasak dil (cümlede biri → cümle atılır). Desen, _lower_tr(metin) üzerinde aranır.
@@ -780,8 +782,10 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
     ev_words = _ev_words(ev_text)
     for b in banned_hits(text):
         reasons.append("yasak_dil:%s" % b)
-    ev_nums = set(v for _, v, _, _ in numbers(ev_text))
-    sw = _norm_words(text)
+    # sayı/tarih yalnız basından (H) ya da kendi verimizden (F): KAP satırındaki kodla hesaplanmış
+    # önem oranı gibi şirket rakamlarını AI yeniden yazamaz (şirket olgusu kodla yazılır)
+    num_text = " ".join(ev[i]["text"] for i in pool if ev[i]["kind"] != "K")
+    ev_nums = set(v for _, v, _, _ in numbers(num_text))
     # "22 Ekim" gibi tarihlerin gün rakamı tarih denetimine kalır (sayı denetiminde atlanır)
     date_spans = [(m.start(), m.end()) for m in _DATE_RE.finditer(_lower_tr(_strip_index_names(text)))]
     for tok, v, st, en in numbers(text):
@@ -790,7 +794,7 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
         if v in ev_nums or (ctx.year is not None and v == ctx.year):
             continue
         reasons.append("sayi:%s" % tok)
-    ev_dates = dates(ev_text)
+    ev_dates = dates(num_text)
     for d in dates(text):
         if d not in ev_dates and d not in ctx.allowed_dates:
             reasons.append("tarih:%s" % d)
@@ -875,12 +879,11 @@ def validate_item(raw, ctx):
     if tr:
         rep["karar"] = "baslik_ret"
         return None, rep
-    ozet = ""
-    for s in kept[:2]:
+    ozet, n_s = "", 0
+    for s in kept:
         cand = (ozet + " " + s).strip()
-        if len(cand) > OZET_MAX:
-            break
-        ozet = cand
+        if n_s < 2 and len(cand) <= OZET_MAX:
+            ozet, n_s = cand, n_s + 1
     if not ozet:
         rep["karar"] = "cumle_kalmadi"
         return None, rep
@@ -890,7 +893,8 @@ def validate_item(raw, ctx):
         rep["karar"] = "basin_kaniti_yok"
         return None, rep
     # Başlık düzeyinde dayanak: maddenin son metnini gerçekten destekleyen başlıklar
-    # (başlık köklerinin ≥%40'ı metinde ya da metin köklerinin ≥%50'si başlık+açıklamada).
+    # (başlık köklerinin ≥%40'ı metinde, ya da metin köklerinin ≥%35'i başlık+açıklamada, ya da
+    # metindeki bir sayı başlıkta geçiyor ve başlık köklerinin ≥%25'i metinde).
     final = title + " " + ozet
     fs = set(_content_stems(final))
     fnums = set(v for _, v, _, _ in numbers(final)) - set([ctx.year])
@@ -909,7 +913,7 @@ def validate_item(raw, ctx):
     # son metin, yalnız destekleyen başlıklar + kendi verimiz/KAP ile yeniden denetlenir
     sub = dict((k, v) for k, v in ev.items() if k in own)
     sub["_S"] = {"kind": "H", "text": " ".join(m["text"] for m in support), "titles": []}
-    sctx = Ctx(sub, ctx.allowed_dates, None, (), ctx.year)
+    sctx = Ctx(sub, ctx.allowed_dates, ctx.aliases, (), ctx.year)
     sctx.h_ngrams = ctx.h_ngrams
     fr = [r for r in check_text(final, ["_S"] + own, ["_S"] + own, sctx)
           if r.split(":")[0] in ("sayi", "tarih", "ad", "neden_bag", "yon")]

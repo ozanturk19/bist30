@@ -238,10 +238,33 @@ def test_kap_only_company_sentence_rejected_and_chip_rules():
         ("Otokar, tekerlekli zırhlı araçların tedariki ve lojistik desteğini kapsayan 1 milyar 472 milyon "
          "80 bin 360 dolarlık bir ihracat sözleşmesi imzaladı.", [h])], kanit_b=[h],
         hisseler=["OTKAR", "ASELS", "XXXXX"], kategori="Şirketler"))
-    assert rep["cumleler"][0]["ret"] == ["kanit_yok"]      # AI, KAP'tan şirket olgusu yazamaz
+    assert rep["cumleler"][0]["ret"] == ["kanit_yok", "sayi:41,6"]   # AI, KAP'tan şirket olgusu yazamaz
     assert it and it["hisseler"] == ["OTKAR"]              # ASELS kanıtta yok, XXXXX evrende yok
     assert "41,6" not in it["ozet"]
     assert sorted(rep["hisse_ret"]) == ["ASELS", "XXXXX"]
+
+
+def test_ai_cannot_restate_kap_numbers_even_with_press_citation():
+    _, ev, _ = _ctx_ev()
+    h = _hid(ev, "Otokar'dan yaklaşık")
+    (it, rep), _ = _validate(_item("Otokar'a zırhlı araç ihracatı için 1,5 milyar dolarlık sözleşme", [
+        ("Otokar'ın sözleşmesi yıllık hasılatının yaklaşık %41,6'sına denk geliyor.", [h, "K1"])],
+        kanit_b=[h], kategori="Şirketler"))
+    assert it is None and "sayi:41,6" in rep["cumleler"][0]["ret"]
+
+
+def test_ozet_skips_overlong_sentence_keeps_next():
+    _, ev, _ = _ctx_ev()
+    h = _hid(ev, "Bankacılıkta kredi")
+    long_s = ("BDDK verilerine göre bankaların toplam kredi büyüklüğü 28,4 trilyon liraya çıktı; tüketici "
+              "kredileri ile kredi kartı alacaklarında da artış görüldü ve bu artış bankacılık sektöründe "
+              "kredi hacminin büyümeye devam ettiğini gösterdi; toplam hacim 25 Eylül haftasında yeni bir "
+              "düzeye ulaştı ve bankaların kredi büyüklüğü ilk kez bu düzeyi geçti.")
+    assert len(long_s) > gh.OZET_MAX
+    (it, rep), _ = _validate(_item("Kredi hacmi 25 Eylül haftasında 164,6 milyar lira arttı", [
+        (long_s, [h]), ("BDDK verilerine göre bankaların toplam kredi büyüklüğü 28,4 trilyon liraya çıktı.", [h])]))
+    assert it and it["ozet"].startswith("BDDK verilerine göre bankaların toplam kredi büyüklüğü 28,4")
+    assert len(it["ozet"]) <= gh.OZET_MAX
 
 
 def test_single_publisher_without_own_data_rejected():
