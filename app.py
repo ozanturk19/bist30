@@ -54,6 +54,7 @@ import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 1
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
+import accounts as _accounts  # D-50: hesap çekirdeği (şifresiz e-posta kodu, oturum, liste, portföy)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -2602,44 +2603,25 @@ def _follow_ticker(raw):
 
 
 def _sub_follow_set(rec):
-    """Abonenin takip listesi (`follow`). `tickers` bir FİLTRE (boş = hepsi) olduğu için
-    takip ayrı alanda tutulur; hisse sayfasından eklemek özet e-postasını daraltmaz."""
-    return {str(t).upper() for t in (rec.get("follow") or []) if t}
+    """Abonenin takip listesi = D-50 hesabın izleme listesi (göç edilmemiş kayıtta
+    tickers ∪ follow ∪ alerts'ten türer). Özet/anlık e-postadaki "TAKİPTE" bunu okur."""
+    return _accounts.watch_set(rec)
 
 
 def _add_follow(rec, ticker):
-    """True: yeni eklendi; False: zaten takipte."""
-    cur = list(rec.get("follow") or [])
-    if ticker in cur:
+    """True: yeni eklendi; False: zaten takipte. D-50: kayıt hesap biçimine çevrilir,
+    hisse izleme listesine yazılır (ayrı `follow` alanı artık yok)."""
+    _accounts.migrate_record(rec)
+    if ticker in rec["watchlist"]:
         return False
-    cur.append(ticker)
-    rec["follow"] = cur
+    if len(rec["watchlist"]) >= _accounts.MAX_WATCH:
+        return False
+    rec["watchlist"].append(ticker)
     return True
 
 
 _LOGIN_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_sends.json")
-_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")
-
-
-def _login_send_allowed(email):
-    """OTP/magic-link tasarımı (CPO-DEV2-034): e-posta başına ek disk-tabanlı
-    rate-limit. Flask-Limiter `memory://` storage 4 gunicorn worker'a bölünüyor
-    (P0-SEC-2 ProxyFix gerçek client IP'yi çözdü ama sayaç hâlâ worker-local,
-    IP bazlı limit tek worker'da dolup diğer 3'ünde sıfırdan başlıyor) — email
-    bazlı bu katman worker'lar arası paylaşılan disk state kullanır: 1 saatte
-    aynı e-postaya 3'ten fazla giriş linki gönderilmez."""
-    now = time.time()
-    with _login_sends_lock:
-        data = _tp_read_json(_LOGIN_SENDS_PATH, default={}) if os.path.exists(_LOGIN_SENDS_PATH) else {}
-        sends = [t for t in data.get(email, []) if now - t < 3600]
-        if len(sends) >= 3:
-            return False
-        sends.append(now)
-        data[email] = sends
-        # eski e-postaları da temizle — dosya süresiz büyümesin
-        data = {k: v for k, v in data.items() if v and now - v[-1] < 3600}
-        _tp_write_json(_LOGIN_SENDS_PATH, data, atomic=True, ensure_ascii=False)
-        return True
+_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")   # D-50: yalnız KVKK temizliği (eski magic-link sayacı)
 
 
 _MAIL_ROUTE_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mail_route_sends.json")
@@ -2647,7 +2629,7 @@ _mail_route_sends_lock = _CrossProcessLock(_MAIL_ROUTE_SENDS_PATH + ".lock")
 
 
 def _mail_route_allowed(bucket, key, max_count, window_sec):
-    """CPO-DEV2-076 (C): _login_send_allowed ile ayni gerekce (Flask-Limiter
+    """CPO-DEV2-076 (C): eski _login_send_allowed (D-50'de kalkti) ile ayni gerekce (Flask-Limiter
     memory:// storage 4 gunicorn worker'a bolunuyor, IP bazli limit tek worker'da
     dolup digerlerinde sifirdan basliyor) -- mail gonderen route'lar (contact/
     subscribe) icin worker'lar arasi paylasilan disk-tabanli sayac. bucket=route
@@ -2699,8 +2681,140 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
         return False
 
 
+# ── D-50: hesap altyapısı (O16g=B, O24=A) ─────────────────────────────────────
+# Mantık accounts.py'de (saf, yerel testli); burada yalnız depo/çerez/rota bağlantısı.
+# Hesap = subscribers.json kaydı: AYNI dosya, AYNI _sub_lock nesnesi (gevent altında ayrı
+# flock tanımlayıcısı aynı süreçte kilitlenirdi), AYNI atomik yazım. İkinci sistem yok.
+_ACCT_DIR = os.path.dirname(os.path.abspath(__file__))
+_ACCT_SESSIONS_PATH = os.path.join(_ACCT_DIR, "sessions.json")
+_ACCT_CODES_PATH = os.path.join(_ACCT_DIR, "login_codes.json")
+_acct_sessions_lock = _CrossProcessLock(_ACCT_SESSIONS_PATH + ".lock")
+_acct_codes_lock = _CrossProcessLock(_ACCT_CODES_PATH + ".lock")
+_ACCT_COOKIE = "bp_session"   # HttpOnly; sunucuda yalnız sha256'sı durur
+_ACCT_HINT = "bp_li"          # JS'in okuduğu "oturum var" ipucu; sır taşımaz, sunucu ona güvenmez
+
+
+def _acct_store(path, lock):
+    # Okuma hatası/threadpool zaman aşımı (None) -> StoreError: yazma iptal, dosya boşla ezilmez.
+    return _accounts.FileStore(
+        path, lock,
+        load=lambda: _tp_read_json(path, default=None) if os.path.exists(path) else {},
+        save=lambda data: _tp_write_json(path, data, atomic=True, ensure_ascii=False, indent=1))
+
+
+def _acct_valid_ticker(t):
+    return t in _PF_VALID_TICKERS and t not in INDEX_TICKERS
+
+
+try:
+    _ACCT_PEPPER = _accounts.load_or_create_pepper(os.environ.get("BP_AUTH_PEPPER", ""),
+                                                   os.path.join(_ACCT_DIR, "auth_pepper.key"))
+except Exception as _acct_e:   # fail-closed: hesap uçları 503
+    _ACCT_PEPPER = None
+    logging.getLogger("bist30").error("D-50 pepper kurulamadi, hesap uclari kapali: %s", _acct_e)
+
+_acct = _accounts.AccountService(
+    _accounts.FileStore(SUBSCRIBERS_FILE, _sub_lock,
+                        load=lambda: _tp_read_json(SUBSCRIBERS_FILE, default=None) if os.path.exists(SUBSCRIBERS_FILE) else {},
+                        save=lambda subs: _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)),
+    _acct_store(_ACCT_SESSIONS_PATH, _acct_sessions_lock),
+    _acct_store(_ACCT_CODES_PATH, _acct_codes_lock),
+    _ACCT_PEPPER, _acct_valid_ticker, rate_allow=_mail_route_allowed,
+) if _ACCT_PEPPER else None
+
+
+def _acct_email():
+    """Geçerli oturumun e-postası. Yalnız bp_session: eski bp_sub (abonelikten çıkma
+    bağlantısındaki belirteçle aynı) yeni API'de kimlik sayılmaz."""
+    if not _acct:
+        return None
+    return _acct.session_email(request.cookies.get(_ACCT_COOKIE, ""))
+
+
+def _acct_set_cookies(resp, token):
+    resp.set_cookie(_ACCT_COOKIE, token, max_age=_accounts.SESSION_TTL, path="/",
+                    secure=True, httponly=True, samesite="Lax")
+    resp.set_cookie(_ACCT_HINT, "1", max_age=_accounts.SESSION_TTL, path="/",
+                    secure=True, httponly=False, samesite="Lax")
+
+
+def _acct_clear_cookies(resp):
+    for _n, _h in ((_ACCT_COOKIE, True), (_ACCT_HINT, False), ("bp_sub", True)):
+        resp.delete_cookie(_n, path="/", secure=True, httponly=_h, samesite="Lax")
+
+
+def _acct_json(body, status=200):
+    return _private_json(body, vary_cookie=True), status
+
+
+def _acct_result(r):
+    return _acct_json(r.body, r.status)
+
+
+def _acct_api(login=True):
+    """D-50 uç koruması: hesap sistemi açık mı; durum değiştiren istekte JSON gövde +
+    aynı köken (CSRF: SameSite=Lax'a ek ikinci katman); login=True ise geçerli oturum.
+    Depo okunamazsa 503 (yazma yapılmaz)."""
+    import functools
+
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            if not _acct:
+                return _acct_json({"ok": False, "error": "unavailable", "message": "Hesap sistemi şu an kapalı."}, 503)
+            if request.method not in ("GET", "HEAD"):
+                if (request.content_length or 0) > 65536:   # içe aktarma dahil 64 KB yeter (_PF_MAX_BYTES deseni)
+                    return _acct_json({"ok": False, "error": "too_large", "message": "Veri çok büyük."}, 413)
+                if not request.is_json:
+                    return _acct_json({"ok": False, "error": "json_required", "message": "İstek JSON olmalı."}, 415)
+                if not _accounts.origin_allowed(request.headers.get("Origin"), request.headers.get("Referer"),
+                                                request.host_url):
+                    return _acct_json({"ok": False, "error": "origin", "message": "İstek reddedildi."}, 403)
+            try:
+                if login:
+                    email = _acct_email()
+                    if not email or not _acct.account(email):
+                        return _acct_json({"ok": False, "error": "login_required",
+                                           "message": _accounts.MSG["login_required"]}, 401)
+                    return fn(email, *args, **kwargs)
+                return fn(*args, **kwargs)
+            except LookupError:
+                return _acct_json({"ok": False, "error": "login_required", "message": _accounts.MSG["login_required"]}, 401)
+            except _accounts.StoreError as e:
+                logger.error("D-50 depo hatasi: %s", e)
+                return _acct_json({"ok": False, "error": "store_error", "message": _accounts.MSG["store_error"]}, 503)
+        return wrapper
+    return deco
+
+
+def _acct_body():
+    d = request.get_json(silent=True)
+    return d if isinstance(d, dict) else {}
+
+
+def _build_code_email(code, unsubscribe_url=None):
+    """D-50: 6 haneli giriş kodu e-postası (kayıtlı ve yeni adres için aynı içerik)."""
+    digits = _html.escape(code)
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:18px;font-weight:800;color:#e5e1e4;margin-bottom:12px">BorsaPusula giriş kodun</div>
+        <div style="font-size:34px;font-weight:800;letter-spacing:10px;color:#e5e1e4;margin:6px 0 16px;font-family:'Space Grotesk',Arial,sans-serif">{digits}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0">
+          Kod <strong style="color:#e5e1e4">10 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.<br>
+          Şifre yok: takip listen ve bildirim tercihlerin bu e-posta adresine bağlıdır.
+        </p>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin; hesabında hiçbir değişiklik yapılmaz.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader="Giriş kodun 10 dakika geçerli")
+
+
 # CPO-1782 (22.09) koken kaydi: e-posta istemcilerinde var() calismadigindan
-# bu dosyadaki (ve _build_welcome_email / _build_login_email /
+# bu dosyadaki (ve _build_welcome_email / _build_code_email /
 # _build_signal_email / _check_user_alerts watchlist alarmindaki) tum renk
 # stilleri ham hex literal. Asagidaki esleme static/css/tokens.css'teki
 # kanonik karsiliklarini kayda gecirir (asagidaki hex'ler bilerek # olmadan
@@ -2804,8 +2918,7 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
             <a href="https://borsapusula.com" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">borsapusula.com</a>
             <span style="color:#30363d">·</span>
             <a href="https://borsapusula.com/iletisim" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">iletişim</a>
-            <span style="color:#30363d">·</span>
-            <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>
+            {f'<span style="color:#30363d">·</span> <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>' if unsubscribe_url else ''}
           </td></tr>
         </table>
       </td></tr>
@@ -2899,35 +3012,6 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
       İlk özet mailini bir sonraki işlem günü akşamı alacaksın (günlük özet — varsayılan tercih).<br>
       Özeti yaklaşık yarım saat önce istersen profilinden "Kapanış sonrası" seçeneğini seçebilirsin.
-    </p>
-    '''
-    return _email_base(content, unsubscribe_url, preheader=preheader)
-
-
-def _build_login_email(email, login_url, unsubscribe_url, name=None):
-    """Magic-link giriş maili (OTP tasarımı, CPO-DEV2-034 — P0-SEC-1 kalıcı fix).
-    15dk geçerli, tek kullanımlık link. Kod-girme adımı YOK — link'e tıklamak
-    yeterli (kullanım hacmi düşük, ek brute-force/deneme-sayacı alt sistemi
-    gerekmiyor)."""
-    preheader = "Giriş bağlantın hazır — 15 dakika geçerli"
-    # CPO-DEV2-r31: _build_welcome_email ile ayni escape-eksikligi, ayni fix.
-    greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
-    content = f'''
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
-      <tr><td style="padding:28px 24px;text-align:center">
-        <div style="font-size:32px;margin-bottom:8px">🔑</div>
-        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
-        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
-          BorsaPusula'ya giriş yapmak için aşağıdaki bağlantıya tıkla.<br>
-          Bağlantı <strong style="color:#e5e1e4">15 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
-        </p>
-        <a href="{login_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
-          Giriş Yap →
-        </a>
-      </td></tr>
-    </table>
-    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
-      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin — hesabında hiçbir değişiklik yapılmayacak.
     </p>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
@@ -3218,16 +3302,10 @@ def _notify_email_signal_changes(changes):
                 continue
             token    = data.get("token", "")
             name     = data.get("name", "")
-            tickers  = data.get("tickers", [])
             follow   = _sub_follow_set(data)
-            # Filter changes by user prefs
-            relevant = list(changes)
-            # Premium-only filter (takipteki hisse premium olmasa da gelir)
-            if mail_pref == "premium":
-                relevant = [c for c in relevant if c[3].get("is_premium") or c[0] in follow]
-            # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
-            if tickers:
-                relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
+            # D-50: hesap tercihi (trend = yalnız izlenenler, bulten = hepsi, liste başta);
+            # premium: takipteki hisse premium olmasa da gelir. Eski kayıtta eski filtre birebir.
+            relevant = _accounts.relevant_changes(data, changes, premium_only=(mail_pref == "premium"))
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
@@ -3523,12 +3601,10 @@ def _send_digest_emails(timeframe="daily", force=False):
             continue
         token   = data.get("token", "")
         name    = data.get("name", "")
-        tickers = data.get("tickers", [])
         follow  = _sub_follow_set(data)
-        # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
-        relevant = list(changes)
-        if tickers:
-            relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
+        # D-50: "Takip listen" = hesabın izleme listesi (TAKİPTE rozeti + başta); hesap tercihi
+        # trend = yalnız izlenenler, bulten = tüm değişimler. Eski kayıtta eski filtre birebir.
+        relevant = _accounts.relevant_changes(data, changes)
         if not relevant:
             skip_reasons["watchlist_empty"] += 1
             continue
@@ -12618,86 +12694,96 @@ def api_market_news():
     })
 
 
+def _acct_code_request():
+    """D-50: kod isteği (ortak gövde). Kod her adrese aynı biçimde gider: kayıtlıysa giriş,
+    değilse hesap açılışı -> yanıt adresin kayıtlı olup olmadığını söylemez."""
+    data = _acct_body()
+    r = _acct.request_code(data.get("email"), data.get("kvkk"), get_remote_address())
+    if r.code:
+        email = _accounts.normalize_email(data.get("email"))
+        rec = _acct.subs.load().get(email)
+        unsub = (f"https://borsapusula.com/unsubscribe/{rec['token']}"
+                 if isinstance(rec, dict) and rec.get("token") else None)
+        if not send_email(email, "BorsaPusula giriş kodun", _build_code_email(r.code, unsub), unsub):
+            _acct.cancel_code(email)
+            logger.error("Hesap kodu e-postasi gonderilemedi: %s", _mask_email(email))
+            return _acct_json({"ok": False, "error": "mail_failed", "message": _accounts.MSG["mail_failed"]}, 503)
+    return _acct_result(r)
+
+
+@app.route("/api/auth/code", methods=["POST"])
+@limiter.limit("20 per hour")
+@_acct_api(login=False)
+def api_auth_code():
+    """D-50 (O24=A): e-posta + KVKK onayı -> 6 haneli kod (10 dk, tek kullanım)."""
+    return _acct_code_request()
+
+
 @app.route("/api/recognize", methods=["POST"])
 @limiter.limit("10 per hour")
+@_acct_api(login=False)
 def api_recognize():
-    """OTP/magic-link giriş isteği (CPO-DEV2-034 tasarımı) — P0-SEC-1'in kalıcı
-    fix'i (CPO-DEV2-033'te GEÇİCİ 503/200 devre-dışı bırakma buradaydı).
+    """Eski "üye girişi" ucu (CPO-DEV2-034 magic-link) D-50'de hesap kodu akışına bağlandı:
+    ikinci giriş sistemi yok, URL'de sır taşıyan bağlantı da artık gönderilmez. Sitede
+    tüketicisi yok; gövde /api/auth/code ile aynı ({email, kvkk:true})."""
+    return _acct_code_request()
 
-    Eski davranış sadece {"email":...} alıp sahiplik kanıtı olmadan doğrudan
-    1 yıllık bp_sub cookie set ediyordu -> bir kurbanın e-postasını bilen
-    herkes o hesabın alarm ayarlarını görüp/değiştirebiliyordu (hesap ele
-    geçirme). Yeni akış: e-posta kayıtlıysa 15dk geçerli tek-kullanımlık
-    magic-link gönderilir, cookie yalnız /api/recognize/confirm'de link
-    tıklanınca set edilir. User-enumeration'ı kapatmak için e-posta var/yok
-    ayrımı yapılmadan HER ZAMAN aynı jenerik mesaj dönülür (eski davranış
-    `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
-    data  = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        data = {}
-    email = (data.get("email") or "").strip().lower()
-    if not email or "@" not in email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
 
-    generic_resp = {
-        "ok": True,
-        "message": "Bu e-posta kayıtlıysa giriş bağlantısı gönderildi. Gelen kutunu kontrol et (15 dakika geçerli).",
-    }
+@app.route("/api/auth/verify", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api(login=False)
+def api_auth_verify():
+    """D-50: kod doğrulama -> 90 günlük oturum (bp_session HttpOnly + bp_li ipucu).
+    İsteğe bağlı `import` ilk girişte tarayıcı listesini hesaba birleştirir."""
+    data = _acct_body()
+    imp = data.get("import") if isinstance(data.get("import"), dict) else None
+    r = _acct.verify_code(data.get("email"), data.get("code"), get_remote_address(), imp)
+    resp, status = _acct_result(r)
+    if r.token:
+        _acct_set_cookies(resp, r.token)
+    return resp, status
 
-    if not _login_send_allowed(email):
-        # Rate-limit aşılsa bile aynı jenerik mesaj — enumeration sızdırmaz.
-        return safe_json(generic_resp)
 
-    with _sub_lock:
-        subs = _load_subscribers()
-        info = subs.get(email)
-        if info and info.get("active", True):
-            login_token = secrets.token_hex(20)
-            info["login_token"]   = login_token
-            info["login_expires"] = time.time() + 900
-            info["login_used"]    = False
-            _save_subscribers(subs)
-            login_url = f"https://borsapusula.com/api/recognize/confirm?t={login_token}"
-            unsub_url = f"https://borsapusula.com/unsubscribe/{info.get('token', '')}"
-            name = info.get("name")
-            # CPO-1608 madde 1: yanit kasitli olarak jenerik kaliyor (enumeration
-            # onlemi) ama SMTP hatasi artik loglaniyor — onceden fire-and-forget
-            # thread'in donus degeri hic kontrol edilmiyordu, hata sessizce kayboluyordu.
-            def _send_login_mail():
-                if not send_email(email, "🔑 BorsaPusula — Giriş Bağlantın",
-                                   _build_login_email(email, login_url, unsub_url, name=name), unsub_url):
-                    logger.error("Magic-link login maili gonderilemedi: %s", _mask_email(email))
-            threading.Thread(target=_send_login_mail, daemon=True).start()
-
-    return safe_json(generic_resp)
+@app.route("/api/auth/logout", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api(login=False)
+def api_auth_logout():
+    """D-50: oturumu sunucuda iptal eder; {all:true} hesabın tüm oturumlarını (tüm cihazlar)."""
+    tok = request.cookies.get(_ACCT_COOKIE, "")
+    email = _acct.session_email(tok)
+    if email and _acct_body().get("all") is True:
+        _acct.revoke_all(email)
+    elif tok:
+        _acct.revoke_session(tok)
+    resp, status = _acct_json({"ok": True})
+    _acct_clear_cookies(resp)
+    return resp, status
 
 
 @app.route("/api/recognize/confirm")
 @limiter.limit("60 per minute")
 def api_recognize_confirm():
-    """Magic-link tıklama hedefi — token'ı doğrular, tek kullanımlık cookie
-    verir. Süresi dolmuş/kullanılmış/geçersiz token → sessizce ana sayfaya
-    yönlendirir (kullanıcıya "üye girişi" formunu tekrar denemesi kalır)."""
+    """Eski magic-link tıklama hedefi (deploy anında en çok 15 dk geçerli bağlantılar için).
+    D-50: geçerli bağlantı artık bp_sub değil, sunucuda iptal edilebilir bp_session verir."""
     tok = (request.args.get("t") or "").strip()
-    if tok:
+    if tok and _acct:
+        target_email = None
         with _sub_lock:
             subs = _load_subscribers()
-            target_email = None
             for em, info in subs.items():
                 stored = info.get("login_token")
                 if stored and secrets.compare_digest(stored, tok):
-                    target_email = em
+                    if not info.get("login_used", True) and time.time() < info.get("login_expires", 0):
+                        info["login_used"] = True
+                        if not info.get("confirmed_at"):
+                            info["confirmed_at"] = _accounts.now_iso()
+                        _save_subscribers(subs)
+                        target_email = em
                     break
-            if target_email:
-                info    = subs[target_email]
-                expires = info.get("login_expires", 0)
-                used    = info.get("login_used", True)
-                if not used and time.time() < expires:
-                    info["login_used"] = True
-                    _save_subscribers(subs)
-                    resp = redirect("/?login=ok")
-                    resp.set_cookie("bp_sub", info.get("token", ""), max_age=31536000, samesite="Lax", secure=True, httponly=True)
-                    return resp
+        if target_email:
+            resp = redirect("/?login=ok")
+            _acct_set_cookies(resp, _acct.create_session(target_email))
+            return resp
     return redirect("/?login=expired")
 
 
@@ -12738,7 +12824,8 @@ def api_subscribe():
                 if follow_t in _sub_follow_set(rec):
                     return safe_json({"ok": True, "status": "already", "ticker": follow_t,
                                       "message": f"{follow_t}'yi zaten takip ediyorsun."})
-                if _ck and _tok and secrets.compare_digest(_ck, _tok):
+                # D-50: sahiplik = eski bp_sub çerezi YA DA aynı e-postanın kodla açılmış oturumu.
+                if (_ck and _tok and secrets.compare_digest(_ck, _tok)) or _acct_email() == email:
                     _add_follow(rec, follow_t)
                     _save_subscribers(subs)
                     return safe_json({"ok": True, "status": "added", "ticker": follow_t,
@@ -12766,6 +12853,11 @@ def api_subscribe():
         if email in subs:
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
+            if subs[email].get("account_v") == 1:
+                # D-50: bülten aboneliği yeniden istendi -> hesabın e-posta tercihleri açılır
+                subs[email]["notify"] = {"trend": True, "bulten": True}
+            if data.get("kvkk") is True and not subs[email].get("kvkk_consent_ts"):
+                subs[email]["kvkk_consent_ts"] = _accounts.now_iso()
             if follow_t:
                 _add_follow(subs[email], follow_t)
             subs[email]["subscribed_at"] = datetime.now(_TZ_TR).isoformat()
@@ -12795,13 +12887,21 @@ def api_subscribe():
             "subscribed_at": datetime.now(_TZ_TR).isoformat(),
             "name":          name,            # FAZ 3: kullanıcı adı
             "tickers":       [],
-            "follow":        [follow_t] if follow_t else [],   # D-P1-2509: takip listesi (`tickers` filtre, boş = hepsi)
             "active":        True,
             "level":         None,            # FAZ 4: yatırım deneyimi
             "freq":          None,            # FAZ 4: işlem sıklığı
             "segments":      [],              # FAZ 4: ilgi alanları
             "mail_pref":     "daily",         # FAZ 4: mail tercihi (daily|instant|premium|weekly)
             "profile_done":  False,           # FAZ 4: profil tamamlandı mı
+            # D-50 hesap alanları: bülten aboneliği = tüm değişimler (eski `tickers` boş davranışı),
+            # hisse sayfasından gelen kod izleme listesine yazılır. E-posta sahipliği kodla
+            # kanıtlanana kadar confirmed_at boş (D-38 çift onayı bu alana bağlanır).
+            "account_v":       1,
+            "watchlist":       [follow_t] if follow_t else [],
+            "portfolio":       {},
+            "notify":          {"trend": True, "bulten": True},
+            "confirmed_at":    None,
+            "kvkk_consent_ts": _accounts.now_iso() if data.get("kvkk") is True else None,
         }
         _save_subscribers(subs)
 
@@ -12979,32 +13079,143 @@ def api_profile():
     return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
 
 
-@app.route("/api/me")
+@app.route("/api/me", methods=["GET"])
+@limiter.limit("120 per minute")
 def api_me():
-    """Kullanıcı tanıma — token ile abonelik durumu sorgular."""
-    token = request.args.get("t") or request.cookies.get("bp_sub")
-    if not token:
-        return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
-    with _sub_lock:
-        subs = _load_subscribers()
-        for em, info in subs.items():
-            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
-                return _private_json({
-                    "ok":            True,
-                    "subscribed":    True,
-                    "email":         em,
-                    "name":          info.get("name", ""),
-                    "first_name":    (info.get("name", "").split()[0] if info.get("name") else ""),
-                    "profile_done":  bool(info.get("profile_done")),
-                    "mail_pref":     info.get("mail_pref", "daily"),
-                }, vary_cookie=True)
-    return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
+    """D-50: oturumdaki hesabın özeti (O25: ileride uygulama da aynı API'yi kullanır).
+    Oturum yoksa 200 + logged_in:false (sayfada konsol hatası olmasın). Eski `?t=` (URL'de
+    sır) ve bp_sub ile tanıma kalktı: tek tüketicisi bp-search.js HttpOnly bp_sub'ı okuyamadığı
+    için bu ucu zaten hiç çağırmıyordu (document.cookie'de görünmez)."""
+    anon = {"ok": False, "logged_in": False, "subscribed": False}
+    email = _acct_email()
+    if not email:
+        return _acct_json(anon)
+    try:
+        rec = _acct.account(email)
+    except _accounts.StoreError as e:
+        logger.error("D-50 depo hatasi: %s", e)
+        return _acct_json({"ok": False, "error": "store_error", "message": _accounts.MSG["store_error"]}, 503)
+    return _acct_json(_acct.me_view(email, rec) if rec else anon)
+
+
+@app.route("/api/me", methods=["DELETE"])
+@limiter.limit("10 per hour")
+@_acct_api()
+def api_me_delete(email):
+    """D-50 (KVKK silme hakkı): hesap kaydı, tüm oturumları ve bekleyen kodu silinir."""
+    _acct.delete_account(email)
+    resp, status = _acct_json({"ok": True})
+    _acct_clear_cookies(resp)
+    return resp, status
+
+
+def _acct_market_snapshot():
+    """Gün sonu satırları + BorsaPusula Skoru + son değişimler (/api/data ile aynı kaynak)."""
+    with _lock:
+        stocks = [s for s in _cache["data"] if s.get("ticker") and s.get("ticker") not in INDEX_TICKERS]
+        hs = dict(_financial_health_cache)
+    rows = {s["ticker"]: s for s in stocks}
+    bp = {t: ((e or {}).get("data") or {}).get("borsapusula_skoru") for t, e in hs.items()}
+    try:
+        asof = _data_quality_snapshot(stocks).get("updated_at") if stocks else None
+    except Exception:
+        asof = None
+    changes = _accounts.last_changes(_load_pending_changes_weekly(), _load_pending_changes())
+    return rows, bp, changes, asof
+
+
+@app.route("/api/me/watchlist", methods=["GET"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist(email):
+    f = _accounts.account_fields(_acct.account(email))
+    rows, bp, changes, asof = _acct_market_snapshot()
+    return _acct_json({"ok": True, "asof": asof, "watchlist": f["watchlist"],
+                       "items": _accounts.watch_items(f, rows, bp, changes, STOCK_NAMES)})
+
+
+@app.route("/api/me/watchlist", methods=["POST"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist_add(email):
+    return _acct_result(_acct.watch_add(email, _acct_body().get("ticker")))
+
+
+@app.route("/api/me/watchlist", methods=["PUT"])
+@limiter.limit("60 per minute")
+@_acct_api()
+def api_me_watchlist_replace(email):
+    d = _acct_body()
+    return _acct_result(_acct.watch_replace(email, d.get("watchlist"), d.get("portfolio")))
+
+
+@app.route("/api/me/watchlist/<ticker>", methods=["DELETE"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist_remove(email, ticker):
+    return _acct_result(_acct.watch_remove(email, ticker))
+
+
+@app.route("/api/me/portfolio", methods=["GET"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_portfolio(email):
+    return _acct_json({"ok": True, "portfolio": _acct.portfolio_view(_acct.account(email))})
+
+
+@app.route("/api/me/portfolio/<ticker>", methods=["PUT"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_position_set(email, ticker):
+    d = _acct_body()
+    return _acct_result(_acct.position_set(email, ticker, d.get("qty"), d.get("cost")))
+
+
+@app.route("/api/me/portfolio/<ticker>", methods=["DELETE"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_position_remove(email, ticker):
+    return _acct_result(_acct.position_remove(email, ticker))
+
+
+@app.route("/api/me/import", methods=["POST"])
+@limiter.limit("30 per hour")
+@_acct_api()
+def api_me_import(email):
+    return _acct_result(_acct.import_merge(email, _acct_body()))
+
+
+@app.route("/api/me/prefs", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api()
+def api_me_prefs(email):
+    return _acct_result(_acct.set_prefs(email, _acct_body()))
+
+
+@app.route("/takip")
+def takip_page():
+    """D-50/C-41: hesap tabanlı Takip sayfası. Şablon kişisel veri taşımaz (hepsi /api/me*
+    ile gelir). Şablon henüz yoksa (C-41 yayında değil) 404: deploy sırası önce backend."""
+    from jinja2 import TemplateNotFound
+    try:
+        app.jinja_env.get_template("takip.html")
+    except TemplateNotFound:
+        abort(404)
+    return _nocache_html(render_template("takip.html"))
 
 
 # ── F4 Watchlist Alert API ────────────────────────────────────────────────────
 
 def _get_sub_by_cookie():
-    """bp_sub cookie → (email, record) veya (None, None)."""
+    """D-50 oturumu (bp_session) ya da eski bp_sub çerezi → (email, record) veya (None, None).
+    Eski uçlar (/api/user-alerts, /profil akışı) iki kimliği de kabul eder."""
+    em = _acct_email()
+    if em:
+        with _sub_lock:
+            subs = _load_subscribers()
+        rec = subs.get(em)
+        if isinstance(rec, dict) and rec.get("active", True):
+            return em, rec
     token = request.cookies.get("bp_sub", "").strip()
     if not token:
         return None, None
@@ -13352,13 +13563,20 @@ def unsubscribe_page(token):
             if match_email in _ls_data:
                 del _ls_data[match_email]
                 _tp_write_json(_LOGIN_SENDS_PATH, _ls_data, atomic=True, ensure_ascii=False)
-        logger.info("E-posta abonelik iptal (kayit silindi): %s", _mask_email(match_email))
-        resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
-        # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
-        # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
-        # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor.
-        resp.delete_cookie("bp_sub", samesite="Lax", secure=True, httponly=True)
-        return resp
+    # D-50: hesap = abone kaydı; kayıt silinince oturumları ve bekleyen kodu da gider (KVKK).
+    # Kilit dışında (kilitler iç içe alınmaz).
+    if _acct:
+        try:
+            _acct.forget(match_email)
+        except Exception as e:
+            logger.error("D-50 abonelik iptalinde oturum temizligi: %s", e)
+    logger.info("E-posta abonelik iptal (kayit silindi): %s", _mask_email(match_email))
+    resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
+    # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
+    # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
+    # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor. D-50: oturum da.
+    _acct_clear_cookies(resp)
+    return resp
 
 
 # ── Blog önbelleği: startup'ta bir kez normalize et, her request'te yeniden hesaplama yok ──

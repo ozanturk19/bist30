@@ -10,6 +10,11 @@ venv/
 subscribers.json
 login_sends.json
 *.json.lock
+# D-50 hesap altyapısı — kişisel veri / sır, ASLA git'e girmesin
+sessions.json
+login_codes.json
+auth_pepper.key
+subscribers.json.bak.*
 
 # Geliştirme araçları
 .claude/
