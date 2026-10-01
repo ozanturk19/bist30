@@ -269,3 +269,24 @@ def test_labels():
     assert hv.range_label("2026-09-25", "2026-09-28") == "25–28 Eylül"
     assert hv.range_label("2026-09-28", "2026-09-28") == "28 Eylül"
     assert hv.tr_pct(-0.5) == "−%0,50" and hv.tr_pct(2.531, 1, False) == "%2,5" and hv.big_try(1.26e9) == "1,3 Mrd ₺"
+
+
+def test_gundem_haber_source_falls_back_to_d57_module():
+    """D-57 dali `_gundem_haber_payload` tanimlamaz; `import gundem_haber` + context processor kullanir.
+    /haberler `gundem_haber`i acikca gecirdigi icin kaynak D-56 kancasinda bulunmali (yoksa None ezer)."""
+    import types
+    doc = {"baski_label": "2 Ekim 2026 · 08:30", "maddeler": [
+        {"id": "g-1", "kategori": "Dünya", "baslik": "B", "ozet": "Ö", "hisseler": [],
+         "kaynaklar": [{"ad": "AA", "url": "https://www.aa.com.tr/x", "tarih": "2026-10-02"}], "ai": True}]}
+    mod = types.SimpleNamespace(load_latest=lambda: doc)
+    assert hv.gundem_haber_source({}) is None and hv.gundem_haber_from({}) is None
+    assert hv.gundem_haber_source({"gundem_haber": mod}) is mod.load_latest
+    got = hv.gundem_haber_from({"gundem_haber": mod})
+    assert got["maddeler"][0]["kaynaklar"] == [{"ad": "AA", "url": "https://www.aa.com.tr/x"}]
+    # acik kanca varsa o once gelir; hata -> None (+ log)
+    assert hv.gundem_haber_from({"gundem_haber": mod, "_gundem_haber_payload": lambda: {"maddeler": []}}) is None
+    logs = []
+    assert hv.gundem_haber_from({"gundem_haber": types.SimpleNamespace(load_latest=lambda: 1 / 0)}, logs.append) is None
+    assert logs and "okunamadı" in logs[0]
+    # D-57 modulu baski yokken None dondurur
+    assert hv.gundem_haber_from({"gundem_haber": types.SimpleNamespace(load_latest=lambda: None)}) is None

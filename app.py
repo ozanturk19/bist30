@@ -9373,16 +9373,11 @@ def api_gundem_girdi():
 
 def _gundem_haber_ctx():
     """D-57 sözleşmesi (Gündem basın derlemesi, O27=A): /api/gundem-haber ile aynı sözlük ya da
-    None. D-57 dalı `_gundem_haber_payload()` tanımlar; tanımlı değilse/boşsa None ve Gündem
-    kural tabanlı v1 maddeleriyle çizilir. Bozuk madde haber_v2.clean_gundem_haber'de elenir."""
-    fn = globals().get("_gundem_haber_payload")
-    if not callable(fn):
-        return None
-    try:
-        return haber_v2.clean_gundem_haber(fn())
-    except Exception as e:
-        logger.warning("gundem_haber okunamadı: %s", e)
-        return None
+    None. Kaynak: `_gundem_haber_payload()` varsa o, yoksa D-57 modülü `gundem_haber.load_latest()`
+    (D-57 dalı değeri context processor ile de verir; /haberler bu anahtarı AÇIKÇA geçirdiği için
+    Flask onu ezer — bu yüzden kaynak burada okunur). Yoksa/boşsa None → Gündem v1 maddeleri.
+    Bozuk madde haber_v2.clean_gundem_haber'de elenir."""
+    return haber_v2.gundem_haber_from(globals(), logger.warning)
 
 
 def _haber_v2_ctx(smap, items):

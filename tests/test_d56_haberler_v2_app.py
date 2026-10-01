@@ -65,6 +65,28 @@ def test_gundem_haber_hook_contract(monkeypatch):
     assert A._gundem_haber_ctx() is None
 
 
+def test_d57_context_processor_value_reaches_haberler(client, monkeypatch):
+    """D-57 dalı `import gundem_haber` + context processor ile verir; /haberler `gundem_haber`i açıkça
+    geçirdiği için (Flask açık değeri context processor'un üstüne yazar) D-56 kancası modülü okumalı."""
+    import types
+    import app as A
+    doc = {"baski_label": "2 Ekim 2026 · 08:30", "maddeler": [
+        {"id": "g-1", "kategori": "Dünya", "baslik": "B", "ozet": "Ö", "hisseler": [],
+         "kaynaklar": [{"ad": "AA", "url": "https://www.aa.com.tr/x"}], "ai": True}]}
+    monkeypatch.delattr(A, "_gundem_haber_payload", raising=False)
+    monkeypatch.setattr(A, "gundem_haber", types.SimpleNamespace(load_latest=lambda: doc), raising=False)
+
+    def _inject():   # D-57 _inject_gundem_haber benzeri
+        return {"gundem_haber": doc}
+    procs = A.app.template_context_processors[None]
+    procs.append(_inject)
+    try:
+        body = client.get("/haberler").get_data(as_text=True)
+    finally:
+        procs.remove(_inject)
+    assert body.startswith("H|gundem|") and body.endswith("|False")
+
+
 def test_sitemap_and_llms_list_bildirimler(client):
     sm = client.get("/sitemap.xml").get_data(as_text=True)
     assert "/haberler/bildirimler</loc>" in sm

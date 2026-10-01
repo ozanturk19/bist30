@@ -529,6 +529,32 @@ GH_CATS = ("Türkiye", "Dünya", "Piyasa", "Şirketler", "Merkez bankaları", "E
 _URL_OK = re.compile(r"^https?://[^\s\"'<>]+$")
 
 
+def gundem_haber_source(ns):
+    """D-57 baskisini veren fonksiyon (app.py ad alani `ns` icinde) ya da None.
+    Once `_gundem_haber_payload()` kancasi; yoksa D-57 dalinin modulu `gundem_haber.load_latest()`
+    (D-57 bu modulu app.py'ye `import gundem_haber` ile ekler ve degeri context processor ile verir).
+    /haberler sablona `gundem_haber`i ACIKCA gecirdigi icin (Flask acik degeri context processor'un
+    ustune yazar) kaynak burada bulunmazsa D-57 baskisi hic gorunmez."""
+    fn = ns.get("_gundem_haber_payload")
+    if callable(fn):
+        return fn
+    fn = getattr(ns.get("gundem_haber"), "load_latest", None)
+    return fn if callable(fn) else None
+
+
+def gundem_haber_from(ns, log=None):
+    """D-57 son baskisi -> clean_gundem_haber ciktisi ya da None (kaynak yok/hata/madde yok)."""
+    fn = gundem_haber_source(ns)
+    if fn is None:
+        return None
+    try:
+        return clean_gundem_haber(fn())
+    except Exception as e:  # noqa: BLE001 — Gundem v1 maddeleriyle cizilir
+        if log:
+            log("gundem_haber okunamadı: %s" % e)
+        return None
+
+
 def clean_gundem_haber(doc, max_items=8):
     """D-57 /api/gundem-haber sozlugu -> dogrulanmis kopya ya da None (madde yoksa)."""
     if not isinstance(doc, dict):
