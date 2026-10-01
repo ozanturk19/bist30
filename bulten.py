@@ -308,6 +308,18 @@ def durum_degisimleri(changes, stocks=None):
 
 
 # ── Bildirimler ──────────────────────────────────────────────────────────────
+_PARA = {"USD": "$", "EUR": "€", "TRY": "₺"}
+
+
+def kisa_tutar(v, isaret):
+    """441624108 -> '441,6 Mn $' ; 1.0085e9 -> '1,0 Mrd €' ; 950000 -> '950.000 $'."""
+    if abs(v) >= 1e9:
+        return "%s Mrd %s" % (("%.1f" % (v / 1e9)).replace(".", ","), isaret)
+    if abs(v) >= 1e6:
+        return "%s Mn %s" % (("%.1f" % (v / 1e6)).replace(".", ","), isaret)
+    return "%s %s" % (sayi(v, 0), isaret)
+
+
 def onem_alanlar(onem):
     """kap_feed.compute_onem çıktısı -> sayfanın cümlesi için yapılandırılmış alanlar
     ('İhale bedeli 137 Mn ₺, şirketin 2025 hasılatının %16,1'i'). Oran %0,1'in altındaysa None."""
@@ -315,7 +327,12 @@ def onem_alanlar(onem):
         return None
     temel = (onem.get("basis") or "Tutar").split(" / ")[0]
     approx = bool(onem.get("approx"))
-    tutar = onem.get("amount_txt") if approx else (onem.get("amount_try_txt") or onem.get("amount_txt"))
+    tutar = onem.get("amount_try_txt") or onem.get("amount_txt")
+    fx = onem.get("fx") or {}
+    if approx:   # döviz: kendi para biriminde kısa yazım (441,6 Mn $), TL karşılığı oranın içinde
+        tutar = onem.get("amount_txt")
+        if _num(onem.get("amount_try")) and _num(fx.get("rate")) and fx["rate"] > 0:
+            tutar = kisa_tutar(onem["amount_try"] / fx["rate"], _PARA.get(fx.get("cur"), fx.get("cur") or ""))
     txt = onem.get("txt") or ("%" + ("%.1f" % onem["pct"]).replace(".", ","))
     return {
         "temel": temel, "tutar": tutar, "yil": onem.get("rev_year"), "yuzde": onem["pct"],
@@ -349,10 +366,16 @@ def _takvim_olay(e):
     return {k: e.get(k) for k in _TAKVIM_ALANLAR if e.get(k) is not None}
 
 
+def _kesin(e):
+    """Bülten yalnız tarihi kesin olayları yazar: tahmini bilanço tarihi / genel kurulu beklenen
+    temettü bir olay değildir (takvim sayfası onları kendi etiketiyle gösterir)."""
+    return e.get("date_kind") in (None, "kesin")
+
+
 def yarin_takvim(events, next_day_iso):
     """events: takvim.build()['events'] (bilanço/temettü/makro); yalnız ertesi işlem günü.
     Satır sayfanın yazdığı her alanı taşır (temettü brüt/net/verim/ödeme, makro bölge/ayrıntı)."""
-    return [_takvim_olay(e) for e in (events or []) if e.get("date") == next_day_iso]
+    return [_takvim_olay(e) for e in (events or []) if e.get("date") == next_day_iso and _kesin(e)]
 
 
 def sonraki_islem_gunleri(day_iso, n, is_trading_day):
@@ -372,7 +395,7 @@ def yaklasan_takvim(events, gunler, n=YAKLASAN_MAX):
     """Sonraki işlem günü boşken: gunler (sonraki beş işlem günü) içindeki olaylar, takvim
     sırasıyla, en çok n."""
     gs = set(gunler or [])
-    return [_takvim_olay(e) for e in (events or []) if e.get("date") in gs][:n]
+    return [_takvim_olay(e) for e in (events or []) if e.get("date") in gs and _kesin(e)][:n]
 
 
 # ── Görüntü ──────────────────────────────────────────────────────────────────

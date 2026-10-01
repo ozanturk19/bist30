@@ -154,10 +154,12 @@ def test_onem_alanlar_tl_doviz_ve_esik():
           "amount_txt": "137.700.000 ₺", "amount_try_txt": "138 Mn ₺", "rev_year": 2025}
     assert bulten.onem_alanlar(tl) == {"temel": "İhale bedeli", "tutar": "138 Mn ₺", "yil": 2025, "yuzde": 16.11,
                                        "yaklasik": False, "oran_txt": "%16,1'i"}
-    fx = dict(tl, pct=41.6, txt="~%41,6", approx=True, amount_txt="25.000.000 $",
-              basis="Sözleşme tutarı / 2025 hasılatı")
+    fx = dict(tl, pct=41.6, txt="~%41,6", approx=True, amount_txt="441.624.108 $", amount_try=18379000000,
+              fx={"cur": "USD", "rate": 41.6178}, basis="Sözleşme tutarı / 2025 hasılatı")
     al = bulten.onem_alanlar(fx)
-    assert al["tutar"] == "25.000.000 $" and al["oran_txt"] == "yaklaşık %41,6'sı" and al["temel"] == "Sözleşme tutarı"
+    assert al["tutar"] == "441,6 Mn $" and al["oran_txt"] == "yaklaşık %41,6'sı" and al["temel"] == "Sözleşme tutarı"
+    assert bulten.onem_alanlar(dict(fx, fx=None))["tutar"] == "441.624.108 $"      # kur yoksa tam yazım
+    assert bulten.kisa_tutar(1.0085e9, "€") == "1,0 Mrd €" and bulten.kisa_tutar(950000, "$") == "950.000 $"
     assert bulten.onem_alanlar(dict(tl, pct=0.04, txt="%0,0")) is None
     assert bulten.onem_alanlar(None) is None
     out = bulten.onemli_bildirimler([{"ticker": "K", "onem": {"pct": 0.02, "txt": "%0,0"}, "date": "x"}])
@@ -175,6 +177,8 @@ def test_takvim_alanlari_ve_yaklasan():
         {"date": "2026-10-05", "kind": "makro", "title": "Enflasyon (TÜFE)"},
         {"date": "2026-10-05", "kind": "temettu", "ticker": "AEFES"},
         {"date": "2026-10-06", "kind": "temettu", "ticker": "TRALT"},     # 6. işlem günü: dışarıda
+        {"date": "2026-10-01", "kind": "bilanco", "ticker": "EREGL", "date_kind": "tahmini"},  # kesin değil
+        {"date": "2026-10-01", "kind": "temettu", "ticker": "X", "date_kind": "tahmini"},      # kesin değil
     ]
     gun = bulten.sonraki_islem_gunleri("2026-09-28", 5, _tdays("2026-10-29"))
     assert gun == ["2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-05"]
