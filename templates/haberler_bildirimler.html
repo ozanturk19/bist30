@@ -1,11 +1,15 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
 {%- set _tl = {} -%}{%- for k, l, s in types or [] -%}{%- set _ = _tl.update({k: l}) -%}{%- endfor -%}
-{%- set _title = ('Şirket bildirimleri: ' ~ _tl.get(tur)) if tur else 'Şirket bildirimleri' -%}
-{%- set _canon = 'https://borsapusula.com/haberler/bildirimler' ~ (('?tur=' ~ tur_slug) if tur_slug else '') ~ ((('&' if tur_slug else '?') ~ 'sayfa=' ~ feed.page) if feed.page > 1 else '') -%}
+{%- set _hisse = hisse if hisse is defined and hisse else none -%}
+{%- set _AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
+{%- set _dayl = ((tarih[8:10]|int) ~ ' ' ~ _AY[(tarih[5:7]|int) - 1]) if tarih else '' -%}
+{%- set _title = ('Şirket bildirimleri: ' ~ _hisse) if _hisse else (('Şirket bildirimleri: ' ~ _tl.get(tur)) if tur else 'Şirket bildirimleri') -%}
+{%- set _q0 = [] -%}{%- if _hisse %}{% set _ = _q0.append('hisse=' ~ _hisse) %}{% endif -%}{%- if tur_slug %}{% set _ = _q0.append('tur=' ~ tur_slug) %}{% endif -%}{%- if feed.page > 1 %}{% set _ = _q0.append('sayfa=' ~ feed.page) %}{% endif -%}
+{%- set _canon = 'https://borsapusula.com/haberler/bildirimler' ~ (('?' ~ _q0|join('&')) if _q0 else '') -%}
 {% block head %}<title>{{ _title }} — Hangi şirket ne açıkladı? | BorsaPusula</title>
-<meta name="description" content="Borsa İstanbul'da sitedeki {{ coverage or '' }} hissenin {% if tur %}{{ _tl.get(tur)|lower }} {% endif %}bildirimleri{% if feed.range_label %}, {{ feed.range_label }}{% endif %}: tür, saat, önem oranı ve hisse kartı; her bildirimin sitede kalıcı sayfası.">
+<meta name="description" content="{% if _hisse %}{{ hisse_name or _hisse }} ({{ _hisse }}) şirket bildirimleri{% else %}Borsa İstanbul'da sitedeki {{ coverage or '' }} hissenin {% if tur %}{{ _tl.get(tur)|lower }} {% endif %}bildirimleri{% endif %}{% if feed.range_label %}, {{ feed.range_label }}{% endif %}: tür, saat, önem oranı ve hisse kartı; her bildirimin sitede kalıcı sayfası.">
 <link rel="canonical" href="{{ _canon }}">
-{% if tarih %}<meta name="robots" content="noindex, follow">{% endif %}
+{% if tarih or _hisse %}<meta name="robots" content="noindex, follow">{% endif %}
 <meta property="og:title"       content="{{ _title }} | BorsaPusula">
 <meta property="og:description" content="Hangi şirket ne açıkladı? Bildirimler türe göre, gün gün.">
 <meta property="og:url"         content="{{ _canon }}">
@@ -44,16 +48,19 @@
     rutin, mini {T: kart}. Filtre ve "Daha fazla göster" yerinde (fetch); JS kapalıyken bağlantılar
     #bildirimler çapasına iner, sayfa başa atlamaz. -#}
 {%- set _base = '/haberler/bildirimler' -%}
-{%- macro href(slug, page) -%}{{ _base }}{% set q = [] %}{% if slug %}{% set _ = q.append('tur=' ~ slug) %}{% endif %}{% if page and page > 1 %}{% set _ = q.append('sayfa=' ~ page) %}{% endif %}{% if q %}?{{ q|join('&') }}{% endif %}{%- endmacro -%}
+{#- adres: hisse, tür, gün (+rutin), sayfa — arka uç haber_v2.bildirimler_url ile aynı sıra. Gün görünümünde
+    (?tarih=&rutin=1) filtre ve sayfalama aynı günde kalır; day=false gün görünümünden çıkar. -#}
+{%- macro href(slug, page, day=true) -%}{{ _base }}{% set q = [] %}{% if _hisse %}{% set _ = q.append('hisse=' ~ _hisse) %}{% endif %}{% if slug %}{% set _ = q.append('tur=' ~ slug) %}{% endif %}{% if day and tarih %}{% set _ = q.append('tarih=' ~ tarih) %}{% if rutin %}{% set _ = q.append('rutin=1') %}{% endif %}{% endif %}{% if page and page > 1 %}{% set _ = q.append('sayfa=' ~ page) %}{% endif %}{% if q %}?{{ q|join('&amp;')|safe }}{% endif %}{%- endmacro -%}
+{%- macro day_href(day) -%}{{ _base }}?{% if _hisse %}hisse={{ _hisse }}&amp;{% endif %}tarih={{ day }}&amp;rutin=1{%- endmacro -%}
 
 <main class="hb hv" id="main-content" tabindex="-1">
-  {% call pagehead('Haberler') %}Günün özeti ve şirket bildirimleri{% if close_label %}, {{ close_label }} kapanışı verisiyle{% endif %}.{% endcall %}
+  {% call pagehead('Haberler') %}Gündem, şirket bildirimleri, takvim ve Akşam Bülteni{% if close_label %}; hepsi {{ close_label }} kapanışı verisiyle{% endif %}.{% endcall %}
   {{ tabs('bildirimler') }}
 
   <section class="hv-bl" id="bildirimler" aria-labelledby="hvBlH">
     <div class="hv-bh">
-      <h2 id="hvBlH">Hangi şirket ne açıkladı?</h2>
-      <p>{% if tarih %}{{ feed.range_label }} tarihli bildirimler{% if rutin %}, rutin duyurular dahil{% endif %}. <a href="{{ _base }}#bildirimler">Bütün bildirimlere dön</a>{% else %}Sitedeki {{ coverage }} hissenin bildirimleri{% if feed.range_label %}, {{ feed.range_label }}{% endif %}.{% if close_label %} Hisse kartlarında {{ close_label }} kapanışı ve 30 işlem günlük çizgi.{% endif %}{% endif %}</p>
+      <h2 id="hvBlH">{% if _hisse %}{{ hisse_name or _hisse }} ne açıkladı?{% else %}Hangi şirket ne açıkladı?{% endif %}</h2>
+      <p>{% if tarih %}{{ _dayl }} tarihli {% if _hisse %}{{ _hisse }} {% endif %}bildirimler{% if rutin %}, rutin duyurular dahil{% endif %}. <a href="{{ href(none, 1, false) }}#bildirimler">{% if _hisse %}Bütün {{ _hisse }} bildirimlerine dön{% else %}Bütün bildirimlere dön{% endif %}</a>{% elif _hisse %}Şirket bildirimleri: {{ _hisse }}{% if feed.range_label %}, {{ feed.range_label }}{% endif %}. <a href="/hisse/{{ _hisse }}">{{ _hisse }} hisse sayfası</a> · <a href="{{ _base }}#bildirimler">Bütün şirketler</a>{% else %}Sitedeki {{ coverage }} hissenin bildirimleri{% if feed.range_label %}, {{ feed.range_label }}{% endif %}.{% if close_label %} Hisse kartlarında {{ close_label }} kapanışı ve 30 işlem günlük çizgi.{% endif %}{% endif %}</p>
     </div>
 
     <div class="hv-fbar">
@@ -69,7 +76,7 @@
     {%- if feed.days %}
     {%- for d in feed.days %}
       <section class="hv-day" data-day="{{ d.day }}" aria-labelledby="hvD{{ d.day }}">
-        <div class="hv-day-h"><h3 id="hvD{{ d.day }}">{{ d.label }}<span>{{ d.w }}</span></h3><div class="hv-day-n"><span>{{ d.total }} bildirim</span>{% if d.routine and not tur and not tarih %}<a class="hv-rut" href="{{ _base }}?tarih={{ d.day }}&amp;rutin=1">Rutin duyurular ({{ d.routine }})</a>{% endif %}</div></div>
+        <div class="hv-day-h"><h3 id="hvD{{ d.day }}">{{ d.label }}<span>{{ d.w }}</span></h3><div class="hv-day-n"><span>{{ d.total }} bildirim</span>{% if d.routine and not tur and not tarih %}<a class="hv-rut" href="{{ day_href(d.day) }}">Rutin duyurular ({{ d.routine }})</a>{% endif %}</div></div>
         {%- if not tur and d.mix|length > 1 %}
         <div class="hv-mix" role="img" aria-label="{{ d.label }} bildirimlerinin türlere dağılımı: {% for m in d.mix %}{{ m.l }} {{ m.n }}{% if not loop.last %}, {% endif %}{% endfor %}">{% for m in d.mix %}<i class="t-{{ m.k }}" style="flex:{{ m.n }}"></i>{% endfor %}</div>
         <div class="hv-mixl" aria-hidden="true">{% for m in d.mix %}<span class="t-{{ m.k }}">{{ m.l }} <b>{{ m.n }}</b></span>{% endfor %}</div>
