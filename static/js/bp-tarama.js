@@ -88,12 +88,12 @@
     var nm = CATN[key] || CATL[key];
     return { h: h, num: 1, tip: nm.charAt(0).toLocaleUpperCase('tr-TR') + nm.slice(1) + ' kategorisinin skoru (0–100).',
       v: function (r) { return r.cat ? r.cat[key] : null; },
-      cell: function (r) { var v = r.cat ? r.cat[key] : null; if (v != null) return String(Math.round(v)); return mut(r.te == null ? 'Sınırlı veri' : (r.na.indexOf(key) >= 0 ? 'Uygulanmaz' : 'Veri yok')); } };
+      cell: function (r) { var v = r.cat ? r.cat[key] : null; if (v != null) return String(Math.round(v)); return mut(r.te == null ? 'Skor yok' : (r.na.indexOf(key) >= 0 ? (r.g === 'Bankacılık' ? 'Bankada yok' : (r.g === 'Sigorta' ? 'Sigortada yok' : 'Kullanılmaz')) : 'Veri yok')); } };
   }
   function cush(r) { return (r.p && r.sl != null) ? (r.p - r.sl) / r.p * 100 : null; }
   var C = {
     bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
-      cell: function (r) { return r.bp == null ? mut('Sınırlı veri') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
+      cell: function (r) { return r.bp == null ? mut('Skor yok') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
       cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },
     p: { h: 'Fiyat', num: 1, v: function (r) { return r.p; }, cell: function (r) { return r.p == null ? mut('Fiyat yok') : nf2.format(r.p) + ' ' + mut('₺'); } },
@@ -105,8 +105,8 @@
       cell: function (r) { var q = cush(r); if (q == null) return mut('Veri yok'); return nf2.format(r.sl) + ' ' + mut('₺') + '<span class="sub">fiyatın %' + nf1.format(Math.abs(q)) + ' ' + (r.sl < r.p ? 'altında' : 'üstünde') + '</span>'; } },
     rv: { h: 'RVOL', num: 1, tip: '5 günlük ortalama hacim / 20 günlük ortalama hacim.', v: function (r) { return r.rv; }, cell: function (r) { return r.rv == null ? mut('Veri yok') : nf2.format(r.rv) + '×'; } },
     d: { h: 'Durum yaşı', num: 1, tip: 'Hisse kaç işlem günüdür bu trend durumunda.', v: function (r) { return r.d; }, cell: function (r) { return r.d == null ? mut('Veri yok') : (r.d <= 1 ? 'son seans' : r.d + ' gün'); } },
-    te: { h: 'Temel skor', tip: 'Kârlılık, nakit akışı, borç durumu, değerleme ve büyüme (0–100). * Sınırlı veri.', v: function (r) { return r.te; },
-      cell: function (r) { return r.te == null ? mut('Sınırlı veri') : bar(r.te, 'cy', false, r.sv) + (r.fa ? '<span class="sub">' + esc(r.fa) + '</span>' : ''); } },
+    te: { h: 'Temel skor', tip: 'Kârlılık, nakit akışı, borç durumu, değerleme ve büyüme (0–100).', v: function (r) { return r.te; },
+      cell: function (r) { return r.te == null ? mut('Skor yok') : bar(r.te, 'cy', false) + (r.fa ? '<span class="sub">' + esc(r.fa) + '</span>' : ''); } },
     kar: catCol('karlilik', 'Kârlılık'),
     nak: catCol('nakit_akisi', 'Nakit akışı'),
     kal: catCol('kaldirac', 'Borç durumu'),
@@ -314,7 +314,6 @@
     if (typeof rule === 'function') rule = rule();
     $('tvInfo').innerHTML = '<b>' + rows.length + ' hisse</b> · ' + (rule ? esc(rule) : 'Sıralama: ' + SORTL[st.sort.k] + ' ' + (st.sort.dir < 0 ? '↓' : '↑'));
     [].forEach.call(document.querySelectorAll('.tv-seg button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === st.cols)); });
-    $('tvFnote').hidden = !(WIDE.matches && st.cols === 'temel');
   }
   function fkey(el) { var a = el && el.closest && el.closest('[data-act]'); return a ? [a.getAttribute('data-act'), a.getAttribute('data-k') || '', a.getAttribute('data-f') || '', a.getAttribute('data-v') || '', a.getAttribute('data-id') || ''].join('|') : null; }
   function byKey(scope, key) { var els = scope.querySelectorAll('[data-act]'); for (var i = 0; i < els.length; i++) if (fkey(els[i]) === key) return els[i]; return null; }

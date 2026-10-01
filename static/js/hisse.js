@@ -1414,7 +1414,7 @@ function hxFillFund(f, divRow) {
   const note = document.getElementById('q2Note');
   if (note) {
     const basis = k && k.basis === 'yabanci_para' ? 'Şirketin işlevsel para birimi döviz; oranlar TL\'ye çevrilmiş finansallardan.' : null;
-    const noMed = V && rows.length && !V.hasMed ? (V.v2 ? 'Sektörde karşılaştırma için yeterli şirket yok.' : 'Sektör ortancası olmadığı için yorum yapılmıyor.') : (V && V.wide ? 'Sektörde yeterli şirket olmadığı için piyasa geneline göre.' : null);
+    const noMed = V && rows.length && !V.hasMed ? (V.v2 ? 'Sektörde karşılaştırma için yeterli şirket yok.' : 'Sektörde karşılaştırma için yeterli şirket yok; bu yüzden ucuz ya da pahalı denmiyor.') : (V && V.wide ? 'Sektörde yeterli şirket olmadığı için piyasa geneline göre.' : null);
     const cur = f.financial_currency || 'TRY';
     const txt = basis || noMed || (cur !== 'TRY' && !rows.length ? 'Şirket finansallarını ' + cur + ' cinsinden raporluyor; F/K ve PD/DD bu yüzden hesaplanmıyor.' : null);
     if (txt) { note.textContent = txt; note.hidden = false; }
@@ -1898,7 +1898,7 @@ function _tvValue(f, k) {
     }).filter(Boolean);
     if (pos.length) say += '. ' + pos.join(', ');
   }
-  if (!V.hasMed) say += (say ? '. ' : '') + 'Sektör ortancası olmadığı için yorum yapılmıyor';
+  if (!V.hasMed) say += (say ? '. ' : '') + 'Sektörde karşılaştırma için yeterli şirket yok; bu yüzden ucuz ya da pahalı denmiyor';
   _tvEl('tvDegerlemeS').textContent = say ? say + '.' : '';
   const tvBox = _tvEl('tvDegerlemeB');
   const now = k && k.degerleme_simdi;
