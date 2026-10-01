@@ -2713,14 +2713,18 @@ except Exception as _acct_e:   # fail-closed: hesap uçları 503
     _ACCT_PEPPER = None
     logging.getLogger("bist30").error("D-50 pepper kurulamadi, hesap uclari kapali: %s", _acct_e)
 
-_acct = _accounts.AccountService(
-    _accounts.FileStore(SUBSCRIBERS_FILE, _sub_lock,
-                        load=lambda: _tp_read_json(SUBSCRIBERS_FILE, default=None) if os.path.exists(SUBSCRIBERS_FILE) else {},
-                        save=lambda subs: _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)),
-    _acct_store(_ACCT_SESSIONS_PATH, _acct_sessions_lock),
-    _acct_store(_ACCT_CODES_PATH, _acct_codes_lock),
-    _ACCT_PEPPER, _acct_valid_ticker, rate_allow=_mail_route_allowed,
-) if _ACCT_PEPPER else None
+try:
+    _acct = _accounts.AccountService(
+        _accounts.FileStore(SUBSCRIBERS_FILE, _sub_lock,
+                            load=lambda: _tp_read_json(SUBSCRIBERS_FILE, default=None) if os.path.exists(SUBSCRIBERS_FILE) else {},
+                            save=lambda subs: _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)),
+        _acct_store(_ACCT_SESSIONS_PATH, _acct_sessions_lock),
+        _acct_store(_ACCT_CODES_PATH, _acct_codes_lock),
+        _ACCT_PEPPER, _acct_valid_ticker, rate_allow=_mail_route_allowed,
+    ) if _ACCT_PEPPER else None
+except Exception as _acct_e:   # hesap uçları kapanır (503), site açılmaya devam eder
+    _acct = None
+    logging.getLogger("bist30").error("D-50 hesap servisi kurulamadi: %s", _acct_e)
 
 
 def _acct_email():

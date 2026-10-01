@@ -340,3 +340,37 @@ def test_pepper_file_created_once(tmp_path):
     assert a == b and len(a) >= 32
     assert oct(os.stat(path).st_mode & 0o777) == "0o600"
     assert A.load_or_create_pepper("x" * 20, path) == b"x" * 20
+
+
+def test_pepper_concurrent_workers_agree(tmp_path):
+    """4 gunicorn işçisi aynı anda açılır: hepsi aynı pepper'ı görmeli (yarım dosya okunmaz)."""
+    import threading as th
+    path = str(tmp_path / "auth_pepper.key")
+    got, errs = [], []
+
+    def run():
+        try:
+            got.append(A.load_or_create_pepper("", path))
+        except Exception as e:  # pragma: no cover
+            errs.append(e)
+    ts = [th.Thread(target=run) for _ in range(8)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert not errs and len(set(got)) == 1 and len(got[0]) >= 32
+    assert [f for f in os.listdir(tmp_path) if f.endswith(".tmp")] == []
+    (tmp_path / "kisa.key").write_bytes(b"abc")
+    with pytest.raises(ValueError):
+        A.load_or_create_pepper("", str(tmp_path / "kisa.key"))
+
+
+def test_tr_number_parsing_matches_client_canon():
+    """accounts._num = static/bp-format.js bpParseTrNumber (K-BA) — aynı girdi, aynı sayı."""
+    cases = {"210,80": 210.8, "1.234,56": 1234.56, "1.500.000": 1500000.0, "9.86": 9.86, "1500": 1500.0,
+             " 12 ": 12.0, "abc": None, "1,2,3": None, "": None, "1e5": None, "-3": -3.0}
+    for raw, want in cases.items():
+        got = A._num(raw)
+        assert (got is None and want is None) or got == pytest.approx(want), (raw, got)
+    assert A.clean_position("1.500.000", "0,5") == (1500000, 0.5)
+    assert A.clean_position("1.5", "10") is None and A.clean_position(True, 1) is None

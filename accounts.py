@@ -179,13 +179,17 @@ def _num(v):
     if isinstance(v, (int, float)):
         f = float(v)
     elif isinstance(v, str):
+        # static/bp-format.js bpParseTrNumber (K-BA) ile birebir: virgül varsa noktalar binlik
+        # ve virgül ondalık ("1.234,56"); virgül yok ama birden çok nokta varsa hepsi binlik
+        # ("1.500.000"); tek nokta ondalıktır ("9.86").
         s = v.strip().replace(" ", "")
-        if "," in s:          # tr-TR: 1.234,56
-            s = s.replace(".", "").replace(",", ".")
-        try:
-            f = float(s)
-        except ValueError:
+        if "," in s:
+            s = s.replace(".", "").replace(",", ".", 1)
+        elif s.count(".") > 1:
+            s = s.replace(".", "")
+        if not re.match(r"^[+-]?\d*\.?\d+$", s):
             return None
+        f = float(s)
     else:
         return None
     return f if math.isfinite(f) else None
@@ -736,19 +740,32 @@ def load_or_create_pepper(env_value, path):
     ürettiği kod diğerinde doğrulanamaz)."""
     if env_value and len(env_value) >= 16:
         return env_value.encode()
-    try:
-        with open(path, "rb") as f:
-            val = f.read().strip()
-        if len(val) >= 32:
-            return val
-    except FileNotFoundError:
-        pass
-    val = secrets.token_hex(32).encode()
-    try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "wb") as f:
-            f.write(val)
-        return val
-    except FileExistsError:           # başka işçi aynı anda yazdı: onunkini oku
+
+    def _read():
         with open(path, "rb") as f:
             return f.read().strip()
+
+    try:
+        val = _read()
+        if len(val) >= 32:
+            return val
+        raise ValueError("pepper dosyası kısa/bozuk: %s" % path)
+    except FileNotFoundError:
+        pass
+    # Dört işçi aynı anda açılabilir: dosya içeriğiyle birlikte TEK hamlede görünür
+    # (geçici dosya + os.link; link hedef varsa FileExistsError) -> kimse yarım dosya okumaz.
+    val = secrets.token_hex(32).encode()
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(path)), suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(val)
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(tmp, 0o600)
+        try:
+            os.link(tmp, path)
+            return val
+        except FileExistsError:       # başka işçi önce yazdı: onunkini kullan
+            return _read()
+    finally:
+        os.unlink(tmp)
