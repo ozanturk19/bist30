@@ -79,8 +79,8 @@ var BP_ASSET_LABELS = {
 var BP_ASSET_DECIMALS = {
   XU100:    0,
   XU030:    0,
-  USDTRY:   4,
-  EURTRY:   4,
+  USDTRY:   2,   /* C-71 K25: veri 2 haneli gelir; 4 hane yalnız sıfır dolgusuydu */
+  EURTRY:   2,
   BTC:      0,
   ETH:      2,
   SOL:      2,

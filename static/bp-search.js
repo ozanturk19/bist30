@@ -14,6 +14,17 @@
   if (window.__bpSearchMounted) return;
   window.__bpSearchMounted = true;
 
+  /* C-71 K25 (görsel denetim 27.09): şerit yüzdesi ve EOD çipi sitenin biçim kanonunda —
+     değişim "+%0,09" (bp-format.js bpFormatPct), tarih "1 Ekim" (bpFormatTrDateLong).
+     bp-format.js yüklenmeyen sayfalarda (haberler, bildirim) aynı kural burada. */
+  var BP_EOD_MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function bpMacroPct(v) {
+    if (typeof bpFormatPct === 'function') return bpFormatPct(v, 2);
+    var r = parseFloat(Number(v).toFixed(2));
+    if (r === 0) r = 0;
+    return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(2).replace('.', ',');
+  }
+
   // ---- CSS ----
   // K-CY (22.09): "hardcoded hex so it works on any page" gerekcesi ARTIK GECERLI
   // DEGIL -- tokens.css bp-search.js'i yukleyen 20 sayfanin hepsinde <head>'de.
@@ -434,9 +445,13 @@
     fetch('/api/data-quality', {cache: 'no-store'})
       .then(function(r) { return r.json(); })
       .then(function(j) {
-        var m = /^(\d{2})\.(\d{2})\./.exec((j && j.updated_at) || '');
+        var m = /^(\d{2})\.(\d{2})\.(\d{4})/.exec((j && j.updated_at) || '');
         if (!m) return;
-        var label = m[1] + '.' + m[2] + ' kapanışı';
+        /* C-71 K25: sayfa damgasıyla aynı uzun biçim ("1 Ekim kapanışı"); bp-format.js
+           yüklenmeyen sayfalarda (haberler, bildirim) aynı kural yerelde. */
+        var day = (typeof bpFormatTrDateLong === 'function' && bpFormatTrDateLong(m[0]))
+          || (parseInt(m[1], 10) + ' ' + BP_EOD_MONTHS[parseInt(m[2], 10) - 1]);
+        var label = day + ' kapanışı';
         document.getElementById('bpEodChipText').textContent = label;
         eodChip.setAttribute('aria-label', 'Veriler ' + label + ' ile günceldir');
         eodChip.style.display = '';
@@ -765,10 +780,9 @@
         var lbl   = bpAssetLabel(it.label);
         var price = bpFormatAssetPrice(it.label, it.price);
         var chg   = it.change;
-        var sign  = chg > 0 ? '+' : '';
         var cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
         var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2).replace('.', ',') + '%</span></span>';
+        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + bpMacroPct(chg) + '</span></span>';
       }).join('');
       /* K-AF (21.09): serit bir MARQUEE — icerik iki kez basilir ve kaydirma
          ikinci kopyayi sürekli besler. `prefers-reduced-motion: reduce` altinda

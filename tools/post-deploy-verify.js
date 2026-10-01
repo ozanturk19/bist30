@@ -561,7 +561,10 @@ const step = async (ad, fn) => {
                  clock: !!document.getElementById('bpLiveTime'), refresh: !!document.getElementById('bpRefreshBtn') };
       });
       if (m.clock || m.refresh) return bad('C-03 eski saat/Yenile duruyor', JSON.stringify(m));
-      if (m.chip !== m.upd.slice(0, 5) + ' kapanışı') return bad('C-03 EOD çipi', m.chip + ' vs ' + m.upd);
+      /* C-71 K25: çip sayfa damgasıyla aynı uzun biçimde ("1 Ekim kapanışı"; yıl yalnız geçmiş yılda). */
+      const AY = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+      const exp = parseInt(m.upd.slice(0, 2), 10) + ' ' + AY[parseInt(m.upd.slice(3, 5), 10) - 1];
+      if (!new RegExp('^' + exp + '( \\d{4})? kapanışı$').test(m.chip)) return bad('C-03 EOD çipi', m.chip + ' vs ' + m.upd);
       ok('C-03 EOD çipi', m.chip);
       await c.close();
     });
