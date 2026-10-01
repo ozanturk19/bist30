@@ -49,16 +49,16 @@ SORU = {"kaliteli_makul": "Hangi şirketler kaliteli ve makul fiyatlı?",
         "istikrarli_temettu": "Hangi şirketler istikrarlı temettü ödüyor?",
         "borcsuz_buyuyen": "Hangi şirketler borçsuz büyüyor?",
         "sektorune_gore_ucuz": "Hangi şirketler sektörüne göre ucuz?"}
-KURAL = {
-    "kaliteli_makul": ("Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektör "
-                       "ortancasından iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan "
+KURAL = {   # gri dil envanteri K9: kullanicinin gordugu metinde "ortanca" yok, "orta deger" var
+    "kaliteli_makul": ("Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektörünün "
+                       "orta değerinden iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan "
                        "şirketler; BorsaPusula Skoru'na göre sıralı."),
     "istikrarli_temettu": ("Hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödemiş şirketler; "
                            "son 12 ayın temettü verimine göre sıralı."),
     "borcsuz_buyuyen": ("Nakdi ve kısa vadeli yatırımları finansal borcundan fazla olan, son yıllık raporunda "
                         "satışlarını artırıp yılı kârla kapatan şirketler; BorsaPusula Skoru'na göre sıralı."),
-    "sektorune_gore_ucuz": ("F/K'sı da PD/DD'si de sektör ortancasının altında olan ve değerlemesi ucuz "
-                            "çıkan şirketler; sektörüne göre en ucuzdan sıralı."),
+    "sektorune_gore_ucuz": ("F/K'sı da PD/DD'si de sektörünün orta değerinin altında olan, fiyatı ucuz tarafta "
+                            "şirketler; sektörüne göre en ucuzdan sıralı."),
 }
 VARSAYILAN = LISTS[0]
 

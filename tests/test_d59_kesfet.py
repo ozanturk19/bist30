@@ -56,7 +56,7 @@ def test_slug_cozumleme_ve_ic_anahtar():
 
 
 _YASAK = re.compile(r"\b(AL|SAT|LONG|SHORT)\b|hedef|stop|giriş fiyat|kâr al|Ücretsiz|Kısmi|veri tamlığı|"
-                    r"Sınırlı veri|hazırlanıyor|bugün|dün\b|yarın|tavsiye", re.I)
+                    r"Sınırlı veri|hazırlanıyor|bugün|dün\b|yarın|tavsiye|ortanca|ROE", re.I)
 
 
 def test_kurallar_tek_cumle_soru_basliklari_ve_yasak_dil():
