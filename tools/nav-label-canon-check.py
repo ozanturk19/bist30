@@ -54,6 +54,7 @@ CANON = {
     '/tarama':           'Keşfet',
     '/karsilastir':      'Karşılaştır',
     '/portfolio':        'Takip',
+    '/takip':            'Takip',            # C-41: hesaba bagli takip sayfasi
     '/sektor-harita':    'Sektörler',
     '/hisseler':         'Tüm Hisseler',
     '/takvim':           'Takvim',            # C-36: iki takvim tek sayfada

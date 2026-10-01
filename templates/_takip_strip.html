@@ -9,7 +9,7 @@
     yoksa istek de yok. Varsa GET /api/me/watchlist; signal_bars <= 1 olan en fazla 3 hisse
     gosterilir, "Takip listen" /takip'e gider. Degisen yoksa, oturum dusmusse (401 -> ipucu
     silinir) ya da istek basarisizsa serit gizli kalir. -#}
-<link rel="stylesheet" href="/static/css/bp-account.css?v=a048a807">
+<link rel="stylesheet" href="{{ static_v('css/bp-account.css') }}">
 <div class="tks" id="tkStrip" role="note" aria-label="Takip ettiklerinde son seansta" hidden></div>
 <script>
 (function () {

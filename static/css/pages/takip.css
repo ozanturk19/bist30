@@ -6,11 +6,6 @@
 
   * { box-sizing: border-box; }
   body { margin: 0; -webkit-font-smoothing: antialiased; line-height: 1.5; }
-  header {
-    background: var(--bp-bg); border-bottom: 1px solid var(--bp-border);
-    padding: 10px 20px; display: flex; align-items: center; gap: 14px;
-    position: sticky; top: 0; z-index: var(--bp-z-dropdown); min-height: 60px;
-  }
 
   .tk { --tk-gut: 28px; max-width: var(--bp-container-1400); margin: 0 auto; padding: 0 var(--tk-gut) 24px; color: var(--bp-text); font-size: 15px; }
   .tk .u { color: var(--bp-al); } .tk .d { color: var(--bp-sat); } .tk .n { color: var(--bp-text2); }

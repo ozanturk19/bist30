@@ -6,12 +6,12 @@
     "Takip nasil calisir?" blogu. -#}
 <meta name="description" content="Takip listen, portföyün ve e-posta bildirimlerin tek sayfada; hesabına bağlı, her cihazda aynı.">
 <meta name="robots" content="noindex">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6834d771">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/takip">
-<link rel="stylesheet" href="/static/css/tokens.css?v=d45615e3">
-<link rel="stylesheet" href="/static/css/data-art.css?v=40964c70">
-<link rel="stylesheet" href="/static/css/bp-account.css?v=a048a807">
-<link rel="stylesheet" href="/static/css/pages/takip.css?v=7e53c8bc">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/bp-account.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/takip.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -51,11 +51,11 @@
 {% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/bp-vocab.js?v=17025fc9"></script>
-<script src="/static/js/bp-account.js?v=f1114c84"></script>
-<script src="/static/js/bp-takip.js?v=b6a4642e"></script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-vocab.js') }}"></script>
+<script src="{{ static_v('js/bp-account.js') }}"></script>
+<script src="{{ static_v('js/bp-takip.js') }}"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}
