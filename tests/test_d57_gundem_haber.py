@@ -160,6 +160,42 @@ def test_banned_language_filter():
         assert gh.banned_hits(ok) == [], ok
 
 
+@pytest.mark.parametrize("bad", [
+    "geçen yılın", "bu yılın", "gelecek yılın", "bugünden", "bugünün", "dünden", "yarından", "bu haftaki",
+    "geçen haftaki", "geçen ayki", "geçtiğimiz hafta", "haftaya", "önceki gün", "önümüzdeki günlerde",
+    "Bugünkü", "dünkü", "geçen sene", "bu sabahki", "şimdiye kadar", "son günlerde", "geçen yıllarda"])
+def test_relative_time_inflected_forms_banned(bad):
+    """İnceleme P1: göreli zaman yasağı çekimli Türkçe biçimleri de yakalar."""
+    assert "goreli_zaman" in gh.banned_hits("Kredi hacmi %s eylül ayında arttı." % bad), bad
+
+
+@pytest.mark.parametrize("ok", [
+    "Dünya Bankası büyüme tahminini açıkladı.", "Dünya genelinde petrol talebi arttı.", "Dünyanın en büyük ekonomisi",
+    "Bu gündem maddesi", "Bu ayrıntı açıklandı.", "Aynı dönemde ihracat arttı.", "Düşüş üst üste beşinci haftaya uzandı.",
+    "Bir önceki güne göre değişim yüzde 2.", "Dünkirk", "Ocak ayında enflasyon"])
+def test_relative_time_ban_has_no_false_positives(ok):
+    assert "goreli_zaman" not in gh.banned_hits(ok), ok
+
+
+def test_relative_time_sentence_on_real_credit_item_dropped():
+    """01.10 girdisinde 'bu yılın' 5 kez geçiyor: model yankılarsa cümle düşer (önceden yayına çıkıyordu)."""
+    _, ev, _ = _ctx_ev()
+    h = _hid(ev, "Bankacılıkta kredi")
+    (it, rep), _ = _validate(_item("Kredi hacmi 25 Eylül haftasında 164,6 milyar lira arttı", [
+        ("Bankacılık sektöründe toplam kredi hacmi bu yılın eylül ayında büyüyerek 28,4 trilyon lirayı aştı.", [h])]))
+    assert it is None and "yasak_dil:goreli_zaman" in rep["cumleler"][0]["ret"]
+
+
+def test_acceptance_flags_inflected_relative_time(out):
+    os.makedirs(out)
+    doc = {"baski": "2026-10-01T19:30:00+03:00", "baski_label": "1 Ekim 2026 · 19:30", "maddeler": [
+        {"id": "g-20261001-11", "baslik": "Kredi hacmi", "ozet": "Kredi hacmi geçen yılın aynı dönemine göre arttı."}]}
+    for name, obj in (("2026-10-01-aksam.json", doc), ("2026-10-01-aksam.audit.json", {"durum": "basildi"})):
+        with open(os.path.join(out, name), "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False)
+    assert gh.acceptance(out, 7, today=NOW.date())["yasak_dil"] == ["2026-10-01-aksam g-20261001-11 goreli_zaman"]
+
+
 def test_publisher_and_url_guard():
     assert gh.publisher("Dünya Finans") == ("Dünya", ("dunya.com",))
     assert gh.publisher("TRT Haber Dünya")[0] == "TRT Haber"
@@ -227,7 +263,10 @@ def test_sentence_initial_names_are_checked():
     assert "Powell" in gh._entity_roots("Powell, politika faizini sabit tuttu.", al)
     assert "Otokar" in gh._entity_roots("Otokar yeni sözleşme imzaladı.", al)
     assert gh._entity_roots("Ayrıca, kredi hacmi arttı.", al) == []
-    assert gh._entity_roots("Analistler adımları değerlendirdi.", al) == []
+    assert gh._entity_roots("Bu adım kredi hacmini artırdı.", al) == []
+    # İnceleme P1: cümle başındaki büyük harfli her sözcük denetlenir (virgülsüz "Powell …" dahil)
+    assert gh._entity_roots("Powell KOBİ kredilerinde sınırı yükseltti.", al) == ["Powell", "KOBİ"]
+    assert gh._entity_roots("Analistler adımları değerlendirdi.", al) == ["Analistler"]
 
 
 def test_kap_only_company_sentence_rejected_and_chip_rules():
@@ -238,7 +277,7 @@ def test_kap_only_company_sentence_rejected_and_chip_rules():
         ("Otokar, tekerlekli zırhlı araçların tedariki ve lojistik desteğini kapsayan 1 milyar 472 milyon "
          "80 bin 360 dolarlık bir ihracat sözleşmesi imzaladı.", [h])], kanit_b=[h],
         hisseler=["OTKAR", "ASELS", "XXXXX"], kategori="Şirketler"))
-    assert rep["cumleler"][0]["ret"] == ["kanit_yok", "sayi:41,6"]   # AI, KAP'tan şirket olgusu yazamaz
+    assert rep["cumleler"][0]["ret"][:2] == ["kanit_yok", "sayi:41,6"]   # AI, KAP'tan şirket olgusu yazamaz
     assert it and it["hisseler"] == ["OTKAR"]              # ASELS kanıtta yok, XXXXX evrende yok
     assert "41,6" not in it["ozet"]
     assert sorted(rep["hisse_ret"]) == ["ASELS", "XXXXX"]
@@ -251,6 +290,75 @@ def test_ai_cannot_restate_kap_numbers_even_with_press_citation():
         ("Otokar'ın sözleşmesi yıllık hasılatının yaklaşık %41,6'sına denk geliyor.", [h, "K1"])],
         kanit_b=[h], kategori="Şirketler"))
     assert it is None and "sayi:41,6" in rep["cumleler"][0]["ret"]
+
+
+def test_kap_line_cannot_launder_company_fact_through_press_id():
+    """İnceleme P1: H1 (TCMB) + K3 (Kartonsan KAP) birlikte anılınca KAP olgusu basın haberi gibi
+    yayımlanıyordu (4 yayıncı kaynağıyla, KARTN çipiyle). Cümle yalnız kendi H/F kanıtıyla denetlenir."""
+    _, ev, ctx = _ctx_ev()
+    h1 = _hid(ev, "TCMB, KOBİ")
+    k3 = [k for k, v in ev.items() if v["kind"] == "K" and v["tickers"] == ["KARTN"]][0]
+    kartonsan = "Kartonsan Karton Sanayii yatırımcı ilişkileri yöneticisinin görevinden ayrıldığını duyurdu."
+    it, rep = gh.validate_item(_item("TCMB KOBİ kredisi sınırını genişletti", [
+        ("Merkez Bankası, zorunlu karşılık düzenlemesi kapsamında KOBİ kredilerinin büyüme sınırını %4,5'ten "
+         "%5'e yükseltti.", [h1]),
+        (kartonsan, [h1, k3])], kanit_b=[h1], hisseler=["KARTN"]), ctx)
+    assert any(r.startswith("dayanak") for r in rep["cumleler"][1]["ret"])
+    assert it is None or ("Kartonsan" not in it["ozet"] and it["hisseler"] == [])
+    assert rep["hisse_ret"] == ["KARTN"]
+    # yalnız KAP'a dayanan başlık da geçmez (K adı kabul ettirir, olguyu değil)
+    it2, rep2 = gh.validate_item(_item("Kartonsan'da yatırımcı ilişkileri yöneticisi değişti",
+                                       [(kartonsan, [h1, k3])], kanit_b=[h1, k3]), ctx)
+    assert it2 is None and rep2["karar"] in ("baslik_ret", "cumle_kalmadi")
+    # K satırı bağımsız dayanak sayılmaz: tek yayıncılı H + K = tek dayanak
+    h13 = _hid(ev, "Çin yakıt")
+    it3, rep3 = gh.validate_item(_item("Çin rafinerileri yakıt ihracatını durdurdu", [
+        ("Çin rafinerileri yakıt ihracatını durdurdu ve petrol yeniden 100 doların üzerine çıktı.", [h13, "K1"])],
+        kanit_b=[h13]), ctx)
+    assert it3 is None and rep3["karar"] == "tek_dayanak"
+
+
+def test_chip_needs_supporting_press_headline_not_kap_line():
+    _, ev, ctx = _ctx_ev()
+    h = _hid(ev, "Otokar'dan yaklaşık")
+    k_asels = [k for k, v in ev.items() if v["kind"] == "K" and v["tickers"] == ["ASELS"]][0]
+    it, rep = gh.validate_item(_item("Otokar'a zırhlı araç ihracatı için 1,5 milyar dolarlık sözleşme", [
+        ("Otokar, tekerlekli zırhlı araçların tedariki ve lojistik desteğini kapsayan 1,5 milyar dolarlık bir "
+         "ihracat sözleşmesi imzaladı.", [h, k_asels])], kanit_b=[h], hisseler=["OTKAR", "ASELS"],
+        kategori="Şirketler"), ctx)
+    assert it and it["hisseler"] == ["OTKAR"] and rep["hisse_ret"] == ["ASELS"]
+
+
+OTOKAR_BASE = ("Otokar, tekerlekli zırhlı araçların tedariki ve lojistik desteğini kapsayan bir ihracat "
+               "sözleşmesi imzaladı")
+
+
+@pytest.mark.parametrize("sentence,code", [
+    ("Otokar zırhlı araç ihracat sözleşmesini iptal etti.", "olumsuzluk"),            # imzaladı → iptal
+    ("Otokar zırhlı araç ihracat sözleşmesini imzalamadı.", "olumsuzluk"),            # -mA- olumsuzluk
+    (OTOKAR_BASE + "; bu, şirketin tarihindeki en büyük sözleşme oldu.", "yargi:en büyük"),
+    (OTOKAR_BASE + "; sözleşme şirketin borçluluğunu azaltacak.", "gelecek"),
+    (OTOKAR_BASE + " ve güçlü bir başarıya imza attı.", "yargi:güçlü"),
+    (OTOKAR_BASE + " ve hisse için yukarı yönlü bir dönem başladı.", "yasak_dil:islem_dili"),
+    (OTOKAR_BASE + "; sözleşme şirketin borçluluğunu ve faiz giderini düşürüyor.", "dayanak"),  # uydurma yan cümle
+])
+def test_planted_meaning_errors_on_otokar_rejected(sentence, code):
+    """İnceleme P1: %40 kök örtüşmesi tersine çevrilmiş olguyu, uydurma iddiayı ve yargıyı geçiriyordu."""
+    _, ev, ctx = _ctx_ev()
+    h = _hid(ev, "Otokar'dan yaklaşık")
+    r = gh.check_text(sentence, [h], [h], ctx)
+    assert any(x == code or x.startswith(code + ":") or x.startswith(code) for x in r), (sentence, r)
+
+
+def test_wrong_actor_without_comma_rejected_and_faithful_sentences_pass():
+    _, ev, ctx = _ctx_ev()
+    h1, h6 = _hid(ev, "TCMB, KOBİ"), _hid(ev, "Otokar'dan yaklaşık")
+    assert "ad:Powell" in gh.check_text("Powell KOBİ kredilerinde büyüme sınırını yüzde 4,5 seviyesinden "
+                                        "yüzde 5 seviyesine çıkardı.", [h1], [h1], ctx)
+    for s, h in ((OTOKAR_BASE + ".", h6),
+                 ("TCMB, KOBİ kredilerinde büyüme sınırını yüzde 4,5 seviyesinden yüzde 5 seviyesine çıkardı.", h1),
+                 ("Türk lirası zorunlu karşılıklarda bloke tesis oranları da düşürüldü.", h1)):
+        assert gh.check_text(s, [h], [h], ctx) == [], s
 
 
 def test_ozet_skips_overlong_sentence_keeps_next():
@@ -326,7 +434,9 @@ def test_edition_audit_records_every_verdict_and_cost(out):
     assert audit["maliyet_usd"] == pytest.approx(0.0012) and audit["gemini_cagri_sayaci"] == 1
     kararlar = [m["karar"] for m in audit["turlar"][0]["maddeler"]]
     assert kararlar.count("yayın") == 9 and len(kararlar) == 12
-    assert audit["atilan_cumle"] == 7          # kopya, dayanaksız, 2× göreli zaman/sayı, yalnız K, Fed, AA
+    # kopya, dayanaksız, 2× göreli zaman/sayı, yalnız K, Fed, AA + "günü tamamladı" (kısa F cümlesinde 2 kanıtsız
+    # sözcük; madde başlığı zaten "alım fırsatı" ile düşüyor)
+    assert audit["atilan_cumle"] == 8
     assert audit["used_ids"] and audit["yayin"]["maddeler"]
     assert gh.done_keys(out) == {"2026-10-01-aksam"}
 
@@ -356,6 +466,74 @@ def test_no_response_means_retry_later_not_marked_done(out):
     res = _run(out, model, usage_fn=lambda: (5, 0.01))      # sayaç artmadı
     assert res["durum"] == "cagri_yapilamadi" and len(model.prompts) == 2
     assert gh.done_keys(out) == set() and gh.load_latest(out) is None
+
+
+def _bad_types_answer():
+    good = json.loads(_read("yanit_1.json"))["maddeler"]
+    bad = [dict(good[0], kategori=["Türkiye"]),                                   # liste kategori
+           dict(good[5], cumleler=[dict(good[5]["cumleler"][0], kanit=9)]),       # sayı kanıt
+           dict(good[6], baslik_kanit=3, kategori=7),                             # sayı başlık kanıtı + kategori
+           dict(good[3], baslik=5)]                                               # sayı başlık
+    return json.dumps({"maddeler": bad}, ensure_ascii=False)
+
+
+def test_malformed_types_never_raise():
+    _, ev, ctx = _ctx_ev()
+    for r in json.loads(_bad_types_answer())["maddeler"]:
+        it, rep = gh.validate_item(r, ctx)
+        assert isinstance(rep["baslik"], str)
+        assert it is None or it["kategori"] in gh.KATEGORILER
+
+
+def _loop(out, model, start, end, **kw):
+    """app.py _gundem_haber_loop taklidi: 5 dk'da bir due → v1_ready → run_edition; istisna yutulur."""
+    from datetime import timedelta
+    now, errors = start, 0
+    while now <= end:
+        try:
+            slot = gh.due(now, gh.done_keys(out), gh.load_latest(out) is not None)
+            if slot and gh.v1_ready(now, slot, {"2026-10-01-aksam"}):
+                gh.run_edition(now, slot, model, v1_doc=_json("v1_baski.json"), kap_items=_json("kap_items.json"),
+                               names=NAMES, universe=set(NAMES), budget_status=OK_BUDGET,
+                               cb_state={"open_until": 0.0}, base_dir=out, input_dir=os.path.join(FX, "girdi"),
+                               usage_fn=FakeUsage(model), **kw)
+        except Exception:
+            errors += 1
+        now += timedelta(minutes=5)
+    return errors
+
+
+def test_malformed_model_json_at_most_four_calls_across_loop_ticks(out):
+    """İnceleme P1: bozuk tipli madde doğrulamayı patlatıyor, iz yazılmadığı için döngü 5 dk'da bir Gemini'yi
+    yeniden çağırıyordu (bir baskıda 22 çağrı; ilk kurulumda sınırsız). Artık ≤4 çağrı, baskı yine basılır."""
+    model = FakeModel(*([_bad_types_answer()] * 60))
+    errors = _loop(out, model, NOW, datetime(2026, 10, 2, 8, 0))
+    assert errors == 0 and len(model.prompts) <= gh.MAX_CALLS
+    audit = json.load(open(os.path.join(out, "2026-10-01-aksam.audit.json"), encoding="utf-8"))
+    assert audit["durum"] in ("basildi", "yetersiz") and "hata" not in audit
+
+
+def test_exception_after_call_marks_edition_done(out, monkeypatch):
+    """Çağrıdan sonra beklenmedik istisna (ör. doğrulayıcı hatası) baskıyı 'yapıldı' sayar: tekrar çağrı yok."""
+    def boom(raw, ctx):
+        raise RuntimeError("beklenmedik")
+    monkeypatch.setattr(gh, "validate_item", boom)
+    model = FakeModel(*([_read("yanit_1.json")] * 60))
+    assert _loop(out, model, NOW, datetime(2026, 10, 1, 23, 30)) == 0
+    assert len(model.prompts) <= gh.MAX_CALLS
+    audit = json.load(open(os.path.join(out, "2026-10-01-aksam.audit.json"), encoding="utf-8"))
+    assert audit["turlar"][0]["maddeler"][0]["karar"] == "bicim_hatasi"
+
+    class Crash(FakeModel):
+        def __call__(self, prompt, max_tokens):
+            FakeModel.__call__(self, prompt, max_tokens)
+            raise ValueError("yanıt işlenemedi")       # çağrı yapıldı, sonra çöktü
+    out2 = out + "-2"
+    crash = Crash()
+    assert _loop(out2, crash, NOW, datetime(2026, 10, 2, 8, 0)) == 0
+    assert len(crash.prompts) == 1                       # iz işareti: aynı baskı yeniden çağrılmaz
+    a2 = json.load(open(os.path.join(out2, "2026-10-01-aksam.audit.json"), encoding="utf-8"))
+    assert a2["hata"].startswith("ValueError") and a2["durum"] == "yetersiz"
 
 
 @pytest.mark.parametrize("budget,cb,why", [

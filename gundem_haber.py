@@ -9,15 +9,18 @@ Akış (günde 2 baskı, hafta içi 08:30 ve 19:30 TR):
   2. Yazım (Gemini flash-lite, grounding YOK, mevcut tavanlı `_gemini_call` yolu; baskı başına
      ≤4 çağrı): 5–8 madde, kendi cümlelerimizle, her cümle kanıt kimlikleriyle, yalnız JSON.
   3. Doğrulayıcı (KOD; geçemeyen cümle/madde yayına çıkmaz):
-       - her cümle ≥1 geçerli H/F kanıtına eşlenir (yalnız K → AI şirket olgusu yazamaz);
+       - her cümle ≥1 geçerli H/F kanıtına eşlenir ve YALNIZ kendi H/F kanıtıyla denetlenir; K satırı (KAP)
+         yalnız şirket adını kabul ettirir (AI, bir H kimliği ekleyerek KAP olgusu yazamaz);
        - sayılar ve "gün ay" tarihleri kanıt metninde birebir geçer;
-       - özel adlar (kurum, kişi, ülke, şirket, hisse kodu) kanıt metninde geçer;
-       - cümlenin içerik sözcüklerinin en az %40'ı kanıtta geçer (dayanaksız genel cümle atılır);
-       - neden-sonuç bağı yalnız kanıt da kuruyorsa; yön (yükseldi/düştü) kanıtla çelişmez;
+       - özel adlar (kurum, kişi, ülke, şirket, hisse kodu; cümle başındaki büyük harfli sözcük dahil) kanıtta geçer;
+       - içerik sözcüklerinin ≥%70'i kanıtta, kanıtsız sözcük ≤2 (başlıkta ≥%60 / ≤3), ≥3 sözcüklü her yan
+         cümlenin en az yarısı kanıtta (iyi dayanaklı cümleye eklenmiş uydurma yan cümle atılır);
+       - neden-sonuç bağı yalnız kanıt da kuruyorsa; yön (yükseldi/düştü) kanıtla çelişmez; olumsuzluk/iptal,
+         yargı/abartı sözcüğü ve şirket hakkında gelecek kipi yalnız kanıtta da varsa;
        - kaynak metinle ortak ≤7 sözcüklük dizi (FSEK m.36 / intihal koruması), başlık kopyası yok;
        - yasak dil: AL/SAT, işlem/hedef dili, göreli zaman, kaynak adı gövdede, iddia/kulis, "Ücretsiz";
-       - madde ≥1 basın kanıtı + ≥2 bağımsız dayanak (iki yayıncı ya da yayıncı + kendi verimiz/KAP);
-       - hisse çipi yalnız evrende olan ve adı/kodu kanıtta geçen şirket için.
+       - madde ≥1 basın kanıtı + ≥2 bağımsız dayanak (iki yayıncı ya da yayıncı + kendi verimiz; KAP sayılmaz);
+       - hisse çipi yalnız evrende olan ve adı/kodu maddeyi destekleyen basın başlığında geçen şirket için.
   4. Kaynaklar (O27k=A): yalnız basın kanıtından — yayıncı adı + o yayıncının başlık bağlantısı
      (+ haber tarihi, FSEK m.36). Kendi verimiz ve KAP kaynak etiketi taşımaz.
   5. Saklama: data/gundem_haber/<gün>-<sabah|aksam>.json + latest.json (atomik) ve iç iz
@@ -67,7 +70,10 @@ MIN_ITEMS, MAX_ITEMS, MIN_PUBLISH = 5, 8, 3
 MIN_BASES = 2               # madde başına bağımsız dayanak
 MAX_CANDIDATES = 40
 MAX_KAP = 15
-SUPPORT_MIN = 0.4           # cümle içerik sözcüklerinin kanıtta geçme oranı
+SUPPORT_MIN = 0.7           # cümle içerik sözcüklerinin (yalnız o cümlenin H/F kanıtında) geçme oranı
+MAX_NOVEL = 2               # kanıtta olmayan içerik sözcüğü en çok 2
+CLAUSE_MIN = 0.5            # ≥3 içerik sözcüklü her yan cümlede de en az yarısı kanıtta
+TITLE_SUPPORT_MIN, TITLE_MAX_NOVEL = 0.6, 3   # başlık kısa ve özgün sözcüklerle yazılmak zorunda (kopya yasağı)
 COPY_NGRAM = 8              # kaynakla ortak 8 sözcüklük dizi = kopya (≤7 serbest)
 OZET_MAX, BASLIK_MAX = 260, 70
 AUDIT_KEEP_DAYS = 30
@@ -82,7 +88,8 @@ _MONTHS_LOW = None  # aşağıda doldurulur
 
 
 def _lower_tr(s):
-    return (s or "").replace("I", "ı").replace("İ", "i").lower()
+    return ((s or "").replace("I", "ı").replace("İ", "i").lower()
+            .replace("â", "a").replace("î", "i").replace("û", "u"))   # zekâ = zeka
 
 
 _MONTHS_LOW = tuple(_lower_tr(m) for m in _TR_MONTHS)
@@ -147,11 +154,17 @@ _BANNED = (
                           r"\bfırsat|tavsiye|\böner(?:i|il|ir|ilir)|güçlü trend|trend bozuldu")),
     ("islem_dili", re.compile(r"hedef\s*fiyat|fiyat\s*hedef|hedef\s*seviye|giriş\s*(?:fiyat|seviye|nokta)|"
                               r"\bstop\b|zarar\s*kes|k[âa]r\s*al|\br/r\b|risk\s*/\s*ödül|\blong\b|\bshort\b|"
-                              r"potansiyel|kaçırma|\btp[12]\b|destek seviye|direnç seviye|alınabilir|satılabilir")),
-    ("goreli_zaman", re.compile(r"\b(?:bugün|bugünkü|bugüne|dün|dünkü|yarın|yarınki|günün|bu sabah|bu akşam|"
-                                r"bu gece|bu hafta|geçen hafta|gelecek hafta|önümüzdeki hafta|son dakika|"
-                                r"az önce|şu anda|şu an|şimdi|geçtiğimiz gün|bu ay|geçen ay|gelecek ay|"
-                                r"önümüzdeki ay|bu yıl|geçen yıl|gelecek yıl|önümüzdeki yıl)\b")),
+                              r"potansiyel|kaçırma|\btp[12]\b|destek seviye|direnç seviye|alınabilir|satılabilir|"
+                              r"yukarı yönlü|aşağı yönlü")),
+    # Türkçe çekimli biçimler de (bugünün, dünden, geçen yılın, bu haftaki, geçen ayki…); "dünya" hariç;
+    # "beşinci haftaya" (sıra sayısı) serbest, "bir önceki gün" (dönem karşılaştırması) serbest.
+    ("goreli_zaman", re.compile(
+        r"\b(?:bugün\w*|yarın\w*|dün(?:kü\w*|den|de|e|ü|ün)?|günün|şimdi\w*|son dakika|az önce|şu an\w*|son günlerde|"
+        r"(?<!nci )(?<!ncı )(?<!ncu )(?<!ncü )(?<!\d )haftaya|"
+        r"(?:bu|geçen|gelecek|önümüzdeki|geçtiğimiz|(?<!bir )önceki)\s+"
+        r"(?:gün(?:ü|ün|e|de|den|kü|ler\w*)?|hafta(?:nın|ya|da|dan|ki|lık|lar\w*|sonu\w*)?|"
+        r"ay(?:ın|a|ı|da|dan|ki|lık|lar\w*)?|yıl(?:ın|a|ı|da|dan|ki|lık|lar\w*)?|"
+        r"sene(?:nin|ye|yi|de|den|ki|lik|ler\w*)?|sabah\w*|akşam\w*|gece\w*))\b")),
     ("kaynak_govdede", re.compile(r"anadolu ajansı|\btrt\b|bloomberg\s?ht|dünya gazetesi|dunya\.com|"
                                   r"haberine göre|habere göre|kaynaklara göre|ajansa göre")),
     ("iddia", re.compile(r"\biddia|\bkulis|öğrenildi|söylenti")),
@@ -164,6 +177,29 @@ _CAUSAL_RE = re.compile(r"nedeniyle|yüzünden|etkisiyle|ardından|sonrasında|s
                         r"yol açtı|tetikledi|sayesinde|neden oldu")
 _UP_RE = re.compile(r"^(?:yüksel|art|çık|kazan|tırman|sıçra|güçlen|toparlan|rekor)")
 _DOWN_RE = re.compile(r"^(?:düş|geril|azal|kaybet|değer kayb|in(?:di|er|miş)|çekil|zayıfla|sert düş)")
+
+# Anlam denetimleri (cümlede varsa kanıtta da olmalı). Desenler _lower_tr(metin) üzerinde.
+# Olumsuzluk: değil/yok ya da fiilde -mA- olumsuzluk eki (imzalamadı, olmadığını, bulunmuyor, olmayacak).
+_NEG_RE = re.compile(r"\b(?:değil\w*|yok|hayır|olmaksızın)\b|"
+                     r"\b\w{2,}(?:ma|me)(?:dı|di|du|dü|dığ|diğ|duğ|düğ|mış|miş|muş|müş|yacak|yecek|yacağ|yeceğ|"
+                     r"yan|yen|z|zlar|zler)\w*|\b\w+(?:mıyor|miyor|muyor|müyor)\w*")
+# Tersine çevirme: imzaladı → iptal etti / askıya aldı / reddetti
+_REV_RE = re.compile(r"\biptal|\bredd|\bret\s+(?:etti|edildi)|\baskıya|\bfeshe|\bfesih|\bvazgeç|\bdurdur|"
+                     r"\bertele|\bgeri\s+çek|\bsona\s+erdir|\bdondur")
+# Gelecek zaman (şirket hakkında kanıtsız gelecek iddiası: "borçluluğunu azaltacak")
+_FUT_RE = re.compile(r"\b(?!(?:içecek|yiyecek|giyecek|gelecek|yakacak)\b)\w+(?:acak|ecek|acağ|eceğ)\w*")
+# Yargı/abartı sözcükleri: kanıtta aynen geçmiyorsa cümle atılır (şirkete yargı değil betim)
+_JUDGE = tuple((k, re.compile(rx)) for k, rx in (
+    ("güçlü", r"\bgüçlü\b"), ("zayıf", r"\bzayıf\b"), ("başarı", r"\bbaşarı"), ("olumlu", r"\bolumlu\b"),
+    ("olumsuz", r"\bolumsuz"), ("rekor", r"\brekor"), ("en büyük", r"\ben büyük"), ("en küçük", r"\ben küçük"),
+    ("en iyi", r"\ben iyi"), ("en kötü", r"\ben kötü"), ("cazip", r"\bcazip"), ("parlak", r"\bparlak"),
+    ("çarpıcı", r"\bçarpıcı"), ("etkileyici", r"\betkileyici"), ("dev", r"\bdev\b")))
+# Yan cümle sınırları (dayanağı yan cümle düzeyinde de ölçmek için: "imzaladı; bu, şirketin en büyük…")
+_CLAUSE_RE = re.compile(r";|:\s|\s(?:ve|ancak|ama|fakat|ayrıca|böylece|dolayısıyla|üstelik|ise)\s|,\s(?:bu|ki)\s")
+# Dayanak hesabında sayılmayan genel sözcükler (anlamları ayrıca denetlenir ya da olgu taşımaz)
+_NEUTRAL = set(w if len(w) <= 5 else w[:5] for w in (
+    "seviye", "düzey", "yeniden", "genel", "tutar", "yönünde", "edebilecek", "edecek", "vurguladı", "aktardı",
+    "olmadı", "yaklaşık", "dair", "fiyat", "değişim"))
 
 # Kanıtta aranmayan, her zaman serbest büyük harfli sözcükler (kökler, küçük harf)
 _ENTITY_OK = {"türkiye", "türk", "tl", "borsa", "istanbul", "dolar", "euro", "avro", "merkez"}
@@ -204,14 +240,18 @@ def _stem(w):
     return w if (w.isdigit() or len(w) <= 5) else w[:5]
 
 
-def _content_stems(s):
+def _content_words(s):
     out = []
     for w in _words(_strip_index_names(s)):
         lw = _lower_tr(w)
         if lw in _STOP or len(lw) < 3 or lw.isdigit():
             continue
-        out.append(_stem(lw))
+        out.append(lw)
     return out
+
+
+def _content_stems(s):
+    return [_stem(w) for w in _content_words(s)]
 
 
 def _strip_index_names(s):
@@ -303,10 +343,19 @@ _CONNECTORS = {"ayrıca", "öte", "buna", "bununla", "böylece", "ancak", "bu", 
                "ilk", "son", "toplamda", "genel", "yani", "örneğin", "bunun", "bunlar"}
 
 
-def _entity_roots(s, aliases=None):
-    """Cümledeki özel ad kökleri: cümle başı dışındaki büyük harfle başlayan sözcükler + tüm
-    BÜYÜK HARF kısaltmalar. Cümle başındaki sözcük ancak ad olduğu belliyse sayılır: kesme işaretli
-    ek almış (Akbank'ın, Şimşek'e) ya da bir şirketin takma adı (Otokar). Ek atılır."""
+# Cümle başında büyük harfle gelen ama özel ad olmayan yaygın sözcükler (ad denetimine girmez)
+_STARTERS = _CONNECTORS | {"şu", "o", "buna", "bunda", "bundan", "konu", "öte", "yandan", "toplam", "yıllık",
+                           "aylık", "haftalık", "yüzde", "en", "yeni", "bir", "her", "tüm", "bütün", "daha",
+                           "hem", "de", "da", "ise", "ile", "için", "gibi", "kadar", "göre", "sonra", "önce",
+                           "oysa", "çünkü", "zira", "böyle", "şöyle", "işte", "bazı", "birçok", "çeşitli"}
+
+
+def _entity_tokens(s, aliases=None):
+    """Cümledeki özel ad kökleri -> [(kök, düz_baş)]: cümle başı dışındaki büyük harfle başlayan
+    sözcükler + tüm BÜYÜK HARF kısaltmalar + cümle başındaki büyük harfli her sözcük (yaygın cümle
+    başlangıçları hariç: Ayrıca, Bu, Öte…). Kesme işaretli ek atılır. düz_baş=True: cümle başında, kesme
+    işaretsiz, takma ad değil — ad mı sıradan sözcük mü belli değil; kökü (5 harf) kanıtta geçmeli
+    ("Powell KOBİ…" yakalanır, "Brüt rezervler…" kanıtta 'brüt' varsa geçer)."""
     names = set()
     for al in (aliases or {}).values():
         names.update(a for a in al if " " not in a)
@@ -324,13 +373,17 @@ def _entity_roots(s, aliases=None):
         is_caps = len(root) >= 2 and root.upper() == root and any(c.isalpha() for c in root)
         is_cap = root[0].isupper()
         if m.start() in starts:
-            nxt = s2[m.end():m.end() + 1]
-            if is_caps or (is_cap and (tok != root or _lower_tr(root) in names or
-                                       (nxt in ",:" and _lower_tr(root) not in _CONNECTORS))):
-                out.append(root)
+            if is_caps or (is_cap and (tok != root or _lower_tr(root) in names)):
+                out.append((root, False))
+            elif is_cap and _lower_tr(root) not in _STARTERS:
+                out.append((root, True))
         elif is_caps or is_cap:
-            out.append(root)
+            out.append((root, False))
     return out
+
+
+def _entity_roots(s, aliases=None):
+    return [r for r, _ in _entity_tokens(s, aliases)]
 
 
 def _ev_words(text):
@@ -351,6 +404,31 @@ def _root_in(root, ev_words, ev_low):
         elif any(w.startswith(a) for w in ev_words):
             return True
     return False
+
+
+def _stem_ok(s, ev_stems):
+    """Kök kanıtta mı? 5 harflik kök eşitliği; kısa kök (4–5 harf) önek olarak da eşleşir
+    (araç ↔ araçların, imza ↔ imzaladı). Genel sözcükler (_NEUTRAL) her zaman geçer."""
+    if s in ev_stems or s in _NEUTRAL:
+        return True
+    if len(s) >= 4:
+        return any(e.startswith(s) or (len(e) >= 4 and s.startswith(e)) for e in ev_stems)
+    return False
+
+
+def _clauses(s):
+    return [c for c in _CLAUSE_RE.split(s or "") if c and c.strip()]
+
+
+def _dirs(low):
+    """Metindeki yön fiilleri -> {1, -1} alt kümesi."""
+    out = set()
+    for w in _norm_words(low):
+        if _UP_RE.match(w):
+            out.add(1)
+        elif _DOWN_RE.match(w):
+            out.add(-1)
+    return out
 
 
 def _direction(words_after):
@@ -668,12 +746,12 @@ GÖREV: Bu malzemeden piyasa ve ekonomi açısından en önemli {n} haberi seç;
 
 KURALLAR
 1. Yalnız verilen malzemedeki bilgiyi kullan. Malzemede olmayan olgu, sayı, tarih, kişi, kurum, ülke ya da şirket adı yazma. Tahmin, yorum, değerlendirme ekleme.
-2. Her cümlenin "kanit" listesine bilginin geldiği kimlikleri yaz (ör. ["H3"], ["H2","F1"]). Her cümlede en az bir H ya da F kimliği olsun. Her maddede en az bir H olsun.
+2. Her cümlenin "kanit" listesine bilginin geldiği kimlikleri yaz (ör. ["H3"], ["H2","F1"]). Her cümlede en az bir H ya da F kimliği olsun. Her maddede en az bir H olsun. Her cümle YALNIZ kendi kanıtlarında geçen bilgiyi içersin. K satırları yalnız hangi şirketin konu olduğunu anlaman içindir: K satırındaki bilgiyi (olay, rakam) cümleye yazma.
 3. Sayıları ve tarihleri kaynaktaki gibi aynen yaz (ör. "%2,92", "4,5", "22 Ekim"); yuvarlama, birim çevirme, hesap yapma.
 4. Kopyalama: başlığı ve cümleleri kaynak başlıktan aynen alma; aynı bilgiyi başka sözcüklerle, sade Türkçeyle anlat. Bir kaynaktan art arda 5'ten fazla sözcüğü aynen kullanma.
 5. Neden-sonuç bağını (nedeniyle, ardından, etkisiyle) yalnız kaynak metin bu bağı kuruyorsa yaz.
-6. Şunları yazma: al/sat/tut önerisi, tavsiye, fırsat, potansiyel, hedef fiyat, stop, giriş seviyesi; göreli zaman sözcükleri (bugün, dün, yarın, bu hafta, bu yıl, geçen yıl; yerine kaynaktaki tarihi yaz ya da hiç yazma); yayın kuruluşu adları (kaynakları biz ayrıca gösteriyoruz); "iddia", "kulis", "öğrenildi" haberleri.
-7. Şirketler hakkında yargı bildirme ("güçlü", "zayıf", "başarılı"); yalnız olanı betimle.
+6. Şunları yazma: al/sat/tut önerisi, tavsiye, fırsat, potansiyel, hedef fiyat, stop, giriş seviyesi; göreli zaman sözcükleri ve çekimleri (bugün, bugünün, dün, dünden, yarın, bu hafta, bu haftaki, bu yıl, bu yılın, geçen yılın, geçen ayki, önümüzdeki günlerde; yerine kaynaktaki tarihi yaz ya da hiç yazma); yayın kuruluşu adları (kaynakları biz ayrıca gösteriyoruz); "iddia", "kulis", "öğrenildi" haberleri.
+7. Yargı ve abartı bildirme ("güçlü", "zayıf", "başarılı", "olumlu", "rekor", "en büyük"), hisse için yön yazma ("yukarı yönlü"), şirket hakkında kaynakta olmayan gelecek iddiası yazma ("…azaltacak"); kaynaktaki olayı tersine çevirme. Yalnız olanı betimle.
 8. "baslik" en fazla 70 karakter. "cumleler" 1 ya da 2 cümle, toplam en fazla 260 karakter.
 9. "kategori" şunlardan biri: "Türkiye", "Dünya", "Piyasa", "Şirketler", "Merkez bankaları", "Emtia". En az 2 madde Türkiye'den, en az 2 madde dünyadan olsun.
 10. "hisseler": yalnız haberin doğrudan konusu olan ve kanıtta adı ya da kodu geçen Borsa İstanbul şirketlerinin kodları (K satırlarındaki kodlar). Emin değilsen boş bırak.
@@ -741,9 +819,12 @@ def parse_response(text):
 
 
 def _ids(v, ev):
+    """Kanıt kimlikleri: liste ya da metin; başka tip (sayı, sözlük, None) -> [] (model JSON'u bozuk olabilir)."""
     if isinstance(v, str):
         v = re.findall(r"[HFK]\d+", v)
-    return [x.strip().upper() for x in (v or []) if isinstance(x, str) and x.strip().upper() in ev]
+    elif not isinstance(v, (list, tuple)):
+        return []
+    return [x.strip().upper() for x in v if isinstance(x, str) and x.strip().upper() in ev]
 
 
 class Ctx(object):
@@ -771,21 +852,24 @@ def allowed_dates_for(now, close_day=None):
 
 def check_text(text, ids, item_ids, ctx, is_title=False):
     """Bir cümle/başlık için ret sebepleri listesi (boş = geçti).
-    ids: bu cümlenin kanıtları; item_ids: maddenin tüm kanıtları (sayı/ad/tarih denetimi bunlarla)."""
+    ids: bu cümlenin kanıtları. Olgu denetimleri (sayı, tarih, dayanak, neden-sonuç, yön, olumsuzluk,
+    yargı, gelecek) YALNIZ bu cümlenin H/F kanıtlarıyla yapılır; K satırı (KAP) yalnız şirket adını
+    kabul ettirebilir — AI, bir H kimliği ekleyerek KAP'tan şirket olgusu yazamaz.
+    item_ids: maddenin tüm kanıtları (yalnız başlık kopyası denetimi)."""
     reasons = []
     ev = ctx.ev
-    if not is_title and not any(ev[i]["kind"] in ("H", "F") for i in ids):
+    fact_ids = [i for i in ids if ev[i]["kind"] != "K"]
+    if not is_title and not fact_ids:
         reasons.append("kanit_yok")
-    pool = item_ids or ids
-    ev_text = " ".join(ev[i]["text"] for i in pool)
+    ev_text = " ".join(ev[i]["text"] for i in fact_ids)
     ev_low = _lower_tr(ev_text)
     ev_words = _ev_words(ev_text)
+    low = _lower_tr(text)
     for b in banned_hits(text):
         reasons.append("yasak_dil:%s" % b)
-    # sayı/tarih yalnız basından (H) ya da kendi verimizden (F): KAP satırındaki kodla hesaplanmış
-    # önem oranı gibi şirket rakamlarını AI yeniden yazamaz (şirket olgusu kodla yazılır)
-    num_text = " ".join(ev[i]["text"] for i in pool if ev[i]["kind"] != "K")
-    ev_nums = set(v for _, v, _, _ in numbers(num_text))
+    # sayı/tarih yalnız bu cümlenin basın (H) ya da kendi verimiz (F) kanıtından: KAP satırındaki kodla
+    # hesaplanmış önem oranı gibi şirket rakamlarını AI yeniden yazamaz (şirket olgusu kodla yazılır)
+    ev_nums = set(v for _, v, _, _ in numbers(ev_text))
     # "22 Ekim" gibi tarihlerin gün rakamı tarih denetimine kalır (sayı denetiminde atlanır)
     date_spans = [(m.start(), m.end()) for m in _DATE_RE.finditer(_lower_tr(_strip_index_names(text)))]
     for tok, v, st, en in numbers(text):
@@ -794,17 +878,20 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
         if v in ev_nums or (ctx.year is not None and v == ctx.year):
             continue
         reasons.append("sayi:%s" % tok)
-    ev_dates = dates(num_text)
+    ev_dates = dates(ev_text)
     for d in dates(text):
         if d not in ev_dates and d not in ctx.allowed_dates:
             reasons.append("tarih:%s" % d)
-    for root in _entity_roots(text, ctx.aliases):
-        if not _root_in(root, ev_words, ev_low):
+    # özel adlar: bu cümlenin kanıtında (K satırı yalnız burada, şirket adı/kodu için sayılır)
+    nm_text = " ".join(ev[i]["text"] for i in ids)
+    nm_low, nm_words = _lower_tr(nm_text), _ev_words(nm_text)
+    nm_stems = set(_stem(w) for w in nm_words)
+    for root, plain in _entity_tokens(text, ctx.aliases):
+        if not (_root_in(root, nm_words, nm_low) or (plain and _stem_ok(_stem(root), nm_stems))):
             reasons.append("ad:%s" % root)
-    if _CAUSAL_RE.search(_lower_tr(text)) and not _CAUSAL_RE.search(ev_low):
+    if _CAUSAL_RE.search(low) and not _CAUSAL_RE.search(ev_low):
         reasons.append("neden_bag")
     # yön: kanıtta işaretli yüzde (+%2,92 / −%0,10) ya da "yüzde N düştü" ile cümle çelişmesin
-    low = _lower_tr(text)
     for tok, v, st, en in numbers(text):
         after = _norm_words(low[en:])[:4]
         sd = _direction(after)
@@ -815,13 +902,43 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
             if evd != sd:
                 reasons.append("yon:%s" % tok)
             break
-    # destek: içerik sözcüklerinin ≥%40'ı kanıtta
-    cs = _content_stems(text)
-    if cs:
-        ev_stems = set(_stem(w) for w in ev_words)
-        sup = sum(1 for s in cs if s in ev_stems) / float(len(cs))
-        if sup < SUPPORT_MIN:
+    # yön fiili: cümle tek yön söylüyor, kanıtta yalnız ters yön var (rezervler arttı ↔ düştü)
+    sdirs, edirs = _dirs(low), _dirs(ev_low)
+    if len(sdirs) == 1 and edirs and not (sdirs & edirs):
+        reasons.append("yon:fiil")
+    # olumsuzluk / tersine çevirme kanıtta da olmalı (imzaladı → iptal etti / imzalamadı)
+    if (_NEG_RE.search(low) and not _NEG_RE.search(ev_low)) or \
+            (_REV_RE.search(low) and not _REV_RE.search(ev_low)):
+        reasons.append("olumsuzluk")
+    # yargı/abartı sözcüğü kanıtta aynen geçmeli (güçlü, başarı, en büyük, rekor…)
+    for k, rx in _JUDGE:
+        if rx.search(low) and k not in ev_low:
+            reasons.append("yargi:%s" % k)
+    # şirket hakkında gelecek iddiası (…azaltacak) yalnız kanıt da gelecek kipiyle konuşuyorsa
+    if _FUT_RE.search(low) and not _FUT_RE.search(ev_low) and \
+            ("şirket" in low or _mentions(text, ctx.aliases)):
+        reasons.append("gelecek")
+    # dayanak: içerik sözcüklerinin ≥%70'i bu cümlenin H/F kanıtında, kanıtsız sözcük ≤2, ve ≥3 sözcüklü
+    # her yan cümlenin en az yarısı kanıtta (iyi dayanaklı cümlenin sonuna eklenmiş uydurma yan cümle)
+    # (yön fiili kanıttaki yönle aynıysa dayanaklı sayılır: azaldı ↔ düşüş; ters yön yukarıda reddedildi)
+    ev_stems = set(_stem(w) for w in ev_words)
+
+    def _ok(w):
+        return _stem_ok(_stem(w), ev_stems) or bool(_dirs(w) & edirs)
+
+    cw = _content_words(text)
+    if cw:
+        nov = [w for w in cw if not _ok(w)]
+        sup = 1.0 - len(nov) / float(len(cw))
+        smin, nmax = (TITLE_SUPPORT_MIN, TITLE_MAX_NOVEL) if is_title else (SUPPORT_MIN, MAX_NOVEL)
+        if sup < smin or len(nov) > nmax:
             reasons.append("dayanak:%.2f" % sup)
+        else:
+            for cl in _clauses(text):
+                ccw = _content_words(cl)
+                if len(ccw) >= 3 and sum(1 for w in ccw if _ok(w)) / float(len(ccw)) < CLAUSE_MIN:
+                    reasons.append("dayanak:yan_cumle")
+                    break
     # kopya: tüm H metinleriyle ortak 8 sözcüklük dizi (sayılar hariç)
     if _ngrams(_copy_words(text), COPY_NGRAM) & ctx.h_ngrams:
         reasons.append("kopya")
@@ -830,7 +947,7 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
             reasons.append("uzun_baslik")
         cw = _copy_words(text)
         n = len(cw)
-        for i in pool:
+        for i in (item_ids or ids):
             for t in ev[i]["titles"]:
                 run = _longest_run(cw, _copy_words(t))
                 if run > max(3, int(0.6 * n)):
@@ -843,7 +960,7 @@ def check_text(text, ids, item_ids, ctx, is_title=False):
 
 
 def _norm_kategori(k, group):
-    k = (k or "").strip()
+    k = k.strip() if isinstance(k, str) else ""
     for c in KATEGORILER:
         if _lower_tr(k) == _lower_tr(c):
             return c
@@ -853,14 +970,14 @@ def _norm_kategori(k, group):
 def validate_item(raw, ctx):
     """Model maddesi -> (yayımlanacak madde | None, rapor)."""
     ev = ctx.ev
-    rep = {"baslik": raw.get("baslik"), "cumleler": [], "karar": None}
+    title = raw.get("baslik").strip() if isinstance(raw.get("baslik"), str) else ""
+    rep = {"baslik": title, "cumleler": [], "karar": None}
     sents = raw.get("cumleler")
     if isinstance(sents, str):
         sents = [{"metin": sents, "kanit": raw.get("kanit") or []}]
     if not isinstance(sents, list):
         sents = []
     sents = [s for s in sents if isinstance(s, dict) and isinstance(s.get("metin"), str) and s["metin"].strip()]
-    title = (raw.get("baslik") or "").strip() if isinstance(raw.get("baslik"), str) else ""
     t_ids = _ids(raw.get("baslik_kanit"), ev)
     all_ids = list(dict.fromkeys(t_ids + [i for s in sents for i in _ids(s.get("kanit"), ev)]))
     kept, kept_ids = [], list(t_ids)
@@ -906,11 +1023,12 @@ def validate_item(raw, ctx):
             nh = bool(fnums & set(v for _, v, _, _ in numbers(m["text"])))
             if r1 >= 0.4 or r2 >= 0.35 or (nh and r1 >= 0.25):
                 support.append(m)
-    own = [i for i in used if ev[i]["kind"] in ("F", "K")]
+    # kendi verimiz (F) ayrı dayanak sayılır; KAP satırı (K) sayılmaz ve son denetimde ad da kabul ettirmez
+    own = [i for i in used if ev[i]["kind"] == "F"]
     if not support:
         rep["karar"] = "kaynak_eslesmedi"
         return None, rep
-    # son metin, yalnız destekleyen başlıklar + kendi verimiz/KAP ile yeniden denetlenir
+    # son metin, yalnız destekleyen başlıklar + kendi verimiz ile yeniden denetlenir
     sub = dict((k, v) for k, v in ev.items() if k in own)
     sub["_S"] = {"kind": "H", "text": " ".join(m["text"] for m in support), "titles": []}
     sctx = Ctx(sub, ctx.allowed_dates, ctx.aliases, (), ctx.year)
@@ -934,12 +1052,10 @@ def validate_item(raw, ctx):
         rep["karar"] = "tek_dayanak"
         return None, rep
     kaynaklar = kaynaklar[:4]
-    # hisse çipleri: evrende + kanıtta (H/K) adı ya da kodu geçen
-    ev_txt = " ".join(ev[i]["text"] for i in used if ev[i]["kind"] in ("H", "K"))
-    in_ev = _mentions(ev_txt, {t: a for t, a in ctx.aliases.items()}) if ctx.aliases else set()
-    for i in used:
-        if ev[i]["kind"] == "K":
-            in_ev |= set(ev[i]["tickers"])
+    # hisse çipleri: evrende + maddeyi DESTEKLEYEN basın başlığında adı ya da kodu geçen (K satırını
+    # anmak çip için yetmez: KAP olgusu basın haberi gibi gösterilmez)
+    sup_txt = " ".join(m["text"] for m in support)
+    in_ev = _mentions(sup_txt, ctx.aliases) if ctx.aliases else set()
     tick = []
     hl = raw.get("hisseler")
     hl = [hl] if isinstance(hl, str) else (hl if isinstance(hl, list) else [])
@@ -1073,33 +1189,50 @@ def run_edition(now, slot, call_model, v1_doc=None, kap_items=None, names=None, 
         audit.update({"durum": "aday_yetersiz", "cagri": 0})
         _finish(audit, None, base, now, log)
         return _summary(audit)
-    while calls < MAX_CALLS and len(accepted) < MIN_ITEMS:
-        need = MAX_ITEMS - len(accepted)
-        prompt = build_prompt(cands, ev, now, slot, n=need, exclude=exclude, feedback=feedback)
-        calls += 1
-        text = call_model(prompt, MAX_TOKENS)
-        raw = parse_response(text)
-        tur = {"cagri": calls, "istem_karakter": len(prompt), "yanit": text, "maddeler": []}
-        audit["turlar"].append(tur)
-        if raw is None:
-            if text is None and calls >= 2:
-                break   # iki kez yanıt yok: Gemini kapalı/zaman aşımı — tavanı boşa harcama
-            continue
-        rejected = []
-        for r in raw:
-            it, rep = validate_item(r, ctx)
-            tur["maddeler"].append(rep)
-            if it:
-                accepted.append(it)
-                exclude |= set(it["_h"])
-            else:
-                rejected.append("\"%s\" (%s)" % (_clip(rep.get("baslik") or "", 60), _why(rep)))
-        if len(raw) == 0:
-            break
-        feedback = ("Önceki taslakta şu maddeler kurallara uymadığı için yayımlanmadı: %s. "
-                    "Yayımlanan maddelerin kanıtlarını (%s) tekrar kullanma; kurallara harfiyen uyan yeni "
-                    "maddeler yaz. Sayıları kaynaktaki gibi aynen yaz, her cümleye kanıt kimliği ekle."
-                    % ("; ".join(rejected[:6]) or "yok", ", ".join(sorted(exclude)) or "yok"))
+    marker = os.path.join(base, "%s.audit.json" % audit["key"])
+    try:
+        while calls < MAX_CALLS and len(accepted) < MIN_ITEMS:
+            need = MAX_ITEMS - len(accepted)
+            prompt = build_prompt(cands, ev, now, slot, n=need, exclude=exclude, feedback=feedback)
+            if calls == 0:
+                # İlk çağrıdan ÖNCE iz işareti: çağrıdan sonra ne olursa olsun (istisna, süreç ölümü) baskı
+                # "yapıldı" sayılır, döngü aynı baskı için Gemini'yi yeniden çağırmaz (≤4 çağrı/baskı).
+                # Yanıt hiç gelmezse (_finish: cagri_yapilamadi) işaret silinir → sonraki turda yeniden.
+                _atomic_write(marker, {"key": audit["key"], "baski": audit["baski"], "durum": "basliyor",
+                                       "model": MODEL})
+            calls += 1
+            text = call_model(prompt, MAX_TOKENS)
+            raw = parse_response(text)
+            tur = {"cagri": calls, "istem_karakter": len(prompt), "yanit": text, "maddeler": []}
+            audit["turlar"].append(tur)
+            if raw is None:
+                if text is None and calls >= 2:
+                    break   # iki kez yanıt yok: Gemini kapalı/zaman aşımı — tavanı boşa harcama
+                continue
+            rejected = []
+            for r in raw:
+                try:
+                    it, rep = validate_item(r, ctx)
+                except Exception as e:   # beklenmedik tip/biçim: yalnız bu madde düşer
+                    it, rep = None, {"baslik": _clip(str(r.get("baslik") or ""), BASLIK_MAX), "cumleler": [],
+                                     "karar": "bicim_hatasi", "hata": "%s: %s" % (type(e).__name__, e)}
+                tur["maddeler"].append(rep)
+                if it:
+                    accepted.append(it)
+                    exclude |= set(it["_h"])
+                else:
+                    rejected.append("\"%s\" (%s)" % (_clip(str(rep.get("baslik") or ""), 60), _why(rep)))
+            if len(raw) == 0:
+                break
+            feedback = ("Önceki taslakta şu maddeler kurallara uymadığı için yayımlanmadı: %s. "
+                        "Yayımlanan maddelerin kanıtlarını (%s) tekrar kullanma; kurallara harfiyen uyan yeni "
+                        "maddeler yaz. Sayıları kaynaktaki gibi aynen yaz, her cümleye kanıt kimliği ekle."
+                        % ("; ".join(rejected[:6]) or "yok", ", ".join(sorted(exclude)) or "yok"))
+    except Exception as e:
+        # çağrıdan sonra beklenmedik hata: baskı kabul edilen maddelerle sonlanır, iz yazılır (tekrar çağrı yok)
+        audit["hata"] = "%s: %s" % (type(e).__name__, e)
+        if log:
+            log("gündem-haber %s: tur hatası %s — baskı mevcut maddelerle kapatıldı" % (audit["key"], audit["hata"]))
     doc = assemble(accepted, now, slot) if len(accepted) >= MIN_PUBLISH else None
     u1 = usage_fn() if usage_fn else (0, 0.0)
     audit["cagri"] = calls
@@ -1122,7 +1255,9 @@ _WHY = (("baslik_kopya", "başlık kaynak başlığa çok benziyor"), ("kopya", 
         ("dayanak", "kaynakta dayanağı yok"), ("neden_bag", "kaynakta olmayan neden-sonuç"),
         ("yon", "yön kaynakla çelişiyor"), ("uzun_baslik", "başlık 70 karakteri aşıyor"),
         ("tek_dayanak", "tek kaynak"), ("basin_kaniti_yok", "H kanıtı yok"), ("kaynakta_yok", "kaynakta yok"),
-        ("cumle_kalmadi", "geçerli cümle kalmadı"), ("kaynak_eslesmedi", "kaynak başlıkla eşleşmedi"))
+        ("cumle_kalmadi", "geçerli cümle kalmadı"), ("kaynak_eslesmedi", "kaynak başlıkla eşleşmedi"),
+        ("olumsuzluk", "kaynakta olmayan olumsuzluk/iptal"), ("yargi", "yargı sözcüğü"),
+        ("gelecek", "kaynakta olmayan gelecek iddiası"), ("bicim_hatasi", "JSON alan tipi yanlış"))
 
 
 def _why(rep):
@@ -1145,9 +1280,13 @@ def _summary(a):
 def _finish(audit, doc, base, now, log):
     """İz her zaman (baskı 'yapıldı' sayılır); belge yalnız yeterli maddeyle. Gemini'ye hiç çağrı
     gitmediyse (sigorta/tavan anlık) iz yazılmaz → sonraki turda yeniden denenir."""
-    if audit.get("durum") != "aday_yetersiz" and not audit.get("gemini_cagri_sayaci") and \
-            all(t.get("yanit") is None for t in audit.get("turlar") or []):
+    if audit.get("durum") != "aday_yetersiz" and not audit.get("hata") and not audit.get("gemini_cagri_sayaci") \
+            and all(t.get("yanit") is None for t in audit.get("turlar") or []):
         audit["durum"] = "cagri_yapilamadi"
+        try:
+            os.remove(os.path.join(base, "%s.audit.json" % audit["key"]))   # ilk çağrı öncesi işaret
+        except OSError:
+            pass
         if log:
             log("gündem-haber %s: Gemini yanıtı yok (çağrı sayacı artmadı) — sonraki turda yeniden" % audit["key"])
         return
