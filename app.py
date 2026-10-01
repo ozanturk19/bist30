@@ -10831,10 +10831,9 @@ def sitemap():
     _blog_lastmod = max((a.get("date") or today) for a in _blog_articles) if _blog_articles else today
     pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly",
                   "lastmod": _blog_lastmod})
-    # K-CK: lastmod varsayilani `today` oldugu icin bu girdi her gun "bugun
-    # degisti" diyordu -- changefreq "monthly" ile ayni satirda celisiyordu.
-    pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly",
-                  "lastmod": _tpl_lastmod("portfolio.html", today)})
+    # D-25b: /portfolio artık /takip'e 301 (C-41) — sitemap girdisi taşındı.
+    pages.append({"loc": "/takip",          "priority": "0.6", "changefreq": "monthly",
+                  "lastmod": _tpl_lastmod("takip.html", today)})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
@@ -11841,7 +11840,9 @@ def yasal():
 # ── Blog ──────────────────────────────────────────────────────────────────────
 @app.route("/portfolio")
 def portfolio():
-    return render_template("portfolio.html")
+    # D-25b: eski tarayıcı-yerel (localStorage) portföy sayfası C-41/D-50 ile
+    # hesap tabanlı /takip'e taşındı; portfolio.html artık render edilmiyor.
+    return redirect("/takip", code=301)
 
 
 # ── Sunucu Taraflı Portföy (UUID Token Bazlı) ─────────────────────────────────
@@ -13613,9 +13614,10 @@ def backtest_page():
 
 # CPO-1191 Karar 6: /virtual-portfolio kaldırıldığında 301 eklenmemişti (CPO-1195 §5) —
 # dış link/bookmark/arama indeksi 404 yiyordu. /backtest ile aynı muamele.
+# D-25b: /portfolio artık kendisi /takip'e 301 — çifte zincire düşmemek için doğrudan hedef.
 @app.route("/virtual-portfolio")
 def virtual_portfolio_redirect():
-    return redirect("/portfolio", code=301)
+    return redirect("/takip", code=301)
 
 
 BLOG_NEW_BADGE_DAYS = 14  # r33: "Yeni" rozeti için eşik — yayın tarihinden itibaren kaç gün
