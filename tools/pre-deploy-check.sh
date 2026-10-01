@@ -154,6 +154,24 @@ wait
 cat "$PD_OUT"/*.out 2>/dev/null
 FAIL=$(ls "$PD_OUT"/*.fail 2>/dev/null | wc -l | tr -d ' ')
 
+# C-71: canli gorsel sonda -- ISTEGE BAGLI (canli URL ister, deploy kapisi degil).
+# GORSEL_DENETIM_BASE tanimliysa koşar; GORSEL_DENETIM_SAYFA ile daraltilir
+# (ornek: GORSEL_DENETIM_BASE=https://borsapusula.com GORSEL_DENETIM_SAYFA=tarama,anasayfa).
+# exit 2 (FAIL/olculemeyen) grubu kirmizi yapar; exit 1 (yalniz WARN) gecer.
+if [ -z "${PREDEPLOY_GROUP:-}" ] || [ "$PREDEPLOY_GROUP" = "gorsel" ]; then
+  echo ""
+  if [ -n "${GORSEL_DENETIM_BASE:-}" ]; then
+    echo "G9 Canli gorsel sonda (istege bagli)..."
+    GD_OUT="${GORSEL_DENETIM_OUT:-$HOME/ops/plans/qa/gorsel-$(date +%F)/predeploy}"
+    gd_rc=0
+    node tools/live/gorsel-denetim.mjs --base="$GORSEL_DENETIM_BASE" ${GORSEL_DENETIM_SAYFA:+--sayfa="$GORSEL_DENETIM_SAYFA"} --out="$GD_OUT" | tail -3 | sed 's/^/  /' || true
+    gd_rc=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['exit'])" "$GD_OUT/_ozet.json" 2>/dev/null || echo 2)
+    if [ "$gd_rc" = "2" ]; then echo "  ✗ G9 gorsel sonda FAIL (rapor: $GD_OUT/_ozet.md)"; FAIL=$((FAIL + 1)); else echo "  ✓ G9 gorsel sonda (exit $gd_rc)"; fi
+  else
+    echo "G9 Canli gorsel sonda: atlandi (GORSEL_DENETIM_BASE tanimsiz; istege bagli adim)"
+  fi
+fi
+
 echo ""
 if [ "$FAIL" = "0" ]; then
   echo "✅ Pre-deploy TÜM CHECK GEÇTİ — deploy izinli."

@@ -1,0 +1,4 @@
+{
+  "_aciklama": "C-71 gorsel-denetim muafiyetleri (ratchet). Her kayit: kontrol (K1..K11, onek eslesir: K2 -> K2a/K2b), sayfa (sayfa:durum regex ya da *), secici (bulgu seci alt dizesi), metin (istege bagli alt dize), azami (istege bagli: esleşen sayi bunu asarsa FAIL), gerekce, son_tarih (YYYY-MM-DD; gecince uygulanmaz). Yeni kayit yalniz acik bir RAPOR/plan maddesine baglanarak eklenir.",
+  "muaf": []
+}

@@ -1,0 +1,63 @@
+{
+  "_aciklama": "C-71 gorsel-denetim.mjs sayfa × durum matrisi (RAPOR 27.09 §2.3) ve halka kaydı (§2.4 K1). yol içinde {api:<GET yolu>|<alan>} çalışma anında çözülür (items[?onem] = onem alanı dolu ilk öğe). adimlar: tikla, tikla_hepsi (seçici kalmayana dek, ≤12), ac_details, kaydir, bekle (ms). geciktir: {desen, ms} API'yi geciktirir (iskelet durumu; networkidle beklenmez). beklenen_durum: HTTP kodu (404 sayfası). ilk_ziyaret: çerez tercihi boş (bant görünür); varsayılan bp_ga_consent=denied. kontrol_haric: o durumda koşmayan kontroller (iskelet bilerek görünür).",
+  "halkalar": [
+    { "secici": ".da-ring", "metin": ".da-ring-num" },
+    { "secici": ".hx-ring", "metin": "b" },
+    { "secici": "td.c-bp .tv-bp", "metin": "b", "cizgi": 4 },
+    { "secici": ".hb-rg", "metin": "b" }
+  ],
+  "k6_muaf": [".hm-t"],
+  "sayfalar": [
+    { "ad": "anasayfa", "yol": "/", "durumlar": [
+      { "ad": "varsayilan" },
+      { "ad": "ilk-ziyaret", "ilk_ziyaret": true }
+    ] },
+    { "ad": "tarama", "yol": "/tarama", "durumlar": [
+      { "ad": "varsayilan" },
+      { "ad": "bp-70", "yol": "/tarama?liste=bp-70" },
+      { "ad": "gruplar-acik", "adimlar": [{ "tikla_hepsi": ".ghb[aria-expanded=\"false\"]" }] },
+      { "ad": "filtre-acik", "adimlar": [{ "tikla": "#tvFbtn", "bekle": 800 }] },
+      { "ad": "hacim-onayli", "yol": "/tarama?liste=hacim-onayli" },
+      { "ad": "temel", "yol": "/tarama?tab=temel" },
+      { "ad": "iskelet", "geciktir": { "desen": "**/api/tarama**", "ms": 9000 }, "olcum_ms": 1200, "kontrol_haric": ["K11", "K6"] }
+    ] },
+    { "ad": "hisse-THYAO", "yol": "/hisse/THYAO", "durumlar": [
+      { "ad": "ozet", "adimlar": [{ "ac_details": true }] },
+      { "ad": "grafik", "yol": "/hisse/THYAO?tab=grafik" },
+      { "ad": "temel", "yol": "/hisse/THYAO?tab=temel" },
+      { "ad": "haberler", "yol": "/hisse/THYAO?tab=haberler" }
+    ] },
+    { "ad": "hisse-GARAN", "yol": "/hisse/GARAN?tab=temel", "durumlar": [{ "ad": "temel-banka" }] },
+    { "ad": "hisse-ANHYT", "yol": "/hisse/ANHYT", "durumlar": [{ "ad": "sigorta" }] },
+    { "ad": "hisse-kapsam-disi", "yol": "/hisse/MARKA", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "bildirim", "yol": "{api:/api/haberler|items.0.href}", "durumlar": [
+      { "ad": "son" },
+      { "ad": "tutarli", "yol": "{api:/api/haberler|items[?onem].href}" }
+    ] },
+    { "ad": "sektor-harita", "yol": "/sektor-harita", "durumlar": [
+      { "ad": "varsayilan" },
+      { "ad": "bp-1a", "yol": "/sektor-harita?renk=bp&donem=1a" }
+    ] },
+    { "ad": "harita-gun", "yol": "/harita", "durumlar": [{ "ad": "son" }] },
+    { "ad": "takvim", "yol": "/takvim", "durumlar": [
+      { "ad": "varsayilan" },
+      { "ad": "makro", "yol": "/takvim?tur=makro" }
+    ] },
+    { "ad": "haberler", "yol": "/haberler", "durumlar": [
+      { "ad": "varsayilan" },
+      { "ad": "bilanco", "yol": "/haberler?tur=bilanco" },
+      { "ad": "hisse-THYAO", "yol": "/haberler?hisse=THYAO" }
+    ] },
+    { "ad": "gundem", "yol": "/gundem", "durumlar": [{ "ad": "arsiv-acik", "adimlar": [{ "ac_details": true }] }] },
+    { "ad": "ozet", "yol": "/ozet", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "karsilastir", "yol": "/karsilastir?tickers=AHGAZ,ISDMR", "durumlar": [{ "ad": "iki-hisse" }] },
+    { "ad": "portfolio", "yol": "/portfolio", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "metodoloji", "yol": "/metodoloji", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "blog", "yol": "/blog", "durumlar": [
+      { "ad": "liste" },
+      { "ad": "makale", "yol": "/blog/supertrend-indikatoru-nedir" }
+    ] },
+    { "ad": "hakkinda", "yol": "/hakkinda", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "hata-404", "yol": "/bu-sayfa-yok-gorsel-denetim", "durumlar": [{ "ad": "varsayilan", "beklenen_durum": 404 }] }
+  ]
+}
