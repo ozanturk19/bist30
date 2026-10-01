@@ -106,18 +106,35 @@ def _med(**kw):
     return {k: ({"deger": v, "n": 6, "kapsam": "sektor"} if v is not None else None) for k, v in kw.items()}
 
 
-def test_kalite_kosulu_karli_ve_ortancadan_iyi():
-    med = _med(ozsermaye_karliligi=-1.5, net_marj=-0.5, gider_gelir=50.0)
+def test_kalite_kosulu_karli_ve_sektorun_ust_ucte_birinde():
+    """Onayli taslak (temel-v2: "banka, sigorta, GYO ve holdingler haric") + D-40c (kalite >= 70)."""
+    med = _med(ozsermaye_karliligi=-1.5, net_marj=-0.5, roe_ust=6.0, net_marj_ust=3.0)
     base = {"sablon": "sanayi", "roe": 8.0, "net_marj": 4.0}
-    assert kesfet._quality(base, med)
-    assert not kesfet._quality(dict(base, roe=-1.0), med)            # ortancanin ustunde ama zararda
-    assert not kesfet._quality(dict(base, net_marj=-0.2), med)       # marj negatif
-    assert not kesfet._quality(dict(base, roe=-1.5), med)            # esit: ustunde degil
-    assert not kesfet._quality(base, _med(ozsermaye_karliligi=-1.5, net_marj=None))   # ortanca yok
-    bank = {"sablon": "banka", "roe": 24.7, "gider_gelir": 43.5}
-    assert kesfet._quality(bank, _med(ozsermaye_karliligi=19.9, gider_gelir=50.7))
-    assert not kesfet._quality(dict(bank, gider_gelir=55.0), _med(ozsermaye_karliligi=19.9, gider_gelir=50.7))
-    assert not kesfet._quality({"sablon": "sigorta", "roe": 40.0}, _med(ozsermaye_karliligi=10.0))
+    assert kesfet._quality(base, med, "Taş ve Toprak")
+    assert not kesfet._quality(dict(base, roe=5.0), med)             # ortancanin ustunde, ust ucte birde degil
+    assert not kesfet._quality(dict(base, net_marj=2.9), med)
+    assert not kesfet._quality(dict(base, roe=6.0), med)             # esik esitligi ust ucte bire sayilmaz
+    assert not kesfet._quality(dict(base, roe=-1.0), _med(roe_ust=-2.0, net_marj_ust=3.0))   # zararda
+    assert not kesfet._quality(base, _med(roe_ust=6.0, net_marj_ust=None))                    # esik yok
+    # Holding ve gayrimenkul kovasi, GYO / banka / sigorta sablonu girmez (marj degerleme kazanciyla sisiyor)
+    assert not kesfet._quality(base, med, "Holding ve Yatırım")
+    assert not kesfet._quality(dict(base, net_marj=941.0), med, "Gayrimenkul")
+    for tpl in ("gyo", "banka", "sigorta"):
+        assert not kesfet._quality(dict(base, sablon=tpl, gider_gelir=20.0), med), tpl
+
+
+def test_sektor_esigi_ucte_bir_ve_havuz():
+    """roe_ust / net_marj_ust: sektor dagiliminin 2/3 noktasi (en az 5 sirket; 'Diger' kovasinda yok)."""
+    facts = {"A%d" % i: {"sablon": "sanayi", "fiyat_var": True, "fk": 5.0, "pd_dd": 1.0,
+                         "roe": float(i), "net_marj": float(10 * i)} for i in range(1, 7)}
+    facts["Z"] = dict(facts["A1"], fiyat_var=False, roe=99.0)   # fiyatsiz: ozsermaye havuzunda yok
+    med = kesfet.sector_medians(facts, lambda t: "X")["X"]
+    assert med["roe_ust"] == {"deger": 4.33, "n": 6, "kapsam": "sektor"}
+    assert med["net_marj_ust"]["deger"] == 40.0 and med["net_marj_ust"]["n"] == 7     # marj: tum sirketler
+    assert med["ozsermaye_karliligi"]["deger"] == 3.5 and "gider_gelir" not in med
+    few = kesfet.sector_medians({t: facts[t] for t in ("A1", "A2", "A3", "A4")}, lambda t: "X")["X"]
+    assert few["roe_ust"] is None and few["net_marj_ust"] is None
+    assert kesfet.sector_medians(facts, lambda t: "Diğer")["Diğer"]["roe_ust"] is None
 
 
 def test_onbellege_yazma_kapisi_girdiler_tam():
@@ -132,12 +149,13 @@ def test_onbellege_yazma_kapisi_girdiler_tam():
 
 
 def test_uyelikler_dort_liste_kurali():
-    med = _med(ozsermaye_karliligi=5.0, net_marj=2.0, fk=10.0, pd_dd=1.0)
+    med = _med(ozsermaye_karliligi=5.0, net_marj=2.0, fk=10.0, pd_dd=1.0, roe_ust=8.0, net_marj_ust=5.0)
     f = {"sablon": "sanayi", "roe": 9.0, "net_marj": 6.0, "fk": 7.0, "pd_dd": 0.7,
          "temettu_son12": True, "temettu_onceki12": True, "verim": 3.2,
          "net_borc": -1e9, "gelir_deg": 12.0, "yillik_kar": 5.0}
     assert kesfet.memberships(f, med, "ucuz") == list(kesfet.LISTS)
     assert kesfet.memberships(f, med, "pahali") == ["istikrarli_temettu", "borcsuz_buyuyen"]
+    assert "kaliteli_makul" not in kesfet.memberships(f, med, "ucuz", "Holding ve Yatırım")
     # ucuz hukmu ama PD/DD ortancanin ustunde: "ikisi de altinda" kurali tutmaz
     assert "sektorune_gore_ucuz" not in kesfet.memberships(dict(f, pd_dd=1.1), med, "ucuz")
     # temettu: iki donemin ikisi de, verim > 0
@@ -155,8 +173,6 @@ def test_neden_cumleleri_kanon_sayi_bicimi_betim():
          "net_borc": -2.31e9, "fk": 2.11, "pd_dd": 0.74}
     assert kesfet.reason("kaliteli_makul", f, med) == \
         "Özsermaye kârlılığı %18,2 (sektör −%1,5), net kâr marjı %23,2 (sektör −%0,5)"
-    assert kesfet.reason("kaliteli_makul", dict(f, sablon="banka", roe=24.72, gider_gelir=43.51), med) == \
-        "Özsermaye kârlılığı %24,7 (sektör −%1,5), gider/gelir %43,5 (sektör %50,7)"
     assert kesfet.reason("istikrarli_temettu", f, med) == \
         "Son 12 ayda temettü verimi %13,7; önceki 12 ayda da ödeme yaptı"
     assert kesfet.reason("borcsuz_buyuyen", f, med) == "2025 yılında satışlar +%7,3, net nakit 2,3 Mrd ₺"
@@ -212,7 +228,8 @@ def test_evren_listeleri_ucuzluk_temettu_kalite_sira_ve_donuk_satir():
     assert tem[:3] == ["K1", "K2", "K3"] and "GARAN" in tem and "ANSGR" in tem and "K0" not in tem
     verims = [float(re.search(r"%([\d,]+)", r["neden"]).group(1).replace(",", ".")) for r in ls["istikrarli_temettu"]]
     assert verims == sorted(verims, reverse=True)
-    # Kaliteli ve makul: yalniz K3 (kar 1,5 kat -> ozsermaye karliligi ve marj ortancanin ustunde)
+    # Kaliteli ve makul: yalniz K3 (kar 1,5 kat -> ozsermaye karliligi ve marj sektorun ust ucte birinde;
+    # digerleri esikte -- esitlik sayilmaz). GARAN banka: kalite listesine girmez.
     assert [r["ticker"] for r in ls["kaliteli_makul"]] == ["K3"]
     assert ls["kaliteli_makul"][0]["neden"].startswith("Özsermaye kârlılığı %22,2 (sektör %14,8)")
     # Borcsuz buyuyen: rafinerinin 2025 satislari geriledi -> yok

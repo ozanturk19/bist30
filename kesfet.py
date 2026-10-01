@@ -50,9 +50,9 @@ SORU = {"kaliteli_makul": "Hangi şirketler kaliteli ve makul fiyatlı?",
         "borcsuz_buyuyen": "Hangi şirketler borçsuz büyüyor?",
         "sektorune_gore_ucuz": "Hangi şirketler sektörüne göre ucuz?"}
 KURAL = {   # gri dil envanteri K9: kullanicinin gordugu metinde "ortanca" yok, "orta deger" var
-    "kaliteli_makul": ("Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektörünün "
-                       "orta değerinden iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan "
-                       "şirketler; BorsaPusula Skoru'na göre sıralı."),
+    "kaliteli_makul": ("Kârlı olan, özsermaye kârlılığı ve net kâr marjı sektörünün en iyi üçte birinde, fiyatı "
+                       "F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan şirketler (banka, sigorta, "
+                       "gayrimenkul ve holding şirketleri hariç); BorsaPusula Skoru'na göre sıralı."),
     "istikrarli_temettu": ("Hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödemiş şirketler; "
                            "son 12 ayın temettü verimine göre sıralı."),
     "borcsuz_buyuyen": ("Nakdi ve kısa vadeli yatırımları finansal borcundan fazla olan, son yıllık raporunda "
@@ -66,6 +66,10 @@ MIN_COMPLETENESS = 0.8           # C-56: listelere giris (D-40c LIST_COMPLETENES
 MIN_PEERS = kt.MIN_PEERS_KAP     # sektor ortancasi en az 5 sirket (hisse sayfasiyla ayni)
 PIOTROSKI_MIN_ITEMS = 7          # D-40c ile ayni: 9 maddenin en az 7'si
 BANK_MIN_ITEMS = 4               # D-40c ile ayni: 5 maddenin en az 4'u
+# Kaliteli listesi (onayli taslak temel-v2 + D-40c list_membership): yalniz sanayi sablonu; holding ve
+# gayrimenkul kovalari disarida (GYO/gayrimenkulde net kar degerleme kazanciyla sisiyor, holdingde
+# istirak geliri -- kalite sinyali degil). Kalite olcusu sektorun en iyi ucte biri (D-40c kalite >= 70).
+KALITE_DISI_KOVA = ("Holding ve Yatırım", "Gayrimenkul")
 TREND = {"AL": ("g", "Güçlü Trend"), "SAT": ("b", "Trend Bozuldu"), "BEKLE": ("y", "Yatay")}
 
 # Sablonun bekledigi gostergeler (veri tamligi paydasi) -- D-40c temel_skor_v2.INPUTS ile ayni.
@@ -231,10 +235,11 @@ def completeness(f, roe_median=None):
 # ----------------------------------------------------------------------------- sektor ortancalari
 
 def sector_medians(facts, bucket_of):
-    """{kova: {fk, pd_dd, ozsermaye_karliligi, net_marj, gider_gelir}} -- her biri
+    """{kova: {fk, pd_dd, ozsermaye_karliligi, net_marj, roe_ust, net_marj_ust}} -- her biri
     {deger, n, kapsam} ya da None. F/K, PD/DD ve ozsermaye karliligi hisse sayfasindaki ortancayla
-    ayni fonksiyondan (kap_temel_v2.sector_medians); marj ve gider/gelir ayni kuralla (en az 5 sirket,
-    'Diger' kovasinda hukum yok)."""
+    ayni fonksiyondan (kap_temel_v2.sector_medians); net kar marji ortancasi ve kalite esikleri
+    (*_ust: sektorun en iyi ucte birinin alt siniri) ayni kuralla (en az 5 sirket, 'Diger' kovasinda
+    yok) ve ayni havuzla (ozsermaye karliligi fiyati olan sirketlerden, marj tum sirketlerden)."""
     # kap_temel_v2.kap_metrics ile ayni girdi: fiyat yoksa uc deger de yok
     metrics = {tk: ({"fk": f.get("fk"), "pd_dd": f.get("pd_dd"), "ozsermaye_karliligi": f.get("roe")}
                     if f.get("fiyat_var") else {}) for tk, f in facts.items() if f}
@@ -242,10 +247,15 @@ def sector_medians(facts, bucket_of):
     out = {}
     for b in sorted({sector_of(t) for t in facts if facts[t]} - {None}):
         med = kt.sector_medians(metrics, sector_of, b)
-        for k in ("net_marj", "gider_gelir"):
-            vals = [f[k] for t, f in facts.items() if f and sector_of(t) == b and _num(f.get(k))]
-            med[k] = ({"deger": round(statistics.median(vals), 2), "n": len(vals), "kapsam": "sektor"}
-                      if b != "Diğer" and len(vals) >= MIN_PEERS else None)
+        ok = b != "Diğer"
+        roe = [m["ozsermaye_karliligi"] for t, m in metrics.items()
+               if sector_of(t) == b and _num(m.get("ozsermaye_karliligi"))]
+        nm = [f["net_marj"] for t, f in facts.items() if f and sector_of(t) == b and _num(f.get("net_marj"))]
+        med["net_marj"] = ({"deger": round(statistics.median(nm), 2), "n": len(nm), "kapsam": "sektor"}
+                           if ok and len(nm) >= MIN_PEERS else None)
+        for k, vals in (("roe_ust", roe), ("net_marj_ust", nm)):
+            med[k] = ({"deger": round(statistics.quantiles(vals, n=3, method="inclusive")[1], 2),
+                       "n": len(vals), "kapsam": "sektor"} if ok and len(vals) >= MIN_PEERS else None)
         out[b] = med
     return out
 
@@ -257,20 +267,18 @@ def _mv(med, k):
 
 # ----------------------------------------------------------------------------- kurallar
 
-def _quality(f, med):
-    """kaliteli_makul kalite kosulu: karli (ozsermaye karliligi > 0) ve ortancanin ustunde VE net kar
-    marji pozitif ve ortancanin ustunde (sanayi/GYO) ya da gider/gelir ortancanin altinda (banka).
-    Sigortada ikinci olcu yok (sablon geregi listeye girmez)."""
-    roe, roe_m = f.get("roe"), _mv(med, "ozsermaye_karliligi")
-    if roe is None or roe_m is None or not (roe > 0 and roe > roe_m):
+def _quality(f, med, bucket=None):
+    """kaliteli_makul kalite kosulu (onayli taslak + D-40c): sanayi sablonu, holding ve gayrimenkul
+    kovasi degil; ozsermaye karliligi ve net kar marji ikisi de pozitif ve sektorun en iyi ucte birinde
+    (esik: sektor dagiliminin 2/3 noktasinin ustu, en az 5 sirket; esitlik ust ucte bire sayilmaz).
+    Banka, sigorta ve GYO girmez."""
+    if f.get("sablon") != "sanayi" or bucket in KALITE_DISI_KOVA:
         return False
-    if f["sablon"] in ("sanayi", "gyo"):
-        nm, nm_m = f.get("net_marj"), _mv(med, "net_marj")
-        return nm is not None and nm_m is not None and nm > 0 and nm > nm_m
-    if f["sablon"] == "banka":
-        gg, gg_m = f.get("gider_gelir"), _mv(med, "gider_gelir")
-        return gg is not None and gg_m is not None and gg < gg_m
-    return False
+    for k, ek in (("roe", "roe_ust"), ("net_marj", "net_marj_ust")):
+        v, cut = f.get(k), _mv(med, ek)
+        if not (_num(v) and cut is not None and v > 0 and v > cut):
+            return False
+    return True
 
 
 def _cheap(f, med):
@@ -284,10 +292,10 @@ def _cheap(f, med):
     return sum(q) / 2.0 if all(x < 1 for x in q) else None
 
 
-def memberships(f, med, verdict):
-    """Bir sirketin girdigi listeler (ortak kapidan gecmis sirket icin)."""
+def memberships(f, med, verdict, bucket=None):
+    """Bir sirketin girdigi listeler (ortak kapidan gecmis sirket icin); bucket: D-23 kovasi."""
     out = []
-    if verdict in ("ucuz", "makul") and _quality(f, med):
+    if verdict in ("ucuz", "makul") and _quality(f, med, bucket):
         out.append("kaliteli_makul")
     if f.get("temettu_son12") and f.get("temettu_onceki12") and _num(f.get("verim")) and f["verim"] > 0:
         out.append("istikrarli_temettu")
@@ -303,10 +311,8 @@ def memberships(f, med, verdict):
 def reason(key, f, med):
     """Satirin tek cumlelik nedeni: kuralin olctugu rakamlar, betim (yargi yok)."""
     if key == "kaliteli_makul":
-        roe = "Özsermaye kârlılığı %s (sektör %s)" % (_pct(f["roe"]), _pct(_mv(med, "ozsermaye_karliligi")))
-        if f["sablon"] == "banka":
-            return "%s, gider/gelir %s (sektör %s)" % (roe, _pct(f["gider_gelir"]), _pct(_mv(med, "gider_gelir")))
-        return "%s, net kâr marjı %s (sektör %s)" % (roe, _pct(f["net_marj"]), _pct(_mv(med, "net_marj")))
+        return "Özsermaye kârlılığı %s (sektör %s), net kâr marjı %s (sektör %s)" % (
+            _pct(f["roe"]), _pct(_mv(med, "ozsermaye_karliligi")), _pct(f["net_marj"]), _pct(_mv(med, "net_marj")))
     if key == "istikrarli_temettu":
         return "Son 12 ayda temettü verimi %s; önceki 12 ayda da ödeme yaptı" % _pct(f["verim"])
     if key == "borcsuz_buyuyen":
@@ -377,7 +383,7 @@ def build(stocks, entries, records, shares=None, bucket_of=None, names=None, tod
                "bp": int(round(bp)) if _num(bp) else None,
                "trend": tr[1] if tr else None, "trend_kod": tr[0] if tr else None,
                "degerleme": hk, "sablon": f["sablon"]}
-        for key in memberships(f, med, hk):
+        for key in memberships(f, med, hk, b):
             r = dict(row, neden=reason(key, f, med))
             lists[key].append(r)
             keys[key][tk] = _sort_key(key, r, f, med)
