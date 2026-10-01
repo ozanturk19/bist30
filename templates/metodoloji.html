@@ -262,6 +262,24 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   </div>
 </dl>
 
+{#- C-56 (01.10): Keşfet listelerinin kuralları — D-59 bağlamı `kesfet_kurallari` (kesfet.KURAL; Keşfet
+    sayfasındaki cümlenin aynısı, tek kaynak). Bağlam yoksa bölüm basılmaz. -#}
+{%- if kesfet_kurallari is defined and kesfet_kurallari %}
+<h2 id="kesfet-listeleri">Orta-uzun vade listeleri nasıl seçiliyor?</h2>
+<p>
+  <a href="/kesfet">Keşfet</a>'teki dört liste yalnız şirketlerin açıkladığı finansallardan ve son kapanış fiyatından,
+  aşağıdaki kurallarla her işlem günü kapanıştan sonra yeniden hazırlanır. Değerleme, hisse sayfasındaki
+  &laquo;Fiyatı makul mu?&raquo; sorusuyla aynıdır: F/K (son 12 ayın kârıyla) ve PD/DD, aynı sektördeki şirketlerin
+  ortancasıyla karşılaştırılır; ortancanın %80'inin altı &laquo;ucuz tarafta&raquo;, %125'inin üstü &laquo;pahalı tarafta&raquo;,
+  arası &laquo;makul&raquo; sayılır; ikisi ters yönü gösterirse &laquo;karışık&raquo;.
+</p>
+<ul>
+  {%- for r in kesfet_kurallari %}
+  <li><a href="/kesfet/{{ r.slug }}"><strong>{{ r.baslik }}</strong></a>: {{ r.kural }}</li>
+  {%- endfor %}
+</ul>
+{%- endif %}
+
 <h2>Veri Kaynağı</h2>
 <p>
   Günlük barlar (1d interval, 2 yıl geçmiş) kullanılır. Sinyal hesaplamaları tamamen Python/NumPy ile yapılır.

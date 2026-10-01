@@ -1,0 +1,136 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-56 (01.10): /kesfet ve /kesfet/<liste> — orta-uzun vade listeleri (SSR; JS yalnız "Tümünü göster").
+    Rota (D-59) bağlamı:
+      kesfet = {anahtar, slug, baslik, soru, kural (tek cümle), tarih ('2026-10-01' | None), sayi,
+                satirlar: [{ticker, name, sector, bp (int|None), trend ('Güçlü Trend'|'Yatay'|'Trend Bozuldu'|None),
+                            trend_kod ('g'|'y'|'b'), degerleme ('ucuz'|'makul'|'pahali'|'karisik'|None),
+                            neden (tek cümle, KAP rakamları), sablon}],
+                listeler: [{anahtar, slug, baslik, sayi, aktif}]}
+      kesfet_kok = True yalnız /kesfet kökünde (varsayılan liste; kanonik adres listenin kendi adresi).
+    Onaylı taslak: plans/mockups/temel-v2.html "Keşfet" + O16e=B — satırda sütunlar sabit genişlik,
+    değerleme + trend rozetleri tek grup aynı yerde, mobilde tek satır biçimi. Değerleme sözcükleri
+    hisse sayfası "Fiyatı makul mu?" ile aynı. Bağlam yoksa sayfa 500 vermez: boş liste gösterir. -#}
+{%- set _k = kesfet if ((kesfet is defined) and kesfet) else {} -%}
+{%- set _rows = _k.satirlar or [] -%}
+{%- set _lists = _k.listeler or [] -%}
+{%- set _MO = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] -%}
+{%- macro _dl(iso) -%}
+{%- set p = (iso or '')[:10].split('-') -%}
+{%- if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 -%}{{ p[2]|int }} {{ _MO[p[1]|int - 1] }} {{ p[0] }}{%- else -%}{{ iso }}{%- endif -%}
+{%- endmacro -%}
+{%- set _lbl = _dl(_k.tarih) if _k.tarih else '' -%}
+{%- set _base = 'https://borsapusula.com' -%}
+{%- set _url = _base ~ '/kesfet/' ~ (_k.slug or 'kaliteli-makul') -%}
+{%- set _name = _k.baslik or 'Orta-uzun vade listeleri' -%}
+{%- set _ttl = _name ~ ' · Orta-uzun vade listeleri' -%}
+{%- set _desc = (_k.kural or 'Şirketlerin açıkladığı finansallara göre dört hazır liste.') ~ (' ' ~ _lbl ~ ' kapanışı.' if _lbl else '') -%}
+{%- set _VL = {'ucuz': ('Ucuz tarafta', 'ucuz'), 'makul': ('Makul', 'makul'), 'pahali': ('Pahalı tarafta', 'pahali'), 'karisik': ('Karışık', 'mix')} -%}
+{%- set _TR = {'g': 'strong', 'y': 'flat', 'b': 'broken'} -%}
+{%- set _SHOW = 15 -%}
+{%- set _items = [] -%}
+{%- for r in _rows %}{% set _ = _items.append({'@type': 'ListItem', 'position': loop.index, 'url': _base ~ '/hisse/' ~ r.ticker, 'name': r.ticker ~ (' · ' ~ r.name if r.name else '')}) %}{% endfor -%}
+{% block head %}<title>{{ _ttl }} | BorsaPusula</title>
+<meta name="description" content="{{ _desc }}">
+<link rel="canonical" href="{{ _url }}">
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ _ttl }}">
+<meta property="og:description" content="{{ _desc }}">
+<meta property="og:url"         content="{{ _url }}">
+<meta property="og:site_name"   content="borsapusula.com">
+<meta property="og:locale"      content="tr_TR">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{{ _ttl }}">
+<meta name="twitter:description" content="{{ _desc }}">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': [
+  {'@type': 'CollectionPage', '@id': _url ~ '#sayfa', 'url': _url, 'name': _ttl, 'description': _desc, 'inLanguage': 'tr',
+   'isPartOf': {'@type': 'WebSite', '@id': _base ~ '/#website', 'name': 'BorsaPusula', 'url': _base ~ '/'},
+   'mainEntity': {'@id': _url ~ '#liste'}, 'breadcrumb': {'@id': _url ~ '#yol'}},
+  {'@type': 'ItemList', '@id': _url ~ '#liste', 'name': _k.soru or _name, 'description': _k.kural or _desc,
+   'numberOfItems': _items|length, 'itemListElement': _items},
+  {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
+    {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': _base ~ '/'},
+    {'@type': 'ListItem', 'position': 2, 'name': 'Keşfet', 'item': _base ~ '/kesfet'},
+    {'@type': 'ListItem', 'position': 3, 'name': _name, 'item': _url}]}
+]}|tojson }}</script>
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/kesfet.css') }}">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button>
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
+{% include '_header.html' %}
+
+{%- macro _row(r) -%}
+{%- set v = _VL.get(r.degerleme) -%}
+<li><a class="kf-row" href="/hisse/{{ r.ticker|urlencode }}">
+  <span class="kf-co"><b class="tk">{{ r.ticker }}</b><span class="nm">{{ r.name or '' }}{% if r.sector %}<span class="sc"> · {{ r.sector }}</span>{% endif %}</span></span>
+  <span class="kf-why">{{ r.neden or '' }}</span>
+  <span class="kf-tags"><span class="kf-val kf-val--{{ v[1] if v else 'yok' }}"><span class="sr-only">Değerleme: </span>{{ v[0] if v else '—' }}</span>
+    {%- if r.trend %}<span class="da-signal da-signal--{{ _TR.get(r.trend_kod, 'flat') }}"><span class="sr-only">Trend: </span>{{ r.trend }}</span>{% else %}<span class="kf-val kf-val--yok"><span class="sr-only">Trend: </span>—</span>{% endif %}</span>
+  <span class="kf-bp"><span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (r.bp ~ ' / 100') if r.bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ r.bp or 0 }} 100"/></svg><b class="da-ring-num">{{ r.bp if r.bp is not none else '—' }}</b></span></span>
+</a></li>
+{%- endmacro %}
+
+<main id="main-content" class="container kf" tabindex="-1">
+  <div class="da-pagehead">
+    <h1 class="da-pagehead-title">Orta-uzun vade listeleri</h1>
+    <p class="da-pagehead-lede">Şirketlerin açıkladığı finansallara göre dört hazır liste{% if _lbl %}; {{ _lbl }} kapanışı{% endif %}.</p>
+  </div>
+
+  {%- if _lists %}
+  <nav class="kf-tabs" aria-label="Listeler">
+    {%- for l in _lists %}
+    <a class="kf-tab" href="/kesfet/{{ l.slug }}"{% if l.aktif %} aria-current="page"{% endif %}><span class="kf-tab-t">{{ l.baslik }}</span><b class="kf-tab-n da-num">{{ l.sayi }}</b></a>
+    {%- endfor %}
+  </nav>
+  {%- endif %}
+
+  <section class="kf-list" aria-labelledby="kfH">
+    <h2 class="kf-q da-display" id="kfH">{{ _k.soru or 'Hangi şirketler öne çıkıyor?' }}</h2>
+    {%- if _k.kural %}
+    <p class="kf-rule"><span><b>Kural:</b> {{ _k.kural }}</span><a class="kf-rule-a" href="/metodoloji#kesfet-listeleri">Yöntem <span aria-hidden="true">→</span></a></p>
+    {%- endif %}
+    {%- if _rows %}
+    <div class="kf-head" aria-hidden="true"><span>Şirket</span><span>Öne çıkan</span><span>Değerleme</span><span>Trend</span><span>BP</span></div>
+    <ol class="kf-rows" id="kfRows">
+      {%- for r in _rows %}
+      {{ _row(r) }}
+      {%- endfor %}
+    </ol>
+    {%- if _rows|length > _SHOW %}
+    <button type="button" class="da-btn da-btn--secondary kf-all" id="kfAll" hidden>Tümünü göster <span class="da-num">({{ _rows|length }})</span></button>
+    <script>
+    /* İlk 15 satır görünür; JS yoksa liste tam basılı kalır (SSR). Satırlar boyamadan önce kırpılır. */
+    (function(){var ol=document.getElementById('kfRows'),b=document.getElementById('kfAll');if(!ol||!b)return;
+      ol.setAttribute('data-clip','{{ _SHOW }}');b.hidden=false;
+      b.addEventListener('click',function(){ol.removeAttribute('data-clip');b.hidden=true;
+        var a=ol.querySelectorAll('.kf-row')[{{ _SHOW }}];if(a)a.focus();});})();
+    </script>
+    {%- endif %}
+    {%- else %}
+    <p class="kf-empty">Bu listeye giren şirket yok.</p>
+    {%- endif %}
+  </section>
+
+  <p class="kf-foot">Listeler her işlem günü kapanıştan sonra şirketlerin açıkladığı son finansallarla yenilenir. Tüm hisseleri filtrelemek için <a href="/tarama">Tarama</a>. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+{% with ftr_self='/kesfet', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+
+<!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

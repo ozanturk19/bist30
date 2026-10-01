@@ -1,0 +1,353 @@
+{
+ "_not": "D-59 kesfet.view çıktısı (01.10.2026 VPS kopyası, prep/D-59 7048ca81); satırlar kısaltıldı",
+ "temettu": {
+  "anahtar": "istikrarli_temettu",
+  "slug": "istikrarli-temettu",
+  "baslik": "İstikrarlı temettü",
+  "soru": "Hangi şirketler istikrarlı temettü ödüyor?",
+  "kural": "Hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödemiş şirketler; son 12 ayın temettü verimine göre sıralı.",
+  "tarih": "2026-10-01",
+  "sayi": 18,
+  "satirlar": [
+   {
+    "ticker": "HLGYO",
+    "name": "Halk GYO",
+    "sector": "Gayrimenkul",
+    "bp": 54,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "ucuz",
+    "sablon": "gyo",
+    "neden": "Son 12 ayda temettü verimi %13,7; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "FROTO",
+    "name": "Ford Otomotiv Sanayi",
+    "sector": "Metal Eşya ve Makine",
+    "bp": 57,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "karisik",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %12,8; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "BRYAT",
+    "name": "Borusan Yatırım",
+    "sector": "Holding ve Yatırım",
+    "bp": 56,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "pahali",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %11,2; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "NUHCM",
+    "name": "Nuh Çimento",
+    "sector": "Taş ve Toprak",
+    "bp": 66,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "pahali",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %10,5; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "ISMEN",
+    "name": "İş Yatırım Menkul Değerler",
+    "sector": "Finansal Hizmetler",
+    "bp": 46,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": null,
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %10,3; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "ANHYT",
+    "name": "Anadolu Hayat Emeklilik",
+    "sector": "Sigorta",
+    "bp": 68,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": null,
+    "sablon": "sigorta",
+    "neden": "Son 12 ayda temettü verimi %8,3; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "LMKDC",
+    "name": "Limak Doğu Anadolu Çimento",
+    "sector": "Taş ve Toprak",
+    "bp": 70,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %8,2; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "CLEBI",
+    "name": "Çelebi Hava Servisi",
+    "sector": "Ulaştırma",
+    "bp": 53,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "pahali",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %7,5; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "TOASO",
+    "name": "Tofaş Türk Otomobil Fabrikası",
+    "sector": "Metal Eşya ve Makine",
+    "bp": 49,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "karisik",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %7,5; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "ULKER",
+    "name": "Ülker Bisküvi",
+    "sector": "Gıda ve İçecek",
+    "bp": 60,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %6,7; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "LILAK",
+    "name": "Lila Kağıt",
+    "sector": "Orman, Kağıt ve Basım",
+    "bp": 68,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %6,4; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "AKMGY",
+    "name": "Akmerkez GYO",
+    "sector": "Gayrimenkul",
+    "bp": 66,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "pahali",
+    "sablon": "gyo",
+    "neden": "Son 12 ayda temettü verimi %5,8; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "LKMNH",
+    "name": "Lokman Hekim",
+    "sector": "Sağlık",
+    "bp": 42,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": null,
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %5,8; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "ANSGR",
+    "name": "Anadolu Sigorta",
+    "sector": "Sigorta",
+    "bp": 64,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": null,
+    "sablon": "sigorta",
+    "neden": "Son 12 ayda temettü verimi %5,7; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "ASUZU",
+    "name": "Anadolu Isuzu",
+    "sector": "Metal Eşya ve Makine",
+    "bp": 50,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": null,
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %5,6; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "AKSA",
+    "name": "Aksa Akrilik Kimya Sanayii",
+    "sector": "Kimya, Petrol ve Plastik",
+    "bp": 52,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %5,5; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "TRGYO",
+    "name": "Torunlar GYO",
+    "sector": "Gayrimenkul",
+    "bp": 59,
+    "trend": "Yatay",
+    "trend_kod": "y",
+    "degerleme": "pahali",
+    "sablon": "gyo",
+    "neden": "Son 12 ayda temettü verimi %5,5; önceki 12 ayda da ödeme yaptı"
+   },
+   {
+    "ticker": "EGPRO",
+    "name": "Ege Profil Ticaret",
+    "sector": "Kimya, Petrol ve Plastik",
+    "bp": 60,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "pahali",
+    "sablon": "sanayi",
+    "neden": "Son 12 ayda temettü verimi %5,2; önceki 12 ayda da ödeme yaptı"
+   }
+  ],
+  "listeler": [
+   {
+    "anahtar": "kaliteli_makul",
+    "slug": "kaliteli-makul",
+    "baslik": "Kaliteli ve makul fiyatlı",
+    "sayi": 36,
+    "aktif": false
+   },
+   {
+    "anahtar": "istikrarli_temettu",
+    "slug": "istikrarli-temettu",
+    "baslik": "İstikrarlı temettü",
+    "sayi": 57,
+    "aktif": true
+   },
+   {
+    "anahtar": "borcsuz_buyuyen",
+    "slug": "borcsuz-buyuyenler",
+    "baslik": "Borçsuz büyüyenler",
+    "sayi": 26,
+    "aktif": false
+   },
+   {
+    "anahtar": "sektorune_gore_ucuz",
+    "slug": "sektorune-gore-ucuz",
+    "baslik": "Sektörüne göre ucuz",
+    "sayi": 27,
+    "aktif": false
+   }
+  ]
+ },
+ "ucuz": {
+  "anahtar": "sektorune_gore_ucuz",
+  "slug": "sektorune-gore-ucuz",
+  "baslik": "Sektörüne göre ucuz",
+  "soru": "Hangi şirketler sektörüne göre ucuz?",
+  "kural": "F/K'sı da PD/DD'si de sektör ortancasının altında olan ve değerlemesi ucuz çıkan şirketler; sektörüne göre en ucuzdan sıralı.",
+  "tarih": "2026-10-01",
+  "sayi": 4,
+  "satirlar": [
+   {
+    "ticker": "ESCOM",
+    "name": "Escort Teknoloji",
+    "sector": "Bilişim",
+    "bp": 50,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "F/K 2,11 (sektör 14,87), PD/DD 0,74 (sektör 2,07)"
+   },
+   {
+    "ticker": "HDFGS",
+    "name": "Hedef Girişim Sermayesi",
+    "sector": "Holding ve Yatırım",
+    "bp": 54,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "F/K 1,44 (sektör 10,68), PD/DD 0,23 (sektör 0,58)"
+   },
+   {
+    "ticker": "THYAO",
+    "name": "Türk Hava Yolları",
+    "sector": "Ulaştırma",
+    "bp": 49,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "sanayi",
+    "neden": "F/K 3,53 (sektör 11,31), PD/DD 0,39 (sektör 1,68)"
+   },
+   {
+    "ticker": "MRGYO",
+    "name": "Martı GYO",
+    "sector": "Gayrimenkul",
+    "bp": 54,
+    "trend": "Trend Bozuldu",
+    "trend_kod": "b",
+    "degerleme": "ucuz",
+    "sablon": "gyo",
+    "neden": "F/K 1,62 (sektör 11,23), PD/DD 0,19 (sektör 0,32)"
+   }
+  ],
+  "listeler": [
+   {
+    "anahtar": "kaliteli_makul",
+    "slug": "kaliteli-makul",
+    "baslik": "Kaliteli ve makul fiyatlı",
+    "sayi": 36,
+    "aktif": false
+   },
+   {
+    "anahtar": "istikrarli_temettu",
+    "slug": "istikrarli-temettu",
+    "baslik": "İstikrarlı temettü",
+    "sayi": 57,
+    "aktif": false
+   },
+   {
+    "anahtar": "borcsuz_buyuyen",
+    "slug": "borcsuz-buyuyenler",
+    "baslik": "Borçsuz büyüyenler",
+    "sayi": 26,
+    "aktif": false
+   },
+   {
+    "anahtar": "sektorune_gore_ucuz",
+    "slug": "sektorune-gore-ucuz",
+    "baslik": "Sektörüne göre ucuz",
+    "sayi": 27,
+    "aktif": true
+   }
+  ]
+ },
+ "kurallar": [
+  {
+   "anahtar": "kaliteli_makul",
+   "slug": "kaliteli-makul",
+   "baslik": "Kaliteli ve makul fiyatlı",
+   "kural": "Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektör ortancasından iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan şirketler; BorsaPusula Skoru'na göre sıralı."
+  },
+  {
+   "anahtar": "istikrarli_temettu",
+   "slug": "istikrarli-temettu",
+   "baslik": "İstikrarlı temettü",
+   "kural": "Hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödemiş şirketler; son 12 ayın temettü verimine göre sıralı."
+  },
+  {
+   "anahtar": "borcsuz_buyuyen",
+   "slug": "borcsuz-buyuyenler",
+   "baslik": "Borçsuz büyüyenler",
+   "kural": "Nakdi ve kısa vadeli yatırımları finansal borcundan fazla olan, son yıllık raporunda satışlarını artırıp yılı kârla kapatan şirketler; BorsaPusula Skoru'na göre sıralı."
+  },
+  {
+   "anahtar": "sektorune_gore_ucuz",
+   "slug": "sektorune-gore-ucuz",
+   "baslik": "Sektörüne göre ucuz",
+   "kural": "F/K'sı da PD/DD'si de sektör ortancasının altında olan ve değerlemesi ucuz çıkan şirketler; sektörüne göre en ucuzdan sıralı."
+  }
+ ]
+}
