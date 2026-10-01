@@ -52,6 +52,7 @@ import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sekt
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
+import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
 import accounts as _accounts  # D-50: hesap çekirdeği (şifresiz e-posta kodu, oturum, liste, portföy)
@@ -7149,13 +7150,16 @@ def _gemini_cap_alert_mail():
         logger.warning("_gemini_cap_alert_mail: %s", e)
 
 
-def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
+def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3, json_mode=False, timeout_cap=None):
     """Model fallback zinciri ile Gemini API çağrısı yapar.
 
     Args:
         prompt: Gönderilecek metin
         attempts: [(model_id, use_google_search), ...] listesi
         timeout: İstek zaman aşımı (saniye)
+        json_mode: D-57 — yanıt yalnız JSON (responseMimeType=application/json)
+        timeout_cap: D-57 — arka plan işleri için _GEMINI_TIMEOUT_CAP yerine üst sınır
+            (web isteğinde KULLANILMAZ; gündem baskısı bist30-macro arka plan iş parçacığında)
 
     Returns:
         (model_id, text) — başarılı ise; (None, None) — tüm modeller başarısızsa
@@ -7186,7 +7190,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         time.sleep(_wait)  # lock serbest — gevent cooperative yield
 
     # Sert timeout cap — caller ne geçerse geçsin per-istek üst sınır.
-    eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
+    eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP if timeout_cap is None else timeout_cap)
 
     for model_id, use_search in attempts:
         # D-P0-2409: günlük çağrı + aylık USD tavanı — dolmuşsa HTTP isteği atılmaz.
@@ -7213,6 +7217,8 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         }
         if use_search:
             body["tools"] = [{"google_search": {}}]
+        elif json_mode:
+            body["generationConfig"]["responseMimeType"] = "application/json"
         url = (f"https://generativelanguage.googleapis.com/v1beta/"
                f"models/{model_id}:generateContent?key={GEMINI_API_KEY}")
         try:
@@ -9672,6 +9678,81 @@ def _kap_fx_rate(day, cur):
 
 if os.environ.get("BP_ROLE") == "macro" and os.environ.get("KAP_FEED", "1") != "0":
     _bg_start(threading.Thread(target=_kap_feed_loop, daemon=True, name="kap-feed"))
+
+
+# ── D-57 Gündem haber derlemesi (O27=A, O27k=A). Mantık gundem_haber.py; burada ince bağlantı. ──
+# bist30-macro sürecinde kendi iş parçacığı: hafta içi 08:30 / 19:30 baskısı (v1 Gündem aynı
+# turda basıldıktan sonra ya da en geç 30 dk sonra), Gemini flash-lite grounding'siz, mevcut
+# tavanlı _gemini_call yolu (manual_hold / kota sigortası / GEMINI_ENABLED / 200 çağrı / 5 $),
+# baskı başına ≤4 çağrı. Kapatma: GUNDEM_AI=0. Acil kaldırma: data/gundem_haber/latest.json silinir.
+def _gundem_haber_model(prompt, max_tokens):
+    _m, text = _gemini_call(prompt, [(gundem_haber.MODEL, False)], timeout=45, max_tokens=max_tokens,
+                            temperature=0.2, json_mode=True, timeout_cap=45)
+    return text
+
+
+def _gundem_haber_usage():
+    _st = gemini_budget.status()
+    return _st.get("calls_today") or 0, _st.get("usd_month") or 0.0
+
+
+def _gundem_haber_print(now, slot):
+    v1 = haber_gundem.load_latest()
+    if not v1 or v1.get("date") != now.date().isoformat():
+        v1 = None   # bayat v1 baskısının rakamları olgu olarak verilmez
+    try:
+        close_day = datetime.strptime((v1 or {}).get("close_day") or "", "%Y-%m-%d").date()
+    except ValueError:
+        close_day = None
+    uni, _oids = _kap_feed_universe()
+    return gundem_haber.run_edition(
+        now, slot, _gundem_haber_model, v1_doc=v1,
+        kap_items=_KAP_STORE.all_items() if _KAP_STORE.available() else [],
+        names=STOCK_NAMES, universe=uni, close_day=close_day,
+        budget_status=gemini_budget.status(),
+        cb_state=gundem_haber.read_cb_state(_GEMINI_QUOTA_CB_PATH),
+        usage_fn=_gundem_haber_usage, log=logger.info)
+
+
+def _gundem_haber_loop():
+    time.sleep(90)
+    while True:
+        now = datetime.now(_TZ_TR).replace(tzinfo=None)
+        try:
+            if GEMINI_API_KEY:
+                slot = gundem_haber.due(now, gundem_haber.done_keys(), gundem_haber.load_latest() is not None)
+                if slot and gundem_haber.v1_ready(now, slot, haber_gundem.printed_keys()):
+                    _gundem_haber_print(now, slot)
+        except Exception as e:
+            logger.warning("gündem-haber turu hatası: %s", e)
+        time.sleep(300)
+
+
+if os.environ.get("BP_ROLE") == "macro" and gundem_haber.ENABLED:
+    _bg_start(threading.Thread(target=_gundem_haber_loop, daemon=True, name="gundem-haber"))
+
+
+@app.route("/api/gundem-haber")
+@limiter.limit("60 per minute")
+def api_gundem_haber():
+    """D-57 sözleşmesi: son Gündem derlemesi {baski, baski_label, maddeler[]} (yoksa boş liste)."""
+    return safe_json(gundem_haber.load_latest() or gundem_haber.empty_doc())
+
+
+@app.context_processor
+def _inject_gundem_haber():
+    """D-57: ana sayfa ve /haberler* SSR bağlamı `gundem_haber` (son baskı ya da None)."""
+    try:
+        p = request.path or ""
+    except RuntimeError:   # istek dışı render (e-posta vb.)
+        return {}
+    if p == "/" or p == "/haberler" or p.startswith("/haberler/"):
+        try:
+            return {"gundem_haber": gundem_haber.load_latest()}
+        except Exception as e:
+            logger.warning("_inject_gundem_haber: %s", e)
+            return {"gundem_haber": None}
+    return {}
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
