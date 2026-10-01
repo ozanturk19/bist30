@@ -72,10 +72,10 @@
   /* ── Hazır listeler: her biri paylaşılabilir adres (?liste=…) ── */
   var PRESETS = [
     { id: 'hacim-onayli', l: 'Güçlü Trend + Hacim Onaylı', rule: 'Trend koşullarının hepsi sağlanıyor; 5 günlük ortalama hacim, 20 günlük ortalamanın en az 1,2 katı (RVOL ≥ 1,20).', set: { durum: ['g'] }, x: function (r) { return r.ho; } },
-    { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü; skor finansallardan %60, trendden %40 pay alıyor.', set: { bp: 70 } },
+    { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü.', set: { bp: 70 } },
     { id: 'yeni-sinyal', l: 'Yeni sinyal (≤3 seans)', rule: 'Trend durumu son 3 seans içinde değişen hisseler.', x: function (r) { return r.d != null && r.d <= 3; } },
     { id: 'trend-bozuldu-son-seans', l: 'Son seansta Trend Bozuldu', rule: function () { return 'Yükseliş trendi ' + (ASOF || 'son') + ' seansında bozulan hisseler.'; }, set: { durum: ['b'] }, x: function (r) { return r.d != null && r.d <= 1; } },
-    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skor 70 ve üstü, finansal verisi tam; trend henüz Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
+    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
   var PRE = {};
   PRESETS.forEach(function (p) { PRE[p.id] = p; });
 
@@ -92,7 +92,7 @@
   }
   function cush(r) { return (r.p && r.sl != null) ? (r.p - r.sl) / r.p * 100 : null; }
   var C = {
-    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40; trend skoru olmayan hissede yalnız finansallar.', v: function (r) { return r.bp; },
+    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
       cell: function (r) { return r.bp == null ? mut('Sınırlı veri') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
       cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },

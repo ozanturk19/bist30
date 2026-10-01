@@ -57,7 +57,8 @@ NATIVE_FOCUSABLE = {'a', 'button', 'input', 'select', 'textarea', 'summary'}
 # 26.09 C-28: ana sayfa Spotlight/Piyasa Ozeti rozeti/skor izgarasi kalkti: 41 -> 36 -> taban 34.
 # 26.09 C-43: makale paylas dugmeleri data-tip yerine gorunur metin (WhatsApp'ta paylas / Baglantiyi kopyala): 34 -> 33.
 # 30.09 C-70 K12: hisse "Algoritmamizin Onaylari" bolumu (Aciklama dugmesi data-tip) kalkti: 33 -> 32.
-MIN_TIPS      = 32
+# 01.10 C-74 K1: hisse "Ne anlama geliyor?" basligindaki "Kural tabanli" rozeti (data-tip) kalkti: 32 -> 31.
+MIN_TIPS      = 31
 # 21.09 (K-AU): gercek sayi artik 0 oldugu icin ">=1" tabani kapiyi surekli
 # "korlesmis" (cikis 2) yapardi. Sifir bir kapsam yalani OLMASIN diye taban
 # yerine POZITIF KONTROL var: css_attr_tooltips()'in mantigi sentetik bir

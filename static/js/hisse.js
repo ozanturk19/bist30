@@ -1924,8 +1924,7 @@ function _tvValue(f, k) {
   const foot = _tvEl('tvDegerlemeN');
   if (now) {
     const ttm = now.son12ay_yontem === 'son12ay' ? 'son 12 ayın kârı (son yıllık kâr + ' + now.son12ay_etiket + ' raporunda açıklanan fark)' : 'son yıllık kâr';
-    foot.textContent = 'F/K: piyasa değeri ÷ ' + ttm + '. PD/DD: piyasa değeri ÷ son açıklanan özkaynak.' + (band.length ? ' Bant: yıl sonu değerleri.' : '') +
-      (V.hasMed ? ' Ucuz / pahalı: sektör ortancasına oran 0,80 altı / 1,25 üstü.' : '');
+    foot.textContent = 'F/K: piyasa değeri ÷ ' + ttm + '. PD/DD: piyasa değeri ÷ son açıklanan özkaynak.' + (band.length ? ' Bant: yıl sonu değerleri.' : '');
     foot.hidden = false;
   }
   return true;
