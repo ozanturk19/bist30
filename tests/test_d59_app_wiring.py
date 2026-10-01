@@ -91,6 +91,9 @@ def test_kesfet_sayfasi_sablon_varsa_ssr_yoksa_404(evren):
     assert r.status_code == 301 and r.headers["Location"].endswith("/kesfet/sektorune-gore-ucuz")
     assert c.get("/kesfet/yok").status_code == 404
     assert "https://borsapusula.com/kesfet/istikrarli-temettu" in c.get("/llms.txt").get_data(as_text=True)
+    app._sitemap_cache.clear()
+    sm = c.get("/sitemap.xml").get_data(as_text=True)
+    assert "/kesfet/sektorune-gore-ucuz</loc>" in sm and "/kesfet</loc>" not in sm   # kök kanonik değil
 
 
 def test_metodoloji_kural_cumleleri_baglamda(monkeypatch):

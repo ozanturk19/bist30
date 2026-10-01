@@ -11194,9 +11194,9 @@ def sitemap():
             pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
-    # D-59/C-56: Keşfet listeleri (şablon yayındaysa); her liste kendi paylaşılabilir adresinde
+    # D-59/C-56: Keşfet listeleri (şablon yayındaysa); her liste kendi paylaşılabilir adresinde.
+    # /kesfet kökü varsayılan listeyi gösterir ve kanonik adresi o listenin adresidir: sitemap'te yok.
     if _tpl_ready("kesfet.html"):
-        pages.append({"loc": "/kesfet", "priority": "0.9", "changefreq": "daily"})
         for _k in kesfet.LISTS:
             pages.append({"loc": f"/kesfet/{kesfet.SLUG[_k]}", "priority": "0.8", "changefreq": "daily"})
     # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
