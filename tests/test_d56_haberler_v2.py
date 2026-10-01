@@ -373,9 +373,15 @@ def test_company_cards_kredi_rating_and_hot_rule():
     by = {c["ticker"]: c for c in cards}
     assert by["ZOREN"]["rating"]["at"] == "B−" and by["ZOREN"]["hot"] is True     # degisiklik -> Öne çıkan
     assert by["GARAN"]["rating"]["at"] == "AAA (tr)" and by["GARAN"]["hot"] is False  # teyit
+    assert [c["ticker"] for c in cards] == ["ZOREN", "GARAN"]                    # Öne çıkan once
     # metin okunamazsa kart yine cikar (cizgiyle)
     cards2 = hv.company_cards(items, "2026-09-28", {}, n=6, doc_fn=lambda i: 1 / 0)
     assert all(c["rating"] is None and c["hot"] is False for c in cards2)
+    # Öne çıkan (degisen not) onemsiz sozlesme bildirimlerinin onunde
+    small = [_it("Yeni İş İlişkisi", "Sözleşme imzalanması", id=7, ticker="QUAGR", tickers=["QUAGR"],
+                 ts="2026-09-28T20:00:00", onem={"pct": 0.9})]
+    order = [c["ticker"] for c in hv.company_cards(small + items, "2026-09-28", {}, doc_fn=lambda i: docs.get(i))]
+    assert order == ["ZOREN", "QUAGR", "GARAN"]
 
 
 def test_onem_two_bar_view_when_ratio_exceeds_scale():

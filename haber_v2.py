@@ -636,22 +636,36 @@ _CARD_TYPES = ("is", "sermaye", "kredi", "temettu", "finansal", "dava")
 
 def company_cards(items, day_iso, names=None, n=6, hot_tickers=(), doc_fn=None):
     """Gunun (day_iso ve oncesindeki son islem gununun) rutin-disi bildirimlerinden kartlar.
-    Sira: onem orani azalan, sonra haber niteligindeki turler, sonra en yeni. Ayni hisse bir kez.
-    doc_fn(id) -> bildirim metni sozlugu (kap_feed.Store.doc): kredi notu kartinda not basamaklari.
     'Öne çıkan' (taslak kurali): onem orani %5 ve ustu, kredi notu ya da gorunum degisikligi,
-    sitedeki en cok yukselen/dusen hissenin bildirimi."""
+    sitedeki en cok yukselen/dusen hissenin bildirimi. Sira: once Öne çıkanlar, sonra onem orani
+    azalan, sonra haber niteligindeki turler, sonra en yeni. Ayni hisse bir kez.
+    doc_fn(id) -> bildirim metni sozlugu (kap_feed.Store.doc): kredi notu kartinda not basamaklari."""
     names = names or {}
+    hot_set = set(hot_tickers or ())
     days = sorted(set(it["ts"][:10] for it in items if it["ts"][:10] <= day_iso and is_listed(it)),
                   reverse=True)[:2]
     pool = [it for it in items if it["ts"][:10] in days and is_listed(it)]
+    ratings = {}
+    if doc_fn:
+        for it in pool:
+            if filing_type(it) == "kredi":
+                try:
+                    ratings[it["id"]] = rating_view((doc_fn(it["id"]) or {}).get("text"))
+                except Exception:  # noqa: BLE001 — metin okunamazsa kart 30 gunluk cizgiyle
+                    ratings[it["id"]] = None
+
+    def is_hot(it):
+        rv = ratings.get(it["id"])
+        return bool(((it.get("onem") or {}).get("pct") or 0.0) >= 5.0 or it["ticker"] in hot_set
+                    or (rv and rv["changed"]))
 
     def rank(it):
         o = it.get("onem") or {}
         k = filing_type(it)
-        return (-(o.get("pct") or 0.0), 0 if k in _CARD_TYPES else 1,
-                _CARD_TYPES.index(k) if k in _CARD_TYPES else 9, "~" if not it["ts"] else "", it["ts"])
+        return (0 if is_hot(it) else 1, -(o.get("pct") or 0.0), 0 if k in _CARD_TYPES else 1,
+                _CARD_TYPES.index(k) if k in _CARD_TYPES else 9)
     pool = sorted(pool, key=lambda it: it["ts"], reverse=True)
-    pool = sorted(pool, key=lambda it: rank(it)[:3])
+    pool = sorted(pool, key=rank)
     out, seen = [], set()
     for it in pool:
         if it["ticker"] in seen:
@@ -661,14 +675,8 @@ def company_cards(items, day_iso, names=None, n=6, hot_tickers=(), doc_fn=None):
             continue
         seen.add(it["ticker"])
         r = row_view(it, names)
-        r["rating"] = None
-        if k == "kredi" and doc_fn:
-            try:
-                r["rating"] = rating_view((doc_fn(it["id"]) or {}).get("text"))
-            except Exception:  # noqa: BLE001 — metin okunamazsa kart 30 gunluk cizgiyle
-                r["rating"] = None
-        r["hot"] = bool((r["onem"] and r["onem"]["pct"] >= 5.0) or it["ticker"] in set(hot_tickers or ())
-                        or (r["rating"] and r["rating"]["changed"]))
+        r["rating"] = ratings.get(it["id"])
+        r["hot"] = is_hot(it)
         r["time_label"] = "%s · %s" % (day_label(r["day"]), r["time"])
         out.append(r)
         if len(out) >= n:
