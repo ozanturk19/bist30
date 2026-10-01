@@ -39,7 +39,7 @@
       }).join(' ');
     } else {
       hint.textContent = '"' + v + '" ile eşleşen bir hisse bulunamadı. ';
-      hint.insertAdjacentHTML('beforeend', '<a href="/tarama" class="da-link">Keşfet sayfasından göz atın</a>.');
+      hint.insertAdjacentHTML('beforeend', '<a href="/tarama" class="da-link">Tarama sayfasından göz atın</a>.');
     }
   }
   form.addEventListener('submit', function (e) {

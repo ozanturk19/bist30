@@ -6,6 +6,7 @@
     hdr_sub_id parametreleri KALKTI (anti-CLS kurali onlari zaten gizliyordu).
       {% include '_header.html' %}
     C-31 (26.09): 5 öğeli menü (O17=A) Piyasa · Keşfet · Haberler · Takip · Öğren + arama;
+    C-56 (01.10): Keşfet orta-uzun vade listelerine (/kesfet) gider; Tarama aynı bölümde (aktif kalır).
     masaüstü = mobil (_mobile_nav_partial.html). "Daha" menüsü kalktı; data-route boşlukla
     ayrılmış önek listesi, öğe o bölümün tüm sayfalarında aktif.
 -#}
@@ -25,7 +26,7 @@
     {{ icon('piyasa') }}
     <span>Piyasa</span>
   </a>
-  <a href="/tarama" data-route="/tarama /hisse /karsilastir" class="bp-nav-item">
+  <a href="/kesfet" data-route="/kesfet /tarama /hisse /karsilastir" class="bp-nav-item">
     {{ icon('ara') }}
     <span>Keşfet</span>
   </a>

@@ -51,7 +51,8 @@ CANON = {
     '/':                 'Piyasa',           # C-31 (O17=A): 5 öğeli menü adları
     '/ozet':             'Günlük Özet',
     '/gundem':           'Gündem',
-    '/tarama':           'Keşfet',
+    '/kesfet':           'Keşfet',            # C-56: orta-uzun vade listeleri (menü)
+    '/tarama':           'Tarama',            # C-56: tarama Keşfet bölümünde, kendi adıyla (H1 "Tarama")
     '/karsilastir':      'Karşılaştır',
     '/portfolio':        'Takip',
     '/takip':            'Takip',            # C-41: hesaba bagli takip sayfasi
