@@ -120,6 +120,17 @@ def test_kalite_kosulu_karli_ve_ortancadan_iyi():
     assert not kesfet._quality({"sablon": "sigorta", "roe": 40.0}, _med(ozsermaye_karliligi=10.0))
 
 
+def test_onbellege_yazma_kapisi_girdiler_tam():
+    """app._kesfet_lists: web worker acilisinda _cache dolu, skor/pay onbellegi bos -> yazilmaz."""
+    st = [{"ticker": "AKSA"}]
+    assert kesfet.ready(st, {"AKSA": {"borsapusula_skoru": 52}}, {"AKSA": 3.9e9})
+    assert not kesfet.ready(st, {}, {"AKSA": 3.9e9})                 # skor kayitlari yuklenmedi
+    assert not kesfet.ready(st, {"AKSA": {}}, {"AKSA": 3.9e9})
+    assert not kesfet.ready(st, {"AKSA": {"borsapusula_skoru": 52}}, {})          # pay adetleri yok
+    assert not kesfet.ready(st, {"AKSA": {"borsapusula_skoru": 52}}, {"AKSA": None})
+    assert not kesfet.ready([], {"AKSA": {"borsapusula_skoru": 52}}, {"AKSA": 3.9e9})
+
+
 def test_uyelikler_dort_liste_kurali():
     med = _med(ozsermaye_karliligi=5.0, net_marj=2.0, fk=10.0, pd_dd=1.0)
     f = {"sablon": "sanayi", "roe": 9.0, "net_marj": 6.0, "fk": 7.0, "pd_dd": 0.7,

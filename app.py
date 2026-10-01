@@ -8849,8 +8849,8 @@ _KESFET_TTL = 600   # sn: veri gün sonunda bir kez değişir; 10 dk bayatlık k
 
 
 def _kesfet_lists():
-    """kesfet.build sonucu ({tarih, listeler}); 10 dk önbellek. Evren boşsa (soğuk açılış)
-    önbelleğe yazılmaz, boş listeler döner (sayfa 500 vermez)."""
+    """kesfet.build sonucu ({tarih, listeler}); 10 dk önbellek. Girdiler eksikse (soğuk açılış:
+    evren, skor kayıtları ya da pay adetleri yok) önbelleğe yazılmaz, o anki sonuç döner (500 yok)."""
     now = time.time()
     hit = _KESFET["data"]
     if hit is not None and now - _KESFET["ts"] < _KESFET_TTL:
@@ -8858,6 +8858,14 @@ def _kesfet_lists():
     with _KESFET_LOCK:
         if _KESFET["data"] is not None and time.time() - _KESFET["ts"] < _KESFET_TTL:
             return _KESFET["data"]
+        # Web worker: _cache _startup'ta yüklenir, skor ve temel önbellekleri background_refresh'in
+        # pid gecikmesinden (0-89 sn) sonra. Boşlarsa diskten şimdi yükle (salt-okur, ts birleştirmeli).
+        with _lock:
+            need_h, need_f = not _financial_health_cache, not _fundamentals_cache
+        if need_h:
+            _load_health_scores_from_disk()
+        if need_f:
+            _load_fundamentals_cache_from_disk()
         with _lock:
             stocks = [dict(s) for s in (_cache.get("data") or [])
                       if isinstance(s, dict) and s.get("ticker") not in INDEX_TICKERS]
@@ -8877,7 +8885,7 @@ def _kesfet_lists():
         except Exception as e:
             logger.warning("_kesfet_lists: %s", e)
             return _KESFET["data"] or kesfet.build([], {}, {})
-        if stocks:
+        if kesfet.ready(stocks, entries, shares):
             _KESFET["data"], _KESFET["ts"] = out, time.time()
         return out
 

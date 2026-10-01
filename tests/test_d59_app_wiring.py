@@ -14,6 +14,7 @@ sys.path.insert(0, ROOT)
 
 import app  # noqa: E402
 import kap_financials as kf  # noqa: E402
+import kap_temel_v2 as kt  # noqa: E402
 import kesfet  # noqa: E402
 
 FIX = os.path.join(ROOT, "tests", "fixtures", "kap_temel_v2")
@@ -22,6 +23,15 @@ FIX = os.path.join(ROOT, "tests", "fixtures", "kap_temel_v2")
 def _rec(t):
     with gzip.open(os.path.join(FIX, t + ".json.gz"), "rt", encoding="utf-8") as f:
         return json.load(f)
+
+
+def _shares(prices):
+    """_fundamentals_cache bicimi; pay adedi KAP kaydindakiyle ayni (pay_uyumsuz yok)."""
+    out = {}
+    for t in prices:
+        rec = _rec("GARAN" if t == "GARAN" else "TUPRS")
+        out[t] = {"data": {"shares": kt.shares_of(kt._latest(rec))}, "ts": 1.0}
+    return out
 
 
 @pytest.fixture
@@ -37,6 +47,9 @@ def evren(monkeypatch):
         + [{"ticker": "XU030", "price": 1.0}])
     monkeypatch.setattr(app, "_get_sector", lambda t: "Bankacılık" if t == "GARAN" else "Kimya, Petrol ve Plastik")
     monkeypatch.setattr(app, "_financial_health_cache", {t: {"data": {"borsapusula_skoru": 55}} for t in prices})
+    monkeypatch.setattr(app, "_fundamentals_cache", _shares(prices))
+    monkeypatch.setattr(app, "_load_health_scores_from_disk", lambda: None)          # testte disk okunmaz
+    monkeypatch.setattr(app, "_load_fundamentals_cache_from_disk", lambda: None)
     monkeypatch.setitem(app._KESFET, "ts", 0.0)
     monkeypatch.setitem(app._KESFET, "data", None)
     return prices
@@ -74,6 +87,28 @@ def test_onbellek_ve_soguk_acilis(evren, monkeypatch):
     monkeypatch.setitem(app._KESFET, "data", None)
     empty = app._kesfet_lists()
     assert all(v == [] for v in empty["listeler"].values()) and app._KESFET["data"] is None   # bos evren yazilmaz
+
+
+def test_yarim_yuklu_girdi_onbellege_yazilmaz_diskten_tamamlanir(evren, monkeypatch):
+    """Web worker acilisi: _cache _startup'ta dolu, skor ve temel onbellekleri background_refresh'in
+    pid gecikmesinden (0-89 sn) once bos. Yarim sonuc (BP yok, pay adedi kontrolu yok) 10 dk yazilmaz;
+    once diskten yukleme denenir."""
+    monkeypatch.setattr(app, "_financial_health_cache", {})
+    monkeypatch.setattr(app, "_fundamentals_cache", {})
+    loads = []
+    monkeypatch.setattr(app, "_load_health_scores_from_disk", lambda: loads.append("h"))
+    monkeypatch.setattr(app, "_load_fundamentals_cache_from_disk", lambda: loads.append("f"))
+    half = app._kesfet_lists()
+    assert loads == ["h", "f"] and app._KESFET["data"] is None
+    assert all(r["bp"] is None for rows in half["listeler"].values() for r in rows)
+    # Disk yukleyicileri onbellekleri doldurunca (gercek akis) sonuc tam ve onbellekte
+    monkeypatch.setattr(app, "_load_health_scores_from_disk", lambda: app._financial_health_cache.update(
+        {t: {"data": {"borsapusula_skoru": 55}} for t in evren}))
+    monkeypatch.setattr(app, "_load_fundamentals_cache_from_disk",
+                        lambda: app._fundamentals_cache.update(_shares(evren)))
+    full = app._kesfet_lists()
+    assert app._KESFET["data"] is full
+    assert [r["bp"] for r in full["listeler"]["sektorune_gore_ucuz"]] == [55, 55]
 
 
 def test_kesfet_sayfasi_sablon_varsa_ssr_yoksa_404(evren):

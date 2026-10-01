@@ -388,6 +388,15 @@ def build(stocks, entries, records, shares=None, bucket_of=None, names=None, tod
     return {"tarih": max(set(dates), key=dates.count) if dates else None, "listeler": lists}
 
 
+def ready(stocks, entries, shares):
+    """Sonuc onbellege yazilabilir mi: evren, skor kayitlari (BP) ve pay adetleri (pay adedi sagligi)
+    birlikte yuklu. Web worker'da _cache acilista, skor ve temel onbellekleri background_refresh'in
+    pid gecikmesinden (0-89 sn) sonra dolar; yarim girdiyle kurulan sonuc (BP yok, siralar alfabetik,
+    yanlis pay adediyle F/K) 10 dk dondurulmasin."""
+    return (bool(stocks) and any(isinstance(e, dict) and e for e in (entries or {}).values())
+            and any(_num(v) and v > 0 for v in (shares or {}).values()))
+
+
 def summary(result, aktif=None):
     """Liste secici: [{anahtar, slug, baslik, sayi, aktif}] (sabit sira)."""
     ls = (result or {}).get("listeler") or {}
