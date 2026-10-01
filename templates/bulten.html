@@ -194,6 +194,9 @@
     {#- ── Sektörler: sıfır eksenli ıraksak çubuk (kesikli çizgi BIST100) ── #}
     {%- set _sk = (B.isi_haritasi_ozet or [])|selectattr('ortalama_degisim_pct', 'number')|list %}
     {%- if _sk %}
+    {#- "piyasa değeriyle ağırlıklı" yalnız D-56 satırlarında (hisse_sayisi işareti); D-56 öncesi
+        donmuş özet basit ortalamadır → yansız "ortalama değişimi" #}
+    {%- set _agr = (_sk|selectattr('hisse_sayisi')|list|length) == (_sk|length) %}
     {%- set _xu = _ix.degisim_pct if _ix.degisim_pct is number else none %}
     {%- set _vals = _sk|map(attribute='ortalama_degisim_pct')|list + [0] + ([_xu] if _xu is not none else []) %}
     {%- set _lo0 = _vals|min %}{%- set _hi0 = _vals|max %}{%- set _sp = (_hi0 - _lo0) or 1 %}
@@ -201,7 +204,7 @@
     {%- macro _sx(v) -%}{{ '%.2f'|format((v - _lo) / (_hi - _lo) * 100) }}{%- endmacro -%}
     {%- set _z = (0 - _lo) / (_hi - _lo) * 100 %}
     <section class="blv-sec" aria-labelledby="skH">
-      <div class="blv-sec-h"><div><h2 id="skH">Sektörler nasıl kapandı?</h2><p class="blv-sub">Sektördeki BIST100 hisselerinin piyasa değeriyle ağırlıklı ortalama değişimi{% if _xu is not none %}; kesikli çizgi BIST100{% endif %}.</p></div></div>
+      <div class="blv-sec-h"><div><h2 id="skH">Sektörler nasıl kapandı?</h2><p class="blv-sub">Sektördeki BIST100 hisselerinin {% if _agr %}piyasa değeriyle ağırlıklı {% endif %}ortalama değişimi{% if _xu is not none %}; kesikli çizgi BIST100{% endif %}.</p></div></div>
       <div class="blv-sk">
         <div class="blv-sk-ax" aria-hidden="true"><span></span><span class="pa">
           {%- if _xu is not none %}{% set _rf = (_xu - _lo) / (_hi - _lo) * 100 %}

@@ -117,6 +117,17 @@ def test_eski_rota_baglami_bolum_gizler_hata_yok(fx):
     assert _page(fx).count('src="/static/js/bp-heatmap.js"') == 1
 
 
+def test_sektor_alt_basligi_yalniz_agirlikli_ozette_agirlikli_der(fx):
+    """İnceleme P1: D-56 öncesi donmuş özet basit ortalama (hisse_sayisi yok) — 'piyasa değeriyle
+    ağırlıklı' yazılmaz; harita yoksa rota özeti yeniden hesaplayamaz, eski değer kalır."""
+    sub = lambda h: re.search(r'<h2 id="skH">.*?<p class="blv-sub">(.*?)</p>', h, re.S).group(1)
+    eski = sub(_page(fx, v2=False))
+    assert "ağırlıklı" not in eski and eski.startswith("Sektördeki BIST100 hisselerinin ortalama değişimi")
+    assert sub(_page(fx)).startswith("Sektördeki BIST100 hisselerinin piyasa değeriyle ağırlıklı ortalama değişimi")
+    karma = dict(fx["v2"], isi_haritasi_ozet=fx["eski"]["isi_haritasi_ozet"])   # v2 json, harita yok
+    assert "ağırlıklı" not in sub(_page(fx, v2=False, bulten=karma))
+
+
 def test_isi_haritasi_parcasi_varsayilan_cikti_degismedi(fx):
     """hm_bare verilmezse kök <section>, başlık ve 'Tüm harita' aynen; bare modda nabız şeridi."""
     g, t = hm.layout(fx["heatmap"]["rows"])
