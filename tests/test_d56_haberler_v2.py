@@ -290,3 +290,50 @@ def test_gundem_haber_source_falls_back_to_d57_module():
     assert logs and "okunamadı" in logs[0]
     # D-57 modulu baski yokken None dondurur
     assert hv.gundem_haber_from({"gundem_haber": types.SimpleNamespace(load_latest=lambda: None)}) is None
+
+
+def test_feed_ticker_filter_and_urls():
+    items = _items()
+    t = "GARAN"
+    mine = [x for x in items if t in (x.get("tickers") or [x["ticker"]]) and x["kap_class"] in ("ODA", "FR", "DG")]
+    fd = hv.feed(items, "2026-10-01", ticker=t, per_page=100)
+    assert fd["total"] == sum(1 for x in mine if not x.get("rutin")) > 0
+    assert all(r["ticker"] == t or t in r["tickers"] for d in fd["days"] for r in d["rows"])
+    assert fd["counts"]["all"] == fd["total"]
+    assert all(d["routine"] == sum(1 for x in mine if x["ts"][:10] == d["day"] and x.get("rutin")) for d in fd["days"])
+    # hisse gorunumu 30 gun penceresiyle sinirli degil (depodaki tum gecmis)
+    assert hv.feed(items, "2026-12-31", ticker=t)["total"] == fd["total"]
+    assert hv.feed(items, "2026-12-31")["total"] == 0
+    # gun + hisse
+    d = hv.feed(items, "2026-10-01", ticker=t, day="2026-09-30", include_rutin=True)
+    assert d["total"] == sum(1 for x in mine if x["ts"][:10] == "2026-09-30")
+    # adresler
+    assert hv.bildirimler_url() == "/haberler/bildirimler"
+    assert hv.bildirimler_url("kredi-notu", "THYAO", 3) == "/haberler/bildirimler?hisse=THYAO&tur=kredi-notu&sayfa=3"
+    assert hv.bildirimler_url(tarih="2026-10-01", rutin=True, page=2) == \
+        "/haberler/bildirimler?tarih=2026-10-01&rutin=1&sayfa=2"
+    lr = hv.legacy_haberler_redirect
+    assert lr({}) is None
+    assert lr({"hisse": "thyao"}) == "/haberler/bildirimler?hisse=THYAO"
+    assert lr({"hisse": "THYAO", "tur": "bilanco", "sayfa": "2"}) == \
+        "/haberler/bildirimler?hisse=THYAO&tur=finansal-rapor&sayfa=3"
+    assert lr({"tur": "temettu"}) == "/haberler/bildirimler?tur=temettu"
+    assert lr({"tur": "xx", "sayfa": "abc"}) == "/haberler/bildirimler"
+    assert lr({"hisse": "<script>"}) == "/haberler/bildirimler"
+
+
+def test_gundem_kap_item_has_no_internal_rule_wording():
+    """O29/C-74: 'kapsamdaki' ve '(rutin duyurular hariç)' iç kural dili Gündem'de görünmez."""
+    items = _items()
+    snap = _snap()
+    stocks = [{"ticker": r["t"], "change_pct": r["ch"]["d1"], "sector": r["g"], "signal": "BEKLE"} for r in snap["rows"]]
+    macro = [{"label": "USDTRY", "price": 49.03, "change": 0.01}, {"label": "SP500", "price": 7645.64, "change": -0.1},
+             {"label": "PETROL", "price": 100.89, "change": 2.92}]
+    now = datetime(2026, 10, 1, 19, 30)
+    doc = hg.build_print(stocks, macro, {"close": 12249.04, "change_pct": 2.53}, items, {}, [], now,
+                         date(2026, 10, 1), "aksam", members=[r["t"] for r in snap["rows"]],
+                         sectors=bulten.isi_haritasi_ozet(snap), counts=snap["counts"])
+    kap = [x for g in doc["groups"] for x in g["items"] if x["id"] == "bildirim"][0]
+    n = sum(1 for x in items if x["ts"][:10] == "2026-10-01" and not x.get("rutin"))
+    assert kap["p"].startswith("1 Ekim tarihinde %d şirket bildirimi. " % n)
+    assert not re.search(r"kapsam|rutin|hariç|elendi|gizli", json.dumps(doc, ensure_ascii=False), re.I)

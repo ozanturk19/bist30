@@ -348,7 +348,8 @@ def _item_kap(feed_items, names, day):
     lead = ranked[0] if ranked else (newsy[0] if newsy else todays[0])
     co = names.get(lead["ticker"]) or lead["ticker"]
     h = "Şirket bildirimlerinde öne çıkan: %s" % co
-    p = "%s tarihinde kapsamdaki şirketlerden %d bildirim (rutin duyurular hariç). %s: “%s”" % (
+    # O29/C-74: "kapsamdaki" ve "(rutin duyurular hariç)" iç kural dili; yalnız sayı
+    p = "%s tarihinde %d şirket bildirimi. %s: “%s”" % (
         _dm(datetime.strptime(day, "%Y-%m-%d").date()), len(todays), co, lead["title"].rstrip("."))
     if lead.get("onem"):
         p += " (%s)" % lead["onem"]["formula"]
