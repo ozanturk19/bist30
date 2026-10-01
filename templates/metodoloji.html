@@ -65,7 +65,7 @@
   <p class="tldr-note">
     Günlük göstergeler aynı yönde olsa bile sinyal beşinci koşul olan <strong>haftalık trend filtresinden</strong> de geçmek
     zorundadır — haftalık EMA20 ters yöndeyse (ya da hissenin haftalık geçmişi yetersizse) sinyal
-    üretilmez, Yatay'da kalır. <a href="#haftalik-trend">Haftalık Trend Gate &rarr;</a>
+    üretilmez, Yatay'da kalır. <a href="#haftalik-trend">Haftalık trend filtresi &rarr;</a>
   </p>
 </div>
 
@@ -172,7 +172,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
 </ul>
 <p>Grafiklerde EMA12 <span style="color:var(--bp-brand)">mavi</span>, EMA99 <span style="color:var(--bp-accent-yellow)">sarı</span> renkle gösterilir. İkisi arasındaki dolgu, yön değiştikçe yeşil/kırmızıya döner.</p>
 
-<h2 id="haftalik-trend">Haftalık Trend Gate (Filtre)</h2>
+<h2 id="haftalik-trend">Haftalık trend filtresi</h2>
 <p>
   Günlük sinyaller, <strong>haftalık EMA20 yönüyle</strong> filtrelenir.
   Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük Güçlü Trend sinyali) sinyal üretilmez.
@@ -281,7 +281,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   Günlük barlar (1d interval, 2 yıl geçmiş) kullanılır. Sinyal hesaplamaları tamamen Python/NumPy ile yapılır.
   Haftalık trend için haftalık barlar (1wk, 1 yıl) kullanılır.
 </p>
-<p>Veriler <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula, orta/uzun vadeli yatırımcılara yönelik gün sonu (EOD) verisiyle çalışır.</p>
+<p>Veriler <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula, orta/uzun vadeli yatırımcılara yönelik gün sonu verisiyle çalışır.</p>
 
 <div class="disclaimer da-panel da-panel--accent">
   <span aria-hidden="true">⚠️</span> <strong>Önemli Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır.

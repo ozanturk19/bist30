@@ -40,7 +40,7 @@
 
 {% include '_stale_banner.html' %}
 
-{% call bpf.pagehead('Portföy Takibi') %}Hisselerinin maliyeti, güncel değeri ve kâr/zararı tek tabloda.{% endcall %}
+{% call bpf.pagehead('Portföy Takibi') %}Hisselerinizin maliyeti, güncel değeri ve kâr/zararı tek tabloda.{% endcall %}
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
   <div class="pf-fetch-error" id="pfFetchError" role="status" aria-live="polite" style="display:none">
@@ -75,8 +75,8 @@
     <span class="ls-warning-icon"><span aria-hidden="true">💾</span></span>
     <div class="ls-warning-body">
       <div class="ls-warning-title">Veriler varsayılan olarak bu cihazın tarayıcısında saklanıyor</div>
-      Portföyünüz varsayılan olarak sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:var(--bp-text)">localStorage</strong>'ında tutulur (aşağıdaki <strong style="color:var(--bp-text)">Cloud Sync</strong> ile isteğe bağlı olarak buluta yedekleyebilirsiniz).
-      Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz ve Cloud Sync kullanmadıysanız <strong style="color:var(--bp-text)">portföy silinir.</strong>
+      Portföyünüz varsayılan olarak sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:var(--bp-text)">belleğinde</strong> tutulur (aşağıdaki <strong style="color:var(--bp-text)">Bulut eşitleme</strong> ile isteğe bağlı olarak buluta yedekleyebilirsiniz).
+      Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz ve bulut eşitlemeyi kullanmadıysanız <strong style="color:var(--bp-text)">portföy silinir.</strong>
       Önemli pozisyonlarınızı ayrıca not almanızı öneririz.
     </div>
     <button class="ls-warning-close" onclick="dismissLsWarning()" aria-label="Kapat">×</button>
@@ -103,13 +103,13 @@
 
   <!-- Cloud Sync Modal -->
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--bp-z-modal);align-items:center;justify-content:center">
-    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Cloud Sync" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
+    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Bulut eşitleme" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
       <!-- 21.09 K-S: 10.5x21px idi, merkezden ±12px'in 5 probundan yalniz 1'i isabet
            ediyordu (WCAG 2.5.8). Boyut/renk/imlec kanonik `.da-close` katina (32x32)
            birakildi; satir ici stil YALNIZ konumlandirma yapar — aksi halde satir ici
            bildirim sinifi sessizce ezerdi. -->
       <button onclick="closeCloudSync()" aria-label="Kapat" class="da-close" style="position:absolute;top:8px;right:10px">×</button>
-      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Cloud Sync</div>
+      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Bulut eşitleme</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:16px">Portföyünüzü sunucuya kaydedin. Oluşan token’ı diğer cihazınızda aşağıdaki &laquo;Token yapıştırın&raquo; alanına girerek aynı portföye erişin.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -186,7 +186,7 @@
       <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
         style="background:rgba(var(--bp-brand-rgb),.08);border-color:rgba(var(--bp-brand-rgb),.48);color:var(--bp-brand)"
         data-tip="Cihazlar arası senkronizasyon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> Cloud Sync
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> Bulut eşitleme
       </button>
     </div>
   </div>
