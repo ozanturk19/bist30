@@ -33,6 +33,7 @@ _TR_DAYS = ("Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"
 
 PER_PAGE = 30
 WINDOW_DAYS = 30
+TICKER_RE = re.compile(r"^[A-Z0-9]{3,6}$")
 
 
 def _lower_tr(s):
@@ -116,6 +117,39 @@ def filing_type(item):
         if rx.search(t):
             return key
     return "ozel"
+
+
+def bildirimler_url(tur_slug=None, hisse=None, page=None, tarih=None, rutin=False, base="/haberler/bildirimler"):
+    """/haberler/bildirimler adresi (sabit parametre sirasi: hisse, tur, tarih, rutin, sayfa)."""
+    q = []
+    if hisse:
+        q.append("hisse=" + hisse)
+    if tur_slug:
+        q.append("tur=" + tur_slug)
+    if tarih:
+        q.append("tarih=" + tarih)
+        if rutin:
+            q.append("rutin=1")
+    if page and int(page) > 1:
+        q.append("sayfa=%d" % int(page))
+    return base + ("?" + "&".join(q) if q else "")
+
+
+def legacy_haberler_redirect(args):
+    """Eski /haberler bildirim adresleri (?tur=bilanco|temettu|ozel, ?hisse=T, ?sayfa=N; v1 60'lik
+    sayfa) -> yeni /haberler/bildirimler adresi ya da None (yonlendirme yok). v1 sayfa N'nin ilk
+    satiri v2'de (30'luk) 2N-1. sayfasinda."""
+    tur, hisse, sayfa = args.get("tur"), (args.get("hisse") or "").upper(), args.get("sayfa")
+    if not (tur or hisse or sayfa):
+        return None
+    k, slug = tur_from_arg(tur)
+    try:
+        p = int(sayfa) if sayfa else 1
+    except (TypeError, ValueError):
+        p = 1
+    return bildirimler_url(tur_slug=(slug or TYPE_SLUG[k]) if k else None,
+                           hisse=hisse if TICKER_RE.match(hisse) else None,
+                           page=2 * p - 1 if p > 1 else None)
 
 
 def tur_from_arg(arg):
@@ -313,12 +347,24 @@ def group_rows(rows):
     return out
 
 
+def _has_ticker(it, ticker):
+    return ticker in (it.get("tickers") or [it.get("ticker")])
+
+
 def feed(items, today_iso, tur=None, page=1, per_page=PER_PAGE, day=None, include_rutin=False,
-         names=None, days=WINDOW_DAYS):
-    """/haberler/bildirimler akisi.
+         names=None, days=WINDOW_DAYS, ticker=None):
+    """/haberler/bildirimler akisi. ticker: tek sirketin bildirimleri (`?hisse=`; 30 gun penceresi
+    yok, depodaki tum gecmis — eski /haberler?hisse= listesinin yerine).
     -> {days:[{day,label,w,total,routine,mix,rows}], counts, total, page, pages, shown_from,
         shown_to, range_label, first_day, last_day}"""
-    win = window_items(items, today_iso, days) if not day else [it for it in items if it["ts"][:10] == day]
+    if day:
+        win = [it for it in items if it["ts"][:10] == day]
+    elif ticker:
+        win = [it for it in items if it["ts"][:10] <= today_iso[:10]]
+    else:
+        win = window_items(items, today_iso, days)
+    if ticker:
+        win = [it for it in win if _has_ticker(it, ticker)]
     company = [it for it in win if it.get("kap_class") in ("ODA", "FR", "DG")]
     counts = type_counts(company)
     sel = [it for it in company if (include_rutin or not it.get("rutin"))

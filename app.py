@@ -9412,12 +9412,12 @@ def haberler_page():
         abort(404)
     # D-56: v1 bildirim filtresi adresleri (?tur=bilanco|temettu|ozel, ?sayfa=) yeni
     # "Şirket bildirimleri" sekmesine taşınır (şablonu yayındaysa).
-    if _tpl_ready("haberler_bildirimler.html") and (request.args.get("tur") or request.args.get("sayfa")):
-        _k, _slug = haber_v2.tur_from_arg(request.args.get("tur"))
-        _q = []
-        if _k:
-            _q.append("tur=" + (_slug or haber_v2.TYPE_SLUG[_k]))
-        return redirect("/haberler/bildirimler" + ("?" + "&".join(_q) if _q else ""), code=301)
+    # ?hisse=T (şirketin bildirim listesi, ör. bildirim sayfasındaki "Tüm T bildirimleri") hisse
+    # filtresiyle aynı listeye gider; v1 60'lık sayfa N → v2 30'luk sayfa 2N-1.
+    if _tpl_ready("haberler_bildirimler.html"):
+        _to = haber_v2.legacy_haberler_redirect(request.args)
+        if _to:
+            return redirect(_to, code=301)
     tur = request.args.get("tur")
     tur = tur if tur in ("bilanco", "temettu", "ozel") else None
     hisse = (request.args.get("hisse") or "").upper()
@@ -9465,15 +9465,16 @@ def haberler_page():
 def haberler_bildirimler_page():
     """D-56/C-72 "Şirket bildirimleri" sekmesi (SSR, dizinlenir). Son 30 takvim gününün rutin-dışı
     bildirimleri; ?tur=<tür> (8 tür, haber_v2.TYPES), ?sayfa=N (30'luk), ?tarih=YYYY-AA-GG&rutin=1
-    (o günün rutin duyuruları dahil). Eski v1 tür adı 301 ile yeni adına. Şablon yoksa 404."""
+    (o günün rutin duyuruları dahil), ?hisse=T (tek şirketin tüm bildirimleri, noindex). Eski v1 tür
+    adı 301 ile yeni adına. Şablon yoksa 404."""
     if not _tpl_ready("haberler_bildirimler.html"):
         abort(404)
+    hisse = (request.args.get("hisse") or "").upper()
+    hisse = hisse if haber_v2.TICKER_RE.match(hisse) else None
     tur_arg = request.args.get("tur")
     tur, legacy = haber_v2.tur_from_arg(tur_arg)
-    if legacy:
-        return redirect("/haberler/bildirimler?tur=" + legacy, code=301)
-    if tur_arg and not tur:
-        return redirect("/haberler/bildirimler", code=301)
+    if legacy or (tur_arg and not tur):
+        return redirect(haber_v2.bildirimler_url(tur_slug=legacy, hisse=hisse), code=301)
     tarih = request.args.get("tarih")
     tarih = tarih if tarih and re.match(r"^\d{4}-\d{2}-\d{2}$", tarih) else None
     rutin = bool(tarih) and request.args.get("rutin") == "1"
@@ -9481,7 +9482,8 @@ def haberler_bildirimler_page():
     smap = _haber_stock_map()
     items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
     today = datetime.now(_TZ_TR).date().isoformat()
-    fd = haber_v2.feed(items, today, tur=tur, page=page, day=tarih, include_rutin=rutin, names=STOCK_NAMES)
+    fd = haber_v2.feed(items, today, tur=tur, page=page, day=tarih, include_rutin=rutin, names=STOCK_NAMES,
+                       ticker=hisse)
     tick = set()
     for d in fd["days"]:
         for r in d["rows"]:
@@ -9490,9 +9492,10 @@ def haberler_bildirimler_page():
     resp = app.make_response(render_template(
         "haberler_bildirimler.html", sekme="bildirimler", feed=fd, tur=tur,
         tur_slug=haber_v2.TYPE_SLUG.get(tur) if tur else None, types=haber_v2.TYPES,
-        tarih=tarih, rutin=rutin, mini=mini, feed_available=bool(items),
+        tarih=tarih, rutin=rutin, mini=mini, feed_available=bool(items), hisse=hisse,
+        hisse_name=STOCK_NAMES.get(hisse, hisse) if hisse else None,
         coverage=len([t for t in smap if t not in INDEX_TICKERS]), close_label=_haber_close_label()))
-    if tarih or page > fd["pages"]:
+    if tarih or hisse or page > fd["pages"]:
         resp.headers["X-Robots-Tag"] = "noindex"
     return resp
 

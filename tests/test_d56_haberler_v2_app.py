@@ -48,7 +48,14 @@ def test_haberler_v1_filter_urls_move_to_bildirimler(client):
     r = client.get("/haberler?tur=temettu")
     assert r.status_code == 301 and r.headers["Location"].endswith("/haberler/bildirimler?tur=temettu")
     r = client.get("/haberler?tur=ozel&sayfa=3")
-    assert r.status_code == 301 and r.headers["Location"].endswith("/haberler/bildirimler?tur=ozel-durum")
+    assert r.status_code == 301 and r.headers["Location"].endswith("/haberler/bildirimler?tur=ozel-durum&sayfa=5")
+    # sirketin bildirim listesi (bildirim.html "Tum T bildirimleri", gundem.html "Bildirimler")
+    r = client.get("/haberler?hisse=thyao&sayfa=2")
+    assert r.status_code == 301 and r.headers["Location"].endswith("/haberler/bildirimler?hisse=THYAO&sayfa=3")
+    r = client.get("/haberler/bildirimler?hisse=THYAO")
+    assert r.status_code == 200 and r.headers.get("X-Robots-Tag") == "noindex"
+    r = client.get("/haberler/bildirimler?hisse=THYAO&tur=bilanco")
+    assert r.status_code == 301 and r.headers["Location"].endswith("/haberler/bildirimler?hisse=THYAO&tur=finansal-rapor")
     r = client.get("/haberler")
     assert r.status_code == 200 and r.get_data(as_text=True).startswith("H|gundem|")
 
