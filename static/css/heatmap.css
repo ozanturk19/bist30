@@ -172,9 +172,11 @@
 .hm-sum-title{font-weight:800;font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.15;letter-spacing:-.02em;margin:0 0 6px}
 .hm-sum-sub{margin:0 0 10px;color:var(--bp-text3);font-size:var(--bp-text-md)}
 .hm-sl{list-style:none;margin:0;padding:0;counter-reset:hmsl}
-.hm-sr{counter-increment:hmsl;display:grid;grid-template-columns:2.2em minmax(0,1fr) auto auto;gap:4px 18px;align-items:baseline;padding:10px 0;border-top:1px solid var(--bp-border)}
+.hm-sr{position:relative;counter-increment:hmsl;display:grid;grid-template-columns:2.2em minmax(0,1fr) auto auto;gap:4px 18px;align-items:baseline;padding:10px 0;border-top:1px solid var(--bp-border)}
 .hm-sr::before{content:counter(hmsl);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;color:var(--bp-text3)}
 .hm-sr-g{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;font-size:var(--bp-text-lg);color:var(--bp-text);text-decoration:none;overflow-wrap:anywhere;min-width:0}
+/* C-71 K28: satırın tamamı sektör bağlantısı (yalnız 19 px'lik ad dokunulabilirdi, kalan 62–82 px ölü alandı) */
+.hm-sr-g::after{content:'';position:absolute;inset:0}
 .hm-sr-g:hover{color:var(--bp-brand)}
 .hm-sr-g:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
 .hm-sr-n{color:var(--bp-text3);font-size:var(--bp-text-sm);white-space:nowrap}
