@@ -151,7 +151,7 @@ gate_group veri "G8 Kullanici verisi (e2e oncesi)" \
   "K-BM local-data-guard|python3 tools/local-data-guard.py"
 
 wait
-cat "$PD_OUT"/*.out 2>/dev/null
+cat "$PD_OUT"/*.out 2>/dev/null || true  # PREDEPLOY_GROUP=gorsel: grup çıktısı yok, set -e sessizce çıkmasın
 FAIL=$(ls "$PD_OUT"/*.fail 2>/dev/null | wc -l | tr -d ' ')
 
 # C-71: canli gorsel sonda -- ISTEGE BAGLI (canli URL ister, deploy kapisi degil).

@@ -30,7 +30,9 @@
 //   --liste    yapılandırmadaki sayfa:durum adlarını yazar
 // Çıktı (--out): <sayfa>__<durum>__<vp>.json · _ozet.json · _ozet.md (PASS/WARN/FAIL tablosu) ·
 //   fail__<K>__<sayfa>__<durum>__<vp>__<n>.png (kırmızı çerçeveli, ~3× kırpıntı — Read ile açılıp bakılır)
-// Exit: 0 temiz · 1 yalnız WARN · 2 FAIL ya da ölçülemeyen durum (ölçülemeyen durum asla yeşil sayılmaz)
+// Exit: 0 temiz · 1 yalnız WARN · 2 FAIL, ölçülemeyen durum ya da sonda çökmesi (ölçülemeyen asla yeşil sayılmaz).
+//   Koşu başında --out'taki eski _ozet.json/_ozet.md silinir; çağıran exit koduna yalnız bu koşunun _ozet.json'u
+//   varsa güvenir (_ozet.json yoksa = ölçülemedi).
 //
 // Sayfa × durum matrisi: tools/live/gorsel-denetim.sayfalar.json (halka kaydı da orada).
 // Muafiyet: tools/live/gorsel-denetim.muaf.json — {kontrol, sayfa (regex|*), secici (alt dize), metin?,
@@ -844,20 +846,23 @@ function writeReport(o, recs, outDir) {
     fail += F.length; warn += W.length; if (ozet.olculemedi) olcm++; injMiss += miss.length;
     sum.yuklemeler.push(ozet);
   }
+  if (o.cokme) olcm++; // çökme de ölçülemeyen sayılır
   sum.toplam = { fail, warn, olculemedi: olcm, pozitifEksik: injMiss };
   sum.yerelStatic = !!o.yerelStatic;
   const expired = (o.muaf || []).filter((m) => m.son_tarih && m.son_tarih < today());
   const over = (o.muaf || []).filter((m) => m.azami != null && (m._n || 0) > m.azami);
   sum.muaf = (o.muaf || []).map((m) => ({ kontrol: m.kontrol, sayfa: m.sayfa, secici: m.secici, gerekce: m.gerekce, son_tarih: m.son_tarih, eslesen: m._n || 0, azami: m.azami ?? null }));
   sum.muafSuresiDolan = expired.map((m) => m.secici);
-  const exit = (fail || olcm || injMiss || over.length) ? 2 : warn ? 1 : 0;
+  sum.cokme = o.cokme || null;
+  const exit = (o.cokme || fail || olcm || injMiss || over.length) ? 2 : warn ? 1 : 0;
   sum.exit = exit;
   fs.writeFileSync(path.join(outDir, '_ozet.json'), JSON.stringify(sum, null, 1));
 
   // Markdown: tablo (sayfa:durum × vp) + FAIL listesi
   const keys = [...new Set(recs.map((r) => r.sayfa + ':' + r.durum))];
   let md = `# Görsel denetim — ${today()}\n\n\`node tools/live/gorsel-denetim.mjs${o.argv ? ' ' + o.argv : ''}\` · ${o.base} · ${new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })}\n\n`;
-  md += `**Sonuç: ${exit === 0 ? 'PASS' : exit === 1 ? 'WARN' : 'FAIL'}** (exit ${exit}) · FAIL ${fail} · WARN ${warn} · ölçülemeyen ${olcm}` + (o.inject ? ` · pozitif kontrolde yakalanmayan ${injMiss}` : '') + (o.css ? ` · enjekte CSS: \`${mdEsc(o.css)}\`` : '') + (o.yerelStatic ? ' · static/ yerel ağaçtan' : '') + '\n\n';
+  md += `**Sonuç: ${exit === 0 ? 'PASS' : exit === 1 ? 'WARN' : 'FAIL'}** (exit ${exit}) · FAIL ${fail} · WARN ${warn} · ölçülemeyen ${olcm}` + (o.inject ? ` · pozitif kontrolde yakalanmayan ${injMiss}` : '') + (o.css ? ` · enjekte CSS: \`${mdEsc(o.css)}\`` : '') + (o.yerelStatic ? ' · static/ yerel ağaçtan' : '') + '\n\n'
+    + (o.cokme ? `**Ölçülemedi, sonda tamamlanmadı (exit 2; tablo yalnız o ana dek ölçülenler):** ${mdEsc(o.cokme)}\n\n` : '');
   md += `| sayfa:durum | ${o.vps.join(' | ')} |\n|---|${o.vps.map(() => '---').join('|')}|\n`;
   for (const key of keys) {
     md += `| ${key} |`;
@@ -891,55 +896,91 @@ function writeReport(o, recs, outDir) {
 }
 
 // ── Ana akış ─────────────────────────────────────────────────────────────────────────────────────────────
-const a = args(process.argv.slice(2));
-const cfg = loadJson(path.join(HERE, 'gorsel-denetim.sayfalar.json'));
-if (a.liste) {
-  for (const p of cfg.sayfalar) for (const s of p.durumlar || [{ ad: 'varsayilan' }]) console.log(`${p.ad}:${s.ad}`.padEnd(34), s.yol || p.yol);
-  process.exit(0);
-}
-const o = {
-  base: String(a.base || process.env.GORSEL_DENETIM_BASE || 'https://borsapusula.com').replace(/\/$/, ''),
-  vps: [...String(a.vp || '1440,820,390,320').split(','), ...(a['ek-vp'] ? String(a['ek-vp']).split(',') : [])].map(Number).filter(Boolean),
-  kontrol: a.kontrol ? String(a.kontrol).split(',').map((x) => x.trim().toUpperCase()) : ALL_K,
-  inject: !!a.inject, css: typeof a.css === 'string' ? a.css : null, yerelStatic: !!a['yerel-static'],
-  kirpinti: a.kirpinti ? Number(a.kirpinti) : 6, cfg,
-  muaf: a.muafsiz ? [] : loadJson(path.join(HERE, 'gorsel-denetim.muaf.json'), { muaf: [] }).muaf || [],
-  argv: process.argv.slice(2).join(' '),
-};
-const outDir = expandHome(a.out || path.join('~', 'ops', 'plans', 'qa', `gorsel-${today()}`, 'oto'));
-fs.mkdirSync(outDir, { recursive: true });
-const want = a.sayfa ? String(a.sayfa).split(',').map((x) => x.trim()).filter(Boolean) : null;
-const plan = [];
-for (const p of cfg.sayfalar) for (const s of p.durumlar || [{ ad: 'varsayilan' }]) {
-  if (want && !want.some((w) => w === p.ad || w === `${p.ad}:${s.ad}`)) continue;
-  plan.push([p, s]);
-}
-if (!plan.length) { console.error('eşleşen sayfa yok (--liste)'); process.exit(2); }
-
-const pw = resolveMod('playwright');
-if (!pw) { console.error('playwright bulunamadı (repo ya da ~/Bist ve BTC/Bist30/node_modules)'); process.exit(2); }
-const browser = await pw.chromium.launch();
-const recs = [];
-const apiCache = {};
-try {
-  for (const [p, s] of plan) {
-    for (const w of o.vps) {
-      const t0 = Date.now();
-      const r = await measure(browser, o, p, s, w, outDir, apiCache);
-      recs.push(r);
-      const real = r.findings.filter((f) => !f.inj && !f.muaf);
-      const F = real.filter((f) => f.sev === 'FAIL'), W = real.filter((f) => f.sev === 'WARN');
-      const ks = Object.entries(F.reduce((acc, f) => { acc[f.k] = (acc[f.k] || 0) + 1; return acc; }, {})).map(([k, v]) => k + '×' + v).join(' ');
-      const poz = r.pozitif ? ' poz ' + Object.entries(r.pozitif).map(([k, v]) => k + (v ? '✓' : '✗')).join(' ') : '';
-      console.log(`${(p.ad + ':' + s.ad).padEnd(30)} ${String(w).padStart(4)} ${r.olculemedi ? 'ÖLÇÜLEMEDİ ' + r.olculemedi : (F.length ? 'FAIL ' + ks : W.length ? 'WARN' : 'PASS')}`
-        + `${W.length ? ' W' + W.length : ''}${r.errors.length ? ' hata ' + r.errors.length : ''}${poz} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
-      await sleep(Number(a.ara || 700));
+// Çökme sözleşmesi: Node'un yakalanmamış hata kodu 1, bu betikte ise 1 "yalnız WARN" demek. Bu yüzden her çökme
+// (Chromium açılamadı, bozuk sayfalar.json, beklenmeyen istisna) exit 2'ye çevrilir ve çıktı dizinine "ölçülemedi"
+// özeti yazılır: ölçülemeyen koşu asla yeşil değil. Koşu başında dizindeki eski _ozet.json/_ozet.md silinir; çağıran
+// exit koduna ancak bu koşunun _ozet.json'u varsa güvenir (yoksa ölçülemedi sayar; pre-deploy-check G9 böyle okur).
+let OUT = null, O = null;
+const RECS = [];
+function abort(msg) {
+  console.error('ÖLÇÜLEMEDİ (exit 2): ' + msg);
+  if (OUT) {
+    try {
+      if (!O) throw new Error('yapılandırma yok');
+      O.cokme = msg;
+      writeReport(O, RECS, OUT);
+    } catch (e) {
+      try {
+        fs.mkdirSync(OUT, { recursive: true });
+        fs.writeFileSync(path.join(OUT, '_ozet.json'), JSON.stringify({ at: new Date().toISOString(), cokme: msg, yuklemeler: [],
+          toplam: { fail: 0, warn: 0, olculemedi: 1, pozitifEksik: 0 }, exit: 2 }, null, 1));
+        fs.writeFileSync(path.join(OUT, '_ozet.md'), `# Görsel denetim — ${today()}\n\n**Sonuç: FAIL** (exit 2) · ölçüm yok — ${mdEsc(msg)}\n`);
+      } catch (e2) { /* yazılamadı; exit 2 yine de */ }
     }
   }
-} finally {
-  await browser.close();
+  process.exit(2);
 }
-const sum = writeReport(o, recs, outDir);
-console.log(`\n${sum.exit === 0 ? 'PASS' : sum.exit === 1 ? 'WARN' : 'FAIL'} · FAIL ${sum.toplam.fail} · WARN ${sum.toplam.warn} · ölçülemeyen ${sum.toplam.olculemedi}`
-  + (o.inject ? ` · pozitif kontrolde yakalanmayan ${sum.toplam.pozitifEksik}` : '') + ` → ${path.join(outDir, '_ozet.md')}`);
-process.exit(sum.exit);
+const crash = (e) => abort('sonda çöktü: ' + String((e && e.message) || e).split('\n')[0].slice(0, 200));
+process.on('uncaughtException', crash);
+process.on('unhandledRejection', crash);
+
+try {
+  const a = args(process.argv.slice(2));
+  if (!a.liste) {
+    OUT = expandHome(a.out || path.join('~', 'ops', 'plans', 'qa', `gorsel-${today()}`, 'oto'));
+    fs.mkdirSync(OUT, { recursive: true });
+    for (const f of ['_ozet.json', '_ozet.md']) fs.rmSync(path.join(OUT, f), { force: true });
+  }
+  const cfg = loadJson(path.join(HERE, 'gorsel-denetim.sayfalar.json'));
+  if (a.liste) {
+    for (const p of cfg.sayfalar) for (const s of p.durumlar || [{ ad: 'varsayilan' }]) console.log(`${p.ad}:${s.ad}`.padEnd(34), s.yol || p.yol);
+    process.exit(0);
+  }
+  const o = {
+    base: String(a.base || process.env.GORSEL_DENETIM_BASE || 'https://borsapusula.com').replace(/\/$/, ''),
+    vps: [...String(a.vp || '1440,820,390,320').split(','), ...(a['ek-vp'] ? String(a['ek-vp']).split(',') : [])].map(Number).filter(Boolean),
+    kontrol: a.kontrol ? String(a.kontrol).split(',').map((x) => x.trim().toUpperCase()) : ALL_K,
+    inject: !!a.inject, css: typeof a.css === 'string' ? a.css : null, yerelStatic: !!a['yerel-static'],
+    kirpinti: a.kirpinti ? Number(a.kirpinti) : 6, cfg,
+    muaf: a.muafsiz ? [] : loadJson(path.join(HERE, 'gorsel-denetim.muaf.json'), { muaf: [] }).muaf || [],
+    argv: process.argv.slice(2).join(' '),
+  };
+  O = o;
+  const outDir = OUT;
+  const want = a.sayfa ? String(a.sayfa).split(',').map((x) => x.trim()).filter(Boolean) : null;
+  const plan = [];
+  for (const p of cfg.sayfalar) for (const s of p.durumlar || [{ ad: 'varsayilan' }]) {
+    if (want && !want.some((w) => w === p.ad || w === `${p.ad}:${s.ad}`)) continue;
+    plan.push([p, s]);
+  }
+  if (!plan.length) abort('eşleşen sayfa yok (--liste)');
+
+  const pw = resolveMod('playwright');
+  if (!pw) abort('playwright bulunamadı (repo ya da ~/Bist ve BTC/Bist30/node_modules)');
+  const browser = await pw.chromium.launch();
+  const apiCache = {};
+  try {
+    for (const [p, s] of plan) {
+      for (const w of o.vps) {
+        const t0 = Date.now();
+        const r = await measure(browser, o, p, s, w, outDir, apiCache);
+        RECS.push(r);
+        const real = r.findings.filter((f) => !f.inj && !f.muaf);
+        const F = real.filter((f) => f.sev === 'FAIL'), W = real.filter((f) => f.sev === 'WARN');
+        const ks = Object.entries(F.reduce((acc, f) => { acc[f.k] = (acc[f.k] || 0) + 1; return acc; }, {})).map(([k, v]) => k + '×' + v).join(' ');
+        const poz = r.pozitif ? ' poz ' + Object.entries(r.pozitif).map(([k, v]) => k + (v ? '✓' : '✗')).join(' ') : '';
+        console.log(`${(p.ad + ':' + s.ad).padEnd(30)} ${String(w).padStart(4)} ${r.olculemedi ? 'ÖLÇÜLEMEDİ ' + r.olculemedi : (F.length ? 'FAIL ' + ks : W.length ? 'WARN' : 'PASS')}`
+          + `${W.length ? ' W' + W.length : ''}${r.errors.length ? ' hata ' + r.errors.length : ''}${poz} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+        await sleep(Number(a.ara || 700));
+      }
+    }
+  } finally {
+    await browser.close().catch(() => {});
+  }
+  const sum = writeReport(o, RECS, outDir);
+  console.log(`\n${sum.exit === 0 ? 'PASS' : sum.exit === 1 ? 'WARN' : 'FAIL'} · FAIL ${sum.toplam.fail} · WARN ${sum.toplam.warn} · ölçülemeyen ${sum.toplam.olculemedi}`
+    + (o.inject ? ` · pozitif kontrolde yakalanmayan ${sum.toplam.pozitifEksik}` : '') + ` → ${path.join(outDir, '_ozet.md')}`);
+  process.exit(sum.exit);
+} catch (e) {
+  crash(e);
+}
