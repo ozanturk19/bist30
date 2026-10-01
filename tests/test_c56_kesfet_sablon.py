@@ -118,13 +118,15 @@ def test_meta_canonical_json_ld():
 def test_bos_ve_baglamsiz_500_vermez():
     empty = dict(FX["ucuz"], satirlar=[], sayi=0, tarih=None)
     main = _main(_render(kesfet=empty))
-    assert "Bu listeye giren şirket yok." in main and "kf-row" not in main and "kapanışı" not in main
+    assert "kf-row" not in main and "kf-empty" not in main and "kapanışı" not in main   # gri dil K5: yer tutucu yok
+    dated = _main(_render(kesfet=dict(FX["ucuz"], satirlar=[], sayi=0)))
+    assert "1 Ekim 2026 kapanışında bu kurala uyan şirket yok." in dated
     bare = _main(_render())
     assert "Orta-uzun vade listeleri" in bare and "kf-tab" not in bare
 
 
 _YASAK = re.compile(r"\b(AL|SAT|LONG|SHORT)\b|hedef (fiyat|seviye)|\bstop\b|giriş fiyat|kâr al|Ücretsiz|Kısmi|veri tamlığı|"
-                    r"Sınırlı veri|hazırlanıyor|\bbugün|\bdün\b|\byarın|Kaynak:")
+                    r"Sınırlı veri|hazırlanıyor|\bbugün|\bdün\b|\byarın|Kaynak:|ortanca|tavsiye")
 
 
 def _text(html):

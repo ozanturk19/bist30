@@ -1,5 +1,5 @@
 {
- "_not": "D-59 kesfet.view çıktısı (01.10.2026 VPS kopyası, prep/D-59 7048ca81); satırlar kısaltıldı",
+ "_not": "D-59 kesfet.view çıktısı (01.10.2026 VPS kopyası, prep/D-59 31faf1f1); satırlar kısaltıldı",
  "temettu": {
   "anahtar": "istikrarli_temettu",
   "slug": "istikrarli-temettu",
@@ -244,7 +244,7 @@
   "slug": "sektorune-gore-ucuz",
   "baslik": "Sektörüne göre ucuz",
   "soru": "Hangi şirketler sektörüne göre ucuz?",
-  "kural": "F/K'sı da PD/DD'si de sektör ortancasının altında olan ve değerlemesi ucuz çıkan şirketler; sektörüne göre en ucuzdan sıralı.",
+  "kural": "F/K'sı da PD/DD'si de sektörünün orta değerinin altında olan, fiyatı ucuz tarafta şirketler; sektörüne göre en ucuzdan sıralı.",
   "tarih": "2026-10-01",
   "sayi": 4,
   "satirlar": [
@@ -329,7 +329,7 @@
    "anahtar": "kaliteli_makul",
    "slug": "kaliteli-makul",
    "baslik": "Kaliteli ve makul fiyatlı",
-   "kural": "Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektör ortancasından iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan şirketler; BorsaPusula Skoru'na göre sıralı."
+   "kural": "Kârlı olan, özsermaye kârlılığı ve net kâr marjı (bankada gider/gelir oranı) sektörünün orta değerinden iyi, fiyatı F/K ve PD/DD'ye göre sektörüne kıyasla ucuz ya da makul olan şirketler; BorsaPusula Skoru'na göre sıralı."
   },
   {
    "anahtar": "istikrarli_temettu",
@@ -347,7 +347,7 @@
    "anahtar": "sektorune_gore_ucuz",
    "slug": "sektorune-gore-ucuz",
    "baslik": "Sektörüne göre ucuz",
-   "kural": "F/K'sı da PD/DD'si de sektör ortancasının altında olan ve değerlemesi ucuz çıkan şirketler; sektörüne göre en ucuzdan sıralı."
+   "kural": "F/K'sı da PD/DD'si de sektörünün orta değerinin altında olan, fiyatı ucuz tarafta şirketler; sektörüne göre en ucuzdan sıralı."
   }
  ]
 }

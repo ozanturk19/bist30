@@ -118,12 +118,13 @@
         var a=ol.querySelectorAll('.kf-row')[{{ _SHOW }}];if(a)a.focus();});})();
     </script>
     {%- endif %}
-    {%- else %}
-    <p class="kf-empty">Bu listeye giren şirket yok.</p>
+    {%- elif _lbl %}
+    {#- gri dil K5: boş liste yer tutucu yazmaz; tarih biliniyorsa tarihli betim, yoksa satır bloğu hiç basılmaz -#}
+    <p class="kf-empty">{{ _lbl }} kapanışında bu kurala uyan şirket yok.</p>
     {%- endif %}
   </section>
 
-  <p class="kf-foot">Listeler her işlem günü kapanıştan sonra şirketlerin açıkladığı son finansallarla yenilenir. Tüm hisseleri filtrelemek için <a href="/tarama">Tarama</a>. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+  <p class="kf-foot">Tüm hisseleri filtrelemek için <a href="/tarama">Tarama</a>.</p>
 </main>
 
 {% with ftr_self='/kesfet', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
