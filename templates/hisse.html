@@ -545,6 +545,8 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 
 
 
+{#- C-74 K11: tablo ve coklu zaman dilimi kalkinca Yatay'da bu acilirda yalniz sozluk cumlesi kaliyordu → acilir yalniz Guclu Trend / Trend Bozuldu'da. -#}
+{% if ssr_signal and ssr_signal.signal in ('AL', 'SAT') %}
 <details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
     <summary class="bp-detail-toggle-summary">
       <span class="bp-detail-toggle-label">Teknik ayrıntılar</span>
@@ -569,7 +571,6 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
        zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
        kardes bir bileseni yok etmemeli). #}
   {#- C-21a (25.09): Yatay'da Hacim Profili gosterilmez (plan C-21a); panel yalniz Guclu Trend / Trend Bozuldu'da. -#}
-  {% if ssr_signal and ssr_signal.signal in ('AL', 'SAT') %}
   <div class="entry-analysis-section" id="volumeProfileSection">
     <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
     <div class="hacim-profili">
@@ -586,49 +587,12 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
-  {% endif %}
 
-  {# Çoklu Zaman Dilimi #}
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
-    <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
-      <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
-    </div>
-  </div>
-
-  {# Sinyal Mini İstatistik Satırı #}
-  <div class="sig-stats-row" id="sigMiniStats">
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
-  </div>
-
-  {# Sinyal Geçmişi #}
-  <div class="history-section" tabindex="0" role="region" aria-label="Sinyal geçmişi tablosu (dar ekranda yana kaydırılabilir)">
-    <h2 class="section-title">Sinyal Geçmişi
-      <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
-    </h2>
-    <table class="history-table">
-      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, kapanış fiyatı ve getiri</caption>
-      <thead>
-        <tr>
-          <th scope="col">Tarih</th>
-          <th scope="col">Sinyal</th>
-          <th scope="col">Kapanış</th>
-          <th scope="col">Getiri</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody">
-        <tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Yükleniyor…</td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
-  </div>
-
-
+  {#- C-74 K10/K11 (02.10, O29): Coklu Zaman Dilimi, sinyal mini istatistikleri ve getirili
+      Sinyal Gecmisi tablosu kalkti — tarihli durum listesi Grafik sekmesinde (Son 6 durum degisimi). -#}
     </div>
   </details>
+{% endif %}
 
 
   {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir

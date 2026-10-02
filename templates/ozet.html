@@ -208,16 +208,7 @@ function goToDate(date) {
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
       <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
-      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺
-          {# K-CC: `ret >= 0` giris fiyatindan HIC uzaklasmamis pozisyonu YESIL +
-               "+0,0%" yapiyordu (22.09 canli: 1 AL karti). Jinja yon kanonu. #}
-          <span class="sc-ret {{ bpf.dir_class(ret, 1, 'sc-ret-pos,sc-ret-neg,sc-ret-neu') }}">{{ bpf.pct_text(ret, 1) }}</span>
-        </div>
-      {% elif s.signal_price %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺</div>
-      {% endif %}
+      {#- C-74 K11 (02.10, O29): "Sinyal fiyatı + getiri" satiri kalkti; durum baslangic tarihi yeter. -#}
     </a>
     {% endfor %}
   </div>
@@ -244,17 +235,7 @@ function goToDate(date) {
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
       <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
-      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺
-          {# CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
-               degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
-               CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) #}
-          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ bpf.pct_text(ret, 1) }}</span>
-        </div>
-      {% elif s.signal_price %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺</div>
-      {% endif %}
+      {#- C-74 K11 (02.10, O29): "Sinyal fiyatı + getiri" satiri kalkti; durum baslangic tarihi yeter. -#}
     </a>
     {% endfor %}
   </div>

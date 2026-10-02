@@ -1036,102 +1036,6 @@ function renderSummary(s, signalData) {
   /* C-20: AI sekmesiyle birlikte cakisma notu (#sigConflictNote) kalkti. */
 }
 
-/* ── Sinyal mini istatistik satırı ─────────────────── */
-function renderMiniStats(history) {
-  const el = document.getElementById('sigMiniStats');
-  if (!el) return;
-  const alCount  = history.filter(h => h.signal === 'AL').length;
-  const satCount = history.filter(h => h.signal === 'SAT').length;
-  let avgStr = '—';
-  const dates = history.map(h => { const p = bpParseTrDate(h.date); return p ? new Date(Date.UTC(p.y, p.m - 1, p.d)) : null; }).filter(d => d && !isNaN(d)).sort((a,b) => a-b);
-  if (dates.length > 1) {
-    const totalDays = (dates[dates.length-1] - dates[0]) / 86400000;
-    avgStr = Math.round(totalDays / (dates.length - 1)) + ' gün';
-  }
-  el.innerHTML = `
-    <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-brand)">${history.length}</div>
-      <div class="sig-stat-lbl">📊 Toplam Sinyal</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val bp-al-text">${alCount}</div>
-      <div class="sig-stat-lbl">▲ Güçlü Trend</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val bp-sat-text">${satCount}</div>
-      <div class="sig-stat-lbl">▼ Trend Bozuldu</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-gold)">${avgStr}</div>
-      <div class="sig-stat-lbl">⏱ Ort. Sinyal Aralığı</div>
-    </div>`;
-}
-
-/* ── Sinyal geçmişi ─────────────────────────────────── */
-function renderHistory(history, currentPrice, liveSignal) {
-  const tbody = document.getElementById('historyBody');
-  if (!history || history.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="da-empty">Geçmiş bulunamadı</td></tr>';
-    renderMiniStats([]);
-    return;
-  }
-  renderMiniStats(history);
-  const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // Getiri hesabı:
-  //   history[0] = en yeni (aktif) sinyal → anlık fiyatla karşılaştır
-  //   history[idx] için kapanış fiyatı = history[idx-1].price (onu kapatan daha yeni sinyal)
-  // CPO-DEV2-080(2): SAT sinyalleri long-only üründe kazanç/kayıp gibi yeşil/
-  // kırmızı gösterilmez ([[project_long_only_ihlali_sat_dali]], aynı desen
-  // CPO-DEV2-074#2'de sinyal_performans.html'e uygulanmıştı) — gerçek (ters
-  // çevrilmemiş) fiyat hareketi nötr gri renkte gösterilir, gizlenmez.
-  const _SAT_TIP = 'Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
-  tbody.innerHTML = history.map((h, idx) => {
-    const icon = h.signal === 'AL' ? '▲' : '▼';
-    let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
-
-    // CPO-1637 Seçenek 2: backend artık BEKLE'ye dönüşü `closed_at_price`/
-    // `closed_at_date` ile bu kaydın üzerinde işaretliyor — varsa bu GERÇEK
-    // kapanış, idx'ten bağımsız olarak "aktif" değil "(kapandı)" olarak
-    // gösterilir (idx===0 olsa bile artık canlı fiyatla karıştırılmaz).
-    const isReallyActive = (idx === 0 && h.signal === liveSignal && h.closed_at_price == null);
-    let exitPrice = null, activeTag = '';
-    if (isReallyActive) {
-      exitPrice = parseFloat(currentPrice) || 0;
-      activeTag = ' <span class="hist-active">(aktif)</span>';
-    } else if (h.closed_at_price != null) {
-      exitPrice = h.closed_at_price;
-    } else if (idx > 0) {
-      // Fallback: closed_at yok (doğrudan karşı yöne flip, BEKLE arada değil)
-      // — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
-      const exitH = history[idx - 1];
-      exitPrice = exitH ? exitH.price : null;
-    }
-
-    if (exitPrice != null && h.price) {
-      const ret  = ((exitPrice - h.price) / h.price * 100);
-      if (h.signal === 'SAT') {
-        retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${bpFormatPct(ret, 1)}${activeTag}</td>`;
-      } else {
-        const isGain = ret > 0;
-        const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-        retHtml = `<td style="color:${clr};font-weight:600;font-size:var(--bp-text-sm)">${bpFormatPct(ret, 1)}${activeTag}</td>`;
-      }
-    } else if (idx === 0) {
-      // Hâlâ aktif olmayan (liveSignal'e uymuyor) ama kapanış fiyatı da yok
-      // — beklenmeyen edge case, uydurmaktansa boş bırakılıyor.
-      retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">(kapandı)</td>';
-    }
-
-    return `<tr>
-      <td>${h.date}</td>
-      <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabel(h.signal)}</span></td>
-      <td>${fmt(h.price)}&nbsp;₺</td>
-      ${retHtml}
-    </tr>`;
-  }).join('');
-}
-
 /* ── Veri yükle — chart + /api/data paralel ─────────── */
 /* SPEC-008 L2 — Frontend Fail-Safe: bozuk/eksik chart ASLA render edilmez,
    sınırlı retry + kullanıcıya görünür durum mesajı. */
@@ -1156,12 +1060,8 @@ function _showChartStatus(msg, withRetryBtn) {
   // C-20: baslikta durum hapi (#hpSignal) yok; nihai hatada yalniz gecmis/gostergeler isaretlenir.
   if (withRetryBtn) {
     if (window.showToast) showToast(msg, 'error');
-    const historyBody = document.getElementById('historyBody');
-    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div></td></tr>';
     const indRow = document.getElementById('indRow');
     if (indRow) indRow.innerHTML = '<span class="ind-badge ind-neutral">Veri yüklenemedi</span>';
-    const sigMiniStats = document.getElementById('sigMiniStats');
-    if (sigMiniStats) sigMiniStats.innerHTML = '<div class="da-empty" style="grid-column:1/-1">Veri yüklenemedi</div>';
   }
 }
 
@@ -1223,7 +1123,6 @@ function _bpRenderOzetFromChart(ch) {
   _bpOzetChartDone = true;
   try { hxChartSetData((ch.ohlc || []).map(b => [b.time, +b.close])); } catch (e) { console.warn('hx chart', e); }
   try { hxFillDI(ch.summary); } catch (e) { console.warn('hx di', e); }
-  renderHistory(ch.signal_history, ch.summary?.price, ch.summary?.signal);
   renderCommentary(ch.commentary);
   if (ch.summary) renderSummary(ch.summary, BP_SSR.ticker ? BP_SSR : null);
 }
@@ -1412,8 +1311,6 @@ function loadOzetChart() {
     if (json && json.chart) _bpRenderOzetFromChart(json.chart);
   }).catch(err => {
     console.warn('[ozet] grafik verisi alinamadi', err);
-    const historyBody = document.getElementById('historyBody');
-    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="_bpOzetChartDone=false;loadOzetChart()">Tekrar dene</button></div></td></tr>';
   });
 }
 
@@ -2126,75 +2023,6 @@ async function loadFundamentals() {
   }
 }
 
-/* ── Çoklu Zaman Dilimi ───────────────────────────── */
-async function loadMTF() {
-  try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/mtf');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const grid = document.getElementById('mtfGrid');
-    if (!grid) return;
-
-    const tfs = [
-      { key: 'daily',   label: '📅 Günlük',    short: '1D' },
-      { key: 'weekly',  label: '📆 Haftalık',  short: '1W' },
-      { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
-    ];
-
-    /* K-BY eki: SAT zemini tint oldugu icin metin K-P kanonu --bp-sat-on-tint. */
-    const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat-on-tint)' : 'var(--bp-bkl)';
-    /* K-BY: AYNI UCLU KOSULUN iki dali iki ayri kanaldandi -- SAT ve BEKLE
-       token okurken AL ham hex yaziyordu (iki yesil tonu, ikisi de
-       tokens.css'te YOK) ve karsiliklari (--bp-al-bg / --bp-al-bd) zaten
-       VARDI; portfolio.css .signal-AL/.signal-SAT ciftini tam olarak boyle
-       esliyor. Canli: 217 sayfanin 6'sinda 11 AL karti boyaniyordu. */
-    const sigBg    = s => s === 'AL' ? 'var(--bp-al-bg)' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
-    const sigBord  = s => s === 'AL' ? 'var(--bp-al-bd)' : s === 'SAT' ? 'var(--bp-sat-bd-tint)' : 'var(--bp-border)';
-    const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
-
-    /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
-    if (tfs.every(tf => !json[tf.key])) {
-      grid.innerHTML = '<div style="grid-column:1/-1;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:16px;text-align:center;color:var(--bp-text3);font-size:var(--bp-text-base);line-height:1.6">Bu hisse için zaman dilimi verisi henüz yok. Sinyal oluştuğunda burada güncellenir.</div>';
-      return;
-    }
-
-    const mtfRots = [-.9, .7, -.6, .8];
-    grid.innerHTML = tfs.map((tf, idx) => {
-      const rot = mtfRots[idx % mtfRots.length];
-      const d = json[tf.key];
-      if (!d) return `
-        <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:14px;padding:14px;text-align:center">
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:6px">${tf.label}</div>
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Veri yok</div>
-        </div>`;
-
-      const bg   = sigBg(d.signal);
-      const col  = sigColor(d.signal);
-      const bord = sigBord(d.signal);
-      const arr  = sigArrow(d.signal);
-      const lbl  = sigLabel(d.signal);
-      const scoreBar = d.bull_score >= d.bear_score
-        ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
-          ).join('')}</div>`
-        : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?col:'var(--bp-border)'}"></div>`
-          ).join('')}</div>`;
-
-      return `
-        <div class="mtf-card" style="background:${bg};border:1px solid ${bord};border-radius:14px;padding:14px;text-align:center;--rot:${rot}deg;box-shadow:0 12px 28px -18px ${col}">
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-bottom:8px">${tf.label}</div>
-          <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-top:4px">ADX ${_trNum(d.adx)}</div>
-          ${scoreBar}
-        </div>`;
-    }).join('');
-  } catch(e) {
-    const grid = document.getElementById('mtfGrid');
-    if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm)">Yüklenemedi</div>';
-  }
-}
-
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
 /* Makro şerit: bp-search.js'te kendiliğinden başlar (C-15). */
@@ -2286,10 +2114,6 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       else if (tab === 'haberler') { loadKapDisclosures(); }
     } catch (e) { console.warn('sekme verisi yuklenemedi: ' + tab, e); }
   }
-  var _odt = document.getElementById('ozetDetailToggle');
-  if (_odt) _odt.addEventListener('toggle', function once() {
-    if (_odt.open) { _odt.removeEventListener('toggle', once); loadMTF(); }
-  });
 
   function applyTab(tab, opts) {
     opts = opts || {};

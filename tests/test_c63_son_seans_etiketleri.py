@@ -226,7 +226,7 @@ def test_ozet_son_seans_ve_arsiv():
     _u = html_lib.unescape(txt)
     assert "kapanışında oluştu" not in txt
     assert "Son seanstan beri" in _u and "23 Eylül'den beri" in _u and "1 gün ·" not in txt
-    assert "Sinyal fiyatı: 9,80&nbsp;₺" in txt and "Giriş" not in txt  # C-70 K22: ₺ yalnız kalmaz
+    assert "Sinyal fiyatı" not in txt and "Giriş" not in txt  # C-74 K11 (O29): fiyat + getiri satırı kalktı
     assert not _REL.findall(_visible(html)), _REL.findall(_visible(html))
     arsiv = _text(_ozet(historical_date="2026-09-18", today_str="18.09.2026"))
     assert "18.09.2026 kapanışında değişenler" in arsiv
