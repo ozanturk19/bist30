@@ -81,8 +81,8 @@ def test_universe_acceptance():
     assert sum(len(v) for v in by.values()) == n
     biggest = max(by.items(), key=lambda kv: len(kv[1]))
     assert len(biggest[1]) <= 0.15 * n, biggest                        # hiçbir kova > %15
-    assert len(by.get(st.OTHER, [])) <= 3, by.get(st.OTHER)            # "Diğer" ≤ 3
-    assert 18 <= len([b for b in by if b != st.OTHER]) <= 24
+    assert len(by.get(st.OTHER, [])) <= 2, by.get(st.OTHER)            # "Diğer" ≤ 2 (D-23b)
+    assert 24 <= len([b for b in by if b != st.OTHER]) <= 28           # D-23b: 25 kova
     assert list(by)[-1] == st.OTHER and list(by)[:-1] == [b for b in st.LABELS if b in by and b != st.OTHER]
 
 
@@ -92,17 +92,17 @@ def test_universe_acceptance():
     ("ISMEN", "Finansal Hizmetler"), ("DSTKF", "Finansal Hizmetler"), ("KTLEV", "Finansal Hizmetler"),
     ("GARAN", "Bankacılık"), ("ISCTR", "Bankacılık"), ("TSKB", "Bankacılık"), ("AKBNK", "Bankacılık"),
     ("KRDMD", "Ana Metal Sanayi"), ("TCKRC", "Ana Metal Sanayi"),
-    ("MPARK", "Sağlık"), ("LKMNH", "Sağlık"), ("TUREX", "Ulaştırma"), ("GMTAS", "Ticaret"),
+    ("MPARK", "İlaç ve Sağlık"), ("LKMNH", "İlaç ve Sağlık"), ("TUREX", "Ulaştırma"), ("GMTAS", "Ticaret"),
     ("DNISI", "Kimya, Petrol ve Plastik"), ("TUPRS", "Kimya, Petrol ve Plastik"),
     ("DOGUB", "Taş ve Toprak"), ("ASELS", "Savunma"), ("TCELL", "İletişim"), ("FENER", "Spor"),
     ("THYAO", "Ulaştırma"), ("EKGYO", "Gayrimenkul"), ("KCHOL", "Holding ve Yatırım"),
     # D-46b uyuşmazlık tablosunun "açıkça başka sektör" (S) satırlarının kalanı
     ("PASEU", "Ulaştırma"), ("PRKAB", "Metal Eşya ve Makine"), ("SMART", "Bilişim"),
-    ("TABGD", "Turizm"), ("YESIL", "Holding ve Yatırım"), ("ADESE", "Gayrimenkul"),
-    ("EGEEN", "Metal Eşya ve Makine"),
+    ("TABGD", FOOD), ("YESIL", "Holding ve Yatırım"), ("ADESE", "Gayrimenkul"),   # TABGD: D-23b düzeltmesi
+    ("EGEEN", "Otomotiv"),                                                          # D-23b düzeltmesi
     ("ADEL", st.OTHER), ("AGROT", st.OTHER),
 ])
-def test_named_stocks_land_in_kap_bucket(ticker, bucket):
+def test_named_stocks_land_in_site_bucket(ticker, bucket):
     t2b, _, _ = st.build(UNI, COMP, KAP)
     assert t2b[ticker] == bucket
 
@@ -143,8 +143,8 @@ def test_heatmap_groups_use_site_taxonomy():
         for k in kaps:
             assert hm.group_of(k) == label
     assert hm.group_of(None) == st.OTHER and hm.group_of("TANINMAYAN") == st.OTHER
-    for t in SEED["indices"]["XU100"]:                  # harita grubu = /hisse sektör etiketi
-        assert hm.group_of(st.kap_sector(t, COMP, KAP)) == st.bucket_for(t, COMP, KAP)
+    for t in SEED["indices"]["XU100"]:                  # harita grubu = /hisse sektör etiketi (D-23b: ticker ile)
+        assert hm.group_of(st.kap_sector(t, COMP, KAP), t) == st.bucket_for(t, COMP, KAP)
 
 
 def test_heatmap_regroup_updates_frozen_rows_only_when_known():
@@ -173,6 +173,9 @@ def test_app_module_level_wiring_runs_on_seed(caplog):
          + parts[2] + parts[3], ns)
     t2b, by, _ = st.build(UNI, COMP, KAP)
     assert ns["SECTORS"] == by and ns["_TICKER_TO_SECTOR"] == t2b
+    # D-23b: ortanca yedeği için yalnız KAP'tan kova (düzeltme tablosuna bakmaz)
+    assert ns["_TICKER_TO_KAP_BUCKET"] == {t: st.kap_bucket_for(t, COMP, KAP) for t in UNI}
+    assert ns["_TICKER_TO_KAP_BUCKET"]["FROTO"] == "Metal Eşya ve Makine" and t2b["FROTO"] == "Otomotiv"
     assert ns["_get_sector"]("AEFES") == FOOD and ns["_get_sector"]("XU030") == st.OTHER
     # eksik sektör: uyarı + "Diğer", import çökmez
     ns["BIST100"] = UNI + ["ZZNEW", "XU030"]
@@ -242,6 +245,8 @@ def test_app_heatmap_serves_frozen_snapshot_with_current_groups(tmp_path, monkey
 
 def test_legacy_alias_eski_sektor_adi_yeni_kovaya_gider():
     assert st.canonical_label("Enerji") == "Elektrik"
+    assert st.canonical_label("Sağlık") == "İlaç ve Sağlık"            # D-23b ad değişikliği
+    assert st.canonical_label("İlaç/Sağlık") == "İlaç ve Sağlık"
     assert st.canonical_label("Kimya/Malzeme") == "Kimya, Petrol ve Plastik"
     assert st.canonical_label("Bankacılık") == "Bankacılık"
     assert st.canonical_label("") == ""

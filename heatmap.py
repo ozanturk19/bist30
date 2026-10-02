@@ -66,21 +66,31 @@ def tr_title(s):
     return " ".join(out)
 
 
-def group_of(sector):
-    """KAP alt sektörü → kova (boş/tanınmayan → 'Diğer')."""
-    return sector_taxonomy.bucket(sector)
+def group_of(sector, ticker=None):
+    """KAP alt sektörü → kova (boş/tanınmayan → 'Diğer'); ticker verilirse D-23b düzeltme
+    tablosu (sector_taxonomy.OVERRIDES) önce gelir."""
+    return sector_taxonomy.bucket_of_ticker(ticker, sector)
+
+
+def sub_of(sector, ticker=None):
+    """Hover kartındaki KAP alt sektörü (Title Case). D-23b: kovası düzeltme tablosundan gelen
+    hissede yazılmaz ("Ulaştırma · Holdingler ve Yatırım Şirketleri" çelişkisi olmasın)."""
+    return None if ticker in sector_taxonomy.OVERRIDES else tr_title(sector)
 
 
 def regroup(rows, group_for):
     """Donmuş satırların `g` alanını güncel taksonomiye çeker (fiyat/değişim dokunulmaz): taksonomi
     değişince son görüntü ertesi günün dondurulmasını beklemeden sitenin geri kalanıyla aynı grubu
-    gösterir. group_for(t) None dönerse satır olduğu gibi kalır. Değişen satır sayısı döner."""
+    gösterir. group_for(t) None dönerse satır olduğu gibi kalır. Kovası düzeltme tablosundan gelen
+    satırın `sub` alanı boşaltılır (sub_of ile aynı kural). Değişen grup sayısı döner."""
     n = 0
     for r in rows or []:
         g = group_for(r.get("t"))
         if g and g != r.get("g"):
             r["g"] = g
             n += 1
+        if r.get("t") in sector_taxonomy.OVERRIDES and r.get("sub"):
+            r["sub"] = None
     return n
 
 
@@ -209,7 +219,7 @@ def build(asof_iso, members, official, rows, fund, scores, sectors, names, xu100
             notes.append("%s: %s" % (t, why))
         sb = row.get("signal_bars")
         out.append({
-            "t": t, "n": names.get(t) or t, "g": group_of(sectors.get(t)), "sub": tr_title(sectors.get(t)),
+            "t": t, "n": names.get(t) or t, "g": group_of(sectors.get(t), t), "sub": sub_of(sectors.get(t), t),
             "mcap": round(m / 1e9, 2) if m else None, "p": round(p, 2), "ch": ch,
             "bp": scores.get(t), "tr": TREND.get(row.get("signal")),
             "days": int(sb) if isinstance(sb, (int, float)) else None,

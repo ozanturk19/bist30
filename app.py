@@ -1419,23 +1419,33 @@ def fetch_kap_disclosures(ticker: str, days: int = 365) -> list:
     return kap_feed.legacy_rows(results)
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
-# D-23: sektör kovası KAP resmi alt sektöründen (sector_taxonomy.py: 23 kova, BIST sektör
+# D-23: sektör kovası KAP resmi alt sektöründen (sector_taxonomy.py: 25 kova (D-23b), BIST sektör
 # endekslerine hizalı + "Diğer"); elle tutulan SECTORS listesi kalktı (AEFES/CCOLA "Kimya",
 # ULKER "Perakende", ENKAI "Enerji", ISMEN/DSTKF "Bankacılık" gibi hatalar ondan geliyordu).
 # Kaynak: evren dosyası sektörü → KAP'ta sektörsüz 22 kod için açık tablo → kap_sirket_bilgileri.
 # Yeni hisse kovasını KAP sektöründen kendisi alır; sektörü yok/tanınmıyorsa uyarı + "Diğer"
 # (import anında çökme yok, D-46). SECTORS = {kova: [ticker]} (dolu kovalar, taksonomi sırası)
 # ve _TICKER_TO_SECTOR tüketicileri (ilgili hisseler, /api/data sectors, /tarama...) aynen kalır.
+# D-23b: sector_taxonomy.OVERRIDES (FROTO → Otomotiv, ARCLK → Dayanıklı Tüketim, SISE → Taş ve
+# Toprak...) KAP'tan önce gelir. _TICKER_TO_KAP_BUCKET yalnız sektör ortancası yedeği içindir
+# (kovada akran < 5 ise KAP sektörü havuzu; görünen ad değil).
 _TICKER_TO_SECTOR, SECTORS, _sectors_unmapped = sector_taxonomy.build(
     [t for t in BIST100 if t not in INDEX_TICKERS], UNIVERSE.get("companies") or {}, KAP_INFO)
 if _sectors_unmapped:
     logger.warning("D-23: KAP sektörü olmayan/tanınmayan ticker'lar 'Diğer'e düşüyor: %s", _sectors_unmapped)
 del _sectors_unmapped
+_TICKER_TO_KAP_BUCKET = {t: sector_taxonomy.kap_bucket_for(t, UNIVERSE.get("companies") or {}, KAP_INFO)
+                         for t in _TICKER_TO_SECTOR}
 
 
 def _get_sector(ticker: str) -> str:
     """Ticker için sektör adını döndürür. Bulunamazsa 'Diğer'."""
     return _TICKER_TO_SECTOR.get(ticker, "Diğer")
+
+
+def _get_kap_bucket(ticker: str) -> str:
+    """D-23b: ticker'ın yalnız KAP'tan kovası (sektör ortancası yedeği). Bulunamazsa 'Diğer'."""
+    return _TICKER_TO_KAP_BUCKET.get(ticker, "Diğer")
 
 
 def _enrich_stock(s: dict) -> dict:
@@ -8820,7 +8830,8 @@ def _fundamentals_temel_v2(ticker, data):
         # D-40c: gün sonu turu v2 ile yazıldıysa sektör ortancası KAP'tan (aynı D-23 kovası, ≥5
         # şirket) ve banka maddesi KAP özsermaye kârlılığıyla -- Temel skorla tek kaynak.
         v2_meds = temel_skor_v2.api_medians(v2)
-        meds = v2_meds or kap_temel_v2.sector_medians(_kap_sector_metrics(), _get_sector, _get_sector(ticker))
+        meds = v2_meds or kap_temel_v2.sector_medians(_kap_sector_metrics(), _get_sector, _get_sector(ticker),
+                                                      _get_kap_bucket, _get_kap_bucket(ticker))   # D-23b yedek
         return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
                                    datetime.now(_TZ_TR).date(), meds)
     except Exception as e:
@@ -8881,7 +8892,7 @@ def _kesfet_lists():
                 logger.warning("_kesfet_lists load_record(%s): %s", s.get("ticker"), e)
         try:
             out = kesfet.build(stocks, entries, records, shares, _get_sector, STOCK_NAMES,
-                               datetime.now(_TZ_TR).date())
+                               datetime.now(_TZ_TR).date(), kap_bucket_of=_get_kap_bucket)   # D-23b
         except Exception as e:
             logger.warning("_kesfet_lists: %s", e)
             return _KESFET["data"] or kesfet.build([], {}, {})

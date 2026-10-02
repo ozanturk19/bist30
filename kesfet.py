@@ -21,7 +21,8 @@ Ortak kapi (dort liste):
   dusurmez -- o bir puanlama siniri, veri eksigi degil.
 - Degerleme hukmu hisse sayfasindaki "Fiyati makul mu?" ile tek kaynak (home_fields.valuation):
   v2 acikken temel_v2.degerleme.hukum; kapaliyken KAP F/K (son 12 ay) ve PD/DD'nin ayni D-23
-  kovasindaki KAP ortancasina orani (kap_temel_v2.sector_medians: en az 5 sirket; yoksa hukum yok).
+  kovasindaki KAP ortancasina orani (kap_temel_v2.sector_medians: en az 5 sirket; kovada yetmezse
+  sirketin KAP sektoru havuzu (D-23b with_fallback); o da yoksa hukum yok).
 - TEMEL_V2 acikken BP (Temel v2 %60 + Trend %40) ve degerleme hukmu skor kaydindaki temel_v2'den
   gelir (satir rozeti ve sira); kurallar ve cumleler iki modda ayni.
 - Siralar sabit ve aciklanabilir: kalite ve buyume listesi BorsaPusula Skoru'na, temettu listesi
@@ -260,6 +261,19 @@ def sector_medians(facts, bucket_of):
     return out
 
 
+def with_fallback(med, kap_med):
+    """D-23b: kovanin ortancasi (sector_medians[kova]) + eksik metrik icin sirketin KAP sektoru
+    ortancasi (ayni fonksiyon, sector_taxonomy.kap_bucket_for havuzuyla). Duzeltme tablosu kovayi
+    kucultse de ortanca D-23 oncesinden geri gitmez; hisse sayfasindaki yedekle ayni kural."""
+    if not kap_med:
+        return med or {}
+    out = dict(med or {})
+    for k, v in kap_med.items():
+        if out.get(k) is None and v is not None:
+            out[k] = dict(v, havuz="kap")
+    return out
+
+
 def _mv(med, k):
     m = (med or {}).get(k)
     return m.get("deger") if m and m.get("kapsam") == "sektor" else None
@@ -343,15 +357,17 @@ def verdict(entry, f, med):
     return home_fields.valuation(entry, fund)
 
 
-def build(stocks, entries, records, shares=None, bucket_of=None, names=None, today=None):
+def build(stocks, entries, records, shares=None, bucket_of=None, names=None, today=None, kap_bucket_of=None):
     """stocks: _cache satirlari (ticker, price, signal, stale_reason, data_quality, bar_date, name);
     entries: {T: saglik kaydi (borsapusula_skoru, temel_v2...)}; records: {T: KAP kaydi};
     shares: {T: Yahoo pay adedi} (pay adedi sagligi, hisse sayfasiyla ayni); bucket_of: {T: D-23 kovasi}
-    ya da fonksiyon; names: {T: gorunen ad}. Donus: {"tarih", "listeler": {anahtar: [satir]}}. Satir: ticker, name, sector, bp, trend, trend_kod, degerleme, neden, sablon."""
+    ya da fonksiyon; names: {T: gorunen ad}; kap_bucket_of: {T: yalniz KAP'tan kova} ya da fonksiyon
+    (D-23b ortanca yedegi, with_fallback). Donus: {"tarih", "listeler": {anahtar: [satir]}}. Satir: ticker, name, sector, bp, trend, trend_kod, degerleme, neden, sablon."""
     today = today or date.today()
     shares = shares or {}
     names = names or {}
     sector_of = (lambda t: bucket_of.get(t)) if isinstance(bucket_of, dict) else (bucket_of or (lambda t: None))
+    kap_of = (lambda t: kap_bucket_of.get(t)) if isinstance(kap_bucket_of, dict) else kap_bucket_of
     rows = [s for s in stocks or [] if isinstance(s, dict) and s.get("ticker")]
     # Ortancalar donuk satirlar dahil tum evrenden (hisse sayfasindaki _kap_sector_metrics ile ayni
     # havuz); listeye yalniz son kapanisi donuk olmayan hisse girer (one cikan havuzuyla ayni kural).
@@ -364,6 +380,7 @@ def build(stocks, entries, records, shares=None, bucket_of=None, names=None, tod
         except Exception:      # tek bozuk kayit listeyi dusurmesin
             facts[tk] = None
     meds = sector_medians(facts, sector_of)
+    kap_meds = sector_medians(facts, kap_of) if kap_of else {}
     lists = {k: [] for k in LISTS}
     keys = {k: {} for k in LISTS}
     for s in live:
@@ -372,7 +389,7 @@ def build(stocks, entries, records, shares=None, bucket_of=None, names=None, tod
         if not f:
             continue
         b = sector_of(tk)
-        med = meds.get(b) or {}
+        med = with_fallback(meds.get(b), kap_meds.get(kap_of(tk)) if kap_of else None)
         entry = ((entries or {}).get(tk)) or {}
         if completeness(f, _mv(med, "ozsermaye_karliligi")) < MIN_COMPLETENESS:
             continue

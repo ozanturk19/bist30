@@ -472,24 +472,34 @@ def kap_metrics(rec, price, yahoo_shares=None):
     return {k: now.get(k) for k in ("fk", "pd_dd", "ozsermaye_karliligi")}
 
 
-def sector_medians(kap_by_ticker, sector_of, sector):
+def sector_medians(kap_by_ticker, sector_of, sector, fallback_of=None, fallback=None):
     """F/K, PD/DD (yalniz pozitif) ve ozsermaye karliligi ortancasi, ayni sektor grubundaki
     sirketlerin KAP degerlerinden (kap_metrics). Grupta gecerli akran < MIN_PEERS_KAP ya da sektor
     belirsizse (None / 'Diger') hukum yok: BIST geneli yedegi YOK (elma-armut kiyas). Donus metrik
-    basina {deger, n, kapsam: 'sektor'} ya da None."""
+    basina {deger, n, kapsam: 'sektor'} ya da None.
+    D-23b: fallback_of/fallback verilirse (sirketin yalniz KAP'tan kovasi, sector_taxonomy.
+    kap_bucket_for) kovada akran yetmeyen metrik KAP sektoru havuzundan hesaplanir ('havuz': 'kap');
+    duzeltme tablosu kovayi kucultse de ortanca D-23 oncesinden geri gitmez."""
     fields = (("fk", True), ("pd_dd", True), ("ozsermaye_karliligi", False))
     out = {k: None for k, _ in fields}
     if sector in (None, "", "Diğer"):
         return out
+    pools = [(sector_of, sector, None)]
+    if fallback_of is not None and fallback not in (None, "", "Diğer"):
+        pools.append((fallback_of, fallback, "kap"))
     for k, pos in fields:
-        vals = []
-        for tk, m in (kap_by_ticker or {}).items():
-            v = (m or {}).get(k)
-            ok = _positive(v) if pos else (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v)
-            if ok and sector_of(tk) == sector:
-                vals.append(v)
-        if len(vals) >= MIN_PEERS_KAP:
-            out[k] = {"deger": round(statistics.median(vals), 2), "n": len(vals), "kapsam": "sektor"}
+        for of, grp, havuz in pools:
+            vals = []
+            for tk, m in (kap_by_ticker or {}).items():
+                v = (m or {}).get(k)
+                ok = _positive(v) if pos else (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v)
+                if ok and of(tk) == grp:
+                    vals.append(v)
+            if len(vals) >= MIN_PEERS_KAP:
+                out[k] = {"deger": round(statistics.median(vals), 2), "n": len(vals), "kapsam": "sektor"}
+                if havuz:
+                    out[k]["havuz"] = havuz
+                break
     return out
 
 
