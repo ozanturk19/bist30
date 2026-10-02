@@ -138,7 +138,9 @@ header{
 .hp-nw1{white-space:nowrap}
 .hp-blk-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px;margin-bottom:14px}
 .hp-blk-h p{margin:0;color:var(--bp-text3);font-size:var(--bp-text-md)}
-.hp-blk-h a{position:relative;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-base);color:var(--bp-brand);text-decoration:none}
+/* C-71 K33: bağlantılı başlıkta açıklama boşluğu doldurur (tarih ortada yüzmez), bağlantı sarınca da sağda kalır */
+.hp-blk-h:has(> a) > p{flex:1 1 auto}
+.hp-blk-h a{margin-left:auto;position:relative;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-base);color:var(--bp-brand);text-decoration:none}
 /* C-71 K28: "Tüm liste →" telefonda 18 px yüksekti; dokunmatikte isabet alanı ~42 px (görünüm ve düzen aynı) */
 @media (pointer:coarse){.hp-blk-h a::after{content:'';position:absolute;inset:-12px -8px}}
 .hp-blk-h a:hover{text-decoration:underline}
@@ -226,7 +228,6 @@ header{
 .hp-ft li:first-child{border-top:0}
 /* taslak "3-5 satır": masaüstü 4, mobil 3 (sayfa bütçesi ≤3.700 / ≤5.000 px) */
 .hp-ft li:nth-child(n+5){display:none}
-#one-cikan .hp-blk-h p{flex:1 1 auto}
 #one-cikan .hp-pan{padding-block:6px}
 .hp-ft-row{padding:8px 0;color:inherit;text-decoration:none}
 .hp-ft-row:hover .tk{text-decoration:underline}

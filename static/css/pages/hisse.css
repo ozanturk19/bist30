@@ -737,6 +737,8 @@
     padding: 8px 12px;
     text-decoration: none;
     min-width: 110px;
+    flex: 1 1 auto;
+    max-width: 100%;
     transition: border-color .15s, background .15s;
   }
   .related-chip:hover { border-color: var(--bp-brand); background: #21202b; }
@@ -747,7 +749,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 130px;
   }
 
   /* ── Responsive ── */

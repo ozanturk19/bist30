@@ -201,7 +201,8 @@
 .hm-arc:hover{color:var(--bp-brand);text-decoration-color:currentColor}
 .hm-arc:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:2px}
 @media (pointer:coarse){.hm-arc{min-height:44px}}
-.hg .da-section{padding-bottom:0}
+/* C-71 K33: tam sayfa haritada (/sektor-harita, /harita/<gün>) bölüm dolgusu 62 px boş bant bırakıyordu → başlık-panel = container boşluğu (24/16 px) */
+main.container > #sektorler.da-section{padding:0}
 .hg-pager{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(14px,2vw,20px)}
 .hg-pg{box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-text-md);font-variant-numeric:tabular-nums;text-decoration:none;white-space:nowrap}
 .hg-next{margin-left:auto}
