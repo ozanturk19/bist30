@@ -72,6 +72,7 @@ def _env(today=_TODAY):
         env.filters[n] = lambda v, *a, **k: v
     env.filters["signal_label"] = lambda c: br.SIGNAL_LABELS.get(c, c)
     env.filters["tr_price"] = lambda v: ("%.2f" % v).replace(".", ",")
+    env.globals["static_v"] = lambda p: "/static/" + p  # C-26
     env.filters["signal_age_days"] = _age_days_filter(today)
     env.filters["signal_age_text"] = _age_text_filter(today)
     return env

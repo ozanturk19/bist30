@@ -59,6 +59,16 @@ _BLOK_YORUM = re.compile(r"/\*.*?\*/", re.S)
 _SATIR_YORUM = re.compile(r"(^|[^:\\])//[^\n]*")
 
 
+# C-27 (25.09): kanon §1 + §2.7 (Ozan O16b=B not 3) ana sayfa kahramanında
+# GÜN SONU kapanışının altında, yalnız seans içinde görünen ve makro şerit
+# (/api/macro, gün içi 15 dk gecikmeli akış) verisini gösteren satırı AÇIKÇA
+# ister: "Seans içi · 15 dk gecikmeli". Bu satır EOD fiyatını değil gün içi
+# akışı tarif eder. Muafiyet yapısaldır: yalnız `data-intraday` işaretli TEK
+# öğenin (iç içe aynı etiket yok) metni; işaretsiz aynı cümle ihlal kalır
+# (sentetik pozitif + negatif aşağıda).
+_SEANS_ICI = re.compile(r"<(\w+)\b[^>]*\bdata-intraday\b[^>]*>.*?</\1\s*>", re.S)
+
+
 def _bosluga_cevir(m):
     """Eslesmeyi ayni uzunlukta bosluga cevir -> satir/sutun numaralari kayar."""
     return re.sub(r"[^\n]", " ", m.group(0))
@@ -80,6 +90,7 @@ def soy(metin: str) -> str:
     """
     metin = _HTML_YORUM.sub(_bosluga_cevir, metin)
     metin = _JINJA_YORUM.sub(_bosluga_cevir, metin)
+    metin = _SEANS_ICI.sub(_bosluga_cevir, metin)
     metin = _BLOK_YORUM.sub(_bosluga_cevir, metin)
     metin = _SATIR_YORUM.sub(lambda m: m.group(1) + " " * (len(m.group(0)) - len(m.group(1))), metin)
     # oznitelik degerleri KALSIN, geri kalan etiket govdesi bosluga cevrilsin
@@ -181,6 +192,7 @@ POZITIF = [
     ("tereddutlu olumsuz", "<p>fiyatlar gercek zamanli olmayabilir.</p>"),
     # script govdesindeki dizgi + ONCESINDE JS karsilastirma operatoru
     # (kapinin ilk yazimi tam burada korlesmisti)
+    ("seans ici satiri isaretsiz", "<div class=\"hp-seans-l\">Seans içi · 15 dk gecikmeli</div>"),
     ("script icinde, < > operatorlerinin ardinda",
      "<script>\nif (age > 900) x=1;\nelse if (age < 300) { label = 'BIST ~15dk gecikmeli'; }\n</script>"),
 ]
@@ -189,6 +201,7 @@ NEGATIF = [
     ("EOD ifadesi", "<p>Gun sonu (EOD) teknik analiz -- son kapanisa aittir.</p>"),
     ("yorumdaki iddia", "<!-- eskiden ~15 dakika gecikmeli diyordu -->\n<p>Gun sonu.</p>"),
     ("gun-sonu gecikme yok", "<p>sinyaller gunde bir kez, kapanistan sonra hesaplanir.</p>"),
+    ("seans ici satiri data-intraday", "<div class=\"hp-seans-l\" data-intraday><i></i>Seans içi · 15 dk gecikmeli</div>\n<p>Gun sonu.</p>"),
     ("script icinde temiz karsilastirma",
      "<script>\nif (a > 1 && b < 2) { label = 'Gun sonu verileri'; }\n</script>"),
 ]

@@ -28,6 +28,7 @@ Kullanim: python3 tools/glossary-where-check.py [--verbose] [--ref GIT_REF]
 Cikis: ihlal varsa 1.
 """
 import re, sys, pathlib, subprocess
+from _page_js import with_page_js
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -38,8 +39,9 @@ YUZEY = {
     "karşılaştırma":        "karsilastir.html",
     "anasayfa":             "index.html",
     "sektör ısı haritası":  "sektor_harita.html",
-    "bilanço":              "bilanco_takvimi.html",
-    "temettü takvimi":      "temettu_takvimi.html",
+    "bilanço":              "takvim.html",       # C-36: iki takvim /takvim'de birlesti
+    "temettü takvimi":      "takvim.html",
+    "takvim":               "takvim.html",
     "csv dışa aktarımı":    "tarama.html",   # CSV uretimi tarama.html icinde
     "sinyal kolonu":        "tarama.html",
 }
@@ -131,7 +133,7 @@ def tara(ref=None, verbose=False):
             for hedef in hedefler:
                 n_vaat += 1
                 if hedef not in onbellek:
-                    onbellek[hedef] = yayimlanan_metin(_read(ref, f"templates/{hedef}"))
+                    onbellek[hedef] = yayimlanan_metin(with_page_js(hedef, _read(ref, f"templates/{hedef}"), read=lambda r: _read(ref, r)))
                 govde = onbellek[hedef]
                 for ifade in TERIM_IFADELERI[baslik]:
                     if ifade in govde:

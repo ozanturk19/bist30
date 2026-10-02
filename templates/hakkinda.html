@@ -1,16 +1,16 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hakkında | BorsaPusula</title>
-<meta name="description" content="BorsaPusula hakkında: BIST100 + ek hisseler için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<meta name="description" content="BorsaPusula nedir, neden var, kim yapıyor? BIST şirketlerini finansalları, değerlemesi ve trendiyle orta-uzun vadeli yatırımcı gözüyle puanlayan gün sonu analiz sitesi.">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/hakkinda">
 <meta property="og:title"       content="Hakkında — borsapusula.com">
-<meta property="og:description" content="Türkiye'nin algoritmik BIST analiz platformu.">
+<meta property="og:description" content="BIST şirketlerini finansalları, değerlemesi ve trendiyle puanlayan gün sonu analiz sitesi.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/hakkinda">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Hakkında — borsapusula.com">
-<meta name="twitter:description" content="Türkiye'nin algoritmik BIST analiz platformu.">
+<meta name="twitter:description" content="BIST şirketlerini finansalları, değerlemesi ve trendiyle puanlayan gün sonu analiz sitesi.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -20,247 +20,51 @@
   {"@type":"ListItem","position":2,"name":"Hakkında","item":"https://borsapusula.com/hakkinda"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/hakkinda.css?v=2ef7ab6b">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+  {"@type":"Question","name":"BorsaPusula nedir?","acceptedAnswer":{"@type":"Answer","text":"BorsaPusula, Borsa İstanbul şirketlerini orta-uzun vadeli yatırımcının gözüyle okuyan bir gün sonu analiz sitesidir. Her şirket için finansallarını, fiyatının makul olup olmadığını ve trendini değerlendirir; sonucu 0–100 arası BorsaPusula Skoru'nda toplar."}},
+  {"@type":"Question","name":"Veriler ne zaman güncellenir?","acceptedAnswer":{"@type":"Answer","text":"Her iş günü seans kapanışından sonra bir kez. Sitedeki fiyatlar son kapanışa aittir; finansal veriler şirketlerin KAP'ta açıkladığı son rapordan gelir."}},
+  {"@type":"Question","name":"BorsaPusula yatırım tavsiyesi verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. BorsaPusula şirketleri betimler ve puanlar; işlem önerisi vermez. Herhangi bir aracı kurum, banka ya da SPK lisanslı kuruluşla bağlantısı yoktur."}}
+]}
+</script>
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/prose.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/hakkinda.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}
 
 
-<main class="container" id="main-content" tabindex="-1">
-{% call bpf.pagehead('Hakkında') %}<span class="da-num">{{ bist_count }}</span> BIST hissesi, her iş günü kapanıştan sonra güncellenen verilerle.{% endcall %}
+<main class="container container--read" id="main-content" tabindex="-1">
+{% call bpf.pagehead('Hakkında') %}Üç soru: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?{% endcall %}
 <article class="prose">
 
-<!-- ── HERO ─────────────────────────────────────────────────────── -->
-<div class="hero da-panel da-panel--accent">
-  <div class="hero-title">Borsa<span>Pusula</span></div>
-  <p class="hero-sub">
-    Türkiye'nin algoritmik BIST analiz platformu.
-    {{ bist_count }} BIST hissesi için sade ve hızlı sinyal paneli.
-  </p>
-  <div class="hero-tags">
-    <span class="hero-tag"><span aria-hidden="true">🇹🇷</span> Türkçe</span>
-    <span class="hero-tag"><span aria-hidden="true">🤖</span> Algoritmik</span>
-    <span class="hero-tag"><span aria-hidden="true">📊</span> Günlük Güncelleme</span>
-  </div>
-</div>
+<h2>BorsaPusula nedir?</h2>
+<p>Borsa İstanbul şirketlerini orta-uzun vadeli yatırımcının gözüyle okuyan bir gün sonu analiz sitesi. Her şirket için aynı üç soruyu aynı ölçüyle cevaplıyor, sonucu 0–100 arası <strong>BorsaPusula Skoru</strong>'nda topluyoruz.</p>
+<ol class="hk-qs">
+  <li class="hk-q da-panel"><span class="hk-q-n">1</span><b class="hk-q-t">Finansalları nasıl?</b><span class="hk-q-d">Kârlılık, büyüme, borçluluk ve nakit akışı; şirketin KAP'ta açıkladığı son finansal tablolardan.</span></li>
+  <li class="hk-q da-panel"><span class="hk-q-n">2</span><b class="hk-q-t">Fiyatı makul mü?</b><span class="hk-q-d">F/K ve PD/DD, aynı sektördeki şirketlerin ortancasıyla karşılaştırılır.</span></li>
+  <li class="hk-q da-panel"><span class="hk-q-n">3</span><b class="hk-q-t">Trend destekliyor mu?</b><span class="hk-q-d">Supertrend, ADX ve EMA ile fiyatın gidişi: Güçlü Trend, Yatay ya da Trend Bozuldu.</span></li>
+</ol>
 
-<!-- ── SAYILARLA PLATFORM ─────────────────────────────────────── -->
-<div class="stats-row">
-  <div class="stat-box da-panel">
-    <div class="stat-num">{{ bist_count }}</div>
-    <div class="stat-lbl">Takip edilen BIST hissesi</div>
-  </div>
-  <div class="stat-box da-panel">
-    <div class="stat-num">Günde 1</div>
-    <div class="stat-lbl">Kapanış sonrası veri güncellemesi (EOD)</div>
-  </div>
-  <div class="stat-box da-panel">
-    <div class="stat-num">3</div>
-    <div class="stat-lbl">Sinyal indikatörü (ST+ADX+EMA)</div>
-  </div>
-  <div class="stat-box da-panel">
-    <div class="stat-num">2 yıl</div>
-    <div class="stat-lbl">Günlük bar geçmişi</div>
-  </div>
-</div>
+<h2>Neden yapıyoruz?</h2>
+<p>Bir şirketi anlamak için gereken rakamlar bilançolara, KAP bildirimlerine ve fiyat grafiğine dağılmış durumda. BorsaPusula bunları tek sayfada, sade Türkçeyle bir araya getirir. Temel analiz ana eksendir; trend yalnızca zamanlamaya yardım eder.</p>
+<p>Tahmin ya da işlem önerisi vermiyoruz. Şirketi betimliyoruz; kararı size bırakıyoruz.</p>
 
-<!-- ── PROJE AMACI ────────────────────────────────────────────── -->
-{# bughunt-13.09 (finansal-analist workflow §2.8): 2 paragraf pazarlama-nesri
-   yukarıdaki stats-row'da zaten capsule formda olan bilgiyi (hisse sayısı,
-   EOD güncelleme, indikatör sayısı) tekrarlıyordu — tek cümleye indirildi. #}
-<h2>Proje Amacı</h2>
-<p>
-  İnsan yorumu yok — her sinyal <strong>tamamen algoritmik</strong>. Amaç: 30 saniyede
-  "hangi hisselerde trend güçlü?" sorusuna cevap.
-</p>
+<h2>Puanlar nasıl hesaplanır?</h2>
+<p>Her sorunun hangi rakamlarla, hangi eşiklerle cevaplandığı ve skorun nasıl birleştiği örnekleriyle <a href="/metodoloji" class="da-link">Metodoloji</a> sayfasında.</p>
 
-<!-- ── SİNYAL METODOLOJİSİ ───────────────────────────────────── -->
-<h2>Sinyal Metodolojisi</h2>
-<div class="method-box da-panel da-panel--accent">
-  <p style="color:var(--bp-text2);font-size:var(--bp-text-base);margin-bottom:8px">
-    Her hisse için 3 teknik gösterge (Supertrend, ADX ailesi, EMA) — toplam 4 koşul — aynı anda değerlendiriliyor:
-  </p>
-  <div class="method-formula">
-Güçlü Trend  →  Supertrend(10,3) yukarı<br>
-               +  ADX(14) ≥ 25          <br>
-               +  DI+ &gt; DI−            <br>
-               +  EMA12 &gt; EMA99       <br><br>
-Trend Bozuldu  →  Supertrend aşağı         <br>
-               +  ADX(14) ≥ 25          <br>
-               +  DI− &gt; DI+            <br>
-               +  EMA12 &lt; EMA99
-  </div>
-  <p style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-top:8px;margin-bottom:0">
-    Haftalık trend yönü ek filtre olarak kullanılır; trend dönüş seviyesi Supertrend alt/üst bandından hesaplanır.
-    Detaylı metodoloji için <a href="/metodoloji" class="da-link">Metodoloji sayfasına</a> bakın.
-  </p>
-</div>
-
-<!-- ── PLATFORM KAPSAMI ───────────────────────────────────────── -->
-<h2>Platform Kapsamı</h2>
-<div class="market-grid">
-  <div class="market-card da-panel">
-    <div class="market-card-title"><span aria-hidden="true">🇹🇷</span> BIST100 + ek hisseler</div>
-    <ul>
-      <li>{{ bist_count }} hisse, sektör filtreleri</li>
-      <li>BIST30 ve BIST100 endeks grafikleri</li>
-      <li>KAP bildirim entegrasyonu</li>
-      <li>Bilanço takvimi</li>
-    </ul>
-  </div>
-</div>
-
-<!-- ── ÖZELLİKLER ────────────────────────────────────────────── -->
-<h2>Ne Sunuyor?</h2>
-<div class="feature-grid">
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">📊</span></div>
-    <div>
-      <div class="feature-title">Sinyal Paneli</div>
-      <div class="feature-desc">{{ bist_count }} BIST hissesinin güncel trend durumu ve trend dönüş seviyeleri tek sayfada.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">📈</span></div>
-    <div>
-      <div class="feature-title">Hisse Detay Sayfası</div>
-      <div class="feature-desc">Bireysel grafik (2 yıl geçmiş), Supertrend + EMA çakıştırması, sinyal geçmişi, KAP haberleri, AI haber özeti.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">🔍</span></div>
-    <div>
-      <div class="feature-title">Hisse Tarayıcı</div>
-      <div class="feature-desc">İki sekme: <strong>Teknik</strong> (sinyal tipi, ADX, sektör, fiyat aralığı) ve <strong>Temel</strong> (temel skor bandı, min temel skor, sektör, fiyat, teknik sinyal). Kriterlere uyan hisseleri listele, sırala, CSV olarak indir.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">🔥</span></div>
-    <div>
-      <div class="feature-title">En Yüksek Teknik Güç Skorları</div>
-      <div class="feature-desc">Ana sayfadaki &laquo;Güçlü Trend'de en yüksek skorlar&raquo; vitrini: Güçlü Trend sinyali olan hisseler, Teknik Güç Skoru'na göre sıralı.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">📰</span></div>
-    <div>
-      <div class="feature-title">Piyasa Gündem Merkezi</div>
-      <div class="feature-desc">Son seansta durum değiştiren hisseler, en güçlü trendler (ADX sıralamalı), makro haberler ve ekonomik takvim.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">⇌</span></div>
-    <div>
-      <div class="feature-title">Hisse Karşılaştırma</div>
-      <div class="feature-desc">Birden fazla hisseyi yan yana karşılaştır. Teknik tarafta sinyal, ADX, RSI, Supertrend seviyesi ve trend durumu; temel tarafta F/K, F/DD, HBK, ROE, temettü verimi ve piyasa değeri; ayrıca her iki skor.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">💼</span></div>
-    <div>
-      <div class="feature-title">Portföy Takibi</div>
-      {# K-CE (22.09): "anlık değer" AYNI SAYFANIN 228. satiriyla celisiyordu
-   ("Fiyatlar gerçek zamanlı değildir: ... son kapanış"). 62 satir arayla
-   iki zit beyan. Site kanonu "son kapanış/güncel". #}
-      <div class="feature-desc">Yerel tarayıcıda (localStorage) portföy oluştur; maliyet, güncel değer, kâr/zarar ve sinyal durumunu takip et.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">📅</span></div>
-    <div>
-      <div class="feature-title">Bilanço Takvimi</div>
-      <div class="feature-desc">BIST şirketlerinin (BIST100 + ek hisseler) çeyreklik finansal sonuç açıklama dönemleri; sinyal durumlarıyla birlikte gösterim.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">🗺️</span></div>
-    <div>
-      <div class="feature-title">Sektör Isı Haritası</div>
-      <div class="feature-desc">Hangi sektörde güçlü trend yoğunluğu var? Tüm BIST sektörlerini sinyal dağılımına göre görsel haritada gör.</div>
-    </div>
-  </div>
-  <div class="feature-card da-panel">
-    <div class="feature-icon"><span aria-hidden="true">🤖</span></div>
-    <div>
-      <div class="feature-title">AI Haber Özeti</div>
-      <div class="feature-desc">Hisse başına güncel haberlerin yapay zekâ ile derlenmiş kısa özeti.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── TEKNOLOJİLER ──────────────────────────────────────────── -->
-<h2>Kullanılan Teknolojiler</h2>
-<div class="tech-grid">
-  <div class="tech-card da-panel">
-    <div class="tech-name">Python / Flask</div>
-    <div class="tech-desc">Backend, sinyal motoru, REST API</div>
-  </div>
-  <div class="tech-card da-panel">
-    <div class="tech-name">Pandas / NumPy</div>
-    <div class="tech-desc">Veri işleme, indikatör hesaplama</div>
-  </div>
-  <div class="tech-card da-panel">
-    <div class="tech-name">Lightweight Charts</div>
-    <div class="tech-desc">TradingView açık kaynak grafik kütüphanesi</div>
-  </div>
-  <div class="tech-card da-panel">
-    <div class="tech-name">Service Worker / PWA</div>
-    <div class="tech-desc">Çevrimdışı destek, hızlı yükleme önbelleği</div>
-  </div>
-</div>
-
-<!-- ── VERİ KAYNAKLARI ────────────────────────────────────────── -->
-<h2>Veri Kaynakları ve Güncellik</h2>
+<h2>Veriler ne zaman güncellenir?</h2>
 <ul>
-  <li><strong>Fiyat verisi:</strong> Gün sonu fiyatları. Fiyatlar gerçek zamanlı değildir: sitede gösterilen değerler <strong>son kapanışa</strong> (gün sonu / EOD) aittir, seans içinde güncellenmez.</li>
-  <li><strong>Sinyal hesaplama:</strong> Günde bir kez, piyasa kapanışından sonra (~18:00–18:30 TR) sunucu tarafında yenilenir</li>
-  <li><strong>BIST kapsamı:</strong> {{ bist_count }} hisse (BIST100 + ek hisseler), 13 sektör</li>
-  <li><strong>KAP haberleri:</strong> KAP bildirimleri hisse sayfalarında gösterilir (30 dakikada bir güncellenir)</li>
-  <li><strong>Yapay zekâ haber özeti:</strong> Hisse başına 6 saatte bir yenilenir</li>
+  <li>Her iş günü seans kapanışından sonra bir kez. Sitedeki fiyatlar <strong>son kapanışa</strong> aittir; seans içinde değişmez.</li>
+  <li>Finansal veriler şirketlerin KAP'ta açıkladığı son rapordan gelir; yeni rapor açıklandığında güncellenir. Kendi tahminimizi ya da düzeltmemizi eklemeyiz.</li>
+  <li>Kapsam: <span class="da-num">{{ bist_count }}</span> BIST şirketi. BIST100'ün tamamından başlayarak kademeli olarak genişliyor; raporlarında puan için gereken kalemler olmayan şirkete temel skor verilmez.</li>
 </ul>
 
-<!-- ── YOL HARİTASI ──────────────────────────────────────────── -->
-<h2>Yol Haritası</h2>
-<ul class="roadmap-list">
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST100 sinyal motoru (Supertrend + ADX + EMA)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST30 / BIST100 endeks grafikleri</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bireysel hisse sayfaları ({{ bist_count }} hisse)</span></li>
-  <li><span class="rl-todo"><span role="img" aria-label="Retire edildi"><span aria-hidden="true">🔚</span></span></span> <span>Canlı fiyat akışı (SSE) — EOD-only mimariye geçişle retire edildi</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal geçmişi tablosu</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hacim grafiği + 52-hafta aralık barı</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Günlük özet sayfası</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>SEO altyapısı (sitemap, meta tags, JSON-LD)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sektör filtreleri ve sektör ısı haritası</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Yapay zekâ haber özeti</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Piyasa Gündem Merkezi</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Tarayıcı (ADX / sektör / fiyat filtreli)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Ana sayfa &laquo;Güçlü Trend'de en yüksek skorlar&raquo; vitrini (Teknik Güç Skoru sıralamalı)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Portföy Takibi (localStorage)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bilanço Takvimi (çeyreklik finansal sonuç tarihleri)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Karşılaştırma (yan yana teknik metrikler)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Blog — teknik analiz içerikleri</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>PWA (Service Worker, çevrimdışı destek)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal değişikliği bildirimleri</span></li>
-  <li><span class="rl-todo"><span role="img" aria-label="Planlanan"><span aria-hidden="true">💡</span></span></span> <span>Sosyal paylaşım (sinyal kartı görseli)</span></li>
-</ul>
-
-<!-- ── ÖNEMLİ UYARI ──────────────────────────────────────────── -->
-<h2>Önemli Uyarı</h2>
-<div class="warning-box da-panel da-panel--accent">
-  <p>
-    Bu platform <strong>yalnızca bilgilendirme amaçlıdır</strong>. Herhangi bir otomatik emir
-    verilmez, yatırım tavsiyesi sunulmaz.
-    <strong>geçmiş performans gelecek getiriyi garanti etmez.</strong>
-  </p>
-  <p>
-    Tüm yatırım kararları kişisel araştırma ve gerektiğinde <strong>lisanslı finansal danışmanlık</strong>
-    gerektirmektedir. Sermayenizi kaybetme riskiniz her zaman mevcuttur. BorsaPusula,
-    herhangi bir işlemden doğabilecek kayıplardan sorumlu tutulamaz.
-  </p>
-</div>
+<h2>Kim yapıyor?</h2>
+<p>BorsaPusula bağımsız bir ekip tarafından geliştiriliyor. Herhangi bir aracı kurum, banka ya da SPK lisanslı kuruluşla bağlantımız yok. Soru, düzeltme ya da öneriniz için <a href="/iletisim" class="da-link">İletişim</a> sayfasından yazabilirsiniz; hukuki çerçeve <a href="/yasal" class="da-link">Yasal Uyarı</a> sayfasında.</p>
 
 </article>
 </main>
@@ -268,10 +72,10 @@ Trend Bozuldu  →  Supertrend aşağı         <br>
 {% with ftr_self='/hakkinda' %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

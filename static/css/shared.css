@@ -32,7 +32,7 @@ textarea {
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index:var(--bp-z-sticky);
-    background: rgba(var(--bp-bg-rgb),0.99);
+    background: var(--bp-bg); /* C-71 K37: opak yapışkan yüzey (0,99 alfa + blur yok = sızıntı) */
     border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -49,46 +49,14 @@ textarea {
   .mbn-icon svg { width: 22px; height: 22px; stroke-width: 1.85; }
   .mbn-label { line-height: 1; white-space: nowrap; }
   .mbn-item:active .mbn-icon { transform: scale(0.85); }
-  .mbn-item.active { color: var(--bp-al); }
+  .mbn-item.active { color: var(--bp-brand); }
   .mbn-item.active::before {
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 28px; height: 3px;
-    background: var(--bp-al); border-radius: 0 0 3px 3px;
-    box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
+    background: var(--bp-brand); border-radius: 0 0 3px 3px;
+    box-shadow: 0 0 10px rgba(var(--bp-brand-rgb),.55);
   }
-  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
-  /* Badge dot — CPO-DEV2-054 Faz 1: push kaldırıldı, hiçbir JS artık göstermiyor, kalıcı gizli */
-  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: var(--bp-z-sheet-backdrop); opacity: 0; transition: opacity .25s ease; }
-  .mbn-sheet-backdrop.open { display: block; opacity: 1; }
-  .mbn-sheet {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-sheet);
-    background: var(--bp-surface); border-top: 1px solid var(--bp-border);
-    border-radius: 16px 16px 0 0;
-    transform: translateY(100%);
-    transition: transform .32s cubic-bezier(.32,.72,0,1);
-    padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
-    max-height: 75vh; overflow-y: auto;
-    box-shadow: var(--bp-shadow-up-lg);
-  }
-  .mbn-sheet.open { transform: translateY(0); }
-  .mbn-sheet-handle { width: 40px; height: 4px; background: var(--bp-border2); border-radius:var(--bp-radius-xs); margin: 4px auto 14px; }
-  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
-  .mbn-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  @media (max-width: 360px) { .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); } }
-  .mbn-sheet-item {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 7px; text-decoration: none; color: var(--bp-text);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
-    padding: 14px 6px; font-size: var(--bp-text-xs); font-weight: 600;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: 0.1px; min-height: 70px;
-    transition: background .15s, border-color .15s, transform .1s;
-    text-align: center;
-  }
-  .mbn-sheet-item svg { width: 22px; height: 22px; color: var(--bp-brand); stroke-width: 1.85; }
-  .mbn-sheet-item:active { transform: scale(0.96); background: var(--bp-surface3); border-color: var(--bp-border2); }
-  .mbn-sheet-item.active { border-color: var(--bp-al); color: var(--bp-al); }
-  .mbn-sheet-item.active svg { color: var(--bp-al); filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); }
+  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-brand-rgb),.45)); stroke-width: 2.1; }
   /* T2.4 — kanonik kirilim 900px'te TEK (eskiden 768px, .bp-main-nav'in
      900px esiginden farkliydi; 769-900px araliginda IKI nav da gizliydi,
      bkz. master-donusum-programi §5 satir 4 / DEV2-021). */
@@ -317,3 +285,60 @@ html {
   .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; }
   html body { padding-bottom: calc(52px + 6px + env(safe-area-inset-bottom, 0px)) !important; }
 }
+
+/* ── Makro şerit: TEK KAYNAK (C-15) ──────────────────────────────────────────
+   Önceden 11 sayfa CSS'inde ayrı kopya vardı (yazı boyu/kenarlık/etiket rengi
+   sayfadan sayfaya kayıyordu). Sayfa CSS'inde `.macro-bar`, `.macro-item`,
+   `.macro-pause-btn`, `.header-search-btn` yazılmaz; ana sayfanın "Piyasalar"
+   rozetli çeşidi `.macro-bar--home`. Arama düğmesinin görünümü
+   `_bp_critical_css.html`te, hover'ı `bp-search.js`te (kapı: canon-css-dup-check). */
+.macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
+.macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
+.macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+.macro-bar::after  { right:32px; background:linear-gradient(to left,var(--bp-bg),transparent); }
+.macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; will-change:transform; height:32px; }
+@media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state:paused; } }
+@keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+/* K-AZ: `top:50%` şeridin safe-area dolgusunu da içeren kutusuna göre ortalıyordu
+   (PWA'da düğmenin üstü çentiğin altında kalıyordu); dolgunun yarısı geri eklendi. */
+.macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1; cursor:pointer; padding:0; }
+.macro-pause-btn:hover, .macro-pause-btn:focus-visible { color:var(--bp-text); }
+.macro-pause-btn svg { width:12px; height:12px; }
+.macro-pause-btn[aria-pressed="true"] .mp-pause, .macro-pause-btn:not([aria-pressed="true"]) .mp-play { display:none; }
+.macro-bar[data-paused="true"] .macro-track { animation-play-state:paused !important; }
+.macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit; }
+.macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+
+/* ── Ana sayfa çeşidi (.macro-bar--home, eski index.css) ──
+   CPO-1558: onaylı mockup'ta makro şerit header'ın ÜSTÜNDE — sıra değişti,
+   şimdi #macroBar top:0'a sabitleniyor, header hemen altına (top:32px).
+   Ayrıca: .macro-live ("Canlı" rozeti) z-index'i yoktu, #macroTrack'in
+   transform:translateX ile kayan marquee'si (yeni stacking context) DOM
+   sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
+   (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
+.macro-bar--home{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
+.macro-bar--home::before,.macro-bar--home::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
+.macro-bar--home::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
+.macro-bar--home::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
+.macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
+/* C-03: nabız ve camgöbeği ışıma "canlı akış" izlenimi veriyordu (veri EOD) → sabit nötr nokta. */
+.macro-bar--home .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text3);flex:none}
+.macro-bar--home .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
+.macro-bar--home:hover .macro-track{animation-play-state:paused}
+@keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.macro-bar--home[data-paused="true"] .macro-track{animation-play-state:paused !important}
+.macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-border);color:var(--bp-text)}
+.macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text2);letter-spacing:.2px}
+/* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
+   24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
+.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text3);font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
+.macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
+/* ── Sayfa kabı: TEK KAYNAK (C-15) ───────────────────────────────────────────
+   Önceden 14 sayfa CSS'inde ayrı `.container` vardı (578/680/820/860/1100/
+   1200/1400 genişlik, 10-40px iç boşluk karışık). Sayfa CSS'inde `.container`
+   yazılmaz; genişlik 3 token: varsayılan uygulama 1200, `container--read`
+   (metin sayfaları) 760, `container--wide` (hisse, ısı haritası) 1360. */
+.container { max-width: var(--bp-container-app); margin: 0 auto; padding: 24px; }
+.container--read { max-width: var(--bp-container-read); }
+.container--wide { max-width: var(--bp-container-wide); }
+@media (max-width: 600px) { .container { padding: 16px; } }

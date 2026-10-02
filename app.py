@@ -10,11 +10,13 @@ if 'gevent' in _sys.modules or any('gunicorn' in arg for arg in _sys.argv):
 import socket as _socket
 _socket.setdefaulttimeout(8)   # CPO-505: 20→8s (uzun yfinance hang -w4 satürasyon yapıyordu)
 
-from flask import Flask, jsonify, render_template, Response, request, abort, redirect
+from flask import Flask, jsonify, render_template, Response, request, abort, redirect, send_file
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from indicators import compute_ema, compute_adx, compute_rsi, compute_atr, compute_supertrend
+# D-09: Teknik Güç ve sinyal kuralı tek kaynak (yerelde test edilir; zorunlu import)
+from business_rules import compose_score, trend_flags, classify_signal, signal_from_indicators, build_signal_conditions
 from datetime import datetime, date, timedelta, timezone
 
 # Türkiye saati: UTC+3, DST yok (2016'dan beri sabit)
@@ -42,13 +44,19 @@ import requests
 import official_close   # D-04: resmi kapanış (BIST bülteni)
 import kapsam           # D-43a: analiz kapsamı dışındaki paylar (O18=A)
 import heatmap          # D-42: BIST100 ısı haritası (gün sonu, donmuş)
+import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /harita gün sayfası bağlamı
+import bulten           # D-45(c): Akşam Bülteni (gün sonu, donmuş; /api/bulten/<tarih>)
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
+import home_fields      # D-53: ana sayfa SSR alanları (öne çıkan şirketler, Finansallar betimi, değerleme hükmü)
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
 import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bayrağıyla
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
+import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
+import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
+import accounts as _accounts  # D-50: hesap çekirdeği (şifresiz e-posta kodu, oturum, liste, portföy)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG
@@ -71,7 +79,7 @@ def _tr_day_month(d):
 
 
 # ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
-from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
+from _alerts       import _check_api_stale, _format_alert_md, _should_send_alert
 from _health_extras import _extend_health_payload, _check_health_loop_stall
 from _guards       import _is_valid_fundamentals, _is_valid_chart, _is_valid_macro, _is_valid_disk_cache
 
@@ -164,69 +172,20 @@ except ImportError as _fhs_import_err:
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("financial_health_score unavailable: %s", _fhs_import_err)
 
-# ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
-_SENTRY_AVAILABLE = False
-
-# CPO-1690: SENTRY_DSN prod'da hiç set değil (motor hiç çalışmıyor) ve
-# @app.errorhandler(500) hiçbir yere tek satır bile yazmıyordu — kaç 500
-# döndüğü hiçbir yüzeyden görünmüyordu. DSN gerçek bir hesap/kayıt istediği
-# için burada icat edilemez; bunun yerine worker-local, dosyasız bir sayaç
+# CPO-1690: @app.errorhandler(500) hiçbir yere tek satır bile yazmıyordu — kaç 500
+# döndüğü hiçbir yüzeyden görünmüyordu. Worker-local, dosyasız sayaç
 # (news_queue_worker_local ile aynı desen) + errorhandler'da logger.exception.
+# D-13: Sentry kodu silindi (DSN prod'da hiç set değildi); alarm tek kanal: e-posta.
 _5xx_error_stats = {"count": 0, "last_ts": 0.0, "last_path": None}
-
-# CPO-1561 P0: abone auth token'ı (/profil?t=, /unsubscribe/<token>) hem query
-# string hem path segment'i olarak Sentry transaction/event URL'lerine ham
-# haliyle gidiyordu (send_default_pii kapalı olsa da request.url zaten
-# scrub edilmiyordu). Token formatı secrets.token_hex(20/24) -> 32+ karakter
-# hex string; hem "t=<hex>" query param'ı hem "/unsubscribe/<hex>" path
-# segment'ini [REDACTED] ile değiştiriyoruz.
-_SENTRY_TOKEN_QS_RE = re.compile(r"([?&]t=)[0-9a-fA-F]{16,}")
-_SENTRY_TOKEN_PATH_RE = re.compile(r"(/unsubscribe/)[0-9a-fA-F]{16,}")
-
-def _sentry_scrub_url(url: str) -> str:
-    if not url:
-        return url
-    url = _SENTRY_TOKEN_QS_RE.sub(r"\1[REDACTED]", url)
-    url = _SENTRY_TOKEN_PATH_RE.sub(r"\1[REDACTED]", url)
-    return url
-
-def _sentry_before_send(event, hint):
-    try:
-        req = event.get("request")
-        if isinstance(req, dict):
-            if req.get("url"):
-                req["url"] = _sentry_scrub_url(req["url"])
-            if req.get("query_string"):
-                req["query_string"] = _sentry_scrub_url("?" + req["query_string"]).lstrip("?")
-        for bc in (event.get("breadcrumbs") or {}).get("values", []):
-            data = bc.get("data")
-            if isinstance(data, dict) and data.get("url"):
-                data["url"] = _sentry_scrub_url(data["url"])
-    except Exception:
-        pass
-    return event
-
-try:
-    import sentry_sdk as _sentry_sdk
-    _sentry_dsn = os.environ.get("SENTRY_DSN", "")
-    if _sentry_dsn:
-        _sentry_sdk.init(
-            dsn=_sentry_dsn,
-            traces_sample_rate=0.1,
-            environment=os.environ.get("FLASK_ENV", "production"),
-            before_send=_sentry_before_send,
-            before_send_transaction=_sentry_before_send,
-        )
-        _SENTRY_AVAILABLE = True
-except ImportError:
-    pass
 
 # ── Faz 12 P2.4 Multi-tier alerting ──────────────────────────────────────────
 try:
-    from alerting import emit_alert as _dqv_alert
+    from alerting import emit_alert as _dqv_alert, send_ops_email as alerting_send_ops_email
     _ALERTING_AVAILABLE = True
 except ImportError as _alerting_err:
     _ALERTING_AVAILABLE = False
+    def alerting_send_ops_email(subject, text):
+        return False
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("alerting unavailable: %s", _alerting_err)
 
@@ -266,8 +225,6 @@ limiter = Limiter(
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "").strip()
-# MSG-019B: admin endpoint token (mail credential ile decoupled — least privilege)
-ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
 
 def require_admin():
     """Bulgu 5 (danışman audit) fix: ADMIN_SECRET boşsa endpoint KAPALI (503).
@@ -521,6 +478,9 @@ def _fetch_intraday_subprocess(ticker_base, timeout=20):
     return _fetch_daily_subprocess(ticker_base, period="5d", interval="1m", timeout=timeout)
 
 
+_MACRO_PREV_DAILY = {}         # D-49: vadeli (=F) + BIST endeksi -> (ts, günlük bar önceki kapanış)
+_MACRO_PREV_DAILY_TTL = 1800   # sn; günlük bar günde bir değişir, Yahoo çağrısı azaltılır
+
 _MACRO_SLOW_MS = 2000  # CPO-740 Görev 12c: >2s uyarı (macro baseline ~650ms × 3)
 
 def _fetch_macro_one_subprocess(label, sym, timeout=10):
@@ -531,10 +491,14 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
+    _is_fut_contract = sym.endswith("=F")  # D-P0-2809a: gercek vadeli kontrat (devir riski)
+    _fut = _is_fut_contract or sym in ("XU100.IS", "XU030.IS")  # D-49: endeks de /api/data ile ayni gunluk bar tabani
+    _cached = _MACRO_PREV_DAILY.get(sym)
+    _need_daily = _fut and (not _cached or time.time() - _cached[0] > _MACRO_PREV_DAILY_TTL)
     try:
         result = subprocess.run(
-            [_sys.executable, _YF_MACRO_SCRIPT, sym],
-            capture_output=True, text=True, timeout=timeout,
+            [_sys.executable, _YF_MACRO_SCRIPT, sym] + (["daily"] if _need_daily else []),
+            capture_output=True, text=True, timeout=timeout + (5 if _need_daily else 0),
         )
         _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
@@ -544,7 +508,30 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         data = json.loads(result.stdout)
         price = data.get("price")
         prev = data.get("prev_close")
+        pct = data.get("pct")  # D-P0-2809a: yalniz =F icin dolu, regularMarketChangePercent
+        if _is_fut_contract and data.get("prev_pct") is not None:
+            # Birincil kaynak: Yahoo'nun aynı-kontrat hesabı — sürekli seri devrinden etkilenmez
+            prev = data["prev_pct"]
+        elif _fut:
+            if data.get("prev_daily") is not None:
+                # =F icin yalniz ayni kontrat testi (same_contract) gecerse guncelle;
+                # anahtar yoksa (eski cagri seklikli mock/test) guven — geriye uyumluluk.
+                if not _is_fut_contract or data.get("same_contract", True):
+                    _MACRO_PREV_DAILY[sym] = (time.time(), float(data["prev_daily"]))
+            if sym in _MACRO_PREV_DAILY:
+                prev = _MACRO_PREV_DAILY[sym][1]
         if not price or not prev or prev == 0:
+            return None
+        change = round((float(price) - float(prev)) / float(prev) * 100, 2)
+        if _is_fut_contract and pct is not None and abs(change) > 6 and abs(change - pct) > 1:
+            # Kontrat devri belirsizliği: hesaplanan degisim buyuk ve Yahoo'nun kendi
+            # pct'siyle uyusmuyor — guvenilmez, eski cache degeri korunur.
+            logger.warning("yf_macro_fetch %s implausible change=%.2f%% vs pct=%.2f%% — cache korunur",
+                            sym, change, pct)
+            with _lock:
+                for _it in (_macro_cache.get("data") or []):
+                    if _it.get("label") == label:
+                        return dict(_it)
             return None
         logger.debug("yf_macro_fetch %s: %.0fms", sym, _ms)
         if _ms > _MACRO_SLOW_MS:
@@ -552,7 +539,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         return {
             "label": label,
             "price": round(float(price), 2),
-            "change": round((float(price) - float(prev)) / float(prev) * 100, 2),
+            "change": change,
         }
     except subprocess.TimeoutExpired:
         _yahoo_cb_record(False, timeout=True)
@@ -713,7 +700,6 @@ def tr_num_filter(value):
 # Şablonlar eskiden `{{ s.signal_bars }} gün` yazıyordu. signal_bars bir BAR
 # sayacıdır: hafta sonlarını ve ticker'ın tazelenemediği günleri atlar, bu
 # yüzden "gün" birimiyle sunulduğunda yanlıştı. Kanonik eksen signal_date.
-
 
 
 @app.template_filter('signal_age_text')
@@ -925,8 +911,8 @@ INDEX_TICKERS = {"XU030", "XU100"}
 BIST_STOCK_COUNT = len([t for t in BIST100 if t not in INDEX_TICKERS])
 # CPO-1533: gerçek BIST30 endeks bileşenleri (BIST30 adı yukarıda BIST100'e
 # alias'landığı için ayrı isim) — Gemini kotası paylaşan işlerde (health-explain)
-# evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 3 yerde (backtest,
-# earnings-refresh, bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
+# evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 2 yerde (earnings-refresh,
+# bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
 # CPO-1596: 2026 Q3 revizyonuyla gerçek BIST30 28 değil 30 üye (DSTKF/TRALT
 # eklendi, ARCLK/HEKTS/ODAS/OYAKC/SOKM/TKFEN çıktı) — TradingView + Midas
 # çapraz doğrulandı, yfinance veri kaynağı da teyit edildi (2026-09-11).
@@ -1371,12 +1357,30 @@ def _get_kap_uuid(ticker: str) -> str | None:
 _kap_cache: dict = {}          # {ticker: {"data": [...], "ts": float}}
 _KAP_CACHE_TTL = 1800          # 30 dakika
 
+# D-45: tüm analiz evreninin KAP akışı (tek kaynak) + Gündem. Mantık modüllerde, burada ince bağlantı.
+import kap_feed  # noqa: E402
+import haber_gundem  # noqa: E402
+import haber_v2  # noqa: E402  D-56: Haberler v2 (sekmeler, /haberler/bildirimler, gunun hikayesi)
+_KAP_STORE = kap_feed.Store()
 
-def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
-    """Ticker için son N günlük KAP bildirimlerini çeker (ODA + FR)."""
+
+def fetch_kap_disclosures(ticker: str, days: int = 365) -> list:
+    """Ticker için son N günlük KAP bildirimleri (ODA + FR) — D-45: TEK KAYNAK.
+
+    Akış deposu (data/kap_feed, bist30-macro sürecindeki kap-feed döngüsü doldurur) varsa
+    /haberler akışıyla AYNI kayıtlar okunur: üye eşleme (yayınlayanın kodu; başka üyenin
+    "ilgili şirket" listesi hisseye yazılmaz), kodlama temizliği ("?" → kesme işareti,
+    sondaki \\n) ve 1 yıllık derinlik (eskiden ~90 gün). Depo yoksa (ilk kurulum, geri
+    besleme bitmeden) eski canlı sorgu aynı normalize() süzgecinden geçer."""
+    try:
+        if _KAP_STORE.available() and _KAP_STORE.meta().get("backfill_done"):
+            return kap_feed.legacy_rows(kap_feed.for_ticker(_KAP_STORE.all_items(), ticker, days=days))
+    except Exception as e:  # depo okunamazsa canlı sorguya düş (sayfa boş kalmasın)
+        logger.warning("fetch_kap_disclosures(%s): depo okunamadı: %s", ticker, e)
     uuid = _get_kap_uuid(ticker)
     if not uuid:
         return []
+    days = min(days, 360)  # KAP listesi en fazla 1 yıllık aralık kabul ediyor
 
     H = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -1404,29 +1408,14 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
                 json=payload, headers=H, timeout=12
             )
             if r.status_code == 200:
-                items = r.json() or []
-                for item in items:
-                    results.append({
-                        "date":    item.get("publishDate", ""),
-                        "summary": item.get("summary", ""),
-                        "subject": item.get("subject", ""),
-                        "class":   disc_class,
-                        "type":    item.get("disclosureType", ""),
-                        "index":   item.get("disclosureIndex"),
-                        "url":     f"https://www.kap.org.tr/tr/Bildirim/{item.get('disclosureIndex')}",
-                        "late":    item.get("isLate", False),
-                    })
+                for item in (r.json() or []):
+                    it = kap_feed.normalize(item, {ticker})   # D-45: üye eşleme + kodlama
+                    if it:
+                        results.append(it)
         except Exception as e:
             logger.warning("fetch_kap_disclosures(%s, %s): %s", ticker, disc_class, e)
-
-    # En yeni tarihe göre sırala
-    def _parse_date(d):
-        try:
-            return datetime.strptime(d, "%d.%m.%Y %H:%M:%S")
-        except Exception:
-            return datetime.min
-    results.sort(key=lambda x: _parse_date(x["date"]), reverse=True)
-    return results
+    results.sort(key=lambda x: (x["ts"], x["id"]), reverse=True)
+    return kap_feed.legacy_rows(results)
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 # D-23: sektör kovası KAP resmi alt sektöründen (sector_taxonomy.py: 23 kova, BIST sektör
@@ -1480,7 +1469,6 @@ def _enrich_stock(s: dict) -> dict:
 
 _cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0, "loading": True}  # SPEC-008 v1.2 #39; loading=True cold-start sentinel (G25)
 _lock        = threading.Lock()
-_bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
 # ── Phase 3 #2 Paket 1 — api_stale globals ────────────────────────────────────
@@ -1493,7 +1481,7 @@ _APP_STARTUP_TS = time.time()
 
 # CPO-DEV2-035 P1-INTEGRITY-1: Sinyal Gecmisi her 15dk GUNCEL kodla yeniden
 # hesaplaniyor (kalici log degil) — algoritma degisince gecmis sessizce
-# degisebilir. Bu commit SHA'si /api/health ve backtest_cache.json'a eklenerek
+# degisebilir. Bu commit SHA'si /api/health'e eklenerek
 # "hangi kod anindan hesaplandi" en azindan gorunur olsun diye (tam birlestirme
 # ayri, dikkatli bir turda — bkz CPO-DEV2-035).
 try:
@@ -1503,6 +1491,26 @@ try:
     ).decode().strip()
 except Exception:
     _GIT_SHA = None
+
+# D-20: import yan etkisi yok. BP_ROLE=batch|shadow (araç, shadow_compare, test) modül
+# düzeyindeki daemon thread'lerini BAŞLATMAZ; import sonrası threading.active_count()==1.
+# Prod servisleri (bist30 / bist30-refresh / bist30-macro) BP_ROLE=batch|shadow taşımaz →
+# davranış birebir aynı (aynı sıra, aynı koşul).
+_NO_BG_THREADS = os.environ.get("BP_ROLE") in ("batch", "shadow")
+# D-16: BP_ROLE=shadow (tools/shadow_compare.py) prod kilitlerini/veri dosyalarını ASLA tutmaz:
+# _is_*_leader_blocking → False, paylaşılan kilit/durum dosyaları süreç-özel geçici dosyaya döner.
+_IS_SHADOW = os.environ.get("BP_ROLE") == "shadow"
+if _IS_SHADOW:  # yfinance/Gemini çağrısı yasak (web worker gibi yalnız disk-yükleme)
+    os.environ["REFRESH_WORKER"] = "web"
+
+
+def _bg_start(th):
+    """Modül düzeyi daemon thread başlatıcı; BP_ROLE=batch|shadow'da hiçbir şey yapmaz."""
+    if _NO_BG_THREADS:
+        return None
+    th.start()
+    return th
+
 
 # D-01b: /api/health tüm süreçlerin (web + macro + refresh) git sha'sını göstersin.
 # Web dışı süreçler açılışta kendi sha'sını dosyaya yazar, web okur; ölü pid elenir.
@@ -1656,7 +1664,7 @@ def _weekly_trend(ticker: str) -> int:
 
 
 def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
-    """Backtest ve sinyal-başlangıcı geriye-yürüme için lookahead-free haftalık
+    """Sinyal-başlangıcı geriye-yürüme için lookahead-free haftalık
     EMA20 yön serisi (CPO-1559 P0-1/P0-2). _weekly_trend()'in canlı gate'ini
     (haftalık EMA20 son iki değerin karşılaştırması) her gün için SADECE o güne
     kadarki veriyle taklit eder — gelecek veri sızıntısı (lookahead bias) yok.
@@ -1694,64 +1702,8 @@ def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
     return pd.Series(dirs, index=close.index)
 
 
-def compose_score(adx: float, vol_ratio: float, bull_score: int,
-                  confirmed: bool, rsi: float, signal: str = "AL") -> int:
-    """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
-
-    SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
-    yazılır (F5 AI Sentiment ±5 ayarıyla birlikte). Güçlü Trend listesi
-    (_mscore) ve hisse detay sayfası ikisi de bu TEK cache alanını okur —
-    ayrı ayrı yeniden hesaplama YASAK (CPO-983 puanlama tutarlılık fix, Site
-    Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36) — ve
-    SPEC-018 W2'de tier badge ataması da bu skora taşındı (CPO-1004).
-
-    CPO-DEV2-053 (2026-08-22): "Yön gücü" bileşeni (bull_or_bear_score/3*25)
-    kaldırıldı — 54 aktif sinyalin tamamında bull_score/bear_score istisnasız
-    =3 olduğu kanıtlandı (sinyal gate'i zaten 3/3 oybirliği şart koşuyor, ara
-    değer hiç yayınlanamıyor), yani bu bileşen aktif bir sinyal için hiçbir
-    ayrıştırıcı bilgi taşımıyordu — sabit +25 puanlık bir taban gibi
-    davranıyordu. bull_score parametresi imza uyumluluğu için tutuldu ama
-    artık skora katkısı yok.
-
-    Bileşenler (ham max 75, 100/75 ile 0-100'e yeniden ölçeklenir):
-        ADX       : min(adx, 50) / 50 * 30   → max 30
-        Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
-        Teyit     : +10 (signal_bars >= 3)
-        RSI bölge : AL  → +10 (50-75) | +5 (>75)
-                    SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
-                    önceki sürüm signal parametresi almıyordu, SAT sinyalinde de AL
-                    bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
-                    bonus alıyor, tier'ı yapay olarak şişiriyordu)
-
-    Tier eşikleri (bkz. _derive_tier — CPO-DEV2-053/055, 70/56 kesim):
-        70+ → Güçlü Sinyal | 56-69 → Standart | <56 → (rozet yok)
-        Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
-    """
-    import math
-
-    def _finite(v, default):
-        try:
-            v = float(v)
-        except (TypeError, ValueError):
-            return default
-        return v if math.isfinite(v) else default
-
-    s = 0.0
-    s += min(_finite(adx, 0), 50) / 50 * 30
-    s += min(_finite(vol_ratio, 1.0), 5) / 5 * 25
-    s += 10 if confirmed else 0
-    rsi = _finite(rsi, 50)
-    if signal == "SAT":
-        if 25 <= rsi <= 50:
-            s += 10
-        elif rsi < 25:
-            s += 5
-    else:
-        if 50 <= rsi <= 75:
-            s += 10
-        elif rsi > 75:
-            s += 5
-    return int(round(s * 100 / 75))
+# compose_score (Teknik Güç, CPO-535) D-09'da business_rules.py'ye taşındı —
+# yukarıdaki import; davranış birebir aynı (tests/test_d09_skor_sinyal.py).
 
 
 def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
@@ -1773,7 +1725,7 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
     tarama/hisse/karsilastir'de SAT'ı görsel olarak "güçlü/kazanan" gibi
     gösteriyordu (Ozan: "trend bozuldu bizim için güçlü bir sinyal olmasın").
     signal_strength (compose_score) ham DEĞERİ değişmedi — sadece bu türetilmiş
-    sunum/rozet bandı SAT için nötrleştirildi, analitik/backtest bütünlüğü ayrı.
+    sunum/rozet bandı SAT için nötrleştirildi, analitik bütünlük ayrı.
     """
     tier = None
     if signal == "AL":
@@ -1977,37 +1929,19 @@ def analyze(ticker_base):
                            ticker_base, change_pct)
             return None  # background_refresh prev_cache fallback'i devreye girer
 
-        # ── 3-Kriter Sinyal Motoru: ST + ADX≥25 + EMA12/99 ─────────────
-        st_bull  = st_val == 1
-        st_bear  = st_val == -1
-        adx_bull = adx_val >= 25 and di_p > di_m
-        adx_bear = adx_val >= 25 and di_m > di_p
-        e12_bull = e12 > e99
-        e12_bear = e12 < e99
+        # ── Sinyal motoru: kanon §3'ün 5 koşulu (D-09: business_rules tek kaynak) ──
+        _flags = trend_flags(st_val, adx_val, di_p, di_m, e12, e99)
+        st_bull,  st_bear  = _flags["st_bull"],  _flags["st_bear"]
+        adx_bull, adx_bear = _flags["adx_bull"], _flags["adx_bear"]
+        e12_bull, e12_bear = _flags["e12_bull"], _flags["e12_bear"]
         # CPO-1656 EK YANIT Seçenek B: ham fark yüzdesi + kararsızlık-bölgesi
         # rozeti — SADECE UI için, e12_bull/e12_bear karşılaştırması (yukarıda)
         # bu değerleri hiç kullanmaz, sinyal motoru değişmez.
         ema_diff_pct, ema_deadband = derive_ema_deadband(e12, e99)
 
-        bull_score = int(st_bull) + int(adx_bull) + int(e12_bull)  # max 3
-        bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)  # max 3
-
-        # Haftalık gate: büyük ters trendde sinyal üretme
-        # CPO-DEV2-039/040 P1-SIGNAL-1: CB açıkken weekly_dir=0 GERÇEK bir
-        # "yatay trend" ölçümü değil, _weekly_trend() hiç çağrılmadığı için
-        # (satır ~1683) yapay bir doldurma değeri — bu durumda weekly_dir=0'ı
-        # gate'in her iki yönde de "geçti" sayması fail-open bir mantık
-        # hatasıydı (veri kalitesi en düşükken ana-trend filtresi devre
-        # dışı kalıyordu). CPO-1496: `not _cb_skip` yalnızca CB-skip yolunu
-        # yakalıyordu — _weekly_trend()'in KENDİ <25-bar/exception fallback'i
-        # (CB kapalıyken de olabilir) de aynı weekly_dir=0'ı üretip gate'i
-        # atlatıyordu. weekly_dir != 0 her iki "hesaplanamadı" yolunu da kapsar.
-        if bull_score >= 3 and weekly_dir != -1 and weekly_dir != 0:
-            signal = "AL"
-        elif bear_score >= 3 and weekly_dir != 1 and weekly_dir != 0:
-            signal = "SAT"
-        else:
-            signal = "BEKLE"
+        # Haftalık kapı (weekly_dir == 0 → Yatay, fail-closed): classify_signal
+        # docstring'i (CPO-DEV2-039/040, CPO-1496).
+        signal, bull_score, bear_score = classify_signal(_flags, weekly_dir)
 
         # ── Sinyal tarihi & süre ─────────────────────────────────────────
         # CPO-1559 P0-2: bar_signal(i) eskiden ham 3-kriter hizalamasına
@@ -2021,18 +1955,8 @@ def analyze(ticker_base):
         weekly_dir_hist = _historical_weekly_dir_series(close)
 
         def bar_signal(i):
-            ei12  = float(ema12.iloc[i]);  ei99  = float(ema99.iloc[i])
-            ai    = float(adx.iloc[i])
-            dip_i = float(di_plus.iloc[i]); dim_i = float(di_minus.iloc[i])
-            sti   = int(supertrend.iloc[i])
-            wdir_i = int(weekly_dir_hist.iloc[i])
-            bs  = int(sti == 1)  + int(ai >= 25 and dip_i > dim_i) + int(ei12 > ei99)
-            brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
-            if bs >= 3 and wdir_i != -1 and wdir_i != 0:
-                return "AL"
-            elif brs >= 3 and wdir_i != 1 and wdir_i != 0:
-                return "SAT"
-            return "BEKLE"
+            return _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend,
+                                    weekly_dir_hist, i)
 
         today_str   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
         signal_date = today_str
@@ -2087,7 +2011,7 @@ def analyze(ticker_base):
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
-        # >= 1.20 → premium sinyal (backtest: Sharpe 0.01 → 2.35, Win Rate 30.1% → 50.7%)
+        # >= 1.20 → premium sinyal
         # CPO-1457 (30.08.2026): orijinal iddiayı üreten script kod tabanında
         # bulunamamıştı — tools/verify_premium_badge_backtest.py ile bağımsız
         # yeniden üretildi, yön/oran doğrulandı. CPO-1547 (09.09.2026): CPO-1543
@@ -2189,9 +2113,10 @@ def analyze(ticker_base):
             "change_pct":    round(change_pct, 2),
             "close_status":  "resmi" if _official_applied else "gecici",   # D-04
             "close_source":  official_close.SOURCE_LABEL if _official_applied else None,
-            # D-42: son barın tarihi (ısı haritası "bayat" = bar_date ≠ son EOD günü) ve dönem
-            # getirileri (1h/1a/YBB/1y) — fiyat/değişimle AYNI resmi-kapanış serisinden.
-            "bar_date":      close.index[-1].strftime("%Y-%m-%d"),
+            # D-42: dönem getirileri (1h/1a/YBB/1y) — fiyat/değişimle AYNI resmi-kapanış serisinden.
+            # Son barın tarihi aşağıdaki tek `bar_date` (D-06, GG.AA.YYYY); ısı haritası "bayat"
+            # kıyası heatmap.iso_day ile yapar (D-54: burada ikinci bir ISO `bar_date` anahtarı
+            # vardı, sözlükte sonraki anahtar kazandığı için hiç yayınlanmıyordu).
             "period_ret":    heatmap.period_returns(
                 [(_ts.strftime("%Y-%m-%d"), float(_c)) for _ts, _c in close.iloc[-300:].items()]),
             "signal":        signal,
@@ -2232,8 +2157,8 @@ def analyze(ticker_base):
                     "bull":  st_bull,  "bear": st_bear,
                 },
                 "adx": {
-                    "label": f"ADX {adx_val:.0f}",
-                    "value": f"DI+{di_p:.0f}/DI-{di_m:.0f}",
+                    "label": f"ADX {_tr1(adx_val)}",
+                    "value": f"DI+{_tr1(di_p)}/DI-{_tr1(di_m)}",
                     "bull":  adx_bull, "bear": adx_bear,
                 },
                 "ema1299": {
@@ -2244,6 +2169,9 @@ def analyze(ticker_base):
                     "deadband": ema_deadband,   # True => "kararsızlık bölgesi", sinyal siniflandirmasi degismez
                 },
             },
+            # D-47: sinyal kuralları tak-çıkar — kanonun 5 koşulu, business_rules.
+            # SIGNAL_CONDITIONS kaydından (indicators'ı DEĞİŞTİRMEZ, ek alan).
+            "conditions":      build_signal_conditions(st_val, adx_val, di_p, di_m, e12, e99, weekly_dir),
             "rsi":             rsi_val,
             "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
             "earnings_warning": earnings_warning,  # Faz 1 #5: 7 gün içinde bilanço uyarısı
@@ -2259,16 +2187,6 @@ def analyze(ticker_base):
         return None
 
 
-# ── Telegram Bildirim ─────────────────────────────────────────────────────────
-TELEGRAM_BOT_TOKEN  = os.environ.get("TELEGRAM_BOT_TOKEN",  "")
-TELEGRAM_CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID", "")
-if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-    # CPO-1260-B P1: önceden _send_telegram() sessizce return ediyordu — hiçbir
-    # log/exception/sayaç yoktu, aylarca kanalın ölü olduğu fark edilmedi
-    # (journald'da tek bir gönderim/hata satırı yok, sadece bu startup ilanı vardı).
-    # Artık bir KEZ, süreç başlangıcında, açıkça uyarıyoruz (her çağrıda değil — log spam olmasın).
-    logger.warning("Telegram: DEVRE DIŞI — TELEGRAM_BOT_TOKEN/TELEGRAM_CHANNEL_ID tanımsız, "
-                    "bu kanaldan hiçbir alarm/bildirim GİTMEYECEK (Ozan: secrets.env'e token eklenmeli)")
 _prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyalleri
 
 # MSG-019B Adım 3: _prev_signals diske persist (worker restart sonrası state korunsun)
@@ -2276,7 +2194,7 @@ _PREV_SIGNALS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "p
 _prev_signals_lock = threading.Lock()  # disk write atomik
 
 # SPEC-006 Faz 1 (CPO MSG-095): Notify-leader lock — gunicorn -w 4 worker'ın
-# her biri background_refresh çalıştırıyor. Bildirim (Telegram/Email/Push) 4×
+# her biri background_refresh çalıştırıyor. Bildirim (Email) 4×
 # duplikasyonunu önlemek için fcntl.flock ile tek worker "notify leader" olur.
 # refresh_data tüm worker'larda devam eder (in-memory _cache her worker'da güncel kalmalı).
 import fcntl as _fcntl
@@ -2317,6 +2235,8 @@ def _is_notify_leader_blocking():
     bazı arka plan thread'lerinin (ör. freshness-monitor) kalıcı olarak yanlış
     fd'ye kilitlenip SONSUZA KADAR non-leader kalmasına yol açıyordu."""
     global _notify_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _notify_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2381,6 +2301,8 @@ def _is_bg_leader_blocking():
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not (aynı sınıf
     çok-thread race, tüm 5 leader fonksiyonunda ortak fix)."""
     global _bg_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _bg_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2422,6 +2344,8 @@ def _is_digest_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _digest_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _digest_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2461,6 +2385,8 @@ def _is_gemini_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _gemini_lock_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _gemini_lock_fh is None:
             with _leader_lock_init_guard:
@@ -2508,6 +2434,8 @@ def _is_macro_leader_blocking():
     CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
     bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _macro_leader_fh
+    if _IS_SHADOW:
+        return False
     try:
         if _macro_leader_fh is None:
             with _leader_lock_init_guard:
@@ -2556,44 +2484,17 @@ def _save_prev_signals(sig_map):
 _load_prev_signals()
 
 
-def _send_telegram(text):
-    """Telegram kanalına/gruba mesaj gönderir. Gönderim gerçekten başarılıysa
-    True, aksi halde (token yok / HTTP hata / exception) False döner.
-
-    CPO-1260-B P1: token eksikse startup'ta zaten bir kez WARNING loglandı (yukarıda,
-    modül yüklenirken) — burada sessiz return kasıtlı, her çağrıda tekrar loglanmaz.
-    Gönderim SONUCU (başarı dahil) artık HTTP koduyla loglanıyor — önceden sadece
-    başarısızlık loglanıyordu, başarı ile "hiç denenmedi" ayırt edilemiyordu.
-
-    CPO-1504: dönüş değeri eklendi — çağıranlar (örn. freshness_monitor_loop)
-    önceden sonucu kontrol etmeden "gönderildi" logluyordu; token yokken bile
-    sessizce başarılı görünüyordu."""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return False
-    try:
-        url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        resp = requests.post(url, json={
-            "chat_id":    TELEGRAM_CHANNEL_ID,
-            "text":       text,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": True,
-        }, timeout=10)
-        if not resp.ok:
-            logger.warning("Telegram gönderimi başarısız: HTTP %d %s", resp.status_code, resp.text[:200])
-            return False
-        logger.info("Telegram gönderimi başarılı: HTTP %d", resp.status_code)
-        return True
-    except Exception as e:
-        logger.warning("Telegram hatası: %s", e)
-        return False
+def _send_ops_alert(subject, text):
+    """Sistem alarmı: tek kanal e-posta (ADMIN_MAIL). D-13: Telegram/Sentry silindi.
+    Gönderim gerçekten başarılıysa True, aksi halde False (SMTP eksik / hata)."""
+    return alerting_send_ops_email(subject, text)
 
 
 def _notify_signal_changes(new_results):
     """Önceki döngüye göre sinyal değişimlerini tespit et;
-    Telegram (seans saati + token varsa), Email (her zaman, abone varsa), Web Push (her zaman) — bağımsız rotalar.
+    Email (her zaman, abone varsa) — tek rota (D-13: Telegram silindi).
 
     MSG-019B Adım 3 düzeltmesi:
-    - Bug 1 fix: Telegram disable olsa bile email/push çalışsın (önce 'return' vardı)
     - Bug 2 fix: Seans dışı değişimler de pending buffer'a yazılır (digest sonraki gün gönderir)
     - State persist: _prev_signals diske yazılır → worker restart sonrası state korunur
     """
@@ -2604,7 +2505,7 @@ def _notify_signal_changes(new_results):
 
     # SPEC-006 Faz 1 (CPO MSG-095): Sadece notify-leader worker bildirim gönderir.
     # Non-leader worker'lar state'i günceller (kendi karşılaştırması taze kalsın) ama
-    # Telegram/Email/Push duplikasyonu yapmaz.
+    # Email duplikasyonu yapmaz.
     if not _is_notify_leader():
         with _prev_signals_lock:
             _prev_signals.update(new_sig_map)
@@ -2626,31 +2527,6 @@ def _notify_signal_changes(new_results):
     if changes:
         logger.info("_notify_signal_changes: %d sinyal değişimi tespit edildi [%s]",
                     len(changes), ", ".join(f"{c[0]}({c[1]}→{c[2]})" for c in changes[:5]))
-
-    # Rota 1: Telegram — sadece seans saatinde + token varsa
-    now_utc  = datetime.utcnow()
-    now_tr_min = now_utc.hour * 60 + now_utc.minute + 180  # UTC+3 dakika
-    in_session = 600 <= now_tr_min <= 1110  # 10:00–18:30 TR
-
-    if changes and TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID and in_session:
-        sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
-        # CPO 10.09: `old` (onceki sinyal) ham "AL"/"SAT"/"BEKLE" olarak sizdiriliyordu —
-        # `new`/`lbl` zaten cevriliyordu ama `old` hic etiketlenmemisti (K3 gate'i bunu
-        # yakalamaz, gate template degil burasi). Ayni cevirmeye tabi tutuldu.
-        _sig_lbl = {"AL": "Güçlü Trend ▲", "SAT": "Trend Bozuldu ▼", "BEKLE": "Yatay"}
-        lines = [f"<b>📊 BorsaPusula — Sinyal Değişimi</b>\n"]
-        for t, old, new, stock in changes[:10]:
-            e    = sig_emoji.get(new, "")
-            name = STOCK_NAMES.get(t, t)
-            lbl  = _sig_lbl.get(new, new)
-            old_lbl = _sig_lbl.get(old, old)
-            price = stock.get("price") or ""
-            price_str = f" — {tr_price_filter(price)} ₺" if price else ""
-            lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
-            lines.append(f"   <i>{old_lbl} → {lbl}</i>")
-        lines.append(f"\n<a href='https://borsapusula.com'>borsapusula.com</a>")
-        lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
-        _send_telegram("\n".join(lines))
 
     # Rota 2: Email — her zaman (seans dışı değişimler de digest'e yazılır)
     if changes:
@@ -2730,44 +2606,25 @@ def _follow_ticker(raw):
 
 
 def _sub_follow_set(rec):
-    """Abonenin takip listesi (`follow`). `tickers` bir FİLTRE (boş = hepsi) olduğu için
-    takip ayrı alanda tutulur; hisse sayfasından eklemek özet e-postasını daraltmaz."""
-    return {str(t).upper() for t in (rec.get("follow") or []) if t}
+    """Abonenin takip listesi = D-50 hesabın izleme listesi (göç edilmemiş kayıtta
+    tickers ∪ follow ∪ alerts'ten türer). Özet/anlık e-postadaki "TAKİPTE" bunu okur."""
+    return _accounts.watch_set(rec)
 
 
 def _add_follow(rec, ticker):
-    """True: yeni eklendi; False: zaten takipte."""
-    cur = list(rec.get("follow") or [])
-    if ticker in cur:
+    """True: yeni eklendi; False: zaten takipte. D-50: kayıt hesap biçimine çevrilir,
+    hisse izleme listesine yazılır (ayrı `follow` alanı artık yok)."""
+    _accounts.migrate_record(rec)
+    if ticker in rec["watchlist"]:
         return False
-    cur.append(ticker)
-    rec["follow"] = cur
+    if len(rec["watchlist"]) >= _accounts.MAX_WATCH:
+        return False
+    rec["watchlist"].append(ticker)
     return True
 
 
 _LOGIN_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_sends.json")
-_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")
-
-
-def _login_send_allowed(email):
-    """OTP/magic-link tasarımı (CPO-DEV2-034): e-posta başına ek disk-tabanlı
-    rate-limit. Flask-Limiter `memory://` storage 4 gunicorn worker'a bölünüyor
-    (P0-SEC-2 ProxyFix gerçek client IP'yi çözdü ama sayaç hâlâ worker-local,
-    IP bazlı limit tek worker'da dolup diğer 3'ünde sıfırdan başlıyor) — email
-    bazlı bu katman worker'lar arası paylaşılan disk state kullanır: 1 saatte
-    aynı e-postaya 3'ten fazla giriş linki gönderilmez."""
-    now = time.time()
-    with _login_sends_lock:
-        data = _tp_read_json(_LOGIN_SENDS_PATH, default={}) if os.path.exists(_LOGIN_SENDS_PATH) else {}
-        sends = [t for t in data.get(email, []) if now - t < 3600]
-        if len(sends) >= 3:
-            return False
-        sends.append(now)
-        data[email] = sends
-        # eski e-postaları da temizle — dosya süresiz büyümesin
-        data = {k: v for k, v in data.items() if v and now - v[-1] < 3600}
-        _tp_write_json(_LOGIN_SENDS_PATH, data, atomic=True, ensure_ascii=False)
-        return True
+_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")   # D-50: yalnız KVKK temizliği (eski magic-link sayacı)
 
 
 _MAIL_ROUTE_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mail_route_sends.json")
@@ -2775,7 +2632,7 @@ _mail_route_sends_lock = _CrossProcessLock(_MAIL_ROUTE_SENDS_PATH + ".lock")
 
 
 def _mail_route_allowed(bucket, key, max_count, window_sec):
-    """CPO-DEV2-076 (C): _login_send_allowed ile ayni gerekce (Flask-Limiter
+    """CPO-DEV2-076 (C): eski _login_send_allowed (D-50'de kalkti) ile ayni gerekce (Flask-Limiter
     memory:// storage 4 gunicorn worker'a bolunuyor, IP bazli limit tek worker'da
     dolup digerlerinde sifirdan basliyor) -- mail gonderen route'lar (contact/
     subscribe) icin worker'lar arasi paylasilan disk-tabanli sayac. bucket=route
@@ -2827,8 +2684,144 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
         return False
 
 
+# ── D-50: hesap altyapısı (O16g=B, O24=A) ─────────────────────────────────────
+# Mantık accounts.py'de (saf, yerel testli); burada yalnız depo/çerez/rota bağlantısı.
+# Hesap = subscribers.json kaydı: AYNI dosya, AYNI _sub_lock nesnesi (gevent altında ayrı
+# flock tanımlayıcısı aynı süreçte kilitlenirdi), AYNI atomik yazım. İkinci sistem yok.
+_ACCT_DIR = os.path.dirname(os.path.abspath(__file__))
+_ACCT_SESSIONS_PATH = os.path.join(_ACCT_DIR, "sessions.json")
+_ACCT_CODES_PATH = os.path.join(_ACCT_DIR, "login_codes.json")
+_acct_sessions_lock = _CrossProcessLock(_ACCT_SESSIONS_PATH + ".lock")
+_acct_codes_lock = _CrossProcessLock(_ACCT_CODES_PATH + ".lock")
+_ACCT_COOKIE = "bp_session"   # HttpOnly; sunucuda yalnız sha256'sı durur
+_ACCT_HINT = "bp_li"          # JS'in okuduğu "oturum var" ipucu; sır taşımaz, sunucu ona güvenmez
+
+
+def _acct_store(path, lock):
+    # Okuma hatası/threadpool zaman aşımı (None) -> StoreError: yazma iptal, dosya boşla ezilmez.
+    return _accounts.FileStore(
+        path, lock,
+        load=lambda: _tp_read_json(path, default=None) if os.path.exists(path) else {},
+        save=lambda data: _tp_write_json(path, data, atomic=True, ensure_ascii=False, indent=1))
+
+
+def _acct_valid_ticker(t):
+    return t in _PF_VALID_TICKERS and t not in INDEX_TICKERS
+
+
+try:
+    _ACCT_PEPPER = _accounts.load_or_create_pepper(os.environ.get("BP_AUTH_PEPPER", ""),
+                                                   os.path.join(_ACCT_DIR, "auth_pepper.key"))
+except Exception as _acct_e:   # fail-closed: hesap uçları 503
+    _ACCT_PEPPER = None
+    logging.getLogger("bist30").error("D-50 pepper kurulamadi, hesap uclari kapali: %s", _acct_e)
+
+try:
+    _acct = _accounts.AccountService(
+        _accounts.FileStore(SUBSCRIBERS_FILE, _sub_lock,
+                            load=lambda: _tp_read_json(SUBSCRIBERS_FILE, default=None) if os.path.exists(SUBSCRIBERS_FILE) else {},
+                            save=lambda subs: _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)),
+        _acct_store(_ACCT_SESSIONS_PATH, _acct_sessions_lock),
+        _acct_store(_ACCT_CODES_PATH, _acct_codes_lock),
+        _ACCT_PEPPER, _acct_valid_ticker, rate_allow=_mail_route_allowed,
+    ) if _ACCT_PEPPER else None
+except Exception as _acct_e:   # hesap uçları kapanır (503), site açılmaya devam eder
+    _acct = None
+    logging.getLogger("bist30").error("D-50 hesap servisi kurulamadi: %s", _acct_e)
+
+
+def _acct_email():
+    """Geçerli oturumun e-postası. Yalnız bp_session: eski bp_sub (abonelikten çıkma
+    bağlantısındaki belirteçle aynı) yeni API'de kimlik sayılmaz."""
+    if not _acct:
+        return None
+    return _acct.session_email(request.cookies.get(_ACCT_COOKIE, ""))
+
+
+def _acct_set_cookies(resp, token):
+    resp.set_cookie(_ACCT_COOKIE, token, max_age=_accounts.SESSION_TTL, path="/",
+                    secure=True, httponly=True, samesite="Lax")
+    resp.set_cookie(_ACCT_HINT, "1", max_age=_accounts.SESSION_TTL, path="/",
+                    secure=True, httponly=False, samesite="Lax")
+
+
+def _acct_clear_cookies(resp):
+    for _n, _h in ((_ACCT_COOKIE, True), (_ACCT_HINT, False), ("bp_sub", True)):
+        resp.delete_cookie(_n, path="/", secure=True, httponly=_h, samesite="Lax")
+
+
+def _acct_json(body, status=200):
+    return _private_json(body, vary_cookie=True), status
+
+
+def _acct_result(r):
+    return _acct_json(r.body, r.status)
+
+
+def _acct_api(login=True):
+    """D-50 uç koruması: hesap sistemi açık mı; durum değiştiren istekte JSON gövde +
+    aynı köken (CSRF: SameSite=Lax'a ek ikinci katman); login=True ise geçerli oturum.
+    Depo okunamazsa 503 (yazma yapılmaz)."""
+    import functools
+
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            if not _acct:
+                return _acct_json({"ok": False, "error": "unavailable", "message": "Hesap sistemi şu an kapalı."}, 503)
+            if request.method not in ("GET", "HEAD"):
+                if (request.content_length or 0) > 65536:   # içe aktarma dahil 64 KB yeter (_PF_MAX_BYTES deseni)
+                    return _acct_json({"ok": False, "error": "too_large", "message": "Veri çok büyük."}, 413)
+                if not request.is_json:
+                    return _acct_json({"ok": False, "error": "json_required", "message": "İstek JSON olmalı."}, 415)
+                if not _accounts.origin_allowed(request.headers.get("Origin"), request.headers.get("Referer"),
+                                                request.host_url):
+                    return _acct_json({"ok": False, "error": "origin", "message": "İstek reddedildi."}, 403)
+            try:
+                if login:
+                    email = _acct_email()
+                    if not email or not _acct.account(email):
+                        return _acct_json({"ok": False, "error": "login_required",
+                                           "message": _accounts.MSG["login_required"]}, 401)
+                    return fn(email, *args, **kwargs)
+                return fn(*args, **kwargs)
+            except LookupError:
+                return _acct_json({"ok": False, "error": "login_required", "message": _accounts.MSG["login_required"]}, 401)
+            except _accounts.StoreError as e:
+                logger.error("D-50 depo hatasi: %s", e)
+                return _acct_json({"ok": False, "error": "store_error", "message": _accounts.MSG["store_error"]}, 503)
+        return wrapper
+    return deco
+
+
+def _acct_body():
+    d = request.get_json(silent=True)
+    return d if isinstance(d, dict) else {}
+
+
+def _build_code_email(code, unsubscribe_url=None):
+    """D-50: 6 haneli giriş kodu e-postası (kayıtlı ve yeni adres için aynı içerik)."""
+    digits = _html.escape(code)
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:18px;font-weight:800;color:#e5e1e4;margin-bottom:12px">BorsaPusula giriş kodun</div>
+        <div style="font-size:34px;font-weight:800;letter-spacing:10px;color:#e5e1e4;margin:6px 0 16px;font-family:'Space Grotesk',Arial,sans-serif">{digits}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0">
+          Kod <strong style="color:#e5e1e4">10 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.<br>
+          Şifre yok: takip listen ve bildirim tercihlerin bu e-posta adresine bağlıdır.
+        </p>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin; hesabında hiçbir değişiklik yapılmaz.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader="Giriş kodun 10 dakika geçerli")
+
+
 # CPO-1782 (22.09) koken kaydi: e-posta istemcilerinde var() calismadigindan
-# bu dosyadaki (ve _build_welcome_email / _build_login_email /
+# bu dosyadaki (ve _build_welcome_email / _build_code_email /
 # _build_signal_email / _check_user_alerts watchlist alarmindaki) tum renk
 # stilleri ham hex literal. Asagidaki esleme static/css/tokens.css'teki
 # kanonik karsiliklarini kayda gecirir (asagidaki hex'ler bilerek # olmadan
@@ -2873,8 +2866,18 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
 #   eski 3a3a42 -> 30363d (--bp-bkl-bd) -- footer link ayraci. En yakin
 #              kanon (fark 12) ama --bp-bkl-bd de bir kenarlik token'i,
 #              ayni ilk-emsal notu gecerli.
+def _brand_icon_v():
+    """CPO-1796: e-posta başlığı ikonu URL'i dosya md5'iyle sürümlenir (istemci önbelleği yeni işareti görsün)."""
+    try:
+        with open(os.path.join(_APP_DIR, "static", "icon-192.png"), "rb") as _f:
+            return hashlib.md5(_f.read()).hexdigest()[:8]
+    except OSError:
+        return "0"
+
+
 def _email_base(content_html, unsubscribe_url, preheader=""):
     """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer."""
+    _icon_v = _brand_icon_v()
     preheader_html = f'''<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#0e0e12;opacity:0">{preheader}</div>''' if preheader else ""
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -2897,7 +2900,7 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">
             <tr>
               <td style="padding-right:14px;vertical-align:middle">
-                <img src="https://borsapusula.com/static/icon-192.png" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
+                <img src="https://borsapusula.com/static/icon-192.png?v={_icon_v}" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
               </td>
               <td style="vertical-align:middle;text-align:left">
                 <div style="font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;font-family:'Sora','Manrope',Arial,sans-serif;color:#e5e1e4">Borsa<span style="color:#00e290">Pusula</span></div>
@@ -2922,8 +2925,7 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
             <a href="https://borsapusula.com" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">borsapusula.com</a>
             <span style="color:#30363d">·</span>
             <a href="https://borsapusula.com/iletisim" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">iletişim</a>
-            <span style="color:#30363d">·</span>
-            <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>
+            {f'<span style="color:#30363d">·</span> <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>' if unsubscribe_url else ''}
           </td></tr>
         </table>
       </td></tr>
@@ -2971,7 +2973,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">⭐</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#ffc850">Hacim Onaylı</strong> sinyaller — hacim teyitli (RVOL ≥ 1.20). Backtest&apos;te %50.7 win rate, Sharpe 2.35.
+              <strong style="color:#ffc850">Hacim Onaylı</strong> sinyaller — hacim teyitli (RVOL ≥ 1.20).
             </td></tr>
         </table>
       </td></tr>
@@ -3017,35 +3019,6 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
       İlk özet mailini bir sonraki işlem günü akşamı alacaksın (günlük özet — varsayılan tercih).<br>
       Özeti yaklaşık yarım saat önce istersen profilinden "Kapanış sonrası" seçeneğini seçebilirsin.
-    </p>
-    '''
-    return _email_base(content, unsubscribe_url, preheader=preheader)
-
-
-def _build_login_email(email, login_url, unsubscribe_url, name=None):
-    """Magic-link giriş maili (OTP tasarımı, CPO-DEV2-034 — P0-SEC-1 kalıcı fix).
-    15dk geçerli, tek kullanımlık link. Kod-girme adımı YOK — link'e tıklamak
-    yeterli (kullanım hacmi düşük, ek brute-force/deneme-sayacı alt sistemi
-    gerekmiyor)."""
-    preheader = "Giriş bağlantın hazır — 15 dakika geçerli"
-    # CPO-DEV2-r31: _build_welcome_email ile ayni escape-eksikligi, ayni fix.
-    greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
-    content = f'''
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
-      <tr><td style="padding:28px 24px;text-align:center">
-        <div style="font-size:32px;margin-bottom:8px">🔑</div>
-        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
-        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
-          BorsaPusula'ya giriş yapmak için aşağıdaki bağlantıya tıkla.<br>
-          Bağlantı <strong style="color:#e5e1e4">15 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
-        </p>
-        <a href="{login_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
-          Giriş Yap →
-        </a>
-      </td></tr>
-    </table>
-    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
-      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin — hesabında hiçbir değişiklik yapılmayacak.
     </p>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
@@ -3170,6 +3143,16 @@ def _build_signal_email(changes, unsubscribe_url, follow=None):
     </table>'''
 
     _now_tr = datetime.now(_TZ_TR)
+    # CPO-1802: 19:00 digest'inde günün Akşam Bülteni'ne tek bağlantı (görüntü + şablon hazırsa)
+    _bulten_day = _now_tr.date().isoformat()
+    _bulten_link_html = ""
+    if _bulten_page_ready() and os.path.isfile(os.path.join(_BULTEN_DIR, _bulten_day + ".json")):
+        _bulten_link_html = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px">
+      <tr><td align="center">
+        <a href="https://borsapusula.com/bulten/{_bulten_day}" style="color:#b8c3ff;font-size:12.5px;font-weight:600;text-decoration:none">📰 Akşam Bülteni'ni oku →</a>
+      </td></tr>
+    </table>'''
     content = f'''
     <!-- Header -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
@@ -3195,6 +3178,7 @@ def _build_signal_email(changes, unsubscribe_url, follow=None):
         </a>
       </td></tr>
     </table>
+    {_bulten_link_html}
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
@@ -3283,8 +3267,7 @@ def _notify_email_signal_changes(changes):
             if not _qa["ok"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_EMAIL_QA",
-                               f"flag={_qa.get('flag')} count={_qa.get('count')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"flag={_qa.get('flag')} count={_qa.get('count')}")
                 else:
                     logger.warning("DQV_EMAIL_QA: flag=%s count=%s", _qa.get("flag"), _qa.get("count"))
         except Exception as _e:
@@ -3326,16 +3309,10 @@ def _notify_email_signal_changes(changes):
                 continue
             token    = data.get("token", "")
             name     = data.get("name", "")
-            tickers  = data.get("tickers", [])
             follow   = _sub_follow_set(data)
-            # Filter changes by user prefs
-            relevant = list(changes)
-            # Premium-only filter (takipteki hisse premium olmasa da gelir)
-            if mail_pref == "premium":
-                relevant = [c for c in relevant if c[3].get("is_premium") or c[0] in follow]
-            # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
-            if tickers:
-                relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
+            # D-50: hesap tercihi (trend = yalnız izlenenler, bulten = hepsi, liste başta);
+            # premium: takipteki hisse premium olmasa da gelir. Eski kayıtta eski filtre birebir.
+            relevant = _accounts.relevant_changes(data, changes, premium_only=(mail_pref == "premium"))
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
@@ -3631,12 +3608,10 @@ def _send_digest_emails(timeframe="daily", force=False):
             continue
         token   = data.get("token", "")
         name    = data.get("name", "")
-        tickers = data.get("tickers", [])
         follow  = _sub_follow_set(data)
-        # Watchlist filter (D-P1-2509: takip listesi filtreyi genişletir)
-        relevant = list(changes)
-        if tickers:
-            relevant = [c for c in relevant if c[0] in tickers or c[0] in follow]
+        # D-50: "Takip listen" = hesabın izleme listesi (TAKİPTE rozeti + başta); hesap tercihi
+        # trend = yalnız izlenenler, bulten = tüm değişimler. Eski kayıtta eski filtre birebir.
+        relevant = _accounts.relevant_changes(data, changes)
         if not relevant:
             skip_reasons["watchlist_empty"] += 1
             continue
@@ -3727,22 +3702,22 @@ def _digest_cron_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
+_bg_start(threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron"))
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
-# ── SPEC-014 B4 — Freshness monitor (market saatinde EOD veri günü eski → Telegram) ──
+# ── SPEC-014 B4 — Freshness monitor (market saatinde EOD veri günü eski → e-posta) ──
 _freshness_alert_state = {"last_alert_ts": 0.0}
 
 def _freshness_monitor_loop():
     """Elimizdeki veri BEKLENEN trading-day'e ait değilse (build_data_freshness().
-    is_stale) Telegram uyarısı gönderir.
+    is_stale) e-posta uyarısı gönderir.
 
     CPO-1508/1512 (EOD-only, Faz 0): eski eşik "veri yaşı > 25dk" idi — cadence
     900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
     background_refresh); dünkü kapanış verisi bugün 10:00-18:00 TR arası HER
     ZAMAN >25dk yaşında ve GEÇERLİ olacağından eski eşik her sabah 10:00'dan
-    itibaren saatte-bir sahte Telegram spam'i üretirdi. is_stale (aynı trading-
+    itibaren saatte-bir sahte alarm spam'i üretirdi. is_stale (aynı trading-
     day karşılaştırması — build_data_freshness/expected_data_date) ile
     değiştirildi: yalnız GERÇEK bir gecikme (bugünün EOD'u beklenenden eski)
     varsa tetiklenir.
@@ -3775,26 +3750,26 @@ def _freshness_monitor_loop():
                     _freshness_alert_state["last_alert_ts"] = now
                     age = fresh.get("stocks_age_seconds")
                     age_txt = f"{age // 60} dakikadır" if age is not None else "bilinmeyen süredir"
-                    sent = _send_telegram(
-                        f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
+                    sent = _send_ops_alert(
+                        "BorsaPusula veri tazeliği uyarısı",
                         f"Hisse verisi beklenen işlem gününe ait değil "
                         f"({age_txt} güncellenmedi).\n"
                         f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
                     )
                     if sent:
-                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram gönderildi", age)
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), e-posta gönderildi", age)
                     else:
-                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), e-posta iletilemedi (SMTP eksik ya da hata) — ops bu uyarıyı GÖRMEDİ", age)
         except Exception as e:
             logger.error("freshness_monitor_loop: %s", e, exc_info=True)
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-# #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker Telegram alarmı
+# #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker e-posta alarmı
 # gönderir (anti-spam state worker-local olduğu için gate şart). CPO-1207 §1:
 # thread artık KOŞULSUZ başlar — leader kontrolü döngü içinde her turda.
-threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
-logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → Telegram)")
+_bg_start(threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor"))
+logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → e-posta)")
 
 
 # SPEC-008 L5 — Modül-load-time tanımlama (alarm thread'inden ÖNCE).
@@ -3843,8 +3818,8 @@ def _chart_integrity_alarm_loop():
 
 # Anti-spam state worker-local; 4× duplicate alarm engellenir. CPO-1207 §1:
 # thread koşulsuz başlar — leader kontrolü döngü içinde her turda.
-threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
-                 name="chart-integrity-alarm").start()
+_bg_start(threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
+                 name="chart-integrity-alarm"))
 logger.info("Chart-integrity alarm başlatıldı (leader durumu döngü içinde her turda — SPEC-008 L5)")
 
 
@@ -3902,13 +3877,12 @@ def _synthetic_drift_monitor():
             logger.error("synthetic_drift_monitor: %s", e)
 
 
-threading.Thread(target=_synthetic_drift_monitor, daemon=True,
-                 name="drift-monitor").start()
+_bg_start(threading.Thread(target=_synthetic_drift_monitor, daemon=True,
+                 name="drift-monitor"))
 logger.info("Synthetic drift monitor başlatıldı (M6 — her 90s drift analizi)")
 
 
 _DISK_CACHE_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
-_BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
@@ -4158,6 +4132,8 @@ def refresh_data():
     # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
     # M2: non-blocking — eş zamanlı ikinci çağrı yinelemeyi önler (watchdog + cron overlap)
+    if _IS_SHADOW:  # D-16: shadow veri dizinine/kilidine dokunmaz
+        return
     if not _refresh_data_lock.acquire(blocking=False):
         logger.warning("refresh_data: önceki çalışma (bu process içinde) devam ediyor, bu çağrı atlandı (M2 concurrency guard)")
         return
@@ -4309,8 +4285,7 @@ def _refresh_data_impl():
             if _br["errors"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_BR",
-                               f"{len(_br['errors'])} violations tickers={_br['failed_tickers']}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_br['errors'])} violations tickers={_br['failed_tickers']}")
                 else:
                     logger.warning("DQV_BR: %d violations, tickers=%s", len(_br["errors"]), _br["failed_tickers"])
         except Exception as _e:
@@ -4345,8 +4320,7 @@ def _refresh_data_impl():
                 _real_failed = list({e["ticker"] for e in _real_errs})
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_CROSS",
-                               f"{len(_real_errs)} inconsistencies tickers={_real_failed}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_real_errs)} inconsistencies tickers={_real_failed}")
                 else:
                     logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
                                    len(_real_errs), _real_failed)
@@ -4388,8 +4362,7 @@ def _refresh_data_impl():
             if _an["errors"]:
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_ANOMALY",
-                               f"{len(_an['errors'])} flags tickers={_an['failed_tickers']}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               f"{len(_an['errors'])} flags tickers={_an['failed_tickers']}")
                 else:
                     logger.warning("DQV_ANOMALY: %d flags, tickers=%s",
                                    len(_an["errors"]), _an["failed_tickers"])
@@ -4606,10 +4579,12 @@ def _run_official_close_pass(day=None, notify=True):
     except Exception as _e:
         logger.warning("OFFICIAL_CLOSE: endeks dosyası alınamadı: %s", _e)
         _idx_parsed = None
-    official_close.save_archive(parsed, got.get("last_modified"), indices=_idx_parsed)
+    official_close.save_archive(parsed, got.get("last_modified"), indices=_idx_parsed, etag=got.get("etag"))
     official_close.reset_memory()
     _before = {s.get("ticker"): s for s in _stocks_now}
     _rescued, _failed = [], []
+    _t_tur = time.time()
+    logger.info("OFFICIAL_CLOSE: tur başladı — %d hisse", len(_universe))
     # D-04c P1-2: 4 işçili havuz (refresh ile aynı) — sıralı tur 11-18 dk sürüyordu.
     _ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="official_par")
     try:
@@ -4646,11 +4621,14 @@ def _run_official_close_pass(day=None, notify=True):
                 if ((_before.get(r["ticker"]) or {}).get("change_pct") or 0) * (r.get("change_pct") or 0) < 0]
     _merge_rescued_into_cache(_rescued, notify=notify)
     # D-04b: 18:10 geçici sinyali resmi barla geri dönen değişimler digest'e girmez.
+    _signal_changes = []   # D-45(c): bülten "durum_degisimleri" — {ticker, old, new} (resmi sinyal)
     try:
         _rt = {r["ticker"] for r in _rescued}
         # D-04c P1-1: girdiler resmi sinyalden yeniden kurulur (EOD öncesi sinyal = önceki gün snapshot'ı).
         _pre = _prev_day_signals(day)
         _off_sig = {r["ticker"]: r.get("signal") for r in _rescued}
+        _signal_changes = [{"ticker": t, "old": _pre.get(t), "new": g}
+                           for t, g in _off_sig.items() if g and _pre.get(t) and _pre.get(t) != g]
         _by_t = {r["ticker"]: r for r in _rescued}
         _mk = lambda t, old, new: _serialize_change((t, old, new, _by_t[t]))
         _rest = {t for t in _rt if t not in _pre}
@@ -4691,15 +4669,64 @@ def _run_official_close_pass(day=None, notify=True):
     except Exception as _e:
         logger.warning("OFFICIAL_CLOSE: snapshot yeniden yazılamadı: %s", _e)
     logger.info("OFFICIAL_CLOSE: SONUC — %s bülten %d pay, %d/%d resmi bara çevrildi, %d fiyat düzeldi, "
-                "yön dönen %d %s, uygulanamayan %s",
+                "yön dönen %d %s, uygulanamayan %s, tur %d sn",
                 day, len(parsed["stocks"]), len(_rescued), len(_universe), _fixed, len(_flipped),
-                _flipped[:15], _failed[:15])
+                _flipped[:15], _failed[:15], int(time.time() - _t_tur))
     # D-42: BIST100 ısı haritası bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
+    _heatmap_snap = None
     try:
-        _build_heatmap_snapshot(day)
+        _heatmap_snap = _build_heatmap_snapshot(day)
     except Exception as _e:
         logger.warning("HEATMAP: görüntü üretilemedi: %s", _e)
+    # D-45(c): Akşam Bülteni bu resmi kapanıştan bir kez üretilip dondurulur (hata turu bozmaz).
+    try:
+        _build_bulten_snapshot(day, _signal_changes, _heatmap_snap)
+    except Exception as _e:
+        logger.warning("BULTEN: görüntü üretilemedi: %s", _e)
     return True
+
+
+_MORNING_VERIFY_START_MIN = 9 * 60 + 30   # D-04b(4): seans öncesi doğrulama
+_MORNING_VERIFY_GIVEUP_MIN = 9 * 60 + 55  # 10:00 açılışından önce bırakılır
+
+
+def _morning_verify_window(now_tr=None):
+    """09:30 ertesi gün doğrulama penceresi: işlem günü 09:30-09:55 TR (açılıştan önce)."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    m = now_tr.hour * 60 + now_tr.minute
+    return _MORNING_VERIFY_START_MIN <= m < _MORNING_VERIFY_GIVEUP_MIN
+
+
+def _run_morning_verify_pass(today_tr=None):
+    """D-04b(4): 09:30 sabah doğrulaması, önceki işlem gününün resmi kapanışı için.
+    Arşiv varsa aynı bülten ETag'iyle koşullu istek atılır (`If-None-Match`):
+    değişmemişse (304) iş yok. Bülten revize edilmişse (nadir) tam kesinleştirme
+    turu (`_run_official_close_pass`) o gün için yeniden koşar — zaten test edilmiş
+    aynı yol. Arşiv hiç yoksa (dünkü kesinleştirme tamamen başarısız oldu) aynı
+    turu yeniden dener; o da olmazsa fiyat geçici kalır ve bir sonraki pencerede
+    (09:55'e kadar) yeniden denenir — kaynağı belirsiz bir yamayla canlı veri
+    kirletilmez (P0 aday, log'da izlenir).
+    True → pencerede bu gün için iş bitti (flag yazılır); False → yeniden denenecek."""
+    today_tr = today_tr or datetime.now(_TZ_TR).date()
+    day = last_trading_day_on_or_before(today_tr - timedelta(days=1))
+    rec = official_close.load_archive(day)
+    if rec is None:
+        logger.warning("MORNING_VERIFY: %s için resmi kapanış arşivi yok, kesinleştirme yeniden deneniyor", day)
+        return _run_official_close_pass(day, notify=False)
+    etag = rec.get("etag")
+    try:
+        changed = official_close.fetch_bulletin_conditional(day, etag)
+    except Exception as _e:
+        logger.warning("MORNING_VERIFY: bülten kontrolü hatası: %s", _e)
+        return False
+    if changed is None:
+        logger.info("MORNING_VERIFY: %s bülteni değişmemiş (ETag)", day)
+        return True
+    logger.warning("MORNING_VERIFY: %s bülteni revize edilmiş görünüyor, yeniden uygulanıyor", day)
+    official_close.reset_memory()
+    return _run_official_close_pass(day, notify=False)
 
 
 # ── D-42: BIST100 ısı haritası (gün sonu görüntüsü, data/heatmap/<gün>.json, dondurulur) ──
@@ -4749,31 +4776,132 @@ def _build_heatmap_snapshot(day):
     logger.info("HEATMAP: %s %s — n=%d, sayım %s, bayat %d, not %d", day,
                 "donduruldu " + path if path else "zaten donmuş, dokunulmadı", snap["n"], snap["counts"],
                 sum(1 for r in snap["rows"] if r["stale"]), len(snap["notes"]))
+    _render_heatmap_images(day.isoformat())
+    return snap
+
+
+def _render_heatmap_images(day_iso):
+    """D-54: günün paylaşım görselleri (1200×630 + 1080×1350) donmuş görüntüden BİR KEZ üretilir
+    (data/heatmap/<gün>.png, <gün>-kare.png; var olana dokunulmaz). Hata EOD turunu bozmaz;
+    eksik kalırsa /harita/<gün>.png ilk istekte kilit altında üretir."""
+    try:
+        m = _heatmap_day(day_iso)
+        if not m:
+            return []
+        done = heatmap_image.ensure(_HEATMAP_DIR, day_iso, lambda: m["snap"])
+        logger.info("HEATMAP: %s görsel %s", day_iso, [os.path.basename(p) for p in done] or "zaten var")
+        return done
+    except Exception as _e:
+        logger.warning("HEATMAP: %s görsel üretilemedi: %s", day_iso, _e)
+        return []
+
+
+# ── D-45(c): Akşam Bülteni (gün sonu görüntüsü, data/bulten/<gün>.json, dondurulur) ──
+_BULTEN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "bulten")
+
+
+def _bulten_next_trading_day(day):
+    d = day
+    for _ in range(7):
+        d = d + timedelta(days=1)
+        if is_trading_day(d):
+            return d.isoformat()
+    return (day + timedelta(days=1)).isoformat()
+
+
+def _build_bulten_snapshot(day, signal_changes, heatmap_snap):
+    """Resmi kapanış turundan sonra çağrılır (heatmap'ten hemen sonra — sektör özeti
+    ondan okunur). Girdiler: resmi arşiv (BIST100), o günün ranked satırları (hareketliler),
+    resmi sinyal değişimleri (çağıran), ısı haritası görüntüsü, KAP akışı (rutin dışı),
+    D-24 takvimi (ertesi işlem günü). Kalite kapısı yok (heatmap'in aksine); o gün zaten
+    donmuşsa dokunulmaz. D-56 (Bülten v2): XU100 30 kapanış serisi + eşik tarihi
+    (chart_xu100.json geçmişi + günün resmi kapanışı), durum değişimlerinde ad/fiyat/%
+    (hareketlilerle aynı satırlar), boş takvim gününde sonraki beş işlem günü, günün cümlesi."""
+    rec = official_close.load_archive(day)
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    bist = [s for s in stocks if s.get("ticker") not in ("XU030", "XU100")]
+    ranked = [s for s in bist if not s.get("stale_reason") and s.get("data_quality") != "stale"]
+    movers = home_fields.movers(ranked)
+    kap_items = []
+    if _KAP_STORE.available():
+        _res = kap_feed.query(_KAP_STORE.all_items(), page=1, per_page=200,
+                              include_rutin=False, day=day.isoformat())
+        kap_items = [kap_feed.public_item(it, STOCK_NAMES) for it in _res["items"]]
+    try:
+        takvim_events = (_takvim_payload() or {}).get("events") or []
+    except Exception as _e:
+        logger.warning("BULTEN: takvim okunamadı: %s", _e)
+        takvim_events = []
+    next_day_iso = _bulten_next_trading_day(day)
+    _load_xu100_chart_from_disk()
+    with _lock:
+        xu100_ohlc = list(((_xu100_chart_cache.get("data") or {}).get("ohlc") or []))
+    by_t = {s.get("ticker"): s for s in bist if s.get("ticker")}
+    gunler = bulten.sonraki_islem_gunleri(day.isoformat(), bulten.YAKLASAN_GUN, is_trading_day)
+    snap = bulten.build(day.isoformat(), rec, movers, signal_changes, heatmap_snap, kap_items,
+                        takvim_events, next_day_iso,
+                        datetime.now(_TZ_TR).isoformat(timespec="seconds"),
+                        xu100_ohlc=xu100_ohlc, stocks=by_t, takvim_gunleri=gunler,
+                        onceki_gun=bulten.onceki_islem_gunu(day.isoformat(), is_trading_day))
+    path = bulten.save_frozen(snap, _BULTEN_DIR)
+    logger.info("BULTEN: %s %s — hareketli %d/%d, durum değişimi %d, bildirim %d, yarın %d, yaklaşan %d, "
+               "seri %d, eşik %s, cümle %s",
+               day, "donduruldu " + path if path else "zaten donmuş, dokunulmadı",
+               len(snap["hareketliler"]["up"]), len(snap["hareketliler"]["down"]),
+               len(snap["durum_degisimleri"]), len(snap["onemli_bildirimler"]), len(snap["yarin_takvim"]),
+               len(snap["yaklasan"]), len(snap["bist100"].get("seri") or []), snap["bist100"].get("esik"),
+               "var" if snap.get("ozet_cumlesi") else "yok")
     return snap
 
 
 _heatmap_mem = {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []}
+_heatmap_day_mem = {}   # D-54: geçmiş günler (yol → _heatmap_mem biçimi), en çok 16 gün
 
 
-def _heatmap_latest():
-    """Son donmuş görüntü + treemap geometrisi (dosya mtime'ına göre bellekte) ya da None."""
-    path = heatmap.latest_path(_HEATMAP_DIR)
-    if not path:
-        return None
+def _heatmap_load(path, mem):
+    """Donmuş görüntü + treemap geometrisi (mem'de, dosya mtime'ına göre) ya da None."""
     try:
         mt = os.path.getmtime(path)
-        if _heatmap_mem["path"] != path or _heatmap_mem["mtime"] != mt:
+        if mem["path"] != path or mem["mtime"] != mt:
             with open(path, encoding="utf-8") as _f:
                 snap = json.load(_f)
             # D-23: donmuş görüntünün grubu güncel taksonomiden (eski dosya eski grup adını taşımasın)
             heatmap.regroup(snap.get("rows"), lambda t: sector_taxonomy.bucket_for(
                 t, UNIVERSE.get("companies"), KAP_INFO, default=None))
             groups, tiles = heatmap.layout(snap.get("rows") or [])
-            _heatmap_mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
+            mem.update(path=path, mtime=mt, snap=snap, groups=groups, tiles=tiles)
     except Exception as _e:
         logger.warning("HEATMAP: %s okunamadı: %s", path, _e)
         return None
-    return _heatmap_mem
+    return mem
+
+
+def _heatmap_latest():
+    """Son donmuş görüntü + treemap geometrisi (dosya mtime'ına göre bellekte) ya da None."""
+    path = heatmap.latest_path(_HEATMAP_DIR)
+    return _heatmap_load(path, _heatmap_mem) if path else None
+
+
+def _heatmap_day(day):
+    """D-54: o günün donmuş görüntüsü (yalnız katı YYYY-AA-GG; yol geçişi yok) ya da None."""
+    if not heatmap_image.valid_day(day):
+        return None
+    path = os.path.join(_HEATMAP_DIR, day + ".json")
+    if not os.path.isfile(path):
+        return None
+    if path == heatmap.latest_path(_HEATMAP_DIR):
+        return _heatmap_latest()
+    if path not in _heatmap_day_mem and len(_heatmap_day_mem) >= 16:
+        _heatmap_day_mem.pop(next(iter(_heatmap_day_mem)))
+    mem = _heatmap_day_mem.setdefault(path, {"path": None, "mtime": None, "snap": None, "groups": [], "tiles": []})
+    return _heatmap_load(path, mem)
+
+
+def _heatmap_og_image():
+    """D-54: son günün bağlantı önizleme görseli yolu ('/harita/<gün>.png') ya da None."""
+    d = heatmap.days(_HEATMAP_DIR)
+    return heatmap_image.url(d[-1]) if d else None
 
 
 def _heatmap_ssr_context():
@@ -4988,6 +5116,18 @@ def background_refresh():
                 logger.warning("chart reverify marker yazılamadı: %s", _e)
 
         if not _should_run_eod:
+            # D-04b(4): 09:30 sabah doğrulaması — dünkü resmi kapanışı bülten ETag'iyle
+            # yeniden kontrol eder (açılıştan önce, _already_done_today'den bağımsız).
+            _morning_verify_path = os.path.join(
+                _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_morning_verify.flag"
+            )
+            if _morning_verify_window(datetime.now(_TZ_TR)) and not os.path.exists(_morning_verify_path):
+                if _run_morning_verify_pass(_today_tr):
+                    try:
+                        with open(_morning_verify_path, "w", encoding="utf-8") as _f:
+                            _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+                    except OSError as _e:
+                        logger.warning("morning_verify flag yazılamadı: %s", _e)
             # CPO-1703: ana EOD turu bugün için zaten çalıştıysa (_already_done_today)
             # ve prev_cache fallback'e düşen ticker'lar varsa, günde BİR kez daha
             # (19:30 TR'den itibaren) catch-up dene. Yeni thread/process yok — bu
@@ -5053,14 +5193,14 @@ def background_refresh():
                         _f.write(_alert_line + "\n")
                 except OSError as _e:
                     logger.warning("api_stale ALERT.md yazılamadı: %s", _e)
-                # CPO-995/DEV-987: CPO-837 aile — network I/O (_send_telegram) lock
+                # CPO-995/DEV-987: CPO-837 aile — network I/O (_send_ops_alert) lock
                 # dışına alındı, lock sadece _last_stale_alert_ts state kontrolü/güncellemesini korur.
                 with _stale_alert_lock:
-                    _should_send = _should_alert_telegram(_stale, _last_stale_alert_ts)
+                    _should_send = _should_send_alert(_stale, _last_stale_alert_ts, cooldown_min=60)
                     if _should_send:
                         _last_stale_alert_ts = time.time()
                 if _should_send:
-                    _send_telegram(_alert_line)
+                    _send_ops_alert("BorsaPusula API bayat", _alert_line)
         except Exception as _e:
             logger.error("Paket 1 api_stale check hatası: %s", _e)
 
@@ -5111,7 +5251,10 @@ def set_security_headers(response):
     # CF'in EKLEMEDİĞİ header'lar (modern security):
     response.headers["X-DNS-Prefetch-Control"] = "on"
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+    # D-54: paylaşılan ısı haritası görselleri başka sitelerde de <img> ile gösterilebilsin
+    _cp = request.path
+    response.headers["Cross-Origin-Resource-Policy"] = (
+        "cross-origin" if _cp.startswith("/harita/") and _cp.endswith(".png") else "same-site")
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     # Server header'ı temizle (info leak)
     response.headers.pop("Server", None)
@@ -5161,11 +5304,59 @@ def _get_xu100_level():
                 change_pct = None
         except Exception:
             pass
+    # D-53: son barın ISO tarihi (kapanış etiketi ısı haritası yokken de tarihli olsun)
+    _last_bar = next((p for p in reversed(_xu100_ohlc) if p.get("close")), None)
     return {
         "close":       close,
         "change_pct":  change_pct,
         "spark":       [round(c, 2) for c in closes],
+        "date":        str(_last_bar["time"])[:10] if _last_bar and _last_bar.get("time") else None,
     }
+
+
+_HOME_EXTRAS_TTL = 120   # sn: değerleme hükmü /fundamentals önbelleğinden okunur, her istekte yeniden hesaplanmaz
+_home_extras_cache = {}  # {ticker: (ts, {"valuation": ...})}
+_HOME_API_POOL_N = 10    # /api/data'da fin_answer/valuation taşıyan satır sayısı (öne çıkan 5'in üst kümesi)
+
+
+def _home_featured_extras(ticker, hs_data):
+    """D-53: öne çıkan satırın Finansallar betimi (anlık, kayıttan) + Değerleme hükmü
+    (hisse "Fiyatı makul mu?" ile aynı kanon; /fundamentals ucundaki zincir, web işçisinde
+    yalnız önbellek — ağ çağrısı yok)."""
+    now = time.time()
+    hit = _home_extras_cache.get(ticker)
+    if hit and now - hit[0] < _HOME_EXTRAS_TTL:
+        val = hit[1]
+    else:
+        try:
+            val = home_fields.valuation(
+                hs_data, _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, _get_fundamentals(ticker))))
+        except Exception as e:
+            logger.warning("_home_featured_extras(%s): %s", ticker, e)
+            val = None
+        _home_extras_cache[ticker] = (now, val)
+    return {"fin_answer": home_fields.fin_answer(hs_data), "valuation": val}
+
+
+def _home_featured_rows(stocks, hs_snap, n):
+    """D-53: öne çıkan şirketler (BP azalan, tamlık >= 0,8; Trend Bozuldu + donuk hariç) — satırlar
+    api_data()'daki borsapusula_skoru/hs_available/data_completeness/bps_partial alanlarını taşır."""
+    enriched = []
+    for s in stocks:
+        entry = hs_snap.get(s.get("ticker", ""))
+        d = entry.get("data") if entry else None
+        enriched.append(dict(s, borsapusula_skoru=(d or {}).get("borsapusula_skoru"),
+                             hs_available=d is not None,
+                             data_completeness=(d or {}).get("data_completeness"),
+                             bps_partial=(d or {}).get("partial")))
+    out = []
+    for s in home_fields.featured_pool(enriched, n):
+        d = (hs_snap.get(s["ticker"]) or {}).get("data")
+        out.append(dict(
+            {k: s.get(k) for k in ("ticker", "name", "sector", "signal", "borsapusula_skoru",
+                                   "bps_partial", "data_completeness")},
+            **_home_featured_extras(s["ticker"], d)))
+    return out
 
 
 def _compute_index_ssr_context():
@@ -5211,11 +5402,31 @@ def _compute_index_ssr_context():
         _tech_pool = [s for s in spot_pool if isinstance(s.get("signal_strength"), (int, float))]
         spotlight = max(_tech_pool, key=lambda s: s["signal_strength"]) if _tech_pool else None
 
+    # D-53: Güçlü Trend kartlarına BP + "Finansallar" betimi (JS'siz ilk boyada dolu);
+    # önbellek satırı değiştirilmez (kopya).
+    _top = []
+    for s in top_signals:
+        _e = (_hs_snap.get(s.get("ticker", "")) or {}).get("data")
+        _top.append(dict(s, borsapusula_skoru=(_e or {}).get("borsapusula_skoru"),
+                         hs_available=_e is not None,
+                         data_completeness=(_e or {}).get("data_completeness"),
+                         bps_partial=(_e or {}).get("partial"),
+                         fin_answer=home_fields.fin_answer(_e)))
+    _g = _compute_gundem_data()
     return {
         "bist_level":    _get_xu100_level(),
         "signal_counts": signal_counts,
-        "top_signals":   top_signals,
+        "top_signals":   _top,
         "spotlight":     spotlight,
+        "featured":      _home_featured_rows(bist, _hs_snap, home_fields.FEATURED_N),
+        "movers":        home_fields.movers(_ranked),   # D-53(a): "Son seansın hareketlileri" (5 yükselen + 5 düşen)
+        "gundem": {     # D-53: "Son seansta değişenler" (BEKLE'ye dönüş listelenmez; /api/gundem ile aynı kaynak)
+            "new_signals":    [{k: s.get(k) for k in ("ticker", "name", "signal", "signal_date")}
+                               for s in _g["new_signals"]],
+            "eod_date":       _g["eod_date"],
+            "eod_label":      _g["eod_label"],
+            "closed_message": _g["closed_message"],
+        },
     }
 
 
@@ -5232,7 +5443,11 @@ def index():
         ssr_signal_counts=_ssr["signal_counts"],
         ssr_top_signals=_ssr["top_signals"],
         ssr_spotlight=_ssr["spotlight"],
+        ssr_featured=_ssr["featured"],      # D-53: öne çıkan şirketler (5 satır; valuation + fin_answer dolu)
+        ssr_movers=_ssr["movers"],          # D-53(a): son seansın hareketlileri (5 yükselen + 5 düşen)
+        ssr_gundem=_ssr["gundem"],          # D-53: son kapanışta durum değiştirenler
         **_heatmap_ssr_context(),   # D-42: heatmap / heatmap_groups / heatmap_tiles (yoksa None/[]/[])
+        heatmap_og_image=_heatmap_og_image(),   # D-54: og:image = son günün haritası (yoksa None)
     ))
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
@@ -5286,6 +5501,24 @@ def api_data():
         # D-07: bileşen eksikliği ve veri tamlığı (Spotlight/sıralama havuzu tüketicisi C tarafında)
         s["data_completeness"] = _hs_data.get("data_completeness") if _hs_data else None
         s["bps_partial"]       = _hs_data.get("partial") if _hs_data else None
+        # D-53: tavan/taban bayrağı tüm evrende (D-51 `lim` ile aynı hesap; donuk satırda yok).
+        # Önbellek satırı yerinde güncellendiği için her çağrıda ya yazılır ya silinir.
+        _lim = (None if s.get("stale_reason") or s.get("data_quality") == "stale"
+                else tarama_fields.limit_flag_from_change(s.get("price"), s.get("change_pct")))
+        if _lim:
+            s["lim"] = _lim
+        else:
+            s.pop("lim", None)
+    # D-53: öne çıkan şirketler havuzunun (üst 10) satırlarına değerleme hükmü + Finansallar betimi —
+    # ana sayfadaki 5 ayrı /fundamentals isteği kalkar. Havuz dışı satırda alan yok (yerinde silinir).
+    _feat_rows = {r["ticker"]: r for r in _home_featured_rows(stocks, _hs_snap, _HOME_API_POOL_N)}
+    for s in stocks:
+        _fr = _feat_rows.get(s.get("ticker"))
+        if _fr:
+            s["valuation"], s["fin_answer"] = _fr["valuation"], _fr["fin_answer"]
+        else:
+            s.pop("valuation", None)
+            s.pop("fin_answer", None)
     # ── Stale-safe fields (CPO-551 Aşama 2 → CPO-1114 K1-K3: per-ticker orana dayalı) ──
     with _lock:
         _loading = _cache.get("loading", False)
@@ -5322,6 +5555,7 @@ def api_data():
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
         "xu100_close":  xu100_close,       # CPO-1558: EOD kapanış (aynı chart cache, live değil)
         "xu100_change_pct": xu100_change_pct,  # CPO-1558: önceki EOD kapanışa göre %
+        "xu100_date":   _xu100_lvl["date"],    # D-53: son kapanış barının ISO tarihi
     }
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
     if _DQV_AVAILABLE:
@@ -5331,7 +5565,6 @@ def api_data():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_DATA",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
@@ -5411,6 +5644,16 @@ def api_hisse_lite(ticker):
         "sl_level":         stock.get("sl_level"),
         "is_premium":       stock.get("is_premium"),
         "anomaly":          {"flag": anomaly.get("flag", False), "reason": anomaly.get("reason", "")},
+        # D-18: tazelik alanları /api/data ve SSR ssr_signal ile aynı kaynaktan (stock sözlüğü);
+        # hisse sayfası /api/data'dan çıkınca "Güncellenmiyor" rozeti ve kapanış günü bu 4 alanla kurulur.
+        "last_fresh_ts":    stock.get("last_fresh_ts"),
+        "data_quality":     stock.get("data_quality"),
+        "stale_reason":     stock.get("stale_reason"),
+        "close_status":     stock.get("close_status"),
+        # D-18b: sayısal DI/ADX (hisse sayfası Q3 DI satırı /chart özetini beklemesin)
+        "di_plus":          stock.get("di_plus"),
+        "di_minus":         stock.get("di_minus"),
+        "adx":              stock.get("adx"),
     }
     _resp = safe_json({"stock": out})
     _etag = hashlib.md5(_resp.get_data()).hexdigest()
@@ -5432,6 +5675,76 @@ def heatmap_page():
     return redirect("/sektor-harita", code=301)
 
 
+# ── D-54: paylaşılabilir ısı haritası — /harita/<gün> kalıcı sayfa + PNG görseller ──────────────
+def _harita_page_ready():
+    """harita_gun.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /harita ve
+    /harita/<gün> 404 döner (500 yok); görseller şablondan bağımsız çalışır."""
+    try:
+        app.jinja_env.get_template("harita_gun.html")
+        return True
+    except Exception:
+        return False
+
+
+def _harita_png(day, kind):
+    m = _heatmap_day(day)
+    if not m:
+        abort(404)
+    path = heatmap_image.image_path(_HEATMAP_DIR, day, kind)
+    if not os.path.isfile(path):
+        try:   # EOD'da üretilemediyse bir kez, dosya kilidi altında (var olan asla yeniden çizilmez)
+            heatmap_image.ensure(_HEATMAP_DIR, day, lambda: m["snap"], kinds=(kind,))
+        except Exception as e:
+            logger.warning("HARITA: %s %s görseli üretilemedi: %s", day, kind, e)
+            return Response("gorsel uretilemedi", status=503, mimetype="text/plain",
+                            headers={"Cache-Control": "no-store"})
+    resp = send_file(path, mimetype="image/png", conditional=True, etag=True, max_age=0)
+    d = heatmap.days(_HEATMAP_DIR)
+    # Geçmiş gün değişmez; son gün aynı gece veri düzeltmesine karşı 1 saat.
+    resp.headers["Cache-Control"] = ("public, max-age=3600" if d and day == d[-1]
+                                     else "public, max-age=31536000, immutable")
+    return resp
+
+
+@app.route("/harita")
+def harita_son():
+    d = heatmap.days(_HEATMAP_DIR)
+    if not d or not _harita_page_ready():
+        abort(404)
+    resp = redirect("/harita/" + d[-1], code=302)
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/harita/<name>")
+def harita(name):
+    """/harita/<YYYY-AA-GG> sayfa · .png 1200×630 · -kare.png 1080×1350 · son.png → son gün.
+    Ad heatmap_image.parse_name ile katı (yalnız ASCII rakam, gerçek tarih); değilse 404."""
+    if name == "son.png":
+        d = heatmap.days(_HEATMAP_DIR)
+        if not d:
+            abort(404)
+        resp = redirect(heatmap_image.url(d[-1]), code=302)
+        resp.headers["Cache-Control"] = "public, max-age=300"
+        return resp
+    parsed = heatmap_image.parse_name(name)
+    if not parsed:
+        abort(404)
+    day, kind = parsed
+    if kind:
+        return _harita_png(day, kind)
+    if not _harita_page_ready():
+        abort(404)
+    m = _heatmap_day(day)
+    if not m:
+        abort(404)
+    resp = app.make_response(render_template(
+        "harita_gun.html", heatmap=m["snap"], heatmap_groups=m["groups"], heatmap_tiles=m["tiles"],
+        harita_gun=heatmap_image.day_context(m["snap"], heatmap.days(_HEATMAP_DIR))))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
 @app.route("/api/heatmap")
 def api_heatmap():
     """D-42: BIST100 gün sonu ısı haritası (resmi kapanıştan sonra dondurulmuş görüntü).
@@ -5449,6 +5762,116 @@ def api_heatmap():
         return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
     return _resp
 
+
+_BULTEN_DAY = re.compile(r"^\d{4}-\d{2}-\d{2}\Z")
+
+
+def _bulten_read(path):
+    try:
+        with open(path, encoding="utf-8") as _f:
+            return json.load(_f)
+    except (OSError, ValueError) as _e:
+        logger.warning("BULTEN: %s okunamadı: %s", path, _e)
+        return None
+
+
+@app.route("/api/bulten/latest")
+@limiter.limit("60 per minute")
+def api_bulten_latest():
+    """D-45(c): son donmuş Akşam Bülteni. Görüntü yoksa 503."""
+    path = bulten.latest_path(_BULTEN_DIR)
+    snap = _bulten_read(path) if path else None
+    if not snap:
+        return safe_json({"error": "bulten_unavailable"}), 503
+    return safe_json(snap)
+
+
+@app.route("/api/bulten/<tarih>")
+@limiter.limit("60 per minute")
+def api_bulten_gun(tarih):
+    """D-45(c): o günün donmuş Akşam Bülteni (yalnız katı YYYY-AA-GG). Anlık görüntüsü
+    olmayan gün (haftasonu, resmi tatil, henüz üretilmemiş) → 404."""
+    if not _BULTEN_DAY.match(tarih):
+        abort(404)
+    path = os.path.join(_BULTEN_DIR, tarih + ".json")
+    if not os.path.isfile(path):
+        abort(404)
+    snap = _bulten_read(path)
+    if not snap:
+        abort(404)
+    return safe_json(snap)
+
+
+def _bulten_page_ready(name="bulten.html"):
+    """bulten.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /bulten ve
+    /bulten/<gün> 404 döner (500 yok); /api/bulten/* şablondan bağımsız çalışır.
+    D-56: /bulten/arsiv aynı desenle bulten_arsiv.html'e bakar."""
+    try:
+        app.jinja_env.get_template(name)
+        return True
+    except Exception:
+        return False
+
+
+@app.route("/bulten")
+def bulten_son():
+    """C-57 v2: son donmuş Akşam Bülteni'ne 302. Görüntü yoksa 404."""
+    d = bulten.days(_BULTEN_DIR)
+    if not d or not _bulten_page_ready():
+        abort(404)
+    resp = redirect("/bulten/" + d[-1], code=302)
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/bulten/<tarih>")
+def bulten_gun(tarih):
+    """/bulten/<YYYY-AA-GG> kalıcı Akşam Bülteni sayfası (SSR, CPO-1802). Katı biçim,
+    o günün donmuş görüntüsü yoksa ya da şablon henüz yayında değilse 404 (500 yok)."""
+    if not _BULTEN_DAY.match(tarih):
+        abort(404)
+    if not _bulten_page_ready():
+        abort(404)
+    path = os.path.join(_BULTEN_DIR, tarih + ".json")
+    if not os.path.isfile(path):
+        abort(404)
+    snap = _bulten_read(path)
+    if not snap:
+        abort(404)
+    d = bulten.days(_BULTEN_DIR)
+    i = d.index(tarih) if tarih in d else -1
+    onceki = d[i - 1] if i > 0 else None
+    sonraki = d[i + 1] if 0 <= i < len(d) - 1 else None
+    # D-56 (Bülten v2): günün donmuş ısı haritası sayfanın ortasında (templates/_heatmap.html).
+    # Sektör özeti TEK TANIM: haritanın çizdiği (güncel taksonomiyle yeniden gruplanmış) aynı
+    # satırlardan, aynı kuralla (piyasa değeriyle ağırlıklı) — haritadaki grup etiketi ile çubuk
+    # grafikteki yüzde aynı sayı olur. Görüntü yoksa harita bölümü gizlenir, özet donmuş hâliyle.
+    hm = _heatmap_day(tarih)
+    hm_ctx = {"heatmap": None, "heatmap_groups": [], "heatmap_tiles": []}
+    if hm and hm.get("snap"):
+        hm_ctx = {"heatmap": hm["snap"], "heatmap_groups": hm["groups"], "heatmap_tiles": hm["tiles"]}
+        _ozet = bulten.isi_haritasi_ozet(hm["snap"])
+        if _ozet:
+            snap = dict(snap, isi_haritasi_ozet=_ozet)
+    resp = app.make_response(render_template(
+        "bulten.html", bulten=snap, onceki=onceki, sonraki=sonraki, gunler=d[-7:],
+        arsiv=bulten.arsiv(_BULTEN_DIR), **hm_ctx))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.route("/bulten/arsiv")
+def bulten_arsiv():
+    """D-56: tüm Akşam Bültenleri (yeniden eskiye; gün, BIST100 kapanışı ve değişimi, günün
+    cümlesi). Şablon yayında değilse ya da hiç bülten yoksa 404 (500 yok)."""
+    if not _bulten_page_ready("bulten_arsiv.html"):
+        abort(404)
+    a = bulten.arsiv(_BULTEN_DIR)
+    if not a:
+        abort(404)
+    resp = app.make_response(render_template("bulten_arsiv.html", arsiv=a))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
 
 
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
@@ -5516,37 +5939,18 @@ def _macro_news_bg_loop():
             logger.debug("Makro RSS loop: %s", e)
         time.sleep(_MACRO_NEWS_TTL)
 
-threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").start()
+_bg_start(threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss"))
 
 
 # ── Ekonomik Takvim ───────────────────────────────────────────────────────────
-ECONOMIC_CALENDAR_2026 = [
-    # TCMB Para Politikası Kurulu Toplantıları
-    {"date": "2026-05-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-06-26", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-07-23", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-09-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-10-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    {"date": "2026-12-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
-    # TUIK Enflasyon Verileri
-    {"date": "2026-05-05", "event": "TÜFE Nisan 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    {"date": "2026-06-03", "event": "TÜFE Mayıs 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    {"date": "2026-07-03", "event": "TÜFE Haziran 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
-    # Fed Faiz Kararları
-    {"date": "2026-05-07", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-06-18", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-07-30", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-09-16", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-10-28", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    {"date": "2026-12-09", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
-    # Bilanço Dönemleri
-    {"date": "2026-05-15", "event": "1Ç 2026 Bilanço Son Günü (ilk açıklamalar)", "importance": "MED", "source": "KAP", "icon": "📋"},
-    {"date": "2026-08-14", "event": "2Ç 2026 Bilanço Son Günü", "importance": "MED", "source": "KAP", "icon": "📋"},
-    # Türkiye büyüme verisi
-    {"date": "2026-05-30", "event": "1Ç 2026 GSYH Büyüme", "importance": "HIGH", "source": "TUIK", "icon": "📈"},
-    # BIST genel
-    {"date": "2026-06-01", "event": "BIST Aylık İşlem İstatistikleri", "importance": "LOW", "source": "BIST", "icon": "📉"},
-]
+# D-24: tek kaynak takvim.MAKRO (resmi takvimlerden doğrulanmış tarihler; eski
+# ECONOMIC_CALENDAR_2026 elle listesi kalktı). Bu uç eski biçimi korur (gundem.html).
+def _economic_calendar_rows():
+    return [{"date": d, "event": (baslik + (" (" + donem + ")" if donem else "")) if bolge == "TR"
+             else "ABD " + baslik + (" (" + donem + ")" if donem else ""),
+             "time": saat, "region": bolge, "source": "Türkiye" if bolge == "TR" else "ABD",
+             "importance": "HIGH"}
+            for d, saat, bolge, baslik, donem, _alt in _takvim.MAKRO]
 
 @app.route("/api/economic-calendar")
 @limiter.limit("60 per minute")
@@ -5554,7 +5958,7 @@ def api_economic_calendar():
     """Ekonomik takvim — yaklaşan ve son 7 günün önemli olayları."""
     today = datetime.now(_TZ_TR).date()
     all_events = []
-    for e in ECONOMIC_CALENDAR_2026:
+    for e in _economic_calendar_rows():
         try:
             ev_date = datetime.strptime(e["date"], "%Y-%m-%d").date()
             delta   = (ev_date - today).days
@@ -5571,9 +5975,8 @@ def api_economic_calendar():
     recent   = sorted([e for e in all_events if e["is_past"] and e["days_until"] >= -7],
                        key=lambda x: x["days_until"], reverse=True)
     if not upcoming:
-        # DEV2 bug-hunt r29: ECONOMIC_CALENDAR_2026 hardcoded liste tukendiginde
-        # sessizce bos donmesin - erken uyari icin logla (P0-CONTENT sinifinda degil ama takip edilsin)
-        logger.warning("ECONOMIC_CALENDAR_2026 tukendi: yaklasan olay kalmadi, listeye yeni tarih eklenmeli")
+        # DEV2 bug-hunt r29: sabit liste tukendiginde sessizce bos donmesin (takvim.MAKRO'ya yeni tarih)
+        logger.warning("takvim.MAKRO tukendi: yaklasan olay kalmadi, listeye dogrulanmis yeni tarih eklenmeli")
     return safe_json({
         "upcoming": upcoming[:6],
         "recent":   recent[:3],
@@ -5589,52 +5992,6 @@ def api_macro_news():
         "updated_at": datetime.fromtimestamp(_macro_news_ts, _TZ_TR).strftime("%H:%M")
                         if _macro_news_ts else "—",
         "count":      len(_macro_news_cache),
-    })
-
-@app.route("/api/refresh", methods=["POST"])
-@limiter.limit("1 per 5 minutes")
-def api_refresh():
-    require_admin()
-    threading.Thread(target=refresh_data, daemon=True).start()
-    return jsonify({"status": "refreshing"})
-
-
-# MSG-019B: Daily digest manuel tetikleyici (token korumalı)
-# Pending boş olsa bile force=true ile test mail göndermek için.
-# Auth: Authorization: Bearer <ADMIN_TOKEN> + localhost-only.
-@app.route("/admin/send-digest-now", methods=["POST"])
-@limiter.limit("3 per hour")
-def admin_send_digest_now():
-    # Layer 1: ADMIN_TOKEN header zorunlu (Bearer auth)
-    if not ADMIN_TOKEN:
-        return jsonify({"error": "ADMIN_TOKEN configured değil (env eksik)"}), 503
-    auth_header = request.headers.get("Authorization", "")
-    expected = f"Bearer {ADMIN_TOKEN}"
-    if not secrets.compare_digest(auth_header, expected):
-        logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
-        abort(401)
-
-    # Layer 2: sadece localhost erişebilir. ProxyFix (P0-SEC-2) kurulduktan sonra
-    # request.remote_addr artik dogrudan gercek client IP'yi veriyor (nginx tek
-    # X-Forwarded-For hop'u ekliyor, ProxyFix onu remote_addr'a tasiyor).
-    remote_first = request.remote_addr or ""
-    if remote_first not in ("127.0.0.1", "::1", "localhost"):
-        logger.warning("admin_send_digest_now: non-localhost erişim engellendi (remote=%s)", remote_first)
-        return jsonify({"error": "Sadece localhost'tan erişilebilir"}), 403
-
-    # Params
-    timeframe = (request.args.get("timeframe") or "daily").strip()
-    if timeframe not in ("daily", "weekly"):
-        return jsonify({"error": "timeframe daily|weekly olmalı"}), 400
-    force = (request.args.get("force") or "false").strip().lower() in ("1", "true", "yes")
-
-    logger.info("admin_send_digest_now: timeframe=%s, force=%s tetiklendi", timeframe, force)
-    result = _send_digest_emails(timeframe=timeframe, force=force)
-    return safe_json({
-        "triggered": True,
-        "timeframe": timeframe,
-        "force": force,
-        "result": result,
     })
 
 
@@ -5832,7 +6189,7 @@ def _fetch_macro():
 
 
 # Background macro refresh — _fetch_macro DEFINED olduktan SONRA başlat
-threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
+_bg_start(threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop"))
 
 
 # Macro refresh — ARTIK SADECE bg loop (request-spawned thread leak'ini önle)
@@ -5869,7 +6226,6 @@ def api_macro():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_MACRO",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
@@ -5878,11 +6234,10 @@ def api_macro():
     return safe_json(_resp_macro)
 
 
-# ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
+# ── Günlük Makro AI Özeti (D-22b: üretim kodu silindi, disk cache gemini-cache-sync
+# tarafından hâlâ okunuyor/yazılıyor — kalıntı veri kalıcı STALE, /api/health bunu
+# bekliyor: "Gemini kota bağımlı — STALE beklenir") ─────────────────────────────
 _macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
-_MACRO_AI_TTL   = 21600      # SPEC-009 Faz 2 B3: 4h→12h; SPEC-011 paketi: 12h→6h
-                             # (makro hızlı değişir — freshness; KPI 245 req/gün stabil)
-_macro_ai_refreshing = False  # arka plan yenileme kilidi
 
 # SPEC-009 Faz 2 B2: macro-ai shared disk cache — leader Gemini çağrısını yapıp
 # diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
@@ -5935,232 +6290,6 @@ def _load_macro_ai_from_disk():
             _macro_ai_cache.update(data)
     except Exception as e:
         logger.warning("_load_macro_ai_from_disk hatası: %s", e)
-
-
-def _do_macro_ai_refresh():
-    """Makro özet Gemini çağrısını arka planda yapar — endpoint'i bloklamaz."""
-    global _macro_ai_refreshing
-    if _macro_ai_refreshing:
-        return
-    _macro_ai_refreshing = True
-    try:
-        # CPO-1494: piyasa kapalıyken (hafta sonu/tatil) yeni özet ÜRETME —
-        # prompt'a "bugün X" deyip piyasa durumunu hiç söylemediğimiz için
-        # Gemini donmuş Cuma verisiyle "şu an işlem görüyor" gibi şimdiki-zaman
-        # dili üretiyordu. Piyasa kapalıyken mevcut (açıkken üretilmiş) özet
-        # zaten stale_warning/hidden (24h/48h) mekanizmasıyla gösteriliyor.
-        if not _market_open():
-            return
-        with _lock:
-            macro_items = _macro_cache.get("data") or []
-        if not macro_items:
-            macro_items = _fetch_macro()
-
-        def _lbl(label):
-            return next((m["price"] for m in macro_items if m.get("label") == label), None)
-
-        xu100  = _lbl("XU100")
-        xu100c = next((m.get("change") for m in macro_items if m.get("label") == "XU100"), None)
-        usdtry = _lbl("USDTRY")
-        gold   = _lbl("ALTIN")
-        oil    = _lbl("PETROL")
-        btc    = _lbl("BTC")
-
-        lines = []
-        if xu100:
-            chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
-            lines.append(f"BIST100: {xu100:,.0f} ({chg_str})")
-        if usdtry: lines.append(f"USD/TRY: {usdtry:.4f}")
-        if gold:   lines.append(f"Altın (XAU/USD): {gold:,.2f} USD/ons")
-        if oil:    lines.append(f"Ham Petrol (Brent): {oil:.2f} USD")
-        if btc:    lines.append(f"BTC: {btc:,.0f} USD")
-
-        if not lines:
-            return
-
-        prompt = (
-            "Türk piyasaları son kapanış verileri:\n"
-            + "\n".join(f"• {ln}" for ln in lines)
-            + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma. "
-            "Tarih belirtme; 'bugün', 'şu an', 'şu anda', 'şu sıralar' gibi zamana "
-            "bağlı ifadeler KULLANMA — veriyi tarihsiz/zamansız yorumla.\n"
-            "GÖREV: Bireysel yatırımcı için TEK SATIR Türkçe piyasa özeti, en fazla 220 karakter. "
-            "Tam cümle kurma; kısa ifadeleri ' · ' ile ayır (örnek biçim: "
-            "'BIST100 %62 yükselişte · Dolar/TL yatay · Altın hafif değer kaybediyor'). "
-            "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
-        )
-        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12, max_tokens=120, temperature=0.3)
-        if text:
-            now = time.time()
-            today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
-            _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
-                                    "generated_at": datetime.now(_TZ_TR).strftime("%H:%M")})
-            logger.info("_do_macro_ai_refresh: tamamlandi")
-    except Exception as e:
-        logger.warning("_do_macro_ai_refresh: hata — %s", e)
-    finally:
-        _macro_ai_refreshing = False
-
-
-@app.route("/api/macro-summary")
-@limiter.limit("30 per minute")
-def api_macro_summary():
-    """Günlük makro ekonomi özeti — Gemini ile üretilir, 4 saat cache'lenir.
-    Stale-while-revalidate: cache varsa anında döner, arka planda yeniler."""
-    now     = time.time()
-    today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
-    # Snapshot (dict() kopya) — arka plan refresh thread'i _macro_ai_cache'i
-    # .update() ile mutate ederken bu request'in yarısı eski/yarısı yeni alan
-    # okumasın (torn read: eski text + yeni generated_at gibi tutarsız yanıt).
-    cached  = dict(_macro_ai_cache)
-
-    cache_fresh = (cached.get("date") == today_s
-                   and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
-
-    # Stale + bu worker gemini-leader ise → arka planda yenile (4× çağrı fix).
-    # Non-leader yenilemez; gemini-cache-sync timer thread'i diskteki leader
-    # cache'ini periyodik (90s) yükler → in-memory'den serve eder (inline I/O YOK, #38).
-    if not cache_fresh and not _macro_ai_refreshing and _is_gemini_leader():
-        threading.Thread(target=_do_macro_ai_refresh, daemon=True,
-                         name="macro-ai-refresh").start()
-
-    if cached.get("text"):
-        age_h = (now - cached.get("ts", 0)) / 3600.0
-        gen_date = ""
-        try:
-            if cached.get("date"):
-                gen_date = datetime.strptime(cached["date"], "%Y-%m-%d").strftime("%d.%m")
-        except Exception:
-            gen_date = ""
-        # DEV2-r103 (bughunt): stale_warning yalnizca saat farkina bakiyordu, takvim
-        # gunu degistiginde (ornegin cumartesi/pazar sonrasi pazartesi sabahi, 24s
-        # esigi henuz dolmadan) "Bugun ..." diyen metin sessizce "taze" isaretleniyordu.
-        date_changed = bool(cached.get("date")) and cached.get("date") != today_s
-        return safe_json({"summary": cached["text"], "cached": cache_fresh,
-                          "generated_at": cached.get("generated_at", ""),
-                          "generated_date": gen_date,
-                          "stale_warning": (24 <= age_h < 48) or date_changed,
-                          "hidden": age_h >= 48})
-    return safe_json({"summary": "", "cached": False})
-
-
-@app.route("/api/market-summary")
-@limiter.limit("60 per minute")
-def api_market_summary():
-    """Feature 1 #1A — Bugünün Özeti hero card data (CPO MSG-054 onayı).
-
-    Sabit 3-cümle şablon için backend compute:
-      Cümle 1: BIST'de bugün N hisse güçlü trende geçti (topTickers)
-      Cümle 2: <hottestSector> sektörü en güçlü ivmesinde, ortalama %X
-      Cümle 3: Genel sinyal dağılımı dünden +N güçlü/zayıf
-
-    Snapshot pattern: _SNAPSHOTS_DIR/<YYYY-MM-DD>.json (mevcut, _save_daily_snapshot kullanılır)
-    """
-    with _lock:
-        stocks = list(_cache.get("data") or [])
-    if not stocks:
-        return jsonify({"loading": True}), 200
-
-    # BIST hisseleri (XU030 hariç)
-    bist = [s for s in stocks if s.get("ticker") != "XU030"]
-    # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
-    # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
-    # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
-    # DEV2-r4-perf: referans gün istek boyunca sabit, N+1 yerine bir kez hesapla.
-    # D-06: referans gün takvim değil verideki son EOD günü (/gundem ile aynı).
-    _eod_ms = last_eod_day(bist)
-    new_bull = [s for s in bist
-                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "AL"]
-    new_bear = [s for s in bist
-                if _eod_ms and is_signal_from_today(s.get("signal_date"), today=_eod_ms) and s.get("signal") == "SAT"]
-    all_bull = [s for s in bist if s.get("signal") == "AL"]
-
-    # Top tickers (en taze 4 AL)
-    top_tickers = [s.get("ticker") for s in new_bull[:8] if s.get("ticker")]
-
-    # Hottest sector — change_pct avg max (en az 2 hisse, mock güvenilirlik)
-    sector_agg = {}
-    for s in bist:
-        sec = s.get("sector")
-        if not sec or sec == "Diğer":
-            continue
-        agg = sector_agg.setdefault(sec, {"sum": 0.0, "count": 0})
-        try:
-            agg["sum"] += float(s.get("change_pct") or 0)
-            agg["count"] += 1
-        except Exception:
-            pass
-
-    hottest_sector = None
-    sector_change = 0.0
-    max_avg = float("-inf")
-    for name, agg in sector_agg.items():
-        if agg["count"] < 2:
-            continue
-        avg = agg["sum"] / agg["count"]
-        if avg > max_avg:
-            max_avg = avg
-            hottest_sector = name
-            sector_change = round(avg, 1)
-
-    # Dün snapshot ile delta (al_count fark)
-    delta = 0
-    try:
-        from datetime import timedelta as _td
-        ydate = (datetime.now(_TZ_TR) - _td(days=1)).strftime("%Y-%m-%d")
-        yfile = os.path.join(_SNAPSHOTS_DIR, f"{ydate}.json")
-        if os.path.exists(yfile):
-            with open(yfile, encoding="utf-8") as f:
-                ysnap = json.load(f)
-            delta = len(all_bull) - int(ysnap.get("al_count") or 0)
-    except Exception as e:
-        logger.debug("market-summary delta hesabı: %s", e)
-
-    # Market status (TR saatine göre) — kanonik trading_calendar (hafta sonu + resmi tatil)
-    now_tr = datetime.now(_TZ_TR)
-    market_open_hours = _market_open(now_tr)
-    market_status = "open" if market_open_hours else "closed"
-
-    # D-06: "Yarın"/"Pazartesi" yerine sonraki işlem gününün tarihi (tatil güvenli).
-    closed_msg = None
-    if not market_open_hours:
-        if is_trading_day(now_tr.date()) and now_tr.hour < 10:
-            closed_msg = "BIST henüz açılmadı. 10:00'da seans başlar."
-        else:
-            _next_session = now_tr.date() + timedelta(days=1)
-            while not is_trading_day(_next_session):
-                _next_session += timedelta(days=1)
-            closed_msg = f"BIST kapalı. Sonraki seans {_tr_day_month(_next_session)} 10:00'da."
-
-    # CPO-1344 §A ikincil: asOfTime duvar saatiydi (now_tr), veri ne zaman
-    # üretildiğini değil "şu an ne zaman" olduğunu söylüyordu. Kanonik veri
-    # zamanına (_data_quality_snapshot) çeviriyoruz; farklı takvim günündeyse
-    # (hafta sonu/tatil sonrası bayat veri) tarihi de basıyoruz — sadece saat
-    # basmak "bugünmüş gibi" yanıltır.
-    as_of_time = now_tr.strftime("%H:%M")
-    try:
-        _data_updated_at = _data_quality_snapshot(stocks).get("updated_at")
-        if _data_updated_at:
-            _dt = datetime.strptime(_data_updated_at, "%d.%m.%Y %H:%M:%S")
-            as_of_time = (_dt.strftime("%H:%M") if _dt.date() == now_tr.date()
-                          else _dt.strftime("%d.%m %H:%M"))
-    except Exception as e:
-        logger.debug("market-summary asOfTime veri-zamanı hesabı: %s", e)
-
-    return safe_json({
-        "asOfTime": as_of_time,
-        "marketStatus": market_status,
-        "closedMessage": closed_msg,
-        "newBullCount": len(new_bull),
-        "newBearCount": len(new_bear),
-        "topTickers": top_tickers,
-        "hottestSector": hottest_sector,
-        "sectorChange": sector_change,
-        "delta": delta,
-        "totalBullCount": len(all_bull),
-        # watchlistMoved: client-side hesaplanır (watchlist localStorage)
-    })
-
 
 
 def _safe_float(val):
@@ -6302,8 +6431,8 @@ def get_chart_data():
                 "bear_score": bear_score,
                 "sl_level":   sl_val,
                 "adx":        round(adx_val, 1),
-                "e12":        round(e12_val, 1),
-                "e99":        round(e99_val, 1),
+                "e12":        round(e12_val, 2),  # D-04b #3: analyze() ile aynı hassasiyet (CPO-1741)
+                "e99":        round(e99_val, 2),
                 "st_bull":    st_bull,  "st_bear":  st_bear,
                 "adx_bull":   adx_bull, "adx_bear": adx_bear,
                 "e12_bull":   e12_bull, "e12_bear": e12_bear,
@@ -6497,89 +6626,6 @@ def _news_ttl_for(ticker: str) -> int:
     return _NEWS_CACHE_TTL
 
 
-# CPO-1350 §2b Sec.1 — cross-process in-flight dedup. Kök neden (CPO-1350/DEV-1659
-# ölçümü): _prefetch_news_worker ve _on_demand_news_worker kararlarını kendi
-# process-local _news_cache'ine göre veriyor; 90s'lik gemini-cache-sync diski bu
-# yarışı kapatamayacak kadar yavaş. Reset anındaki gibi çoklu worker aynı ticker'ı
-# aynı ~saniyelerde miss görürse ikisi de bağımsızca Gemini'ye soruyor (canlı kanıt:
-# aynı 5 hisse, 84s pencerede, 2 farklı PID, 2x gerçek çağrı = %50 israf).
-# _gemini_rate_acquire ile BİREBİR AYNI SINIF: tek paylaşımlı dosya + flock
-# (LOCK_EX|LOCK_NB) + sınırlı poll bütçesi + gevent hub threadpool offload + 10s
-# sert tavan. Kilit alınamazsa (budget/timeout) GÜVENLİ VARSAYILAN "claim başarılı"
-# döner — worker hiçbir koşulda asılı kalmaz/bloklanmaz, en kötü ihtimalle eski
-# (dedup'suz) davranışa döner, asla yeni bir hang sınıfı eklemez.
-_NEWS_INFLIGHT_PATH           = os.environ.get("NEWS_INFLIGHT_PATH",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_inflight.json"))
-_NEWS_INFLIGHT_STALE_S        = 60    # gerçekçi üst sınır: 2×_GEMINI_TIMEOUT_CAP(5s) + rate-wait + marj
-_NEWS_INFLIGHT_FLOCK_BUDGET_S = 8.0   # outer .get(timeout=10) altında kalsın diye 2s marj
-_news_inflight_lock = threading.Lock()
-if not os.path.exists(_NEWS_INFLIGHT_PATH):
-    open(_NEWS_INFLIGHT_PATH, "a").close()
-_news_inflight_fh = open(_NEWS_INFLIGHT_PATH, "r+")
-
-
-def _news_inflight_claim_blocking(ticker: str) -> bool:
-    """True → bu ticker'ı BU worker fetch edebilir (claim alındı).
-    False → başka process aynı ticker'ı <_NEWS_INFLIGHT_STALE_S sn içinde claim
-    etmiş — Gemini çağrısı ATLANMALI (sonuç disk-sync/queue retry ile gelecek)."""
-    with _news_inflight_lock:
-        _t0 = time.time()
-        while True:
-            try:
-                _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
-                break
-            except (BlockingIOError, OSError):
-                if time.time() - _t0 > _NEWS_INFLIGHT_FLOCK_BUDGET_S:
-                    logger.error(
-                        "_news_inflight_claim: %.1fs içinde flock alınamadı — "
-                        "dedup atlanıyor (güvenli varsayılan)", _NEWS_INFLIGHT_FLOCK_BUDGET_S)
-                    return True
-                time.sleep(0.05)
-        try:
-            _news_inflight_fh.seek(0)
-            raw = _news_inflight_fh.read().strip()
-            try:
-                state = json.loads(raw) if raw else {}
-                if not isinstance(state, dict):
-                    state = {}
-            except ValueError:
-                state = {}
-            now = time.time()
-            claimed_at = state.get(ticker)
-            if claimed_at and (now - claimed_at) < _NEWS_INFLIGHT_STALE_S:
-                return False
-            # Bayat kayıtları temizle (dosya süresiz şişmesin) + bu ticker'ı claim et
-            state = {t: ts for t, ts in state.items() if (now - ts) < _NEWS_INFLIGHT_STALE_S}
-            state[ticker] = now
-            _news_inflight_fh.seek(0)
-            _news_inflight_fh.truncate()
-            _news_inflight_fh.write(json.dumps(state))
-            _news_inflight_fh.flush()
-            return True
-        finally:
-            _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_UN)
-
-
-def _news_inflight_claim(ticker: str) -> bool:
-    """`_gemini_rate_acquire` ile birebir aynı offload deseni — 10s sert tavan,
-    timeout'ta güvenli varsayılan (claim başarılı sayılır, dedup atlanır, hang YOK)."""
-    if _WS_AVAILABLE:
-        try:
-            return _gevent.get_hub().threadpool.spawn(_news_inflight_claim_blocking, ticker).get(timeout=10)
-        except _gevent.Timeout:
-            logger.error("_news_inflight_claim: 10s threadpool timeout — dedup atlanıyor (güvenli varsayılan)")
-            return True
-    return _news_inflight_claim_blocking(ticker)
-
-
-# On-demand news fetch kuyruğu — iki farklı HTTP endpoint'i besler (CPO-1206 §3):
-# api_stock_news (tekil hisse sayfası) ve api_market_news (piyasa haber şeridi).
-# Kuyruk artık ticker->origin eşlemesi tutuyor ki _on_demand_news_worker gerçek
-# kökeni etiketleyebilsin — önceden ikisi de sabit source="user" ile işleniyordu,
-# "kim çağırdı" hep _on_demand_news_worker'a atfediliyordu, gerçek üretici kayboluyordu.
-_news_fetch_queue     = {}         # {ticker: (origin, ua_class)} — origin: "stock_news" | "market_news"
-_news_queue_lock      = threading.Lock()
-
 # CPO-1208 §1(d): "kotayı kim yiyor" zincirinin son doğrulanmamış halkası —
 # recycle-sonrası her poll gerçekten Gemini çağrısına mı dönüşüyor. 24s toplanıp
 # NEWS_MEASURE log satırlarından [ua_class]×[cache hit/miss]×[gemini_call] tablosu
@@ -6764,17 +6810,6 @@ _SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliy
 _SIG_EXPLAIN_TTL_JITTER = 3600 * 2  # CPO-1008: ±2h jitter — toplu yazılan cache'lerin aynı anda thundering-herd bitişini önler
 _SIG_FAIL_TTL         = 300        # 5 dakika
 
-# CPO-1008 — /news'teki cache-or-queue pattern'e taşındı. Request path'inde Gemini
-# çağrısı YOK: cache-miss → bg thread kuyruğuna at, algoritmik commentary anında dön.
-_signal_explain_queue      = {}   # {ticker: signal_data} — bg enrichment bekleyen
-_signal_explain_queue_lock = threading.Lock()
-
-# CPO-1531 Faz 3 — Temel Analiz Skoru doğal-dil açıklaması. AYNI on-demand worker'ı
-# (_on_demand_signal_explain_worker) paylaşır — ikinci bir paralel Gemini tüketici
-# EKLENMEDİ, mevcut 15s rate-limit'li kuyruğa katılıyor (Gemini kotası ikiye katlanmaz).
-_health_explain_queue      = {}   # {ticker: entry} — bg enrichment bekleyen
-_health_explain_queue_lock = threading.Lock()
-
 # SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
 # Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
 # burst = gevent hub 40-50s donar → K6 v2 quorum tetik. Çözüm:
@@ -6827,10 +6862,6 @@ def _load_explain_cache_from_disk():
 # Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
 # (use_search=False olan denemeler grounding olmadan gider → daha stabil)
 # D-P0-2409 (maliyet): grounding kapalı, önce ucuz model (flash-lite $0,10/$0,40 · flash $0,30/$2,50).
-_GEMINI_NEWS_ATTEMPTS = [
-    ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite, grounding yok
-    ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
-]
 _GEMINI_EXPLAIN_ATTEMPTS = [
     ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite
     ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
@@ -7009,9 +7040,12 @@ _GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock
 # guard — O_APPEND belirsizliği ve bozuk state'in kalıcılaşması ihtimaline karşı.
 _gemini_rate_lock = threading.Lock()
 _GEMINI_RATE_FLOCK_BUDGET_S = 8.0  # outer .get(timeout=10) altında kalsın diye 2s marj
-if not os.path.exists(_GEMINI_RATE_PATH):
-    open(_GEMINI_RATE_PATH, "a").close()
-_gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
+if _IS_SHADOW:  # D-16: prod oran-sınırı kilit dosyasına dokunma
+    _gemini_rate_fh = tempfile.TemporaryFile("r+")
+else:
+    if not os.path.exists(_GEMINI_RATE_PATH):
+        open(_GEMINI_RATE_PATH, "a").close()
+    _gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
 
 
 def _gemini_rate_acquire_blocking() -> float:
@@ -7106,248 +7140,6 @@ def _gemini_rate_acquire() -> float:
     return _gemini_rate_acquire_blocking()
 
 
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# IMPLICIT CACHING — Gemini 2.5 sabit prefix sistem prompt'ları (1024+ token)
-# Aynı prefix tekrar gönderildiğinde input token maliyeti %75 düşer.
-# Bu prompt'lar değişmemeli — her değişiklik cache invalidate eder.
-# ═══════════════════════════════════════════════════════════════════════════
-
-_SYS_NEWS = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun haber özet asistanısın. Borsa İstanbul'da işlem gören şirketler hakkındaki resmi açıklamaları, finansal sonuçları, KAP bildirimlerini ve önemli kurumsal gelişmeleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — TARİH KISITI:
-YALNIZCA görev mesajında belirtilen tarih aralığındaki olayları yaz. Bu tarih aralığı dışındaki herhangi bir gelişmeyi DAHIL ETME. Bugünün tarihinden sonraki tarihler için ASLA "olacak, planlanıyor, açıklanacak" gibi ifadeler kullanma — gelecek bilinmez.
-
-KURAL 2 — GELECEK YASAĞI:
-Bugünden sonraki tarihlerde olacak olaylar HAKKINDA SPEKÜLASYON YAPMA. Eğer arama sonuçlarında "X şirket yarın bilanço açıklayacak" gibi bir haber bulursan, bunu özete DAHIL ETME. Sadece zaten gerçekleşmiş olayları rapor et. Tahminler, beklentiler ve "olabilir" denenen şeyler de yasaktır.
-
-KURAL 3 — BOŞ KAYNAK YANITI:
-Eğer belirtilen tarih aralığında doğrulanmış bir gelişme bulamadıysan, SADECE şunu yaz: "Son 7 günde kayda değer bir gelişme bulunmuyor." Başka bir ek metin yazma, "bilgim sınırlı" gibi bahane sunma, alternatif öneri sunma.
-
-KURAL 4 — UYDURMA YASAĞI:
-Tarih uydurma, rakam uydurma, isim uydurma, KAP referans numarası uydurma. Spekülasyon yapma. "Olabilir, muhtemelen, görünüyor, sanırım" gibi belirsiz ifadeler kullanma. Sadece arama kaynaklarında doğrulayabildiğin bilgileri yaz. Emin değilsen yazma.
-
-KURAL 5 — GİRİŞ/KAPANIŞ YASAĞI:
-"Aşağıda X şirketinin özetlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur, başka sorunuz olursa..." gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun, gereksiz dolgu metni ekleme.
-
-═══ FORMAT ═══
-
-• Her madde "•" (madde imi) ile başlasın.
-• Her madde tek konuya odaklansın (1-2 cümle, 30-40 kelimeyi geçmesin).
-• Sayıları Türkçe formatla yaz: 1.234,56 TL (binlik ayraç nokta, ondalık virgül).
-• Yüzdeleri Türkçe formatla yaz: %12,5 büyüme.
-• Tarihleri "DD MMMM YYYY" formatında yaz (örn: 8 Mayıs 2026).
-• En önemli haberi en üste koy (KAP açıklamalarında genelde en yeni tarihli).
-• Teknik finansal jargonu sade dile çevir:
-  - "tahvil itfası" yerine "tahvil geri ödemesi"
-  - "ihraç" yerine "satış / çıkarma"
-  - "iştirak" yerine "bağlı şirket"
-  - "konsolide gelir" yerine "şirket grubunun toplam geliri"
-  - "FAVÖK" yerine "esas faaliyet kârı (FAVÖK)"
-  - "esas faaliyet" yerine "ana iş kolu"
-  - "sermaye artırımı" → açıklayarak yaz: "şirket yeni hisse çıkararak sermayesini artırdı"
-
-═══ İYİ ÖRNEK (referans çıktı) ═══
-
-• 8 Mayıs 2026: Akbank, 2025 yılına ait sürdürülebilirlik raporunu yayınladı. Çevresel ve sosyal hedeflerine ilişkin performansı paylaştı.
-
-• 7 Mayıs 2026: Akbank, vadesi gelen 250 milyon dolarlık tahvilin geri ödemesini tamamladı. Yatırımcılara anapara ve son faiz ödendi.
-
-═══ KÖTÜ ÖRNEKLER (yapma) ═══
-
-❌ "Bilgi sahibi olduğum kadarıyla..." — bilgi yetersizse Kural 3'teki boş kaynak yanıtı kullan.
-❌ "Akbank yarın bilanço açıklayacak" — Kural 2 gelecek yasağı.
-❌ "Hisse fiyatı yükselebilir" — spekülasyon yasağı, sen analist değil özetçisin.
-❌ "Aşağıdaki özetler size yardımcı olacaktır" — Kural 5 giriş yasağı.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
-_SYS_EXPLAIN = """KIMLIK: Sen BorsaPusula platformunun teknik sinyal açıklama asistanısın. Algoritmik olarak üretilmiş hisse sinyal yorumlarını sade Türkçe ile yeniden ifade edersin. Görevini "bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslupla yaparsın. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — ALGORİTMİK METİN KESINLIKLE DOĞRUDUR:
-Sana verilen "DOĞRU ALGORİTMİK ANALİZ" bölümündeki bilgiler matematiksel olarak hesaplanmıştır ve doğrudur. Bu analize ASLA itiraz ETME, "ama bir yandan da" diyerek ters yön belirtme, "fakat dikkat edilmeli" gibi şüphe ekleme. Görevin bu analizi desteklemek ve sade dille açıklamak — yorumlamak değil.
-
-KURAL 2 — SİNYALİN YÖNÜNE SADIK KAL:
-Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Trend Bozuldu" ise DÜŞÜŞ yönünde. "Yatay" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
-
-KURAL 3 — ÜÇ CÜMLE KURALI:
-Yorumun TAM olarak 3 cümle olsun. Birinci cümle teknik durumu özetlesin, ikinci cümle bu durumun ne anlama geldiğini söylesin, üçüncü cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin. Daha fazla veya daha az cümle yazma.
-
-KURAL 4 — SADE DİL ZORUNLU:
-Teknik göstergeleri sıradan yatırımcı diline çevir:
-  - Supertrend → fiyat trendi göstergesi / trend yönü
-  - ADX → trend gücü
-  - EMA → hareketli ortalama
-  - DI+ / DI- → yön göstergeleri
-  - Trend dönüş seviyesi (Supertrend) → fiyat bu çizginin öbür yanına geçerse trend yönü değişmiş sayılır
-  - RSI → momentum göstergesi
-  - Hacim oranı → işlem hacmi karşılaştırması
-
-KURAL 5 — SAYI YAZIM KURALI:
-- Fiyat: TL cinsinden, virgülle ondalık (örn: 32,45 ₺).
-- ADX: tam sayı + parantezle açıklama (örn: "28 - güçlü trend").
-- Yön: net ifade ("yukarı yönlü", "aşağı yönlü", "kararsız").
-- Süre: "X gündür", "yeni başladı".
-- Yüzde: virgülle ondalık (%5,3).
-
-KURAL 6 — YASAKLI İFADELER:
-- ❌ "Bence", "düşünüyorum", "tahminim" → algoritmik metni anlat, kendi görüşünü ekleme.
-- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
-- ❌ "Al/sat tavsiyesi", "almalısınız", "satın" → tavsiye yasağı.
-- ❌ Başlık, alt başlık (## veya **bold**) → düz paragraf yaz.
-- ❌ Madde işaretleri (- veya •) → düz paragraf, virgüllerle bağla.
-- ❌ 1. çoğul fiil ("belirtelim", "ifade edelim", "söyleyebiliriz", "anlayalım") →
-     3. tekil / nesnel kullan ("görünüyor", "durumunda", "seviyesinde",
-     "olarak hesaplanmış"). Mesafeli + bilgilendirici ton (SPEC-014 polish #1).
-- ❌ "Bu durumda yatırımcılar..." → genel tavsiye yok.
-- ❌ Hedef fiyat, kâr al, stop/zarar durdurma, giriş bölgesi, risk/ödül → işlem yönetimi dili yok.
-
-═══ İYİ ÖRNEK ═══
-
-"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu dört koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; trend dönüş seviyesi (Supertrend) 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
-
-═══ KÖTÜ ÖRNEKLER ═══
-
-❌ "Akbank hissesinde yükseliş trendi var, ancak dikkatli olunmalı..." (Kural 1 — itiraz yasağı)
-❌ "Bence şu an alım fırsatı olabilir" (Kural 6 — kişisel görüş)
-❌ "**AKBNK Analizi**" başlık (Kural 6 — formatlama yok)
-❌ "- Trend: Güçlü\n- Yön: Yukarı" (Kural 6 — düz paragraf)
-
-═══ EK BAĞLAM ═══
-
-Algoritmik sinyal motoru üç gösterge kombinasyonu kullanır:
-1. Supertrend — fiyatın trend bandının üstünde mi altında mı?
-2. ADX (14) ≥ 25 — trend ne kadar güçlü?
-3. DI+ / DI− — trendin yönü hangi tarafta?
-4. EMA12 vs EMA99 — kısa vade uzun vade hareketli ortalamasının üstünde mi?
-
-Dört koşul da AYNI yönde olursa sinyal aktif olur. Bu nedenle açıklamalar
-çelişkisiz, tek yönde olmalı. Yatırımcıya "bu üç gösterge nedir?" sorusunun
-cevabını sade dille verebilirsin.
-
-Hacim Onaylı sinyal: Eğer hisse "Hacim Onaylı" olarak işaretliyse, bu AL sinyali +
-hacim teyidinin de olduğu anlamına gelir (RVOL ≥ 1.20). Bunu yorumda
-"hacimle desteklenmiş güçlü sinyal" şeklinde belirtmek serbest ama zorunlu değil.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
-_SYS_EXPLAIN_FUNDAMENTAL = """KIMLIK: Sen BorsaPusula platformunun Temel Analiz Skoru açıklama asistanısın. Python'da deterministik olarak hesaplanmış, kategori bazlı bir gerekçe cümlesini sade Türkçe ile yeniden ifade edersin. "Bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslup kullan. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — ŞABLON CÜMLE KESİNLİKLE DOĞRUDUR:
-Sana verilen "DOĞRU ŞABLON CÜMLE" matematiksel olarak hesaplanmıştır. Bu cümlenin anlamına ASLA itiraz ETME, yeni kategori/skor uydurma, "ama bir yandan da" diyerek ters yön ekleme. Görevin bu cümleyi anlamını değiştirmeden akıcı Türkçe nesire çevirmek — yeni analiz/yorum yapmak değil.
-
-KURAL 2 — BANDA SADIK KAL:
-Bant "yesil" ise ton olumlu/güçlü, "kirmizi" ise ton temkinli/zayıf, "sari" ise dengeli olsun. Bantla çelişen kelimeler kullanma (yeşil bantta 'zayıf/riskli', kırmızı bantta 'güçlü/sağlam' gibi).
-
-KURAL 3 — İKİ-ÜÇ CÜMLE KURALI:
-Yorumun 2-3 cümle olsun. Son cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin.
-
-KURAL 4 — YASAKLI İFADELER:
-- ❌ "Bence", "düşünüyorum", "tahminim" → şablon cümleyi anlat, kendi görüşünü ekleme.
-- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
-- ❌ "Al/sat tavsiyesi", "almalısınız", "satın alın" → tavsiye yasağı.
-- ❌ Başlık, alt başlık (## veya **bold**), madde işaretleri (- veya •) → düz paragraf yaz.
-- ❌ 1. çoğul fiil ("belirtelim", "söyleyebiliriz") → 3. tekil / nesnel kullan ("görünüyor", "hesaplanmış").
-
-═══ İYİ ÖRNEK ═══
-
-Şablon: "Kârlılık kategorisinde güçlü bir görünüm var (skor: 78), Kaldıraç kategorisinde ise zayıf sonuçlar öne çıkıyor (skor: 42)."
-Çıktı: "Şirketin kârlılık tarafı sektörüne göre güçlü bir performans sergiliyor, ancak kaldıraç (borçluluk) kategorisinde aynı gücü göstermiyor. Bu ikisi arasındaki fark, temel analiz skorunun neden orta seviyede kaldığını açıklıyor. Yatırım tavsiyesi değildir."
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
-
-_SYS_KAP = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun KAP (Kamuyu Aydınlatma Platformu) bildirim özet asistanısın. Borsa İstanbul'da işlem gören şirketlerin KAP'a yaptıkları resmi bildirimleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
-
-═══ KESİN KURALLAR ═══
-
-KURAL 1 — SADECE VERİLEN BİLDİRİMLER:
-Sana ham veri olarak verilen KAP bildirimlerinden BAŞKA bilgi katma. Ek araştırma yapma, dış kaynak kullanma, kendi yorumunu ekleme. Görevin sadece verilen bildirimleri Türkçe sadeleştirmek.
-
-KURAL 2 — UYDURMA YASAĞI:
-Tarih uydurma, rakam uydurma, kontrat numarası uydurma. Bildirim metninde olmayan bilgileri YAZMA. "Bu bildirimin anlamı muhtemelen..." gibi yorum kullanma.
-
-KURAL 3 — GİRİŞ/KAPANIŞ YASAĞI:
-"Aşağıda X şirketinin KAP bildirimlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur" gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun.
-
-KURAL 4 — SADE DİL ZORUNLU:
-KAP'ta kullanılan teknik finansal terimleri sıradan dile çevir:
-  - "tahvil itfası" → "tahvil geri ödemesi" (vade sona erdi)
-  - "ihraç" → "satış / çıkarma"
-  - "iştirak" → "bağlı şirket"
-  - "konsolide finansal sonuçlar" → "şirket grubunun toplam finansal sonuçları"
-  - "FAVÖK" → "esas faaliyet kârı (FAVÖK)"
-  - "ana ortaklığa ait net kâr" → "ana şirkete düşen net kâr"
-  - "yönetim kurulu kararı" → "yönetim kurulu kararı"
-  - "kar payı dağıtımı" → "temettü ödemesi"
-  - "MKK" → "Merkezi Kayıt Kuruluşu (MKK)"
-  - "SPK" → "Sermaye Piyasası Kurulu (SPK)"
-
-═══ FORMAT ═══
-
-• Her madde "•" (madde imi) ile başlasın.
-• Her madde 1-2 cümle olsun, gereksiz uzatma.
-• Tarihi başta yaz: "8 Mayıs 2026: ..."
-• Önemli sayıları belirgin yap: 250 milyon TL, %5 oranında, vb.
-• Yatırımcı için "ne anlama geliyor" kısmını parantezle ekleyebilirsin (kısa, max 5 kelime).
-• Birden fazla bildirim varsa kronolojik (yeni → eski) sırala.
-• Sayıları Türkçe formatla: 1.234,56 TL, %12,5.
-
-═══ İYİ ÖRNEK ═══
-
-• 8 Mayıs 2026: Şirket, 2025 yılı sürdürülebilirlik raporunu yayınladı (çevresel ve sosyal performans verisi).
-
-• 7 Mayıs 2026: 250 milyon TL nominal değerli tahvilin geri ödemesi tamamlandı (vadesi gelen borçlanma kapatıldı).
-
-• 6 Mayıs 2026: Yönetim kurulu, %15 temettü dağıtım kararı aldı; ödeme 15 Mayıs'ta yapılacak.
-
-═══ KÖTÜ ÖRNEKLER ═══
-
-❌ "Aşağıda X şirketinin bildirimlerini bulabilirsiniz" (Kural 3 — giriş yasağı)
-❌ "Bu temettü artışı hissenin yükselmesine neden olabilir" (Kural 2 — yorum yasağı)
-❌ "Sektör genelinde benzer trendler görülüyor" (Kural 1 — ek bilgi yasağı)
-❌ "**KAP Bildirimleri**" başlık (Kural 3 — formatlama yok)
-
-═══ KAP BİLDİRİM TÜRLERİ REFERANSI ═══
-
-Yatırımcılar için en önemli KAP bildirim kategorileri (sadeleştirilmiş açıklama):
-
-• "Finansal Rapor" → çeyrek bilanço açıklaması (3 ayda bir).
-  Yatırımcıya etkisi: net kâr/zarar, satış büyümesi → hisse fiyatına yansır.
-
-• "Esas Sözleşme Değişikliği" → şirket tüzüğünde değişiklik.
-  Yatırımcıya etkisi: yönetişim/oy hakları değişimi olabilir.
-
-• "Genel Kurul Toplantısı" → ortaklar yıllık toplantısı.
-  Yatırımcıya etkisi: temettü dağıtım kararı, yönetim kurulu seçimi.
-
-• "Pay Geri Alımı" (buyback) → şirket kendi hissesini satın alıyor.
-  Yatırımcıya etkisi: hisse arzı azalır → fiyat desteği oluşur.
-
-• "Önemli Olaylar" → satın alma, satış, ortaklık değişikliği, davalar.
-  Yatırımcıya etkisi: olayın boyutuna göre büyük fiyat etkisi olabilir.
-
-• "İhraç Tavanı" → şirket yeni borçlanma izni almış.
-  Yatırımcıya etkisi: borç yükü artabilir, faiz gideri yükselir.
-
-• "Bağımsız Denetim" → yıllık dış denetim sonuçları.
-  Yatırımcıya etkisi: muhasebe doğruluğu teyidi.
-
-═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
-"""
-
 def _gemini_cap_alert_mail():
     """D-P0-2409: aylık harcama tavanı dolduğunda tek uyarı e-postası (ay başına bir kez)."""
     try:
@@ -7359,13 +7151,16 @@ def _gemini_cap_alert_mail():
         logger.warning("_gemini_cap_alert_mail: %s", e)
 
 
-def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
+def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3, json_mode=False, timeout_cap=None):
     """Model fallback zinciri ile Gemini API çağrısı yapar.
 
     Args:
         prompt: Gönderilecek metin
         attempts: [(model_id, use_google_search), ...] listesi
         timeout: İstek zaman aşımı (saniye)
+        json_mode: D-57 — yanıt yalnız JSON (responseMimeType=application/json)
+        timeout_cap: D-57 — arka plan işleri için _GEMINI_TIMEOUT_CAP yerine üst sınır
+            (web isteğinde KULLANILMAZ; gündem baskısı bist30-macro arka plan iş parçacığında)
 
     Returns:
         (model_id, text) — başarılı ise; (None, None) — tüm modeller başarısızsa
@@ -7396,7 +7191,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         time.sleep(_wait)  # lock serbest — gevent cooperative yield
 
     # Sert timeout cap — caller ne geçerse geçsin per-istek üst sınır.
-    eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
+    eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP if timeout_cap is None else timeout_cap)
 
     for model_id, use_search in attempts:
         # D-P0-2409: günlük çağrı + aylık USD tavanı — dolmuşsa HTTP isteği atılmaz.
@@ -7423,6 +7218,8 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         }
         if use_search:
             body["tools"] = [{"google_search": {}}]
+        elif json_mode:
+            body["generationConfig"]["responseMimeType"] = "application/json"
         url = (f"https://generativelanguage.googleapis.com/v1beta/"
                f"models/{model_id}:generateContent?key={GEMINI_API_KEY}")
         try:
@@ -7494,83 +7291,6 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                 break   # Fallback fayda vermez, dur
 
     return None, None
-
-
-def get_ai_news(ticker, source="user", ua_class=None):
-    """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
-
-    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite (bkz. _GEMINI_NEWS_ATTEMPTS;
-    gemini-1.5-flash v1beta'da 404 döndüğü için zincirden çıkarılmıştı).
-    Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
-
-    source: "prefetch" (_prefetch_news_worker) veya _on_demand_news_worker'ın kuyruktan
-    aldığı gerçek köken — "stock_news" (api_stock_news, tekil hisse sayfası) ya da
-    "market_news" (api_market_news, piyasa haber şeridi). CPO-1205 §4(1) — log
-    satırında ve günlük sayaçlarda (ok_<src>/fail_<src>) ayrı izlenir. CPO-1206 §3 —
-    önceden ikisi de sabit "user" ile etiketleniyordu ("hangi worker çağırdı" yerine
-    "hangi HTTP endpoint kuyruğa ekledi" bilgisi kayıptı); artık kuyruk kendisi
-    {ticker: origin} tutuyor, "user" etiketi gerçek kökeni yansıtmıyordu.
-
-    ua_class: CPO-1208 §1(d) ölçümü için kuyruğa eklendiği andaki istek UA sınıfı
-    ("uptimerobot" | "headless_chrome" | "qa_bot" | "other_bot" | "human_or_unclassified"
-    | "prefetch" | None). Yalnız NEWS_MEASURE log satırında kullanılır, davranışı etkilemez.
-    """
-    if not GEMINI_API_KEY:
-        return None
-    now = time.time()
-    with _lock:
-        cached = _news_cache.get(ticker)
-    if cached:
-        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) —
-        # burada _lock tutulurken çağrılırsa kalıcı self-deadlock olur, o yüzden
-        # lock bloğunun dışına taşındı.
-        ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-        if (now - cached["ts"]) < ttl:
-            # CPO-1208 §1(d) ölçüm: kuyruğa girdiğinde miss'ti, işlenene kadar
-            # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
-            logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
-            return cached.get("text")   # başarısız cache → None döner
-    if not gemini_budget.GROUNDING:
-        # D-P0-2409: haber özeti "gerçek KAP bildirimi" ister; Google Search grounding olmadan
-        # model bildirim UYDURUR. Grounding maliyet gerekçesiyle kapalıyken çağrı atılmaz,
-        # mevcut başarısızlık yolu (negatif cache → dürüst "kullanılamıyor") kullanılır.
-        logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=no (grounding kapalı)", ticker, ua_class)
-        with _lock:
-            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
-        return None
-    logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
-
-    name       = STOCK_NAMES.get(ticker, ticker)
-    _news_now  = datetime.now(_TZ_TR)
-    today_str  = f"{_news_now.strftime('%d')} {_tr_month(_news_now)} {_news_now.strftime('%Y')}"   # ör: "01 Mayıs 2026"
-    today_iso  = _news_now.strftime("%Y-%m-%d")   # ör: "2026-05-01"
-    week_ago   = (_news_now - timedelta(days=7)).strftime("%Y-%m-%d")
-    prompt = _SYS_NEWS + (
-        f"\nHisse: {ticker} ({name})\n"
-        f"Tarih aralığı: {week_ago} → {today_iso} (son 7 gün)\n"
-        f"Bugün: {today_str}\n\n"
-        f"Yukarıdaki kurallara göre bu hisse için belirtilen tarih aralığındaki "
-        f"gerçek KAP bildirimleri, finansal sonuçlar veya önemli şirket açıklamalarını "
-        f"madde madde özetle."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25, max_tokens=400, temperature=0.2)
-
-    with _lock:
-        if text:
-            logger.info("get_ai_news(%s): OK [model=%s] src=%s", ticker, model_used, source)
-            _news_cache[ticker] = {"text": text, "ts": now, "failed": False}
-        else:
-            logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk src=%s", ticker, source)
-            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
-    # CPO-1208 §1e-1: köprü tek yönlüydü — yalnız gemini-cache-sync leader'ı 90s'de
-    # bir yazıyordu, non-leader'ın kendi fetch'lediği ticker diske hiç düşmüyordu.
-    # Worker recycle o ticker'ı sıfırlıyor, sıradaki poll garantili miss. Fetch'i
-    # yapan worker (leader olsun olmasın) kendi sonucunu hemen yazar — çift yönlü.
-    _save_news_cache_to_disk()
-    _news_daily_stats_incr("ok" if text else "fail")
-    _news_daily_stats_incr(f"{'ok' if text else 'fail'}_{source}")
-    return text
 
 
 def _compute_signal_commentary(ticker, signal_data):
@@ -7648,20 +7368,15 @@ def _compute_signal_commentary(ticker, signal_data):
 
 
 def get_ai_signal_explanation(ticker, signal_data):
-    """Sinyal açıklaması — request path'i ASLA Gemini çağırmaz (CPO-1008).
+    """Sinyal açıklaması — request path'i Gemini çağırmaz (D-22b: bg zenginleştirme
+    kaldırıldı, algoritmik commentary tek kaynak).
 
-    Strateji (SPEC-AI-EXPLANATION-FIX + CPO-1008 cache-or-queue):
-    - Cache hit → cache'teki metni (AI zenginleştirilmiş veya commentary) dön
-    - Cache miss → algoritmik commentary'yi ANINDA dön, Gemini zenginleştirmeyi
-      bg thread kuyruğuna at (_on_demand_signal_explain_worker, /news ile aynı desen)
-    - AI tab ASLA boş/takılı kalmaz; Gemini cache gelince üzerine yazar (glass-box)
+    - Cache hit → önceki (Gemini zenginleştirilmiş ya da algoritmik) metni dön
+      (geçmişte yazılmış cache kayıtları TTL'leri dolana kadar geçerli kalır)
+    - Cache miss → algoritmik commentary hesaplanır, ANINDA dön
 
-    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
-    Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
-
-    Returns: (text, source) — CPO-1756 Bulgu 1: source ARTIK "GEMINI_API_KEY var mı"
-    konfig kontrolü değil, dönen metnin gerçek kökeni (cache hit + failed=False
-    → "gemini", her diğer yol — cache miss, non-leader, fallback — → "algorithmic").
+    Returns: (text, source) — "gemini" yalnız eski cache kayıtlarından gelir,
+    yeni üretim her zaman "algorithmic".
     """
     now = time.time()
     sig = signal_data.get("signal", "BEKLE")
@@ -7675,7 +7390,6 @@ def get_ai_signal_explanation(ticker, signal_data):
                 return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
-    # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
     _load_explain_cache_from_disk()
     with _lock:
         cached = _signal_explain_cache.get(ticker)
@@ -7685,217 +7399,16 @@ def get_ai_signal_explanation(ticker, signal_data):
                 return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
-    # AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
+    # AI tab ASLA boş/takılı kalmaz.
     fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"] + " Yatırım tavsiyesi değildir."
-
-    # Non-leader worker → Gemini call YOK, direkt commentary dön (Glass-box + K8 data-trust)
-    if not _is_gemini_leader():
-        return fallback_text, "algorithmic"
-
-    # AI yoksa direkt algoritmik metni döndür
-    if not GEMINI_API_KEY:
-        return fallback_text, "algorithmic"
-
-    # CPO-1008 — ARCHITECTURAL FIX: /news'teki cache-or-queue pattern'e taşındı.
-    # ÖNCEKİ DAVRANIŞ: request handler İÇİNDE senkron Gemini call → _gemini_rate_acquire
-    # thundering herd'de saniyelerce sleep döndürüyor → gunicorn worker o süre boyunca
-    # bloke (12-25s response, DEV-1005 log kanıtı). YENİ DAVRANIŞ: request path'inde
-    # Gemini çağrısı SIFIR — commentary anında dön, zenginleştirme bg thread kuyruğunda.
-    with _signal_explain_queue_lock:
-        _signal_explain_queue[ticker] = signal_data
     return fallback_text, "algorithmic"
-
-
-def _enrich_signal_explanation(ticker, signal_data):
-    """Bg thread: Gemini çağrısı yapıp cache'i AI metniyle zenginleştirir.
-
-    Yalnızca _on_demand_signal_explain_worker tarafından çağrılır (leader-only,
-    _gemini_rate_acquire üzerinden global rate-limited). Request path'ini bloke etmez.
-    """
-    # CPO-1496: piyasa kapalıyken (hafta sonu/tatil) yeni açıklama ÜRETME —
-    # CPO-1494 ile aynı kusur: Gemini'ye piyasa durumu söylenmediği için donmuş
-    # fiyatla "şu an X ₺ seviyesinde işlem görüyor" gibi şimdiki-zaman metni
-    # üretiyordu. Piyasa kapalıyken mevcut cache (varsa) korunur, yoksa
-    # request path zaten algoritmik commentary dönüyor (tense-safe).
-    if not _market_open():
-        return None
-    now = time.time()
-    ctx = _compute_signal_commentary(ticker, signal_data)
-    sig, name, commentary, sig_lbl = ctx["sig"], ctx["name"], ctx["commentary"], ctx["sig_lbl"]
-    adx, di_plus, di_minus = ctx["adx"], ctx["di_plus"], ctx["di_minus"]
-    e12, e99, st_bull      = ctx["e12"], ctx["e99"], ctx["st_bull"]
-    price, sl, bars        = ctx["price"], ctx["sl"], ctx["bars"]
-
-    # ── Sinyalin yönü (validation için) ──────────────────────────────────────
-    if sig == "AL":
-        direction_tr   = "yükseliş"
-        opposite_words = ["düşüş", "satış", "negatif", "aşağı", "zayıf trend", "bear", "sat ", "kayıp"]
-    elif sig == "SAT":
-        direction_tr   = "düşüş"
-        opposite_words = ["yükseliş", "alım", "pozitif", "yukarı", "güçlü trend", "bull", "al ", "kazanç"]
-    else:
-        direction_tr   = "belirsiz"
-        opposite_words = []
-
-    # ── Trend dönüş seviyesi satırı (D-39: "Stop-Loss" dili yok, kanon §2.2) ──
-    sl_line = f"\n- Trend dönüş seviyesi (Supertrend): {tr_price_filter(sl)} ₺" if sl else ""
-
-    # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
-    prompt = _SYS_EXPLAIN + (
-        f"\n=== DOĞRU ALGORİTMİK ANALİZ ===\n"
-        f"{commentary}\n\n"
-        f"=== ARKA PLAN ===\n"
-        f"Hisse: {ticker} ({name})\n"
-        f"Sinyal: {sig_lbl} — 3 göstergenin TAMAMI {direction_tr} yönünü işaret ediyor\n"
-        f"Göstergeler:\n"
-        f"  • Supertrend: {'YUKARI ✓' if st_bull else 'AŞAĞI ✓'}\n"
-        f"  • ADX: {adx:.0f} ({'güçlü trend ✓' if derive_adx_label(adx) in ('Güçlü', 'Çok Güçlü') else derive_adx_label(adx).lower()}), "
-        f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
-        f"  • EMA12 {tr_price_filter(e12)} {'>' if e12 > e99 else '<'} EMA99 {tr_price_filter(e99)} ✓\n"
-        f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
-        f"Yukarıdaki rakamlar/göstergeler zaten kullanıcıya ayrıca gösteriliyor — onları tekrarlama. "
-        f"SADECE bu sinyalde neden şu an dikkat çekici olduğunu tek cümlede, en fazla 15 kelimeyle vurgula."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=60, temperature=0.3)
-
-    # ── Validation: sinyalle çelişen metin ürettiyse commentary'ye fall back ─
-    if text and opposite_words:
-        text_lower = text.lower()
-        if any(w in text_lower for w in opposite_words):
-            logger.warning(
-                "_enrich_signal_explanation(%s): AI sinyalle çelişti [%s→%s], commentary kullanılıyor",
-                ticker, sig, text[:60]
-            )
-            text = None
-
-    if text and _TRADE_LANG_RE.search(text):   # D-39: hedef/işlem yönetimi dili → commentary
-        logger.warning("_enrich_signal_explanation(%s): AI işlem yönetimi dili üretti, commentary kullanılıyor",
-                       ticker)
-        text = None
-
-    final_text = text if text else (commentary + " Yatırım tavsiyesi değildir.")
-
-    with _lock:
-        # AI başarılıysa uzun TTL (+jitter, thundering-herd önleme), fallback ise kısa TTL
-        ai_ok = bool(text)
-        _signal_explain_cache[ticker] = {
-            "text":   final_text,
-            "sig":    sig,
-            "ts":     now,
-            "failed": not ai_ok,
-            "ttl":    _SIG_EXPLAIN_TTL + random.uniform(-_SIG_EXPLAIN_TTL_JITTER, _SIG_EXPLAIN_TTL_JITTER),
-        }
-        if ai_ok:
-            logger.info("_enrich_signal_explanation(%s): OK [model=%s]", ticker, model_used)
-        else:
-            logger.info("_enrich_signal_explanation(%s): commentary fallback kullanıldı", ticker)
-
-    # SPEC-020 Faz 1 — Leader yazımı sonrası disk cache senkronu
-    # Non-leader workers _load_explain_cache_from_disk ile mtime guard'a göre
-    # bu güncellemeyi okur, ikinci Gemini call yapmaz.
-    if ai_ok:  # Sadece gerçek AI başarısı disk'e (fallback noise olmaz)
-        _save_explain_cache_to_disk()
-
-    return final_text
-
-
-def _enrich_health_score_explanation(ticker, entry):
-    """Bg thread: Faz 3 (CPO-1531) — Temel Analiz Skoru kategorilerinden
-    _fhs.build_rationale() ile üretilen deterministik Türkçe gerekçe cümlesini
-    Gemini'yle akıcı nesire çevirir. _enrich_signal_explanation ile birebir desen
-    (önce-hesapla-sonra-Türkçeleştir-sonra-doğrula) — Gemini SADECE stilize eder,
-    yeni analiz yapmaz. _on_demand_signal_explain_worker üzerinden AYNI kuyruk/
-    rate-limit'i paylaşır (bkz. _health_explain_queue tanımı).
-    """
-    categories        = entry.get("categories") or {}
-    band              = entry.get("band")
-    data_completeness = entry.get("data_completeness")
-    categories_na     = entry.get("categories_na") or []
-    rationale         = _fhs.build_rationale(categories, data_completeness, categories_na)
-    fallback_text     = rationale + " Yatırım tavsiyesi değildir."
-
-    # ── Bandın yönüne göre çelişki-kontrol kelimeleri (validation için) ──────
-    if band == "yesil":
-        opposite_words = ["zayıf", "kötü", "riskli", "endişe verici", "başarısız", "düşük performans"]
-    elif band == "kirmizi":
-        opposite_words = ["güçlü", "sağlam", "başarılı", "yüksek performans", "sağlıklı görünüm", "parlak"]
-    else:
-        opposite_words = []   # "sari" bant için nötr — çelişki tanımı belirsiz
-
-    prompt = _SYS_EXPLAIN_FUNDAMENTAL + (
-        f"\n=== DOĞRU ŞABLON CÜMLE ===\n{rationale}\n\n"
-        f"=== ARKA PLAN ===\nHisse: {ticker}\nBant: {band or 'bilinmiyor'}\n\n"
-        f"Yukarıdaki şablon cümleyi anlamını DEĞİŞTİRMEDEN, akıcı ve doğal Türkçe nesire çevir."
-    )
-
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=250, temperature=0.3)
-
-    # ── Validation: bantla çelişen metin ürettiyse şablona fall back ─────────
-    if text and opposite_words:
-        text_lower = text.lower()
-        if any(w in text_lower for w in opposite_words):
-            logger.warning(
-                "_enrich_health_score_explanation(%s): AI bantla çelişti [%s→%s], şablon kullanılıyor",
-                ticker, band, text[:60]
-            )
-            text = None
-
-    final_text = text if text else fallback_text
-    ai_ok = bool(text)
-
-    with _lock:
-        cached = _financial_health_cache.get(ticker)
-        if cached and isinstance(cached.get("data"), dict):
-            cached["data"]["temel_analiz_aciklamasi"] = final_text
-
-    if ai_ok:
-        logger.info("_enrich_health_score_explanation(%s): OK [model=%s]", ticker, model_used)
-        _save_health_scores_to_disk()
-    else:
-        logger.info("_enrich_health_score_explanation(%s): şablon fallback kullanıldı", ticker)
-
-    return final_text
-
-
-# ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
-_PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
-_PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
-_PREFETCH_STARTUP_GRACE_S = 300  # SPEC-016 K1 — restart sonrası prefetch bekleme (soğuk-start storm fix)
-_PREFETCH_POLL_S = 300  # tur-arası disk-zaman-damgası kontrol periyodu
-
-# CPO-1205 §4-3: tur, `time.sleep(_NEWS_CACHE_TTL)` ile PROSES ömrüne bağlıydı.
-# `--max-requests 500` recycle'ı worker'ı 6 saatten çok daha sık öldürdüğü için
-# bu sleep neredeyse hiç dolmuyor, her yeni PID sıfırdan başlayıp 8 hissenin
-# tamamını yeniden istiyordu. Son-tur zaman damgasını diske yazıp yeni PID'de
-# oradan okuyarak turu prosesten bağımsız, gerçek saate bağlıyoruz.
-_PREFETCH_LAST_RUN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_prefetch_run.json")
-
-
-def _prefetch_last_run_ts():
-    try:
-        if os.path.exists(_PREFETCH_LAST_RUN_PATH):
-            with open(_PREFETCH_LAST_RUN_PATH, "r", encoding="utf-8") as f:
-                return float(json.load(f).get("ts", 0))
-    except Exception as e:
-        logger.warning("_prefetch_last_run_ts hatası: %s", e)
-    return 0.0
-
-
-def _prefetch_mark_run(ts):
-    try:
-        _atomic_write_json(_PREFETCH_LAST_RUN_PATH, {"ts": ts})
-    except Exception as e:
-        logger.warning("_prefetch_mark_run hatası: %s", e)
 
 
 def _market_box_candidates(stocks):
     """Ana sayfa Gündem kutusu adayları: top5 AL + top2 SAT (endeks hariç).
 
-    CPO-1353 §4 — kanonik tek kaynak: hem _prefetch_news_worker (yalnızca
-    cache ISITMA amaçlı, listeyi DONDURMAZ) hem api_market_news (serve-time,
-    ticker listesini burada HER ÇAĞRIDA TAZE türetir) aynı seçim mantığını
-    kullanır. Aday listesi hiçbir yerde cache'lenmez — her okuyucu kendi
+    api_market_news (serve-time) ticker listesini burada HER ÇAĞRIDA TAZE
+    türetir — aday listesi hiçbir yerde cache'lenmez, her okuyucu kendi
     anındaki _cache["data"] üzerinden hesaplar.
     """
     al_stocks  = [s for s in stocks
@@ -7905,106 +7418,6 @@ def _market_box_candidates(stocks):
                   if s.get("signal") == "SAT"
                   and s.get("ticker") not in ("XU030", "XU100")][:2]
     return al_stocks + sat_stocks
-
-
-def _prefetch_news_worker():
-    """Gündem kutusu adaylarının (top5 AL + top2 SAT, _market_box_candidates) haberlerini 6 saatte bir cache'e önceden yükler (istekler arası 30s); tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts), worker recycle turu atlamaz."""
-    # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
-    # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
-    time.sleep(_PREFETCH_STARTUP_GRACE_S)
-    while True:
-        # CPO-1207 §1: leader kontrolü artık HER TURDA burada — önceden yalnız
-        # modül-yükleme anında (thread'in hiç başlatılıp başlatılmayacağı
-        # kararında) kontrol ediliyordu. Reload race'inde kaybeden worker'ın
-        # thread'i hiç doğmuyordu; kilit sonradan boşalsa (eski leader ölse)
-        # bile o worker bir daha asla denemiyordu (kanıt: lsof ile kilit
-        # sahibi 871107 iken, o worker'ın prefetch thread'i hiç yoktu).
-        if not _is_gemini_leader():
-            time.sleep(_PREFETCH_POLL_S)
-            continue
-
-        now = time.time()
-
-        last_run = _prefetch_last_run_ts()
-        if last_run and (now - last_run) < _NEWS_CACHE_TTL:
-            # 6 saat henüz dolmadı (başka bir PID'de veya bu PID'de yakın
-            # zamanda tur yapılmış) — kısa aralıklarla tekrar kontrol et.
-            time.sleep(min(_PREFETCH_POLL_S, max(1, _NEWS_CACHE_TTL - (now - last_run))))
-            continue
-
-        # CPO-1353 §4 — Gündem kutusu adaylarını (top5 AL + top2 SAT) kanonik
-        # kaynaktan seç; önceden yalnız AL sinyalli hisseler prefetch
-        # ediliyordu, SAT dalı hep reaktif yola düşüyordu.
-        with _lock:
-            stocks = list(_cache.get("data") or [])
-        candidate_tickers = [
-            s["ticker"] for s in _market_box_candidates(stocks)
-        ][:_PREFETCH_MAX]
-
-        if not candidate_tickers:
-            # Henüz veri yüklenmemiş — bu bir tamamlanmış tur DEĞİL, damga yazılmaz
-            time.sleep(_PREFETCH_POLL_S)
-            continue
-
-        to_fetch = []
-        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) — bu
-        # yüzden snapshot _lock altında alınır, TTL hesabı lock dışında yapılır
-        # (aksi halde kalıcı self-deadlock).
-        with _lock:
-            cached_snapshot = {ticker: _news_cache.get(ticker) for ticker in candidate_tickers}
-        for ticker in candidate_tickers:
-            cached = cached_snapshot[ticker]
-            if not cached:
-                to_fetch.append(ticker)          # hiç denenmemiş
-            elif cached.get("failed"):
-                to_fetch.append(ticker)          # başarısız cache süresi dolmuş
-            elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
-                to_fetch.append(ticker)          # cache sona ermek üzere
-
-        logger.info("Prefetch: %d/%d Gündem-kutusu hissesi (AL+SAT) için haber yüklenecek", len(to_fetch), len(candidate_tickers))
-        fetched = 0
-        attempted = 0
-        for ticker in to_fetch:
-            # SPEC-016 K2 — sıralı + leader teyidi: storm sırasında leader
-            # değişirse prefetch'i durdur (çift worker Gemini yükü engellenir).
-            if not _is_gemini_leader():
-                logger.info("Prefetch: leader değil — tur durduruldu")
-                break
-            if _gemini_news_degraded():  # CPO-1340 S1: kota kapalıyken çağrı garantili fail, atla
-                logger.info("Prefetch: kota kapalı (retry_after_s=%ds) — %s atlandı", _gemini_cb_retry_after_s(), ticker)
-                _news_daily_stats_incr("prefetch_skipped_quota")
-                continue
-            if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
-                logger.info("Prefetch: %s başka process az önce claim etti — atlandı (dedup)", ticker)
-                _news_daily_stats_incr("dedup_skip")
-                _news_daily_stats_incr("dedup_skip_prefetch")
-                continue
-            attempted += 1
-            try:
-                result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
-                if result:
-                    fetched += 1
-            except Exception as e:
-                logger.error("Prefetch hatası [%s]: %s", ticker, e)
-            time.sleep(_PREFETCH_DELAY)   # İstekler arası 30 saniye — rate-limit koruması
-
-        logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
-        if attempted or not to_fetch:  # CPO-1340 S1: tam-atlanan tur damgalanmaz — 6h gate erken tetiklenmesin
-            _prefetch_mark_run(now)   # tur zaman damgasını diske yaz — process ömründen bağımsız 6h gate
-        time.sleep(_PREFETCH_POLL_S)
-
-
-_prefetch_thread = threading.Thread(
-    target=_prefetch_news_worker,
-    daemon=True,
-    name="gemini-prefetch"
-)
-# SPEC-009 Gemini Faz 1: yalnız leader worker prefetch çalıştırır — 4× Gemini
-# maliyet multiplier fix (non-leader 3 worker prefetch yapmaz, on-demand
-# cache'ten okur). CPO-1207 §1: thread artık KOŞULSUZ başlar — leader
-# kontrolü döngü içinde her turda (_prefetch_news_worker üstünde).
-_prefetch_thread.start()
-logger.info("gemini-prefetch: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
 # SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
@@ -8040,105 +7453,7 @@ def _gemini_cache_sync_loop():
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
 
-threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync").start()
-
-
-def _on_demand_news_worker():
-    """İki HTTP endpoint'inden (api_stock_news, api_market_news) gelen kuyruğu
-    arka planda doldurur. Kuyruk artık {ticker: origin} — her ticker gerçek
-    çağıran endpoint'iyle etiketli (CPO-1206 §3), sabit source="user" DEĞİL.
-
-    Kuyrukta bekleyen her ticker için get_ai_news() çağırır; istekler arası
-    15 saniye bekler (Gemini rate-limit koruması). Kuyruk boşsa 5s polling.
-
-    CPO-1206 §5 — kota devresi açıkken (quota tükenmiş) kuyrukta bekleyen
-    ticker'ları çekmeye devam etmek getirisi sıfır bir israftı; devre açıkken
-    kuyruğu tüketmeden bekle (kuyruk BOŞALTILMAZ, birikir — devre kapanınca işlenir).
-    """
-    while True:
-        if _gemini_news_degraded():
-            time.sleep(30)
-            continue
-        ticker = None
-        origin = "stock_news"
-        ua_class = "unknown"
-        with _news_queue_lock:
-            if _news_fetch_queue:
-                ticker, (origin, ua_class) = _news_fetch_queue.popitem()
-        if ticker:
-            try:
-                if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
-                    logger.info("On-demand news [%s]: dedup atlandı (başka process az önce claim etti) [origin=%s]", ticker, origin)
-                    _news_daily_stats_incr("dedup_skip")
-                    _news_daily_stats_incr(f"dedup_skip_{origin}")
-                    time.sleep(15)
-                    continue
-                result = get_ai_news(ticker, source=origin, ua_class=ua_class)
-                _news_queue_stats["last_processed_ts"] = time.time()
-                _news_queue_stats["total_processed"] += 1
-                logger.info("On-demand news [%s]: %s [origin=%s]", ticker, "OK" if result else "FAIL", origin)
-                # CPO-1165 D-NEWS-2 — sayaç artık get_ai_news() içinde tekil kaynaktan
-                # artıyor (CPO-1205 §4(1)); burada tekrar artırmak çift-sayım yapardı.
-            except Exception as exc:
-                logger.error("On-demand news hatası [%s, origin=%s]: %s", ticker, origin, exc)
-                _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2 — get_ai_news'e hiç girilemedi
-                _news_daily_stats_incr(f"fail_{origin}")
-            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
-        else:
-            time.sleep(5)    # Kuyruk boşsa 5s bekle
-
-
-_on_demand_thread = threading.Thread(
-    target=_on_demand_news_worker,
-    daemon=True,
-    name="news-ondemand"
-)
-_on_demand_thread.start()
-
-
-def _on_demand_signal_explain_worker():
-    """CPO-1008: signal-explanation cache-miss talepleri arka planda işlenir.
-
-    _on_demand_news_worker ile birebir desen — kuyruk yalnızca Gemini leader
-    tarafından doldurulur (get_ai_signal_explanation), 15s rate-limited,
-    kuyruk boşsa 5s polling.
-
-    CPO-1531 Faz 3: Temel Analiz Skoru açıklaması (_health_explain_queue) da
-    AYNI döngüyü/rate-limit'i paylaşır — ikinci paralel Gemini tüketici
-    EKLENMEDİ. Sinyal açıklaması (kullanıcı-odaklı, on-demand) önceliklidir;
-    health-explain kuyruğu yalnızca sinyal kuyruğu boşken tüketilir.
-    """
-    while True:
-        item = None
-        with _signal_explain_queue_lock:
-            if _signal_explain_queue:
-                ticker = next(iter(_signal_explain_queue))
-                item = ("signal", ticker, _signal_explain_queue.pop(ticker))
-        if not item:
-            with _health_explain_queue_lock:
-                if _health_explain_queue:
-                    ticker = next(iter(_health_explain_queue))
-                    item = ("health", ticker, _health_explain_queue.pop(ticker))
-        if item:
-            kind, ticker, payload = item
-            try:
-                if kind == "signal":
-                    _enrich_signal_explanation(ticker, payload)
-                else:
-                    _enrich_health_score_explanation(ticker, payload)
-            except Exception as exc:
-                logger.error("On-demand %s-explanation hatası [%s]: %s", kind, ticker, exc)
-            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
-        else:
-            time.sleep(5)    # Kuyruk boşsa 5s bekle
-
-
-_signal_explain_ondemand_thread = threading.Thread(
-    target=_on_demand_signal_explain_worker,
-    daemon=True,
-    name="signal-explain-ondemand"
-)
-_signal_explain_ondemand_thread.start()
+_bg_start(threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync"))
 
 
 def _tr1(value):
@@ -8487,8 +7802,8 @@ def _compute_chart_data(ticker_base, period="2y"):
                 "adx":        round(adx_val, 1),
                 "di_plus":    round(di_p, 1),
                 "di_minus":   round(di_m, 1),
-                "e12":        round(e12_val, 1),
-                "e99":        round(e99_val, 1),
+                "e12":        round(e12_val, 2),  # D-04b #3: analyze() ile aynı hassasiyet (CPO-1741)
+                "e99":        round(e99_val, 2),
                 "st_bull":    st_bull,  "st_bear":  st_bear,
                 "adx_bull":   adx_bull, "adx_bear": adx_bear,
                 "e12_bull":   e12_bull, "e12_bear": e12_bear,
@@ -8815,6 +8130,45 @@ def build_signal_summary(stock):
     }
 
 
+# D-18b: hisse sayfası SSR bağlamı — ilk sekme + son 30 EOD kapanışı (fetch beklemeden ilk çizim).
+# Sekme adları hisse.html `VALID_TABS` ile aynı tek kanon; eski `ai` adı Özet'e düşer (C-19).
+_HISSE_VALID_TABS = ("ozet", "grafik", "temel", "haberler")
+_HISSE_TAB_ALIAS = {"ai": "ozet"}
+
+
+def _hisse_initial_tab(raw):
+    t = _HISSE_TAB_ALIAS.get(raw or "", raw or "")
+    return t if t in _HISSE_VALID_TABS else "ozet"
+
+
+def _closes_30(ticker, stock):
+    """Son 30 EOD kapanışı `[[YYYY-MM-DD, close], ...]` (grafik önbelleğindeki günlük barlardan).
+
+    Grafik ucu ana sinyalin resmi kapanış gününden geride kalmışsa ve o kapanış resmiyse
+    (close_status=="resmi") son nokta olarak eklenir: şablon kapanış gününü bu listenin son
+    tarihinden okur, bayat grafik "dünün kapanışı" yazdırmasın. Veri yoksa None (şablon geri düşer)."""
+    data, _ = _load_chart_from_disk_per_ticker(ticker)
+    rows = []
+    for b in ((data or {}).get("ohlc") or [])[-30:]:
+        try:
+            t, c = str(b["time"])[:10], float(b["close"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if c > 0:
+            rows.append([t, round(c, 2)])
+    if not rows:
+        return None
+    st = stock or {}
+    try:
+        _bd = datetime.strptime(str(st.get("bar_date") or ""), "%d.%m.%Y").strftime("%Y-%m-%d")
+        _px = float(st.get("price"))
+    except (TypeError, ValueError):
+        _bd, _px = None, 0.0
+    if _bd and _px > 0 and st.get("close_status") == "resmi" and _bd > rows[-1][0]:
+        rows = (rows + [[_bd, round(_px, 2)]])[-30:]
+    return rows
+
+
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
@@ -8921,12 +8275,16 @@ def stock_page(ticker):
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
     # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
+    # CPO-1806 (gri dil envanteri K1, O29): "algoritmik sinyal" jargonu kalkar,
+    # kapanış tarihi + 5 koşuldan kaçının sağlandığı sade cümlede verilir.
+    _faq_date_label = derive_signal_date_label((ssr_signal or {}).get("bar_date"))
+    _faq_n_ok = sum(1 for c in (ssr_signal or {}).get("conditions") or () if c.get("ok"))
     seo_faq = []
     seo_faq.append({
         "q": f"{ticker} hissesinin güncel teknik sinyali nedir?",
-        "a": (f"{ticker} için güncel algoritmik sinyal: {sig_label}. "
-              f"BorsaPusula teknik göstergeleri (Supertrend, ADX, EMA12/EMA99) baz alır. "
-              f"Yatırım tavsiyesi değildir."),
+        "a": (f"{ticker}'nin trend durumu"
+              + (f" {_faq_date_label} kapanışında" if _faq_date_label else "")
+              + f" {sig_label}. Beş koşuldan {_faq_n_ok}'i sağlanıyor."),
     })
     if price:
         # CPO-1496: TR locale formatlayıcısından geçmeden ham Python float basılıyordu
@@ -8940,7 +8298,7 @@ def stock_page(ticker):
     if adx_val is not None or score is not None:
         _parts = []
         if adx_val is not None:
-            _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
+            _parts.append(f"ADX {_tr1(adx_val)} (trend gücü)")
         if score is not None:
             _parts.append(f"Teknik Güç Skoru {score}/100")
         # D-02 (O8): getiri vaadi gibi duran "prim potansiyeli" sorusu kalktı; R/R oranı
@@ -8975,11 +8333,15 @@ def stock_page(ticker):
                            seo_signal=sig,
                            seo_score=score,
                            seo_adx=adx_val,
-                           seo_rsi=rsi_val)
+                           seo_rsi=rsi_val,
+                           initial_tab=_hisse_initial_tab(request.args.get("tab")),
+                           closes_30=_closes_30(ticker, ssr_signal))
 
 
 _fundamentals_cache = {}
-_FUND_TTL = 3600 * 4  # 4 saat
+_FUND_TTL = 3600 * 24  # D-40a: 24 saat (eskiden 4 sa); bilanço günleri _fund_earnings_due ile öne çekilir
+_FUND_SCHEMA_MAX_TRIES = 2  # D-40a: şeması eksik kayıt için günlük en çok deneme
+_fund_schema_tries = {}  # {ticker: (gün, sayaç)} — yalnız _lock altında okunur/yazılır (bellek içi)
 
 # ── Temel analiz sanity sınırları (yfinance Türk hisselerinde bozuk değer üretir) ──
 _FUND_SANITY = {
@@ -9147,6 +8509,33 @@ def _fundamentals_schema_ok(data):
     return bool(data.get("statement_trend_quarterly")) and bool(data.get("financial_currency")) and bool(data.get("statement_currency"))
 
 
+def _fund_schema_try_allowed(ticker_base, now):
+    """D-40a (1): şeması eksik kayıt (ya da hiç kaydı olmayan hisse) her 30 dk'lık warmup
+    turunda yeniden çekiliyordu (canlı 26.09: 34/234 kayıt, ~1.600 boş çağrı/gün). Günde en çok
+    _FUND_SCHEMA_MAX_TRIES deneme; hak dolunca eldeki kayıt servis edilir. _lock altında çağrılır."""
+    day = time.strftime("%Y-%m-%d", time.localtime(now))
+    d, n = _fund_schema_tries.get(ticker_base, (day, 0))
+    if d != day:
+        n = 0
+    if n >= _FUND_SCHEMA_MAX_TRIES:
+        return False
+    _fund_schema_tries[ticker_base] = (day, n + 1)
+    return True
+
+
+def _fund_earnings_due(ticker_base, cached, now):
+    """D-40a (2): TTL 24 sa'e çıkınca bilanço açıklanma gününden sonraki 3 gün boyunca
+    (Yahoo gecikmesi) kayıt 12 saatte bir tazelenir. Tarih kaynağı: _earnings_cache tahminleri."""
+    try:
+        est = ((_earnings_cache.get("data") or {}).get("estimates") or {}).get(ticker_base)
+        if not est or not cached:
+            return False
+        gun = (datetime.now(_TZ_TR).date() - datetime.strptime(est, "%Y-%m-%d").date()).days
+        return 0 <= gun <= 3 and (now - cached["ts"]) > 12 * 3600
+    except Exception:
+        return False
+
+
 _BETA_MIN_OVERLAP_DAYS = 60  # CPO-1787: rejim/IPO gibi kısa ortak geçmişte regresyon güvenilmez
 _beta_disk_close = {}  # {anahtar: (mtime, {tarih: kapanış})} — diskten okuma mtime korumalı
 
@@ -9223,13 +8612,13 @@ def _compute_beta_vs_xu030(ticker_base):
         return None, None
 
 
-def _get_fundamentals(ticker_base):
-    """yfinance ile temel analiz verilerini döndürür."""
+def _get_fundamentals(ticker_base, force=False):
+    """yfinance ile temel analiz verilerini döndürür. force=True: TTL'i yok say (D-40a bilanço günü)."""
     now = time.time()
     _is_web = os.environ.get("REFRESH_WORKER") == "web"
     with _lock:
         cached = _fundamentals_cache.get(ticker_base)
-        _fresh = bool(cached) and (now - cached["ts"]) < _FUND_TTL
+        _fresh = bool(cached) and not force and (now - cached["ts"]) < _FUND_TTL
         # CPO-1671: web worker zaten fetch yapamaz (aşağıda cache-only döner), TTL
         # yeterli. Ama leader'da (buradan devam) şema eksikse (statement_trend_quarterly
         # yok — eski kod/yarım fetch kalıntısı) TTL dolmamış olsa bile yeniden çekilsin;
@@ -9241,6 +8630,12 @@ def _get_fundamentals(ticker_base):
         # (30dk) kendiliğinden tazelesin — TTL'in 4 saatini beklemesin.
         _schema_ok = _fundamentals_schema_ok(cached["data"]) if cached else False
         _ret_cached = _fresh and (_is_web or _schema_ok)
+        # D-40a (1): eksik şemalı kayıt günde ≤2 kez yeniden çekilir; hak dolunca eldeki kayıt döner
+        _tries_out = False
+        if not _ret_cached and not _is_web and not force and not _schema_ok:
+            _tries_out = not _fund_schema_try_allowed(ticker_base, now)
+    if _tries_out:
+        return _with_beta(ticker_base, cached["data"]) if cached else {}
     if _ret_cached:
         # D-07: _with_beta _lock alır (threading.Lock, reentrant değil) → kilit dışında
         return _with_beta(ticker_base, cached["data"])
@@ -9378,6 +8773,38 @@ def _fundamentals_kap(ticker, data):
         return data
 
 
+_KAP_SECTOR_METRICS = {"ts": 0.0, "data": {}}
+_KAP_SECTOR_METRICS_LOCK = threading.Lock()
+_KAP_SECTOR_METRICS_TTL = 1800
+
+
+def _kap_sector_metrics():
+    """D-40a2: sektor ortancası için evrendeki her hissenin KAP'tan türetilen F/K · PD/DD · özsermaye
+    kârlılığı ({ticker: {...}}). 30 dk önbellek; kayıtlar mtime önbellekli (kap_financials.load_record)."""
+    now = time.time()
+    if now - _KAP_SECTOR_METRICS["ts"] < _KAP_SECTOR_METRICS_TTL and _KAP_SECTOR_METRICS["data"]:
+        return _KAP_SECTOR_METRICS["data"]
+    with _KAP_SECTOR_METRICS_LOCK:
+        if now - _KAP_SECTOR_METRICS["ts"] < _KAP_SECTOR_METRICS_TTL and _KAP_SECTOR_METRICS["data"]:
+            return _KAP_SECTOR_METRICS["data"]
+        with _lock:
+            prices = {s.get("ticker"): s.get("price") for s in (_cache.get("data") or [])}
+            shares = {tk: ((w.get("data") or {}).get("shares")) for tk, w in _fundamentals_cache.items()}
+        out = {}
+        for tk in BIST100:
+            try:
+                m = kap_temel_v2.kap_metrics(kap_financials.load_record(tk), prices.get(tk), shares.get(tk))
+            except Exception as e:
+                logger.warning("_kap_sector_metrics(%s): %s", tk, e)
+                m = None
+            if m:
+                out[tk] = m
+        if out:
+            _KAP_SECTOR_METRICS["data"] = out
+            _KAP_SECTOR_METRICS["ts"] = time.time()
+        return out
+
+
 def _fundamentals_temel_v2(ticker, data):
     """D-40a2: Temel sekmesi v2 alanları (kap_temel_v2.extend) — yalnız /fundamentals ucu.
     kap bloğuna yıllık marj/oran, son 12 ay kârı (O22=B) ile F/K · PD/DD · özsermaye kârlılığı,
@@ -9387,15 +8814,14 @@ def _fundamentals_temel_v2(ticker, data):
         return data
     with _lock:
         price = next((s.get("price") for s in (_cache.get("data") or []) if s.get("ticker") == ticker), None)
-        fund_snap = {tk: (w.get("data") or {}) for tk, w in _fundamentals_cache.items()}
         v2 = (((_financial_health_cache.get(ticker) or {}).get("data")) or {}).get("temel_v2")
     try:
         # D-40c: gün sonu turu v2 ile yazıldıysa sektör ortancası KAP'tan (aynı D-23 kovası, ≥5
         # şirket) ve banka maddesi KAP özsermaye kârlılığıyla -- Temel skorla tek kaynak.
         v2_meds = temel_skor_v2.api_medians(v2)
-        meds = v2_meds or kap_temel_v2.sector_medians(fund_snap, _get_sector, _get_sector(ticker))
+        meds = v2_meds or kap_temel_v2.sector_medians(_kap_sector_metrics(), _get_sector, _get_sector(ticker))
         return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
-                                   datetime.now(_TZ_TR).date(), meds, roe=v2.get("roe") if v2_meds else None)
+                                   datetime.now(_TZ_TR).date(), meds)
     except Exception as e:
         logger.warning("_fundamentals_temel_v2(%s): %s", ticker, e)
         return data
@@ -9551,45 +8977,21 @@ def _run_eod_scoring_pass(results: list):
         _save_sector_stats_to_disk()
 
         signal_strength_by_ticker = {r.get("ticker"): r.get("signal_strength") for r in results}
+        # D-21: yönlü BP (BP_DIRECTIONAL=1) trend payını bu turdaki durumdan alır
+        signal_by_ticker = {r.get("ticker"): r.get("signal") for r in results}
 
         health_now = time.time()
         scores_out = {}
         for fdata in stocks_with_fundamentals:
             tk = fdata["ticker"]
-            sec = fdata["sector"]
-            health = _fhs.compute_health_score(fdata, sec, stocks_with_fundamentals)
-            teknik_skor = signal_strength_by_ticker.get(tk)
-            composite = _fhs.compute_borsapusula_score(teknik_skor, health.get("temel_analiz_skoru"))
-            entry = {
-                "teknik_analiz_skoru": teknik_skor,
-                "temel_analiz_skoru": health.get("temel_analiz_skoru"),
-                "borsapusula_skoru": composite.get("borsapusula_skoru"),
-                "data_completeness": health.get("data_completeness"),
-                "categories_complete": health.get("categories_complete"),
-                "partial": composite.get("partial"),
-                "band": health.get("band"),
-                "categories": health.get("categories"),
-                "categories_na": health.get("categories_na") or [],
-            }
-            # CPO-1531 Faz 3: deterministik gerekçe cümlesi hemen hesaplanır (Gemini
-            # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
-            # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
-            entry["temel_analiz_aciklamasi"] = _fhs.build_rationale(
-                entry["categories"], entry["data_completeness"], entry["categories_na"]
-            ) + " Yatırım tavsiyesi değildir."
+            # Temel skor + BP + gerekçe cümlesi tek yerde (financial_health_score, D-21)
+            entry = _fhs.build_score_entry(fdata, fdata["sector"], stocks_with_fundamentals,
+                                           signal_strength_by_ticker.get(tk), signal_by_ticker.get(tk))
             scores_out[tk] = entry
             if fdata.get("_temel_v2"):   # D-40c: eksen cümleleri, veri notu, değerleme hükmü, listeler
                 entry["temel_v2"] = fdata["_temel_v2"]["detay"]
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}
-            # CPO-1533: Gemini zenginleştirmesi BIST30 ile sınırlı — kota haber
-            # prefetch'iyle paylaşılıyor (~20-40 istek/gün tavanı), 215 ticker'ın
-            # tamamı bu kuyruğa girerse kota anında tükenir. Deterministik şablon
-            # metni (yukarıda) yine TÜM ticker'lara yazılıyor, hiçbir alan boş
-            # kalmaz — sadece doğal-dile çevirme BIST30'a odaklanıyor.
-            if tk in BIST30_LITERAL and entry["categories"] and GEMINI_API_KEY and _is_gemini_leader():
-                with _health_explain_queue_lock:
-                    _health_explain_queue[tk] = entry
 
         _save_health_scores_to_disk()
 
@@ -9609,25 +9011,8 @@ def _run_eod_scoring_pass(results: list):
         logger.error("_run_eod_scoring_pass hatası: %s", e)
 
 
-@app.route("/api/hisse/<ticker>/health-score")
-@limiter.limit("30 per minute")
-def api_stock_health_score(ticker):
-    """Teknik/Temel/BorsaPusula kompozit skoru — CPO-1528 Faz 2, sadece manuel
-    doğrulama için, ana UI'a henüz bağlanmadı (CPO Faz 4'te bağlayacak)."""
-    ticker = ticker.upper()
-    if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-    with _lock:
-        cached = _financial_health_cache.get(ticker)
-    if not cached:
-        return safe_json({"error": "Skor henüz hesaplanmadı (EOD turu bekleniyor)"}), 404
-    return safe_json(cached["data"])
-
-
-# ─── News endpoint queue pattern ───
-# Pattern: cache hit → return. Miss → push to _news_fetch_queue → return null.
-# _on_demand_news_worker (mevcut, 15s rate-limited) kuyruğu işler.
-# THREAD SPAWN YOK → worker capacity korunur.
+# D-22b: bg enrichment kuyruğu kaldırıldı — sayaçlar artık hep 0, /api/health
+# geriye dönük uyumluluk için alanı okumaya devam ediyor.
 _news_queue_stats = {"last_added_ts": 0, "last_processed_ts": 0, "total_added": 0, "total_processed": 0}
 
 
@@ -9762,13 +9147,7 @@ def api_stock_news(ticker):
             "kap_url": kap_url,
         })
 
-    # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
-    with _news_queue_lock:
-        _news_fetch_queue[ticker] = ("stock_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
-    _news_queue_stats["last_added_ts"] = time.time()
-    _news_queue_stats["total_added"] += 1
-
-    # Return placeholder — frontend zaten retry yapacak (loadNews 8s sonra)
+    # 4. CACHE MISS — D-22b: Gemini üretimi kaldırıldı, doldurulacak worker yok.
     return safe_json({"news": None, "loading": True, "kap_url": kap_url})
 
 
@@ -9799,7 +9178,7 @@ def get_signal_story(ticker: str, signal_date: str) -> dict:
         if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
             all_discs = kap_hit["data"]
         else:
-            all_discs = fetch_kap_disclosures(ticker, days=90)
+            all_discs = fetch_kap_disclosures(ticker)   # D-45: hisse /kap ile aynı liste (365 gün)
             with _lock:
                 _kap_cache[ticker] = {"data": all_discs, "ts": now_ts}
             _save_kap_cache_to_disk()
@@ -9899,7 +9278,7 @@ def _load_kap_cache_from_disk():
 @app.route("/api/hisse/<ticker>/kap")
 @limiter.limit("30 per minute")
 def api_stock_kap(ticker):
-    """KAP bildirimleri — 30 dakikalık cache. Son 90 günlük ODA + FR."""
+    """KAP bildirimleri — 30 dakikalık cache. Son 365 günün ODA + FR'si (D-45: /haberler akışıyla aynı depo)."""
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
@@ -9918,7 +9297,7 @@ def api_stock_kap(ticker):
         if cached and (now - cached["ts"]) < _KAP_CACHE_TTL:
             return safe_json({"disclosures": cached["data"], "cached": True})
 
-    disclosures = fetch_kap_disclosures(ticker, days=90)
+    disclosures = fetch_kap_disclosures(ticker)   # D-45: 365 gün (C-M10: eskiden ~90)
     with _lock:
         _kap_cache[ticker] = {"data": disclosures, "ts": now}
     _save_kap_cache_to_disk()
@@ -9929,6 +9308,482 @@ def api_stock_kap(ticker):
         "kap_search_url": f"https://www.kap.org.tr/tr/bildirim-sorgu?q={ticker}",
         "cached": False,
     })
+
+
+# ── D-45 Haberler: KAP akışı + Gündem (ince bağlantı; mantık kap_feed.py / haber_gundem.py) ──
+# Sayfa rotaları şablon yoksa 404 döner (C-57 şablonu gelmeden D-45 tek başına güvenli);
+# API'ler depo yoksa boş ama 200 döner (available:false). Dış bağlantı ve kaynak etiketi yok.
+_HABER_STATE = {"AL": ("g", "Güçlü Trend"), "SAT": ("b", "Trend Bozuldu")}
+
+
+def _tpl_ready(name):
+    try:
+        app.jinja_env.get_template(name)
+        return True
+    except Exception:
+        return False
+
+
+def _haber_stock_map():
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    return {s["ticker"]: s for s in stocks if isinstance(s, dict) and s.get("ticker")}
+
+
+def _haber_mini(ticker, smap, with_spark=False):
+    s = smap.get(ticker) or {}
+    code, label = _HABER_STATE.get(s.get("signal"), ("y", "Yatay"))
+    m = {"t": ticker, "name": STOCK_NAMES.get(ticker, ticker), "price": s.get("price"),
+         "ch": s.get("change_pct"), "bp": s.get("borsapusula_skoru"),
+         "st": code if s else None, "stn": label if s else None}
+    if with_spark:
+        # D-56: hisse mini kartinin 30 islem gunluk cizgisi (data/charts/chart_<T>.json, mtime onbellekli)
+        m["sp"] = haber_v2.spark(haber_v2.closes_from_chart_file(
+            os.path.join(_PHASE3_CHART_DIR, "chart_%s.json" % ticker))) if re.match(r"^[A-Z0-9]{3,6}$", ticker) else None
+    return m
+
+
+def _haber_close_label():
+    """Mini kartlardaki fiyatın günü: '24 Eylül' (göreli zaman yok)."""
+    with _lock:
+        upd = _cache.get("updated_at") or ""
+    try:
+        return kap_feed.date_long(datetime.strptime(upd[:10], "%d.%m.%Y").strftime("%Y-%m-%d"))[:-5]
+    except ValueError:
+        return None
+
+
+def _haber_page_int(v, default=1, lo=1, hi=10000):
+    try:
+        return max(lo, min(int(v), hi))
+    except (TypeError, ValueError):
+        return default
+
+
+@app.route("/api/haberler")
+@limiter.limit("60 per minute")
+def api_haberler():
+    """Tüm analiz evreninin bildirim akışı, tarihe göre (yeniden eskiye), sayfalı.
+    ?sayfa=1&adet=50&tur=bilanco|temettu|ozel&hisse=THYAO,ASELS&rutin=1&gun=YYYY-MM-DD"""
+    tur = request.args.get("tur")
+    tur = tur if tur in ("bilanco", "temettu", "ozel") else None
+    hisse = [t for t in (request.args.get("hisse") or "").upper().split(",") if re.match(r"^[A-Z0-9]{3,6}$", t)][:50]
+    gun = request.args.get("gun")
+    gun = gun if gun and re.match(r"^\d{4}-\d{2}-\d{2}$", gun) else None
+    if not _KAP_STORE.available():
+        return safe_json({"available": False, "items": [], "page": 1, "pages": 1, "total": 0,
+                          "routine_hidden": 0, "updated_at": None})
+    res = kap_feed.query(_KAP_STORE.all_items(), page=_haber_page_int(request.args.get("sayfa")),
+                         per_page=_haber_page_int(request.args.get("adet"), 50, 1, 200), filt=tur,
+                         tickers=hisse or None, include_rutin=request.args.get("rutin") == "1", day=gun)
+    res["items"] = [kap_feed.public_item(it, STOCK_NAMES) for it in res["items"]]
+    res["available"] = True
+    res["updated_at"] = _KAP_STORE.meta().get("updated_at")
+    return safe_json(res)
+
+
+_TR_UPPER_TRANS = str.maketrans({"i": "İ", "ı": "I"})
+
+
+def _kap_title_for_headline(title, ticker):
+    """K20(d): baslik yayinlayanin tam (resmi) unvaniyla basliyorsa o kisim kirpilir —
+    H1 zaten '<kisa ad>: <baslik>' bicimindeyken sirket adi iki kez gorunmesin diye
+    (ornek: AKCNS 'Akçansa Çimento: Akçansa Çimento Sanayi ve Ticaret A.Ş. ...')."""
+    unvan = (KAP_INFO.get(ticker) or {}).get("unvan")
+    if not unvan or not title:
+        return title
+    n = len(unvan)
+    if title[:n].translate(_TR_UPPER_TRANS).upper() != unvan.translate(_TR_UPPER_TRANS).upper():
+        return title
+    rest = title[n:].lstrip(" ,.-–")
+    return (rest[:1].upper() + rest[1:]) if rest else title
+
+
+def _bildirim_payload(idx):
+    it = _KAP_STORE.get(idx)
+    if not it:
+        return None
+    doc = _KAP_STORE.doc(idx) or {}
+    same = [x for x in kap_feed.for_ticker(_KAP_STORE.all_items(), it["ticker"], days=365, classes=None)
+            if not x.get("rutin") and x["id"] != it["id"]][:4]
+    pub = kap_feed.public_item(it, STOCK_NAMES)
+    company = STOCK_NAMES.get(it["ticker"], it["ticker"])
+    title = _kap_title_for_headline(it["title"], it["ticker"])
+    # K20(d): ozet H1'i tekrar etmesin diye burada her zaman taze uretilir (onbellekteki
+    # eski 'ozet' alani gecmis akista yinelemeliydi; backfill gerekmez).
+    pub["summary"] = kap_feed.summary_sentence(it, company, it.get("onem"))
+    same_as_class = kap_feed._lower_tr(title) in (kap_feed._lower_tr(it["class"]), kap_feed._lower_tr(it["subject"]))
+    return {"item": pub, "headline": "%s: %s" % (company, it["class"] if same_as_class else title),
+            "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
+            "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
+                     "lines": doc.get("lines") or [], "resp": doc.get("resp")},
+            "has_text": bool(doc),
+            "similar": [kap_feed.public_item(x, STOCK_NAMES) for x in same]}
+
+
+@app.route("/api/bildirim/<int:idx>")
+@limiter.limit("60 per minute")
+def api_bildirim(idx):
+    """Tek bildirim: kural tabanlı tek cümle özet + önem oranı + bildirimin kendi metni (AI yok)."""
+    p = _bildirim_payload(idx)
+    if not p:
+        return safe_json({"error": "Bildirim bulunamadı"}), 404
+    return safe_json(p)
+
+
+@app.route("/api/gundem-girdi")
+@limiter.limit("30 per minute")
+def api_gundem_girdi():
+    """YALNIZ İÇ KULLANIM (X-Admin-Secret): günün haber başlıkları, kaynak ve bağlantılarıyla.
+    Sitede yayınlanmaz (başka sitelerin metni kopyalanmaz, kanon §4)."""
+    require_admin()
+    day = request.args.get("tarih") or datetime.now(_TZ_TR).date().isoformat()
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", day):
+        return safe_json({"error": "tarih YYYY-MM-DD"}), 400
+    doc = haber_gundem.load_input(day) or {"date": day, "items": []}
+    doc["print"] = haber_gundem.load_latest()
+    resp = safe_json(doc)
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
+def _gundem_haber_ctx():
+    """D-57 sözleşmesi (Gündem basın derlemesi, O27=A): /api/gundem-haber ile aynı sözlük ya da
+    None. Kaynak: `_gundem_haber_payload()` varsa o, yoksa D-57 modülü `gundem_haber.load_latest()`
+    (D-57 dalı değeri context processor ile de verir; /haberler bu anahtarı AÇIKÇA geçirdiği için
+    Flask onu ezer — bu yüzden kaynak burada okunur). Yoksa/boşsa None → Gündem v1 maddeleri.
+    Bozuk madde haber_v2.clean_gundem_haber'de elenir."""
+    return haber_v2.gundem_haber_from(globals(), logger.warning)
+
+
+def _haber_v2_ctx(smap, items):
+    """D-56: Gündem sekmesi (C-72) bağlamı — günün hikâyesi (BIST100 donmuş ısı haritası, Bülten'le
+    aynı sektör özeti), şirket kartları (kural tabanlı), D-57 basın derlemesi, hisse mini kartları."""
+    hm = _heatmap_latest()
+    snap = (hm or {}).get("snap")
+    lead = None
+    if snap:
+        try:
+            lead = haber_v2.lead_story(snap, bulten.isi_haritasi_ozet(snap), _get_xu100_level().get("spark") or [])
+        except Exception as e:
+            logger.warning("haberler: günün hikâyesi kurulamadı: %s", e)
+    day = (lead or {}).get("day") or datetime.now(_TZ_TR).date().isoformat()
+    hot = [m["t"] for m in (lead or {}).get("movers") or []]
+    cards = haber_v2.company_cards(items, day, STOCK_NAMES, n=6, hot_tickers=hot,
+                                   doc_fn=_KAP_STORE.doc) if items else []
+    gh = _gundem_haber_ctx()
+    tick = set(hot)
+    tick.update(c["ticker"] for c in cards)
+    for m in (gh or {}).get("maddeler") or []:
+        tick.update(m["hisseler"])
+    mini = {t: _haber_mini(t, smap, with_spark=True) for t in sorted(tick) if t in smap}
+    ctx = {"sekme": "gundem", "gundem_lead": lead, "gundem_sirket": cards, "gundem_haber": gh, "mini": mini}
+    ctx.update(_heatmap_ssr_context())
+    return ctx
+
+
+@app.route("/haberler")
+def haberler_page():
+    """C-57/C-72 sayfası (SSR). Şablon yoksa 404 — D-45 tek başına canlıda güvenli."""
+    if not _tpl_ready("haberler.html"):
+        abort(404)
+    # D-56: v1 bildirim filtresi adresleri (?tur=bilanco|temettu|ozel, ?sayfa=) yeni
+    # "Şirket bildirimleri" sekmesine taşınır (şablonu yayındaysa).
+    # ?hisse=T (şirketin bildirim listesi, ör. bildirim sayfasındaki "Tüm T bildirimleri") hisse
+    # filtresiyle aynı listeye gider; v1 60'lık sayfa N → v2 30'luk sayfa 2N-1.
+    if _tpl_ready("haberler_bildirimler.html"):
+        _to = haber_v2.legacy_haberler_redirect(request.args)
+        if _to:
+            return redirect(_to, code=301)
+    tur = request.args.get("tur")
+    tur = tur if tur in ("bilanco", "temettu", "ozel") else None
+    hisse = (request.args.get("hisse") or "").upper()
+    hisse = hisse if re.match(r"^[A-Z0-9]{3,6}$", hisse) else None
+    page = _haber_page_int(request.args.get("sayfa"))
+    smap = _haber_stock_map()
+    items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
+    res = kap_feed.query(items, page=page, per_page=60, filt=tur, tickers=[hisse] if hisse else None)
+    days = []
+    counts = {"all": 0, "bilanco": 0, "temettu": 0, "ozel": 0}   # görünen sayfanın satırları (filtre çipleri)
+    for d in kap_feed.group_by_day(res["items"]):
+        cnt = kap_feed.day_counts(items, d["day"], filt=tur, tickers=[hisse] if hisse else None)
+        days.append({"day": d["day"], "label": d["label"], "total": cnt["total"], "routine": cnt["routine"],
+                     "rows": [dict(kap_feed.public_item(x, STOCK_NAMES), mc=_haber_mini(x["ticker"], smap))
+                              for x in d["items"]]})
+        for x in d["items"]:
+            counts["all"] += 1
+            if x.get("filter") in counts:
+                counts[x["filter"]] += 1
+    close_label = _haber_close_label()
+    gundem = haber_gundem.load_latest()
+    if gundem:
+        # K19: dosyaya donan next_label basim aninda dondugu icin hafta sonu
+        # boyunca gecmis/yanlis bir saat gosterebiliyordu — her yuklemede
+        # guncel saatten yeniden hesaplanir (ekstra basim yok, yalniz etiket).
+        gundem["next_label"] = haber_gundem.next_print_label(datetime.now(_TZ_TR).replace(tzinfo=None), gundem.get("edition"))
+    for g in (gundem or {}).get("groups") or []:
+        for it in g.get("items") or []:
+            for c in it.get("chips") or []:
+                if c.get("k") == "tk" and c.get("t") in smap:
+                    c["ch"] = smap[c["t"]].get("change_pct")
+    # CPO-1802: son donmuş Akşam Bülteni (yoksa None; sayfa bloğu gizler)
+    _bp = bulten.latest_path(_BULTEN_DIR)
+    bulten_ctx = _bulten_read(_bp) if _bp else None
+    v2 = _haber_v2_ctx(smap, items) if _tpl_ready("haberler_bildirimler.html") else {}
+    return render_template("haberler.html", gundem=gundem, feed_days=days, feed_page=res["page"],
+                           feed_pages=res["pages"], feed_total=res["total"], feed_filter=tur,
+                           feed_ticker=hisse, feed_counts=counts, feed_available=bool(items),
+                           feed_updated=_KAP_STORE.meta().get("updated_at"),
+                           coverage=len([t for t in smap if t not in INDEX_TICKERS]),
+                           close_label=close_label, bulten=bulten_ctx, **v2)
+
+
+@app.route("/haberler/bildirimler")
+def haberler_bildirimler_page():
+    """D-56/C-72 "Şirket bildirimleri" sekmesi (SSR, dizinlenir). Son 30 takvim gününün rutin-dışı
+    bildirimleri; ?tur=<tür> (8 tür, haber_v2.TYPES), ?sayfa=N (30'luk), ?tarih=YYYY-AA-GG&rutin=1
+    (o günün rutin duyuruları dahil), ?hisse=T (tek şirketin tüm bildirimleri, noindex). Eski v1 tür
+    adı 301 ile yeni adına. Şablon yoksa 404."""
+    if not _tpl_ready("haberler_bildirimler.html"):
+        abort(404)
+    hisse = (request.args.get("hisse") or "").upper()
+    hisse = hisse if haber_v2.TICKER_RE.match(hisse) else None
+    tur_arg = request.args.get("tur")
+    tur, legacy = haber_v2.tur_from_arg(tur_arg)
+    if legacy or (tur_arg and not tur):
+        return redirect(haber_v2.bildirimler_url(tur_slug=legacy, hisse=hisse), code=301)
+    tarih = request.args.get("tarih")
+    tarih = tarih if tarih and re.match(r"^\d{4}-\d{2}-\d{2}$", tarih) else None
+    rutin = bool(tarih) and request.args.get("rutin") == "1"
+    page = _haber_page_int(request.args.get("sayfa"))
+    smap = _haber_stock_map()
+    items = _KAP_STORE.all_items() if _KAP_STORE.available() else []
+    today = datetime.now(_TZ_TR).date().isoformat()
+    fd = haber_v2.feed(items, today, tur=tur, page=page, day=tarih, include_rutin=rutin, names=STOCK_NAMES,
+                       ticker=hisse)
+    tick = set()
+    for d in fd["days"]:
+        for r in d["rows"]:
+            tick.add(r["ticker"])
+    mini = {t: _haber_mini(t, smap, with_spark=True) for t in sorted(tick)}
+    resp = app.make_response(render_template(
+        "haberler_bildirimler.html", sekme="bildirimler", feed=fd, tur=tur,
+        tur_slug=haber_v2.TYPE_SLUG.get(tur) if tur else None, types=haber_v2.TYPES,
+        tarih=tarih, rutin=rutin, mini=mini, feed_available=bool(items), hisse=hisse,
+        hisse_name=STOCK_NAMES.get(hisse, hisse) if hisse else None,
+        coverage=len([t for t in smap if t not in INDEX_TICKERS]), close_label=_haber_close_label()))
+    if tarih or hisse or page > fd["pages"]:
+        resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
+@app.route("/hisse/<ticker>/bildirim/<int:idx>")
+def bildirim_page(ticker, idx):
+    """Kalıcı bildirim sayfası (SSR, dizinlenir). Şablon yoksa 404."""
+    if not _tpl_ready("bildirim.html"):
+        abort(404)
+    p = _bildirim_payload(idx)
+    if not p:
+        abort(404)
+    it = p["item"]
+    if ticker.upper() not in it["tickers"]:
+        return redirect(it["href"], code=301)
+    if ticker != ticker.upper():
+        return redirect(it["href"], code=301)
+    smap = _haber_stock_map()
+    return render_template("bildirim.html", b=p, mc=_haber_mini(it["ticker"], smap),
+                           canonical="https://borsapusula.com" + it["href"], close_label=_haber_close_label())
+
+
+def _kap_feed_universe():
+    tickers = sorted(t for t in BIST100 if t not in INDEX_TICKERS)
+    oids = sorted(set(KAP_UUID_OIDS[t] for t in tickers if KAP_UUID_OIDS.get(t)))
+    return set(tickers), oids
+
+
+def _haber_calendar():
+    """Merkez bankası takvimi: D-24 (takvim.MAKRO) varsa oradan, yoksa ECONOMIC_CALENDAR_2026.
+    D-24 eski sabiti kaldırıyor; Gündem baskısı iki durumda da çalışır."""
+    try:
+        import takvim as _tk
+        return [{"date": m[0], "event": m[3]} for m in _tk.MAKRO]
+    except Exception:
+        return list(globals().get("ECONOMIC_CALENDAR_2026") or [])
+
+
+def _haber_print_now(now):
+    """Gündem baskısı: kendi verimizden (gün sonu hisseleri, makro şerit, KAP akışı, takvim)."""
+    _load_cache_from_disk()
+    _load_macro_from_disk()
+    with _lock:
+        # K40: XU030 endeks satırı _cache["data"]'da bir hisse gibi durur; Gündem
+        # "Kapsamdaki N hisse" sayımına ve yükselen/düşen sıralamasına (top[0]/top[-1])
+        # sızmasın diye burada elenir (BIST_STOCK_COUNT'un aynı kuralı, D-45 hattı için).
+        stocks = [s for s in (_cache.get("data") or []) if s.get("ticker") not in INDEX_TICKERS]
+        updated = _cache.get("updated_at") or ""
+        macro = list(_macro_cache.get("data") or [])
+    try:
+        close_day = datetime.strptime(updated[:10], "%d.%m.%Y").date()
+    except ValueError:
+        close_day = now.date()
+    lvl = _get_xu100_level()
+    slot = "sabah" if now.hour < 12 else "aksam"
+    # D-56: Gundem ile Bulten AYNI hisse kumesi (BIST100) ve ayni sektor ozeti (donmus isi haritasi)
+    _hm = _heatmap_day(close_day.isoformat())
+    _snap = (_hm or {}).get("snap")
+    # C-72: durum maddesi 'önceki → yeni' akışı, Bülten'in durum değişimleriyle (aynı sayım)
+    _bp = os.path.join(_BULTEN_DIR, "%s.json" % close_day.isoformat())
+    _trans = ((_bulten_read(_bp) or {}).get("durum_degisimleri") if os.path.exists(_bp) else None) or None
+    doc = haber_gundem.build_print(stocks, macro, {"close": lvl.get("close"), "change_pct": lvl.get("change_pct")},
+                                   _KAP_STORE.all_items(), STOCK_NAMES, _haber_calendar(), now, close_day, slot,
+                                   members=BIST100_MEMBERS or None,
+                                   sectors=bulten.isi_haritasi_ozet(_snap) if _snap else None,
+                                   counts=(_snap or {}).get("counts"), transitions=_trans)
+    if doc:
+        haber_gundem.save_print(doc)
+    return doc
+
+
+def _kap_feed_loop():
+    """bist30-macro sürecinde (7/24, tek süreç) çalışır. KAP'a saygı: istekler arası ≥2 sn,
+    429/5xx'te tur biter. Takvim: 07:00-24:00 her 10 dk, gece saatte bir. Liste sorgusu
+    tur başına ODA+FR (saat başı turda DG+DUY de); yeni rutin-dışı bildirimlerin metni tur başına
+    ≤8, eski metin geri beslemesi (son 90 gün) gündüz 4, gece 40. RSS girdisi 30 dk'da bir.
+    Gündem baskısı 08:30 ve 19:30 (hafta içi). Depo yoksa ilk tur 12 aylık geri besleme (≈36 istek)."""
+    import requests as _rq
+    time.sleep(60)
+    client = kap_feed.KapClient()
+    last_rss = 0.0
+    while True:
+        now = datetime.now(_TZ_TR).replace(tzinfo=None)
+        night = now.hour < 7
+        try:
+            uni, oids = _kap_feed_universe()
+            if not _KAP_STORE.meta().get("backfill_done"):
+                n = kap_feed.backfill_months(_KAP_STORE, client, oids, uni, months=12, today=now.date())
+                logger.info("kap-feed: geri besleme bitti, %d kayıt, %d istek", n, client.count)
+            classes = kap_feed.POLL_CLASSES if (now.minute < 10 or night) else ("ODA", "FR")
+            st = kap_feed.poll_once(_KAP_STORE, client, oids, uni, STOCK_NAMES, now=now, max_docs=8,
+                                    classes=classes, fx_getter=_kap_fx_rate, log=logger.warning)
+            back = kap_feed.backfill_docs(_KAP_STORE, client, STOCK_NAMES, limit=40 if night else 4,
+                                          days=90, fx_getter=_kap_fx_rate)
+            logger.info("kap-feed: liste=%d metin=%d geri=%d istek=%d", st["listed"], st["docs"], back, client.count)
+        except kap_feed.KapStop as e:
+            logger.warning("kap-feed: KAP durdurdu (%s) — sonraki turda devam", e)
+        except Exception as e:
+            logger.warning("kap-feed turu hatası: %s", e)
+        try:
+            if time.time() - last_rss > 1800:
+                last_rss = time.time()
+                haber_gundem.collect_input(
+                    lambda url: _rq.get(url, headers={"User-Agent": haber_gundem.UA}, timeout=20).content,
+                    now=now, log=logger.warning)
+            slot = haber_gundem.due_slot(now, haber_gundem.printed_keys())
+            if slot or haber_gundem.load_latest() is None:
+                _haber_print_now(now)
+        except Exception as e:
+            logger.warning("gündem turu hatası: %s", e)
+        time.sleep(3600 if night else 600)
+
+
+_KAP_FX_CACHE: dict = {}
+
+
+def _kap_fx_rate(day, cur):
+    """Bildirim günü TCMB döviz alış kuru (gün yayımlanmadıysa önceki 5 gün) -> (kur, kur günü) | None."""
+    import requests as _rq
+    d0 = datetime.strptime(day, "%Y-%m-%d").date()
+    for back in range(0, 6):
+        d = d0 - timedelta(days=back)
+        key = d.isoformat()
+        if key not in _KAP_FX_CACHE:
+            try:
+                r = _rq.get(kap_feed.TCMB_URL % (d.strftime("%Y%m"), d.strftime("%d%m%Y")), timeout=15)
+                _KAP_FX_CACHE[key] = kap_feed.parse_tcmb(r.text) if r.status_code == 200 else {}
+            except Exception:
+                return None
+        if _KAP_FX_CACHE[key].get(cur):
+            return _KAP_FX_CACHE[key][cur], key
+    return None
+
+
+if os.environ.get("BP_ROLE") == "macro" and os.environ.get("KAP_FEED", "1") != "0":
+    _bg_start(threading.Thread(target=_kap_feed_loop, daemon=True, name="kap-feed"))
+
+
+# ── D-57 Gündem haber derlemesi (O27=A, O27k=A). Mantık gundem_haber.py; burada ince bağlantı. ──
+# bist30-macro sürecinde kendi iş parçacığı: hafta içi 08:30 / 19:30 baskısı (v1 Gündem aynı
+# turda basıldıktan sonra ya da en geç 30 dk sonra), Gemini flash-lite grounding'siz, mevcut
+# tavanlı _gemini_call yolu (manual_hold / kota sigortası / GEMINI_ENABLED / 200 çağrı / 5 $),
+# baskı başına ≤4 çağrı. Kapatma: GUNDEM_AI=0. Acil kaldırma: data/gundem_haber/latest.json silinir.
+def _gundem_haber_model(prompt, max_tokens):
+    _m, text = _gemini_call(prompt, [(gundem_haber.MODEL, False)], timeout=45, max_tokens=max_tokens,
+                            temperature=0.2, json_mode=True, timeout_cap=45)
+    return text
+
+
+def _gundem_haber_usage():
+    _st = gemini_budget.status()
+    return _st.get("calls_today") or 0, _st.get("usd_month") or 0.0
+
+
+def _gundem_haber_print(now, slot):
+    v1 = haber_gundem.load_latest()
+    if not v1 or v1.get("date") != now.date().isoformat():
+        v1 = None   # bayat v1 baskısının rakamları olgu olarak verilmez
+    try:
+        close_day = datetime.strptime((v1 or {}).get("close_day") or "", "%Y-%m-%d").date()
+    except ValueError:
+        close_day = None
+    uni, _oids = _kap_feed_universe()
+    return gundem_haber.run_edition(
+        now, slot, _gundem_haber_model, v1_doc=v1,
+        kap_items=_KAP_STORE.all_items() if _KAP_STORE.available() else [],
+        names=STOCK_NAMES, universe=uni, close_day=close_day,
+        budget_status=gemini_budget.status(),
+        cb_state=gundem_haber.read_cb_state(_GEMINI_QUOTA_CB_PATH),
+        usage_fn=_gundem_haber_usage, log=logger.info)
+
+
+def _gundem_haber_loop():
+    time.sleep(90)
+    while True:
+        now = datetime.now(_TZ_TR).replace(tzinfo=None)
+        try:
+            if GEMINI_API_KEY:
+                slot = gundem_haber.due(now, gundem_haber.done_keys(), gundem_haber.load_latest() is not None)
+                if slot and gundem_haber.v1_ready(now, slot, haber_gundem.printed_keys()):
+                    _gundem_haber_print(now, slot)
+        except Exception as e:
+            logger.warning("gündem-haber turu hatası: %s", e)
+        time.sleep(300)
+
+
+if os.environ.get("BP_ROLE") == "macro" and gundem_haber.ENABLED:
+    _bg_start(threading.Thread(target=_gundem_haber_loop, daemon=True, name="gundem-haber"))
+
+
+@app.route("/api/gundem-haber")
+@limiter.limit("60 per minute")
+def api_gundem_haber():
+    """D-57 sözleşmesi: son Gündem derlemesi {baski, baski_label, maddeler[]} (yoksa boş liste)."""
+    return safe_json(gundem_haber.load_latest() or gundem_haber.empty_doc())
+
+
+@app.context_processor
+def _inject_gundem_haber():
+    """D-57: ana sayfa ve /haberler* SSR bağlamı `gundem_haber` (son baskı ya da None)."""
+    try:
+        p = request.path or ""
+    except RuntimeError:   # istek dışı render (e-posta vb.)
+        return {}
+    if p == "/" or p == "/haberler" or p.startswith("/haberler/"):
+        try:
+            return {"gundem_haber": gundem_haber.load_latest()}
+        except Exception as e:
+            logger.warning("_inject_gundem_haber: %s", e)
+            return {"gundem_haber": None}
+    return {}
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
@@ -9998,7 +9853,7 @@ def _load_mtf_cache_from_disk():
 def _compute_mtf(ticker):
     """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır.
 
-    CPO-1217 §2 ek bulgu: backtest_ticker ile AYNI sınıf hub-bloke bug'ı burada da
+    CPO-1217 §2 ek bulgu: (silinen backtest_ticker ile) AYNI sınıf hub-bloke bug'ı burada da
     vardı — üstelik burada REFRESH_WORKER=="web" guard'ı (api_stock_mtf, aşağıda)
     unset ortamda (prod .env'de REFRESH_WORKER hiç tanımlı değil) hiç devreye
     girmiyor, yani bu senkron doğrudan-yfinance çağrıları herhangi bir kullanıcının
@@ -10311,7 +10166,6 @@ def api_stock_chart(ticker):
                     _dqv_alert("DQV_SV_CHART",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
                                ticker=ticker,
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
                                errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
@@ -10339,6 +10193,7 @@ def _tarama_d51_fields(s, health_snap, fund_snap, val_medians):
         "data_completeness":  entry.get("data_completeness") if has else None,
         "categories":         (entry.get("categories") or {}) if has else None,
         "categories_na":      (entry.get("categories_na") or []) if has else [],
+        "limited_data":       bool(entry.get("limited_data")) if has else False,
         "va":       v2["va"] if v2 else tarama_fields.derive_valuation_band(pe, pb, _get_sector(tk), val_medians),
         "pe":       pe,
         "pb":       pb,
@@ -10624,6 +10479,7 @@ def api_tarama_temel():
             "categories":              entry.get("categories") or {},
             "categories_na":           entry.get("categories_na") or [],
             "data_completeness":       entry.get("data_completeness"),
+            "limited_data":            bool(entry.get("limited_data")),
             "categories_complete":     entry.get("categories_complete"),
             "partial":                 entry.get("partial"),
             "temel_analiz_aciklamasi": entry.get("temel_analiz_aciklamasi"),
@@ -10863,14 +10719,12 @@ def _compute_health():
         # onun kendi leader/thread durumu, global değil (news_queue_note ile
         # aynı uyarı geçerli).
         "leaders": {
-            "gemini":                _is_gemini_leader(),
-            "notify":                _is_notify_leader(),
-            "prefetch_thread_alive": _prefetch_thread.is_alive(),
+            "gemini": _is_gemini_leader(),
+            "notify": _is_notify_leader(),
         },
         # CPO-1260-B P1: alarm kanallarının KENDİSİ de sağlık yüzeyine girsin —
-        # Telegram token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
+        # Alarm kanalı token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
         "alarm_channels": {
-            "telegram": "configured" if (TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID) else "missing",
             "smtp":     "configured" if (SMTP_HOST and SMTP_USER and SMTP_PASS) else "missing",
         },
         # CPO-1504: MOD A (saf Yahoo yavaşlığı) / MOD B (breaker açık) ayrımı önceden
@@ -11051,7 +10905,7 @@ def _health_snapshot_loop():
             logger.error("dispatch heartbeat write: %s", e)
         time.sleep(8)
 
-threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
+_bg_start(threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot"))
 logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
 
 
@@ -11090,7 +10944,7 @@ def _lock_probe_loop():
             logger.error("_lock_probe_loop: %s", e)
         time.sleep(3)
 
-threading.Thread(target=_lock_probe_loop, daemon=True, name="lock-probe").start()
+_bg_start(threading.Thread(target=_lock_probe_loop, daemon=True, name="lock-probe"))
 logger.info("_lock probe loop başlatıldı (CPO-1269 §6/§7 — lock-free, asla kendisi asılı kalamaz)")
 
 
@@ -11232,10 +11086,9 @@ def sitemap():
     _blog_lastmod = max((a.get("date") or today) for a in _blog_articles) if _blog_articles else today
     pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly",
                   "lastmod": _blog_lastmod})
-    # K-CK: lastmod varsayilani `today` oldugu icin bu girdi her gun "bugun
-    # degisti" diyordu -- changefreq "monthly" ile ayni satirda celisiyordu.
-    pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly",
-                  "lastmod": _tpl_lastmod("portfolio.html", today)})
+    # D-25b: /portfolio artık /takip'e 301 (C-41) — sitemap girdisi taşındı.
+    pages.append({"loc": "/takip",          "priority": "0.6", "changefreq": "monthly",
+                  "lastmod": _tpl_lastmod("takip.html", today)})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
@@ -11249,9 +11102,33 @@ def sitemap():
             pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
-    pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "daily"})
-    pages.append({"loc": "/temettu-takvimi",    "priority": "0.8", "changefreq": "daily"})
+    # D-54: /harita/<gün> kalıcı ısı haritası sayfaları (şablon yayındaysa)
+    if _harita_page_ready():
+        for d in reversed(heatmap.days(_HEATMAP_DIR)[-90:]):
+            pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
+    # CPO-1802: /bulten/<gün> kalıcı Akşam Bülteni sayfaları (şablon yayındaysa)
+    if _bulten_page_ready() and _bulten_page_ready("bulten_arsiv.html") and bulten.days(_BULTEN_DIR):
+        pages.append({"loc": "/bulten/arsiv", "priority": "0.6", "changefreq": "daily"})   # D-56
+    if _bulten_page_ready():
+        for d in reversed(bulten.days(_BULTEN_DIR)[-90:]):
+            _snap = _bulten_read(os.path.join(_BULTEN_DIR, d + ".json"))
+            _lastmod = (_snap or {}).get("updated_at", d)[:10]
+            pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
+    pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
+    # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
+    if _tpl_ready("haberler.html"):
+        pages.append({"loc": "/haberler",           "priority": "0.8", "changefreq": "daily"})
+        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
+            pages.append({"loc": "/haberler/bildirimler", "priority": "0.7", "changefreq": "daily"})
+        if _tpl_ready("bildirim.html") and _KAP_STORE.available():
+            _cut = (datetime.now(_TZ_TR).date() - timedelta(days=180)).isoformat()
+            for _it in _KAP_STORE.all_items():
+                if _it["ts"][:10] < _cut:
+                    break
+                if not _it.get("rutin"):
+                    pages.append({"loc": "/hisse/%s/bildirim/%d" % (_it["ticker"], _it["id"]),
+                                  "priority": "0.4", "changefreq": "never", "lastmod": _it["ts"][:10]})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
                   "lastmod": _tpl_lastmod("karsilastir.html", today)})
     for a in _blog_articles:
@@ -11384,38 +11261,55 @@ def llms_txt():
     yazılmış özet."""
     body = """# BorsaPusula
 
-> BIST (Borsa İstanbul) hisseleri için algoritmik teknik analiz sinyalleri.
-> Supertrend(10,3) + ADX + EMA12/EMA99 tabanlı, kural-temelli, gün sonu güncellenen.
+> Her akşam kapanıştan sonra BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?
+> Finansallar şirketin KAP'ta açıkladığı rakamlardan, trend Supertrend(10,3) + ADX + EMA12/EMA99 kurallarından gelir; kural-temelli, yapay zekâ rakam üretmez.
 > Yatırım tavsiyesi değildir.
 
 ## Ana Sayfalar
-- [Sinyal Paneli](https://borsapusula.com/): BIST100 güncel Güçlü Trend/Trend Bozuldu sinyalleri, BIST100 endeks durumu
-- [Hisse Tarayıcı](https://borsapusula.com/tarama): sinyal/sektör/fiyat/ADX filtreli tarama, Teknik ve Temel Analiz modları
-- [Sektör Haritası](https://borsapusula.com/sektor-harita): sektör bazlı sinyal yoğunluğu
-- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta sinyal değiştiren hisseler
-- [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
-- [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
+- [Piyasa](https://borsapusula.com/): "Üç soruda BIST" — son kapanışta BIST100, öne çıkan şirketler, durum değiştirenler, sektör ısı haritası
+- [Keşfet (Hisse Tarayıcı)](https://borsapusula.com/tarama): BorsaPusula Skoru, finansal skor, trend, sektör, fiyat ve değerleme filtreleriyle tarama
+- [Sektörler](https://borsapusula.com/sektor-harita): hisselerin kapanış günü değişimi, piyasa değerine göre kutular ve KAP sektör grupları
+- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta trend durumu değişen hisseler
+- [Günlük Özet](https://borsapusula.com/ozet): Güçlü Trend / Trend Bozuldu / Yatay dağılımı
+- [Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
-- [Bilanço Takvimi](https://borsapusula.com/bilanco-takvimi): yaklaşan finansal sonuç tarihleri
-- [Temettü Takvimi](https://borsapusula.com/temettu-takvimi): BIST30 şirketlerinin yaklaşan ex-temettü tarihleri
-- [Blog](https://borsapusula.com/blog): teknik analiz eğitim içerikleri (okumalar)
+- [Takvim](https://borsapusula.com/takvim): şirketlerin temettü ve finansal rapor tarihleri, Türkiye ve ABD veri günleri
+- [Borsa Okulu (Blog)](https://borsapusula.com/blog): teknik ve temel analiz kavramları, eğitim içerikleri
 
 ## Hisse Sayfaları
 - Format: https://borsapusula.com/hisse/{TICKER} — örn. /hisse/THYAO
-- Her sayfada: güncel fiyat, sinyal, ADX/RSI, teknik ve temel analiz skoru, SSS
+- Her sayfada: kapanış fiyatı ve kapanış günü, "3 soruda" kartı (finansallar, değerleme, trend), BorsaPusula Skoru, KAP'a dayalı finansal göstergeler, grafik, KAP bildirimleri, SSS
 
 ## Metodoloji
-- [Metodoloji](https://borsapusula.com/metodoloji): sinyal üretim kuralları
+- [Metodoloji](https://borsapusula.com/metodoloji): skorlar ve trend durumu nasıl hesaplanır
 - [Hakkında](https://borsapusula.com/hakkinda)
 
 ## Önemli Notlar
-- Veri kaynağı: gün sonu (EOD) BIST verisi, günlük güncelleme
-- Sinyal terminolojisi: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
+- Veri: her işlem günü kapanışından sonra güncellenen resmi kapanış fiyatları ve şirketlerin KAP'ta açıkladığı finansal raporlar
+- Trend durumu terimleri: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
 - Tüm sayfalar Türkçe (tr)
 
 ## İletişim
 - [İletişim](https://borsapusula.com/iletisim)
 """
+    if _harita_page_ready():   # D-54: kalıcı gün sayfaları (şablon yayındaysa)
+        body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
+                            "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
+                            "kapanış günü kalıcı sayfa: /harita/YYYY-AA-GG\n- [Takvim](", 1)
+    if _tpl_ready("haberler.html"):  # D-45/C-57: sayfa canlıysa listelenir
+        body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
+                            "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
+                            "/hisse/{TICKER}/bildirim/{NO}\n- [Blog]", 1)
+        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
+            body = body.replace("- [Blog]", "  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): "
+                                "şirket bildirimleri türe göre (?tur=finansal-rapor, temettu, sermaye, genel-kurul, "
+                                "ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar\n- [Blog]", 1)
+        if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
+            body = body.replace("- [Blog]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
+                                "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "
+                                "sayfa: /bulten/YYYY-AA-GG" + (
+                                    "; tüm bültenler: https://borsapusula.com/bulten/arsiv"
+                                    if _bulten_page_ready("bulten_arsiv.html") else "") + "\n- [Blog]", 1)
     return Response(body, mimetype="text/plain")
 
 
@@ -11608,65 +11502,6 @@ _OG_TITLE_PARTS = (("Borsa", "text"), ("Pusula", "logo"))
 _OG_SUBTITLE    = "borsapusula.com · BIST100 + ek hisseler · Algoritmik Trend Sinyalleri"
 
 
-@app.route("/og-image.svg")
-@limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL/SVG render her istekte tekrarlaniyor
-def og_image():
-    """Eski SVG OG image — geri uyumluluk için tutulur (eski paylaşılan linkler).
-    CPO-1107 madde 10: yeni sayfalar /og-image.png kullanır — çoğu sosyal medya
-    platformu (Facebook/WhatsApp/LinkedIn) og:image için SVG render etmiyor."""
-    # K-CL (22.09): 4. deger BILEREK KULLANILMIYOR. Eskiden alt basliga
-    # `datetime.now()` tarihi basiliyordu; veri ise bir onceki EOD turundan
-    # geliyor (olculdu 22.09 09:3x: gorsel "22.09.2026", veri 21.09 18:22).
-    # Ustelik og:image URL'i versiyonsuz -- Facebook/WhatsApp/X kartı URL'e
-    # gore onbelleklediginden HERHANGI bir tarih onbellekte kalici yalana
-    # doner (86. ders: kuralin sertligi kanalin yeniden-degerlendirme
-    # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
-    al_count, sat_count, total, _today_unused = _og_image_stats()
-    c = _OG_PALETTE
-    c_bg, c_sf, c_sf2, c_bd = c["bg"], c["surface"], c["surface2"], c["border"]
-    c_tx, c_t2, c_t3 = c["text"], c["text2"], c["text3"]
-    c_br, c_lg, c_al, c_sat = c["brand"], c["logo"], c["al"], c["sat"]
-
-    # Baslik IKI rotada da _OG_TITLE_PARTS'tan turer (head-meta-check R6:
-    # tek urun, tek metin kanonu). Ilk parca kapsayici elemanin kendi
-    # fill'ini alir; kalanlar tspan ile kendi token'larindan boyanir.
-    # (Bu yorumda SVG etiketi YAZILMAZ: kapinin metin ayristiricisi
-    #  ham kaynaga bakar, yorum govdeyi uzatip sahte-pozitif uretir.)
-    _svg_title = "".join(
-        p if i == 0 else f'<tspan fill="{c[role]}">{p}</tspan>'
-        for i, (p, role) in enumerate(_OG_TITLE_PARTS))
-
-    svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
-     xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
-  <rect width="1200" height="630" fill="{c_bg}"/>
-  <rect x="0" y="0" width="6" height="630" fill="{c_br}"/>
-  <!-- Marka sozcuk-isareti — K-CZ kanonu: vurgulu yari bp-logo-accent token'i
-       (XML yorumunda iki tire yan yana YAZILAMAZ: belge iyi-bicimli kalmaz) -->
-  <text x="60" y="120" font-size="64" font-weight="700" fill="{c_tx}">{_svg_title}</text>
-  <text x="60" y="165" font-size="26" fill="{c_t3}">{_OG_SUBTITLE}</text>
-  <!-- Ayırıcı çizgi -->
-  <line x1="60" y1="195" x2="1140" y2="195" stroke="{c_bd}" stroke-width="1"/>
-  <!-- İstatistik kutular -->
-  <rect x="60"  y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="200" y="305" font-size="72" font-weight="800" fill="{c_al}" text-anchor="middle">{al_count}</text>
-  <text x="200" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▲ GÜÇLÜ TREND</text>
-  <rect x="380" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="520" y="305" font-size="72" font-weight="800" fill="{c_sat}" text-anchor="middle">{sat_count}</text>
-  <text x="520" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▼ TREND BOZULDU</text>
-  <rect x="700" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="840" y="305" font-size="72" font-weight="800" fill="{c_br}" text-anchor="middle">{total}</text>
-  <text x="840" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
-  <!-- Alt slogan -->
-  <text x="60" y="480" font-size="30" fill="{c_t2}">Supertrend · ADX · EMA12/99</text>
-  <text x="60" y="525" font-size="22" fill="{c_t3}">Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
-  <!-- Sağ ikon -->
-  <rect x="1020" y="230" width="120" height="160" rx="12" fill="{c_sf2}" stroke="{c_bd}" stroke-width="1"/>
-  <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
-</svg>'''
-    return Response(svg, mimetype="image/svg+xml",
-                    headers={"Cache-Control": "public, max-age=3600"})
-
-
 _OG_FONT_DIR = "/usr/share/fonts/truetype/dejavu"
 _og_font_cache = {}
 
@@ -11704,10 +11539,16 @@ def og_image_png():
     draw.rectangle([0, 0, 6, 630], fill=c["brand"])
 
     # Marka sozcuk-isareti — K-CZ kanonu (vurgulu yari --bp-logo-accent).
+    # CPO-1796: logo v2 isareti (static/icon-192.png, zemini og zeminiyle ayni #0e0e12) sol ustte.
+    try:
+        _mark = Image.open(os.path.join(_APP_DIR, "static", "icon-192.png")).convert("RGB").resize((88, 88), Image.LANCZOS)
+        img.paste(_mark, (60, 52))
+        x = 60 + 88 + 22
+    except OSError:
+        x = 60
     f_title = _og_font(64, bold=True)
-    x = 60
     for text, role in _OG_TITLE_PARTS:
-        draw.text((x, 70), text, font=f_title, fill=c[role])
+        draw.text((x, 64), text, font=f_title, fill=c[role])
         x += draw.textlength(text, font=f_title)
 
     draw.text((60, 150), _OG_SUBTITLE, font=_og_font(26), fill=c["text3"])
@@ -11728,7 +11569,7 @@ def og_image_png():
         draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill=c["text3"])
 
     draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill=c["text2"])
-    draw.text((60, 512), "Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
+    draw.text((60, 512), "Algoritmik, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
                font=_og_font(22), fill=c["text3"])
 
     # Sağ ikon kutusu — mini bar-chart (emoji yerine, font-bağımsız)
@@ -11754,16 +11595,19 @@ def og_image_png():
 def _normalize_tickers(raw, limit=4):
     """`tickers=` query-param'ını /karsilastir sayfası ve /api/karsilastir için
     TEK ortak mantıkla normalize eder (CPO-1630 P2): trim + upper + whitelist +
-    alfabetik dedup + limit. Önceden sayfa sorted(set(...)) kullanırken API
-    dict.fromkeys(...) (giriş sırası) kullanıyordu — aynı ticker seti farklı
-    sırayla girilince limit'in kestiği 4'lü farklılaşabiliyordu.
+    dedup + limit. CPO-1811: kullanıcının girdiği SIRA korunur (yalnız büyük harf
+    + tekilleştirme) — önceden alfabetik sıralanıyordu, `?tickers=THYAO,AKBNK`
+    canonical'ı `AKBNK,THYAO`'ya 301 atıyordu (kullanıcı sırası kayboluyordu).
     CPO-1783: endeks ticker'ları (INDEX_TICKERS) burada elenir — /karsilastir
     ve /api/karsilastir AYNI fonksiyonu kullanır, tek eleme iki yüzeyi kapatır."""
-    return sorted({
-        t.strip().upper() for t in raw.split(",")
-        if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
-        and t.strip().upper() not in INDEX_TICKERS
-    })[:limit]
+    seen = set()
+    out = []
+    for t in raw.split(","):
+        tu = t.strip().upper()
+        if re.match(r"^[A-Z0-9]{1,10}$", tu) and tu not in INDEX_TICKERS and tu not in seen:
+            seen.add(tu)
+            out.append(tu)
+    return out[:limit]
 
 
 # ── Hisse Karşılaştırma ──────────────────────────────────────────────────────
@@ -11861,7 +11705,23 @@ def api_karsilastir():
         # /api/data ve /api/tarama'nın da kaynağı) — doğrudan onu kullan.
         adx_val = s.get("adx")
         # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
-        fund = _fundamentals_kap(ticker, _get_fundamentals(ticker)) if ticker in BIST100 and bool(s) else {}
+        # D-P0-2809b: /hisse'nin Temel v2 zinciriyle AYNI kaynak (app.py:8702 ile
+        # simetrik) — eskiden yalnız _fundamentals_kap çağrılıyordu, KAP zincirinin
+        # F/K·PD/DD·ÖK kârlılığı (kap_temel_v2) hiç görünmüyordu; hisse.js:1656/
+        # tvValuation ile AYNI seçim mantığı (bkz. aşağıdaki kap_now bloğu).
+        fund = _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, _get_fundamentals(ticker))) if ticker in BIST100 and bool(s) else {}
+        # kap_durum=='var' ise F/K·PD/DD pay_uyumsuz değilse degerleme_simdi'den,
+        # pay_uyumsuz'sa (ya da kayıt yoksa) None/Yahoo yedeği — hisse.js tvValuation()
+        # ile birebir aynı dallanma (KAP kaydı varken uyumsuzsa Yahoo'ya DÜŞMEZ).
+        # ÖK kârlılığı pay adedinden bağımsız hesaplandığı için pay_uyumsuz'dan etkilenmez.
+        _kap = fund.get("kap") if fund.get("kap_durum") == "var" else None
+        _kap_now = (_kap or {}).get("degerleme_simdi")
+        if _kap_now and not _kap_now.get("pay_uyumsuz"):
+            pe_val, pb_val = _kap_now.get("fk"), _kap_now.get("pd_dd")
+        else:
+            pe_val = None if _kap else fund.get("pe_ratio")
+            pb_val = None if _kap else fund.get("pb_ratio")
+        roe_val = _kap_now.get("ozsermaye_karliligi") if (_kap_now and _kap_now.get("ozsermaye_karliligi") is not None) else fund.get("roe")
         results.append({
             "ticker":         ticker,
             "name":           STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
@@ -11902,16 +11762,20 @@ def api_karsilastir():
             # eşik (financial_health_score._band, 50/70) — karsilastir.html kendi
             # eşiğini yeniden icat etmesin (feedback_puan_tutarlilik_kanonik).
             "band": _fhs._band(hs_data.get("borsapusula_skoru")) if (hs_data and _FHS_AVAILABLE) else None,
+            # CPO-1811: /hisse Temel kartının değerleme hükmüyle AYNI kaynak
+            # (home_fields.valuation — HX_TV2.h'nin SSR'daki kökeni, D-40c tv2
+            # hükmü/sektör ortancası); yeni hesap icat edilmedi.
+            "degerleme":      {"h": home_fields.valuation(hs_data, fund)},
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
             # bir hisse icin sahte/tiklanabilir KAP linki gosteriyordu.
             "kap_url":        kap_url_for(ticker) if bool(s) else None,
             # ── Temel analiz ───────────────────────────────
-            "pe_ratio":       fund.get("pe_ratio"),
-            "pb_ratio":       fund.get("pb_ratio"),
+            "pe_ratio":       pe_val,
+            "pb_ratio":       pb_val,
             "market_cap":     fund.get("market_cap"),
-            "roe":            fund.get("roe"),
+            "roe":            roe_val,
             "dividend_yield": fund.get("dividend_yield"),
             "eps":            fund.get("eps"),
             "profit_margin":  fund.get("profit_margin"),
@@ -11964,27 +11828,9 @@ def _compute_gundem_data():
         key=_adx_val, reverse=True
     )[:8]
 
-    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (date.today() sunucu/UTC günüdür)
-    today_dt  = datetime.now(_TZ_TR).date()
-    today_iso = today_dt.isoformat()
-    bilanco_upcoming = []
-    for qlabel, start, end, desc in _BILANCO_PERIODS:
-        if end < today_iso:
-            continue
-        start_dt      = date.fromisoformat(start)
-        end_dt        = date.fromisoformat(end)
-        days_to_end   = (end_dt   - today_dt).days
-        days_to_start = (start_dt - today_dt).days
-        bilanco_upcoming.append({
-            "label":      qlabel,
-            "desc":       desc,
-            "start":      start,
-            "end":        end,
-            "status":     "active" if today_dt >= start_dt else "upcoming",
-            "days_label": f"{days_to_end} gün kaldı" if today_dt >= start_dt else f"{days_to_start} gün sonra",
-        })
-        if len(bilanco_upcoming) >= 2:
-            break
+    # Yaklaşan bilanço dönemi (gündem için) — D-24: doğrulanmış yasal son günlerden
+    # (takvim.DONEMLER); elle kalibre _BILANCO_PERIODS tahmin tablosu kalktı.
+    bilanco_upcoming = _takvim.donem_ozeti(datetime.now(_TZ_TR).date())[:2]
 
     # D-06: boş-liste metni göreli zaman (bugün/yarın) yerine son EOD gününün
     # tarihini taşır; liste o güne bağlı olduğundan seans durumundan bağımsızdır.
@@ -12034,23 +11880,6 @@ def gundem_page():
 def api_gundem():
     """Piyasa Gündem API — son seansta (son EOD günü) değişen sinyaller, güçlü trendler, sinyal özeti."""
     return safe_json(_compute_gundem_data())
-
-
-# ── Geçmiş Günlük Snapshot API ───────────────────────────────────────────────
-@app.route("/api/snapshots")
-@limiter.limit("30 per minute")
-def api_snapshots():
-    """Mevcut günlük snapshot tarihlerini listele."""
-    try:
-        files = sorted([
-            f.replace(".json", "")
-            for f in os.listdir(_SNAPSHOTS_DIR)
-            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
-        ], reverse=True)
-        return safe_json({"dates": files[:30]})  # son 30 gün
-    except Exception as e:
-        logger.error("Snapshots list: %s", e)
-        return safe_json({"dates": [], "error": "Sunucu hatası"}), 500
 
 
 @app.route("/ozet/<tarih>")
@@ -12283,7 +12112,9 @@ def yasal():
 # ── Blog ──────────────────────────────────────────────────────────────────────
 @app.route("/portfolio")
 def portfolio():
-    return render_template("portfolio.html")
+    # D-25b: eski tarayıcı-yerel (localStorage) portföy sayfası C-41/D-50 ile
+    # hesap tabanlı /takip'e taşındı; portfolio.html artık render edilmiyor.
+    return redirect("/takip", code=301)
 
 
 # ── Sunucu Taraflı Portföy (UUID Token Bazlı) ─────────────────────────────────
@@ -12467,209 +12298,21 @@ def api_portfolio_delete(token):
         return safe_json({"error": "Sunucu hatası"}), 500
 
 
-# ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
+# ── Bar sinyali (analyze() geriye yürüme) ─────────────────────────────────────
 def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, weekly_dir, i):
     """i. bar için sinyal hesapla.
 
     CPO-1559 P0-1: canlı analyze()'nin uyguladığı haftalık-trend gate'i
-    (app.py ~1587-1592, büyük ters trendde sinyal üretme) artık burada da
-    uygulanıyor — weekly_dir, _historical_weekly_dir_series() ile lookahead
-    olmadan hesaplanmış geçmiş haftalık yön serisi.
+    (büyük ters trendde sinyal üretme) burada da uygulanır — weekly_dir,
+    _historical_weekly_dir_series() ile lookahead olmadan hesaplanmış geçmiş
+    haftalık yön serisi. D-09: kural business_rules.signal_from_indicators'ta
+    (analyze() canlı durumla aynı kaynak); analyze() geriye yürürken de bunu çağırır.
     """
-    ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
-    ai    = float(adx.iloc[i])
-    dip   = float(di_plus.iloc[i]); dim   = float(di_minus.iloc[i])
-    sti   = int(supertrend.iloc[i])
-    wdir  = int(weekly_dir.iloc[i])
-    bs    = int(sti == 1)  + int(ai >= 25 and dip > dim) + int(ei12 > ei99)
-    brs   = int(sti == -1) + int(ai >= 25 and dim > dip) + int(ei12 < ei99)
-    if bs >= 3 and wdir != -1 and wdir != 0:
-        return "AL"
-    elif brs >= 3 and wdir != 1 and wdir != 0:
-        return "SAT"
-    return "BEKLE"
-
-
-def backtest_ticker(ticker_base, fwd_days=20):
-    """Bir hisse için son 2 yıl AL/SAT sinyal performansını hesapla.
-
-    CPO-1217 §2: eskiden burada doğrudan (subprocess-izolasyonsuz) yfinance
-    indirme çağrısı yapılıyordu — yfinance 1.2.0 curl_cffi kullanıyor (gevent
-    monkey.patch_all()'ın kapsamadığı
-    ham libcurl syscall'ı), bu da run_backtest() sırasında worker'ın TÜM
-    gevent hub'ını (dolayısıyla /api/data, /api/macro dahil aynı worker'daki
-    her istek) yfinance'in gerçek ağ süresi kadar (60s+) bloke ediyordu. G24
-    dalgasında (chart/fundamentals/live-prices) uygulanan subprocess-izolasyon
-    deseni backtest_ticker'a hiç taşınmamıştı — tek eksik çağrı noktası buydu.
-    """
-    try:
-        df = _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=30)
-        if df is None or len(df) < 120:
-            return None
-        df    = df.dropna().sort_index()
-        close = df["Close"].squeeze()
-        high  = df["High"].squeeze()
-        low   = df["Low"].squeeze()
-        n     = len(close)
-        if n < 120:
-            return None
-
-        ema12                  = compute_ema(close, 12)
-        ema99                  = compute_ema(close, 99)
-        adx, di_plus, di_minus = compute_adx(high, low, close)
-        supertrend, _          = compute_supertrend(high, low, close)
-        weekly_dir_hist        = _historical_weekly_dir_series(close)
-
-        # Her bar için sinyal
-        signals = [_bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend,
-                                     weekly_dir_hist, i)
-                   for i in range(n)]
-
-        episodes = []   # {"sig", "entry_i", "entry_price", "exit_i", "exit_price", "ret_pct"}
-        i = 0
-        while i < n:
-            sig = signals[i]
-            if sig in ("AL", "SAT"):
-                entry_i     = i
-                entry_price = float(close.iloc[i])
-                if entry_price <= 0:
-                    # Bozuk/sifir kapanis bari (veri kaynagi glitch'i) - sadece bu
-                    # barı atla, ZeroDivisionError'in tum ticker'in backtest'ini
-                    # (fonksiyon-geneli except Exception uzerinden) sessizce
-                    # dusurmesine izin verme.
-                    logger.warning("backtest_ticker(%s): entry_price<=0 @ %s, bar atlandi",
-                                    ticker_base, close.index[i])
-                    i += 1
-                    continue
-                # Sinyal bitmesini bekle (max fwd_days bar)
-                j = i + 1
-                while j < n and j < i + fwd_days + 1 and signals[j] == sig:
-                    j += 1
-                exit_i     = min(j, n - 1)
-                exit_price = float(close.iloc[exit_i])
-                ret_pct    = (exit_price - entry_price) / entry_price * 100
-                duration_bars = exit_i - entry_i
-                episodes.append({
-                    "sig":           sig,
-                    "date":          close.index[entry_i].strftime("%d.%m.%Y"),
-                    "entry_price":   round(entry_price, 2),
-                    "exit_price":    round(exit_price, 2),
-                    "bars":          duration_bars,
-                    "duration_days": duration_bars,  # günlük bar = işlem günü
-                    "ret_pct":       round(ret_pct, 2),
-                    "win":           (ret_pct > 0 and sig == "AL") or (ret_pct < 0 and sig == "SAT"),
-                })
-                i = j
-            else:
-                i += 1
-        return {"ticker": ticker_base, "episodes": episodes}
-    except Exception as e:
-        logger.warning("backtest_ticker(%s): %s", ticker_base, e)
-        return None
-
-
-def _signed_ret(ep):
-    """Sinyal yönüne göre düzeltilmiş getiri: AL için ham ret_pct, SAT için
-    ters işaretli (kısa pozisyon mantığıyla fiyat düşüşü = kazanç)."""
-    return ep["ret_pct"] if ep["sig"] == "AL" else -ep["ret_pct"]
-
-
-def run_backtest():
-    """BIST30 hisseleri için backtest yürüt ve cache'e kaydet."""
-    # CPO-1559 P1: kasıtlı olarak sadece BIST30 (ilk 30 hisse) — ürün ~217
-    # ticker'ı tarıyor ama tam evrende backtest (217 × yfinance.download,
-    # her biri arasında 0.3s bekleme) hem çok yavaş olur hem Yahoo rate-limit/
-    # circuit-breaker riskini büyütür (bkz. bilinen CB kesinti geçmişi).
-    # Bu yüzden istatistiğin kapsamı /sinyal-performans'ta açıkça belirtilir
-    # (küçük/orta-cap için temsili olmayabilir) — örneklemi genişletmek yerine.
-    bt_tickers = BIST30_LITERAL
-    all_episodes = {"AL": [], "SAT": []}
-    per_ticker   = []
-
-    for t in bt_tickers:
-        res = backtest_ticker(t)
-        time.sleep(0.3)
-        if not res:
-            continue
-        t_al = [e for e in res["episodes"] if e["sig"] == "AL"]
-        t_sa = [e for e in res["episodes"] if e["sig"] == "SAT"]
-        all_episodes["AL"] += t_al
-        all_episodes["SAT"] += t_sa
-        if t_al or t_sa:
-            per_ticker.append({
-                "ticker":   t,
-                "al_count": len(t_al),
-                "al_wins":  sum(1 for e in t_al if e["win"]),
-                "al_avg":   round(sum(_signed_ret(e) for e in t_al) / len(t_al), 2) if t_al else None,
-                "sat_count":len(t_sa),
-                "sat_wins": sum(1 for e in t_sa if e["win"]),
-                "sat_avg":  round(sum(_signed_ret(e) for e in t_sa) / len(t_sa), 2) if t_sa else None,
-            })
-
-    def stats(eps):
-        if not eps: return {
-            "count": 0, "win_rate": 0, "avg_ret": 0, "best": 0, "worst": 0,
-            "sharpe": None, "max_drawdown": None, "profit_factor": None,
-            "avg_duration_days": None,
-        }
-        wins = [e for e in eps if e["win"]]
-        rets = [_signed_ret(e) for e in eps]
-        avg  = sum(rets) / len(rets)
-        std  = (sum((r - avg) ** 2 for r in rets) / len(rets)) ** 0.5
-
-        # Sharpe (günlük getiri % → yıllık ölçekle; her işlem ~bağımsız)
-        sharpe = round(avg / std * (len(rets) ** 0.5), 2) if std > 0 else None
-
-        # Kümülatif max drawdown
-        cum   = 100.0
-        peak  = 100.0
-        max_dd = 0.0
-        for r in rets:
-            cum  *= (1 + r / 100)
-            peak  = max(peak, cum)
-            dd    = (cum - peak) / peak * 100
-            max_dd = min(max_dd, dd)
-
-        # Profit factor = brüt kazanç / brüt kayıp
-        gross_win  = sum(r for r in rets if r > 0)
-        gross_loss = abs(sum(r for r in rets if r < 0))
-        pf = round(gross_win / gross_loss, 2) if gross_loss > 0 else None
-
-        # Ortalama işlem süresi
-        durations = [e.get("duration_days") for e in eps if e.get("duration_days") is not None]
-        avg_dur   = round(sum(durations) / len(durations), 1) if durations else None
-
-        return {
-            "count":             len(eps),
-            "win_rate":          round(len(wins) / len(eps) * 100, 1),
-            "avg_ret":           round(avg, 2),
-            "best":              round(max(rets), 2),
-            "worst":             round(min(rets), 2),
-            "sharpe":            sharpe,
-            "max_drawdown":      round(max_dd, 2),
-            "profit_factor":     pf,
-            "avg_duration_days": avg_dur,
-        }
-
-    result = {
-        "al":          stats(all_episodes["AL"]),
-        "sat":         stats(all_episodes["SAT"]),
-        "per_ticker":  sorted(per_ticker, key=lambda x: (-x["al_count"], -x["sat_count"])),
-        "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
-        "tickers_used": len(bt_tickers),
-        "git_sha":      _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1 — hangi kod aniyla hesaplandigi
-    }
-    with _lock:
-        _bt_cache["data"]        = result
-        _bt_cache["computed_at"] = result["computed_at"]
-    logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
-                result["al"]["count"], result["sat"]["count"])
-    # Diske kaydet — restart sonrası anında yüklenir (atomic write, DEV2-172 bulgusu)
-    try:
-        _atomic_write_json(_BT_DISK_PATH, result)
-        logger.info("Backtest diske kaydedildi: %s", _BT_DISK_PATH)
-    except Exception as e:
-        logger.warning("Backtest disk yazma hatası: %s", e)
+    return signal_from_indicators(
+        int(supertrend.iloc[i]), float(adx.iloc[i]),
+        float(di_plus.iloc[i]), float(di_minus.iloc[i]),
+        float(ema12.iloc[i]), float(ema99.iloc[i]),
+        int(weekly_dir.iloc[i]))
 
 
 @app.context_processor
@@ -12695,6 +12338,48 @@ def _inject_og_image_url():
     return dict(og_image_url=url)
 
 
+_static_v_cache = {}
+
+
+def static_v(path):
+    """D-19: '/static/<path>?v=<md5[:8]>' — içerik özeti sürüm anahtarı (el ile yazılan
+    `?v=` kopyalarının yerine; şablon göçü C-26). Özet süreç başına bir kez hesaplanır
+    (deploy = restart → yeni içerik yeni özet). Dosya yoksa/yol static dışına çıkıyorsa
+    sürümsüz yol döner, istek hata vermez."""
+    path = str(path or "").lstrip("/")
+    if path.startswith("static/"):
+        path = path[len("static/"):]
+    hit = _static_v_cache.get(path)
+    if hit is not None:
+        return hit
+    url = "/static/" + path
+    try:
+        root = os.path.realpath(app.static_folder)
+        full = os.path.realpath(os.path.join(root, path))
+        if full.startswith(root + os.sep) and os.path.isfile(full):
+            with open(full, "rb") as fh:
+                url += "?v=" + hashlib.md5(fh.read()).hexdigest()[:8]
+    except Exception as e:
+        logger.warning("static_v(%s): %s", path, e)
+    _static_v_cache[path] = url
+    return url
+
+
+app.jinja_env.globals["static_v"] = static_v
+
+
+@app.context_processor
+def _inject_bp_rules():
+    """D-19: business_rules eşikleri tek JSON → şablonda
+    `<script>window.BP_RULES = {{ bp_rules|tojson }};</script>` (göç C-26)."""
+    try:
+        from business_rules import BP_RULES
+    except Exception as e:
+        logger.warning("_inject_bp_rules: %s", e)
+        BP_RULES = {}
+    return dict(bp_rules=BP_RULES)
+
+
 @app.route("/sinyaller")
 def redirect_sinyaller():
     return redirect("/tarama", 301)
@@ -12705,23 +12390,6 @@ def sinyal_performans():
     # CPO-1585 İş 1: sayfa /tarama'ya birlestirildi, eski bookmark/backlink
     # 404 yemesin diye decorator kaldı, govde kalici redirect'e cevrildi.
     return redirect("/tarama", code=301)
-
-
-@app.route("/api/backtest")
-def api_backtest():
-    with _lock:
-        bt = _bt_cache.get("data")
-    if not bt:
-        return safe_json({"status": "computing", "message": "Backtest hesaplanıyor..."})
-    return safe_json(bt)
-
-
-@app.route("/api/backtest/run", methods=["POST"])
-@limiter.limit("1 per 30 minutes")
-def api_backtest_run():
-    require_admin()
-    threading.Thread(target=run_backtest, daemon=True).start()
-    return jsonify({"status": "started"})
 
 
 @app.route("/nasdaq")
@@ -12782,78 +12450,12 @@ def sektor():
     return redirect("/sektor-harita", 301)
 
 
-def _compute_sector_heatmap():
-    """Sektör bazlı AL/SAT/BEKLE toplamı + skor + ort. RVOL — /sektor-harita
-    (SSR) ve /api/sector-heatmap (canlı JS) tarafından ortak kullanılır
-    (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
-    with _lock:
-        stocks = list(_cache["data"])
-        upd = _cache.get("updated_at")
-    sec_map = {}
-    for s in stocks:
-        tk = s.get("ticker", "")
-        if tk == "XU030":
-            continue
-        sec = s.get("sector") or _get_sector(tk)
-        if sec not in sec_map:
-            sec_map[sec] = {"al": 0, "sat": 0, "bekle": 0, "premium": 0, "rvol_vals": []}
-        d = sec_map[sec]
-        sig = s.get("signal", "BEKLE")
-        if sig == "AL":
-            d["al"] += 1
-        elif sig == "SAT":
-            d["sat"] += 1
-        else:
-            d["bekle"] += 1
-        # CPO-1668 #8: JS'in ⭐ Hacim Onaylı rozeti (pill-prem, sec.premium.length)
-        # is_premium'a bağlı ama SSR bunu hiç toplamıyordu — ilk boyada rozet
-        # eksik kalıp JS re-render'da "beliriyordu".
-        if s.get("is_premium"):
-            d["premium"] += 1
-        rv = s.get("rvol")
-        if rv is not None:
-            d["rvol_vals"].append(float(rv))
-    result = []
-    for name, d in sec_map.items():
-        total = d["al"] + d["sat"] + d["bekle"]
-        score = round((d["al"] - d["sat"]) / total * 100) if total > 0 else 0
-        rvol_vals = d["rvol_vals"]
-        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
-        result.append({"name": name, "al": d["al"], "sat": d["sat"], "bekle": d["bekle"],
-                        "total": total, "score": score, "avg_rvol": avg_rvol,
-                        "premium": d["premium"]})
-    # CPO-1668 #7: JS'in tiebreak'iyle (b.score - a.score || a.name.localeCompare(b.name,'tr'))
-    # AYNI ikincil sıralama — eskiden eşit skorlu sektörler için tiebreak yoktu,
-    # Python dict insertion-order'a düşüyordu; JS yüklenince eşit skorlu kartlar
-    # ad-alfabetik sıraya "atlıyordu" (görünür yer değiştirme). Çıplak string
-    # karşılaştırması Unicode kod noktası sırasına düşer ve "İlaç/Sağlık" (tek
-    # İ-baslayan sektör) gibi adları TR alfabesindeki gerçek yerine (H-K arası)
-    # değil en sona koyar (İ'nin kod noktası Z'den büyük) — küçük, sabit bir TR
-    # alfabe tablosuyla gerçek collation taklit ediliyor. locale.setlocale()
-    # KULLANILMIYOR (process-global, gevent'te thread-safe değil, VPS'te
-    # tr_TR.UTF-8 kurulu olmayabilir).
-    _tr_order_str = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
-    _tr_order = {ch: i for i, ch in enumerate(_tr_order_str)}
-
-    def _tr_sort_key(name):
-        return [_tr_order.get(ch, 1000 + ord(ch)) for ch in name]
-
-    result.sort(key=lambda x: (-x["score"], _tr_sort_key(x["name"])))
-    return result, upd
-
-
 @app.route("/sektor-harita")
 def sektor_harita():
-    # CPO-1587 Faz 2: sektör sayısı az olduğu için tamamı SSR context'e geçiliyor
-    # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
-    ssr_sectors, ssr_updated_at = _compute_sector_heatmap()
-    return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at)
-
-
-@app.route("/api/sector-heatmap")
-def api_sector_heatmap():
-    result, updated_at = _compute_sector_heatmap()
-    return safe_json({"sectors": result, "updated_at": updated_at})
+    # D-52: C-29 şablonu yalnız ısı haritası bağlamını tüketir (ssr_sectors/ssr_updated_at kalktı).
+    return render_template("sektor_harita.html",
+                           **_heatmap_ssr_context(),   # heatmap / heatmap_groups / heatmap_tiles
+                           heatmap_og_image=_heatmap_og_image())   # D-54: og:image (yoksa None)
 
 
 # ── F12: Sektör Karşılaştırma ─────────────────────────────────────────────────
@@ -12900,58 +12502,6 @@ def api_sektor_summary():
     return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
 
 
-@app.route("/api/sektor-compare")
-@limiter.limit("30 per minute")
-def api_sektor_compare():
-    """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
-    selected = request.args.getlist("s")
-    if not selected:
-        return safe_json({"ok": False, "error": "s parametresi gerekli"}), 400
-    # bug-hunt r93: dedup yoktu -- ayni sektor tekrar tekrar (?s=X&s=X&s=X) gonderilirse
-    # renderCompare() ayni sektoru N ayri sutunda (farkli accent renkleriyle) tekrar ciziyordu.
-    selected = list(dict.fromkeys(s.strip() for s in selected))[:3]  # max 3 sektor, dedup sira-koruyarak
-    with _lock:
-        stocks = list(_cache["data"])
-    sec_map = _build_sector_map(stocks)
-    # bug-hunt r86: /api/karsilastir'deki tickers whitelist deseniyle tutarli
-    # defense-in-depth -- dogrulanmamis sec_name JSON yanitina aynen yaziliyordu.
-    selected = [s for s in selected if s in sec_map]
-    if not selected:
-        return safe_json({"ok": False, "error": "geçerli sektör bulunamadı"}), 400
-    result = {}
-    for sec_name in selected:
-        items = sec_map.get(sec_name, [])
-        al = [s for s in items if s.get("signal") == "AL"]
-        sat = [s for s in items if s.get("signal") == "SAT"]
-        bkl = [s for s in items if s.get("signal") == "BEKLE"]
-        total = len(items)
-        score = round((len(al) - len(sat)) / total * 100) if total > 0 else 0
-        rvol_vals = [float(s["rvol"]) for s in items if s.get("rvol") is not None]
-        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
-        avg_chg = None
-        chg_vals = [float(s["change_pct"]) for s in items if s.get("change_pct") is not None]
-        if chg_vals:
-            avg_chg = round(sum(chg_vals) / len(chg_vals), 2)
-        def _stock_row(s):
-            return {
-                "ticker": s.get("ticker"), "name": s.get("name", ""),
-                "signal": s.get("signal", "BEKLE"),
-                "price": s.get("price"), "change_pct": s.get("change_pct"),
-                "rvol": s.get("rvol"),
-            }
-        result[sec_name] = {
-            "name": sec_name,
-            "found": sec_name in sec_map,  # DEV2-r4-input-edge: bilinmeyen/case-mismatch sektor artik ayirt edilebilir
-            "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
-            "score": score, "avg_rvol": avg_rvol, "avg_chg": avg_chg,
-            "stocks": sorted([_stock_row(s) for s in items],
-                             key=lambda x: (x["signal"] != "AL", x["signal"] != "SAT",
-                                            -(float(x["rvol"] or 0)))),
-        }
-    return safe_json({"compare": result, "selected": selected,
-                      "updated_at": _cache.get("updated_at")})
-
-
 # T4.2 (BIRLESTIR): /sektor-karsilastir sektor_harita.html'e ikinci tab olarak
 # tasindi (ayni /api/sektor-summary + /api/sektor-compare veri kaynagini
 # kullaniyordu, ayri sayfa gereksizdi). 301 hedefi ?tab=compare ile Karsilastir
@@ -12963,29 +12513,6 @@ def sektor_karsilastir():
     if qs:
         target += "&" + qs
     return redirect(target, code=301)
-
-
-def _overlay_live_prices(stocks):
-    """CPO-1632 fix: bilanco/temettu takvimi cache'leri 12s TTL'li yfinance
-    hesaplamasi anindaki fiyati donduruyordu — hesaplama genelde seans
-    ACILISINDA (bist30-refresh baslangicinda) tetiklendigi icin buyuk gun-ici
-    hareketlerde ana /api/data fiyatindan %10'a varan sapma olusuyordu.
-    yfinance tarih/donem alanlari degismez oldugu icin cache TTL'i aynen
-    kalir; sadece sunum aninda fiyat/sinyal _cache'ten (zaten 90s'de bir
-    disk'ten tazelenen ana snapshot) ucuza overlay edilir, yfinance
-    cagrisi gerekmez."""
-    with _lock:
-        live = {s["ticker"]: s for s in _cache["data"]}
-    out = []
-    for s in stocks:
-        live_s = live.get(s.get("ticker"))
-        if live_s:
-            s = dict(s)
-            s["price"]      = live_s.get("price", s.get("price"))
-            s["signal"]     = live_s.get("signal", s.get("signal"))
-            s["is_premium"] = live_s.get("is_premium", s.get("is_premium"))
-        out.append(s)
-    return out
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
@@ -13024,7 +12551,9 @@ def _load_earnings_cache_from_disk():
             return
         with open(_EARNINGS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
-        if not isinstance(data, dict) or "periods" not in data:
+        if isinstance(data, dict) and "periods" in data and "estimates" not in data:
+            data = _earnings_flat_from_periods(data)   # D-24 öncesi disk biçimi (tek seferlik)
+        if not isinstance(data, dict) or "estimates" not in data:
             return
         _earnings_cache["data"] = data
         _earnings_cache["ts"]   = current_mtime
@@ -13032,32 +12561,16 @@ def _load_earnings_cache_from_disk():
     except Exception as e:
         logger.warning("_load_earnings_cache_from_disk hatası: %s", e)
 
-# BIST'te finansal sonuçlar genellikle şu dönemlerde açıklanır:
-# Q4 (Ekim-Aralık bilanços): Mart-Nisan
-# Q1 (Ocak-Mart bilanços):   Mayıs ortası
-# Q2/H1 (Nisan-Haziran):     Ağustos-Eylül
-# Q3 (Temmuz-Eylül):         Ekim-Kasım
-#
-# CPO-DEV2-048 (21.08): aralıklar çakışmasız + bitişik olacak şekilde düzeltildi
-# (eski hâlde Q4 2025/Q1 2026 arası 47 gün çakışıyordu, Q1→Q2 ve Q2→Q3 arası
-# haftalarca boşluk vardı — bir ticker'ın yfinance tarihi 2 döneme birden
-# girebiliyor ya da hiçbirine girmeyip kayboluyordu). Q3 2026 → Q4 2026 (Yıllık)
-# arasındaki boşluk (Aralık-Şubat) kasıtlı bırakıldı — bu dönemde BIST'te
-# tipik olarak bilanço açıklaması olmuyor (bkz. yukarıdaki sezon notu); bu
-# boşluğa denk gelen kesin bir yfinance tarihi olursa _earnings_refresh_impl
-# onu en yakın gelecek döneme (Q4 2026 Yıllık) düşürür, kaybolmaz.
-# CPO-1678: bu tarihler SPK II-14.1 teblig gün-sayısından TÜRETİLMİYOR — geçmiş
-# KAP bildirim emsaline göre elle kalibre edilmiş TAHMİNdir (Q1/Q4-yıllık lag
-# deseninden enterpole edildi). İleride KAP'tan gerçek bildirim tarihi
-# çekilebilirse bu tablo tamamen emekli olmalı.
-_BILANCO_PERIODS = [
-    # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
-    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-08", "2025 yıl sonu bilanço açıklamaları (tahmini)"),
-    ("Q1 2026",          "2026-05-09", "2026-07-08", "2026 1. çeyrek sonuçları (tahmini)"),
-    ("Q2 2026 (H1)",     "2026-08-08", "2026-10-07", "2026 ilk yarıyıl sonuçları (tahmini)"),
-    ("Q3 2026",          "2026-11-08", "2027-01-07", "2026 3. çeyrek sonuçları (tahmini)"),
-    ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları (tahmini)"),
-]
+def _earnings_flat_from_periods(data):
+    """D-24 öncesi `last_earnings_cache.json` ({"periods":[{stocks:[{ticker,date}]}]}) ->
+    düz {"estimates": {T: tarih}}; "yaklaşık" satırları tarih değildir, taşınmaz."""
+    est = {}
+    for p in data.get("periods") or []:
+        for s in p.get("stocks") or []:
+            d = s.get("date")
+            if s.get("ticker") and d and re.match(r"^\d{4}-\d{2}-\d{2}$", d):
+                est[s["ticker"]] = d
+    return {"estimates": est, "updated_at": data.get("updated_at")}
 
 def _do_earnings_refresh():
     """Bilanço takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
@@ -13076,11 +12589,6 @@ def _do_earnings_refresh():
 def _earnings_refresh_impl():
     """Gerçek yfinance çağrılarını yapar, cache'i günceller."""
     now = time.time()
-
-    # Mevcut sinyal datasını al
-    with _lock:
-        stocks = list(_cache["data"])
-    sig_map = {s["ticker"]: s for s in stocks}
 
     # Her hisse için yfinance calendar dene (bazı hisseler için gerçek tarih döner)
     yf_dates = {}   # ticker → date_str
@@ -13106,84 +12614,11 @@ def _earnings_refresh_impl():
             pass
         time.sleep(0.1)
 
-    # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
-    today_str = datetime.now(_TZ_TR).date().isoformat()
-
-    # CPO-DEV2-048: ticker-merkezli TEK-atama modeli — eski dönem-merkezli döngü
-    # her ticker'ı bağımsız her döneme karşı test ediyordu; aralıklar çakışıyor/
-    # boşluk bırakıyordu ve "yaklaşık" tickerlar HER aktif dönemde tekrar
-    # ediyordu (186 ticker'ın 3 dönemde birebir aynı kümeyle görünmesinin nedeni
-    # buydu). Artık her ticker'a önce tek bir period index atanıyor, sonra
-    # dönemler bu atamaya göre dolduruluyor — bir ticker asla 2 dönemde aynı
-    # anda görünmüyor, "Toplam" sayacı kart sayısıyla birebir eşleşiyor.
-    active_periods = [p for p in _BILANCO_PERIODS if p[2] >= today_str]  # p=(qlabel,start,end,desc)
-
-    def _nearest_future_period_idx():
-        future = [(i, p[1]) for i, p in enumerate(active_periods) if p[1] >= today_str]
-        if future:
-            return min(future, key=lambda x: x[1])[0]
-        return len(active_periods) - 1 if active_periods else None
-
-    # assigned[ticker] = (period_idx, date_label)
-    assigned = {}
-    for t in BIST100:
-        if t == "XU030":
-            continue
-        yf_date = yf_dates.get(t)
-        if yf_date:
-            # Kesin tarih: bu aralığa giren TEK dönemi bul (artık çakışmasız → en fazla 1 eşleşme)
-            match_idx = next((i for i, p in enumerate(active_periods) if p[1] <= yf_date <= p[2]), None)
-            if match_idx is None:
-                # Hiçbir aktif döneme girmiyor (geçmişte kaldı ya da sezon-dışı
-                # boşluğa denk geldi) → en yakın GELECEK döneme düş, kaybolmasın
-                match_idx = _nearest_future_period_idx()
-            if match_idx is not None:
-                assigned[t] = (match_idx, yf_date)
-        else:
-            # Yaklaşık: TEK bir varsayılan dönem — güncel dönem varsa o, yoksa en yakın gelecek
-            cur_idx = next((i for i, p in enumerate(active_periods) if p[1] <= today_str <= p[2]), None)
-            if cur_idx is None:
-                cur_idx = _nearest_future_period_idx()
-            if cur_idx is not None:
-                assigned[t] = (cur_idx, "yaklaşık")
-
-    result_periods = []
-    for i, (qlabel, start, end, desc) in enumerate(active_periods):
-        stocks_in_period = []
-        for t, (pidx, date_label) in assigned.items():
-            if pidx != i:
-                continue
-            # CPO-1647: sig_map'te yoksa (ör. DSTKF/TRALT — <120 gün geçmişi
-            # olan yeni BIST30 üyeleri, analyze() 120 bar eşiğinin altında
-            # sessizce None döner) eski kod {} default'u üzerinden uydurma
-            # "BEKLE"/Yatay basıyordu. Artık dürüstçe None — frontend "Veri
-            # bekleniyor" gösteriyor, sahte bir sinyal iddia etmiyor.
-            sig_data = sig_map.get(t)
-            stocks_in_period.append({
-                "ticker":      t,
-                "name":        STOCK_NAMES.get(t, t),
-                "signal":      sig_data.get("signal") if sig_data else None,
-                "price":       sig_data.get("price") if sig_data else None,
-                "is_premium":  sig_data.get("is_premium", False) if sig_data else False,
-                "date":        date_label,
-                "kap_url":     kap_url_for(t),
-            })
-        # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
-        stocks_in_period.sort(key=lambda x: (
-            0 if x["signal"] == "AL" else 1 if x["signal"] == "SAT" else 2,
-            x["ticker"]
-        ))
-        result_periods.append({
-            "label":       qlabel,
-            "start":       start,
-            "end":         end,
-            "description": desc,
-            "stocks":      stocks_in_period,
-            "is_current":  start <= today_str <= end,
-        })
-
+    # D-24: dönem kovalaması (_BILANCO_PERIODS) kalktı. Dış veri tarihi düz tutulur;
+    # /api/takvim onu her zaman date_kind="tahmini" gösterir, geçmişte kalanı ve şirketin
+    # raporu zaten açıklanmışsa takvim.bilanco() eler.
     data = {
-        "periods":    result_periods,
+        "estimates":  yf_dates,
         "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
     }
     with _lock:
@@ -13193,7 +12628,7 @@ def _earnings_refresh_impl():
     _rebuild_earnings_warning_lookup()
     # CPO-1180 K2: web worker'ların disk-reload ile okuyabilmesi için diske yaz
     _save_earnings_cache_to_disk()
-    logger.info("_earnings_refresh_impl: tamamlandi (%d donem)", len(result_periods))
+    logger.info("_earnings_refresh_impl: tamamlandi (%d tahmini tarih)", len(yf_dates))
 
 
 # Faz 1 #5: ticker → upcoming earnings flat lookup (O(1) erişim)
@@ -13210,19 +12645,13 @@ def _rebuild_earnings_warning_lookup():
             return
         today = datetime.now(_TZ_TR).date()
         new_lookup = {}
-        for period in cached.get("periods", []):
-            for s in period.get("stocks", []):
-                d = s.get("date")
-                t = s.get("ticker")
-                if not t or not d or d == "yaklaşık":
-                    continue
-                try:
-                    e_date = datetime.strptime(d, "%Y-%m-%d").date()
-                    delta = (e_date - today).days
-                    if 0 <= delta <= 7:
-                        new_lookup[t] = {"date": d, "days_ahead": delta}
-                except Exception:
-                    continue
+        for t, d in (cached.get("estimates") or {}).items():
+            try:
+                delta = (datetime.strptime(d, "%Y-%m-%d").date() - today).days
+            except (TypeError, ValueError):
+                continue
+            if 0 <= delta <= 7:
+                new_lookup[t] = {"date": d, "days_ahead": delta}
         with _earnings_warning_lock:
             _earnings_warning_lookup.clear()
             _earnings_warning_lookup.update(new_lookup)
@@ -13263,246 +12692,131 @@ def get_earnings_data():
     # Stale cache varsa onu dön; yoksa boş döndür (loading state)
     if cached:
         return cached
-    return {"periods": [], "updated_at": "—"}
-
-
-@app.route("/bilanco-takvimi")
-def bilanco_takvimi():
-    return render_template("bilanco_takvimi.html")
+    return {"estimates": {}, "updated_at": "—"}
 
 
 @app.route("/api/bilanco-takvimi")
-@limiter.limit("60 per minute")  # r37 bug-hunt: kardeş /api/bilanco-mini ile aynı limit, eksikti
+@limiter.limit("60 per minute")
 def api_bilanco_takvimi():
-    data = get_earnings_data()
-    if data.get("periods"):
-        data = dict(data)
-        data["periods"] = [
-            {**p, "stocks": _overlay_live_prices(p.get("stocks", []))}
-            for p in data["periods"]
-        ]
-    return safe_json(data)
+    """D-24: dönem kovalamalı eski uç kalktı; tek kaynak /api/takvim."""
+    return redirect("/api/takvim", code=301)
 
 
 @app.route("/api/bilanco-mini")
 @limiter.limit("60 per minute")
 def api_bilanco_mini():
-    """Ana sayfa mini bilanço widget — yfinance çağrısı yok, sadece dönem bilgisi."""
-    today_dt  = datetime.now(_TZ_TR).date()
-    today_str = today_dt.isoformat()
-    items     = []
-    for qlabel, start, end, desc in _BILANCO_PERIODS:
-        if end < today_str:
-            continue
-        start_dt      = date.fromisoformat(start)
-        end_dt        = date.fromisoformat(end)
-        days_to_end   = (end_dt   - today_dt).days
-        days_to_start = (start_dt - today_dt).days
-        if today_dt >= start_dt:
-            status     = "active"
-            days_label = f"{days_to_end} gün kaldı"
-        else:
-            status     = "upcoming"
-            days_label = f"{days_to_start} gün sonra"
-        items.append({
-            "label":      qlabel,
-            "start":      start,
-            "end":        end,
-            "desc":       desc,
-            "status":     status,
-            "days_label": days_label,
-        })
-        if len(items) >= 3:
-            break
-    return safe_json({"periods": items})
+    """Ana sayfa mini bilanço widget'ı — D-24: doğrulanmış yasal son günlerden (takvim.DONEMLER)."""
+    return safe_json({"periods": _takvim.donem_ozeti(datetime.now(_TZ_TR).date())[:3]})
 
 
-# ── Temettü Takvimi ───────────────────────────────────────────────────────────
-# CPO-1457 madde 3: bilanco-takvimi'ndeki disk-cache köprü deseni (CPO-1180 K2)
-# birebir tekrarlanıyor — REFRESH_WORKER=1 (bist30-refresh.service) hesaplar ve
-# diske yazar, REFRESH_WORKER=web worker'lar yfinance'e hiç gitmeden diskten okur.
-_dividend_cache       = {"data": None, "ts": 0}
-_DIVIDEND_TTL         = 3600 * 12   # 12 saat
-_dividend_refreshing  = False         # arka plan yenileme kilidi
-
-_DIVIDEND_CACHE_DISK_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "last_dividend_cache.json")
+# ── Takvim (D-24) ─────────────────────────────────────────────────────────────
+# Tek kaynak takvim.build(): bilanço (dış veri tahmini "tahmini" + açıklanan rapor tarihi),
+# temettü (kâr payı dağıtım bildirimleri — D-40a0 kaydı data/kap_fin/<T>.json), makro ve
+# yasal son günler (resmi takvim). Eski yfinance temettü döngüsü (_dividend_refresh_impl:
+# yalnız BIST30, tutar = son ödeme, EREGL 15.12 "en geç başlama" tarihi) kalktı; D-40a0
+# kayıtları yoksa temettü boş kalır (uydurma yok).
+_TAKVIM_TTL = 300
+_takvim_cache = {"ts": 0.0, "day": None, "data": None}
 
 
-def _save_dividend_cache_to_disk():
-    """Temettü takvimi cache'ini diske yazar (hesaplayan process). _lock DIŞINDA çağrılmalı."""
-    try:
-        data = _dividend_cache.get("data")
-        if not data:
-            return   # empty-overwrite guard — restart sonrası diskteki geçerli veriyi silme
-        _atomic_write_json(_DIVIDEND_CACHE_DISK_PATH, data)
-    except Exception as e:
-        logger.warning("_save_dividend_cache_to_disk hatası: %s", e)
-
-
-def _load_dividend_cache_from_disk():
-    """Diskten temettü takvimi cache'ini yükler (web worker — yfinance yasak, CPO-558F)."""
-    try:
-        if not os.path.exists(_DIVIDEND_CACHE_DISK_PATH):
-            return
-        current_mtime = os.path.getmtime(_DIVIDEND_CACHE_DISK_PATH)
-        if _dividend_cache.get("ts") == current_mtime and _dividend_cache.get("data"):
-            return
-        with open(_DIVIDEND_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if not isinstance(data, dict) or "stocks" not in data:
-            return
-        _dividend_cache["data"] = data
-        _dividend_cache["ts"]   = current_mtime
-    except Exception as e:
-        logger.warning("_load_dividend_cache_from_disk hatası: %s", e)
-
-
-def _unwrap_yf_scalar(val):
-    """yfinance calendar alanları farklı tiplerde dönebilir (list[date], pandas Series/Index,
-    çıplak datetime.date) — CPO-1447'de aynı hata sınıfı yaşandı: tip kontrolsüz str()
-    ham repr üretip API'den kullanıcıya sızdı. Aynı unwrap zincirini burada da uyguluyoruz."""
-    if val is None:
-        return None
-    if hasattr(val, "iloc"):
-        val = val.iloc[0] if len(val) > 0 else None
-    elif isinstance(val, (list, tuple)):
-        val = val[0] if len(val) > 0 else None
-    if val is None:
-        return None
-    return str(val)[:10]
-
-
-def _do_dividend_refresh():
-    """Temettü takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
-    global _dividend_refreshing
-    if _dividend_refreshing:
-        return
-    _dividend_refreshing = True
-    try:
-        _dividend_refresh_impl()
-    except Exception as e:
-        logger.warning("_do_dividend_refresh: hata — %s", e)
-    finally:
-        _dividend_refreshing = False
-
-
-def _dividend_refresh_impl():
-    """Gerçek yfinance çağrılarını yapar, temettü cache'ini günceller.
-
-    yfinance'in "Ex-Dividend Date" calendar alanı ileri-projeksiyon garantisi
-    vermiyor (canlı doğrulandı: THYAO/GARAN'da bugünden ESKİ bir tarih dönebiliyor,
-    son gerçekleşmiş ex-div tarihini yansıtıyor) — bu yüzden sadece bugünden
-    SONRAKİ tarihler "yaklaşan" (next_ex_date) sayılır; geçmişte kalan tarih atılır,
-    gerçek geçmiş bilgi zaten `Ticker.dividends` serisinden (last_div_date) geliyor.
-    """
-    now = time.time()
-    today_str = datetime.now(_TZ_TR).date().isoformat()
-
+def _takvim_stocks():
     with _lock:
         stocks = list(_cache["data"])
-    sig_map = {s["ticker"]: s for s in stocks}
-
-    # KALICI ÜRÜN KARARI (CPO-1789, DEV-2043): temettü takvimi BIST30 ile
-    # sınırlı kalır. 217 hisseye genişletmek 2 yfinance çağrısı x 217 =
-    # ~7-8dk tek turda + ciddi rate-limit riski demek (bkz. DEV-1409 /
-    # bulk_refresh_also_yahoo_blocked emsali) — kapsam sabit, sayfa UI'si
-    # (title/h1/banner/"Takvimdeki Hisse" cipi) bu kararla tutarlı yazıldı.
-    sample_tickers = BIST30_LITERAL   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
-    result_stocks = []
-    for t in sample_tickers:
-        try:
-            tk  = yf.Ticker(t + ".IS")
-            cal = tk.calendar
-            next_ex = None
-            if cal is not None and isinstance(cal, dict):
-                next_ex = _unwrap_yf_scalar(cal.get("Ex-Dividend Date"))
-                if next_ex and next_ex <= today_str:
-                    next_ex = None
-
-            last_div_date   = None
-            last_div_amount = None
-            divs = tk.dividends
-            if divs is not None and len(divs) > 0:
-                last_amt = divs.iloc[-1]
-                if pd.notna(last_amt):
-                    last_div_date   = divs.index[-1].strftime("%Y-%m-%d")
-                    last_div_amount = round(float(last_amt), 4)
-
-            if next_ex or last_div_date:
-                # CPO-1647 ile aynı desen (bilanco-takvimi) — sig_map'te yoksa
-                # dürüstçe None, uydurma "BEKLE" yok.
-                sig_data = sig_map.get(t)
-                result_stocks.append({
-                    "ticker":          t,
-                    "name":            STOCK_NAMES.get(t, t),
-                    "signal":          sig_data.get("signal") if sig_data else None,
-                    "price":           sig_data.get("price") if sig_data else None,
-                    "is_premium":      sig_data.get("is_premium", False) if sig_data else False,
-                    "next_ex_date":    next_ex,
-                    "last_div_date":   last_div_date,
-                    "last_div_amount": last_div_amount,
-                    "kap_url":         kap_url_for(t),
-                })
-        except Exception:
-            pass
-        time.sleep(0.1)
-
-    # Sıralama: yaklaşan ex-div tarihi olanlar önce (en yakın ilk),
-    # sonra sadece geçmiş temettü verisi olanlar (en yeni ilk)
-    with_next    = sorted((s for s in result_stocks if s["next_ex_date"]),
-                          key=lambda s: s["next_ex_date"])
-    without_next = sorted((s for s in result_stocks if not s["next_ex_date"]),
-                          key=lambda s: s["last_div_date"] or "", reverse=True)
-    result_stocks = with_next + without_next
-
-    data = {
-        "stocks":     result_stocks,
-        "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
-    }
-    with _lock:
-        _dividend_cache["data"] = data
-        _dividend_cache["ts"]   = now
-    _save_dividend_cache_to_disk()
-    logger.info("_dividend_refresh_impl: tamamlandi (%d hisse)", len(result_stocks))
+    return [s for s in stocks if s.get("ticker") and s["ticker"] not in INDEX_TICKERS]
 
 
-def get_dividend_data():
-    """Temettü takvimi verisi — cache'den döner, stale ise arka planda yeniler."""
-    now = time.time()
-    cached = _dividend_cache.get("data")
-    ts     = _dividend_cache.get("ts", 0)
+def _takvim_payload():
+    today = datetime.now(_TZ_TR).date()
+    c = _takvim_cache
+    if c["data"] is not None and c["day"] == today and time.time() - c["ts"] < _TAKVIM_TTL:
+        return c["data"]
+    stocks = _takvim_stocks()
+    uni = [s["ticker"] for s in stocks]
+    fiyat_tarihi = None
+    try:   # verim paydası: gösterilen kapanışın tarihi (bulunamazsa sayfa tarih yazmaz)
+        upd = _data_quality_snapshot(stocks).get("updated_at") if stocks else None
+        if upd:
+            fiyat_tarihi = datetime.strptime(upd[:10], "%d.%m.%Y").date().isoformat()
+    except Exception as e:
+        logger.debug("_takvim_payload: fiyat tarihi okunamadi: %s", e)
+    data = _takvim.build(
+        uni, STOCK_NAMES, _takvim.load_kap_records(uni),
+        (get_earnings_data().get("estimates") or {}),
+        {s["ticker"]: s.get("price") for s in stocks}, today,
+        fiyat_tarihi=fiyat_tarihi, updated_at=datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"))
+    c.update(ts=time.time(), day=today, data=data)
+    return data
 
-    if cached and (now - ts) < _DIVIDEND_TTL:
-        return cached
 
-    if os.environ.get("REFRESH_WORKER") == "web":
-        _load_dividend_cache_from_disk()
-        cached = _dividend_cache.get("data")
-        if cached:
-            return cached
-    elif not _dividend_refreshing:
-        threading.Thread(target=_do_dividend_refresh, daemon=True,
-                         name="dividend-refresh").start()
+@app.route("/api/takvim")
+@limiter.limit("60 per minute")
+def api_takvim():
+    return safe_json(_takvim_payload())
 
-    if cached:
-        return cached
-    return {"stocks": [], "updated_at": "—"}
+
+def _takvim_page_ready():
+    """takvim.html (C-36) yayında mı? Arka uç önce deploy edilirse eski sayfalar
+    301 yerine kendi şablonlarıyla kalır, /takvim 404 döner (500 yok)."""
+    try:
+        app.jinja_env.get_template("takvim.html")
+        return True
+    except Exception:
+        return False
+
+
+@app.route("/takvim")
+def takvim_page():
+    if not _takvim_page_ready():
+        abort(404)
+    today = datetime.now(_TZ_TR).date()
+    try:
+        payload = _takvim_payload()
+        ctx = _takvim.ssr_context(payload, {s["ticker"]: s for s in _takvim_stocks()}, today)
+    except Exception as e:   # veri katmanı düşerse sayfa boş durumla açılır (JS /api/takvim'i dener)
+        logger.warning("takvim_page: SSR bağlamı kurulamadı: %s", e)
+        ctx = None
+    return render_template("takvim.html", takvim=ctx)
+
+
+@app.route("/bilanco-takvimi")
+def bilanco_takvimi():
+    if _takvim_page_ready():
+        return redirect("/takvim?tur=bilanco", code=301)
+    return render_template("bilanco_takvimi.html")
 
 
 @app.route("/temettu-takvimi")
 def temettu_takvimi():
+    if _takvim_page_ready():
+        return redirect("/takvim?tur=temettu", code=301)
     return render_template("temettu_takvimi.html")
 
 
 @app.route("/api/temettu-takvimi")
 @limiter.limit("60 per minute")
 def api_temettu_takvimi():
-    data = get_dividend_data()
-    if data.get("stocks"):
-        data = dict(data)
-        data["stocks"] = _overlay_live_prices(data["stocks"])
-    return safe_json(data)
+    """Eski biçim (hisse sayfası Temel sekmesi temettü kartı okur), D-24'ten beri
+    aynı kaynaktan: siradaki açıklanmış ödeme + son 24 ayda yapılmış son ödeme, tüm evren."""
+    stocks = _takvim_stocks()
+    by_t = {s["ticker"]: s for s in stocks}
+    today = datetime.now(_TZ_TR).date()
+    oz = _takvim.temettu_ozeti(_takvim.load_kap_records(list(by_t)), today)
+    rows = []
+    for t, o in oz.items():
+        nx, last, s = o["next"], o["last"], by_t.get(t) or {}
+        rows.append({
+            "ticker": t, "name": STOCK_NAMES.get(t, t),
+            "signal": s.get("signal"), "price": s.get("price"), "is_premium": s.get("is_premium", False),
+            "next_ex_date": nx["ex"] if nx else None,
+            "next_pay_date": nx["pay"] if nx else None,
+            "next_div_amount": nx["brut"] if nx else None,
+            "last_div_date": last["pay"] if last else None,
+            "last_div_amount": last["brut"] if last else None,
+            "kap_url": kap_url_for(t),
+        })
+    rows.sort(key=lambda r: (r["next_ex_date"] is None, r["next_ex_date"] or "",
+                             "" if r["next_ex_date"] else r["last_div_date"] or ""))
+    return safe_json({"stocks": rows, "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M")})
 
 
 @app.route("/api/market-news")
@@ -13564,18 +12878,8 @@ def api_market_news():
             source = "explanation"
 
         if not text:
-            # Haber cache yok → on-demand kuyruğuna ekle (eğer başarısız cache yoksa
-            # VE gerçek kullanıcıysa — CPO-1320: izleme/QA trafiği bu kuyruğu asla
-            # beslemez, Gemini çağrısı tetiklemez, algoritmik fallback'e düşer).
-            failed_recently = news_c and news_c.get("failed") and \
-                              (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
-            if not failed_recently and not is_synthetic_client(request):
-                with _news_queue_lock:
-                    _news_fetch_queue[t] = ("market_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
-                # CPO-1206 §4 — bu üretici önceden _news_queue_stats'e hiç dokunmuyordu,
-                # health.news_queue "toplam eklenen" sayısı bu yüzden eksik ölçüyordu.
-                _news_queue_stats["last_added_ts"] = time.time()
-                _news_queue_stats["total_added"] += 1
+            # D-22b: Gemini üretimi kaldırıldı — haber cache yoksa doğrudan
+            # algoritmik fallback'e düşülür, doldurulacak bg kuyruk yok.
 
             # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
             if sig == "AL":
@@ -13667,86 +12971,96 @@ def api_market_news():
     })
 
 
+def _acct_code_request():
+    """D-50: kod isteği (ortak gövde). Kod her adrese aynı biçimde gider: kayıtlıysa giriş,
+    değilse hesap açılışı -> yanıt adresin kayıtlı olup olmadığını söylemez."""
+    data = _acct_body()
+    r = _acct.request_code(data.get("email"), data.get("kvkk"), get_remote_address())
+    if r.code:
+        email = _accounts.normalize_email(data.get("email"))
+        rec = _acct.subs.load().get(email)
+        unsub = (f"https://borsapusula.com/unsubscribe/{rec['token']}"
+                 if isinstance(rec, dict) and rec.get("token") else None)
+        if not send_email(email, "BorsaPusula giriş kodun", _build_code_email(r.code, unsub), unsub):
+            _acct.cancel_code(email)
+            logger.error("Hesap kodu e-postasi gonderilemedi: %s", _mask_email(email))
+            return _acct_json({"ok": False, "error": "mail_failed", "message": _accounts.MSG["mail_failed"]}, 503)
+    return _acct_result(r)
+
+
+@app.route("/api/auth/code", methods=["POST"])
+@limiter.limit("20 per hour")
+@_acct_api(login=False)
+def api_auth_code():
+    """D-50 (O24=A): e-posta + KVKK onayı -> 6 haneli kod (10 dk, tek kullanım)."""
+    return _acct_code_request()
+
+
 @app.route("/api/recognize", methods=["POST"])
 @limiter.limit("10 per hour")
+@_acct_api(login=False)
 def api_recognize():
-    """OTP/magic-link giriş isteği (CPO-DEV2-034 tasarımı) — P0-SEC-1'in kalıcı
-    fix'i (CPO-DEV2-033'te GEÇİCİ 503/200 devre-dışı bırakma buradaydı).
+    """Eski "üye girişi" ucu (CPO-DEV2-034 magic-link) D-50'de hesap kodu akışına bağlandı:
+    ikinci giriş sistemi yok, URL'de sır taşıyan bağlantı da artık gönderilmez. Sitede
+    tüketicisi yok; gövde /api/auth/code ile aynı ({email, kvkk:true})."""
+    return _acct_code_request()
 
-    Eski davranış sadece {"email":...} alıp sahiplik kanıtı olmadan doğrudan
-    1 yıllık bp_sub cookie set ediyordu -> bir kurbanın e-postasını bilen
-    herkes o hesabın alarm ayarlarını görüp/değiştirebiliyordu (hesap ele
-    geçirme). Yeni akış: e-posta kayıtlıysa 15dk geçerli tek-kullanımlık
-    magic-link gönderilir, cookie yalnız /api/recognize/confirm'de link
-    tıklanınca set edilir. User-enumeration'ı kapatmak için e-posta var/yok
-    ayrımı yapılmadan HER ZAMAN aynı jenerik mesaj dönülür (eski davranış
-    `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
-    data  = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        data = {}
-    email = (data.get("email") or "").strip().lower()
-    if not email or "@" not in email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
 
-    generic_resp = {
-        "ok": True,
-        "message": "Bu e-posta kayıtlıysa giriş bağlantısı gönderildi. Gelen kutunu kontrol et (15 dakika geçerli).",
-    }
+@app.route("/api/auth/verify", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api(login=False)
+def api_auth_verify():
+    """D-50: kod doğrulama -> 90 günlük oturum (bp_session HttpOnly + bp_li ipucu).
+    İsteğe bağlı `import` ilk girişte tarayıcı listesini hesaba birleştirir."""
+    data = _acct_body()
+    imp = data.get("import") if isinstance(data.get("import"), dict) else None
+    r = _acct.verify_code(data.get("email"), data.get("code"), get_remote_address(), imp)
+    resp, status = _acct_result(r)
+    if r.token:
+        _acct_set_cookies(resp, r.token)
+    return resp, status
 
-    if not _login_send_allowed(email):
-        # Rate-limit aşılsa bile aynı jenerik mesaj — enumeration sızdırmaz.
-        return safe_json(generic_resp)
 
-    with _sub_lock:
-        subs = _load_subscribers()
-        info = subs.get(email)
-        if info and info.get("active", True):
-            login_token = secrets.token_hex(20)
-            info["login_token"]   = login_token
-            info["login_expires"] = time.time() + 900
-            info["login_used"]    = False
-            _save_subscribers(subs)
-            login_url = f"https://borsapusula.com/api/recognize/confirm?t={login_token}"
-            unsub_url = f"https://borsapusula.com/unsubscribe/{info.get('token', '')}"
-            name = info.get("name")
-            # CPO-1608 madde 1: yanit kasitli olarak jenerik kaliyor (enumeration
-            # onlemi) ama SMTP hatasi artik loglaniyor — onceden fire-and-forget
-            # thread'in donus degeri hic kontrol edilmiyordu, hata sessizce kayboluyordu.
-            def _send_login_mail():
-                if not send_email(email, "🔑 BorsaPusula — Giriş Bağlantın",
-                                   _build_login_email(email, login_url, unsub_url, name=name), unsub_url):
-                    logger.error("Magic-link login maili gonderilemedi: %s", _mask_email(email))
-            threading.Thread(target=_send_login_mail, daemon=True).start()
-
-    return safe_json(generic_resp)
+@app.route("/api/auth/logout", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api(login=False)
+def api_auth_logout():
+    """D-50: oturumu sunucuda iptal eder; {all:true} hesabın tüm oturumlarını (tüm cihazlar)."""
+    tok = request.cookies.get(_ACCT_COOKIE, "")
+    email = _acct.session_email(tok)
+    if email and _acct_body().get("all") is True:
+        _acct.revoke_all(email)
+    elif tok:
+        _acct.revoke_session(tok)
+    resp, status = _acct_json({"ok": True})
+    _acct_clear_cookies(resp)
+    return resp, status
 
 
 @app.route("/api/recognize/confirm")
 @limiter.limit("60 per minute")
 def api_recognize_confirm():
-    """Magic-link tıklama hedefi — token'ı doğrular, tek kullanımlık cookie
-    verir. Süresi dolmuş/kullanılmış/geçersiz token → sessizce ana sayfaya
-    yönlendirir (kullanıcıya "üye girişi" formunu tekrar denemesi kalır)."""
+    """Eski magic-link tıklama hedefi (deploy anında en çok 15 dk geçerli bağlantılar için).
+    D-50: geçerli bağlantı artık bp_sub değil, sunucuda iptal edilebilir bp_session verir."""
     tok = (request.args.get("t") or "").strip()
-    if tok:
+    if tok and _acct:
+        target_email = None
         with _sub_lock:
             subs = _load_subscribers()
-            target_email = None
             for em, info in subs.items():
                 stored = info.get("login_token")
                 if stored and secrets.compare_digest(stored, tok):
-                    target_email = em
+                    if not info.get("login_used", True) and time.time() < info.get("login_expires", 0):
+                        info["login_used"] = True
+                        if not info.get("confirmed_at"):
+                            info["confirmed_at"] = _accounts.now_iso()
+                        _save_subscribers(subs)
+                        target_email = em
                     break
-            if target_email:
-                info    = subs[target_email]
-                expires = info.get("login_expires", 0)
-                used    = info.get("login_used", True)
-                if not used and time.time() < expires:
-                    info["login_used"] = True
-                    _save_subscribers(subs)
-                    resp = redirect("/?login=ok")
-                    resp.set_cookie("bp_sub", info.get("token", ""), max_age=31536000, samesite="Lax", secure=True, httponly=True)
-                    return resp
+        if target_email:
+            resp = redirect("/?login=ok")
+            _acct_set_cookies(resp, _acct.create_session(target_email))
+            return resp
     return redirect("/?login=expired")
 
 
@@ -13787,7 +13101,8 @@ def api_subscribe():
                 if follow_t in _sub_follow_set(rec):
                     return safe_json({"ok": True, "status": "already", "ticker": follow_t,
                                       "message": f"{follow_t}'yi zaten takip ediyorsun."})
-                if _ck and _tok and secrets.compare_digest(_ck, _tok):
+                # D-50: sahiplik = eski bp_sub çerezi YA DA aynı e-postanın kodla açılmış oturumu.
+                if (_ck and _tok and secrets.compare_digest(_ck, _tok)) or _acct_email() == email:
                     _add_follow(rec, follow_t)
                     _save_subscribers(subs)
                     return safe_json({"ok": True, "status": "added", "ticker": follow_t,
@@ -13815,6 +13130,11 @@ def api_subscribe():
         if email in subs:
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
+            if subs[email].get("account_v") == 1:
+                # D-50: bülten aboneliği yeniden istendi -> hesabın e-posta tercihleri açılır
+                subs[email]["notify"] = {"trend": True, "bulten": True}
+            if data.get("kvkk") is True and not subs[email].get("kvkk_consent_ts"):
+                subs[email]["kvkk_consent_ts"] = _accounts.now_iso()
             if follow_t:
                 _add_follow(subs[email], follow_t)
             subs[email]["subscribed_at"] = datetime.now(_TZ_TR).isoformat()
@@ -13844,13 +13164,21 @@ def api_subscribe():
             "subscribed_at": datetime.now(_TZ_TR).isoformat(),
             "name":          name,            # FAZ 3: kullanıcı adı
             "tickers":       [],
-            "follow":        [follow_t] if follow_t else [],   # D-P1-2509: takip listesi (`tickers` filtre, boş = hepsi)
             "active":        True,
             "level":         None,            # FAZ 4: yatırım deneyimi
             "freq":          None,            # FAZ 4: işlem sıklığı
             "segments":      [],              # FAZ 4: ilgi alanları
             "mail_pref":     "daily",         # FAZ 4: mail tercihi (daily|instant|premium|weekly)
             "profile_done":  False,           # FAZ 4: profil tamamlandı mı
+            # D-50 hesap alanları: bülten aboneliği = tüm değişimler (eski `tickers` boş davranışı),
+            # hisse sayfasından gelen kod izleme listesine yazılır. E-posta sahipliği kodla
+            # kanıtlanana kadar confirmed_at boş (D-38 çift onayı bu alana bağlanır).
+            "account_v":       1,
+            "watchlist":       [follow_t] if follow_t else [],
+            "portfolio":       {},
+            "notify":          {"trend": True, "bulten": True},
+            "confirmed_at":    None,
+            "kvkk_consent_ts": _accounts.now_iso() if data.get("kvkk") is True else None,
         }
         _save_subscribers(subs)
 
@@ -14028,32 +13356,143 @@ def api_profile():
     return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
 
 
-@app.route("/api/me")
+@app.route("/api/me", methods=["GET"])
+@limiter.limit("120 per minute")
 def api_me():
-    """Kullanıcı tanıma — token ile abonelik durumu sorgular."""
-    token = request.args.get("t") or request.cookies.get("bp_sub")
-    if not token:
-        return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
-    with _sub_lock:
-        subs = _load_subscribers()
-        for em, info in subs.items():
-            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
-                return _private_json({
-                    "ok":            True,
-                    "subscribed":    True,
-                    "email":         em,
-                    "name":          info.get("name", ""),
-                    "first_name":    (info.get("name", "").split()[0] if info.get("name") else ""),
-                    "profile_done":  bool(info.get("profile_done")),
-                    "mail_pref":     info.get("mail_pref", "daily"),
-                }, vary_cookie=True)
-    return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
+    """D-50: oturumdaki hesabın özeti (O25: ileride uygulama da aynı API'yi kullanır).
+    Oturum yoksa 200 + logged_in:false (sayfada konsol hatası olmasın). Eski `?t=` (URL'de
+    sır) ve bp_sub ile tanıma kalktı: tek tüketicisi bp-search.js HttpOnly bp_sub'ı okuyamadığı
+    için bu ucu zaten hiç çağırmıyordu (document.cookie'de görünmez)."""
+    anon = {"ok": False, "logged_in": False, "subscribed": False}
+    email = _acct_email()
+    if not email:
+        return _acct_json(anon)
+    try:
+        rec = _acct.account(email)
+    except _accounts.StoreError as e:
+        logger.error("D-50 depo hatasi: %s", e)
+        return _acct_json({"ok": False, "error": "store_error", "message": _accounts.MSG["store_error"]}, 503)
+    return _acct_json(_acct.me_view(email, rec) if rec else anon)
+
+
+@app.route("/api/me", methods=["DELETE"])
+@limiter.limit("10 per hour")
+@_acct_api()
+def api_me_delete(email):
+    """D-50 (KVKK silme hakkı): hesap kaydı, tüm oturumları ve bekleyen kodu silinir."""
+    _acct.delete_account(email)
+    resp, status = _acct_json({"ok": True})
+    _acct_clear_cookies(resp)
+    return resp, status
+
+
+def _acct_market_snapshot():
+    """Gün sonu satırları + BorsaPusula Skoru + son değişimler (/api/data ile aynı kaynak)."""
+    with _lock:
+        stocks = [s for s in _cache["data"] if s.get("ticker") and s.get("ticker") not in INDEX_TICKERS]
+        hs = dict(_financial_health_cache)
+    rows = {s["ticker"]: s for s in stocks}
+    bp = {t: ((e or {}).get("data") or {}).get("borsapusula_skoru") for t, e in hs.items()}
+    try:
+        asof = _data_quality_snapshot(stocks).get("updated_at") if stocks else None
+    except Exception:
+        asof = None
+    changes = _accounts.last_changes(_load_pending_changes_weekly(), _load_pending_changes())
+    return rows, bp, changes, asof
+
+
+@app.route("/api/me/watchlist", methods=["GET"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist(email):
+    f = _accounts.account_fields(_acct.account(email))
+    rows, bp, changes, asof = _acct_market_snapshot()
+    return _acct_json({"ok": True, "asof": asof, "watchlist": f["watchlist"],
+                       "items": _accounts.watch_items(f, rows, bp, changes, STOCK_NAMES)})
+
+
+@app.route("/api/me/watchlist", methods=["POST"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist_add(email):
+    return _acct_result(_acct.watch_add(email, _acct_body().get("ticker")))
+
+
+@app.route("/api/me/watchlist", methods=["PUT"])
+@limiter.limit("60 per minute")
+@_acct_api()
+def api_me_watchlist_replace(email):
+    d = _acct_body()
+    return _acct_result(_acct.watch_replace(email, d.get("watchlist"), d.get("portfolio")))
+
+
+@app.route("/api/me/watchlist/<ticker>", methods=["DELETE"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_watchlist_remove(email, ticker):
+    return _acct_result(_acct.watch_remove(email, ticker))
+
+
+@app.route("/api/me/portfolio", methods=["GET"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_portfolio(email):
+    return _acct_json({"ok": True, "portfolio": _acct.portfolio_view(_acct.account(email))})
+
+
+@app.route("/api/me/portfolio/<ticker>", methods=["PUT"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_position_set(email, ticker):
+    d = _acct_body()
+    return _acct_result(_acct.position_set(email, ticker, d.get("qty"), d.get("cost")))
+
+
+@app.route("/api/me/portfolio/<ticker>", methods=["DELETE"])
+@limiter.limit("120 per minute")
+@_acct_api()
+def api_me_position_remove(email, ticker):
+    return _acct_result(_acct.position_remove(email, ticker))
+
+
+@app.route("/api/me/import", methods=["POST"])
+@limiter.limit("30 per hour")
+@_acct_api()
+def api_me_import(email):
+    return _acct_result(_acct.import_merge(email, _acct_body()))
+
+
+@app.route("/api/me/prefs", methods=["POST"])
+@limiter.limit("60 per hour")
+@_acct_api()
+def api_me_prefs(email):
+    return _acct_result(_acct.set_prefs(email, _acct_body()))
+
+
+@app.route("/takip")
+def takip_page():
+    """D-50/C-41: hesap tabanlı Takip sayfası. Şablon kişisel veri taşımaz (hepsi /api/me*
+    ile gelir). Şablon henüz yoksa (C-41 yayında değil) 404: deploy sırası önce backend."""
+    from jinja2 import TemplateNotFound
+    try:
+        app.jinja_env.get_template("takip.html")
+    except TemplateNotFound:
+        abort(404)
+    return _nocache_html(render_template("takip.html"))
 
 
 # ── F4 Watchlist Alert API ────────────────────────────────────────────────────
 
 def _get_sub_by_cookie():
-    """bp_sub cookie → (email, record) veya (None, None)."""
+    """D-50 oturumu (bp_session) ya da eski bp_sub çerezi → (email, record) veya (None, None).
+    Eski uçlar (/api/user-alerts, /profil akışı) iki kimliği de kabul eder."""
+    em = _acct_email()
+    if em:
+        with _sub_lock:
+            subs = _load_subscribers()
+        rec = subs.get(em)
+        if isinstance(rec, dict) and rec.get("active", True):
+            return em, rec
     token = request.cookies.get("bp_sub", "").strip()
     if not token:
         return None, None
@@ -14401,28 +13840,20 @@ def unsubscribe_page(token):
             if match_email in _ls_data:
                 del _ls_data[match_email]
                 _tp_write_json(_LOGIN_SENDS_PATH, _ls_data, atomic=True, ensure_ascii=False)
-        logger.info("E-posta abonelik iptal (kayit silindi): %s", _mask_email(match_email))
-        resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
-        # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
-        # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
-        # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor.
-        resp.delete_cookie("bp_sub", samesite="Lax", secure=True, httponly=True)
-        return resp
-
-
-@app.route("/api/telegram/test", methods=["POST"])
-@limiter.limit("5 per hour")
-def api_telegram_test():
-    """Admin: Telegram bağlantısını test et."""
-    require_admin()
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"}), 503
-    _send_telegram(
-        "🔔 <b>BorsaPusula Test Mesajı</b>\n"
-        "Telegram entegrasyonu başarıyla yapılandırıldı!\n"
-        f"<i>Sunucu: {datetime.now(_TZ_TR).strftime('%d.%m.%Y %H:%M:%S')}</i>"
-    )
-    return safe_json({"ok": True, "channel": TELEGRAM_CHANNEL_ID})
+    # D-50: hesap = abone kaydı; kayıt silinince oturumları ve bekleyen kodu da gider (KVKK).
+    # Kilit dışında (kilitler iç içe alınmaz).
+    if _acct:
+        try:
+            _acct.forget(match_email)
+        except Exception as e:
+            logger.error("D-50 abonelik iptalinde oturum temizligi: %s", e)
+    logger.info("E-posta abonelik iptal (kayit silindi): %s", _mask_email(match_email))
+    resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
+    # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
+    # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
+    # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor. D-50: oturum da.
+    _acct_clear_cookies(resp)
+    return resp
 
 
 # ── Blog önbelleği: startup'ta bir kez normalize et, her request'te yeniden hesaplama yok ──
@@ -14455,9 +13886,10 @@ def backtest_page():
 
 # CPO-1191 Karar 6: /virtual-portfolio kaldırıldığında 301 eklenmemişti (CPO-1195 §5) —
 # dış link/bookmark/arama indeksi 404 yiyordu. /backtest ile aynı muamele.
+# D-25b: /portfolio artık kendisi /takip'e 301 — çifte zincire düşmemek için doğrudan hedef.
 @app.route("/virtual-portfolio")
 def virtual_portfolio_redirect():
-    return redirect("/portfolio", code=301)
+    return redirect("/takip", code=301)
 
 
 BLOG_NEW_BADGE_DAYS = 14  # r33: "Yeni" rozeti için eşik — yayın tarihinden itibaren kaç gün
@@ -14588,18 +14020,6 @@ def _startup():
         _load_sentiment_cache_from_disk()
     except Exception as e:
         logger.warning("Sentiment disk yükleme hatası: %s", e)
-    # Backtest disk cache'i yükle — restart sonrası hemen sinyal-performans sayfasına veri verir
-    try:
-        if os.path.exists(_BT_DISK_PATH):
-            with open(_BT_DISK_PATH, encoding="utf-8") as f:
-                bt_data = json.load(f)
-            if bt_data and bt_data.get("al"):
-                _bt_cache["data"]        = bt_data
-                _bt_cache["computed_at"] = bt_data.get("computed_at", "")
-                logger.info("Backtest disk cache yüklendi: AL=%s, computed=%s",
-                            bt_data["al"].get("count"), bt_data.get("computed_at"))
-    except Exception as e:
-        logger.warning("Backtest disk cache yükleme hatası: %s", e)
     refresh_chart()
     # XU100 sirali sekilde yukle (CPO-DEV2-065: 10 oksuz varlik-chart rotasi
     # -kripto/emtia/ABD, 19.08 CPO-DEV2-036 sayfa kaldirmasinin unutulmus parcasi-
@@ -14659,15 +14079,6 @@ def _startup():
             _macro_cache["ts"]   = time.time()
         logger.info("_warm_macro: %d sembol hazır", len(items))
     threading.Thread(target=_warm_macro, daemon=True).start()
-    # Makro AI özetini başlangıçta ısıt (arka planda — _warm_macro bittikten sonra)
-    def _warm_macro_summary():
-        # CPO-558E: web worker'da Gemini/yfinance yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_macro_summary: REFRESH_WORKER=web — atlandı")
-            return
-        time.sleep(10)   # macro fiyatlarının gelmesini bekle
-        _do_macro_ai_refresh()
-    threading.Thread(target=_warm_macro_summary, daemon=True).start()
     # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
     def _warm_earnings():
         # CPO-558B: web worker'da yfinance yasak — refresh service günceller, disk-reload yeter
@@ -14677,15 +14088,6 @@ def _startup():
         time.sleep(30)   # ana sinyal datasının gelmesini bekle
         _do_earnings_refresh()
     threading.Thread(target=_warm_earnings, daemon=True).start()
-    # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
-    def _delayed_backtest():
-        # CPO-558H: web worker'da backtest (28 × yfinance.download) yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_delayed_backtest: REFRESH_WORKER=web — atlandı")
-            return
-        time.sleep(1800)   # 30 dakika sonra
-        run_backtest()
-    threading.Thread(target=_delayed_backtest, daemon=True).start()
     # F5 — AI Sentiment bg worker DURDURULDU (CPO-1781): sıfır tüketici + aktif
     # Gemini kota tüketimi. _compute_sentiment() silinmedi, geri açmak için bu
     # satırı geri aç yeterli.
@@ -14704,31 +14106,7 @@ def _startup():
             logger.warning("_warm_earnings: %s", e)
     threading.Thread(target=_warm_earnings_2, daemon=True).start()
 
-    # Temettü takvimi ilk yüklemesini arka planda hazırla (bilanço takvimiyle aynı
-    # desen — bu warm-up olmadan _dividend_cache hiç dolmaz: get_dividend_data()'nın
-    # lazy-TTL dalı sadece web-dışı bir process'e /api/temettu-takvimi isteği
-    # geldiğinde tetiklenir, ama refresh service'e böyle bir istek hiç gelmiyor).
-    #
-    # CPO-1666 #5: bu fonksiyon TEK SEFER çalışıp çıkıyordu — bist30-refresh.service
-    # Type=simple/Restart=always (systemd timer YOK, kalıcı süreç), yani "yenileme
-    # döngüsü" fiilen crash olmadıkça bir daha hiç tetiklenmiyordu (TTL=12 saat
-    # hedefine rağmen). while True + _DIVIDEND_TTL periyoduyla gerçek bir döngüye çevrildi —
-    # get_dividend_data() zaten kendi TTL/lock kontrolünü yapıyor, burada sadece
-    # düzenli aralıklarla çağrılması gerekiyordu.
-    def _warm_dividend():
-        # CPO-558B ile aynı guard: web worker'da yfinance yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_dividend: REFRESH_WORKER=web — yfinance atlandı")
-            return
-        time.sleep(90)    # bilanço/macro warm-up'lardan sonra başla, yfinance rate-limit'i paylaş
-        while True:
-            try:
-                get_dividend_data()
-                logger.info("_warm_dividend: temettü takvimi ön yüklendi")
-            except Exception as e:
-                logger.warning("_warm_dividend: %s", e)
-            time.sleep(_DIVIDEND_TTL)
-    threading.Thread(target=_warm_dividend, daemon=True).start()
+    # D-24: yfinance temettü ısınma döngüsü (_warm_dividend) kalktı; temettü D-40a0 kaydından.
 
     def _slow_chart_refresh_daemon():
         # CPO-565 Bug 1: Per-ticker chart dosyalarını diske yazar.
@@ -14867,10 +14245,31 @@ def _systemd_watchdog_thread():
 
 if os.environ.get("NOTIFY_SOCKET"):
     _wd_thread = threading.Thread(target=_systemd_watchdog_thread, daemon=True, name="systemd-watchdog")
-    _wd_thread.start()
+    _bg_start(_wd_thread)
     logger.info("CPO-576: systemd watchdog heartbeat başlatıldı (30s ping, WatchdogSec=120)")
 
-threading.Thread(target=_startup, daemon=True).start()
+_bg_start(threading.Thread(target=_startup, daemon=True))
+
+
+# D-16: shadow thread başlatmaz ama gerçek veriyle karşılaştırılabilmeli → ilk istekte yalnız
+# DİSK yükleyicileri (salt-okur, thread'siz; prod web worker'ının açılış yüklemeleri). Yazma yok.
+if _IS_SHADOW:
+    _shadow_warmed = []
+
+    @app.before_request
+    def _shadow_warm_once():
+        if _shadow_warmed:
+            return
+        _shadow_warmed.append(1)
+        for _fn in (_load_cache_from_disk, _load_macro_from_disk, _load_macro_ai_from_disk,
+                    _load_sentiment_cache_from_disk, _load_news_cache_from_disk,
+                    _load_explain_cache_from_disk, _load_fundamentals_cache_from_disk,
+                    _load_sector_stats_from_disk, _load_xu100_chart_from_disk,
+                    _load_health_scores_from_disk, _load_mtf_cache_from_disk):
+            try:
+                _fn()
+            except Exception as _e:
+                logger.warning("shadow warm [%s]: %s", getattr(_fn, "__name__", _fn), _e)
 
 # CPO-585: MTF warmup daemon — REFRESH_WORKER=1 only, web worker hang önlenir
 # /api/hisse/<ticker>/mtf cache miss → web worker artık blocking call yapmaz (guard var)
@@ -14916,7 +14315,7 @@ def _mtf_warmup_daemon():
         time.sleep(1800)
 
 if os.environ.get("REFRESH_WORKER") == "1":
-    threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup").start()
+    _bg_start(threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup"))
     logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, 30dk interval)")
 
 _FUND_DISK_FLUSH_EVERY_N = 10  # MTF'nin 5'lik aralığından seyrek — fundamentals TTL daha uzun (4s)
@@ -14928,6 +14327,9 @@ def _fundamentals_warmup_daemon():
     hep {} dönüyordu. MTF warmup daemon paterniyle aynı: tüm BIST listesini döner, periyodik diske yazar.
     """
     time.sleep(120)  # MTF daemon'dan sonra başla — startup I/O ile çakışma önlenir
+    # D-40a: lider açılışta diski YÜKLEMİYORDU (yalnız web/non-leader yüklüyor) → her restart
+    # 233 hissenin tamamını Yahoo'dan yeniden çektiriyordu (canlı 26.09: restart +710 sn'de 180 kayıt).
+    _load_fundamentals_cache_from_disk()
     while True:
         now = time.time()
         _written_this_round = 0
@@ -14942,9 +14344,10 @@ def _fundamentals_warmup_daemon():
             # CPO-1706: artık _fundamentals_schema_ok() ile İÇERİK (truthy) kontrol
             # ediliyor, sadece anahtar varlığı değil — bkz. fonksiyonun docstring'i.
             _stale_schema = bool(_fc) and not _fundamentals_schema_ok(_fc.get("data"))
-            if not _fc or _stale_schema or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
+            _earn_due = _fund_earnings_due(_t, _fc, now)
+            if not _fc or _stale_schema or _earn_due or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
                 try:
-                    _get_fundamentals(_t)
+                    _get_fundamentals(_t, force=_earn_due)
                     _written_this_round += 1
                     if _written_this_round % _FUND_DISK_FLUSH_EVERY_N == 0:
                         _save_fundamentals_cache_to_disk()
@@ -14955,7 +14358,7 @@ def _fundamentals_warmup_daemon():
         time.sleep(1800)
 
 if os.environ.get("REFRESH_WORKER") == "1":
-    threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup").start()
+    _bg_start(threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup"))
     logger.info("CPO-DEV2-038: fundamentals warmup daemon başlatıldı (REFRESH_WORKER=1, tüm BIST kapsam, disk köprülü)")
 
 logger.info("=" * 50)

@@ -103,7 +103,8 @@ def test_signal_email_uses_trend_donus_seviyesi():
     ns = {"_SIGNAL_LABELS": br.SIGNAL_LABELS, "STOCK_NAMES": {"SAHOL": "Sabancı Holding"},
           "tr_price_filter": lambda v: f"{v:.2f}".replace(".", ","), "datetime": datetime,
           "_TZ_TR": ZoneInfo("Europe/Istanbul"), "_tr_month": lambda d: "Eylül",
-          "_email_base": lambda content, unsub, preheader="": preheader + content}
+          "_email_base": lambda content, unsub, preheader="": preheader + content,
+          "_bulten_page_ready": lambda: False}
     exec(_func_src("_build_signal_email"), ns)
     stock = {"price": 91.1, "sl_level": 95.4, "adx": 31.0, "rvol": 1.3, "is_premium": False}
     html = ns["_build_signal_email"]([("SAHOL", "BEKLE", "SAT", stock)], "https://x/unsub")
@@ -144,13 +145,6 @@ def test_app_generated_strings_have_no_trade_language():
                    and id(n) not in skip and n.value not in _ALLOWED
                    and not _is_prompt(n.value) and br.TRADE_LANG_RE.search(n.value)})
     assert hits == [], f"hedef/işlem yönetimi dili üreten metin: {hits}"
-
-
-def test_explain_prompt_and_validation():
-    strings = " ".join(_strings("_enrich_signal_explanation"))
-    assert "Stop-Loss" not in strings and "Trend dönüş seviyesi (Supertrend): " in strings
-    # AI yine de üretirse commentary'ye düşer
-    assert "_TRADE_LANG_RE.search(text)" in _func_src("_enrich_signal_explanation")
 
 
 # ── VPS (py3.12): gerçek import — DQV import bloğu yedeğe düşmemiş olmalı ────

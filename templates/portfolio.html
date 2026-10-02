@@ -6,7 +6,7 @@
    Sayfanin KENDI gorunur kanonu zaten "Güncel Değer"/"Güncel Fiyat" -- uc meta
    kanali o kanona hizalandi (71. ders: bir modun TUM kanallarini say). #}
 <meta name="description" content="BIST hisselerinizi takip edin. Maliyet, güncel değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/portfolio">
 <meta property="og:title"       content="Portföy Takibi — BorsaPusula">
 <meta property="og:description" content="BIST hisselerinizi takip edin. Maliyet, güncel değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
@@ -26,21 +26,21 @@
   {"@type":"ListItem","position":2,"name":"Portföy Takibi","item":"https://borsapusula.com/portfolio"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=42d4f1aa">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/portfolio.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% include '_header.html' %}
 
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
 
-{% call bpf.pagehead('Portföy Takibi') %}Hisselerinin maliyeti, güncel değeri ve kâr/zararı tek tabloda.{% endcall %}
+{% call bpf.pagehead('Portföy Takibi') %}Hisselerinizin maliyeti, güncel değeri ve kâr/zararı tek tabloda.{% endcall %}
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
   <div class="pf-fetch-error" id="pfFetchError" role="status" aria-live="polite" style="display:none">
@@ -75,8 +75,8 @@
     <span class="ls-warning-icon"><span aria-hidden="true">💾</span></span>
     <div class="ls-warning-body">
       <div class="ls-warning-title">Veriler varsayılan olarak bu cihazın tarayıcısında saklanıyor</div>
-      Portföyünüz varsayılan olarak sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:var(--bp-text)">localStorage</strong>'ında tutulur (aşağıdaki <strong style="color:var(--bp-text)">Cloud Sync</strong> ile isteğe bağlı olarak buluta yedekleyebilirsiniz).
-      Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz ve Cloud Sync kullanmadıysanız <strong style="color:var(--bp-text)">portföy silinir.</strong>
+      Portföyünüz varsayılan olarak sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:var(--bp-text)">belleğinde</strong> tutulur (aşağıdaki <strong style="color:var(--bp-text)">Bulut eşitleme</strong> ile isteğe bağlı olarak buluta yedekleyebilirsiniz).
+      Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz ve bulut eşitlemeyi kullanmadıysanız <strong style="color:var(--bp-text)">portföy silinir.</strong>
       Önemli pozisyonlarınızı ayrıca not almanızı öneririz.
     </div>
     <button class="ls-warning-close" onclick="dismissLsWarning()" aria-label="Kapat">×</button>
@@ -103,13 +103,13 @@
 
   <!-- Cloud Sync Modal -->
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--bp-z-modal);align-items:center;justify-content:center">
-    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Cloud Sync" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
+    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Bulut eşitleme" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
       <!-- 21.09 K-S: 10.5x21px idi, merkezden ±12px'in 5 probundan yalniz 1'i isabet
            ediyordu (WCAG 2.5.8). Boyut/renk/imlec kanonik `.da-close` katina (32x32)
            birakildi; satir ici stil YALNIZ konumlandirma yapar — aksi halde satir ici
            bildirim sinifi sessizce ezerdi. -->
       <button onclick="closeCloudSync()" aria-label="Kapat" class="da-close" style="position:absolute;top:8px;right:10px">×</button>
-      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Cloud Sync</div>
+      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Bulut eşitleme</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:16px">Portföyünüzü sunucuya kaydedin. Oluşan token’ı diğer cihazınızda aşağıdaki &laquo;Token yapıştırın&raquo; alanına girerek aynı portföye erişin.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -130,7 +130,7 @@
           <button onclick="copyCloudToken()" aria-label="Token’ı panoya kopyala" style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-md)" data-tip="Token’ı panoya kopyala"><span aria-hidden="true">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-al-rgb),.1);border:1px solid rgba(var(--bp-al-rgb),.2);color:var(--bp-al);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-ok-rgb),.1);border:1px solid rgba(var(--bp-ok-rgb),.2);color:var(--bp-ok);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
           <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(var(--bp-accent-cyan-rgb),.08);border:1px solid rgba(var(--bp-accent-cyan-rgb),.15);color:var(--bp-accent-cyan);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
@@ -162,7 +162,7 @@
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-border)">İptal</button>
-    <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
+    <span id="addErr" role="alert" style="color:var(--bp-danger);font-size:var(--bp-text-sm)"></span>
   </div>
 
   <!-- Tablo -->
@@ -186,7 +186,7 @@
       <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
         style="background:rgba(var(--bp-brand-rgb),.08);border-color:rgba(var(--bp-brand-rgb),.48);color:var(--bp-brand)"
         data-tip="Cihazlar arası senkronizasyon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> Cloud Sync
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> Bulut eşitleme
       </button>
     </div>
   </div>
@@ -223,7 +223,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -736,6 +736,7 @@ function removePosition(id) {
 }
 
 let _fetchLiveBusy = false;
+let _pfUpdatedAt = null;
 async function fetchLive() {
   if (_fetchLiveBusy) return;
   _fetchLiveBusy = true;
@@ -761,6 +762,7 @@ async function fetchLive() {
       _pfFetchErr.warming = true;
       if (_pfWarmTries < PF_WARM_MAX_TRIES) { _pfWarmTries++; setTimeout(fetchLive, PF_WARM_RETRY_MS); }
     } else {
+      _pfUpdatedAt = j.updated_at || null;
       j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
       _pfFetchErr.live = false;
       _pfFetchErr.warming = false;
@@ -963,36 +965,18 @@ document.getElementById('addTicker').addEventListener('input', e => {
 render();
 fetchLive();
 fetchCharts();
-/* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
-   Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
-   ile baştan yazdığı için o an ODAKTA olan öğeyi yok ediyordu: odak <body>'ye
-   düşüyor, Enter hiçbir şey yapmıyor, Tab belgenin EN BAŞINDAN başlıyor — ve
-   bu, süre dolduğu her seferde yeniden oluyordu (WCAG 2.2.2 A / 2.4.3 A).
-
-   ⛔ SARMALAMA TIK ANINDA (lazy) YAPILIR: `bp-search.js` `defer` ile ve bu
-   inline betikten SONRA çalışır, yani BURADA `window.bpPreserveFocus` henüz
-   TANIMSIZDIR. Parse anında sarmalamak `ReferenceError` atıp sayfanın tüm
-   betiğini öldürürdü. `||` dalı ayrıca bp-search.js hiç yüklenemezse eski
-   davranışa sessizce döner — yenileme çalışmaya devam eder. */
-const _pfLiveTick   = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchLive)   : fetchLive)();
-const _pfChartsTick = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchCharts) : fetchCharts)();
-let _pfLiveInt   = setInterval(_pfLiveTick, 60000);
-let _pfChartsInt = setInterval(_pfChartsTick, 300000); // sparkline + XU030 5dk'da bir yenile
-
-/* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
-   index.html/hisse.html'deki CPO-DEV2-072 r98 deseniyle aynı ilke; bu sayfa
-   setInterval kullandığı için (setTimeout polling değil) clearInterval +
-   yeniden setInterval ile uygulanıyor. */
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clearInterval(_pfLiveInt);
-    clearInterval(_pfChartsInt);
-  } else {
-    _pfLiveTick();
-    _pfChartsTick();
-    _pfLiveInt   = setInterval(_pfLiveTick, 60000);
-    _pfChartsInt = setInterval(_pfChartsTick, 300000);
-  }
+/* C-09 (26.09): EOD mimarisinde veri günde bir değişir — 60 sn / 5 dk
+   setInterval'ları kalktı. Sekme görünür olunca (en fazla 15 dk'da bir)
+   /api/data yeniden okunur; `updated_at` değiştiyse grafikler de yenilenir.
+   Yenileme kullanıcının odağını korur (K-AX: bpPreserveFocus, tık anında). */
+const PF_RECHECK_MS = 15 * 60 * 1000;
+let _pfLastCheck = Date.now();
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden || Date.now() - _pfLastCheck < PF_RECHECK_MS) return;
+  _pfLastCheck = Date.now();
+  const before = _pfUpdatedAt;
+  await (window.bpPreserveFocus ? window.bpPreserveFocus(fetchLive) : fetchLive)();
+  if (_pfUpdatedAt !== before) (window.bpPreserveFocus ? window.bpPreserveFocus(fetchCharts) : fetchCharts)();
 });
 
 /* ── Cloud Sync ───────────────────────────────── */
@@ -1042,13 +1026,13 @@ async function createCloudToken() {
     const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
     if (!data.token) throw new Error('no token');
-    if (!_safeSetToken(data.token)) { _setCloudMsg('Token oluşturuldu ama bu cihazda saklanamadı (gizli mod?).', 'var(--bp-sat)'); return; }
+    if (!_safeSetToken(data.token)) { _setCloudMsg('Token oluşturuldu ama bu cihazda saklanamadı (gizli mod?).', 'var(--bp-danger)'); return; }
     _showActiveToken(data.token);
     // Auto-save current portfolio
     const saved = await saveToCloud(true);
-    if (saved) _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', 'var(--bp-al)');
+    if (saved) _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', 'var(--bp-ok)');
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1057,16 +1041,16 @@ async function createCloudToken() {
 async function loadCloudToken() {
   const input = document.getElementById('cloudTokenInput');
   const token = (input.value || '').trim();
-  if (!token) { _setCloudMsg('Token girin.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Token girin.', 'var(--bp-danger)'); return; }
   const btn = document.getElementById('cloudLoadTokenBtn');
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
-    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
     const data = await res.json();
-    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
-    if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', 'var(--bp-sat)'); return; }
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-danger)'); return; }
+    if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', 'var(--bp-danger)'); return; }
     _showActiveToken(token);
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi —
     // eski-format/eksik kayitlar (yalniz buy_price/quantity, ya da lot/price
@@ -1088,7 +1072,7 @@ async function loadCloudToken() {
       + (skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''), 'var(--bp-al)');
     input.value = '';
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1096,7 +1080,7 @@ async function loadCloudToken() {
 
 async function saveToCloud(silent) {
   const token = _safeGetToken();
-  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-danger)'); return; }
   if (!silent && !confirm('Bu, sunucudaki mevcut veriyi değiştirecek, devam edilsin mi?')) return;
   const btn = document.getElementById('cloudSaveBtn');
   if (btn) btn.disabled = true;
@@ -1112,15 +1096,15 @@ async function saveToCloud(silent) {
     if (data.ok) {
       if (!silent) {
         const skippedMsg = (data.skipped && data.skipped.length) ? ` (${data.skipped.length} bilinmeyen sembol atlandı: ${data.skipped.join(', ')})` : '';
-        _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.${skippedMsg}`, skippedMsg ? 'var(--bp-warn)' : 'var(--bp-al)');
+        _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.${skippedMsg}`, skippedMsg ? 'var(--bp-warn)' : 'var(--bp-ok)');
       }
       return true;
     } else {
-      _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), 'var(--bp-sat)');
+      _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), 'var(--bp-danger)');
       return false;
     }
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
     return false;
   } finally {
     if (btn) btn.disabled = false;
@@ -1129,19 +1113,19 @@ async function saveToCloud(silent) {
 
 async function loadFromCloud() {
   const token = _safeGetToken();
-  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-sat)'); return; }
+  if (!token) { _setCloudMsg('Önce token oluşturun.', 'var(--bp-danger)'); return; }
   if (portfolio.length && !confirm(`Bulut kopyası yerel portföyünüzün (${portfolio.length} pozisyon) üzerine yazılacak. Devam edilsin mi?`)) return;
   const btn = document.getElementById('cloudLoadFromCloudBtn');
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
-    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
     const data = await res.json();
     /* K-BI es-yazim taramasi: ayni zayif kontrol IKINCI bir bulut yolunda da
        vardi. Obje donerse `.length` undefined, `.map` patlar ve kullaniciya
        ham JS hata metni gosterilirdi. */
-    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-danger)'); return; }
     // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
     // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi — eski-
@@ -1154,9 +1138,9 @@ async function loadFromCloud() {
       .filter(p => p.ticker && bpIsValidLot(p.lot) && bpIsValidPrice(p.price));
     save(); render();
     const skipped = rawCount - portfolio.length;
-    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-al)');
+    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-ok)');
   } catch(e) {
-    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1185,10 +1169,10 @@ function copyCloudToken() {
       ta.select();
       const ok = document.execCommand('copy');
       document.body.removeChild(ta);
-      if (ok) _setCloudMsg('✓ Token kopyalandı', 'var(--bp-al)');
-      else _setCloudMsg('Kopyalama başarısız.', 'var(--bp-sat)');
+      if (ok) _setCloudMsg('✓ Token kopyalandı', 'var(--bp-ok)');
+      else _setCloudMsg('Kopyalama başarısız.', 'var(--bp-danger)');
     } catch (e) {
-      _setCloudMsg('Kopyalama başarısız.', 'var(--bp-sat)');
+      _setCloudMsg('Kopyalama başarısız.', 'var(--bp-danger)');
     }
   }
   if (!navigator.clipboard || !navigator.clipboard.writeText) {
@@ -1196,7 +1180,7 @@ function copyCloudToken() {
     return;
   }
   navigator.clipboard.writeText(token).then(
-    () => _setCloudMsg('✓ Token kopyalandı', 'var(--bp-al)'),
+    () => _setCloudMsg('✓ Token kopyalandı', 'var(--bp-ok)'),
     () => fallbackCopy()
   );
 }
@@ -1212,11 +1196,11 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 });
 
 // Makro Ticker Bandı
-(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
+/* makro şerit bp-search.js'te kendiliğinden başlar (C-15) */
 </script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 <script>bpStartDataQualityPolling();</script>
 
 <script>

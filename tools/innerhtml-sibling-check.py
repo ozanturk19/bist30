@@ -30,6 +30,7 @@ Kullanim:
 """
 import os, re, sys, io, subprocess, tempfile, tarfile
 from html.parser import HTMLParser
+from _page_js import with_page_js
 
 TPL_DIR = 'templates'
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
@@ -58,11 +59,8 @@ EXEMPT_REASON = {
         'kabi EZMEZ, mesaji #heroSubMsg`e yazar (index.html heroSubmitSub).',
     ('templates/ozet.html', 'ozSubForm'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
     ('templates/blog_article.html', 'artSubForm'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
-    ('templates/hisse.html', 'hisseSubCta'): 'Ayni abonelik kalibi (bkz. heroSubForm).',
 }
 EXEMPT = set([
-    ('templates/hisse.html', 'hisseSubCta', 'hisseSubEmail'),
-    ('templates/hisse.html', 'hisseSubCta', 'hisseSubKvkk'),
     ('templates/index.html', 'heroSubForm', 'heroSubEmail'),
     ('templates/index.html', 'heroSubForm', 'heroSubKvkk'),
     ('templates/index.html', 'heroSubForm', 'heroSubMsg'),
@@ -154,7 +152,7 @@ def check_tree(root):
             path = os.path.join(dp, f)
             rel = os.path.relpath(path, root)
             try:
-                raw = io.open(path, encoding='utf-8').read()
+                raw = with_page_js(f, io.open(path, encoding='utf-8').read(), root=root)
             except (UnicodeDecodeError, OSError):
                 continue
             containers = overwritten_containers(raw)

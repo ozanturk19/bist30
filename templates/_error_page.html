@@ -1,0 +1,42 @@
+{#- C-44 (26.09): 404/410/429/500 tek kabuk — kanonik header + `.da-pagehead` + hisse arama + 3 bağlantı.
+    Kullanım: {% extends '_base.html' %}{% import '_error_page.html' as err with context %} … {% block body %}{% call err.page('404', 'Başlık') %}lede{% endcall %}{% endblock %} -#}
+{%- macro head(title, desc) -%}
+<title>{{ title }} | BorsaPusula</title>
+<meta name="description" content="{{ desc }}">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/err.css') }}">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+{%- endmacro -%}
+
+{%- macro page(code, title) -%}
+{%- import '_fmt_macros.html' as bpf -%}
+<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% include '_header.html' %}
+<main class="container container--read err-main" id="main-content" tabindex="-1">
+<span class="da-label err-code">Hata {{ code }}</span>
+{%- set _lede = caller() -%}
+{% call bpf.pagehead(title) %}{{ _lede }}{% endcall %}
+<div class="err-search da-panel">
+  <label for="q404">Hisse kodu ile ara (ör. THYAO)</label>
+  <form class="err-row" id="q404Form">
+    <input id="q404" name="q" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS..."
+           autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+    <button type="submit">Git</button>
+  </form>
+  <div id="q404Hint" class="err-hint" role="status" aria-live="polite"></div>
+</div>
+<nav class="err-links" aria-label="Sık kullanılan sayfalar">
+  <a class="da-chip" href="/">Piyasa</a>
+  <a class="da-chip" href="/tarama">Keşfet</a>
+  <a class="da-chip" href="/haberler">Haberler</a>
+</nav>
+</main>
+{% include '_footer.html' %}
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/err-search.js') }}" defer></script>
+{% include '_mobile_nav_partial.html' %}
+{%- endmacro -%}

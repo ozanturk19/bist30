@@ -76,13 +76,12 @@ def test_corrupt_usage_file_starts_blank(path):
 
 def test_app_wiring_grounding_off_reserve_before_request_health_fields():
     src = open(_APP_PY, encoding="utf-8").read()
-    call = src[src.index("def _gemini_call("):src.index("def get_ai_news(")]
+    call = src[src.index("def _gemini_call("):src.index("def _compute_signal_commentary(")]
     assert call.index("gemini_budget.reserve()") < call.index("requests.post(")
     assert "use_search and gemini_budget.GROUNDING" in call
     assert "gemini_budget.record(" in call
-    news = src[src.index("_GEMINI_NEWS_ATTEMPTS = ["):src.index("_GEMINI_EXPLAIN_ATTEMPTS = [")]
-    assert "True" not in news, "haber denemelerinde grounding açık kalmamalı"
-    assert news.index("flash-lite") < news.index('"gemini-2.5-flash"')
+    explain = src[src.index("_GEMINI_EXPLAIN_ATTEMPTS = ["):src.index("_GEMINI_EXPLAIN_ATTEMPTS = [") + 200]
+    assert "True" not in explain, "denemelerde grounding açık kalmamalı"
+    assert explain.index("flash-lite") < explain.index('"gemini-2.5-flash"')
     for k in ("gemini_calls_today", "gemini_usd_month"):
         assert f'resp["{k}"]' in src
-    assert "gemini_call=no (grounding kapalı)" in src

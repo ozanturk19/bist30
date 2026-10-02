@@ -1,0 +1,434 @@
+{
+ "_not": "D-24 fixture: D-40a0 kayit bicimi (data/kap_fin/<T>.json alt kumesi). temettu_odemeleri 24.09.2026'da cekilmis 12 gercek kar payi bildiriminden kap_financials.parse_dividend + dividend_payments ile; son_rapor THYAO/GARAN gercek FR listesinden, TUPRS/TCELL takvim_kaynaklar_ic.md'den.",
+ "records": {
+  "AEFES": {
+   "schema_version": 1,
+   "ticker": "AEFES",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 0.16975,
+      "net": 0.1442875,
+      "hak_kullanim": "2026-05-13",
+      "odeme": "2026-05-15",
+      "kaynak": {
+       "rapor": 1592286,
+       "donem": "2026-04-13",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 0.16975,
+      "net": 0.1442875,
+      "hak_kullanim": "2026-10-05",
+      "odeme": "2026-10-07",
+      "kaynak": {
+       "rapor": 1592286,
+       "donem": "2026-04-13",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "ASELS": {
+   "schema_version": 1,
+   "ticker": "ASELS",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "Peşin",
+      "brut": 0.4276315,
+      "net": 0.3634867,
+      "hak_kullanim": "2026-11-24",
+      "odeme": "2026-11-26",
+      "kaynak": {
+       "rapor": 1607068,
+       "donem": "2026-05-13",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "ASTOR": {
+   "schema_version": 1,
+   "ticker": "ASTOR",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "Peşin",
+      "brut": 2.1911471,
+      "net": 1.862475,
+      "hak_kullanim": "2026-10-15",
+      "odeme": "2026-10-19",
+      "kaynak": {
+       "rapor": 1645625,
+       "donem": "2026-08-07",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "BIMAS": {
+   "schema_version": 1,
+   "ticker": "BIMAS",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 2.0,
+      "net": 1.7,
+      "hak_kullanim": "2026-06-17",
+      "odeme": "2026-06-19",
+      "kaynak": {
+       "rapor": 1607901,
+       "donem": "2026-05-05",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 2.5,
+      "net": 2.125,
+      "hak_kullanim": "2026-09-16",
+      "odeme": "2026-09-18",
+      "kaynak": {
+       "rapor": 1607901,
+       "donem": "2026-05-05",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "3. Taksit",
+      "brut": 2.5,
+      "net": 2.125,
+      "hak_kullanim": "2026-12-16",
+      "odeme": "2026-12-18",
+      "kaynak": {
+       "rapor": 1607901,
+       "donem": "2026-05-05",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "EREGL": {
+   "schema_version": 1,
+   "ticker": "EREGL",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": []
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "GARAN": {
+   "schema_version": 1,
+   "ticker": "GARAN",
+   "derived": {
+    "son_rapor": {
+     "donem": "2026/06",
+     "yayin": "2026-07-30T08:00"
+    },
+    "temettu_odemeleri": []
+   },
+   "flags": {
+    "banka": true
+   }
+  },
+  "GOKNR": {
+   "schema_version": 1,
+   "ticker": "GOKNR",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 0.3062928,
+      "net": 0.2603488,
+      "hak_kullanim": "2026-08-10",
+      "odeme": "2026-08-12",
+      "kaynak": {
+       "rapor": 1634534,
+       "donem": "2026-07-17",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 0.3062928,
+      "net": 0.2603488,
+      "hak_kullanim": "2026-11-09",
+      "odeme": "2026-11-11",
+      "kaynak": {
+       "rapor": 1634534,
+       "donem": "2026-07-17",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "3. Taksit",
+      "brut": 0.3062928,
+      "net": 0.2603488,
+      "hak_kullanim": "2027-02-08",
+      "odeme": "2027-02-10",
+      "kaynak": {
+       "rapor": 1634534,
+       "donem": "2026-07-17",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "4. Taksit",
+      "brut": 0.3062928,
+      "net": 0.2603488,
+      "hak_kullanim": "2027-05-10",
+      "odeme": "2027-05-12",
+      "kaynak": {
+       "rapor": 1634534,
+       "donem": "2026-07-17",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "LKMNH": {
+   "schema_version": 1,
+   "ticker": "LKMNH",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 0.2314814,
+      "net": 0.1967591,
+      "hak_kullanim": "2026-05-20",
+      "odeme": "2026-05-22",
+      "kaynak": {
+       "rapor": 1572702,
+       "donem": "2026-03-14",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 0.2314814,
+      "net": 0.1967591,
+      "hak_kullanim": "2026-09-28",
+      "odeme": "2026-09-30",
+      "kaynak": {
+       "rapor": 1572702,
+       "donem": "2026-03-14",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "MEDTR": {
+   "schema_version": 1,
+   "ticker": "MEDTR",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 0.1134453,
+      "net": 0.0964285,
+      "hak_kullanim": "2026-07-29",
+      "odeme": "2026-07-31",
+      "kaynak": {
+       "rapor": 1582826,
+       "donem": "2026-04-02",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 0.1134453,
+      "net": 0.0964285,
+      "hak_kullanim": "2026-10-27",
+      "odeme": "2026-11-02",
+      "kaynak": {
+       "rapor": 1582826,
+       "donem": "2026-04-02",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "3. Taksit",
+      "brut": 0.1134453,
+      "net": 0.0964285,
+      "hak_kullanim": "2026-12-28",
+      "odeme": "2026-12-30",
+      "kaynak": {
+       "rapor": 1582826,
+       "donem": "2026-04-02",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "NTHOL": {
+   "schema_version": 1,
+   "ticker": "NTHOL",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "Peşin",
+      "brut": 1.0,
+      "net": 0.85,
+      "hak_kullanim": "2026-12-16",
+      "odeme": "2026-12-18",
+      "kaynak": {
+       "rapor": 1649795,
+       "donem": "2026-08-13",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "TCELL": {
+   "schema_version": 1,
+   "ticker": "TCELL",
+   "derived": {
+    "son_rapor": {
+     "donem": "2026/06",
+     "yayin": "2026-08-13"
+    },
+    "temettu_odemeleri": [
+     {
+      "taksit": "Peşin",
+      "brut": 4.0,
+      "net": 3.4,
+      "hak_kullanim": "2026-12-09",
+      "odeme": "2026-12-11",
+      "kaynak": {
+       "rapor": 1602814,
+       "donem": "2026-05-07",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "THYAO": {
+   "schema_version": 1,
+   "ticker": "THYAO",
+   "derived": {
+    "son_rapor": {
+     "donem": "2026/06",
+     "yayin": "2026-08-05T08:00"
+    },
+    "temettu_odemeleri": []
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "TRALT": {
+   "schema_version": 1,
+   "ticker": "TRALT",
+   "derived": {
+    "son_rapor": null,
+    "temettu_odemeleri": [
+     {
+      "taksit": "Peşin",
+      "brut": 0.5,
+      "net": 0.425,
+      "hak_kullanim": "2026-10-06",
+      "odeme": "2026-10-08",
+      "kaynak": {
+       "rapor": 1639873,
+       "donem": "2026-07-30",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  },
+  "TUPRS": {
+   "schema_version": 1,
+   "ticker": "TUPRS",
+   "derived": {
+    "son_rapor": {
+     "donem": "2026/06",
+     "yayin": "2026-08-04"
+    },
+    "temettu_odemeleri": [
+     {
+      "taksit": "1. Taksit",
+      "brut": 10.3799282,
+      "net": 8.8229389,
+      "hak_kullanim": "2026-03-16",
+      "odeme": "2026-03-18",
+      "kaynak": {
+       "rapor": 1570793,
+       "donem": "2026-03-11",
+       "birim": "TL/pay brüt"
+      }
+     },
+     {
+      "taksit": "2. Taksit",
+      "brut": 6.7469533,
+      "net": 5.7349103,
+      "hak_kullanim": "2026-09-30",
+      "odeme": "2026-10-02",
+      "kaynak": {
+       "rapor": 1570793,
+       "donem": "2026-03-11",
+       "birim": "TL/pay brüt"
+      }
+     }
+    ]
+   },
+   "flags": {
+    "banka": false
+   }
+  }
+ }
+}

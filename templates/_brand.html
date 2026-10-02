@@ -1,0 +1,16 @@
+{#- MARKA TEK KAYNAK (C-06, logo v2 A "Yumusak Yildiz", O7b=A) — geometri
+    docs/URUN-VE-TASARIM.md §5.7. Isaret baska yerde elle cizilmez:
+      {% import '_brand.html' as brand %}
+      {{ brand.mark(28, 'ftr') }}              -> <svg> (<=32 px kalin sade surum)
+      {{ brand.mark(96, 'hdr', x=6, y=12) }}   -> baska bir SVG'nin icine
+      {{ brand.wordmark() }}                   -> tek <span> "Borsa" + "Pusula"
+    uid: ayni sayfada iki isaret olursa gradyan id'leri cakismasin diye.
+    static/favicon.svg, static/logo.svg, icon-192/512.png ayni geometriden
+    uretilir (tools/brand-icons.mjs). -#}
+{% macro mark(size=28, uid='m', x=none, y=none, cls='') -%}
+{%- set small = size <= 32 -%}
+<svg class="bp-mark{{ ' ' ~ cls if cls }}" width="{{ size }}" height="{{ size }}"{% if x is not none %} x="{{ x }}" y="{{ y }}"{% endif %} viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs><linearGradient id="bpg-{{ uid }}" x1="18" y1="18" x2="102" y2="102" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="60" cy="60" r="44" fill="none" stroke="url(#bpg-{{ uid }})" stroke-width="{{ 11 if small else 7 }}" stroke-linecap="round" stroke-dasharray="232 44.5" transform="rotate(-18 60 60)"/><path d="M60 25 C62.8 50.5 69.5 57.2 95 60 C69.5 62.8 62.8 69.5 60 95 C57.2 69.5 50.5 62.8 25 60 C50.5 57.2 57.2 50.5 60 25 Z" fill="url(#bpg-{{ uid }})" stroke="url(#bpg-{{ uid }})" stroke-width="{{ 7 if small else 5 }}" stroke-linejoin="round"/><circle cx="91.1" cy="28.9" r="{{ 9 if small else 6.5 }}" fill="var(--bp-logo-accent)"/></svg>
+{%- endmacro %}
+{% macro wordmark() -%}
+<span class="bp-wordmark">Borsa<span class="bp-logo-accent">Pusula</span></span>
+{%- endmacro %}

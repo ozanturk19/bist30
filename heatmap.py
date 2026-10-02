@@ -33,7 +33,18 @@ _TICKS = ((20.0, 0.01), (50.0, 0.02), (100.0, 0.05), (250.0, 0.10), (500.0, 0.25
           (1000.0, 0.50), (2500.0, 1.00), (float("inf"), 2.50))
 BOX_W, BOX_H = 160.0, 100.0  # 16:10; geometri gerçek oranda hesaplanır, çıktı yüzde
 MIN_ROWS = 95                # kalite kapısı: bundan az dolu satırlı görüntü dondurulmaz
-_DAY_FILE = re.compile(r"^\d{4}-\d{2}-\d{2}\.json$")
+_DAY_FILE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}\.json\Z")
+
+
+def iso_day(s):
+    """'25.09.2026' (D-06 analiz satırı `bar_date`) ya da '2026-09-25' → '2026-09-25'; tanınmazsa None.
+    D-06 analyze() sözlüğündeki ikinci `bar_date` anahtarı GG.AA.YYYY yazıyordu; ISO ile kıyaslanınca
+    25.09 görüntüsünde 100/100 satır "bayat" çıktı (canlı /api/heatmap 25.09 20:2x)."""
+    s = str(s or "").strip()
+    m = re.fullmatch(r"([0-9]{2})\.([0-9]{2})\.([0-9]{4})", s)
+    if m:
+        return "%s-%s-%s" % (m.group(3), m.group(2), m.group(1))
+    return s[:10] if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", s[:10]) else None
 
 
 def date_label(iso):
@@ -191,7 +202,8 @@ def build(asof_iso, members, official, rows, fund, scores, sectors, names, xu100
         pr = row.get("period_ret") or {}
         ch = {"d1": d1}
         ch.update({k: pr.get(k) for k in PERIODS})
-        stale = (not off) or row.get("bar_date") != asof_iso or (d1 is not None and abs(d1) > STALE_ABS_D1)
+        stale = ((not off) or iso_day(row.get("bar_date")) != asof_iso
+                 or (d1 is not None and abs(d1) > STALE_ABS_D1))
         m, why = mcap_tl(p, (fund.get(t) or {}).get("shares"), reported_mcap(fund.get(t)))
         if why:
             notes.append("%s: %s" % (t, why))
@@ -271,13 +283,14 @@ def squarify(values, x, y, dx, dy):
     return rects
 
 
-def _pct_rect(x, y, w, h):
-    return {"x": round(x / BOX_W * 100, 3), "y": round(y / BOX_H * 100, 3),
-            "w": round(w / BOX_W * 100, 3), "h": round(h / BOX_H * 100, 3)}
+def _pct_rect(x, y, w, h, bw=BOX_W, bh=BOX_H):
+    return {"x": round(x / bw * 100, 3), "y": round(y / bh * 100, 3),
+            "w": round(w / bw * 100, 3), "h": round(h / bh * 100, 3)}
 
 
-def layout(rows):
-    """(heatmap_groups, heatmap_tiles): gruplar toplam PD'ye, kutular grup içinde PD'ye göre azalan."""
+def layout(rows, box_w=BOX_W, box_h=BOX_H):
+    """(heatmap_groups, heatmap_tiles): gruplar toplam PD'ye, kutular grup içinde PD'ye göre azalan.
+    Geometri box_w × box_h oranında hesaplanır (site 16:10; D-54 paylaşım görseli kendi oranıyla)."""
     by_g = {}
     for r in rows or []:
         if r.get("mcap") and r["mcap"] > 0:
@@ -286,12 +299,12 @@ def layout(rows):
     if not order:
         return [], []
     groups, tiles = [], []
-    grects = squarify([sum(r["mcap"] for r in v) for _, v in order], 0.0, 0.0, BOX_W, BOX_H)
+    grects = squarify([sum(r["mcap"] for r in v) for _, v in order], 0.0, 0.0, box_w, box_h)
     for (g, members), (gx, gy, gw, gh) in zip(order, grects):
-        groups.append(dict({"g": g}, **_pct_rect(gx, gy, gw, gh)))
+        groups.append(dict({"g": g}, **_pct_rect(gx, gy, gw, gh, box_w, box_h)))
         ms = sorted(members, key=lambda r: (-r["mcap"], r["t"]))
         for r, rect in zip(ms, squarify([r["mcap"] for r in ms], gx, gy, gw, gh)):
-            tiles.append(dict({"t": r["t"], "g": g}, **_pct_rect(*rect)))
+            tiles.append(dict({"t": r["t"], "g": g}, **_pct_rect(*rect, bw=box_w, bh=box_h)))
     return groups, tiles
 
 
@@ -335,9 +348,14 @@ def save_frozen(snap, dir_):
     return path
 
 
-def latest_path(dir_):
+def days(dir_):
+    """Donmuş görüntüsü olan günler, artan ('2026-09-25', ...); klasör yoksa []."""
     try:
-        days = sorted(n for n in os.listdir(dir_) if _DAY_FILE.match(n))
+        return sorted(n[:-5] for n in os.listdir(dir_) if _DAY_FILE.match(n))
     except OSError:
-        return None
-    return os.path.join(dir_, days[-1]) if days else None
+        return []
+
+
+def latest_path(dir_):
+    d = days(dir_)
+    return os.path.join(dir_, d[-1] + ".json") if d else None

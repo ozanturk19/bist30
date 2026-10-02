@@ -1,13 +1,12 @@
-<!-- SPEC-014 B3 / CPO-1125 İş Kolu B — Stale banner (kanonik partial, 6 sayfa paylaşıyor).
+{# SPEC-014 B3 / CPO-1125 İş Kolu B — Stale banner (kanonik partial, 6 sayfa paylaşıyor).
      Yeniden tasarım YOK — index.html:2144'teki mevcut markup birebir merkezileşti.
      Render mantığı: static/stale-banner.js (bpUpdateStaleBanner).
      K-BN (21.09): kuyruk cümlesi "fiyatlar gerçek zamanlı olMAYABİLİR" diyordu —
      KESİN olan bir şeyi olasılık gibi sunuyordu. EOD-only mimaride (app.py
      background_refresh, CPO-1508/1512) fiyat HİÇBİR ZAMAN gerçek zamanlı değildir;
      `critical` dalının "güncel veri şu an alınamıyor" mesajının ardına eklenince
-     mesajı da zayıflatıyordu. Renkler token'a alındı (--bp-stale). -->
+     mesajı da zayıflatıyordu. Renkler token'a alındı (--bp-stale). #}
 <div id="staleBanner" role="alert"
      style="display:none;background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-md);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-stale);line-height:1.5">
-  <span aria-hidden="true">⚠️</span> <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
-  Gösterilen fiyatlar gün sonu (EOD) kapanış verisidir; seans içinde güncellenmez.
+  <span aria-hidden="true">⚠️</span> <span id="staleBannerText">Yeni kapanış verisi gecikti.</span>
 </div>

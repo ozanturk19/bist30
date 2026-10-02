@@ -19,7 +19,8 @@ def _helpers():
     want = {"_follow_ticker", "_sub_follow_set", "_add_follow"}
     body = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in want]
     assert {n.name for n in body} == want
-    ns = {"re": __import__("re"), "INDEX_TICKERS": {"XU030", "XU100"}, "BIST100": ["THYAO", "AHGAZ", "XU030"]}
+    ns = {"re": __import__("re"), "INDEX_TICKERS": {"XU030", "XU100"}, "BIST100": ["THYAO", "AHGAZ", "XU030"],
+          "_accounts": __import__("accounts")}   # D-50: takip listesi hesabın izleme listesi
     exec(compile(ast.Module(body=body, type_ignores=[]), "app_helpers", "exec"), ns)
     return ns
 
@@ -38,7 +39,7 @@ def test_add_follow_idempotent_and_leaves_tickers_filter_alone():
     rec = {"tickers": []}
     assert h["_add_follow"](rec, "THYAO") is True
     assert h["_add_follow"](rec, "THYAO") is False
-    assert rec["follow"] == ["THYAO"] and rec["tickers"] == []   # filtre (boş = hepsi) daralmaz
+    assert rec["watchlist"] == ["THYAO"] and rec["tickers"] == []   # filtre (boş = hepsi) daralmaz (D-50: izleme listesi)
     assert h["_sub_follow_set"](rec) == {"THYAO"}
 
 
@@ -65,7 +66,7 @@ def test_new_subscriber_gets_follow(client):
     r = _sub(client, email="a@example.com", ticker="AHGAZ")
     assert r["ok"] and "AHGAZ bildirimleri açıldı" in r["message"]
     rec = client.mod._load_subscribers()["a@example.com"]
-    assert rec["follow"] == ["AHGAZ"] and rec["tickers"] == []
+    assert rec["watchlist"] == ["AHGAZ"] and rec["tickers"] == []   # D-50: izleme listesi
 
 
 @PY310
@@ -85,11 +86,11 @@ def test_registered_without_cookie_sends_confirm_then_confirms(client):
     n = len(client.sent)
     r = _sub(client, email="a@example.com", ticker="THYAO")
     assert r["status"] == "confirm_sent" and len(client.sent) == n + 1
-    assert not client.mod._load_subscribers()["a@example.com"].get("follow")   # onaya kadar eklenmez
+    assert not client.mod._load_subscribers()["a@example.com"].get("watchlist")   # onaya kadar eklenmez
     tok = client.mod._load_subscribers()["a@example.com"]["follow_pending"]["token"]
     resp = client.get(f"/api/follow/confirm?t={tok}")
     assert resp.status_code == 302 and "/hisse/THYAO" in resp.headers["Location"]
-    assert client.mod._load_subscribers()["a@example.com"]["follow"] == ["THYAO"]
+    assert client.mod._load_subscribers()["a@example.com"]["watchlist"] == ["THYAO"]
     assert client.get(f"/api/follow/confirm?t={tok}").headers["Location"].endswith("takip=expired")  # tek kullanım
 
 
@@ -102,7 +103,7 @@ def test_inactive_reactivated_with_follow(client):
     r2 = _sub(client, email="a@example.com", ticker="THYAO")
     assert r2["ok"] and "THYAO" in r2["message"]
     rec = client.mod._load_subscribers()["a@example.com"]
-    assert rec["active"] and rec["follow"] == ["THYAO"]
+    assert rec["active"] and rec["watchlist"] == ["THYAO"]
 
 
 @PY310

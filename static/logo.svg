@@ -1,15 +1,1 @@
-<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="36" height="36" rx="9" fill="#0b111f"/>
-  <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
-  <!-- N needle — blue/bullish, pointing up -->
-  <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
-  <!-- S needle — muted navy -->
-  <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
-  <!-- E needle -->
-  <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
-  <!-- W needle -->
-  <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
-  <!-- Center hub -->
-  <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
-  <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
-</svg>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bpg" x1="18" y1="18" x2="102" y2="102" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="60" cy="60" r="44" fill="none" stroke="url(#bpg)" stroke-width="7" stroke-linecap="round" stroke-dasharray="232 44.5" transform="rotate(-18 60 60)"/><path d="M60 25 C62.8 50.5 69.5 57.2 95 60 C69.5 62.8 62.8 69.5 60 95 C57.2 69.5 50.5 62.8 25 60 C50.5 57.2 57.2 50.5 60 25 Z" fill="url(#bpg)" stroke="url(#bpg)" stroke-width="5" stroke-linejoin="round"/><circle cx="91.1" cy="28.9" r="6.5" fill="#00e290"/></svg>

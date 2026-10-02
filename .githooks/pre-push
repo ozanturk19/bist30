@@ -6,7 +6,9 @@
 set -e
 REPO_DIR="$(git rev-parse --show-toplevel)"
 
-if ! "$REPO_DIR/smoke_check.sh"; then
+# C-12: kapi zorunlu -- smoke (py + pytest) ardindan tam pre-deploy kapisi
+# (node-syntax dahil; smoke'taki ikinci kosum kaldirildi).
+if ! "$REPO_DIR/smoke_check.sh" || ! bash "$REPO_DIR/tools/pre-deploy-check.sh"; then
     echo ""
     echo "Push aborted by P2.5 pre-deploy gate. Fix the issues above."
     echo "Emergency bypass (CPO approval required): git push --no-verify"

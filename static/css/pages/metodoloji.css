@@ -22,17 +22,11 @@
   header {
     background: var(--bp-surface);
     border-bottom: 1px solid var(--bp-border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
     position: sticky;
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); }
 
-  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
 
   .prose h2 {
     font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
@@ -129,9 +123,15 @@
     font-size: var(--bp-text-base); font-weight: 500;
   }
   .tldr-icon { font-size: var(--bp-text-lg); flex-shrink: 0; }
-  .tldr-label { font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
+  .tldr-label { font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 96px; }
   .tldr-eq { color: var(--bp-text3); font-size: var(--bp-text-sm); margin: 0 4px; }
   .tldr-formula { color: var(--bp-text2); font-family: var(--bp-font-mono); font-size: var(--bp-text-sm); }
+  /* C-70 K23: telefonda formül kendi satırına iner (320'de kutudan taşıyor, 390'da "DI+ / > DI−" bölünüyordu) */
+  @media (max-width: 600px) {
+    .tldr-row { flex-wrap: wrap; }
+    .tldr-eq { display: none; }
+    .tldr-formula { flex: 1 1 100%; min-width: 0; padding-left: 34px; }
+  }
   .tldr-green .tldr-label { color: var(--bp-al); }
   .tldr-red   .tldr-label { color: var(--bp-sat); }
   .tldr-gray  .tldr-label { color: var(--bp-text3); }
@@ -156,31 +156,7 @@
     --da-glow-size: 260px; --da-glow-a: .12;
   }
 
-
-  @media (max-width: 600px) {
-    .container { padding: 16px; }
-  }
-
-  /* Makro Ticker */
-  .macro-bar{background:var(--bp-bg);border-bottom:1px solid var(--bp-border-subtle);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden;position:sticky;top:0;z-index:var(--bp-z-sticky);white-space:nowrap;}
-  .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised);}
-  .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-bg),transparent);}
-  .macro-bar::after{right:0;background:linear-gradient(to left,var(--bp-bg),transparent);}
-  .macro-track{display:inline-flex;align-items:center;animation:macroScroll 40s linear infinite;will-change:transform;height:32px;}
-  .macro-bar:hover .macro-track{animation-play-state:paused;}
-  @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  /* K-AZ: `top:50%` seridin safe-area DOLGUSUNU da iceren kutusuna gore
-     ortaliyordu -> PWA'da dugmenin ust ~24px'i centigin altinda kaliyordu
-     (olculdu, inset=47px). Dolgunun yarisi geri eklendi; inset=0'da deger
-     BIREBIR ayni (50%). */
-  .macro-pause-btn { position: absolute; right: 2px; top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid var(--bp-border-subtle);font-size:var(--bp-text-xs);height:32px;}
-  .macro-item-lbl{font-weight:600;color:var(--bp-text2);}
   .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:var(--bp-text3);}
-
 
   /* Terimler — Karıştırılmaması Gerekenler (CPO-1682 terim netleştirmesi) */
   .term-grid { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }

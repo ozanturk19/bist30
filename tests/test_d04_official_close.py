@@ -265,3 +265,130 @@ def test_overlay_index_record_without_volume_keeps_series_volume():
     df.index = pd.to_datetime(["2026-09-21", "2026-09-22", "2026-09-23"])
     out, ok = oc.overlay_official_bar(df, rec, "XU030")
     assert ok and out["Close"].iloc[-1] == 16370.07 and out["Volume"].iloc[-1] == 1000.0
+
+
+# ── D-04b(4): 09:30 sabah doğrulaması — ETag koşullu istek + İş Yatırım yedeği ──
+
+class _FakeResp:
+    def __init__(self, status_code, content=b"", headers=None, json_data=None):
+        self.status_code = status_code
+        self.content = content
+        self.headers = headers or {}
+        self._json = json_data
+
+    def json(self):
+        if self._json is None:
+            raise ValueError("no json")
+        return self._json
+
+
+def test_fetch_bulletin_captures_etag(monkeypatch):
+    def fake_get(url, timeout=None, headers=None):
+        return _FakeResp(200, b"zip-bytes", {"Last-Modified": "Wed, 23 Sep 2026 15:27:00 GMT", "ETag": '"abc123"'})
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    got = oc.fetch_bulletin(date(2026, 9, 23))
+    assert got["etag"] == '"abc123"' and got["raw"] == b"zip-bytes"
+
+
+def test_fetch_bulletin_conditional_not_modified(monkeypatch):
+    calls = []
+
+    def fake_get(url, timeout=None, headers=None):
+        calls.append(headers)
+        return _FakeResp(304)
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    assert oc.fetch_bulletin_conditional(date(2026, 9, 23), '"abc123"') is None
+    assert calls[0]["If-None-Match"] == '"abc123"'
+
+
+def test_fetch_bulletin_conditional_changed(monkeypatch):
+    def fake_get(url, timeout=None, headers=None):
+        return _FakeResp(200, b"new-zip", {"ETag": '"def456"'})
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    got = oc.fetch_bulletin_conditional(date(2026, 9, 23), '"abc123"')
+    assert got["raw"] == b"new-zip" and got["etag"] == '"def456"'
+
+
+def test_fetch_bulletin_conditional_no_etag_falls_back_to_plain_get(monkeypatch):
+    def fake_get(url, timeout=None, headers=None):
+        assert "If-None-Match" not in (headers or {})
+        return _FakeResp(200, b"zip", {"ETag": '"x"'})
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    got = oc.fetch_bulletin_conditional(date(2026, 9, 23), None)
+    assert got["raw"] == b"zip"
+
+
+def test_archive_roundtrip_stores_etag(tmp_path, monkeypatch):
+    monkeypatch.setattr(oc, "ARCHIVE_DIR", str(tmp_path))
+    oc.reset_memory()
+    oc.save_archive(oc.parse_bulletin(_zip(ROWS)), "Wed, 23 Sep 2026 15:27:00 GMT", etag='"abc123"')
+    rec = oc.load_archive(date(2026, 9, 23))
+    assert rec["etag"] == '"abc123"'
+    oc.reset_memory()
+
+
+def test_fetch_isyatirim_hisse_tekil_reads_close(monkeypatch):
+    def fake_get(url, params=None, timeout=None, headers=None):
+        assert params["hisse"] == "THYAO" and params["startdate"] == "23-09-2026"
+        return _FakeResp(200, json_data={"value": [{"HGDG_TARIH": "23-09-2026", "HG_KAPANIS": "298,50"}]})
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    got = oc.fetch_isyatirim_hisse_tekil("THYAO", date(2026, 9, 23))
+    assert got == {"close": 298.5}
+
+
+def test_fetch_isyatirim_hisse_tekil_missing_day_returns_none(monkeypatch):
+    def fake_get(url, params=None, timeout=None, headers=None):
+        return _FakeResp(200, json_data={"value": []})
+    import requests
+    monkeypatch.setattr(requests, "get", fake_get)
+    assert oc.fetch_isyatirim_hisse_tekil("THYAO", date(2026, 9, 23)) is None
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")
+def test_morning_verify_window():
+    import app
+    tr = app._TZ_TR
+    assert not app._morning_verify_window(datetime(2026, 9, 24, 9, 29, tzinfo=tr))
+    assert app._morning_verify_window(datetime(2026, 9, 24, 9, 30, tzinfo=tr))
+    assert app._morning_verify_window(datetime(2026, 9, 24, 9, 54, tzinfo=tr))
+    assert not app._morning_verify_window(datetime(2026, 9, 24, 9, 55, tzinfo=tr))
+    assert not app._morning_verify_window(datetime(2026, 9, 26, 9, 40, tzinfo=tr))   # Cumartesi
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")
+def test_run_morning_verify_pass_unchanged_bulletin_is_noop(monkeypatch):
+    import app
+    monkeypatch.setattr(oc, "load_archive", lambda d: {"etag": '"abc"'})
+    monkeypatch.setattr(oc, "fetch_bulletin_conditional", lambda d, etag, timeout=30: None)
+    called = []
+    monkeypatch.setattr(app, "_run_official_close_pass", lambda day, notify=True: called.append(day) or True)
+    assert app._run_morning_verify_pass(date(2026, 9, 24)) is True
+    assert called == []   # değişmemiş bültende tam tur yeniden koşmaz
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")
+def test_run_morning_verify_pass_revised_bulletin_reruns_full_pass(monkeypatch):
+    import app
+    monkeypatch.setattr(oc, "load_archive", lambda d: {"etag": '"abc"'})
+    monkeypatch.setattr(oc, "fetch_bulletin_conditional",
+                         lambda d, etag, timeout=30: {"raw": b"x", "etag": '"def"'})
+    monkeypatch.setattr(oc, "reset_memory", lambda: None)
+    called = []
+    monkeypatch.setattr(app, "_run_official_close_pass", lambda day, notify=True: called.append((day, notify)) or True)
+    assert app._run_morning_verify_pass(date(2026, 9, 24)) is True
+    assert called == [(date(2026, 9, 23), False)]
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="app.py 3.10+ ister — VPS venv'de çalıştır")
+def test_run_morning_verify_pass_missing_archive_retries_full_pass(monkeypatch):
+    import app
+    monkeypatch.setattr(oc, "load_archive", lambda d: None)
+    called = []
+    monkeypatch.setattr(app, "_run_official_close_pass", lambda day, notify=True: called.append((day, notify)) or False)
+    assert app._run_morning_verify_pass(date(2026, 9, 24)) is False
+    assert called == [(date(2026, 9, 23), False)]

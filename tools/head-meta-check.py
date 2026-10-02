@@ -54,9 +54,7 @@ R4  Indekslenebilir sablon (robots noindex YOK) canonical + og:title +
 R5  Sablonlarin ilan ettigi og:image:width/height, rotanin GERCEKTEN
     urettigi tuval olculeriyle ayni olmali (89. ders: iki alan ayni
     olguyu anlatiyorsa birbirine karsi olcul).
-R6  `/og-image.svg` ve `/og-image.png` AYNI metin kumesini yayinlamali --
-    tek urun, tek kanon. (Merceğin tekrar eden P1'i: "ayni is icin iki
-    kanon basli basina bulgudur".)
+R6  (kalkti 27.09, D-11: `/og-image.svg` silindi; tek rota kaldi)
 R7  og-image'daki KISA etiketler (<=25 karakter, sayilarin altina cizilen
     kutu etiketleri) bir endeks adi (`BIST<sayi>`) TASIYAMAZ -- sayilan
     kume XU030 haric TUM evren. Kapi kor kalmasin diye `_og_image_stats`
@@ -69,7 +67,6 @@ Kullanim:
 """
 import ast
 import re
-import xml.dom.minidom
 import subprocess
 import sys
 from pathlib import Path
@@ -159,19 +156,6 @@ def _route_body(app_src, route):
     return ""
 
 
-def _svg_texts(body):
-    """SVG <text ...>GOVDE</text> govdeleri.
-
-    K-DB (22.09): govdedeki IC ETIKETLER (<tspan fill=...>) SOYULUR. Marka
-    sozcuk-isareti `<text>Borsa<tspan>Pusula</tspan></text>` olarak yazilir --
-    soyulmazsa R6 bu yuzeyi PNG'deki "BorsaPusula" ile hic eslestiremez ve
-    kapi kendi isaretleme bicimi yuzunden sahte-pozitif uretir."""
-    out = []
-    for t in re.findall(r"<text\b[^>]*>(.*?)</text>", body, re.S):
-        out.append(re.sub(r"<[^>]+>", "", t).strip())
-    return out
-
-
 def _png_texts(body):
     """draw.text(...) ve (x, "sayi", "ETIKET", renk) tuple'larindaki insan metni."""
     out = []
@@ -181,8 +165,8 @@ def _png_texts(body):
     for m in re.finditer(r"\(\s*\d+\s*,\s*str\([^)]*\)\s*,\s*[\"'](.*?)[\"']", body):
         out.append(m.group(1))
     # for text, color in [("BIST", "#f0f6fc"), ("100", "#58a6ff"), ...]
-    # -- baslik PNG tarafinda dongude cizilir; ILK yazim bunu KACIRDI ve R6
-    #    3 sahte-pozitif uretti (57. ders: dar cikarim, muafiyeti beyan et).
+    # -- baslik PNG tarafinda dongude cizilir; ILK yazim bunu KACIRDI
+    #    ve 3 sahte-pozitif uretti (57. ders: dar cikarim, muafiyeti beyan et).
     for m in re.finditer(r"\(\s*[\"'](.*?)[\"']\s*,\s*[\"']#[0-9a-fA-F]{3,8}[\"']\s*\)", body):
         out.append(m.group(1))
     # font_family / tuple icinde gecen renk kodlarini disla
@@ -191,8 +175,8 @@ def _png_texts(body):
 
 def _og_title(app_src):
     """K-DB: baslik artik IKI rotada da `_OG_TITLE_PARTS`tan turuyor; rota
-    govdesinde literal olarak GECMEZ. Modul sabitinden cozulur, boylece R6
-    her iki yuzeyde de AYNI tek metni gorur."""
+    govdesinde literal olarak GECMEZ. Modul sabitinden cozulur, boylece R1/R2/R7
+    ayni tek metni gorur."""
     m = re.search(r"_OG_TITLE_PARTS\s*=\s*\((.*?)\)\n", app_src, re.S)
     if not m:
         return None
@@ -213,16 +197,14 @@ def main():
 
     # ---------------- og-image rotalari ----------------
     app_src = _read(ref, "app.py")
-    svg_body = _route_body(app_src, "/og-image.svg")
     png_body = _route_body(app_src, "/og-image.png")
-    if not svg_body or not png_body:
-        print("  [R0] og-image rotalari bulunamadi -- kapi kor, ayristirici guncellenmeli")
+    if not png_body:
+        print("  [R0] og-image rotasi bulunamadi -- kapi kor, ayristirici guncellenmeli")
         return 1
 
     _title = _og_title(app_src)
     _t = [_title] if _title else []
-    og_surfaces = [("/og-image.svg", svg_body, _svg_texts(svg_body) + _t),
-                   ("/og-image.png", png_body, _png_texts(png_body) + _t)]
+    og_surfaces = [("/og-image.png", png_body, _png_texts(png_body) + _t)]
 
     for name, body, texts in og_surfaces:
         for t in texts:
@@ -243,31 +225,6 @@ def main():
                 out.append(("R7", name,
                             f'"{t}" -> kutu etiketi endeks adlandiriyor; sayilan kume '
                             f"XU030 haric TUM evren (kanon: 'BIST100 + ek hisseler')"))
-
-    # R9 (K-DB, 22.09) -- /og-image.svg IYI-BICIMLI XML MI?
-    #   Rota bir f-string ile elle kuruluyor; sablon motoru yok, dolayisiyla
-    #   hicbir sey iyi-bicimliligi dogrulamiyordu. K-DB sirasinda tam da bu
-    #   sinifta bir kusur URETILDI: aciklama yorumuna token adi yazildi ve
-    #   XML yorumu ICINDE IKI TIRE YAN YANA gecemedigi icin belge bozuldu
-    #   (olculdu: expat "not well-formed", satir 5). Tarayici bagislar, kati
-    #   ayristirici (ve bazi paylasim onizleyicileri) bagislamaz.
-    #   Kapi rotayi vekil sayilarla render edip ayristirir.
-    try:
-        _ns = {}
-        _pal = app_src[app_src.index("_OG_PALETTE = {"):]
-        exec(_pal[:_pal.index(chr(10) + "}" + chr(10)) + 3], _ns)
-        _tp = app_src.index("_OG_TITLE_PARTS =")
-        exec(app_src[_tp:app_src.index(chr(10), app_src.index("_OG_SUBTITLE", _tp)) + 1], _ns)
-        _stat = "    al_count, sat_count, total, _today_unused = _og_image_stats()"
-        _i = app_src.index(_stat, app_src.index('@app.route("/og-image.svg")'))
-        _j = app_src.index("</svg>", _i) + len("</svg>") + 3   # + kapatan uclu tirnak
-        _body = app_src[_i:_j].replace(
-            _stat.strip(), "al_count, sat_count, total = 7, 72, 216")
-        exec("def _r():" + chr(10) + _body + chr(10) + "    return svg" + chr(10), _ns)
-        xml.dom.minidom.parseString(_ns["_r"]())
-    except Exception as exc:
-        out.append(("R9", "/og-image.svg",
-                    "rota iyi-bicimli XML uretmiyor / ayristirilamadi: %s" % exc))
 
     # R7b (K-DB, 22.09) -- BIR KURAL, PARCA PARCA CIZILEN METNI GORMEZ.
     #   R7 ("kisa kutu etiketi endeks adlandiramaz") 22.09'a kadar HIC
@@ -315,26 +272,8 @@ def main():
                     "`og_image_url` context processor'u yok -- sablonlardaki "
                     "`{{ og_image_url }}` bos render edilir, R8 kor kalir"))
 
-    # R6 -- iki rota AYNI metni yayinlamali.
-    # BILEREK MUAF (57. ders -- muafiyeti dosyada ACIKCA beyan et):
-    #   "📊"  : PNG'de bilerek YOK. Rotanin kendi yorumu: "mini bar-chart
-    #           (emoji yerine, font-bagimsiz)" -- DejaVu emoji glifi tasimaz,
-    #           PIL kutu cizerdi. Bu bir SUS tercihi, metin kanonu degil.
-    #   "\u2022": sayi placeholder'inin normalize hali ({al_count} vs
-    #           str(al_count)) -- DEGER, kopya degil.
-    R6_EXEMPT = {"\U0001F4CA", "\u2022"}
-    svg_set = {_norm(t) for t in og_surfaces[0][2] if _norm(t)} - R6_EXEMPT
-    png_set = {_norm(t) for t in og_surfaces[1][2] if _norm(t)} - R6_EXEMPT
-    for only, where in ((svg_set - png_set, "yalniz /og-image.svg"),
-                        (png_set - svg_set, "yalniz /og-image.png")):
-        for t in sorted(only):
-            out.append(("R6", "og-image", f'"{t}" -> {where} (tek urun, tek kanon)'))
-
     # R5 -- ilan edilen olcu <-> uretilen tuval
     canvas = set()
-    m = re.search(r'<svg width="(\d+)" height="(\d+)"', svg_body)
-    if m:
-        canvas.add((m.group(1), m.group(2)))
     m = re.search(r'Image\.new\(\s*["\']RGB["\']\s*,\s*\((\d+),\s*(\d+)\)', png_body)
     if m:
         canvas.add((m.group(1), m.group(2)))
@@ -399,7 +338,7 @@ def main():
 
     if verbose:
         print(f"  tarandi: {len(names)} sablon / {n_meta} meta degeri, "
-              f"og-image {len(svg_set)}+{len(png_set)} dize, tuval {sorted(canvas)}")
+              f"og-image {len(og_surfaces[0][2])} dize, tuval {sorted(canvas)}")
     if out:
         for rule, where, msg in out:
             print(f"  [{rule}] {where}: {msg}")

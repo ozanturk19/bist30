@@ -1,0 +1,39 @@
+{#- C-41 BILESEN (yalniz bilesen, henuz hicbir sayfada DEGIL) — "Takip ettiklerinde son seansta" seridi.
+    Onayli taslak C-M8 "Bos hal ve Piyasa seridi": takip listesi olan ziyaretci Piyasa sayfasinin
+    en ustunde, son seansta trend durumu degisen 1-3 hissesini ince bir seritte gorur.
+    BAGLAMA (CPO): templates/index.html'de header include'unun HEMEN ALTINA tek satir:
+        {% include '_takip_strip.html' %}
+    Baska bir sey gerekmez: bilesen kendi stilini (bp-account.css) ve betigini tasir. Sayfa
+    bp-vocab.js'i (sigLabel) zaten yukluyor olmali (index.html yukluyor).
+    Davranis: sunucu HICBIR SEY basmaz (serit gizli, kisisel veri yok). `bp_li` ipucu cerezi
+    yoksa istek de yok. Varsa GET /api/me/watchlist; signal_bars <= 1 olan en fazla 3 hisse
+    gosterilir, "Takip listen" /takip'e gider. Degisen yoksa, oturum dusmusse (401 -> ipucu
+    silinir) ya da istek basarisizsa serit gizli kalir. -#}
+<link rel="stylesheet" href="{{ static_v('css/bp-account.css') }}">
+<div class="tks" id="tkStrip" role="note" aria-label="Takip ettiklerinde son seansta" hidden></div>
+<script>
+(function () {
+  var box = document.getElementById('tkStrip');
+  if (!box || !/(?:^|;\s*)bp_li=/.test(document.cookie || '')) return;
+  var KEY = { AL: 'strong', BEKLE: 'flat', SAT: 'broken' };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pill(sig) { return '<span class="da-signal da-signal--' + (KEY[sig] || 'flat') + '">' + esc(window.sigLabel(sig)) + '</span>'; }
+  fetch('/api/me/watchlist', { credentials: 'same-origin' }).then(function (r) {
+    if (r.status === 401) { document.cookie = 'bp_li=; Max-Age=0; Path=/; Secure; SameSite=Lax'; throw new Error('oturum yok'); }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function (j) {
+    if (!j || j.ok !== true || !Array.isArray(j.items)) throw new Error('beklenmeyen govde');
+    if (typeof window.sigLabel !== 'function') throw new Error('sigLabel yok');
+    var ch = j.items.filter(function (x) { return x && x.ticker && x.signal_bars !== null && x.signal_bars !== undefined && +x.signal_bars <= 1; }).slice(0, 3);
+    if (!ch.length) return;
+    box.innerHTML = '<span class="tks-tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.9 6.6 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Takip ettiklerinde son seansta</span>' +
+      ch.map(function (x, i) {
+        var t = esc(x.ticker), lab = x.prev_signal ? t + ': ' + esc(window.sigLabel(x.prev_signal)) + ' durumundan ' + esc(window.sigLabel(x.signal)) + ' durumuna geçti' : t + ': son seansta ' + esc(window.sigLabel(x.signal)) + ' durumuna geçti';
+        return (i ? '<span class="tks-sep" aria-hidden="true">·</span>' : '') + '<a class="tks-i" href="/hisse/' + t + '" aria-label="' + lab + '"><b>' + t + '</b>' +
+          (x.prev_signal ? pill(x.prev_signal) + '<span class="tks-ar" aria-hidden="true">→</span>' : '') + pill(x.signal) + '</a>';
+      }).join('') + '<a class="tks-go" href="/takip">Takip listen →</a>';
+    box.hidden = false;
+  }).catch(function (e) { console.warn('takip seridi gizli:', e); });
+})();
+</script>

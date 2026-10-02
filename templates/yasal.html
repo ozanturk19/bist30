@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Yasal Uyarı & SPK Bildirimi | BorsaPusula</title>
 <meta name="description" content="BorsaPusula yasal uyarı, SPK bildirimi ve sorumluluk reddi. Bu platform yatırım tavsiyesi vermez, SPK lisansı bulunmamaktadır.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/yasal">
 <meta property="og:title"       content="Yasal Uyarı &amp; SPK Bildirimi — borsapusula.com">
 <meta property="og:description" content="BorsaPusula yasal uyarı, SPK bildirimi ve sorumluluk reddi. Bu platform yatırım tavsiyesi vermez.">
@@ -20,27 +20,27 @@
   {"@type":"ListItem","position":2,"name":"Yasal Uyarı","item":"https://borsapusula.com/yasal"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/yasal.css?v=9fe23227">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/prose.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/yasal.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}
 
 
-<div class="container lg-head">{% call bpf.pagehead('Yasal Uyarı') %}SPK bildirimi, içeriklerin hukuki niteliği ve sorumluluk sınırları.{% endcall %}</div>
-<main class="container" id="main-content" tabindex="-1">
-  <p class="updated">Son güncelleme: 21 Eylül 2026 — Bu sayfa yasal zorunluluk kapsamında yayımlanmaktadır.</p>
+<div class="container container--read lg-head">{% call bpf.pagehead('Yasal Uyarı') %}SPK bildirimi, içeriklerin hukuki niteliği ve sorumluluk sınırları.{% endcall %}</div>
+<main class="container container--read prose" id="main-content" tabindex="-1">
+  <p class="updated">Son güncelleme: 26 Eylül 2026 — Bu sayfa yasal zorunluluk kapsamında yayımlanmaktadır.</p>
 
-  <!-- Kırmızı uyarı banner -->
-  <div class="warn-banner">
-    <h2 class="warn-banner-title">
-      <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bp-sat)" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      ÖNEMLİ YASAL UYARI
-    </h2>
-    <p><strong>borsapusula.com, Sermaye Piyasası Kurulu (SPK) tarafından yetkilendirilmiş bir yatırım danışmanlığı kuruluşu değildir.</strong> Bu platformda yer alan hiçbir içerik, sinyal, analiz veya veri; 6362 sayılı Sermaye Piyasası Kanunu kapsamında yatırım danışmanlığı hizmeti olarak değerlendirilemez.</p>
-    <p>Tüm içerikler yalnızca <strong>algoritmik teknik analiz verisi</strong> niteliğinde olup bilgilendirme amacıyla sunulmaktadır. Yatırım kararlarınızı vermeden önce <strong>SPK lisanslı bir yatırım danışmanına</strong> başvurmanızı tavsiye ederiz.</p>
+  <div class="da-notice da-notice--caution" role="note">
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div>
+      <h2 class="da-notice-title">Önemli yasal uyarı</h2>
+      <p><strong>borsapusula.com, Sermaye Piyasası Kurulu (SPK) tarafından yetkilendirilmiş bir yatırım danışmanlığı kuruluşu değildir.</strong> Bu platformda yer alan hiçbir içerik, puan, analiz veya veri; 6362 sayılı Sermaye Piyasası Kanunu kapsamında yatırım danışmanlığı hizmeti olarak değerlendirilemez.</p>
+      <p>Tüm içerikler yalnızca <strong>algoritmik olarak hesaplanan analiz verisi</strong> niteliğinde olup bilgilendirme amacıyla sunulmaktadır. Yatırım kararlarınızı vermeden önce <strong>SPK lisanslı bir yatırım danışmanına</strong> başvurmanızı tavsiye ederiz.</p>
+    </div>
   </div>
 
   <!-- SPK Bildirimi -->
@@ -51,11 +51,11 @@
     </h2>
     <div class="clause">
       <div class="clause-num">1</div>
-      <div class="clause-text">Bu platform, <span class="highlight">yatırım tavsiyesi, portföy yönetimi veya yatırım danışmanlığı hizmeti vermemektedir.</span> 6362 sayılı Sermaye Piyasası Kanunu ve ilgili SPK tebliğleri uyarınca, bu tür hizmetlerin yalnızca SPK'nın yetkilendirdiği kuruluşlar tarafından verilebileceğini hatırlatırız.</div>
+      <div class="clause-text">Bu platform, <strong>yatırım tavsiyesi, portföy yönetimi veya yatırım danışmanlığı hizmeti vermemektedir.</strong> 6362 sayılı Sermaye Piyasası Kanunu ve ilgili SPK tebliğleri uyarınca, bu tür hizmetlerin yalnızca SPK'nın yetkilendirdiği kuruluşlar tarafından verilebileceğini hatırlatırız.</div>
     </div>
     <div class="clause">
       <div class="clause-num">2</div>
-      <div class="clause-text">borsapusula.com'da yer alan <strong>sinyal, indikatör, teknik analiz verileri ve grafik gösterimleri</strong>; algoritmik hesaplama sonuçlarıdır. Bu veriler yalnızca teknik analiz bilgisi sunmak amacıyla üretilmekte olup hiçbir yatırım aracının alım-satımına yönelik tavsiye içermez.</div>
+      <div class="clause-text">borsapusula.com'da yer alan <strong>puanlar, sinyaller, temel ve teknik analiz verileri ve grafik gösterimleri</strong>; algoritmik hesaplama sonuçlarıdır. Bu veriler yalnızca analiz bilgisi sunmak amacıyla üretilmekte olup hiçbir yatırım aracının alım-satımına yönelik tavsiye içermez.</div>
     </div>
     <div class="clause">
       <div class="clause-num">3</div>
@@ -67,7 +67,7 @@
     </div>
     <div class="clause">
       <div class="clause-num">5</div>
-      <div class="clause-text">Platformda yer alan tüm içerikler, BIST'te işlem gören menkul kıymetlere ilişkin teknik analiz kapsamındadır. <strong>Belirli bir menkul kıymeti alma veya satma yönünde doğrudan tavsiye niteliği taşımaz.</strong></div>
+      <div class="clause-text">Platformda yer alan tüm içerikler, BIST'te işlem gören menkul kıymetlere ilişkin temel ve teknik analiz kapsamındadır. <strong>Belirli bir menkul kıymeti alma veya satma yönünde doğrudan tavsiye niteliği taşımaz.</strong></div>
     </div>
     <div class="clause">
       <div class="clause-num">6</div>
@@ -97,14 +97,14 @@
       <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
       Platform Hakkında
     </h2>
-    <p><strong>borsapusula.com</strong>, BIST'te işlem gören hisse senetleri için algoritmik teknik analiz sinyalleri sunan bağımsız bir bilgi platformudur.</p>
+    <p><strong>borsapusula.com</strong>, BIST'te işlem gören hisse senetleri şirketlerini finansalları, değerlemesi ve trendiyle algoritmik olarak puanlayan bağımsız bir bilgi platformudur.</p>
     <ul>
       <li>Sinyal yönü <strong>Supertrend, ADX ve EMA göstergeleri</strong> kullanılarak otomatik hesaplanır; hacim, ayrı bir teyit/güç bileşeni olarak Teknik Güç Skoru'na dahil edilir.</li>
       <li>Veri kaynağı: Yahoo Finance (yfinance kütüphanesi) — fiyatlar <strong>gerçek zamanlı değildir</strong>. Sitede gösterilen fiyatlar <strong>son kapanışa (gün sonu / EOD)</strong> aittir ve seans içinde güncellenmez; yeni işlem gününün verisi ancak kapanıştan sonra (~18:00-18:30 TR) yüklenir. Bu nedenle seans sırasında gördüğünüz fiyat bir <strong>önceki kapanışa</strong>, hafta sonu ve tatil sonrasında ise daha da eskisine ait olabilir. Sinyaller de aynı turda, günde yalnızca bir kez yeniden hesaplanır.</li>
       <li>Platform, herhangi bir <strong>aracı kurum, banka veya SPK lisanslı kuruluş</strong> ile bağlantılı değildir.</li>
-      <li>İçerikler bireysel araştırma amacıyla ücretsiz sunulmaktadır.</li>
+      <li>İçerikler bireysel araştırma amacıyla sunulmaktadır.</li>
     </ul>
-    <p style="margin-top:10px">Metodoloji hakkında ayrıntılı bilgi için <a href="/metodoloji" class="da-link">Metodoloji sayfasını</a> inceleyebilirsiniz.</p>
+    <p>Metodoloji hakkında ayrıntılı bilgi için <a href="/metodoloji" class="da-link">Metodoloji sayfasını</a> inceleyebilirsiniz.</p>
   </div>
 
   <!-- KVKK Özet -->
@@ -128,7 +128,7 @@
       <li><strong>E-posta:</strong> <a href="mailto:iletisim@borsapusula.com" class="da-link">iletisim@borsapusula.com</a></li>
       <li><strong>İletişim sayfası:</strong> <a href="/iletisim" class="da-link">borsapusula.com/iletisim</a></li>
     </ul>
-    <p style="margin-top:10px;font-size:var(--bp-text-base);color:var(--bp-text3)">KVKK kapsamındaki veri taleplerinizi de yukarıdaki e-posta adresine iletebilirsiniz. Talepler 30 gün içinde yanıtlanır.</p>
+    <p class="lg-note">KVKK kapsamındaki veri taleplerinizi de yukarıdaki e-posta adresine iletebilirsiniz. Talepler 30 gün içinde yanıtlanır.</p>
   </div>
 
 </main>
@@ -136,10 +136,10 @@
 {% with ftr_self='/yasal' %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

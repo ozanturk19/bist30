@@ -6,7 +6,8 @@ import time
 import pytest
 from unittest.mock import MagicMock
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+# D-09: üretim modülü (depo kökü, tests/conftest.py); tools/ kopyası silindi
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from _health_extras import (
     _compute_uptime_sec,
     _compute_cache_age_min,

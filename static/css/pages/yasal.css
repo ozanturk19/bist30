@@ -1,77 +1,38 @@
-/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
-   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
-   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
-:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
+/* C-44 (26.09): ortak düzen prose.css'te; burada yalnız Yasal'ın deltası
+   (numaralı madde kartları). Üstteki uyarı artık amber `.da-notice--caution`
+   (kanon: yasal uyarı rengi amber; kırmızı yalnız hata/veri kaybı). */
+.section-card {
+  background: var(--bp-surface);
+  border: 1px solid var(--bp-border);
+  border-radius: var(--bp-radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.prose .section-card h2 {
+  font-family: inherit; font-size: var(--bp-text-15); font-weight: 700; letter-spacing: 0; line-height: 1.4;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--bp-border-subtle);
+}
+.prose .section-card h2::after { display: none; }
+/* SVG sunum-özniteliğinde var() çalışmadığı için ikon rengi burada verilir. */
+.section-card h2 > svg { color: var(--bp-text3); flex-shrink: 0; }
+.prose .section-card p { margin-bottom: 10px; }
+.prose .section-card p:last-child { margin-bottom: 0; }
+.prose .section-card ul { margin: 8px 0 10px 18px; }
+.prose .section-card li { margin-bottom: 5px; }
+.lg-note { font-size: var(--bp-text-base); }
+.prose .lg-note { color: var(--bp-text3); }
 
-/* ==== extracted from templates/yasal.html (T2.5) ==== */
+.clause { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--bp-border-subtle); }
+.clause:last-child { border-bottom: none; }
+.clause-num {
+  flex-shrink: 0; width: 24px; height: 24px;
+  background: var(--bp-border-subtle); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
+  margin-top: 1px;
+}
+.clause-text { color: var(--bp-text2); font-size: var(--bp-text-base); line-height: 1.65; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-size: var(--bp-text-md); line-height: 1.75; min-height: 100vh; }
-  header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); }
-
-  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 36px 24px 48px; }
-  /* C-18b: görünür başlık <main> dışında (hukuki metin kapısı <main>'i izler); main üst boşluğu arayı verir */
-  .container.lg-head { padding-top: 0; padding-bottom: 0; }
-
-  /* Büyük uyarı banner */
-  .warn-banner {
-    background: rgba(var(--bp-sat-rgb), 0.08);
-    border: 1.5px solid rgba(var(--bp-sat-rgb), 0.35);
-    border-radius:var(--bp-radius-xl);
-    padding: 20px 24px;
-    margin-bottom: 32px;
-  }
-  .warn-banner-title {
-    font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-sat);
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 0;   /* K-AM: artik <h2> */
-    margin-bottom: 10px;
-  }
-  .warn-banner p { color: var(--bp-text2); font-size: var(--bp-text-base); margin-bottom: 8px; }
-  .warn-banner p:last-child { margin-bottom: 0; }
-
-  /* Bölüm kartları */
-  .section-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .section-card h2 {
-    font-size: var(--bp-text-15); font-weight: 700; color: var(--bp-text);
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 14px; padding-bottom: 10px;
-    border-bottom: 1px solid var(--bp-border-subtle);
-  }
-  /* Baslik ikonlari: onceden sablonda ham `stroke="#8b949e"` (eski palet grisi)
-     vardi — SVG sunum-ozniteliginde var() calismadigi icin renk burada verilir. */
-  .section-card h2 > svg { color: var(--bp-text3); flex-shrink: 0; }
-  .section-card p { color: var(--bp-text2); margin-bottom: 10px; }
-  .section-card p:last-child { margin-bottom: 0; }
-  .section-card ul { color: var(--bp-text2); margin: 8px 0 10px 18px; }
-  .section-card li { margin-bottom: 5px; }
-  strong { color: var(--bp-text); }
-  .highlight { color: var(--bp-sat); font-weight: 600; }
-
-  /* Madde listesi özel stil */
-  .clause {
-    display: flex; gap: 12px; padding: 10px 0;
-    border-bottom: 1px solid var(--bp-border-subtle);
-  }
-  .clause:last-child { border-bottom: none; }
-  .clause-num {
-    flex-shrink: 0; width: 24px; height: 24px;
-    background: var(--bp-border-subtle); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
-    margin-top: 1px;
-  }
-  .clause-text { color: var(--bp-text2); font-size: var(--bp-text-base); line-height: 1.65; }
-
-  .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 28px; }
-
-
-  @media (max-width: 600px) { .container { padding: 16px 14px 32px; } .section-card { padding: 16px; } }
-
+@media (max-width: 600px) { .section-card { padding: 16px; } }

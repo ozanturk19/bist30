@@ -11,7 +11,7 @@ Metin/kanon kapilarinin envanteri cikarildiginda gorulen sira:
     K-CI -> static/manifest.json  (BU DOSYA)
 
 `static/manifest.json` 53 kapidan **YALNIZ BIRI** tarafindan okunuyordu
-(`cachebust-check.py`) -- o da metni degil IKON HASH'ini denetliyor.
+(`sw_manifest.py`, eski cachebust-check) -- o da metni degil IKON HASH'ini denetliyor.
 Manifest'in metni ise kullaniciya **isletim sistemi kabugunda** ulasir:
 yukleme diyalogu, ana ekran adi, uygulama gorev cubugu ve **uzun basinca
 acilan kisayol menusu**. Bu kanal, sitedeki hicbir sayfayi degistirmeden

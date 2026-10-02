@@ -48,16 +48,16 @@ def _format_alert_md(alert: dict) -> str:
     return f"🔴 ALERT [{alert.get('level', 'UNKNOWN')}] {alert.get('type', 'unknown')}"
 
 
-def _should_alert_telegram(
+def _should_send_alert(
     alert: dict,
     last_alert_ts: Optional[float] = None,
     cooldown_min: float = 5,
 ) -> bool:
-    """Returns True if alert should be forwarded to Telegram.
+    """Returns True if alert should be forwarded to alarm e-postası.
 
     Enforces market_open guard (alert must exist) and cooldown window.
-    last_alert_ts: UNIX timestamp of last Telegram alert sent, or None.
-    cooldown_min: minimum minutes between Telegram alerts (default 5).
+    last_alert_ts: UNIX timestamp of last alarm e-postası alert sent, or None.
+    cooldown_min: minimum minutes between alarm e-postası alerts (default 5).
     """
     if not alert:
         return False

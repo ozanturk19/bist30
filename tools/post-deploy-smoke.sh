@@ -22,7 +22,7 @@ echo "$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')"
 echo ""
 
 # ── 1. Health ────────────────────────────────────────────────────────────────
-echo "1/6 Health check..."
+echo "1/5 Health check..."
 HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HOST/api/health" 2>/dev/null || echo "ERR")
 if [ "$HTTP" = "200" ]; then
   ok "GET /api/health → 200"
@@ -32,7 +32,7 @@ fi
 
 # ── 2. Ana sayfa yüklenme ─────────────────────────────────────────────────────
 echo ""
-echo "2/6 Ana sayfa (/) ..."
+echo "2/5 Ana sayfa (/) ..."
 HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$HOST/" 2>/dev/null || echo "ERR")
 if [ "$HTTP" = "200" ]; then
   ok "GET / → 200"
@@ -42,7 +42,7 @@ fi
 
 # ── 3. Hisse sayfası (subprocess chart + fundamentals) ───────────────────────
 echo ""
-echo "3/6 Hisse sayfası THYAO (chart + fundamentals subprocess)..."
+echo "3/5 Hisse sayfası THYAO (chart + fundamentals subprocess)..."
 HISSE_OUT=$(curl -s --max-time 30 "$HOST/hisse/THYAO" 2>/dev/null || echo "CURL_ERR")
 HTTP_HISSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/hisse/THYAO" 2>/dev/null || echo "ERR")
 if [ "$HTTP_HISSE" = "200" ]; then
@@ -64,7 +64,7 @@ fi
 
 # ── 4. API live prices (/api/data — stock prices) ────────────────────────────
 echo ""
-echo "4/6 API /api/data (live stock prices)..."
+echo "4/5 API /api/data (live stock prices)..."
 LIVE_OUT=$(curl -s --max-time 30 "$HOST/api/data" 2>/dev/null || echo "CURL_ERR")
 LIVE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/data" 2>/dev/null || echo "ERR")
 if [ "$LIVE_HTTP" = "200" ]; then
@@ -81,7 +81,7 @@ fi
 
 # ── 5. BIST30 chart API (/api/chart — XU030 default) ────────────────────────
 echo ""
-echo "5/6 BIST30 chart API (XU030 subprocess fetch)..."
+echo "5/5 BIST30 chart API (XU030 subprocess fetch)..."
 XU030_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/chart" 2>/dev/null || echo "ERR")
 if [ "$XU030_HTTP" = "200" ]; then
   ok "GET /api/chart → 200"
@@ -89,16 +89,6 @@ elif [ "$XU030_HTTP" = "202" ] || [ "$XU030_HTTP" = "204" ]; then
   warn "GET /api/chart → $XU030_HTTP (loading/cache miss, normal)"
 else
   fail "GET /api/chart → $XU030_HTTP"
-fi
-
-# ── 6. Market summary (/api/market-summary — global prices) ──────────────────
-echo ""
-echo "6/6 Market summary API (global prices subprocess)..."
-GLOBAL_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/market-summary" 2>/dev/null || echo "ERR")
-if [ "$GLOBAL_HTTP" = "200" ]; then
-  ok "GET /api/market-summary → 200"
-else
-  warn "GET /api/market-summary → $GLOBAL_HTTP (soğuk cache olabilir)"
 fi
 
 # ── Özet ─────────────────────────────────────────────────────────────────────

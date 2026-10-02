@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel xmlns:atom="http://www.w3.org/2005/Atom">
+    <title>Anadolu Ajansı Güncel Haberler</title>
+    <link>https://www.aa.com.tr/</link>
+    <description>Türkiye'den ve Dünya'dan Güncel Haberler</description>
+    <language>tr</language>
+    <image>
+      <url>https://www.aa.com.tr/images/meta-photo.png</url>
+      <title>Anadolu Ajansı Güncel Haberler</title>
+      <link>https://www.aa.com.tr/</link>
+    </image>
+    <item>
+      <guid isPermaLink="false">4068495</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/hazine-ve-maliye-bakani-simsek-istifa-iddialarini-yalanladi/4068495</link>
+      <title>Hazine ve Maliye Bakanı Şimşek "istifa" iddialarını yalanladı</title>
+      <description>Hazine ve Maliye Bakanı Mehmet Şimşek, hakkında ortaya atılan istifa iddialarının gerçeği yansıtmadığını bildirdi.</description>
+      <pubDate>Thu, 24 Sep 2026 21:35:54 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_3197aafcb7efa7450e435c462be46729.jpg</image>
+    </item><item>
+      <guid isPermaLink="false">4068335</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/bae-iran-hava-yolu-sirketlerinin-ucuslarini-askiya-aldi/4068335</link>
+      <title>BAE, İran hava yolu şirketlerinin uçuşlarını askıya aldı</title>
+      <description>Birleşik Arap Emirlikleri (BAE), İran hava yolu şirketlerinin ülkeye ve ülkeden gerçekleştirdiği uçuşların bugünden itibaren ikinci bir duyuruya kadar askıya alındığını duyurdu.</description>
+      <pubDate>Thu, 24 Sep 2026 19:25:08 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_fc3580bc8ed82fdf0beb8921070bfd95.jpg</image>
+    </item><item>
+      <guid isPermaLink="false">4067905</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/musiad-expo-2026-farkli-ulkelerden-is-insanlarini-kuresel-pazarlarla-bulusturuyor/4067905</link>
+      <title>MÜSİAD EXPO 2026, farklı ülkelerden iş insanlarını küresel pazarlarla buluşturuyor</title>
+      <description>MÜSİAD EXPO 2026 kapsamındaki ikili iş görüşmelerine katılan yabancı iş dünyası temsilcileri, fuarın sadece Türkiye ile değil, farklı ülkelerden şirketlerle de temas kurarak dünyaya açılma imkanı sunduğunu belirtti.</description>
+      <pubDate>Thu, 24 Sep 2026 16:28:52 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_3d2c327515aa4a8facecd37da03025ca.jpg</image>
+    </item><item>
+      <guid isPermaLink="false">4068266</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/borsa-gunu-dususle-tamamladi/4068266</link>
+      <title>Borsa günü düşüşle tamamladı</title>
+      <description>Borsa İstanbul'da BIST 100 endeksi, günü yüzde 2,74 değer kaybederek 12.888,33 puandan tamamladı.</description>
+      <pubDate>Thu, 24 Sep 2026 18:25:34 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_b83f0998294cdc27b69dcfc809d48a7c.jpg</image>
+    </item><item>
+      <guid isPermaLink="false">4068094</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/ab-ukraynaya-yaklasik-3-milyar-avroluk-yeni-odemeyi-onayladi/4068094</link>
+      <title>AB, Ukrayna'ya yaklaşık 3 milyar avroluk yeni ödemeyi onayladı</title>
+      <description>Avrupa Birliği (AB) Konseyi, Ukrayna Fonu kapsamında ülkeye yaklaşık 3 milyar avro daha aktarılmasını onayladı.</description>
+      <pubDate>Thu, 24 Sep 2026 17:54:28 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_33d42781720c59e7256e2d3081b09e9e.jpg</image>
+    </item><item>
+      <guid isPermaLink="false">4068050</guid>
+      <link>https://www.aa.com.tr/tr/ekonomi/thynin-suleymaniye-ucuslari-yeniden-basliyor/4068050</link>
+      <title>THY'nin Süleymaniye uçuşları yeniden başlıyor</title>
+      <description>Türk Hava Yolları (THY), bölge hava sahasında yaşanan gerilim nedeniyle ara verdiği Irak'ın Süleymaniye kentine uçuşların 1 Ekim'de yeniden başlayacağını duyurdu.</description>
+      <pubDate>Thu, 24 Sep 2026 17:39:23 +0300</pubDate>
+      <image>https://cdnuploads.aa.com.tr/uploads/Contents/2026/09/24/thumbs_b_c_7efafa47260c905f84ddd8bbf175ac8c.jpg</image>
+    </item>
+  </channel>
+</rss>

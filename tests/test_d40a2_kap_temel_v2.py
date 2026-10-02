@@ -103,6 +103,21 @@ def test_garan_banka_oranlari_ve_5_madde():
     assert (ck2["puan"], ck2["toplam"], ck2["eksik"]) == (2, 4, ["ozsermaye_karliligi_ortanca_ustu"])
 
 
+def test_garan_saglamlik_ok_basliktaki_son12ay_ile_ayni():
+    """D-P0-2809b: bank_checks'in ozsermaye karliligi build_v2 icinde ARTIK
+    Yahoo (data.get('roe')) DEGIL, ayni fonksiyonun urettigi degerleme_simdi
+    (son 12 ay) ile ayni kaynaktan -- GARAN'da uc farkli ÖK (%28,1/%28,4/%24,7)
+    ayni sayfada gorunmesin diye."""
+    rec = _rec("GARAN")
+    r = kt.ratios_by_year(rec, "banka")["2025"]
+    med = {"ozsermaye_karliligi": {"deger": 23.3, "n": 6, "kapsam": "sektor"}}
+    v2 = kt.build_v2(rec, price=133.9, today=TODAY, yahoo_shares=4200000000.0, medians=med)
+    assert v2["degerleme_simdi"]["ozsermaye_karliligi"] == 24.72
+    it = _items(v2["saglamlik"])
+    assert it["ozsermaye_karliligi_ortanca_ustu"]["cur"] == v2["degerleme_simdi"]["ozsermaye_karliligi"]
+    assert it["ozsermaye_karliligi_ortanca_ustu"]["cur"] != r["ozsermaye_karliligi"]  # yillik oran (28,38) DEGIL
+
+
 def test_piotroski_9_madde_tek_yillik_rapordan():
     ck = kt.checks(_rec("TUPRS"), "sanayi")
     it = _items(ck)
@@ -173,16 +188,31 @@ def test_extend_kayit_yoksa_hazirlaniyor_varsa_kaynaksiz_v2():
     assert kt.extend({}, rec) == {}
 
 
-def test_sektor_ortancasi_d51_kurali():
-    fund = {"A": {"pe_ratio": 10, "pb_ratio": 1.0, "roe": 20}, "B": {"pe_ratio": 12, "pb_ratio": 2.0, "roe": 10},
-            "C": {"pe_ratio": 14, "pb_ratio": -1, "roe": -5}, "D": {"pe_ratio": 40, "pb_ratio": 3.0, "roe": 30},
-            "E": {"pe_ratio": None, "pb_ratio": 5.0, "roe": None}}
-    sec = {"A": "Banka", "B": "Banka", "C": "Banka", "D": "Enerji", "E": "Diğer"}.get
-    m = kt.sector_medians(fund, sec, "Banka")
-    assert m["fk"] == {"deger": 12, "n": 3, "kapsam": "sektor"}
-    assert m["pd_dd"] == {"deger": 2.5, "n": 4, "kapsam": "bist"}        # bankada pozitif PD/DD 2 (<3) -> BIST
-    assert m["ozsermaye_karliligi"]["kapsam"] == "sektor" and m["ozsermaye_karliligi"]["deger"] == 10
-    assert kt.sector_medians(fund, sec, "Diğer")["fk"]["kapsam"] == "bist"
+def test_sektor_ortancasi_kap_degerleri_en_az_5_akran():
+    """CPO 25.09: ortanca ayni sektor grubunun KAP degerlerinden; <5 gecerli akranda hukum yok (BIST yedegi yok)."""
+    def row(fk, pd, roe):
+        return {"fk": fk, "pd_dd": pd, "ozsermaye_karliligi": roe}
+    kap = {"A": row(10, 1.0, 20), "B": row(12, 2.0, 10), "C": row(14, -1, -5), "D": row(16, 3.0, 30),
+           "E": row(18, 4.0, 15), "F": row(None, 5.0, None), "X": row(40, 9.0, 50)}
+    sec = {"A": "Banka", "B": "Banka", "C": "Banka", "D": "Banka", "E": "Banka", "F": "Banka", "X": "Enerji"}.get
+    m = kt.sector_medians(kap, sec, "Banka")
+    assert m["fk"] == {"deger": 14, "n": 5, "kapsam": "sektor"}          # F/K None -> 5 gecerli
+    assert m["pd_dd"] == {"deger": 3.0, "n": 5, "kapsam": "sektor"}      # -1 (negatif) sayilmaz, F(5.0) sayilir
+    assert m["ozsermaye_karliligi"] == {"deger": 15, "n": 5, "kapsam": "sektor"}   # None sayilmaz, negatif ROE sayilir
+    assert kt.sector_medians(kap, sec, "Enerji") == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}
+    assert kt.sector_medians(kap, sec, "Diğer") == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}
+    assert kt.sector_medians(kap, sec, None)["fk"] is None
+    four = {k: v for k, v in kap.items() if k in "ABCX"}
+    assert kt.sector_medians(four, sec, "Banka")["fk"] is None            # 3 akran < 5
+
+
+def test_kap_metrics_valuation_now_ile_ayni_ve_kayitsizda_none():
+    rec = _rec("TUPRS")
+    m = kt.kap_metrics(rec, 410.75)
+    now = kt.valuation_now(rec, kt.template_of(rec), 410.75)
+    assert m == {"fk": now["fk"], "pd_dd": now["pd_dd"], "ozsermaye_karliligi": now["ozsermaye_karliligi"]}
+    assert kt.kap_metrics(None, 100) is None
+    assert kt.kap_metrics(rec, None) is None
 
 
 @pytest.mark.parametrize("t", ["TUPRS", "THYAO", "GARAN", "BIMAS", "ANSGR", "EKGYO"])

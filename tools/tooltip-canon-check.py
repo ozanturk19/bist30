@@ -32,6 +32,7 @@ Olctugu uc eksen:
 Cikis: 0 temiz · 1 sapma · 2 kapsam tabani altinda (dedektor korlesmis).
 """
 import os, re, sys
+from _page_js import with_page_js
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TPL  = os.path.join(ROOT, 'templates')
@@ -50,7 +51,14 @@ CSS_ALLOW = set()
 NATIVE_FOCUSABLE = {'a', 'button', 'input', 'select', 'textarea', 'summary'}
 
 # kapsam tabanlari — dedektor bunlarin altina duserse sessizce korlesmis demektir
-MIN_TIPS      = 50
+# C-29 (25.09): /sektor-harita sektor kartlari + lejant paneli silindi, onlarla
+# [data-tip] kullanimi 47'ye indi (dedektor korlesmedi: pozitif kontrol 3/3) -> taban 50 -> 45.
+# 26.09 merge (C-22b + C-29 birlikte): gercek sayi 41 -> taban 40.
+# 26.09 C-28: ana sayfa Spotlight/Piyasa Ozeti rozeti/skor izgarasi kalkti: 41 -> 36 -> taban 34.
+# 26.09 C-43: makale paylas dugmeleri data-tip yerine gorunur metin (WhatsApp'ta paylas / Baglantiyi kopyala): 34 -> 33.
+# 30.09 C-70 K12: hisse "Algoritmamizin Onaylari" bolumu (Aciklama dugmesi data-tip) kalkti: 33 -> 32.
+# 01.10 C-74 K1: hisse "Ne anlama geliyor?" basligindaki "Kural tabanli" rozeti (data-tip) kalkti: 32 -> 31.
+MIN_TIPS      = 31
 # 21.09 (K-AU): gercek sayi artik 0 oldugu icin ">=1" tabani kapiyi surekli
 # "korlesmis" (cikis 2) yapardi. Sifir bir kapsam yalani OLMASIN diye taban
 # yerine POZITIF KONTROL var: css_attr_tooltips()'in mantigi sentetik bir
@@ -168,7 +176,7 @@ def main():
     for fn in sorted(os.listdir(TPL)):
         if not fn.endswith('.html'):
             continue
-        src = open(os.path.join(TPL, fn), encoding='utf-8').read()
+        src = with_page_js(fn, open(os.path.join(TPL, fn), encoding='utf-8').read())
 
         # eski oznitelik geri gelmis mi? (K-AU'dan beri ISTISNASIZ)
         for m in re.finditer(r'data-tooltip\s*=', src):

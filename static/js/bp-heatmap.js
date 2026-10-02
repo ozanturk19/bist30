@@ -14,6 +14,19 @@
         (ikinci dokunuş hisse sayfasına gider), klavyede odakta; Esc kapatır.
    Güvenli düşüş: JSON yok/bozuksa ya da DOM beklenen biçimde değilse hiçbir
    şeye dokunmaz, SSR kutuları olduğu gibi kalır.
+
+   C-29 (25.09.2026) tam sayfa — YALNIZ kök `data-hm-full` taşıyorsa
+   (/sektor-harita). Ana sayfa bu özniteliği taşımaz: oradaki davranış C-55 ile aynı.
+     5) Renk modu (Değişim / BP Skoru / Trend) ve dönem (1G/1H/1A/YB/1Y) anahtarları
+        yerinde boyar: kutu sınıfı + --k + metin + okunan ad, grup değeri, cümle,
+        lejant, açıklama, sektör sıralaması. Kurallar _heatmap.html _paint() ve
+        şablon cümleleriyle BİREBİR (biri değişirse öteki de).
+     6) Durum adreste: ?renk=degisim|bp|trend&donem=1g|1h|1a|yb|1y; varsayılanlar
+        yazılmaz, adresi yalnız publish() yazar (tek yayımcı, replaceState).
+     7) Masaüstü haritada grup etiketi sığmazsa önce değeri, sonra kendisi gizlenir;
+        grup yeterince yüksekse ad iki satıra kırılır (kırpılmaz).
+   C-68 (25.09.2026) "Paylaş" — dosyanın sonundaki AYRI blok (harita bloğundan
+   bağımsız; ana sayfa, /sektor-harita ve /harita/<gün>'de başlıktaki düğme).
    Renk ve yön bu dosyada HESAPLANMAZ (SSR'da, token'dan); biçimler
    bp-format.js / bp-vocab.js kanonundan (bpFormatPct, bpDirClass,
    bpMoneyCompact, sigLabel).
@@ -36,6 +49,8 @@
 
   var byT = {};
   data.rows.forEach(function (r) { if (r && r.t) byT[r.t] = r; });
+  var FULL = root.hasAttribute('data-hm-full');
+  var st = { mode: root.getAttribute('data-mode') || 'chg', per: root.getAttribute('data-per') || 'd1' };
 
   function num(el, prop) {
     var v = parseFloat(el.style.getPropertyValue(prop));
@@ -187,7 +202,11 @@
     hideCard(true);
     var stack = cq && W < STACK_MAX;
     root.classList.toggle('hm-stack', stack);
+    /* C-28: ana sayfada (tam sayfa değil) dar kapta önizleme — piyasa değeri
+       sırasıyla büyük sektörler ~820 px'e sığdığı kadar, gerisi "Tüm harita →". */
+    var PREV = stack && !FULL && !root.hasAttribute('data-hm-all'), used = 0, cut = false;
     if (!stack) {
+      groups.forEach(function (g) { g.el.style.display = ''; });
       var H = map.clientHeight || Math.round(Wi / 1.6);
       var Wg = Wi + GROUP_GAP, Hg = H + GROUP_GAP;
       groups.forEach(function (g) {
@@ -197,22 +216,29 @@
         var gw = x1 - x0, gh = y1 - y0;
         var lh = (gh >= 56 && gw >= 64) ? LABEL_H : 0;
         place(g.el, x0, y0, gw, gh);
+        if (FULL) lh = fitLabel(g, gw, gh, lh);
         if (g.lbl) g.lbl.classList.toggle('hm-off', !lh);
         g.inner.style.top = lh + 'px';
         g.inner.style.height = '';
         layoutTiles(g, gw, gh - lh, 1.15);
       });
     } else {
-      var budget = Math.max(1500, W * 4.6);
-      groups.forEach(function (g) {
-        var h = Math.round(Math.max(78, Math.min(360, budget * g.value / total)));
+      var budget = PREV ? Math.max(900, W * 2.4) : Math.max(1500, W * 4.6);
+      groups.forEach(function (g, i) {
+        var h = Math.round(Math.max(PREV ? 64 : 78, Math.min(PREV ? 240 : 360, budget * g.value / total)));
+        if (PREV && (cut || (i >= 2 && used + h + LABEL_H + 14 > 820))) cut = true;
+        g.el.style.display = cut ? 'none' : '';
+        if (cut) return;
+        used += h + LABEL_H + 14;
         unplace(g.el);
         if (g.lbl) g.lbl.classList.remove('hm-off');
+        if (FULL && g.lbl) g.lbl.classList.remove('hm-gl2');
         g.inner.style.top = '';
         g.inner.style.height = h + 'px';
         layoutTiles(g, Wi, h, 1.1);
       });
     }
+    root.classList.toggle('hm-cut', cut);
     fitText();
     lastW = W;
   }
@@ -238,7 +264,7 @@
   function dirCls(v, frac) { return bpDirClass(v, frac, ['up', 'dn', 'neu']); }
   function trLabel(tr) {
     var sig = TR_SIG[tr];
-    if (!sig) return 'Kapsam dışı';
+    if (!sig) return 'Trend durumu yok';
     return (typeof sigLabel === 'function') ? sigLabel(sig) : '—';
   }
   function money(bn) {
@@ -260,14 +286,16 @@
     card.appendChild(top);
     var sec = [r.g, r.sub].filter(Boolean).join(' · ');
     if (sec) card.appendChild(mk('div', 'c-sec', sec));
+    var sel = FULL ? st.per : 'd1';
     var pr = mk('div', 'c-price');
     pr.appendChild(mk('strong', null, price(r.p)));
-    pr.appendChild(mk('span', 'c-ch ' + dirCls(ch.d1, 2), bpFormatPct(ch.d1, 2)));
-    if (data.asof_label) pr.appendChild(mk('span', 'c-asof', data.asof_label));
+    pr.appendChild(mk('span', 'c-ch ' + dirCls(ch[sel], 2), bpFormatPct(ch[sel], 2)));
+    var asof = sel === 'd1' ? data.asof_label : perInfo(sel)[1];
+    if (asof) pr.appendChild(mk('span', 'c-asof', asof));
     card.appendChild(pr);
     var per = mk('div', 'c-per');
     PER.forEach(function (p) {
-      var c = mk('div');
+      var c = mk('div', (FULL && p[0] === sel) ? 'on' : null);
       c.appendChild(mk('em', null, p[1]));
       var pv = ch[p[0]];   /* 5 dar hücre: |%| >= 100 tam sayı, yoksa 1 ondalık */
       c.appendChild(mk('span', dirCls(pv, 1), bpFormatPct(pv, (typeof pv === 'number' && Math.abs(pv) >= 100) ? 0 : 1)));
@@ -278,7 +306,7 @@
     card.appendChild(row('BorsaPusula Skoru', (typeof r.bp === 'number') ? String(r.bp) : '—'));
     card.appendChild(row('Trend', trLabel(r.tr) + ((r.tr && r.days > 0) ? ' · ' + r.days + ' gündür' : '')));
     if (r.lim === 'tavan' || r.lim === 'taban') card.appendChild(row('Günlük limit', r.lim === 'tavan' ? 'Tavan' : 'Taban'));
-    if (r.stale) card.appendChild(mk('div', 'c-note', 'Veri gecikmeli'));
+    if (r.stale) card.appendChild(mk('div', 'c-note', 'Bu günün kapanış verisi gelmedi'));
     var go = mk('a', 'c-go', 'Hisse sayfası →');
     go.href = '/hisse/' + encodeURIComponent(t);
     card.appendChild(go);
@@ -358,6 +386,297 @@
     });
   }
 
+  /* ── C-29: tam sayfa (yalnız data-hm-full) ─────────────────────────── */
+  /* (kod, düğme, okunan ad, lejant adı, açıklama cümlesi, cümle öneki, sıralama cümlesi) — _heatmap.html _PER */
+  var PERS = [
+    ['d1', '1G', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'],
+    ['w1', '1H', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'],
+    ['m1', '1A', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'],
+    ['ytd', 'YB', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'],
+    ['y1', '1Y', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime']
+  ];
+  var CAP = { d1: 3, w1: 6, m1: 12, ytd: 50, y1: 80 };
+  var MQ = { chg: 'degisim', bp: 'bp', tr: 'trend' }, PQ = { d1: '1g', w1: '1h', m1: '1a', ytd: 'yb', y1: '1y' };
+  var PAINT = ['up', 'dn', 'neu', 'na', 'bp-hi', 'bp-lo', 'tr-g', 'tr-y', 'tr-b', 'dark', 'lim', 'tavan', 'taban', 'stale'];
+  function perInfo(p) {
+    for (var i = 0; i < PERS.length; i++) if (PERS[i][0] === p) return PERS[i];
+    return PERS[0];
+  }
+  function isNum(v) { return typeof v === 'number' && isFinite(v); }
+  /* Jinja |round (Python round) ile aynı yuvarlama: tam yarımda çifte (22,25 → 22,2).
+     toFixed tam yarımı yukarı atar; SSR metni (bpf.pct_text) ile JS metni ayrışmasın diye
+     tam sayfa metinleri önce bununla yuvarlanır. */
+  function pyRound(v, f) {
+    var m = Math.pow(10, f), x = v * m, fl = Math.floor(x);
+    if (x - fl === 0.5) return (fl % 2 === 0 ? fl : fl + 1) / m;
+    return parseFloat(v.toFixed(f));
+  }
+  function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  /* Türkçe iyelik eki (_heatmap.html _poss ile aynı): 71'i, 4'ü, 6'sı, 10'u, 100'ü */
+  function poss(n) {
+    var u = n % 10, t = Math.floor(n / 10) % 10;
+    if (n === 0) return 'ı';
+    if (u) return ['', 'i', 'si', 'ü', 'ü', 'i', 'sı', 'si', 'i', 'u'][u];
+    if (t) return ['', 'u', 'si', 'u', 'ı', 'si', 'ı', 'i', 'i', 'ı'][t];
+    return (Math.floor(n / 100) % 10) ? 'ü' : 'i';
+  }
+  /* Kutu boyası — _heatmap.html _paint() ile BİREBİR */
+  function paint(r) {
+    r = r || {};
+    if (st.mode === 'bp') {
+      var b = r.bp;
+      if (!isNum(b)) return { cls: 'na', k: 0, dark: false, vt: '—', av: 'BorsaPusula Skoru yok' };
+      var bi = Math.floor(b + 0.5), d = (b - 50) / 40, t = Math.min(Math.abs(d), 1), k;
+      if (d >= 0) { k = 0.10 + 0.85 * Math.pow(t, 0.9); return { cls: 'bp-hi', k: k, dark: k >= 0.55, vt: 'BP ' + bi, av: 'BorsaPusula Skoru ' + bi }; }
+      k = 0.08 + 0.55 * Math.pow(t, 0.9);
+      return { cls: 'bp-lo', k: k, dark: false, vt: 'BP ' + bi, av: 'BorsaPusula Skoru ' + bi };
+    }
+    if (st.mode === 'tr') {
+      if (r.tr === 'guclu') return { cls: 'tr-g', k: 0.9, dark: true, vt: 'Güçlü Trend', av: 'Güçlü Trend' };
+      if (r.tr === 'yatay') return { cls: 'tr-y', k: 0, dark: false, vt: 'Yatay', av: 'Yatay' };
+      if (r.tr === 'bozuk') return { cls: 'tr-b', k: 0, dark: false, vt: 'Trend Bozuldu', av: 'Trend Bozuldu' };
+      return { cls: 'na', k: 0, dark: false, vt: '—', av: 'trend verisi yok' };
+    }
+    var v = r.ch ? r.ch[st.per] : null;
+    if (!isNum(v)) return { cls: 'na', k: 0, dark: false, vt: '—', av: 'değişim verisi yok' };
+    v = pyRound(v, 2);
+    var cls = bpDirClass(v, 2, ['up', 'dn', 'neu']);
+    var tt = Math.min(Math.abs(v) / CAP[st.per], 1);
+    var kk = cls !== 'neu' ? 0.16 + 0.84 * Math.pow(tt, 0.72) : 0;
+    if (r.stale) kk = kk * 0.45;
+    var dk = (cls === 'up' && kk >= 0.55) || (cls === 'dn' && kk >= 0.83);
+    return { cls: cls, k: kk, dark: dk, vt: bpFormatPct(v, 2), av: bpFormatPct(v, 2) };
+  }
+  /* Grup değeri (etiket + sıralama): Değişim = piyasa değeriyle ağırlıklı, BP = ortalama, Trend = Güçlü Trend sayısı */
+  function gAgg(g) {
+    var a = { n: 0, s: 0, w: 0, bs: 0, bn: 0, tg: 0 };
+    g.tiles.forEach(function (n) {
+      var r = n.r;
+      if (!r || !(r.mcap > 0)) return;
+      a.n++;
+      var v = r.ch ? r.ch[st.per] : null;
+      if (isNum(v)) { a.s += v * r.mcap; a.w += r.mcap; }
+      if (isNum(r.bp)) { a.bs += r.bp; a.bn++; }
+      if (r.tr === 'guclu') a.tg++;
+    });
+    a.c = a.w ? pyRound(a.s / a.w, 1) : null;
+    a.b = a.bn ? Math.floor(a.bs / a.bn + 0.5) : null;
+    return a;
+  }
+  function thesis() {
+    var rows = data.rows, n = data.n || rows.length, i, r;
+    if (st.mode === 'bp') {
+      var bs = rows.filter(function (x) { return isNum(x.bp); }), out = '';
+      if (bs.length) {
+        var avg = Math.floor(bs.reduce(function (s, x) { return s + x.bp; }, 0) / bs.length + 0.5);
+        out = 'Ortalama BorsaPusula Skoru <b class="neu">' + avg + '</b> · <b class="up">' +
+          bs.filter(function (x) { return x.bp >= 70; }).length + '</b> hissede 70 ve üstü';
+      }
+      if (rows.length > bs.length) out += (bs.length ? ' · ' : '') + '<b class="neu">' + (rows.length - bs.length) + '</b> hissede skor yok';
+      return out;
+    }
+    if (st.mode === 'tr') {
+      var c = { guclu: 0, yatay: 0, bozuk: 0 };
+      rows.forEach(function (x) { if (c.hasOwnProperty(x.tr)) c[x.tr]++; });
+      var s = '<b class="up">' + c.guclu + '</b> hisse Güçlü Trend\'de · <b class="neu">' + c.yatay + '</b> Yatay · <b class="neu">' + c.bozuk + '</b> Trend Bozuldu';
+      var na = rows.length - c.guclu - c.yatay - c.bozuk;
+      return s + (na > 0 ? ' · <b class="neu">' + na + '</b> hissede trend verisi yok' : '');
+    }
+    var up = 0, dn = 0, fl = 0, tv = 0, tb = 0;
+    if (st.per === 'd1' && data.counts) { up = data.counts.up || 0; dn = data.counts.down || 0; fl = data.counts.flat || 0; }
+    else {
+      for (i = 0; i < rows.length; i++) {
+        r = rows[i];
+        var v = r.ch ? r.ch[st.per] : null;
+        if (!isNum(v)) continue;
+        var rv = pyRound(v, 2);
+        if (rv > 0) up++; else if (rv < 0) dn++; else fl++;
+      }
+    }
+    if (st.per === 'd1') rows.forEach(function (x) { if (x.lim === 'tavan') tv++; else if (x.lim === 'taban') tb++; });
+    var xu = (data.xu100 && data.xu100.ch) ? data.xu100.ch[st.per] : null;
+    if (isNum(xu)) xu = pyRound(xu, 2);
+    var sep = '', o = perInfo(st.per)[5];
+    if (up || dn || fl) {
+      o += n + ' hissenin';
+      if (up === n) o += ' tamamı <b class="up">yükseldi</b>';
+      else if (dn === n) o += ' tamamı <b class="dn">düştü</b>';
+      else {
+        var sp = '';
+        if (up) { o += ' <b class="up">' + up + '</b>\'' + poss(up) + ' yükseldi'; sp = ','; }
+        if (dn) { o += sp + ' <b class="dn">' + dn + '</b>\'' + poss(dn) + ' düştü'; sp = ','; }
+        if (fl) o += sp + ' <b class="neu">' + fl + '</b>\'' + poss(fl) + ' değişmedi';
+      }
+      sep = ' · ';
+    }
+    if (isNum(xu)) { o += sep + 'BIST100 <b class="' + bpDirClass(xu, 2, ['up', 'dn', 'neu']) + '">' + bpFormatPct(xu, 2) + '</b>'; sep = ' · '; }
+    if (tv) { o += sep + '<b class="neu">' + tv + '</b> tavan'; sep = ', '; }
+    if (tb) o += sep + '<b class="neu">' + tb + '</b> taban';
+    return o;
+  }
+  function href(m, p) {
+    var q = [];
+    if (m !== 'chg') q.push('renk=' + MQ[m]);
+    if (p !== 'd1') q.push('donem=' + PQ[p]);
+    return location.pathname + (q.length ? '?' + q.join('&') : '');
+  }
+  /* Masaüstü grup etiketi: sığdır ya da gizle (kırpma yok). Dönüş: etiket şeridi yüksekliği. */
+  function fitLabel(g, gw, gh, lh) {
+    var L = g.lbl;
+    if (!L) return lh;
+    L.classList.remove('hm-gl2');
+    var b = L.querySelector('b'), i = L.querySelector('i');
+    if (i) i.classList.remove('hm-off');
+    if (!lh || !b) return lh;
+    L.classList.remove('hm-off');
+    if (b.scrollWidth <= b.clientWidth + 0.5) return lh;
+    if (i) i.classList.add('hm-off');
+    if (b.scrollWidth <= b.clientWidth + 0.5) return lh;
+    if (gh >= 110) {
+      L.classList.add('hm-gl2');
+      var two = Math.ceil(L.getBoundingClientRect().height);
+      if (b.scrollWidth <= b.clientWidth + 0.5 && two <= 36) return two + 2;
+      L.classList.remove('hm-gl2');
+    }
+    return 0;
+  }
+  function repaint() {
+    var lon = st.mode === 'chg' && st.per === 'd1', anyNa = false, anyStale = false;
+    root.setAttribute('data-mode', st.mode);
+    root.setAttribute('data-per', st.per);
+    ['chg', 'bp', 'tr'].forEach(function (m) { root.classList.toggle('hm-m-' + m, m === st.mode); });
+    root.classList.toggle('hm-lim-on', lon);
+    tiles.forEach(function (n) {
+      var r = n.r || {}, p = paint(r), el = n.el;
+      var stale = !!r.stale && st.mode === 'chg';
+      var lim = (lon && (r.lim === 'tavan' || r.lim === 'taban')) ? r.lim : null;
+      PAINT.forEach(function (c) { el.classList.remove(c); });
+      el.classList.add(p.cls);
+      if (p.dark) el.classList.add('dark');
+      if (lim) { el.classList.add('lim'); el.classList.add(lim); }
+      if (stale) { el.classList.add('stale'); anyStale = true; }
+      if (p.cls === 'na') anyNa = true;
+      el.style.setProperty('--k', p.k.toFixed(3));
+      if (n.v) n.v.textContent = p.vt;
+      var t = el.getAttribute('data-t');
+      el.setAttribute('aria-label', t + (r.n ? ', ' + r.n : '') + ', ' + p.av + (lim ? ', ' + lim : '') + (stale ? ', kapanış verisi gelmedi' : ''));
+    });
+    /* grup etiketi değeri */
+    groups.forEach(function (g) {
+      g.agg = gAgg(g);
+      var i = g.lbl ? g.lbl.querySelector('i') : null;
+      if (!i) return;
+      var a = g.agg, cls = 'neu', tx = '';
+      if (st.mode === 'bp') tx = a.b != null ? 'ort. ' + a.b : '';
+      else if (st.mode === 'tr') { cls = a.tg ? 'up' : 'neu'; tx = a.tg + ' Güçlü Trend'; }
+      else { cls = bpDirClass(a.c, 1, ['up', 'dn', 'neu']) || 'neu'; tx = a.c != null ? bpFormatPct(a.c, 1) : ''; }
+      i.className = cls;
+      i.textContent = tx;
+    });
+    var th = document.getElementById('hmThesis');
+    if (th) th.innerHTML = thesis();
+    /* lejant + açıklama */
+    var pi = perInfo(st.per), cap = CAP[st.per], half = cap / 2, hf = (half % 1) ? 1 : 0;
+    Array.prototype.forEach.call(root.querySelectorAll('[data-lg]'), function (lg) {
+      var on = lg.getAttribute('data-lg') === st.mode;
+      lg.hidden = !on;
+      var na = lg.querySelector('[data-lg-na]');
+      if (na) na.hidden = !(on && anyNa);
+    });
+    var tk = root.querySelector('[data-lg-ticks]');
+    if (tk) tk.innerHTML = [bpFormatPct(-cap, 0), bpFormatPct(-half, hf), '0', bpFormatPct(half, hf), bpFormatPct(cap, 0)]
+      .map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
+    var ln = root.querySelector('[data-lg-name]');
+    if (ln) ln.textContent = pi[3];
+    var ls = root.querySelector('[data-lg-stale]');
+    if (ls) ls.hidden = !anyStale;
+    var src = document.getElementById('hmSrc');
+    if (src) src.textContent = st.mode === 'bp'
+      ? 'Kutu büyüklüğü piyasa değeri, renk BorsaPusula Skoru: 50 nötr; 90 ve üstü en koyu yeşil, 10 ve altı en koyu mor.'
+      : (st.mode === 'tr' ? 'Kutu büyüklüğü piyasa değeri, renk trend durumu.'
+        : 'Kutu büyüklüğü piyasa değeri, renk ' + pi[4] + '; ±%' + cap + ' ve üstü en koyu tonda.');
+    /* anahtarlar */
+    Array.prototype.forEach.call(root.querySelectorAll('.hm-sw[data-m]'), function (a) {
+      var m = a.getAttribute('data-m');
+      a.setAttribute('href', href(m, st.per));
+      if (m === st.mode) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+    var pseg = root.querySelector('.hm-seg-per');
+    if (pseg) { if (st.mode === 'chg') pseg.removeAttribute('aria-disabled'); else pseg.setAttribute('aria-disabled', 'true'); }
+    Array.prototype.forEach.call(root.querySelectorAll('.hm-sw[data-p]'), function (a) {
+      var p = a.getAttribute('data-p');
+      if (st.mode === 'chg') { a.setAttribute('href', href('chg', p)); a.removeAttribute('aria-disabled'); }
+      else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
+      if (p === st.per) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+    sortList();
+  }
+  /* Sektör sıralaması: seçili ölçü, yüksekten düşüğe; eşitlikte piyasa değeri sırası (harita sırası) */
+  function sortList() {
+    var ol = document.getElementById('hmSl');
+    if (!ol) return;
+    var byG = {};
+    Array.prototype.forEach.call(ol.children, function (li) { byG[li.getAttribute('data-g')] = li; });
+    var items = [];
+    groups.forEach(function (g, idx) {
+      var name = g.el.getAttribute('aria-label'), li = byG[name], a = g.agg;
+      if (!li || !a) return;
+      var key = st.mode === 'chg' ? (a.c != null ? a.c : -1e9)
+        : (st.mode === 'bp' ? (a.b != null ? a.b : -1e9) : a.tg);
+      var c = li.querySelector('.hm-sr-chg'), b = li.querySelector('.hm-sr-bp'), t = li.querySelector('.hm-sr-tr');
+      if (c) { c.className = 'hm-sr-m hm-sr-chg ' + (bpDirClass(a.c, 1, ['up', 'dn', 'neu']) || '') + (st.mode === 'chg' ? ' on' : ''); c.textContent = bpFormatPct(a.c, 1); }
+      if (b) { b.className = 'hm-sr-m hm-sr-bp' + (st.mode === 'bp' ? ' on' : ''); b.textContent = 'BP ort. ' + (a.b != null ? a.b : '—'); }
+      if (t) { t.className = 'hm-sr-m hm-sr-tr' + (a.tg ? ' up' : '') + (st.mode === 'tr' ? ' on' : ''); t.textContent = a.tg + ' Güçlü Trend'; }
+      items.push({ li: li, key: key, idx: idx });
+    });
+    items.sort(function (x, y) { return (y.key - x.key) || (x.idx - y.idx); });
+    items.forEach(function (it) { ol.appendChild(it.li); });
+    var sub = document.getElementById('hmSumSub');
+    if (sub) sub.textContent = st.mode === 'bp' ? 'Ortalama BorsaPusula Skoruna göre, yüksekten düşüğe.'
+      : (st.mode === 'tr' ? 'Güçlü Trend\'deki hisse sayısına göre, çoktan aza.'
+        : 'Piyasa değeriyle ağırlıklı ' + perInfo(st.per)[6] + ' göre, yüksekten düşüğe.');
+  }
+  /* Adresin TEK yayımcısı: varsayılanlar yazılmaz; eski Karşılaştır parametreleri (tab, s) temizlenir */
+  function publish() {
+    try {
+      var u = new URL(location.href);
+      ['renk', 'donem', 'tab', 's'].forEach(function (k) { u.searchParams.delete(k); });
+      if (st.mode !== 'chg') u.searchParams.set('renk', MQ[st.mode]);
+      if (st.per !== 'd1') u.searchParams.set('donem', PQ[st.per]);
+      var next = u.pathname + u.search + u.hash;
+      if (next !== location.pathname + location.search + location.hash) history.replaceState(history.state, '', next);
+    } catch (e) { /* eski tarayıcı: adres değişmez, harita yine boyanır */ }
+  }
+  function setState(m, p) {
+    if (m !== 'chg') p = 'd1'; /* K11: dönem yalnız Değişim modunda anlamlı */
+    if (m === st.mode && p === st.per) return;
+    st.mode = m; st.per = p;
+    hideCard(true);
+    repaint();
+    layout();
+    publish();
+  }
+  if (FULL) {
+    var MR = { degisim: 'chg', bp: 'bp', trend: 'tr' }, PR = { '1g': 'd1', '1h': 'w1', '1a': 'm1', 'yb': 'ytd', '1y': 'y1' };
+    var ctl = root.querySelector('.hm-ctl');
+    if (ctl) ctl.addEventListener('click', function (e) {
+      var a = (e.target && e.target.closest) ? e.target.closest('.hm-sw') : null;
+      if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      if (a.hasAttribute('data-m')) setState(a.getAttribute('data-m'), st.per);
+      else if (a.hasAttribute('data-p') && st.mode === 'chg') setState('chg', a.getAttribute('data-p'));
+    });
+    /* Adresten geri yükleme (SSR zaten aynı durumu çizdi; bfcache/önbellek farkına karşı) */
+    try {
+      var q = new URLSearchParams(location.search);
+      var qm = MR[(q.get('renk') || '').toLowerCase()] || 'chg', qp = PR[(q.get('donem') || '').toLowerCase()] || 'd1';
+      if (qm !== 'chg') qp = 'd1';
+      if (qm !== st.mode || qp !== st.per) { st.mode = qm; st.per = qp; }
+    } catch (e) { /* URLSearchParams yok: SSR durumu kalır */ }
+    repaint();
+    publish();
+  }
+
   root.classList.add('js');
   layout();
   var tmr = null;
@@ -369,4 +688,184 @@
   }
   if (window.ResizeObserver) new ResizeObserver(onResize).observe(body);
   else window.addEventListener('resize', onResize);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   C-68 (25.09.2026) — "Paylaş" (templates/_heatmap.html _share()).
+   SSR: <details class="hm-share"> — JS kapalıyken de açılır; içinde iki düz
+   bağlantı: "Bağlantıyı kopyala" (kalıcı gün sayfasına <a>) ve "Görseli indir"
+   (<a download>). Bu blok haritadan BAĞIMSIZ çalışır ve yalnız İYİLEŞTİRİR:
+     1) Telefonda (hover yok + kaba işaretçi) navigator.share varsa düğme menüyü
+        açmaz, paylaşım sayfasını açar: dosya paylaşımı destekleniyorsa -kare.png
+        (1080×1350) + metin + bağlantı; değilse başlık + metin + bağlantı (bağlantı
+        önizlemesi 1200×630 görseli zaten taşır). Görsel (~400 KB) sayfa açılışında
+        İNDİRİLMEZ: parmak düğmeye değince (pointerdown) alınmaya başlar, dokunuş
+        en çok 4 sn bekler (düğme aria-busy), sonra paylaşır. Tarayıcı bekleme
+        yüzünden paylaşımı reddederse (NotAllowedError) menü açılır; görsel artık
+        hazır olduğundan ikinci dokunuş dosyayla paylaşır. Veri tasarrufu açıkken
+        dosya hiç alınmaz (bağlantı paylaşılır). İptal sessiz.
+     2) Masaüstünde menü: "Bağlantıyı kopyala" panoya yazar (Clipboard API →
+        execCommand yedeği → seçili adres kutusu), sonucu okunur duyurur. Esc
+        kapatır ve odağı düğmeye verir; dışarı tıklama / odak çıkışı kapatır.
+     3) /sektor-harita'da (data-view) varsayılan dışı görünüm (renk/dönem)
+        paylaşılırsa bağlantı o görünümün adresidir (C-29 publish() ile aynı
+        parametreler); görsel her durumda günün varsayılan görseli.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var boxes = document.querySelectorAll('[data-hm-share]');
+  if (!boxes.length) return;
+  var MQ = { chg: 'degisim', bp: 'bp', tr: 'trend' }, PQ = { d1: '1g', w1: '1h', m1: '1a', ytd: 'yb', y1: '1y' };
+  function mq(q) { try { return !!(window.matchMedia && matchMedia(q).matches); } catch (e) { return false; } }
+  var SHARE = mq('(hover: none) and (pointer: coarse)') && typeof navigator.share === 'function';
+  var FILES = SHARE && typeof navigator.canShare === 'function' && typeof File === 'function' && typeof fetch === 'function';
+  var SAVE = !!(navigator.connection && navigator.connection.saveData);
+
+  Array.prototype.forEach.call(boxes, function (box) {
+    var btn = box.querySelector('summary');
+    if (!btn) return;
+    var copyA = box.querySelector('[data-share-copy]'), dl = box.querySelector('a[download]');
+    var live = box.querySelector('[data-share-st]'), menu = box.querySelector('.hm-share-menu');
+    var D = {
+      url: box.getAttribute('data-url') || location.href, kare: box.getAttribute('data-kare'),
+      text: box.getAttribute('data-text') || '', title: box.getAttribute('data-title') || document.title,
+      view: box.getAttribute('data-view') || ''
+    };
+    var copyLbl = copyA ? copyA.textContent : '', file = null, fileP = null, tmr = null, urlBox = null;
+
+    /* Paylaşılan bağlantı: tam sayfada varsayılan dışı görünümün adresi, yoksa kalıcı gün sayfası */
+    function link() {
+      if (D.view) {
+        var r = document.querySelector('[data-hm-full]'), q = [];
+        var m = r ? r.getAttribute('data-mode') : 'chg', p = r ? r.getAttribute('data-per') : 'd1';
+        if (m !== 'chg' && MQ[m]) q.push('renk=' + MQ[m]);
+        if (p !== 'd1' && PQ[p]) q.push('donem=' + PQ[p]);
+        if (q.length) return D.view + '?' + q.join('&');
+      }
+      return D.url;
+    }
+    function say(msg) {
+      if (!live) return;
+      live.textContent = '';
+      setTimeout(function () { live.textContent = msg; }, 40);
+    }
+    function reset() {
+      clearTimeout(tmr);
+      if (copyA) { copyA.textContent = copyLbl; copyA.classList.remove('ok'); }
+      if (urlBox && urlBox.parentNode) urlBox.parentNode.removeChild(urlBox);
+      urlBox = null;
+    }
+    function close(focus) {
+      if (box.open) box.open = false;
+      if (focus) btn.focus();
+    }
+
+    /* ── Telefon: Web Share ── */
+    function getFile() {
+      if (fileP || !FILES || !D.kare) return fileP;
+      fileP = fetch(D.kare, { credentials: 'same-origin' }).then(function (res) {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.blob();
+      }).then(function (b) {
+        var name = (dl && dl.getAttribute('download')) || 'borsapusula-isi-haritasi.png';
+        var f = new File([b], name, { type: b.type || 'image/png' });
+        if (navigator.canShare({ files: [f] })) file = f;
+        return file;
+      }).catch(function () { return null; });   /* görsel yoksa dosyasız paylaşılır */
+      return fileP;
+    }
+    if (FILES && !SAVE) btn.addEventListener('pointerdown', getFile);   /* niyet: dokunuşta indirmeye başla */
+    var busy = false;
+    btn.addEventListener('click', function (e) {
+      if (!SHARE) return;                  /* masaüstü: <details> menüsü (yerel davranış) */
+      e.preventDefault();
+      if (busy) return;
+      var url = link();
+      var fail = function (err) {
+        if (err && err.name === 'AbortError') return;   /* kullanıcı vazgeçti */
+        box.open = true;
+      };
+      var run = function (f) {
+        var data = f ? { files: [f], title: D.title, text: D.text + '\n' + url } : { title: D.title, text: D.text, url: url };
+        try { navigator.share(data).then(function () { say('Paylaşıldı'); }, fail); } catch (err) { fail(err); }
+      };
+      if (file || !FILES || SAVE) return run(file);
+      busy = true;
+      btn.setAttribute('aria-busy', 'true');
+      var late = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+      Promise.race([getFile(), late]).then(function (f) {
+        busy = false;
+        btn.removeAttribute('aria-busy');
+        run(f);
+      });
+    });
+
+    /* ── Masaüstü menüsü ── */
+    box.addEventListener('toggle', function () {
+      if (box.open) { if (copyA) copyA.setAttribute('href', link()); }
+      else reset();
+    });
+    function legacyCopy(t) {
+      var ta = document.createElement('textarea'), ok = false;
+      ta.value = t;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+    function copy(t) {
+      if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+        return navigator.clipboard.writeText(t).then(null, function () {
+          if (!legacyCopy(t)) throw new Error('copy');
+        });
+      }
+      return legacyCopy(t) ? Promise.resolve() : Promise.reject(new Error('copy'));
+    }
+    if (copyA) copyA.addEventListener('click', function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;  /* yeni sekme: düz bağlantı */
+      e.preventDefault();
+      var url = link();
+      copy(url).then(function () {
+        copyA.textContent = 'Bağlantı kopyalandı';
+        copyA.classList.add('ok');
+        copyA.focus();
+        say('Bağlantı kopyalandı');
+        clearTimeout(tmr);
+        tmr = setTimeout(function () { close(box.contains(document.activeElement)); }, 1600);
+      }, function () {
+        /* pano kapalı: adres seçili kutuda, kullanıcı kendisi kopyalar */
+        if (!urlBox) {
+          urlBox = document.createElement('input');
+          urlBox.type = 'text';
+          urlBox.readOnly = true;
+          urlBox.className = 'hm-share-url';
+          urlBox.setAttribute('aria-label', 'Paylaşım bağlantısı');
+          (menu || box).appendChild(urlBox);
+        }
+        urlBox.value = url;
+        urlBox.focus();
+        urlBox.select();
+        say('Kopyalanamadı; bağlantı seçili, kopyalayabilirsin');
+      });
+    });
+    if (dl) dl.addEventListener('click', function () { setTimeout(function () { close(false); }, 0); });
+    box.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && box.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        close(true);
+      }
+    });
+    box.addEventListener('focusout', function (e) {
+      var to = e.relatedTarget;
+      if (box.open && to && !box.contains(to)) close(false);
+    });
+    document.addEventListener('click', function (e) {
+      if (box.open && !box.contains(e.target)) close(false);
+    });
+  });
 })();

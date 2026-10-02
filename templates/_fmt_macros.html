@@ -93,6 +93,14 @@
 <div class="da-pagehead"><h1 class="da-pagehead-title">{{ title }}</h1>{% if _lede %}<p class="da-pagehead-lede">{{ _lede }}</p>{% endif %}</div>
 {%- endmacro -%}
 
+{#- C-27 (25.09): sayı + Türkçe 3. tekil iyelik eki, okunuşa göre: 0'ı, 4'ü, 6'sı,
+    10'u, 40'ı, 102'si, 110'u, 216'sı. Tablo `_heatmap.html` `_poss` ile aynı
+    (o partial C-29 dalında; birleşince oradaki kopya bu makroya bağlanabilir). -#}
+{%- macro poss(n) -%}
+{%- set n = n|int -%}{%- set u = n % 10 -%}{%- set t = (n // 10) % 10 -%}
+{{- n }}'{% if n == 0 %}ı{% elif u %}{{ ['', 'i', 'si', 'ü', 'ü', 'i', 'sı', 'si', 'i', 'u'][u] }}{% elif t %}{{ ['', 'u', 'si', 'u', 'ı', 'si', 'ı', 'i', 'i', 'ı'][t] }}{% elif (n // 100) % 10 %}ü{% else %}i{% endif -%}
+{%- endmacro -%}
+
 {#- "23.09.2026" → "23 Eylül" (başlık cümleleri için; biçim dışıysa aynen). -#}
 {%- macro day_month(dmy) -%}
 {%- set p = (dmy or '').split('.') -%}

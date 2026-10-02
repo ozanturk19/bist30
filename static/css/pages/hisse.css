@@ -1,13 +1,5 @@
 /* ==== extracted from templates/hisse.html (T2.5) ==== */
 
-  @font-face {
-    font-family: 'Inter-Fallback';
-    src: local('Arial');
-    size-adjust: 105%;
-    ascent-override: 92%;
-    descent-override: 24%;
-    line-gap-override: 0%;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -29,11 +21,7 @@
     position: sticky;
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
-    display: flex;
-    min-height: calc(60px + env(safe-area-inset-top));
-    max-height: calc(60px + env(safe-area-inset-top));
   }
-
 
   .hib-action-btn {
     display: inline-flex; align-items: center; gap: 5px;
@@ -51,7 +39,7 @@
     background: rgba(var(--bp-brand-rgb),0.14); border-color: rgba(var(--bp-brand-rgb),0.55); color: var(--bp-brand);
   }
   .hib-action-btn.active-bell {
-    background: rgba(var(--bp-al-rgb),0.14); border-color: rgba(var(--bp-al-rgb),0.55); color: var(--bp-al);
+    background: rgba(var(--bp-ok-rgb),0.14); border-color: rgba(var(--bp-ok-rgb),0.55); color: var(--bp-ok);
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
@@ -73,7 +61,7 @@
     transition: opacity .25s, transform .25s;
   }
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .hib-toast.success { border-color: rgba(var(--bp-al-rgb),0.4); }
+  .hib-toast.success { border-color: rgba(var(--bp-ok-rgb),0.4); }
   .hib-toast.warn { border-color: rgba(var(--bp-volume-rgb),0.4); }
   /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
      sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
@@ -118,7 +106,6 @@
     font-size: var(--bp-text-xs); font-weight: 600; cursor: default;
   }
   /* ── Container ── */
-  .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
 
   /* ── Grafik bölümü (20.09 — Data-Art denetimi, Grafik sekmesi) ──
      Panel gövdesi bilinçli olarak DÜZ var(--bp-surface) kalıyor: lightweight-charts
@@ -172,10 +159,38 @@
      (24px/3px/.7s) ve bu şablondaki altı kullanımın dördü zaten geometriyi
      inline eziyordu. `#chartLoading` yerleşimi `.da-loading--block`a geçti;
      burada yalnız grafik alanının yüksekliği (sayfa deltası) kaldı. */
-  #chartLoading { height: 420px; padding: 0; }
+  #chartLoading { height: clamp(420px, 60vh, 640px); padding: 0; }
 
   #chartsInner { display: none; }
-  #chartMain   { height: 340px; margin: 8px 18px 10px; }
+  #chartMain   { height: clamp(420px, 60vh, 640px); margin: 4px 18px 8px; }
+  /* C-23 (C-M10): donem cipleri, OHLC lejanti, anahtar satiri, getiri seridi. */
+  .ch-chips { margin-left: auto; display: inline-flex; gap: 2px; padding: 2px; background: var(--bp-bg); border: 1px solid var(--bp-border); border-radius: 11px; }
+  .ch-chips button { font: 600 12.5px/1 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); background: transparent; border: 0; border-radius: 9px; padding: 6px 11px; min-width: 40px; min-height: 34px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .ch-chips button:hover { color: var(--bp-text2); }
+  .ch-chips button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); }
+  .ch-chips button:disabled { opacity: .35; cursor: default; }
+  .ch-chips button:focus-visible, .ch-ema:focus-visible { outline: 2px solid var(--bp-accent-cyan); outline-offset: 1px; }
+  .ch-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; min-height: 22px; padding: 10px 18px 0; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-legend b { color: var(--bp-text); font-weight: 600; }
+  .ch-l-date { color: var(--bp-text2); font-weight: 600; }
+  .ch-l-ev { color: var(--bp-text2); }
+  .ch-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 6px 18px 0; font-size: var(--bp-text-xs); color: var(--bp-text3); }
+  /* C-25a: veri gelmeden de satirin yeri ayrilir (gorunmez, erisilebilirlik agacinda yok) -- grafik govdesi sonradan asagi kaymaz. */
+  .ch-keys[hidden] { display: flex; visibility: hidden; }
+  .ch-keys[hidden], .ch-returns[hidden] { display: none; }
+  .ch-key { display: inline-flex; align-items: center; gap: 6px; }
+  .ch-key b { color: var(--bp-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ch-sw { display: inline-block; width: 14px; height: 2px; border-radius: 1px; }
+  .ch-sw--close { background: var(--bp-brand); }
+  .ch-sw--st { background: var(--bp-art-violet); }
+  .ch-ev-ic { display: inline-flex; gap: 2px; font-size: 9px; }
+  .ch-ev-ic .up { color: var(--bp-al); } .ch-ev-ic .flat { color: var(--bp-text3); } .ch-ev-ic .down { color: var(--bp-state-broken-text); }
+  .ch-ema { margin-left: auto; font: 600 var(--bp-text-xs) system-ui, sans-serif; color: var(--bp-text3); background: transparent; border: 1px solid var(--bp-border); border-radius: 99px; padding: 5px 10px; min-height: 30px; cursor: pointer; }
+  .ch-ema[aria-pressed="true"] { color: var(--bp-text); border-color: var(--bp-brand); }
+  .ch-period { margin: 0; padding: 0 18px 2px; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-returns { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 4px 18px 12px; font-size: var(--bp-text-xs); color: var(--bp-text3); font-variant-numeric: tabular-nums; }
+  .ch-ret { display: inline-flex; gap: 6px; align-items: baseline; }
+  .ch-ret-k { font-weight: 600; letter-spacing: .04em; }
 
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
@@ -345,52 +360,6 @@
   @media (max-width: 480px) {
     .entry-analysis-grid { grid-template-columns: 1fr; }
   }
-  .eq-badge {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius:var(--bp-radius);
-    font-size: var(--bp-text-base);
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .eq-safe  { background: rgba(var(--bp-al-rgb),0.12);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
-  .eq-risky { background: rgba(var(--bp-warn-rgb),0.12); color: var(--bp-warn); border: 1px solid rgba(var(--bp-warn-rgb),0.3); }
-  .eq-note {
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    line-height: 1.5;
-  }
-  /* R/R bar */
-  .rr-card-label {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  .rr-bar {
-    display: flex;
-    height: 10px;
-    border-radius: var(--bp-radius-5);
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
-  .rr-risk-seg   { background: var(--bp-sat); border-radius: 5px 0 0 5px; }
-  .rr-reward-seg { background: linear-gradient(90deg, var(--bp-al), var(--bp-brand)); border-radius: 0 5px 5px 0; }
-  .rr-level-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: var(--bp-text-xs);
-  }
-  .rr-lvl {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    color: var(--bp-text3);
-  }
-  .rr-lvl strong { font-size: var(--bp-text-base); font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .vol-status-lbl {
     font-size: var(--bp-text-xs);
     color: var(--bp-text3);
@@ -402,6 +371,9 @@
   .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:var(--bp-text-sm); margin-top:4px; line-height:1.4; flex-wrap:wrap; }
   .hacim-profili .hp-row-icon { font-size:var(--bp-text-xs); flex-shrink:0; }
   .hacim-profili .hp-row-text { color:var(--bp-text2); flex-shrink:0; }
+  /* C-71 K28: RVOL ipucu 17 px yüksekti; isabet alanı ~27 px, görünüm ve satır aynı */
+  .hacim-profili .hp-row-text abbr[tabindex] { position:relative; cursor:help; }
+  .hacim-profili .hp-row-text abbr[tabindex]::after { content:''; position:absolute; inset:-5px -2px; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
   /* K-BO (21.09): Hacim Profili'nin IKI satiri da (RVOL 5g/20g + sinyal gunu
      signal_vol_ratio) YON-BAGIMSIZ buyukluklerdir — yuksek hacim cokuste de
@@ -586,11 +558,14 @@
     border-bottom: 1px solid var(--bp-surface2);
     font-size: var(--bp-text-base);
     color: var(--bp-text2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;   /* C-70 K13: "₺", yuzde ve rozet tek satirda */
   }
+  .hist-active { font-size: var(--bp-text-2xs); color: var(--bp-text3); }
   .history-table tr:last-child td { border-bottom: none; }
   /* Dar ekranda 4 sutunun yatay dolgusu 80px yer kapliyordu; 16px'lik tasmayi
      kapatmak icin 32px serbest birakmak yetiyor (olculdu: 305px -> 273px). */
-  @media (max-width: 380px) {
+  @media (max-width: 480px) {
     .history-table th,
     .history-table td { padding-left: 6px; padding-right: 6px; }
   }
@@ -634,8 +609,8 @@
     --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.12;
   }
   /* Temel Analiz verisi hic yoksa panel gizlenir. Inline style.display DEGIL
-     sinif kullaniliyor: applyTab() her sekme gecisinde [data-tab-content]
-     panellerinin inline display'ini '' yapiyor, yani inline gizleme bir
+     sinif kullaniliyor: applyTab() eskiden her sekme gecisinde [data-tab-content]
+     panellerinin inline display'ini '' yapiyordu (C-25a'dan beri [data-hx-tab] kurali), yani inline gizleme bir
      sekme gidip-gelisinde geri aciliyordu (canlida olculdu: none -> block)
      ve icerigi olmayan bos bir "Temel Analiz" basligi ortaya cikiyordu. */
   .da-fund-panel.da-fund-empty { display: none !important; }
@@ -666,94 +641,6 @@
     gap: 8px;
   }
 
-  /* ── AI Haberler ── */
-  /* Data-Art (20.09): AI haber ozeti paneli. Glow rengi VIOLET — bu kutunun
-     icerigi Gemini uretimi, sayfadaki diger AI yuzeyleriyle (AI Analiz sekmesi)
-     ayni aksan; KAP paneli ise resmi/dogrulanabilir veri oldugu icin cyan. */
-  /* K-T: Haberler sekmesinin UC panelinden ikisi (story + KAP) 3px accent
-     seridi tasirken bu SERITSIZDI — ayni goruntude kardes panellerle ayni
-     aileye ait gorunmuyordu. Parilti moru oldugu icin serit de mor. */
-  .news-section {
-    --da-accent: var(--bp-art-violet);
-    --da-glow-rgb: var(--bp-art-violet-rgb);
-    --da-glow-a: .13;
-    --da-glow-size: 240px;
-    padding: 18px 20px;
-    margin-bottom: 20px;
-  }
-  /* 21.09 (K-W): `.news-loading` yerleşimi kanonik `.da-loading`a geçti;
-     burada yalnız dikey boşluk deltası kaldı. */
-  .news-loading { padding: 8px 0; }
-  .news-content {
-    font-size: var(--bp-text-base);
-    color: var(--bp-text2);
-    line-height: 1.75;
-  }
-  .news-content ul {
-    margin: 4px 0;
-    padding-left: 18px;
-  }
-  .news-content li {
-    margin-bottom: 8px;
-  }
-  .news-content p {
-    margin: 6px 0;
-  }
-  .news-content strong {
-    color: var(--bp-text);
-    font-weight: 600;
-  }
-  .news-content a {
-    color: var(--bp-brand);
-    text-decoration: underline;         /* WCAG link-in-text-block */
-    text-decoration-color: rgba(var(--bp-brand-rgb),.4);
-    text-underline-offset: 2px;
-  }
-  .news-content a:hover { text-decoration-color: var(--bp-brand); }
-  .news-error {
-    color: var(--bp-text3);
-    font-size: var(--bp-text-base);
-    padding: 6px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  /* K-T (21.09): GIZLI SEKMEDE olculen ilk ihlal grubu. 22px yuksekti —
-     WCAG 2.5.8 (24px). Haberler sekmesi `display:none` oldugu icin K-L'nin
-     189 ihlallik canli turu bu dugmeyi HIC gormedi. */
-  .news-retry-btn {
-    background: none;
-    border: 1px solid var(--bp-border);
-    color: var(--bp-brand);
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 3px 10px;
-    border-radius: var(--bp-radius-5);
-    cursor: pointer;
-    font-size: var(--bp-text-sm);
-    transition: border-color .15s;
-  }
-  .news-retry-btn:hover { border-color: var(--bp-brand); }
-  .news-source {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .news-badge {
-    background: rgba(var(--bp-brand-rgb),0.1);
-    border: 1px solid rgba(var(--bp-brand-rgb),0.2);
-    color: var(--bp-brand);
-    font-size: var(--bp-text-2xs);
-    font-weight: 600;
-    padding: 1px 7px;
-    border-radius:var(--bp-radius-lg);
-    letter-spacing: 0.3px;
-  }
-
   /* ── KAP Bildirimleri ── */
   /* K-T: gorunum zaten kanonikle AYNIYDI, ama el yazimiyla kopyalanmisti —
      tek kaynaga alindi (parilti SOLDA kalir: --da-glow-left). */
@@ -767,83 +654,36 @@
     padding: 18px 20px;
     margin-bottom: 20px;
   }
+  /* C-24 (25.09): tek kronolojik zaman cizelgesi -- ay basligi, gun sutunu, notr etiket
+     (kanon: "Ozel durum / Finansal rapor"), trend durumunun basladigi gun ayrac. */
+  .kap-month {
+    font-size: var(--bp-text-xs); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--bp-text3); margin: 16px 0 2px;
+  }
+  .kap-month:first-child { margin-top: 0; }
   .kap-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--bp-surface2);
+    display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--bp-surface2);
   }
-  .kap-item:last-child { border-bottom: none; }
-  .kap-item-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
+  .kap-day { font-size: var(--bp-text-sm); color: var(--bp-text3); font-variant-numeric: tabular-nums; padding-top: 2px; white-space: nowrap; }
+  .kap-body { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
   .kap-class-badge {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: var(--bp-radius-4);
-    font-size: var(--bp-text-2xs);
-    font-weight: 700;
-    letter-spacing: .3px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 1px;
+    display: inline-block; padding: 1px 7px; border-radius: var(--bp-radius-4);
+    font-size: var(--bp-text-2xs); font-weight: 600; letter-spacing: .3px; white-space: nowrap;
+    color: var(--bp-text3); border: 1px solid var(--bp-border); background: transparent;
   }
-  .kap-class-badge.oda { background: rgba(var(--bp-brand-rgb),.1); color:var(--bp-brand); border:1px solid rgba(var(--bp-brand-rgb),.2); }
-  .kap-class-badge.fr  { background: rgba(var(--bp-al-rgb),.1);  color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.2); }
-  .kap-summary {
-    font-size: var(--bp-text-base);
-    color: var(--bp-text2);
-    line-height: 1.45;
-    flex: 1;
-  }
-  .kap-summary a {
-    color: var(--bp-text2);
-    text-decoration: underline;         /* WCAG link-in-text-block: must be distinguishable from text */
-    text-decoration-color: rgba(var(--bp-text2-rgb),.4);
-    text-underline-offset: 2px;
-  }
-  .kap-summary a:hover { color:var(--bp-brand); text-decoration-color: var(--bp-brand); }
-  /* K-T: bildirim BASLIGI satir-ici bir baglantidir ve kutusu font metrigiyle
-     16px'te kalir (line-height kutuyu BUYUTMEZ — satir-ici ogenin sinir kutusu
-     yazi tipi yukseligindendir). Satir-ici dikey dolgu satir kutusunu ETKILEMEZ
-     ama isabet alanini buyutur: duzen kaymasi SIFIR, hedef 16 -> 24px.
-     Not: `.kap-summary` metninin TAMAMI baglanti oldugu icin WCAG'in "cumle
-     icinde" muafiyeti burada GECERSIZ (muafiyet hedef-olmayan metnin satir
-     yuksekligiyle kisitlanmis hedefler icindir). */
-  .kap-summary a { padding-block: 4px; }
-  .kap-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    padding-left: 0;
-  }
-  /* K-T: "↗" ikon baglantisi 8.5x13 idi — sitenin EN KUCUK hedefi (GARAN'da
-     20 kopya). `.kap-item-top` yogun bir satir (rozet + baslik + ikon), yani
-     `.da-tap-halo` burada komsulara tasardi; data-art.css'in kendi notu bu
-     durumda "ogenin KENDISINI 24px yap" diyor. Glifin gorsel boyu degismez. */
-  .kap-link-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    min-height: 24px;
-    gap: 3px;
-    font-size: var(--bp-text-xs);
-    color: var(--bp-brand);
-    text-decoration: none;
-    opacity: .7;
-    transition: opacity .15s;
-  }
-  .kap-link-btn:hover { opacity: 1; }
-  /* 21.09 (K-V): gövde kanonik `.da-empty`den geliyor; burada DELTA yalniz
-     dar ic boşluk — bu kutu panelin ICINDE, kisa bir listenin yerinde durur,
-     sayfa boyu bos durum degildir. */
-  .kap-empty { padding: 12px 0; }
+  .kap-summary { font-size: var(--bp-text-base); color: var(--bp-text2); line-height: 1.45; overflow-wrap: anywhere; }
+  .kap-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); line-height: 1.4; overflow-wrap: anywhere; }
+  .kap-fold summary { cursor: pointer; list-style: none; min-height: 24px; }
+  .kap-fold summary::-webkit-details-marker { display: none; }
+  .kap-fold summary::after { content: " ▾"; color: var(--bp-text3); }
+  .kap-fold[open] summary::after { content: " ▴"; }
+  .kap-fold ul { margin: 6px 0 0; padding-left: 16px; font-size: var(--bp-text-sm); color: var(--bp-text3); line-height: 1.5; }
+  .kap-sig { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: var(--bp-text-xs); color: var(--bp-text2); font-weight: 600; }
+  .kap-sig::before, .kap-sig::after { content: ""; flex: 1; height: 1px; background: rgba(var(--bp-art-violet-rgb), .45); }
+  .kap-n { color: var(--bp-text3); font-size: var(--bp-text-sm); white-space: nowrap; }
+  .kap-all { margin-top: 12px; min-height: 44px; }
+  .kap-empty { margin: 0; font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
   /* ── Metodoloji notu ── */
   .methodology {
@@ -918,7 +758,7 @@
   /* K-BQ: Supertrend seviyesinin FIYATA GORE rolu (destek/direnc/stop) —
      sayinin yanindaki ikincil aciklama, deger gibi okunmamali. */
   .qf-row dd .qf-sub {
-    font-family: var(--bp-font); font-size: var(--bp-text-xs);
+    font-size: var(--bp-text-xs);
     font-weight: 500; color: var(--bp-text3); letter-spacing: 0;
   }
   .quickfacts-disclaimer {
@@ -977,72 +817,34 @@
     max-width: 130px;
   }
 
-
-
   /* ── Responsive ── */
   /* K-DR: bu sayfanın kendi guard'ı (SPEC-STICKY-HEADER-v3 + DEV2-T-MOBOVF-1)
      shared.css'teki TEK KANONA taşındı — `html, body { overflow-x: clip; }`.
      Gerekçe orada, ölçümüyle birlikte yazılı. Bu sayfada guard'ın ölçülmüş işi
      `.score-section::before` (inset:-60px dekoratif ışıma) + `.ind-help::after`
      tooltip'in belge-seviyesi taşmasını kesmek; 320px'te 48px, 1280px'te 36px. */
-  @media (max-width: 768px) {
-    header { gap: 6px; padding: 10px 14px; }  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
+  @media (max-width: 768px) {  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
-    .container { padding: 10px 12px; }
-    #chartMain    { height: 224px; margin: 6px 14px 8px; }
+    #chartMain    { height: 360px; margin: 4px 14px 6px; }
+    .ch-chips { order: 5; margin-left: 0; width: 100%; display: flex; }
+    .ch-chips button { flex: 1; min-height: 44px; }
+    .ch-legend, .ch-keys, .ch-period, .ch-returns { padding-left: 14px; padding-right: 14px; }
+    .ch-ema { min-height: 36px; }
     /* 20.09: masaustunde 18px olan serit insetleri mobilde de chartMain ile
        ayni degerde kalmali — aksi halde grafik govdesi seritlerden 4-8px kayiyor. */
     .chart-header { padding: 12px 14px; }
     .week52-bar   { padding: 12px 14px 14px; }
-    #chartLoading { height: 280px; }
+    #chartLoading { height: 360px; }
+    .ch-legend { min-height: 42px; }  /* C-25a: telefonda lejant iki satir; yer onceden ayrilir */
+    .ch-keys { min-height: 62px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; } /* C-61: 3 kart */
     .chart-section { overflow: hidden; }
   }
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar {
-    background: var(--bp-bg); border-bottom: 1px solid var(--bp-border);
-    min-height: 32px; padding-top: env(safe-area-inset-top,0px); overflow: hidden; position: sticky; top: 0; z-index: var(--bp-z-sticky); white-space: nowrap;
-  }
-  .macro-bar::before, .macro-bar::after {
-    content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
-    pointer-events: none; z-index:var(--bp-z-raised);
-  }
-  .macro-bar::before { left: 0; background: linear-gradient(to right, var(--bp-bg), transparent); }
-  .macro-bar::after  { right: 0; background: linear-gradient(to left,  var(--bp-bg), transparent); }
-  .macro-track {
-    display: inline-flex; align-items: center;
-    animation: macroScroll 40s linear infinite;will-change:transform; height: 32px;
-  }
-  @media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state: paused; } }
-  @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  /* K-AZ: `top:50%` seridin safe-area DOLGUSUNU da iceren kutusuna gore
-     ortaliyordu -> PWA'da dugmenin ust ~24px'i centigin altinda kaliyordu
-     (olculdu, inset=47px). Dolgunun yarisi geri eklendi; inset=0'da deger
-     BIREBIR ayni (50%). */
-  .macro-pause-btn { position: absolute; right: 2px; top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 0 20px; border-right: 1px solid var(--bp-border);
-    font-size: var(--bp-text-sm); height: 32px;
-  }
-  .macro-item-lbl { font-weight: 600; color: var(--bp-text); }
   .mc-pos { color: var(--bp-al); }
   .mc-neg { color: var(--bp-sat); }
   .mc-neu { color: var(--bp-bkl); }
-
-  /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-ctl-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
-  @media (hover: hover) and (pointer: fine) {
-    .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-ctl-border-hover); color: var(--bp-text); }
-  }
-  @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
-
-
 
   /* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada UCUNCU bir yapiskan bant var --
      C-19'dan beri .da-tabs sekme seridi (44px + 1px cizgi). Kanonik
@@ -1051,29 +853,10 @@
 
   /* ── C-19 (25.09): .da-tabs — 4 sekme, ARIA tabs deseni (C-M10 taslagi, O16i=A).
      Eski .bp-segments hap seridi + sembol hapi + AI sekmesi kalkti. Aktif sekme
-     marka rengi alt cizgi; yapiskan (header'in hemen alti). Tek kaynak bu blok. ── */
-  .da-tabs{
-    position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader);
-    display:flex; gap:4px; margin:0 0 18px; background:var(--bp-bg);
-    border-bottom:1px solid var(--bp-border);
-  }
-  .da-tab{
-    position:relative; min-height:44px; padding:0 14px; border:0; background:none; cursor:pointer;
-    font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-md); font-weight:600;
-    color:var(--bp-text3); white-space:nowrap; -webkit-tap-highlight-color:transparent;
-  }
-  @media (hover:hover) and (pointer:fine){ .da-tab:hover{ color:var(--bp-text2); } }
-  .da-tab[aria-selected="true"]{ color:var(--bp-text); }
-  .da-tab[aria-selected="true"]::after{
-    content:''; position:absolute; left:10px; right:10px; bottom:-1px; height:2px;
-    background:var(--bp-brand); border-radius:var(--bp-radius-xs);
-  }
-  .da-tab:focus-visible{ outline:2px solid var(--bp-accent-cyan); outline-offset:-2px; border-radius:var(--bp-radius-md); }
-  @media (max-width:768px){
-    .da-tabs{ margin:0 -12px 14px; padding:0 4px; overflow-x:auto; scrollbar-width:none; }
-    .da-tabs::-webkit-scrollbar{ display:none; }
-    .da-tab{ flex:1 0 auto; padding:0 10px; }
-  }
+     marka rengi alt cizgi; yapiskan (header'in hemen alti). Görünüm C-17'den beri data-art.css'te. ── */
+  /* Görünüm kanonda (data-art.css §7e .da-tabs, C-17); burada yalnız konum. */
+  .da-tabs{ position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader); margin:0 0 18px; }
+  @media (max-width:768px){ .da-tabs{ margin:0 -12px 14px; padding:0 4px; } }
 
   /* C-19: "Ne anlama geliyor? · Kural tabanli" karti (eski AI sekmesinin icerigi). */
   .hx-mean{ padding:16px 18px; margin-bottom:16px; }
@@ -1128,9 +911,10 @@
   .hx-acts .hx-act{ height:40px; padding:0 13px; border-radius:var(--bp-radius-lg); font-size:var(--bp-text-base); text-decoration:none; background:var(--bp-surface2); border-color:var(--bp-border); color:var(--bp-text); }
   .hx-acts .hx-act svg{ width:16px; height:16px; }
   .hx-acts .hx-act--pri{ background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
-  .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-al-rgb),0.14); border-color:rgba(var(--bp-al-rgb),0.55); color:var(--bp-al); }
+  .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-ok-rgb),0.14); border-color:rgba(var(--bp-ok-rgb),0.55); color:var(--bp-ok); }
   .hx-acts .hx-act--ico .hib-action-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hx-acts .hx-act--ico{ position:relative; width:40px; padding:0; justify-content:center; }
+  /* C-21c: 🔔 "Takip et" altindaki e-posta paneli (girissiz kullanici; eski sayfa sonu kutusunun yerine) */
   .hx-chart{ position:relative; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-16); padding:14px 16px 12px; min-width:0; }
   .hx-chart-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .hx-chart-pc{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text2); }
@@ -1160,9 +944,8 @@
   .hx-ring b{ position:absolute; inset:0; display:grid; place-items:center; font-size:var(--bp-text-22); font-weight:800; letter-spacing:-.02em; }
   .hx-ring-bg{ fill:none; stroke:var(--bp-border); stroke-width:7; }
   .hx-ring-fg{ fill:none; stroke-width:7; stroke-linecap:round; }
-  .hx-ring-fg--bp{ stroke:var(--bp-al); }
+  .hx-ring-fg--bp{ stroke:var(--bp-score-bp); }
   .hx-bp-l{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-xs); font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--bp-text3); }
-  .hx-bp-v{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-15); font-weight:700; }
   .hx-bp-f{ font-size:var(--bp-text-sm); color:var(--bp-text3); }
   .hx-qs{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .hx-q{ padding:18px 20px 4px 0; min-width:0; }
@@ -1219,7 +1002,7 @@
   }
   @media (max-width:640px){
     .hx-top{ margin-top:2px; gap:14px; }
-    .hx-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"id id" "price acts" "chg chg" "facts facts"; column-gap:10px; }
+    .hx-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"id id" "price acts" "chg chg" "facts facts" "sub sub"; column-gap:10px; }
     .hx-id{ grid-area:id; flex-wrap:nowrap; }
     .hx-tk{ font-size:var(--bp-text-22); }
     .hx-nm{ font-size:var(--bp-text-base); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; }
@@ -1228,6 +1011,7 @@
     .hx-chg{ grid-area:chg; font-size:var(--bp-text-md); }
     .hx-facts{ grid-area:facts; margin-top:12px; }
     .hx-facts > div{ flex:1 1 40%; }
+    .hx-head > .acc-slot{ grid-area:sub; }
     .hx-acts{ grid-area:acts; margin:10px 0 4px; align-self:end; gap:6px; flex-wrap:nowrap; }
     .hx-acts .hx-act{ width:44px; height:44px; padding:0; justify-content:center; position:relative; }
     .hx-acts .hx-act .hib-action-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
@@ -1282,34 +1066,10 @@
     .da-ai-panel{ padding:18px 20px;margin-bottom:20px; }
     .da-ai-panel--fund{ --da-accent:var(--bp-accent-cyan);--da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10; }
     .da-ai-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px}
-    .da-ai-badge{
-      margin-left:auto;font-size:var(--bp-text-xs);
-      background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);
-      padding:2px 8px;border-radius:var(--bp-radius-pill);
-      border:1px solid rgba(var(--bp-brand-rgb),0.25);
-    }
-    /* K-BZ (22.09): rozet altindaki icerigin kokenini soyler. Kural tabanli
-       (SSR 3-kriter checklist / hata / veri-yok) durumda marka-AI rengi degil
-       notr yuzey kullanilir — "Gemini AI" rozeti yalnizca gercek AI metninde. */
-    .da-ai-badge--rule{
-      background:var(--bp-surface2);color:var(--bp-text3);
-      border-color:var(--bp-border);
-    }
     .da-ai-body{
       font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0;
     }
     .da-ai-note{font-size:var(--bp-text-xs);color:var(--bp-text3)}
-
-    .da-story-panel{
-      padding:18px 20px;margin-bottom:20px;
-      --da-accent:var(--bp-accent-cyan);--da-glow-x:-10%;--da-glow-size:260px;
-      --da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10;
-    }
-    .da-story-head{position:relative;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-    .da-story-title{
-      position:relative;font-weight:800;letter-spacing:-.01em;font-size:clamp(1.05rem,2vw,1.3rem);
-      color:var(--bp-text);margin:0;
-    }
 
     /* ── "Sinyal Özeti" kutusu — 19.09, hisse.html Data-Art denetiminin devamı.
        Bu kutu Özet sekmesinde hero kartın HEMEN altında, sayfanın en görünür
@@ -1350,38 +1110,6 @@
        ediyordu. Paylaş .hib-action-bar'a üçüncü buton olarak taşındı. Her sayfa
        görüntülemesinde kalıcı ~60-90px (safe-area dahil) dikey alan geri kazanıldı. */
 
-    .bp-detail-cta-wrap {
-      margin-bottom: 20px; padding: 16px;
-      background: linear-gradient(135deg, rgba(var(--bp-al-rgb),0.06), rgba(var(--bp-al-rgb),0.02));
-      border: 1px solid rgba(var(--bp-al-rgb),0.18);
-      border-radius:var(--bp-radius-xl);
-    }
-    .bp-detail-cta-label {
-      font-size: var(--bp-text-xs); color: var(--bp-text3); font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 10px; text-align: center;
-    }
-    .bp-detail-cta-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    }
-    .bp-detail-cta-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 12px 6px; border-radius:var(--bp-radius-lg);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--bp-text); cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bp-detail-cta-btn:hover { background: rgba(var(--bp-al-rgb),0.10); border-color: rgba(var(--bp-al-rgb),0.32); }
-    .bp-detail-cta-btn:active { transform: scale(0.97); }
-    .bp-detail-cta-icon { font-size: var(--bp-text-22); line-height: 1; }
-    .bp-detail-cta-text {
-      font-size: var(--bp-text-base); font-weight: 700; letter-spacing: 0.2px;
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .bp-detail-cta-arrow { color: var(--bp-al); font-weight: 800; }
   
 
 /* a11y: #signalSummaryDetails > summary'nin outline:none'i klavye odak
@@ -1481,155 +1209,155 @@
 .mtf-card:hover { transform: rotate(0deg) translateY(-3px); }
 
 /* ══════════════════════════════════════════════════════════════════════
-   CPO-1554 Faz 4 — Üç Skor Analizi (BorsaPusula / Teknik / Temel + radar)
-   Organik/Asimetrik konsept (workflow judge-panel 8.4/10 kazanan tasarım),
-   Kokpit'ten radar-renk düzeltmesi + Kart Yığını'ndan "YENİ" rozeti aşılandı.
-   [data-state="full"]  — hs (health-score) mevcut, tüm kompozisyon.
-   [data-state="partial"] — hs yok (EOD turu bekleniyor), sadece Teknik
-   gauge + kompakt dürüst bekleme notu, sade tek-satır düzen.
+   C-22 + C-22b (25.09) — Temel sekmesi v2 (onaylı taslak v3, C-M6).
+   Eski "Üç Skor Analizi" (halkalar + radar + AI yorumu) ve kart ızgarası
+   kalktı. Üstte "Finansalları nasıl?" + Temel skor halkası (.da-ring--temel)
+   + eksen satırları; altta 6 panel. Renk: Temel kimliği camgöbeği, değişim
+   çubuklarında yön rengi yok (kanon §5.3, negatif = soluk). O16e=B: sayı
+   sütunları sabit genişlik, satırlar hizalı.
    ══════════════════════════════════════════════════════════════════════ */
-
-.score-section { position: relative; margin-bottom: 20px; }
-.score-section::before {
-  content: ''; position: absolute; inset: -60px; pointer-events: none; z-index: 0;
+.tv-hero {
+  display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.5fr); gap: 26px;
+  padding: 22px 24px; margin-bottom: 18px; border-radius: var(--bp-radius-20); border: 1px solid var(--bp-border);
   background:
-    radial-gradient(ellipse 600px 420px at 26% 14%, rgba(var(--bp-volume-rgb), .07), transparent 70%),
-    radial-gradient(ellipse 520px 420px at 78% 68%, rgba(var(--bp-accent-cyan-rgb), .06), transparent 70%);
+    radial-gradient(70% 120% at 100% 0%, rgba(var(--bp-accent-cyan-rgb), .10), transparent 58%),
+    radial-gradient(60% 120% at 0% 100%, rgba(var(--bp-art-violet-rgb), .07), transparent 60%),
+    var(--bp-surface);
 }
-.score-section-eyebrow { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 6px; max-width: 1180px; position: relative; z-index: 1; }
-.score-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 22px; color: var(--bp-text); }
-.formula-note { font-size: 12.5px; color: var(--bp-text3); margin-top: 2px; }
-.formula-note b { color: var(--bp-text2); font-weight: 600; }
-.axis-legend { font-size: 11.5px; color: var(--bp-text3); margin: 6px 0 26px; max-width: 1180px; position: relative; z-index: 1; }
-.axis-legend span { color: var(--bp-text2); }
-.axis-legend em { font-style: normal; color: var(--bp-text3); }
+.tv-lead { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tv-q { margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text2); }
+.tv-ans { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-weight: 800; font-size: clamp(1.45rem, 2.3vw, 1.9rem); line-height: 1.1; letter-spacing: -.025em; text-wrap: balance; color: var(--bp-text); }
+.tv-ringrow { display: flex; gap: 14px; align-items: center; }
+.tv-ring { --da-ring-s: 76px; }
+.tv-lbl { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--bp-text3); }
+.tv-sub { font-size: var(--bp-text-base); color: var(--bp-text3); }
+.tv-kind, .tv-per { margin: 0; font-size: var(--bp-text-base); line-height: 1.5; color: var(--bp-text3); }
+.tv-per { color: var(--bp-text2); }
+.tv-axes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; align-content: start; }
+.tv-ax { display: grid; grid-template-columns: 150px minmax(0, 1fr) 34px; gap: 4px 12px; align-items: center; padding: 8px 10px; border-radius: var(--bp-radius-xl); }
+.tv-ax-n { font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: var(--bp-text-md); color: var(--bp-text); }
+.tv-ax-tr { display: block; width: 100%; height: 8px; }
+.tv-ax-bg { fill: var(--bp-ring-track); }
+.tv-ax-fg { fill: var(--bp-accent-cyan); }
+.tv-ax-v { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-15); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.tv-ax-l { grid-column: 2 / 4; font-size: var(--bp-text-base); line-height: 1.4; color: var(--bp-text3); }
+.tv-ax-na { font-size: var(--bp-text-sm); color: var(--bp-text3); }
+.tv-ax--na .tv-ax-v { color: var(--bp-text3); }
 
-.score-canvas { position: relative; width: 100%; max-width: 1180px; margin: 0 auto; z-index: 1; }
-[data-state="full"] .score-canvas { min-height: 800px; }
+.tv-prep, .tv-err { margin: 0 0 14px; font-size: var(--bp-text-base); color: var(--bp-text3); }
+.tv-err { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.tv-pan { min-width: 0; padding: 16px 18px 18px; border-radius: var(--bp-radius-16); border: 1px solid var(--bp-border); background: var(--bp-surface); }
+.tv-ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.tv-ph > div:first-child { min-width: 0; }
+.tv-pan h3 { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 1.08rem; letter-spacing: -.01em; }
+.tv-unit { margin: 2px 0 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-xs); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); }
+.tv-say { margin: 8px 0 12px; font-size: var(--bp-text-md); line-height: 1.55; color: var(--bp-text2); }
+.tv-foot { margin: 10px 0 0; font-size: var(--bp-text-sm); line-height: 1.5; color: var(--bp-text3); }
+.tv-segs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tv-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: var(--bp-radius-lg); border: 1px solid var(--bp-border); background: var(--bp-bg); }
+.tv-seg button { min-height: 32px; padding: 6px 10px; border: 0; border-radius: var(--bp-radius-md); background: transparent; color: var(--bp-text3); font: 600 var(--bp-text-sm) 'Space Grotesk', system-ui, sans-serif; cursor: pointer; }
+.tv-seg button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); }
+.tv-seg button:disabled { opacity: .35; cursor: default; }
+.tv-seg button:focus-visible { outline: 2px solid var(--bp-accent-cyan); outline-offset: 1px; }
+.tv-ch { min-height: 0; }
+.tv-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tv-svg text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11.5px; fill: var(--bp-text3); }
+.tv-svg .tv-vl { font-weight: 700; font-size: 12.5px; fill: var(--bp-text); }
+.tv-zero { stroke: var(--bp-border2); }
+.tv-grid-l { stroke: var(--bp-ring-track); }
+.tv-bar { fill: var(--bp-accent-cyan); }
+.tv-bar--neg { fill-opacity: .42; }
+.tv-bar--zero { fill-opacity: .6; }
+.tv-cut { stroke: var(--bp-bg); stroke-width: 3; fill: none; }
+.tv-ln { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.tv-ln--0, .tv-dot--0 { stroke: var(--bp-brand); }
+.tv-ln--1, .tv-dot--1 { stroke: var(--bp-accent-cyan); }
+.tv-dot--0 { fill: var(--bp-brand); }
+.tv-dot--1 { fill: var(--bp-accent-cyan); }
+.tv-ln--dash { stroke-dasharray: 4 4; stroke-width: 2.2; }
+.tv-lgd { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 6px; font: 500 var(--bp-text-base) 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); }
+.tv-lgd span { display: inline-flex; align-items: center; gap: 6px; }
+.tv-lgd b { color: var(--bp-text); font-weight: 700; }
+.tv-lgd small { color: var(--bp-text3); }
+.tv-sw { display: inline-block; width: 10px; height: 3px; border-radius: var(--bp-radius-xs); }
+.tv-sw--0 { background: var(--bp-brand); }
+.tv-sw--1 { background: var(--bp-accent-cyan); }
+.tv-bands { display: grid; gap: 16px; margin-top: 6px; }
+.tv-bd-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tv-bd-h b { font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-md); }
+.tv-bd-h span { font: 600 var(--bp-text-base) 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text2); font-variant-numeric: tabular-nums; }
+.tv-band text { font-size: 11px; }
+.tv-band-bg { fill: var(--bp-surface2); }
+.tv-band-rg { fill: rgba(var(--bp-accent-cyan-rgb), .22); }
+.tv-band-y { fill: var(--bp-accent-cyan); fill-opacity: .75; }
+.tv-band-med { stroke: var(--bp-text2); stroke-dasharray: 3 3; }
+.tv-band-now { fill: var(--bp-text); stroke: var(--bp-bg); stroke-width: 3; }
+.tv-chip { font: 700 var(--bp-text-base) 'Space Grotesk', system-ui, sans-serif; padding: 3px 10px; border-radius: var(--bp-radius-pill); border: 1px solid var(--bp-border2); color: var(--bp-text2); white-space: nowrap; }
+.tv-chip--u { color: var(--bp-accent-cyan); border-color: rgba(var(--bp-accent-cyan-rgb), .45); }
+.tv-chip--p { color: var(--bp-stale); border-color: rgba(var(--bp-stale-rgb), .45); }
+.tv-an { margin: 14px 0 0; padding: 9px 11px; border-radius: var(--bp-radius-lg); background: var(--bp-surface2); font-size: var(--bp-text-base); color: var(--bp-text2); }
+.tv-an b { font-family: 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); }
+/* kv: etiket + sabit genişlikli sayı sütunları (O16e=B) */
+.tv-kv-t { display: grid; margin-top: 12px; font-size: var(--bp-text-md); }
+.tv-kv-h, .tv-kv-r { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px; gap: 8px; align-items: baseline; }
+.tv-kv-t--1 .tv-kv-h, .tv-kv-t--1 .tv-kv-r { grid-template-columns: minmax(0, 1fr) 112px; }
+.tv-kv-h { padding-bottom: 2px; font: 600 var(--bp-text-xs) 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); }
+.tv-kv-h span + span { text-align: right; }
+.tv-kv-r { padding: 7px 0; border-top: 1px dashed var(--bp-border); }
+.tv-kv-r > span { color: var(--bp-text2); min-width: 0; }
+.tv-kv-r b { font: 600 var(--bp-text-md) 'Space Grotesk', system-ui, sans-serif; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tv-kv-r b.tv-p { color: var(--bp-text3); font-weight: 500; }
+.tv-score { display: flex; align-items: baseline; gap: 6px; }
+.tv-score b { font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-weight: 800; font-size: 2rem; line-height: 1; letter-spacing: -.03em; }
+.tv-score span { font: 600 var(--bp-text-base) 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); }
+.tv-chk { display: grid; gap: 12px; }
+.tv-chk h4 { margin: 0 0 4px; font: 600 var(--bp-text-xs) 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); }
+.tv-chk ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.tv-chk li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: var(--bp-text-md); color: var(--bp-text2); }
+.tv-chk li i { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 700 10px/1 'Space Grotesk', system-ui, sans-serif; font-style: normal; }
+.tv-chk li.ok i { background: var(--bp-accent-cyan); color: var(--bp-bg); }
+.tv-chk li.no i { background: var(--bp-surface3); color: var(--bp-text3); }
+.tv-chk li b { font: 600 var(--bp-text-sm) 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text3); text-align: right; font-variant-numeric: tabular-nums; }
+.tv-divs { display: flex; gap: 18px; flex-wrap: wrap; margin: 6px 0 8px; }
+.tv-divs span { display: block; font: 600 var(--bp-text-xs) 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); }
+.tv-divs b { font: 700 1.15rem/1.3 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+#panel-temel > .hx-disc { margin-top: 18px; }
 
-/* radar */
-.radar-wrap { position: absolute; left: 0; top: 90px; width: 560px; height: 560px; transition: opacity .35s ease, filter .35s ease; }
-.radar-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.radar-grid { fill: none; stroke: var(--bp-border); stroke-width: 1; opacity: .55; }
-.radar-grid--outer { opacity: .85; }
-.radar-axis { stroke: var(--bp-border); stroke-width: 1; opacity: .4; }
-.radar-data { stroke: var(--bp-accent-cyan); stroke-width: 2; }
-.axis-name { font-size: 10.5px; letter-spacing: .07em; fill: var(--bp-text3); text-transform: uppercase; font-family: 'Space Grotesk', system-ui, sans-serif; }
-.axis-value { font-size: 17px; font-weight: 800; font-family: 'Space Grotesk', system-ui, sans-serif; }
-.radar-partial-note {
-  display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: 230px; text-align: center; font-size: 12px; color: var(--bp-text2);
-  background: rgba(20, 20, 22, .85); border: 1px solid var(--bp-border); border-radius: 10px; padding: 10px 14px;
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+@media (max-width: 980px) {
+  .tv-hero { grid-template-columns: 1fr; }
+  .tv-grid { grid-template-columns: 1fr; }
 }
-.radar-wrap[data-dim="true"] { opacity: .3; filter: saturate(.35); }
-.radar-wrap[data-dim="true"] .radar-partial-note { display: block; }
-
-.decor-nodes { position: absolute; left: 34px; top: 110px; width: 170px; height: 170px; z-index: 0; opacity: .7; pointer-events: none; }
-
-/* gauges (ortak) */
-.gauge { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: transform .25s ease, opacity .3s ease; }
-.gauge:hover { transform: scale(1.035); }
-.gauge .gauge-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.gauge .ring-bg { fill: none; stroke: var(--bp-border); stroke-width: 6; }
-.gauge .ring-fg { fill: none; stroke: var(--band-color, var(--bp-brand)); stroke-width: 6; stroke-linecap: round; }
-.gauge-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.gauge-value { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.02em; color: var(--bp-text); line-height: 1; }
-.gauge-max { font-size: 12px; color: var(--bp-text3); margin-top: 2px; }
-.gauge-label {
-  position: absolute; left: 50%; bottom: -30px; transform: translateX(-50%);
-  text-align: center; font-size: 10.5px; letter-spacing: .08em; color: var(--bp-text3);
-  text-transform: uppercase; white-space: nowrap;
+@media (max-width: 600px) {
+  .tv-hero { padding: 16px 14px; gap: 14px; }
+  .tv-ring { --da-ring-s: 60px; }
+  .tv-ax { grid-template-columns: 108px minmax(0, 1fr) 30px; padding: 7px 2px; }
+  .tv-ax-l { font-size: var(--bp-text-sm); }
+  .tv-grid { gap: 12px; }
+  .tv-pan { padding: 14px 14px 16px; }
+  .tv-say { margin: 6px 0 10px; }
+  .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 84px 84px; }
+  .tv-kv-r { padding: 6px 0; }
+  .tv-foot, .tv-kind, .tv-ax-x { display: none; }   /* taslak v3: telefonda yontem notu ve ikincil ifade yok */
+  .tv-chk { gap: 8px; }
+  .tv-chk ul { gap: 4px; }
+  .tv-chk li { font-size: var(--bp-text-base); }
+}
+@media (max-width: 360px) {
+  .tv-ax { grid-template-columns: 92px minmax(0, 1fr) 28px; }
+  .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 76px 76px; }
 }
 
-/* hero — BorsaPusula Skoru */
-.hero-gauge { left: 490px; top: 0; width: 260px; height: 260px; z-index: 6; box-shadow: 0 30px 70px -24px rgba(var(--band-rgb), .5); }
-.hero-gauge .gauge-ring { overflow: visible; }   /* C-04: drop-shadow SVG kutusunda kesilip kare kose birakiyordu */
-.hero-gauge .ring-fg { stroke-width: 9; filter: drop-shadow(0 0 12px rgba(var(--band-rgb), .6)); }
-.hero-gauge .gauge-value { font-size: 66px; }
-.hero-gauge .gauge-label { bottom: -46px; font-size: 12px; line-height: 1.5; }
-.hero-formula { position: absolute; left: 50%; bottom: -70px; transform: translateX(-50%); font-size: 11px; color: var(--bp-text3); white-space: nowrap; text-align: center; }
-.partial-badge {
-  display: none; position: absolute; top: -8px; right: -4px; z-index: 8;
-  align-items: center; gap: 5px; background: var(--bp-surface); border: 1px solid rgba(var(--bp-premium-rgb), .5);
-  color: var(--bp-premium); font-size: 10px; font-weight: 700; letter-spacing: .05em;
-  padding: 5px 10px; border-radius: 20px; text-transform: uppercase; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .6);
-}
-.hero-gauge[data-missing="true"] .partial-badge { display: flex; }
-
-/* teknik + temel */
-.teknik-gauge { left: 26px; top: 560px; width: 172px; height: 172px; z-index: 4; --band-color: var(--bp-brand); --band-rgb: var(--bp-brand-rgb); }
-.teknik-gauge .gauge-value { font-size: 34px; }
-
-.temel-gauge { left: 518px; top: 518px; width: 172px; height: 172px; z-index: 4; --band-color: var(--bp-accent-cyan); --band-rgb: var(--bp-accent-cyan-rgb); }
-.temel-gauge .gauge-value { font-size: 34px; }
-.new-badge {
-  position: absolute; top: -8px; left: 50%; transform: translateX(-50%); z-index: 8;
-  font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--bp-premium); background: rgba(var(--bp-premium-rgb), .13);
-  border: 1px solid rgba(var(--bp-premium-rgb), .35);
-  padding: 2px 8px; border-radius: 20px; white-space: nowrap;
-}
-.completeness { position: absolute; left: 50%; bottom: -60px; transform: translateX(-50%); width: 130px; text-align: center; }
-.completeness .bar { height: 3px; border-radius: 2px; background: var(--bp-border); overflow: hidden; margin-top: 4px; }
-.completeness .bar i { display: block; height: 100%; background: var(--bp-accent-cyan); }
-.completeness span { font-size: 9.5px; color: var(--bp-text3); }
-
-.temel-gauge[data-missing="true"] { opacity: .4; }
-.temel-gauge[data-missing="true"] .gauge-value { color: var(--bp-text3); }
-
-/* AI gerekçe kartı */
-.rationale-card {
-  position: absolute; left: 770px; top: 330px; width: 360px; z-index: 3;
-  background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius: 16px;
-  padding: 22px 24px; overflow: hidden;
-}
-.rationale-card::before {
-  content: ''; position: absolute; top: -55%; right: -8%; width: 130px; height: 130px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb), .14), transparent 70%); pointer-events: none;
-}
-.rc-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--bp-accent-cyan); margin-bottom: 12px; position: relative; }
-.rationale-card p { font-size: 14px; line-height: 1.65; color: var(--bp-text2); margin: 0 0 12px; position: relative; }
-.rationale-card .rc-note { font-size: 11.5px; color: var(--bp-volume); margin: -4px 0 12px; }
-.rc-disclaimer { font-size: 11px; color: var(--bp-text3); position: relative; }
-
-/* ── [data-state="partial"] — hs yok, sade tek-satır düzen ── */
-[data-state="partial"] .score-canvas {
-  display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 6px 0 34px;
-}
-[data-state="partial"] .teknik-gauge { position: relative; left: auto; top: auto; width: 140px; height: 140px; flex-shrink: 0; }
-.pending-note {
-  flex: 1; min-width: 260px; display: flex; align-items: flex-start; gap: 14px;
-  background: var(--bp-surface2); border: 1px dashed var(--bp-border); border-radius: 14px; padding: 18px 20px;
-}
-.pending-icon {
-  width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: 1.5px dashed var(--bp-text3);
-  display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--bp-text3);
-  animation: scorePendingPulse 2.4s ease-in-out infinite;
-}
-@keyframes scorePendingPulse { 0%, 100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
-.pending-title { font-size: 14px; font-weight: 700; color: var(--bp-text); margin-bottom: 4px; }
-.pending-text { font-size: 12.5px; color: var(--bp-text3); line-height: 1.55; }
-.pending-eta { display: inline-block; margin-top: 8px; font-size: 11.5px; color: var(--bp-volume); background: rgba(var(--bp-volume-rgb), .1); border: 1px solid rgba(var(--bp-volume-rgb), .3); padding: 3px 10px; border-radius: 20px; }
-
-/* ── ≥1024px serbest kompozisyon, <900px tek-kolon akış (full state) ── */
-@media (max-width: 900px) {
-  [data-state="full"] .score-canvas {
-    min-height: auto; display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 10px 0 40px;
-  }
-  [data-state="full"] .radar-wrap, [data-state="full"] .hero-gauge,
-  [data-state="full"] .teknik-gauge, [data-state="full"] .temel-gauge,
-  [data-state="full"] .rationale-card {
-    position: relative; left: auto; top: auto; right: auto; bottom: auto; transform: none; margin: 0;
-  }
-  [data-state="full"] .decor-nodes { display: none; }
-  [data-state="full"] .hero-gauge { order: 1; width: 190px; height: 190px; margin-bottom: 64px; box-shadow: 0 20px 50px -20px rgba(var(--band-rgb), .5); }
-  [data-state="full"] .hero-gauge .gauge-value { font-size: 48px; }
-  [data-state="full"] .teknik-gauge { order: 2; width: 130px; height: 130px; margin-bottom: 44px; }
-  [data-state="full"] .temel-gauge { order: 3; width: 130px; height: 130px; margin-bottom: 64px; }
-  [data-state="full"] .radar-wrap { order: 4; width: min(360px, 90vw); height: min(360px, 90vw); margin-top: 6px; }
-  [data-state="full"] .rationale-card { order: 5; width: 100%; max-width: 420px; }
-  [data-state="full"] .gauge-label { bottom: -26px; }
-  [data-state="full"] .hero-formula { display: none; }
-  [data-state="partial"] .score-canvas { flex-direction: column; align-items: center; text-align: left; }
-}
+/* C-25a: sekme -> panel gorunurlugu tek kanon. <main data-hx-tab> SSR'da secili sekmeyle
+   gelir (?tab=), applyTab yalniz niteligi degistirir; ilk boyamada yanlis panel gorunmez. */
+[data-hx-tab="ozet"] [data-tab-content]:not([data-tab-content~="ozet"]):not([data-tab-content~="always"]),
+[data-hx-tab="grafik"] [data-tab-content]:not([data-tab-content~="grafik"]):not([data-tab-content~="always"]),
+[data-hx-tab="temel"] [data-tab-content]:not([data-tab-content~="temel"]):not([data-tab-content~="always"]),
+[data-hx-tab="haberler"] [data-tab-content]:not([data-tab-content~="haberler"]):not([data-tab-content~="always"]) { display: none; }
+/* C-70 K16: kapsam dışı pay — tek sütun kimlik + not kartları */
+.hx-top.hx-oos{ grid-template-columns:1fr; margin-bottom:16px; }
+.hx-oos-note{ max-width:720px; margin-bottom:14px; padding:16px 18px; }
+.hx-oos .hx-chip{ display:inline-block; }
+.hx-oos-note p{ margin:0; line-height:1.6; color:var(--bp-text2); }
+.hx-oos-note .section-title{ margin:0 0 8px; }
+.hx-oos-links{ margin-top:10px !important; }

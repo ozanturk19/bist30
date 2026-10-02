@@ -39,15 +39,6 @@ else
     fail_module "Paket 2 — UptimeRobot Forwarder"
 fi
 
-# ── Paket 3: Sentry Forwarder ─────────────────────────────────────────────────
-divider
-echo "[Paket 3] Sentry Forwarder (test_sentry_forwarder.py)"
-if python3 -m pytest "$REPO_ROOT/tests/test_sentry_forwarder.py" -q --tb=short 2>&1; then
-    pass_module "Paket 3 — Sentry Forwarder"
-else
-    fail_module "Paket 3 — Sentry Forwarder"
-fi
-
 # ── Paket 4: Health Endpoint Extras ───────────────────────────────────────────
 divider
 echo "[Paket 4] Health Endpoint Extras (test_health_extras.py)"

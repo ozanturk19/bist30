@@ -1,11 +1,1 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="7" fill="#0e0e12"/>
-  <defs>
-    <linearGradient id="bpMark" x1="5" y1="7" x2="27" y2="27" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7c5cff"/>
-      <stop offset="1" stop-color="#22d3ee"/>
-    </linearGradient>
-  </defs>
-  <circle cx="16" cy="16" r="12.5" fill="none" stroke="url(#bpMark)" stroke-width="1.3"/>
-  <path d="M16 6.5 L19.4 14.7 L27.5 16 L19.4 17.3 L16 25.5 L12.6 17.3 L4.5 16 L12.6 14.7 Z" fill="url(#bpMark)"/>
-</svg>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" rx="26" fill="#0e0e12"/><g transform="translate(0 0) scale(1)"><defs><linearGradient id="bpg" x1="18" y1="18" x2="102" y2="102" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="60" cy="60" r="44" fill="none" stroke="url(#bpg)" stroke-width="11" stroke-linecap="round" stroke-dasharray="232 44.5" transform="rotate(-18 60 60)"/><path d="M60 25 C62.8 50.5 69.5 57.2 95 60 C69.5 62.8 62.8 69.5 60 95 C57.2 69.5 50.5 62.8 25 60 C50.5 57.2 57.2 50.5 60 25 Z" fill="url(#bpg)" stroke="url(#bpg)" stroke-width="7" stroke-linejoin="round"/><circle cx="91.1" cy="28.9" r="9" fill="#00e290"/></g></svg>

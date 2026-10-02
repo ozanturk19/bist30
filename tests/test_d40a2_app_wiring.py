@@ -27,6 +27,8 @@ def test_fundamentals_temel_v2_kayitla_ve_kayitsiz(monkeypatch):
     rec = _rec("TUPRS")
     monkeypatch.setattr(kf, "load_record", lambda t, base_dir=None: rec if t == "TUPRS" else None)
     monkeypatch.setitem(app._cache, "data", [{"ticker": "TUPRS", "price": 397.0}])
+    monkeypatch.setitem(app._KAP_SECTOR_METRICS, "ts", 0.0)
+    monkeypatch.setitem(app._KAP_SECTOR_METRICS, "data", {})
     yahoo = {"pe_ratio": 11.7, "pb_ratio": 1.74, "roe": 17.6, "shares": 1926795598.0,
              "market_cap": {"value": 7.6e11, "currency": "TRY"}}
     out = app._fundamentals_temel_v2("TUPRS", app._fundamentals_kap("TUPRS", yahoo))
@@ -36,3 +38,23 @@ def test_fundamentals_temel_v2_kayitla_ve_kayitsiz(monkeypatch):
     other = app._fundamentals_temel_v2("GARAN", app._fundamentals_kap("GARAN", dict(yahoo)))
     assert other["kap_durum"] == "hazirlaniyor" and "kap" not in other
     assert app._fundamentals_temel_v2("TUPRS", {}) == {}
+
+
+def test_kap_sektor_metrikleri_onbellekli_ve_tek_akranda_hukum_yok(monkeypatch):
+    rec = _rec("TUPRS")
+    calls = []
+
+    def load(t, base_dir=None):
+        calls.append(t)
+        return rec if t == "TUPRS" else None
+    monkeypatch.setattr(kf, "load_record", load)
+    monkeypatch.setitem(app._cache, "data", [{"ticker": "TUPRS", "price": 397.0}])
+    monkeypatch.setitem(app._KAP_SECTOR_METRICS, "ts", 0.0)
+    monkeypatch.setitem(app._KAP_SECTOR_METRICS, "data", {})
+    m = app._kap_sector_metrics()
+    assert list(m) == ["TUPRS"] and m["TUPRS"]["fk"] == 11.33 and m["TUPRS"]["pd_dd"] == 1.68
+    n = len(calls)
+    assert app._kap_sector_metrics() is m and len(calls) == n            # 30 dk onbellek: yeniden okuma yok
+    # tek sirketli veri: sektor ortancasi hukumsuz (>=5 akran yok, BIST yedegi yok)
+    out = app._fundamentals_temel_v2("TUPRS", app._fundamentals_kap("TUPRS", {"pe_ratio": 11.7, "shares": 1926795598.0}))
+    assert out["sektor_ortanca"] == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}

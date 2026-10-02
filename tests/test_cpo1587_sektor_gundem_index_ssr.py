@@ -1,9 +1,8 @@
 """CPO-1587 Faz 2 — /sektor-harita, /gundem, anasayfa icin backend SSR extraction.
 
 Ayni /tarama desenini (_compute_tarama_results, bkz. test_cpo1587_tarama_ssr.py)
-3 sayfaya daha uygular:
-  - _compute_sector_heatmap(): sektor_harita() (SSR) ve api_sector_heatmap()
-    (canli JS) artik ayni fonksiyonu cagirir.
+diger sayfalara da uygular (D-11: _compute_sector_heatmap D-52/D-54 heatmap
+gecisiyle yetim kaldi, /api/sector-heatmap silinince 27.09 kaldirildi):
   - _compute_gundem_data(): gundem_page() (SSR) ve api_gundem() (canli JS)
     artik ayni fonksiyonu cagirir.
   - _get_xu100_level() + _compute_index_ssr_context(): index() (SSR) ve
@@ -17,6 +16,10 @@ import os
 import re
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import takvim as _takvim_mod  # noqa: E402  D-24
 
 import business_rules as _br
 
@@ -40,56 +43,6 @@ def _extract(func_name):
     return m.group(0)
 
 
-# ── _compute_sector_heatmap ──────────────────────────────────────────────────
-
-_SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
-
-_SECTOR_STOCKS = [
-    {"ticker": "XU030", "signal": "AL", "rvol": 5.0},
-    {"ticker": "AKBNK", "signal": "AL", "sector": "Bankacılık", "rvol": 1.5},
-    {"ticker": "GARAN", "signal": "SAT", "sector": "Bankacılık", "rvol": 0.8},
-    {"ticker": "THYAO", "signal": "AL", "sector": "Ulaştırma", "rvol": 2.0},
-    {"ticker": "ASELS", "signal": "BEKLE", "sector": "Savunma", "rvol": None},
-]
-
-
-def _fresh_sector_heatmap():
-    ns = {
-        "_lock": _FakeLockCtx(),
-        "_cache": {"data": _SECTOR_STOCKS, "updated_at": "11.09.2026 18:00"},
-        "_get_sector": lambda ticker: _SECTORS.get(ticker, "Diğer"),
-    }
-    exec(_extract("_compute_sector_heatmap"), ns)
-    return ns["_compute_sector_heatmap"]
-
-
-def test_sector_heatmap_excludes_xu030():
-    fn = _fresh_sector_heatmap()
-    result, upd = fn()
-    names = [r["name"] for r in result]
-    assert "XU030" not in names
-    assert upd == "11.09.2026 18:00"
-
-
-def test_sector_heatmap_scores_and_sorts_desc():
-    fn = _fresh_sector_heatmap()
-    result, _ = fn()
-    # Bankacilik: 1 AL, 1 SAT -> score 0; Ulastirma: 1 AL, 0 SAT -> score 100
-    by_name = {r["name"]: r for r in result}
-    assert by_name["Ulaştırma"]["score"] == 100
-    assert by_name["Bankacılık"]["score"] == 0
-    assert by_name["Savunma"]["score"] == 0  # tek hisse BEKLE -> al=sat=0, score=(0-0)/1*100=0
-    # sirali (score desc) oldugunu dogrula
-    assert [r["score"] for r in result] == sorted([r["score"] for r in result], reverse=True)
-
-
-def test_sector_heatmap_avg_rvol_ignores_none():
-    fn = _fresh_sector_heatmap()
-    result, _ = fn()
-    by_name = {r["name"]: r for r in result}
-    assert by_name["Savunma"]["avg_rvol"] is None  # tek hissenin rvol'u None
-
-
 # ── _compute_gundem_data ─────────────────────────────────────────────────────
 
 _TZ_TR_STUB = ZoneInfo("Europe/Istanbul")
@@ -111,7 +64,7 @@ def _fresh_gundem():
         "_TZ_TR": _TZ_TR_STUB,
         "datetime": datetime,
         "date": date,
-        "_BILANCO_PERIODS": [],
+        "_takvim": _takvim_mod,   # D-24: bilanço bandı takvim.donem_ozeti()'nden
         "is_trading_day": lambda d: True,
         "_market_open": lambda now: True,
         "_data_quality_snapshot": lambda stocks: {"updated_at": "12.09.2026 09:00"},
@@ -210,6 +163,18 @@ def test_xu100_level_empty_ohlc_returns_none():
     assert lvl["spark"] == []
 
 
+def _d53_stubs(ns):
+    """D-53: _compute_index_ssr_context artik home_fields + gundem/featured yardimcilarini da kullanir
+    (bunlar kendi testlerinde: test_d53_home_fields.py) -- burada yalniz sayim/secim mantigi izole."""
+    import home_fields
+    ns.setdefault("home_fields", home_fields)
+    ns.setdefault("_compute_gundem_data", lambda: {"new_signals": [], "eod_date": None, "eod_label": None,
+                                                    "closed_message": ""})
+    ns.setdefault("_home_featured_rows", lambda *a, **k: [])
+    return ns
+
+
+
 def _fresh_index_ssr_context(financial_health_cache=None):
     ns = {
         "_lock": _FakeLockCtx(),
@@ -222,7 +187,7 @@ def _fresh_index_ssr_context(financial_health_cache=None):
     }
     # _compute_index_ssr_context, govde icinde _get_xu100_level'i cagiriyor --
     # ikisi de ayni namespace'te tanimlanmali.
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     return ns["_compute_index_ssr_context"]
 
 
@@ -266,7 +231,7 @@ def test_index_ssr_spotlight_no_top8_restriction_includes_bekle():
         "_xu100_chart_cache": {"data": {"ohlc": [{"close": 100.0}]}},
         "_financial_health_cache": {},
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "TCELL"  # BEKLE ama SAT haric en yuksek skor
 
@@ -287,7 +252,7 @@ def test_index_ssr_spotlight_prefers_borsapusula_skoru_over_signal_strength():
         "_xu100_chart_cache": {"data": {"ohlc": []}},
         "_financial_health_cache": hs_cache,
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "AEFES"
     assert ctx["spotlight"]["hs_available"] is True
@@ -310,7 +275,7 @@ def test_index_ssr_excludes_stale_from_spotlight_and_top_signals():
         "_xu100_chart_cache": {"data": {"ohlc": []}},
         "_financial_health_cache": {},
     }
-    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), _d53_stubs(ns))
     ctx = ns["_compute_index_ssr_context"]()
     assert ctx["spotlight"]["ticker"] == "AKBNK"
     assert [s["ticker"] for s in ctx["top_signals"]] == ["AKBNK"]

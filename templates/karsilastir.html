@@ -7,7 +7,7 @@
    Gercek kaynak app.py'dir (CPO-1758, DEV1). Buradaki metin yalnizca
    rota page_description vermezse devreye girer. #}
 <meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 {% if tickers_param %}<meta name="robots" content="noindex,follow">{% endif %}
 <meta property="og:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
@@ -45,14 +45,14 @@
 }
 </script>
 {% endif %}
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=1d3c20b5">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/karsilastir.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
@@ -79,19 +79,19 @@
     <span class="search-bar-label" id="cmpSearchLbl">Karşılaştırılacak hisseler (2-4 adet)</span>
     <div class="ticker-inputs">
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t1" placeholder="AKBNK" maxlength="20" autocomplete="off" aria-label="1. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac1">
+        <input type="text" class="ticker-input" id="t1" placeholder="Hisse kodu" maxlength="20" autocomplete="off" aria-label="1. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac1">
         <div class="ac-dropdown" id="ac1" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t2" placeholder="GARAN" maxlength="20" autocomplete="off" aria-label="2. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac2">
+        <input type="text" class="ticker-input" id="t2" placeholder="Hisse kodu" maxlength="20" autocomplete="off" aria-label="2. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac2">
         <div class="ac-dropdown" id="ac2" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t3" placeholder="ISCTR" maxlength="20" autocomplete="off" aria-label="3. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac3">
+        <input type="text" class="ticker-input" id="t3" placeholder="Hisse kodu" maxlength="20" autocomplete="off" aria-label="3. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac3">
         <div class="ac-dropdown" id="ac3" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t4" placeholder="THYAO" maxlength="20" autocomplete="off" aria-label="4. hisse (isteğe bağlı)" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac4">
+        <input type="text" class="ticker-input" id="t4" placeholder="Hisse kodu" maxlength="20" autocomplete="off" aria-label="4. hisse (isteğe bağlı)" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac4">
         <div class="ac-dropdown" id="ac4" role="listbox"></div>
       </div>
     </div>
@@ -134,25 +134,26 @@
 const TICKERS_PARAM = "{{ tickers_param }}";
 
 const ROW_LABELS = [
-  { key: '_sep_tech',     label: '<span aria-hidden="true">📊</span> TEKNİK ANALİZ', isSep: true },
+  { key: '_sep_tech',     label: 'TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
   // CPO-1610: /hisse hero'daki kompozit skorla AYNI alan (hs.borsapusula_skoru) — ayrı,
   // açıkça etiketli satır. "Yatırım Skoru" (üstteki scoreRow) SADECE Teknik Güç'tür,
   // bu ikisi artık aynı sayı gibi karışmıyor.
-  { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Temel Analiz ×%60 + Teknik Güç ×%40 kompozit puan — /hisse sayfasındaki ana skorla birebir aynı kaynak. Yukarıdaki "Teknik Güç" ile karıştırılmamalı.' },
-  { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'Güçlü Trend sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1,20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
+  { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Finansallar %60, trend %40.' },
+  { key: 'is_premium',    label: 'Hacim Onaylı', help: 'Güçlü Trend sinyali olan ve 5 günlük hacim ortalaması son 20 gün ortalamasının 1,20 katından yüksek olan hisseler.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
   { key: 'rsi',           label: 'RSI (14)' },
   { key: 'signal_date',   label: 'Sinyal Tarihi' },
   { key: 'signal_bars',   label: 'Sinyal Süresi' },
-  { key: 'sl_level',      label: 'Supertrend Seviyesi', help: 'Supertrend bandının güncel seviyesi — sinyal yönü ne olursa olsun her zaman hesaplanır, açık bir pozisyonun stopu anlamına gelmez.' },
+  { key: 'sl_level',      label: 'Trend dönüş seviyesi (Supertrend)', help: 'Fiyat bu seviyenin üzerinde kaldıkça trend yukarı yönlü sayılır; altına inerse trend döner.' },
   /* C-52 (24.09): TP1/TP2 ve Giriş Kalitesi satırları kalktı — teknik hedef ve
      işlem yönetimi dili yok (kanon §2.2). */
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
-  { key: '_sep_fund',     label: '<span aria-hidden="true">📋</span> TEMEL ANALİZ', isSep: true },
+  { key: '_sep_fund',     label: 'TEMEL ANALİZ', isSep: true },
+  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve F/DD oranlarının sektör ortancasıyla karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
   { key: 'pb_ratio',       label: 'F/DD Oranı' },
@@ -165,7 +166,7 @@ const ROW_LABELS = [
 function renderPremium(s) {
   if (!s) return '<span class="muted">—</span>';
   return s.is_premium
-    ? '<span class="badge" style="background:var(--bp-volume-bg);color:var(--bp-volume);border:1px solid var(--bp-volume-bd);font-weight:700"><span aria-hidden="true">⭐</span> Hacim Onaylı</span>'
+    ? '<span class="badge" style="background:var(--bp-volume-bg);color:var(--bp-volume);border:1px solid var(--bp-volume-bd);font-weight:700">Hacim Onaylı</span>'
     : '<span class="muted" style="font-size:var(--bp-text-xs)">—</span>';
 }
 
@@ -274,10 +275,20 @@ function renderCell(key, s) {
        boyuyordu (K-BO kanonu) — rol artik fiyata gore metinle soyleniyor, renkle degil. */
     case 'sl_level': {
       if (!v) return '<span class="muted">—</span>';
-      const _r = bpStLevelRole(v, s.price, s.signal);
-      const _txt = parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      return `<span class="mono">${_txt} ₺</span>` +
-             (_r ? `<span class="sl-role">${_r.above ? 'direnç' : (s.signal === 'AL' ? 'stop' : 'destek')}</span>` : '');
+      /* C-70 K21 (02.10): kanon §2.2 -- rol sozcugu (direnc/destek/stop) yok;
+         seviye fiyata gore betimlenir: "fiyatin %Y altinda/ustunde". */
+      const _n = parseFloat(v), _p = parseFloat(s.price);
+      const _txt = _n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const _d = _p > 0 ? (_n - _p) / _p * 100 : null;
+      const _rel = _d == null ? '' : (Math.abs(_d) < 0.05 ? 'fiyatla aynı' : `fiyatın ${bpPctLevel(Math.abs(_d), 1)} ${_d < 0 ? 'altında' : 'üstünde'}`);
+      return `<span class="mono">${_txt}&nbsp;₺</span>` + (_rel ? `<span class="sl-role">${_rel}</span>` : '');
+    }
+    /* C-70 K21 (02.10): CPO-1811 degerleme.h -- /hisse Temel kartinin HX_TV2.h'si,
+       ayni sozcukler; renk notr (yon rengi yok). Hukum yoksa '—'. */
+    case 'degerleme': {
+      const _h = v && v.h;
+      const _w = _h === 'ucuz' ? 'Ucuz tarafta' : _h === 'makul' ? 'Makul' : _h === 'pahali' ? 'Pahalı tarafta' : _h === 'karisik' ? 'Karışık' : '';
+      return _w ? `<span>${_w}</span>` : '<span class="muted">—</span>';
     }
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
@@ -288,8 +299,8 @@ function renderCell(key, s) {
       // bughunt-13.09 (CPO-1628, DEV1 band alanini ekledi): hisse.html
       // hero'daki AYNI kanonik banti (financial_health_score.py _band()) —
       // yeni esik hesaplanmiyor, backend'in kendi siniflandirmasi kullaniliyor.
-      const _bandVar = { yesil: '--bp-al', sari: '--bp-volume', kirmizi: '--bp-sat' }[s.band] || '--bp-text2';
-      return `<span class="mono" style="font-weight:700;color:var(${_bandVar})">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>`;
+      /* C-70 K21 (02.10): BP rengi /tarama ile ayni -- notr (bant rengi yok). */
+      return `<span class="mono" style="font-weight:700;color:var(--bp-text)">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>`;
     }
     // ── Temel analiz ──
     case 'market_cap':    { const _mc = _fmtMcap(v); return _mc ? `<span class="mono" style="font-size:var(--bp-text-base)">${_mc}</span>` : '<span class="muted">—</span>'; }
@@ -307,17 +318,18 @@ function renderCell(key, s) {
        OLARAK kullanilmadi: kapi 45 (K-BP) sifiri bir yonle ayni kefeye koyan
        `<= 0 ?` desenini yon isaretinin ('up') yakininda gorunce -- hakli
        olarak -- ihlal sayiyor. Anlam ayni, yazim kanonik. */
+    /* C-70 K21 (02.10): sabit 12/25 ve 1/3 esikleri /hisse'nin sektor ortancali
+       hukmuyle celisiyordu (AHGAZ burada "Makul", /hisse'de "Pahali tarafta").
+       /api/karsilastir hukmu tasiyana kadar oranlar YARGISIZ basilir. */
     case 'pe_ratio': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
-      const band = n > 0 ? (n < 12 ? 'ucuz' : n < 25 ? 'makul' : 'pahali') : null;
-      return _valuationCell(n.toFixed(1).replace('.', ','), band);
+      return _valuationCell(n.toFixed(1).replace('.', ','), null);
     }
     case 'pb_ratio': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
-      const band = n > 0 ? (n < 1 ? 'ucuz' : n < 3 ? 'makul' : 'pahali') : null;
-      return _valuationCell(n.toFixed(2).replace('.', ','), band);
+      return _valuationCell(n.toFixed(2).replace('.', ','), null);
     }
     case 'eps':           { if (v == null) return '<span class="muted">—</span>'; const n = parseFloat(v), cl = n < 0 ? 'dn' : ''; return `<span class="mono ${cl}">${n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`; }
     /* K-BX eki (22.09) — AYNI SAYI, IKI SAYFA, IKI KEFE. Bu sutun ROE'yi
@@ -337,7 +349,7 @@ function renderCell(key, s) {
          Temel karti ayni turda 'Basabas'/'Negatif'e gecti; kapi (cross_surface)
          iki yuzeyi bagli tutuyor, band kumesi burada da ayni olmali. Negatif ROE
          'zayif getiri' degil, OZ SERMAYE ERIMESIdir. */
-      const cl  = n > 20 ? 'up'     : n > 10 ? 'mid'  : 'dn';
+      const cl  = '';   /* C-70 K21: ROE notr renk */
       const lbl = n > 20 ? 'Güçlü'  : n > 10 ? 'Orta' : n > 0 ? 'Zayıf' : n === 0 ? 'Başabaş' : 'Negatif';
       return `<span class="${cl} mono">${bpPctLevel(n, 1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
@@ -369,7 +381,7 @@ const TIER_META = {
   // Sinyal" sinyal TÜRÜ olan "Güçlü Trend" ile karışıyordu. Artık rozet, annote
   // ettiği sayının (Teknik Güç Skoru) bandını söylüyor; "Sinyal" kelimesi sitede
   // yalnızca yönü (Güçlü Trend / Trend Bozuldu / Yatay) ifade ediyor.
-  guclu_sinyal: { color: 'var(--bp-premium)', label: 'Yüksek Skor' },
+  guclu_sinyal: { color: 'var(--bp-art-violet)', label: 'Yüksek Skor' },
   standart:     { color: 'var(--bp-brand)', label: 'Orta Skor' },
 };
 
@@ -388,7 +400,7 @@ function renderScoreCell(s, isWinner) {
   const total = s.signal_strength;
   const v = verdictFor(s.tier);
   const winnerCls = isWinner ? ' winner' : '';
-  const winnerBadge = isWinner ? '<div class="winner-badge">🏆 En Yüksek</div>' : '';
+  const winnerBadge = isWinner ? '<div class="winner-badge">En yüksek</div>' : '';
   return `
     <div class="score-cell${winnerCls}">
       ${winnerBadge}
@@ -446,7 +458,7 @@ function buildTable(stocks) {
   }).join('');
   const scoreRow = `
     <tr class="score-row">
-      <th class="row-label" scope="row" style="font-size:var(--bp-text-sm);color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Teknik<br>Güç</th>
+      <th class="row-label" scope="row" style="font-size:var(--bp-text-sm);color:var(--bp-text2)">Teknik Güç</th>
       ${scoreCells}
     </tr>
   `;
@@ -499,7 +511,7 @@ function buildMobileCards(stocks) {
         </a>
         ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap"><span aria-hidden="true">KAP ↗</span><span class="sr-only">${escapeHtml(s.ticker)} KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span></a>` : ''}
       </div>`;
-    const scoreHtml = `<div class="cmp-mscore">${renderScoreCell(s, isWinner)}</div>`;
+    const scoreHtml = `<div class="cmp-mscore"><span class="cmp-mscore-lbl">Teknik Güç</span>${renderScoreCell(s, isWinner)}</div>`;
     const rowsHtml = ROW_LABELS.map(({key, label, isSep, help}) => {
       if (isSep) return `<div class="cmp-msep">${label}</div>`;
       const helpHtml = help ? ` <span class="help-icon" tabindex="0" data-tip="${help}">i</span>` : '';
@@ -545,7 +557,7 @@ async function doCompare(opts) {
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
         <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="da-skel da-skel--line" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Teknik Güç</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line" style="height:60px;width:90px"></div></td>`).join('')}</tr>
+          <tr class="score-row"><th class="row-label" scope="row">Teknik Güç</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
             return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line"></div></td>`).join('')}</tr>`;
@@ -571,14 +583,14 @@ async function doCompare(opts) {
         ? 'Çok fazla istek gönderildi. Lütfen birazdan tekrar deneyin.'
         : (data.error || 'Karşılaştırma yüklenemedi. Lütfen tekrar deneyin.');
       document.getElementById('compareResult').innerHTML =
-        `<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> ${escapeHtml(msg)}</span><button type="button" class="da-retry" onclick="doCompare({skipUrl:true})">Tekrar dene</button></div>`;
+        `<div class="da-empty da-empty--error" role="alert"><span>${escapeHtml(msg)}</span><button type="button" class="da-retry" onclick="doCompare({skipUrl:true})">Tekrar dene</button></div>`;
       return;
     }
     document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []) + buildMobileCards(data.stocks || []);
   } catch(e) {
     if (mySeq !== _compareSeq) return;
     document.getElementById('compareResult').innerHTML =
-      '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Karşılaştırma yüklenemedi.</span><button type="button" class="da-retry" onclick="doCompare({skipUrl:true})">Tekrar dene</button></div>';
+      '<div class="da-empty da-empty--error" role="alert"><span>Karşılaştırma yüklenemedi.</span><button type="button" class="da-retry" onclick="doCompare({skipUrl:true})">Tekrar dene</button></div>';
   }
 }
 
@@ -893,12 +905,12 @@ window.addEventListener('popstate', function() {
 });
 
 // Makro Ticker Bandı
-(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
+/* makro şerit bp-search.js'te kendiliğinden başlar (C-15) */
 </script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/bp-format.js?v=63228ae2"></script>
-<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

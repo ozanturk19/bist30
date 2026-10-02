@@ -3,20 +3,26 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body { font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
 
-  .container { max-width:var(--bp-container-820); margin:0 auto; padding:32px 24px; }
+  /* C-43: sutun = govde metninin okuma olcusu. Space Grotesk'te 68ch ~712px = satirda ~90 karakter
+     (olculdu 26.09); 17px x 34em ~578px = satirda <=75 karakter. Baslik, modul ve SSS ayni sutunda. */
 
   .article-header { margin-bottom:28px; }
   .art-cat  { font-size:var(--bp-text-sm); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-  .art-title{ font-size:var(--bp-text-28); font-weight:800; color:var(--bp-text); line-height:1.3; margin:10px 0 12px; }
-  .art-desc { font-size:var(--bp-text-15); color:var(--bp-text3); line-height:1.6; margin-bottom:14px; }
-  .art-meta { display:flex; gap:16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
+  /* C-43 (26.09): baslik Bricolage (Data-Art .da-pagehead-title dili), govdeyle ayni sutunda */
+  .art-title{ font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:clamp(1.75rem,3.4vw,2.5rem); font-weight:800; letter-spacing:-.02em; color:var(--bp-text); line-height:1.12; margin:10px 0 12px; overflow-wrap:anywhere; }
+  .art-desc { font-size:var(--bp-text-17); color:var(--bp-text2); line-height:1.6; margin-bottom:14px; }
+  .art-meta { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px 16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
+  .art-share { display:flex; gap:4px; }
+  .art-share-btn { background:none; border:0; padding:0 8px; min-height:44px; font:inherit; font-size:var(--bp-text-sm); color:var(--bp-text3); cursor:pointer; }
+  .art-share-btn:hover, .art-share-btn:focus-visible { color:var(--bp-text); text-decoration:underline; }
 
-  .prose { color:var(--bp-text2); }
-  .prose h2 { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); margin:32px 0 12px; padding-bottom:8px; }
-  .prose h3 { font-size:var(--bp-text-15); font-weight:600; color:var(--bp-text2); margin:20px 0 8px; }
-  .prose p  { margin-bottom:14px; }
+  /* C-43 (26.09): okuma olcusu — sutun genisligi (<=75 karakter), 17px/1,7, H2 28px (satir <=75 karakter) */
+  .prose { font-size:var(--bp-text-17); line-height:1.7; color:var(--bp-text2); }
+  .prose h2 { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-28); font-weight:700; letter-spacing:-.015em; line-height:1.2; color:var(--bp-text); margin:40px 0 12px; }
+  .prose h3 { font-size:var(--bp-text-lg); font-weight:600; color:var(--bp-text); margin:24px 0 8px; }
+  .prose p  { margin-bottom:16px; }
   .prose ul, .prose ol { margin:8px 0 14px 20px; }
   .prose li { margin-bottom:6px; }
   .prose strong { color:var(--bp-text); }
@@ -31,6 +37,7 @@
   }
   .prose code { background:var(--bp-border-subtle); color:var(--bp-accent-cyan); padding:2px 6px; border-radius:var(--bp-radius-4); font-family:var(--bp-font-mono); font-size:var(--bp-text-base); }
   .prose table { width:100%; border-collapse:collapse; margin:14px 0; }
+  .prose table { display:block; overflow-x:auto; }
   .prose th, .prose td { padding:8px 10px; text-align:left; border-top:1px solid var(--bp-border); font-size:var(--bp-text-base); }
   .prose th { background:var(--bp-border-subtle); font-weight:600; color:var(--bp-text); }
 
@@ -43,25 +50,7 @@
   .rel-title { font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); line-height:1.4; }
   .rel-mins  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; }
 
-  /* İlgili Hisseler */
-  .rel-stock-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 16px; min-width:130px; flex:1; max-width:180px; text-decoration:none; display:block; transition:all .15s; }
-  .rel-stock-card:hover { border-color:var(--bp-text3); background:var(--bp-surface2); transform:translateY(-1px); }
-  .rel-stock-ticker { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin-bottom:3px; }
-  .rel-stock-price  { font-family:var(--bp-font-mono); font-size:var(--bp-text-base); color:var(--bp-text); }
-  .rel-stock-sig    { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-2xs); font-weight:700; margin-top:5px; }
-  .rel-stock-sig.al    { background:rgba(var(--bp-al-rgb),.12); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.25); }
-  .rel-stock-sig.sat   { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.25); }
-  .rel-stock-sig.bekle { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-text3); border:1px solid rgba(var(--bp-text3-rgb),.2); }
-  /* 21.09 (K-W): `.rel-stock-skeleton` bir SINIF ADIYDI ama HİÇBİR CSS kuralı
-     yoktu — kutunun tamamı (kenarlık, dolgu, iki iç şerit, shimmer) şablona
-     inline yazılmıştı. Üstelik kenarlığı `--bp-bkl-bd` (#30363d) idi,
-     yerini aldığı `.rel-stock-card`ınki `--bp-border` (#2a2a2c): veri
-     gelince kenarlık GÖRÜNÜR ŞEKİLDE koyulaşıyordu. Yer tutucu artık
-     yerini aldığı kartın geometrisini paylaşıyor, şeritler `.da-skel`. */
-  .rel-stock-skeleton { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 16px; min-width:130px; flex:1; max-width:180px; }
-  .rel-stock-skeleton .da-skel { display:block; border-radius:var(--bp-radius-4); }
-
-  .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding:14px 16px; color:var(--bp-text2); font-size:var(--bp-text-base); margin-top:32px; }
+  .disclaimer { color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1.6; margin-top:20px; }
 
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
@@ -79,64 +68,28 @@
   .faq-item .bp-detail-toggle-label { display:block; }
   .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.65; }
 
-  /* CTA kutusu */
-  .cta-box {
-    background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),.1),rgba(var(--bp-accent-cyan-rgb),.06));
-    border:1px solid rgba(var(--bp-accent-cyan-rgb),.3); border-radius:var(--bp-radius-xl);
-    padding:20px 22px; margin-top:28px;
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-  }
-  .cta-box-text { flex:1; min-width:220px; }
-  .cta-box-text strong { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); display:block; margin-bottom:4px; }
-  .cta-box-text span   { font-size:var(--bp-text-sm); color:var(--bp-text3); line-height:1.5; }
-  .cta-box-btns { display:flex; gap:8px; flex-wrap:wrap; }
-  .cta-btn-primary {
-    background:var(--bp-brand); color:var(--bp-bg); border:none; border-radius:var(--bp-radius-7);
-    padding:8px 18px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer;
-    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-    transition:background .15s,color .15s; white-space:nowrap;
-  }
-  .cta-btn-primary:hover { background:var(--bp-accent-cyan); color:var(--bp-bg); }
-  .cta-btn-secondary {
-    background:rgba(var(--bp-accent-cyan-rgb),.1); color:var(--bp-accent-cyan);
-    border:1px solid rgba(var(--bp-accent-cyan-rgb),.25); border-radius:var(--bp-radius-7);
-    padding:8px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer;
-    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-    transition:all .15s; white-space:nowrap;
-  }
-  .cta-btn-secondary:hover { background:rgba(var(--bp-accent-cyan-rgb),.18); }
+  /* C-43 (26.09): sonda TEK modul — canli hisse satiri + kural baglantisi + tek satir abonelik */
+  .art-live { margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); }
+  .art-live-title { font-size:var(--bp-text-sm); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
+  .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-border); }
+  .art-live-t { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-22); font-weight:800; }
+  .art-live-v { flex:1; min-width:0; font-family:var(--bp-font-mono); font-size:var(--bp-text-md); color:var(--bp-text2); }
+  .art-live-v[data-dir="up"] { color:var(--bp-al); } .art-live-v[data-dir="down"] { color:var(--bp-sat); }
+  .art-live-go { color:var(--bp-text3); }
+  .art-live-row:hover .art-live-go, .art-live-row:focus-visible .art-live-go { color:var(--bp-text); }
+  .art-live-rule { display:inline-flex; align-items:center; min-height:44px; font-size:var(--bp-text-sm); color:var(--bp-text3); text-decoration:none; }
+  .art-live-rule b { color:var(--bp-text); font-weight:600; margin:0 4px; }
+  .art-live-rule:hover { color:var(--bp-text); }
+  .art-sub { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; padding-top:14px; border-top:1px solid var(--bp-border); }
+  .art-sub-lbl { font-size:var(--bp-text-sm); color:var(--bp-text2); white-space:nowrap; }
+  .art-sub .da-field { flex:1; min-width:0; width:auto; min-height:44px; }
+  .art-sub-btn { min-height:44px; padding:0 16px; background:var(--bp-brand); color:var(--bp-bg); border:0; border-radius:var(--bp-radius-lg); font:inherit; font-size:var(--bp-text-md); font-weight:600; cursor:pointer; white-space:nowrap; }
+  .art-sub-btn:hover { filter:brightness(1.1); }
+  .art-sub-kvkk { flex-basis:100%; display:flex; align-items:flex-start; gap:6px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
+  .art-sub-msg { font-size:var(--bp-text-md); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-danger); }
 
-  @media(max-width:600px) { .container{padding:16px;} .art-title{font-size:var(--bp-text-22);} }
-
-  /* Makro Ticker */
-  .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite;will-change:transform; height:32px; }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  /* K-AZ: `top:50%` seridin safe-area DOLGUSUNU da iceren kutusuna gore
-     ortaliyordu -> PWA'da dugmenin ust ~24px'i centigin altinda kaliyordu
-     (olculdu, inset=47px). Dolgunun yarisi geri eklendi; inset=0'da deger
-     BIREBIR ayni (50%). */
-  .macro-pause-btn { position: absolute; right: 2px; top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:32px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+  @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
-
-  /* r155 gorsel denetim: WCAG 2.5.5 - .btn-action emsaliyle ayni desen, gorunum degismez.
-     #artSubCloseBtn zaten inline position:absolute tasiyor (kendi konumlandirma baglami),
-     digerlerine position:relative gerekiyor. */
-  #blogShareWaBtn, #blogCopyBtn, #artSubBtn { position: relative; }
-  #blogShareWaBtn::before, #blogCopyBtn::before, #artSubBtn::before, #artSubCloseBtn::before {
-    content: ''; position: absolute; top: 50%; left: 50%;
-    min-width: 44px; min-height: 44px; width: 100%; height: 100%;
-    transform: translate(-50%,-50%);
-  }
 
   /* Reading progress bar */
   .read-progress {

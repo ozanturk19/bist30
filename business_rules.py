@@ -159,6 +159,11 @@ def validate_stocks_list(stocks):
 
 # bug-hunt r66: bu esikler (18/25/40) app.py:~96 icindeki ImportError-fallback kopyasi
 # ve templates/hisse.html:~1880 icindeki JS ilk-render fallback'iyle BIREBIR AYNI kalmali.
+# D-19: BP_RULES için tablo; K-AR kapısı fonksiyon gövdesini ayrıştırdığından fonksiyon if-zinciri kalır,
+# eşitliği tests/test_d19_static_v_bp_rules.py sınır değerleriyle kilitler.
+ADX_LABEL_BANDS = ((40, "Çok Güçlü"), (25, "Güçlü"), (18, "Orta"))  # >= eşik; altı "Zayıf"
+
+
 def derive_adx_label(adx):
     """ADX değerinden tek kaynaklı trend-gücü etiketi (Site Contract v1.2).
 
@@ -193,6 +198,10 @@ def derive_adx_label(adx):
 # Frontend zaten bpRsiZoneText() ile bu ismi signal!='AL' iken "Nötr bölge"ye
 # çeviriyordu (bp-format.js) — aynı düzeltme artık kaynakta da var, ham
 # /api/data tüketicileri (frontend'in üzerinden geçmeyenler) de doğru metni alır.
+RSI_ZONE_BANDS = ((30, "Aşırı Satım"), (45, "Dip Toparlanması"), (60, "Sağlıklı Momentum"),
+                  (70, "Trend Güçleniyor"), (80, "Dikkatli"))  # < üst sınır; 80 ve üstü "Aşırı Alım"
+
+
 def derive_rsi_zone(rsi, signal=None):
     """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
 
@@ -265,6 +274,154 @@ SIGNAL_LABELS = {
     "SAT": "Trend Bozuldu",
     "BEKLE": "Yatay",
 }
+
+# ── D-09 — sinyal kuralı ve Teknik Güç tek kaynak (app.py'den taşındı) ──────
+# app.py yerelde (Python 3.9) import edilemediği için bu üç fonksiyon burada
+# durur; testler (tests/test_d09_skor_sinyal.py) doğrudan bunları çağırır.
+# Tüketiciler: analyze() canlı durum + sinyal başlangıcı, _bar_signal_fast
+# (geçmiş barlar/backtest), _load_cache_from_disk (restart köprüsü).
+# Kalan kopyalar (grafik uçları) D-47 koşul kaydına taşınacak.
+#
+# Kanon §3 (O23=A) durumu 5 koşuldan türetir: (1) Supertrend yukarı,
+# (2) ADX >= 25, (3) EMA 12 > EMA 99, (4) DI+ > DI-, (5) haftalık EMA 20
+# yükseliyor. Motor (2) ile (4)'ü tek oy sayar; (5) ayrı bir kapıdır.
+# Güçlü Trend = beşi birden; Trend Bozuldu = tersleri birden; diğer her
+# durum Yatay. İç anahtarlar AL / SAT / BEKLE (SIGNAL_LABELS).
+TREND_ADX_MIN = 25
+
+
+def trend_flags(st_dir, adx, di_plus, di_minus, e12, e99):
+    """Günlük koşulların iki yönlü oyları (haftalık kapı classify_signal'de).
+
+    st_dir: Supertrend yönü (+1 yukarı, -1 aşağı). NaN karşılaştırmaları
+    False döner, yani eksik gösterge hiçbir yöne oy vermez.
+    """
+    adx_ok = adx >= TREND_ADX_MIN
+    return {
+        "st_bull":  st_dir == 1,
+        "st_bear":  st_dir == -1,
+        "adx_bull": adx_ok and di_plus > di_minus,
+        "adx_bear": adx_ok and di_minus > di_plus,
+        "e12_bull": e12 > e99,
+        "e12_bear": e12 < e99,
+    }
+
+
+def classify_signal(flags, weekly_dir):
+    """trend_flags() oyları + haftalık yön → (sinyal, bull_score, bear_score).
+
+    weekly_dir: haftalık EMA 20 yönü (+1 / -1 / 0 = hesaplanamadı).
+    CPO-DEV2-039/040 + CPO-1496: weekly_dir == 0 gerçek bir "yatay" ölçümü
+    değil, _weekly_trend() hiç çağrılmadığında (CB açık) ya da <25 bar /
+    hata yolunda üretilen doldurma değeridir; kapı bu durumda iki yönde de
+    KAPALI kalır (fail-closed), durum Yatay olur.
+    """
+    bull = int(flags["st_bull"]) + int(flags["adx_bull"]) + int(flags["e12_bull"])  # max 3
+    bear = int(flags["st_bear"]) + int(flags["adx_bear"]) + int(flags["e12_bear"])  # max 3
+    if bull >= 3 and weekly_dir != -1 and weekly_dir != 0:
+        return "AL", bull, bear
+    if bear >= 3 and weekly_dir != 1 and weekly_dir != 0:
+        return "SAT", bull, bear
+    return "BEKLE", bull, bear
+
+
+def signal_from_indicators(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir):
+    """Tek bar için durum (AL / SAT / BEKLE) — trend_flags + classify_signal."""
+    return classify_signal(trend_flags(st_dir, adx, di_plus, di_minus, e12, e99), weekly_dir)[0]
+
+
+# D-47: sinyal kuralları tak-çıkar — 5 koşulun okunabilir kaydı (id, Türkçe
+# etiket). API `conditions` alanı ve ileride /metodoloji (C-42) aynı kayıttan
+# okur; yeni koşul eklemek bu listeye 1 satır demek. trend_flags/classify_signal
+# DEĞİŞMEZ — motorun zaten hesapladığı oyları etiketleyip dışa açar.
+SIGNAL_CONDITIONS = [
+    {"id": "supertrend",   "label": "Supertrend yönü"},
+    {"id": "adx",          "label": f"ADX ≥ {TREND_ADX_MIN:.0f}"},
+    {"id": "di",           "label": "DI+ > DI-"},
+    {"id": "ema1299",      "label": "EMA12 > EMA99"},
+    {"id": "weekly_ema20", "label": "Haftalık EMA20 yönü"},
+]
+
+
+def build_signal_conditions(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir):
+    """5 koşulun `{id, label, ok, value, threshold}` listesi (D-47).
+
+    `ok` her koşulun YUKARI (bull) okunuşudur — trend_flags()'in zaten
+    hesapladığı karşılaştırmalardan türer, ikinci bir sinyal kanonu açmaz.
+    """
+    adx_ok = adx >= TREND_ADX_MIN
+    labels = {c["id"]: c["label"] for c in SIGNAL_CONDITIONS}
+    return [
+        {"id": "supertrend", "label": labels["supertrend"], "ok": st_dir == 1,
+         "value": "Yukarı" if st_dir == 1 else ("Aşağı" if st_dir == -1 else None),
+         "threshold": None},
+        {"id": "adx", "label": labels["adx"], "ok": bool(adx_ok),
+         "value": round(float(adx), 1), "threshold": TREND_ADX_MIN},
+        {"id": "di", "label": labels["di"], "ok": di_plus > di_minus,
+         "value": f"{di_plus:.1f}/{di_minus:.1f}", "threshold": None},
+        {"id": "ema1299", "label": labels["ema1299"], "ok": e12 > e99,
+         "value": round(float(e12 - e99), 2), "threshold": 0},
+        {"id": "weekly_ema20", "label": labels["weekly_ema20"], "ok": weekly_dir == 1,
+         "value": weekly_dir, "threshold": None},
+    ]
+
+
+def compose_score(adx, vol_ratio, bull_score, confirmed, rsi, signal="AL"):
+    """Teknik Güç (0-100) — tek skor kaynağı. CPO-535 spec.
+
+    SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
+    yazılır (restart köprüsü _load_cache_from_disk aynı girdilerden yeniden
+    türetir). Güçlü Trend listesi ve hisse detay sayfası ikisi de bu TEK
+    cache alanını okur — ayrı ayrı yeniden hesaplama YASAK (CPO-983 puanlama
+    tutarlılık fix, Site Contract §24). AUDIT-004 tier_score'un yerine geçer
+    (CPO-531 #36) — ve SPEC-018 W2'de tier badge ataması da bu skora taşındı
+    (CPO-1004).
+
+    CPO-DEV2-053 (2026-08-22): "Yön gücü" bileşeni (bull_or_bear_score/3*25)
+    kaldırıldı — 54 aktif sinyalin tamamında bull_score/bear_score istisnasız
+    =3 olduğu kanıtlandı (sinyal gate'i zaten 3/3 oybirliği şart koşuyor, ara
+    değer hiç yayınlanamıyor), yani bu bileşen aktif bir sinyal için hiçbir
+    ayrıştırıcı bilgi taşımıyordu — sabit +25 puanlık bir taban gibi
+    davranıyordu. bull_score parametresi imza uyumluluğu için tutuldu ama
+    artık skora katkısı yok.
+
+    Bileşenler (ham max 75, 100/75 ile 0-100'e yeniden ölçeklenir):
+        ADX       : min(adx, 50) / 50 * 30   → max 30
+        Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
+        Teyit     : +10 (signal_bars >= 3)
+        RSI bölge : AL  → +10 (50-75) | +5 (>75)
+                    SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
+                    önceki sürüm signal parametresi almıyordu, SAT sinyalinde de AL
+                    bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
+                    bonus alıyor, tier'ı yapay olarak şişiriyordu)
+
+    Tier eşikleri (bkz. app._derive_tier — CPO-DEV2-053/055, 70/56 kesim):
+        70+ → Güçlü Sinyal | 56-69 → Standart | <56 → (rozet yok)
+        Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
+    """
+    def _finite(v, default):
+        try:
+            v = float(v)
+        except (TypeError, ValueError):
+            return default
+        return v if math.isfinite(v) else default
+
+    s = 0.0
+    s += min(_finite(adx, 0), 50) / 50 * 30
+    s += min(_finite(vol_ratio, 1.0), 5) / 5 * 25
+    s += 10 if confirmed else 0
+    rsi = _finite(rsi, 50)
+    if signal == "SAT":
+        if 25 <= rsi <= 50:
+            s += 10
+        elif rsi < 25:
+            s += 5
+    else:
+        if 50 <= rsi <= 75:
+            s += 10
+        elif rsi > 75:
+            s += 5
+    return int(round(s * 100 / 75))
 
 # D-39b: ENTRY_QUALITY_LABELS kalktı (entry_quality üretilmiyor).
 
@@ -421,3 +578,16 @@ def derive_signal_date_key(signal_date, today=None):
     if age == 1:
         return "yesterday"
     return "older"
+
+
+# ── D-19: window.BP_RULES — şablon/JS'in okuyacağı eşiklerin tek JSON'u ───────
+# app.py `bp_rules` bağlam değişkeni olarak verir; şablon göçü C-26'da (CPO).
+# Yalnız yukarıdaki sabit/tablolardan türer — burada ayrı sayı tutulmaz.
+BP_RULES = {
+    "adx_min": TREND_ADX_MIN,
+    "adx_bands": [[e, l] for e, l in ADX_LABEL_BANDS],
+    "rsi_bands": [[u, l] for u, l in RSI_ZONE_BANDS],
+    "ema_deadband_pct": EMA_DEADBAND_THRESHOLD_PCT,
+    "daily_limit_pct": BIST_DAILY_LIMIT_PCT,
+    "signal_labels": dict(SIGNAL_LABELS),
+}

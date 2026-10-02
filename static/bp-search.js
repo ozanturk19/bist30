@@ -6,13 +6,24 @@
    • Trigger: any element with class "header-search-btn" OR
               any element with onclick="bpOpenSearch()"
    • Keyboard: Cmd/Ctrl+K opens, Esc closes, ↑↓ Enter navigate
-   • Data: /api/data → sessionStorage 5min cache
+   • Data: /api/stocks/list (~4 KB) → sessionStorage 5min cache
    • Idempotent: safe to load multiple times (no-op if mounted)
    ============================================================ */
 (function(){
   'use strict';
   if (window.__bpSearchMounted) return;
   window.__bpSearchMounted = true;
+
+  /* C-71 K25 (görsel denetim 27.09): şerit yüzdesi ve EOD çipi sitenin biçim kanonunda —
+     değişim "+%0,09" (bp-format.js bpFormatPct), tarih "1 Ekim" (bpFormatTrDateLong).
+     bp-format.js yüklenmeyen sayfalarda (haberler, bildirim) aynı kural burada. */
+  var BP_EOD_MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function bpMacroPct(v) {
+    if (typeof bpFormatPct === 'function') return bpFormatPct(v, 2);
+    var r = parseFloat(Number(v).toFixed(2));
+    if (r === 0) r = 0;
+    return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(2).replace('.', ',');
+  }
 
   // ---- CSS ----
   // K-CY (22.09): "hardcoded hex so it works on any page" gerekcesi ARTIK GECERLI
@@ -39,12 +50,9 @@
     + '.bp-search-results{flex:1;overflow-y:auto;padding:6px 6px 12px}'
     + '.bp-search-empty{padding:24px;text-align:center;color:#909097;font-size:13px}'
     + '.bp-search-section-title{font-family:"Space Grotesk",system-ui,sans-serif;font-size:10px;font-weight:700;color:#909097;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px 6px}'
-    + '.bp-search-result{display:grid;grid-template-columns:64px 14px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;transition:background .12s;font-size:13px}'
+    + '.bp-search-result{display:grid;grid-template-columns:64px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;transition:background .12s;font-size:13px}'
     + '.bp-search-result:hover,.bp-search-result.bp-sel{background:#1c1b1f}'
     + '.bp-sr-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:#e5e1e4;font-size:13px}'
-    + '.bp-sr-sig.bp-al{color:#00e290;font-weight:700}'
-    + '.bp-sr-sig.bp-sat{color:#f85149;font-weight:700}'
-    + '.bp-sr-sig.bp-bekle{color:#909097}'
     + '.bp-sr-name{color:#c7c5cd;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}'
     + '.bp-sr-price{font-variant-numeric:tabular-nums;font-size:12px;color:#c7c5cd}'
     + '.bp-sr-chg{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;min-width:56px;text-align:right}'
@@ -57,23 +65,16 @@
        ikisi de %100 guvensiz bolgede). Sonuc listesi de ev gostergesinin altina
        tasiyordu. 100vh -> 100dvh: iOS'ta URL cubugu kadar TASIYORDU (ayni ders
        unsubscribe.css'te yazili), vh satiri dvh desteklemeyen tarayici yedegi. */
-    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 14px 1fr auto}.bp-sr-price{display:none}}'
+    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 1fr auto}.bp-sr-price{display:none}}'
     /* ── Anti-CLS: reserve space for async-loaded sections ── */
     + '#gundemSec{min-height:230px}'
     + '#statsBar,.stats-bar{min-height:78px}'
     /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
     + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
-    /* ── Unified Logo (replaces .back-btn variants across pages) ── */
-    + '.logo-link{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;padding:0;margin:0;background:none;border:none}'
-    + '.logo-link .bp-logo{display:block;width:260px;height:68px;flex-shrink:0}'
-    + '@media (max-width:1024px){.logo-link .bp-logo{width:230px;height:60px}}'
-    + '@media (max-width:768px){.logo-link .bp-logo{width:200px;height:52px}}'
-    + '@media (max-width:420px){.logo-link .bp-logo{width:170px;height:44px}}'
+    /* Logo boyutu + header{flex,60px} kurallari C-08 (26.09) ile _bp_critical_css.html'e tasindi: defer
+       betik ilk boyamadan SONRA uyguladigi icin nav ikinci satirdan birinciye zipliyordu (takvim CLS 0,19-0,44). */
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
     + 'header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
-    /* ── Unified header dimensions: 60px tall, 12px 20px padding (force across all pages) ── */
-    + 'header{padding:calc(10px + env(safe-area-inset-top)) 20px 10px !important;min-height:calc(60px + env(safe-area-inset-top)) !important;max-height:calc(60px + env(safe-area-inset-top)) !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
-    + 'header > *{max-height:48px}'
     + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
     + 'header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}'
     /* ── Unified Nav (bp-main-nav) — K-CY (22.09): TEK KANON ──
@@ -92,22 +93,6 @@
     + '.bp-nav-item svg{width:13px;height:13px;opacity:0.65;flex-shrink:0}'
     + '.bp-nav-item:hover svg{opacity:1}'
     + '.bp-nav-item[aria-current="page"] svg{opacity:1}'
-    /* Acilir menu kapaliyken de "buradasin" gorunur olsun: kanonik hap dili + nokta */
-    + '.bp-nav-more-btn[data-has-current="true"]{color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.10);border-color:rgba(var(--bp-brand-rgb),.24)}'
-    + '.bp-nav-more-btn[data-has-current="true"]::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--bp-brand);flex-shrink:0}'
-    + '.bp-nav-chev{width:11px !important;height:11px !important;transition:transform .18s ease;opacity:0.6}'
-    + '.bp-nav-more-btn[aria-expanded="true"] .bp-nav-chev{transform:rotate(180deg);opacity:1}'
-    + '.bp-nav-more-btn[aria-expanded="true"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand)}'
-    /* Dropdown rendered as fixed/portal to body to escape stacking context */
-    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:var(--bp-surface2);border:1px solid var(--bp-border2);border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:var(--bp-z-toast)}'
-    + '.bp-nav-more-menu.open{display:block;animation:bpNavMoreIn .15s ease}'
-    + '@keyframes bpNavMoreIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}'
-    + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:var(--bp-text);text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
-    + '.bp-nav-more-menu a:hover{background:var(--bp-surface2)}'
-    + '.bp-nav-more-menu a svg{width:14px;height:14px;opacity:0.7;flex-shrink:0}'
-    + '.bp-nav-more-menu a[aria-current="page"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand);font-weight:700}'
-    + '.bp-nav-more-menu a[aria-current="page"] svg{opacity:1}'
-    + '.bp-nav-sep{height:1px;background:var(--bp-border);margin:5px 8px}'
     /* On wider screens: bump up padding/font slightly */
     + '@media (min-width:1500px){.bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}.bp-main-nav{gap:6px}}'
     /* On tighter screens: shrink */
@@ -147,18 +132,17 @@
         return Promise.resolve(_syms);
       }
     } catch(e) { /* best-effort onbellek okuma (private tarama/quota hata verebilir) - fetch fallback altta devam eder */ }
-    return fetch('/api/data', { cache: 'no-store', signal: AbortSignal.timeout(10000) })
+    /* C-25c (27.09): kaynak /api/data (~40 KB gzip, 216 hissenin tamamı) yerine
+       /api/stocks/list (~4 KB: kod + ad). Sektör/fiyat/değişim alanları uç
+       eklerse kendiliğinden görünür; yoksa satır kod + ad. Eski ▲/▼ sinyal
+       oku kalktı (AL/SAT terimine bağlıydı). Boş liste önbelleğe yazılmaz. */
+    return fetch('/api/stocks/list', { signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         var syms = (d.stocks || [])
           .filter(function(s){ return s.ticker && s.ticker !== 'XU030' && s.ticker !== 'XU100'; })
-          .map(function(s){ return { t:s.ticker, n:s.name||'', sec:s.sector||'', sig:s.signal, p:s.price, c:s.change_pct }; });
-        if (d.loading) {
-          /* soguk-baslangic: backend _cache["data"] henuz dolmadi (app.py "loading": len(stocks)==0),
-             bu stocks=[] gercek bir "sonuc yok" durumu degil - _syms/sessionStorage'a yazma,
-             bir sonraki loadSyms() cagrisi (5dk TTL'i beklemeden) tekrar fetch etsin */
-          return syms;
-        }
+          .map(function(s){ return { t:s.ticker, n:s.name||'', sec:s.sector||'', p:s.price, c:s.change_pct }; });
+        if (!syms.length) return syms;
         _syms = syms;
         try {
           sessionStorage.setItem('bp_search_cache_v1', JSON.stringify(_syms));
@@ -225,7 +209,7 @@
     { h:'/tarama?signal=AL&sort=signal_strength', i:'⚡', t:'Güçlü Trend Hisseler' },
     { h:'/tarama',            i:'🔍', t:'Teknik Analiz Tarama' },
     { h:'/tarama?tab=temel',  i:'🧮', t:'Temel Analiz Tarama' },
-    { h:'/bilanco-takvimi',   i:'📅', t:'Bilanço Takvimi' },
+    { h:'/takvim',            i:'📅', t:'Takvim' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },
     { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' }
   ];
@@ -278,19 +262,16 @@
     }
     var html = '<div class="bp-search-section-title">Hisseler</div>';
     m.forEach(function(s, i){
-      var arr = s.sig === 'AL' ? '▲' : s.sig === 'SAT' ? '▼' : '●';
-      var sigCls = s.sig === 'AL' ? 'bp-al' : s.sig === 'SAT' ? 'bp-sat' : 'bp-bekle';
       var c = (typeof s.c === 'number') ? s.c : null;
       var cCls = c == null ? 'bp-neu' : c > 0 ? 'bp-pos' : c < 0 ? 'bp-neg' : 'bp-neu';
       /* CPO 20.09: ayni satirda fiyat toLocaleString('tr-TR') ile "321,75 ₺"
          (virgul) basilirken degisim toFixed(2) ile "+1.23%" (NOKTA) basiliyordu
          — tek satirda iki farkli ondalik ayirici. Ayni dosyadaki makro bar
          (bpRenderMacro) zaten .replace('.', ',') kullaniyor; ayni idiom. */
-      var cSign = c == null ? '—' : bpFormatPct(c, 2);
+      var cSign = c == null ? '' : bpFormatPct(c, 2);
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
       html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
-            + '<span class="bp-sr-sig ' + sigCls + '">' + arr + '</span>'
             + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
             + '<span class="bp-sr-price">' + priceStr + '</span>'
             + '<span class="bp-sr-chg ' + cCls + '">' + cSign + '</span>'
@@ -411,150 +392,8 @@
     }
   });
 
-  // ---- Nav: auto-activate current route + Daha dropdown ----
-  // K-CY (22.09): TEK DURUM ANAHTARI = `aria-current="page"`.
-  // Onceden burasi `.active` sinifini DA ekliyordu ve enjekte edilen CSS o sinifa
-  // gore boyuyordu; kanonik `_bp_critical_css.html` ise `[aria-current]`e gore
-  // boyuyor -- ayni durum iki anahtar + iki renk sozlugu demekti (canli olculdu:
-  // metin AL yesili, kenarlik brand). `.active` artik YAZILMIYOR; tek okuyucu
-  // `aria-current`. Ek: acilir menudeki bir oge gecerli sayfaysa kapali "Daha"
-  // dugmesi de isaretlenir -- 14 hedeften 10'u masaustunde hicbir "buradasin"
-  // gostermiyordu (menu kapaliyken vurgu gorunmez kaliyordu).
-  function activateNav() {
-    var path = location.pathname;
-    var items = document.querySelectorAll('.bp-nav-item[data-route], .bp-nav-more-menu a[data-route]');
-    var hiddenCurrent = false;
-    items.forEach(function(el){
-      var route = el.getAttribute('data-route');
-      if (route === '/' ? path === '/' : path.indexOf(route) === 0) {
-        el.setAttribute('aria-current', 'page');
-        if (el.closest('.bp-nav-more-menu')) hiddenCurrent = true;
-      }
-    });
-    var moreBtn = document.querySelector('.bp-nav-more-btn');
-    if (moreBtn) {
-      if (hiddenCurrent) moreBtn.setAttribute('data-has-current', 'true');
-      else moreBtn.removeAttribute('data-has-current');
-    }
-  }
-
-  function positionMenu() {
-    var menu = document.querySelector('.bp-nav-more-menu');
-    var btn = document.querySelector('.bp-nav-more-btn');
-    if (!menu || !btn) return;
-    var br = btn.getBoundingClientRect();
-    // Position below button, right-aligned with button's right edge
-    menu.style.top = (br.bottom + 8) + 'px';
-    menu.style.left = '';
-    menu.style.right = (window.innerWidth - br.right) + 'px';
-  }
-
-  function bindNavMore() {
-    // Portal: move menu to body (escapes stacking contexts/backdrop-filter clipping)
-    var menu = document.querySelector('.bp-nav-more-menu');
-    if (menu && menu.parentElement !== document.body) {
-      document.body.appendChild(menu);
-    }
-
-    function closeMenu(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (!m) return;
-      var hadFocusInside = m.contains(document.activeElement);
-      m.classList.remove('open');
-      var b = document.querySelector('.bp-nav-more-btn');
-      if (b) {
-        b.setAttribute('aria-expanded', 'false');
-        if (hadFocusInside) b.focus();
-      }
-    }
-
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest && e.target.closest('.bp-nav-more-btn');
-      var menu = document.querySelector('.bp-nav-more-menu');
-      if (btn && menu) {
-        e.preventDefault();
-        var open = menu.classList.contains('open');
-        if (!open) positionMenu();
-        menu.classList.toggle('open', !open);
-        btn.setAttribute('aria-expanded', !open);
-        if (!open) {
-          var firstLink = menu.querySelector('a');
-          if (firstLink) firstLink.focus();
-        }
-        return;
-      }
-      // Outside click → close (must NOT include menu itself or its descendants)
-      if (menu && menu.classList.contains('open')
-          && !(e.target.closest && (e.target.closest('.bp-nav-more-wrap') || e.target.closest('.bp-nav-more-menu')))) {
-        closeMenu();
-      }
-    });
-    // Close on Esc
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') {
-        var menu = document.querySelector('.bp-nav-more-menu');
-        if (menu && menu.classList.contains('open')) closeMenu();
-      }
-    });
-    // r103 bug-hunt: klavye ile Tab ederek menuden cikinca (fare disi-tik olmadan)
-    // menu acik kaliyordu — outside-click korumasi Tab-out'u kapsamiyordu.
-    document.addEventListener('focusout', function(e){
-      var menu = document.querySelector('.bp-nav-more-menu');
-      if (!menu || !menu.classList.contains('open')) return;
-      setTimeout(function(){
-        var next = document.activeElement;
-        var insideWrapOrMenu = next && next.closest &&
-          (next.closest('.bp-nav-more-wrap') || next.closest('.bp-nav-more-menu'));
-        if (!insideWrapOrMenu) closeMenu();
-      }, 0);
-    });
-    /* 21.09 K-S: "Daha" menusu stacking-context kacisi icin document.body'ye
-       PORTALLANIYOR (yukarida) — boylece DOM sirasinda sayfanin EN SON dugumu
-       oluyor. Tab sirasi DOM sirasini izledigi icin canli olcum (2 sayfa, iki
-       yon, deterministik):
-         · son linkten ileri Tab -> odak <body>'ye, yani HICBIR YERE dusuyor
-           (sonraki Tab tarayici cubuguna gider; kullanici nav'a donmek icin
-           butun sayfayi bastan Tab'lamak zorunda)
-         · ilk linkten Shift+Tab -> odak FOOTER'in son linkine ("Iletisim")
-           atliyor — sayfa basindaki bir menuden sayfanin en altina.
-       WCAG 2.4.3. APG menu-button davranisi: Tab menuyu kapatir ve odagi
-       BUTONDAN SONRAKI ogeye tasir. Kenar ogedeyken Tab'i biz ele aliyoruz. */
-    function tabSeq() {
-      var sel = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-      var m = document.querySelector('.bp-nav-more-menu');
-      return Array.prototype.filter.call(document.querySelectorAll(sel), function(el){
-        if (m && m.contains(el)) return false;
-        if (el.closest('[inert],[aria-hidden="true"]')) return false;
-        var r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      });
-    }
-    document.addEventListener('keydown', function(e){
-      if (e.key !== 'Tab') return;
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (!m || !m.classList.contains('open')) return;
-      var links = Array.prototype.slice.call(m.querySelectorAll('a'));
-      var i = links.indexOf(document.activeElement);
-      if (i < 0) return;
-      var atEdge = e.shiftKey ? (i === 0) : (i === links.length - 1);
-      if (!atEdge) return;
-      e.preventDefault();
-      var btn = document.querySelector('.bp-nav-more-btn');
-      closeMenu();                       // odagi once butona iade eder
-      var seq = tabSeq(), bi = seq.indexOf(btn);
-      var next = (bi < 0) ? null : seq[bi + (e.shiftKey ? -1 : 1)];
-      (next || btn).focus();
-    });
-    // Reposition on resize/scroll while open
-    window.addEventListener('resize', function(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (m && m.classList.contains('open')) positionMenu();
-    });
-    window.addEventListener('scroll', function(){
-      var m = document.querySelector('.bp-nav-more-menu');
-      if (m && m.classList.contains('open')) positionMenu();
-    }, { passive: true });
-  }
+  // ---- Nav: aktif oge _header.html / _mobile_nav_partial.html satir-ici betiginde
+  // (tek anahtar aria-current). C-31 (26.09): "Daha" acilir menusu kalkti.
 
   // ---- Trend Strip removed (Strategy 1: Hareketliler widget anasayfada bunun yerini alıyor) ----
   // Bu fonksiyon artik CSS uretmiyor (dead .bp-trend-strip/.bp-trend-chip kurallari temizlendi,
@@ -606,9 +445,13 @@
     fetch('/api/data-quality', {cache: 'no-store'})
       .then(function(r) { return r.json(); })
       .then(function(j) {
-        var m = /^(\d{2})\.(\d{2})\./.exec((j && j.updated_at) || '');
+        var m = /^(\d{2})\.(\d{2})\.(\d{4})/.exec((j && j.updated_at) || '');
         if (!m) return;
-        var label = m[1] + '.' + m[2] + ' kapanışı';
+        /* C-71 K25: sayfa damgasıyla aynı uzun biçim ("1 Ekim kapanışı"); bp-format.js
+           yüklenmeyen sayfalarda (haberler, bildirim) aynı kural yerelde. */
+        var day = (typeof bpFormatTrDateLong === 'function' && bpFormatTrDateLong(m[0]))
+          || (parseInt(m[1], 10) + ' ' + BP_EOD_MONTHS[parseInt(m[2], 10) - 1]);
+        var label = day + ' kapanışı';
         document.getElementById('bpEodChipText').textContent = label;
         eodChip.setAttribute('aria-label', 'Veriler ' + label + ' ile günceldir');
         eodChip.style.display = '';
@@ -882,13 +725,13 @@
       badge = document.createElement('span');
       badge.className = 'macro-stale-badge';
       badge.setAttribute('role', 'img');
-      badge.setAttribute('aria-label', 'Veriler gecikmeli olabilir');
+      badge.setAttribute('aria-label', 'Şerit verisi gecikti');
       // K-AH: `title` burada OLU idi -- asagidaki pointer-events:none yuzunden
       // masaustunde bile hic acilmiyordu. [data-tip] + pointer-events:auto ile
       // aciklama hover/odak/dokunma ile erisilebilir hale geldi.
-      badge.setAttribute('data-tip', 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)');
+      badge.setAttribute('data-tip', 'Şeritte son okunan değerler duruyor; yeni veri gecikti.');
       badge.tabIndex = 0;
-      badge.textContent = '⏱';
+      badge.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.8V8l2 1.4"/></svg>';
       badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit';
       bar.appendChild(badge);
     }
@@ -937,10 +780,9 @@
         var lbl   = bpAssetLabel(it.label);
         var price = bpFormatAssetPrice(it.label, it.price);
         var chg   = it.change;
-        var sign  = chg > 0 ? '+' : '';
         var cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
         var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2).replace('.', ',') + '%</span></span>';
+        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + bpMacroPct(chg) + '</span></span>';
       }).join('');
       /* K-AF (21.09): serit bir MARQUEE — icerik iki kez basilir ve kaydirma
          ikinci kopyayi sürekli besler. `prefers-reduced-motion: reduce` altinda
@@ -965,6 +807,33 @@
       }
     }
   };
+  // C-15: makro şeridin TEK zamanlayıcısı. Önceden 12 şablon kendi
+  // setInterval + visibilitychange kopyasını taşıyordu. `#macroBar` olan her
+  // sayfada kendiliğinden başlar; ana sayfa seans kutusu için
+  // `window.bpMacroOnItems` geri çağrısını satır içi betikte tanımlar (defer'li
+  // bu dosya satır içi betiklerden SONRA çalışır). Gizli sekmede yükleme
+  // bpLoadMacroBar'ın kendi guard'ıyla atlanır; görünür olunca tazelenir.
+  function _bpStartMacro() {
+    if (window._bpMacroTimer || !document.getElementById('macroTrack')) return;
+    var run = function() { window.bpLoadMacroBar(window.bpMacroOnItems); };
+    window._bpResumeMacro = run;
+    run();
+    window._bpMacroTimer = setInterval(run, 180000);
+    document.addEventListener('visibilitychange', function() { if (!document.hidden) run(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bpStartMacro);
+  else _bpStartMacro();
+  // Şerit duraklat/oynat: 12 şablondaki satır içi onclick yerine tek delege (K04).
+  // Simge SVG'dir; hangisinin görüneceğini aria-pressed üzerinden CSS seçer.
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest && e.target.closest('.macro-pause-btn');
+    var bar = b && b.closest('.macro-bar');
+    if (!bar) return;
+    var p = bar.getAttribute('data-paused') !== 'true';
+    bar.setAttribute('data-paused', String(p));
+    b.setAttribute('aria-pressed', String(p));
+    b.setAttribute('aria-label', p ? 'Haber şeridini devam ettir' : 'Haber şeridini duraklat');
+  });
 
 
   // ── View Transitions API + perceived performance polish ──
@@ -1013,8 +882,6 @@
   // ---- Init: ensure overlay on DOM ready (so Cmd+K works even before button click) ----
   function init() {
     ensureOverlay();
-    activateNav();
-    bindNavMore();
     ensureTrendStrip();
     ensureHeaderRight();
     recognizeUser();

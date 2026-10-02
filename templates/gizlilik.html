@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Gizlilik Politikası | BorsaPusula</title>
 <meta name="description" content="borsapusula.com gizlilik politikası. Kişisel veri toplama, çerez kullanımı ve üçüncü taraf hizmetler hakkında bilgilendirme.">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/gizlilik">
 <meta property="og:title"       content="Gizlilik Politikası — borsapusula.com">
 <meta property="og:description" content="borsapusula.com gizlilik politikası. Kişisel veri toplama, çerez kullanımı ve üçüncü taraf hizmetler hakkında bilgilendirme.">
@@ -20,56 +20,57 @@
   {"@type":"ListItem","position":2,"name":"Gizlilik Politikası","item":"https://borsapusula.com/gizlilik"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<link rel="stylesheet" href="/static/css/pages/gizlilik.css?v=bd0b5d95">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/pages/prose.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}
 
 
-<div class="container lg-head">{% call bpf.pagehead('Gizlilik Politikası') %}Hangi verileri neden topladığımızı, nasıl sakladığımızı ve haklarınızı açıklar.{% endcall %}</div>
-<main class="container" id="main-content" tabindex="-1">
-  <p class="updated">Son güncelleme: 25 Eylül 2026 (rev. 3) — yazı tipleri artık kendi sunucumuzdan yükleniyor, Google Fonts maddesi kaldırıldı; aşağıdaki "Değişiklikler" bölümüne bakınız.</p>
+<div class="container container--read lg-head">{% call bpf.pagehead('Gizlilik Politikası') %}Hangi verileri neden topladığımızı, nasıl sakladığımızı ve haklarınızı açıklar.{% endcall %}</div>
+<main class="container container--read prose" id="main-content" tabindex="-1">
+  <p class="updated">Son güncelleme: 2 Ekim 2026 (rev. 4) — şifresiz e-posta koduyla açılan isteğe bağlı hesap eklendi; aşağıdaki "Değişiklikler" bölümüne bakınız.</p>
 
   <p>Bu gizlilik politikası, <strong>borsapusula.com</strong> web sitesinin kişisel verilerinizi nasıl ele aldığını açıklamaktadır.</p>
 
   <h2>Toplanan Veriler</h2>
-  <p>borsapusula.com, kullanıcı adı/şifre ile geleneksel bir hesap sistemi içermez; bunun yerine e-posta bağlantısıyla taşınan, şifresiz bir <strong>tanıma çerezi</strong> (bp_sub) kullanılır. Aşağıdaki veriler toplanmaktadır:</p>
+  <p>borsapusula.com şifre kullanmaz. İsteğe bağlı <strong>hesap</strong>, e-posta adresinize gönderilen tek kullanımlık 6 haneli kodla açılır; giriş de aynı yöntemle yapılır. Aşağıdaki veriler toplanmaktadır:</p>
   <ul>
     <li><strong>Teknik veriler (otomatik):</strong> IP adresi, ziyaret edilen sayfa URL'leri, tarayıcı türü ve işletim sistemi (User-Agent), ziyaret tarihi ve saati. Ayrıca sayfada bir JavaScript hatası oluşursa hata mesajı, hatanın kaynak dosyası/satır numarası ve hatanın oluştuğu sayfa adresi sunucu günlüğüne yazılır (bu kayıt e-posta adresinizle ilişkilendirilmez). Bu veriler teknik sorunların giderilmesi ve sitenin kötüye kullanıma/aşırı istek yüküne karşı korunması (rate-limit) amacıyla kullanılır.</li>
     <li><strong>E-posta adresi (isteğe bağlı):</strong> Sinyal bildirim aboneliği için e-posta adresi toplanmaktadır. Abonelik tamamen gönüllülük esasına dayanır.</li>
+    <li><strong>Hesap (isteğe bağlı, şifresiz):</strong> Takip sayfasında ya da bir hisse sayfasındaki "Takip et" düğmesiyle e-posta adresinizi yazıp KVKK aydınlatma metnini onayladığınızda adresinize <strong>tek kullanımlık 6 haneli giriş kodu</strong> gönderilir. Kod sunucuda yalnızca geri çevrilemez bir özeti (hash) olarak ve en çok 10 dakika saklanır; 5 yanlış denemede giriş geçici olarak kilitlenir. Kodu girdiğinizde hesabınızda şunlar saklanır: e-posta adresiniz, KVKK onayınızın ve e-posta adresinizin doğrulandığı zaman, <strong>takip listeniz</strong> (hisse sembolleri), isteğe bağlı olarak girdiğiniz <strong>portföy bilgileri</strong> (hisse, adet ve ortalama maliyet) ve bildirim tercihleriniz ("Durum değişince e-posta", "Akşam Bülteni"). İlk girişte bu tarayıcıda kayıtlı takip listeniz ve portföyünüz hesabınıza aktarılır; böylece aynı liste telefonda ve bilgisayarda görünür.</li>
     <li><strong>Bildirim tercihleri:</strong> Aboneliğinizi kişiselleştirmek için seçtiğiniz mail sıklığı tercihi (günlük özet / kapanış sonrası / haftada bir / sadece Hacim Onaylı), e-posta adresinizle ilişkilendirilerek saklanır.</li>
     <li><strong>Portföy (isteğe bağlı bulut senkronizasyonu):</strong> "Buluta kaydet" özelliğini kullanırsanız, portföyünüze girdiğiniz hisse/lot/fiyat/tarih/not bilgileri rastgele üretilmiş bir bağlantı koduyla (token) sunucuda saklanır; bu veriler tarafınızca silinene kadar sunucuda kalır, otomatik bir silme süresi yoktur. Bu kanal yalnızca portföy pozisyonlarınızı taşır — izleme listeniz buraya dâhil değildir (izleme listesi için bir alttaki maddeye bakınız).</li>
     <li><strong>Hisse bazlı e-posta alarmları:</strong> E-posta aboneliğiniz varken bir hisse sayfasındaki "Bildirim al" (🔔) düğmesine bastığınızda, <strong>o hissenin sembolü ve seçtiğiniz alarm koşulu</strong> (sinyal değişimi, fiyat değişim yüzdesi, RSI veya hacim eşiği) e-posta adresinizle ilişkilendirilerek sunucuda saklanır — alarmı size gönderebilmemizin başka yolu yoktur. Kayıt, alarmı kapattığınızda (aynı düğme ya da profil sayfanızdaki alarm listesi) veya aboneliğinizi sonlandırdığınızda silinir. <strong>Abone değilseniz</strong> bu düğme yalnızca tarayıcınızdaki yerel listeye yazar; sunucuya hiçbir şey gönderilmez.</li>
     <li><strong>İletişim formu:</strong> /iletisim sayfasından mesaj gönderirseniz ad-soyad, e-posta adresi ve mesaj içeriğiniz, yalnızca talebinizi yanıtlamak amacıyla e-posta yoluyla iletilir; ayrı bir veritabanında saklanmaz.</li>
-    <li><strong>Tanıma çerezi (bp_sub):</strong> Aboneliğiniz sırasında tarayıcınıza 1 yıl geçerli, şifresiz bir tanıma çerezi yerleştirilir; bu çerez profil sayfanıza ve tercihlerinize e-posta linkine tekrar tıklamadan erişmenizi sağlar.</li>
+    <li><strong>Oturum çerezleri (bp_session, bp_li):</strong> Kodla giriş yaptığınızda tarayıcınıza 90 gün geçerli <strong>bp_session</strong> oturum çerezi yerleştirilir. Bu çerez JavaScript tarafından okunamaz, yalnızca HTTPS üzerinden gönderilir ve sunucuda yalnızca özeti tutulur; "Çıkış yap" dediğinizde sunucuda hemen geçersiz olur. Yanındaki <strong>bp_li</strong> çerezi yalnızca "bu tarayıcıda oturum var" bilgisini taşır, kişisel veri içermez.</li>
+    <li><strong>Tanıma çerezi (bp_sub):</strong> Eski abonelik akışında tarayıcınıza 1 yıl geçerli, şifresiz bir tanıma çerezi yerleştirilir; bu çerez profil sayfanıza ve alarm tercihlerinize e-posta bağlantısına tekrar tıklamadan erişmenizi sağlar. Hesap sayfaları onu kimlik olarak kabul etmez; çıkış yaptığınızda silinir.</li>
   </ul>
 
   <h2>E-posta Aboneliği ve KVKK</h2>
   <p>Sinyal bildirimleri için e-posta aboneliği oluşturduğunuzda, <strong>e-posta adresiniz ve yukarıdaki bildirim tercihleriniz</strong> 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında veri sorumlusu sıfatıyla borsapusula.com tarafından işlenmektedir.</p>
   <ul>
-    <li><strong>İşleme amacı:</strong> Yalnızca algoritmik sinyal bildirimlerinin iletilmesi, kurduğunuz hisse bazlı alarmların çalıştırılması ve bildirim tercihlerinizin uygulanması.</li>
+    <li><strong>İşleme amacı:</strong> Yalnızca algoritmik sinyal bildirimlerinin iletilmesi, kurduğunuz hisse bazlı alarmların çalıştırılması, bildirim tercihlerinizin uygulanması, giriş kodunun gönderilmesi ve hesabınızdaki takip listesi ile portföyün farklı cihazlarda size gösterilmesi.</li>
     <li><strong>Hukuki dayanak:</strong> Açık rıza (KVKK Madde 5/1).</li>
-    <li><strong>Saklama süresi:</strong> Abonelik iptaline kadar veya talep üzerine derhal. Hisse bazlı alarm kayıtlarınız abonelik kaydınızın içinde tutulur; aboneliği sonlandırdığınızda onlar da aynı anda silinir. (Bulut senkronizasyonuyla kaydedilen portföy verisi bundan ayrıdır — bkz. yukarıdaki "Portföy" maddesi; o veri siz silene kadar saklanır.)</li>
+    <li><strong>Saklama süresi:</strong> Abonelik iptaline ya da hesabınızı silene kadar, veya talep üzerine derhal. Giriş kodları en çok 10 dakika, oturum kayıtları en çok 90 gün saklanır. Hisse bazlı alarm kayıtlarınız abonelik kaydınızın içinde tutulur; aboneliği sonlandırdığınızda onlar da aynı anda silinir. (Bulut senkronizasyonuyla kaydedilen portföy verisi bundan ayrıdır — bkz. yukarıdaki "Portföy" maddesi; o veri siz silene kadar saklanır.)</li>
     <li><strong>Üçüncü taraflarla paylaşım:</strong> E-posta adresiniz hiçbir üçüncü tarafla paylaşılmaz, satılmaz veya pazarlama amacıyla kullanılmaz.</li>
-    <li><strong>Abonelik iptali:</strong> Gelen bildirim e-postalarındaki "aboneliği sonlandır" bağlantısına tıklayarak veya <a href="mailto:iletisim@borsapusula.com" class="da-link">iletisim@borsapusula.com</a> adresine e-posta göndererek istediğiniz zaman aboneliğinizi sonlandırabilirsiniz.</li>
+    <li><strong>Abonelik iptali:</strong> Gelen bildirim e-postalarındaki "aboneliği sonlandır" bağlantısına tıklayarak veya <a href="mailto:iletisim@borsapusula.com" class="da-link">iletisim@borsapusula.com</a> adresine e-posta göndererek istediğiniz zaman aboneliğinizi sonlandırabilirsiniz. Takip sayfasındaki "Hesabı sil" düğmesi hesabınızı, takip listenizi, portföyünüzü ve tüm oturumlarınızı derhal siler.</li>
   </ul>
 
   <h2>Çerezler (Cookie)</h2>
-  <p>Site pazarlama çerezi kullanmamaktadır. Tarayıcınızın yerel deposu (localStorage) portföyünüz, izleme listeniz, açık sekme, Öğrenme Modu ve ipucu balonları gibi arayüz tercihlerinizi saklamak için kullanılır; bu kayıtlar <strong>varsayılan olarak</strong> sunucuya gönderilmez. İki istisna vardır ve her ikisi de sizin bir eyleminizle başlar: portföyünüz için "Buluta kaydet", izleme listeniz için abone olarak kurduğunuz hisse alarmları (yukarıdaki "Portföy" ve "Hisse bazlı e-posta alarmları" maddeleri). bp_sub tanıma çerezi yalnızca abone olduğunuzda, yukarıda açıklanan amaçla yerleştirilir. Google Analytics (GA4) yalnızca <strong>açık onayınızla</strong> çalışır: ilk ziyaretinizde çıkan bantta "Kabul Et"e basmadığınız sürece GA4 hiç yüklenmez; "Reddet"e basmanız veya bandı kapatmanız GA4'ün o tarayıcıda hiç çalışmaması anlamına gelir. Tercihiniz localStorage'a yazılır — bir sonraki ziyaretinizde bant tekrar çıkmaz, tarayıcı verilerinizi temizlerseniz tekrar sorulur. Cloudflare Web Analytics (aşağıda ayrıca açıklanmıştır) bu onay mekanizmasından bağımsız olarak, çerez kullanmadan çalışır.</p>
+  <p>Site pazarlama çerezi kullanmamaktadır. Tarayıcınızın yerel deposu (localStorage) portföyünüz, izleme listeniz, açık sekme, Öğrenme Modu ve ipucu balonları gibi arayüz tercihlerinizi saklamak için kullanılır; bu kayıtlar <strong>varsayılan olarak</strong> sunucuya gönderilmez. Üç istisna vardır ve üçü de sizin bir eyleminizle başlar: portföyünüz için "Buluta kaydet", izleme listeniz için abone olarak kurduğunuz hisse alarmları ve hesabınıza kodla giriş yapmanız: girişte bu tarayıcıdaki takip listeniz ve portföyünüz hesabınıza aktarılır, sonrasında hesabınızda saklanır (yukarıdaki "Portföy", "Hisse bazlı e-posta alarmları" ve "Hesap" maddeleri). bp_session ve bp_li çerezleri yalnızca kodla giriş yaptığınızda, bp_sub tanıma çerezi yalnızca eski abonelik akışında, yukarıda açıklanan amaçlarla yerleştirilir. Google Analytics (GA4) yalnızca <strong>açık onayınızla</strong> çalışır: ilk ziyaretinizde çıkan bantta "Kabul Et"e basmadığınız sürece GA4 hiç yüklenmez; "Reddet"e basmanız veya bandı kapatmanız GA4'ün o tarayıcıda hiç çalışmaması anlamına gelir. Tercihiniz localStorage'a yazılır — bir sonraki ziyaretinizde bant tekrar çıkmaz, tarayıcı verilerinizi temizlerseniz tekrar sorulur. Cloudflare Web Analytics (aşağıda ayrıca açıklanmıştır) bu onay mekanizmasından bağımsız olarak, çerez kullanmadan çalışır.</p>
 
   <h2>Üçüncü Taraf Hizmetler</h2>
   <ul>
     <li><strong>Yahoo Finance (yfinance):</strong> Hisse fiyat verileri Yahoo Finance API üzerinden alınır. Yahoo Finance'ın gizlilik politikası geçerlidir.</li>
-    <li><strong>Google Gemini AI:</strong> AI haber özeti özelliği için Google Gemini API kullanılır. Sorgu metinleri (hisse adı) Google sunucularına iletilir. Google'ın gizlilik politikası geçerlidir.</li>
     <li><strong>Google Analytics (GA4):</strong> Yalnızca yukarıdaki onay bandında "Kabul Et"e bastığınızda çalışır (bkz. Çerezler bölümü). Onaylarsanız sayfa görüntüleme ve etkileşim verileri Google'a iletilir. Google'ın gizlilik politikası geçerlidir.</li>
     <li><strong>Cloudflare (CDN/proxy + Web Analytics):</strong> Site, Cloudflare CDN/proxy hizmeti üzerinden sunulur. Ayrıca çerez kullanmayan, IP adresini saklamayan Cloudflare Web Analytics ile temel ziyaret istatistikleri (sayfa görüntüleme sayısı vb.) toplanır — bu, onay bandındaki tercihinizden bağımsız çalışır. Cloudflare'ın gizlilik politikası geçerlidir.</li>
   </ul>
 
   <h2>Veri Saklama</h2>
-  <p>Sunucu erişim günlükleri otomatik olarak 14 gün sonra silinir. Bulut senkronizasyonuyla kaydedilen portföy verisi ve bildirim tercihleri otomatik bir silme süresine tabi değildir; talep üzerine silinir. Hisse bazlı alarm kayıtları abonelik kaydınıza bağlıdır ve abonelik sonlandığında birlikte silinir.</p>
+  <p>Sunucu erişim günlükleri otomatik olarak 14 gün sonra silinir. Bulut senkronizasyonuyla kaydedilen portföy verisi ve bildirim tercihleri otomatik bir silme süresine tabi değildir; talep üzerine silinir. Hisse bazlı alarm kayıtları abonelik kaydınıza bağlıdır ve abonelik sonlandığında birlikte silinir. Hesap verileri (takip listesi, portföy, bildirim tercihleri) hesabınızı silene ya da aboneliği sonlandırana kadar saklanır; giriş kodları en çok 10 dakika, oturum kayıtları en çok 90 gün tutulur.</p>
 
   <h2>Haklarınız</h2>
   <p>KVKK (6698 sayılı Kişisel Verilerin Korunması Kanunu) <strong>Madde 11</strong> uyarınca veri sahibi olarak aşağıdaki haklara sahipsiniz:</p>
@@ -89,6 +90,8 @@
   <h2>Değişiklikler</h2>
   <p>Bu politika zaman zaman güncellenebilir. Önemli değişiklikler bu sayfada duyurulacaktır.</p>
   <ul>
+    <li><strong>2 Ekim 2026 (rev. 4):</strong> Şifresiz, isteğe bağlı hesap eklendi: e-posta adresinize gelen tek kullanımlık 6 haneli kodla giriş; takip listesi, isteğe bağlı portföy (hisse, adet, ortalama maliyet) ve bildirim tercihleri hesabınızda sunucuda saklanır; bp_session (90 gün) ve bp_li çerezleri açıklandı; "Hesabı sil" ile tüm hesap verisinin derhal silinmesi eklendi. Hesap açmayan ziyaretçiler için toplanan veri değişmedi. Hesap açanlar için takip listesi ve portföyün sunucuda saklanması bir <em>artıştır</em> ve yalnızca sizin girişinizle başlar.</li>
+    <li><strong>27 Eylül 2026 (rev. 3.1):</strong> Yapay zekâ ile üretilen haber ve piyasa özetleri siteden kaldırıldı; ziyaretçilerin hiçbir bilgisi Google Gemini'ye iletilmediği için "Google Gemini AI" maddesi Üçüncü Taraf Hizmetler listesinden çıkarıldı. Toplanan veri miktarında bir <em>artış olmamıştır</em>.</li>
     <li><strong>25 Eylül 2026 (rev. 3):</strong> Sayfa yazı tipleri artık BorsaPusula sunucusundan yükleniyor; Google Fonts'a istek gönderilmediği için "Google Fonts" maddesi Üçüncü Taraf Hizmetler listesinden kaldırıldı. Toplanan veri miktarında bir <em>artış olmamıştır</em>.</li>
     <li><strong>22 Eylül 2026 (rev. 2):</strong> "Hisse bazlı e-posta alarmları" maddesi eklendi — abone bir kullanıcı bir hisseyi izlemeye aldığında hisse sembolünün ve alarm koşulunun e-posta adresiyle ilişkilendirilerek sunucuda saklandığı açıkça beyan edildi. Önceki metin bu veriyi yanlışlıkla bulut senkronizasyonu kanalına atfediyor ve Çerezler bölümünde izleme listesinin sunucuya hiç gönderilmediğini söylüyordu; her iki ifade de düzeltildi. Ayrıca JavaScript hata kayıtlarının sunucu günlüğüne yazıldığı "Teknik veriler" maddesine eklendi. Toplanan veri miktarında bir <em>artış olmamıştır</em> — değişiklik yalnızca mevcut işlemenin doğru beyan edilmesidir.</li>
   </ul>
@@ -97,10 +100,10 @@
 {% with ftr_self='/gizlilik' %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 <!-- K-DG: bp-search.js arama katlamasini bp-vocab.js `bpTrFold()`ten alir; ONCE yuklenmeli. -->
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

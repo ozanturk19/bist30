@@ -20,6 +20,7 @@ Kasitli istisna: GOZDEN_GECIRILMIS sozlugune GEREKCESIYLE ekle, sessizce
 kaldirma.
 """
 import re, sys, pathlib
+from _page_js import with_page_js
 
 TPL = pathlib.Path(__file__).resolve().parent.parent / "templates"
 
@@ -65,7 +66,7 @@ def main() -> int:
     kullanilan = set()
     sayac = {g: 0 for g in KANON}
     for f in sorted(TPL.glob("*.html")):
-        for no, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+        for no, line in enumerate(with_page_js(f.name, f.read_text(encoding="utf-8")).splitlines(), 1):
             for glif, (ad, anahtarlar) in KANON.items():
                 start = 0
                 while True:

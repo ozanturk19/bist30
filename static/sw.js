@@ -1,31 +1,26 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v61';
+const CACHE = 'borsapusula-f45f5887';
 
-/* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
+/* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç).
+   C-26: CACHE ve STATIC elle yazılmaz — tools/sw_manifest.py üretir (pre-deploy 11. adım). */
 const STATIC = [
-  '/static/lightweight-charts.min.js?v=86b4c600',
-  '/static/manifest.json?v=287c7b00',
-  '/static/icon-192.png?v=933a8452',
-  '/static/icon-512.png?v=e9ec3ef2',
-  '/static/favicon.svg?v=6ef6d5a3',
-  '/static/css/tokens.css?v=13e1ddc7',
-  '/static/css/shared.css?v=8fb82747',
-  '/static/css/data-art.css?v=d9121b8e',
+  '/static/css/data-art.css?v=192ffa6b',
   '/static/css/pages/offline.css?v=34a9a271',
-  '/static/fonts/space-grotesk.woff2?v=5ac34783',
+  '/static/css/shared.css?v=26e60ba1',
+  '/static/css/tokens.css?v=9a453dd8',
+  '/static/favicon.svg?v=6834d771',
   '/static/fonts/bricolage-800.woff2?v=c76bd7c0',
+  '/static/fonts/space-grotesk.woff2?v=5ac34783',
+  '/static/icon-192.png?v=0b40a6a6',
+  '/static/icon-512.png?v=265a8cb2',
+  '/static/lightweight-charts.min.js?v=86b4c600',
+  '/static/manifest.json?v=00de4c25',
   '/offline',
 ];
 
-/* 20.09 BULGU: bu listedeki cache-bust hash'leri templates/offline.html'dekilerle
-   ELLE senkron tutuluyordu ve ikisi birbirinden kopmustu (tokens.css burada
-   ?v=1eabd653, sablonda ?v=a9ea1d38). `caches.match` varsayilan olarak query
-   string'i de ANAHTARIN PARCASI sayar -> cevrimdisi kullanici offline.html'i
-   aliyor ama sayfanin ISTEDIGI iki CSS de cache'te BULUNAMIYOR, fetch de
-   basarisiz oluyordu: sayfa tam da ise yarayacagi anda STILSIZ aciliyordu.
-   Iki katli onlem: (1) hash'ler duzeltildi + CACHE surumu artirildi,
-   (2) asagidaki ignoreSearch YEDEGI ile ileride yeniden kopsa bile en
-   kotusu BAYAT CSS olur, HIC CSS olmaz. */
+/* 20.09 BULGU (elle senkron hash'ler koptu, /offline stilsiz açıldı) C-26 ile
+   kapandı: liste /offline'ın render edilmiş static_v URL'lerinden üretilir.
+   ignoreSearch yedeği yine de durur: en kötüsü BAYAT CSS olur, HİÇ CSS olmaz. */
 
 self.addEventListener('install', e => {
   e.waitUntil(

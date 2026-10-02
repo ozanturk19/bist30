@@ -106,16 +106,37 @@ def test_emit_alert_window_expiry_flushes_with_suppressed_count(monkeypatch):
     assert "+1 suppressed" in lines[1]
 
 
-def test_emit_alert_never_raises_on_sentry_exception(monkeypatch):
-    _reset()
-    _capture(monkeypatch)
+def test_send_ops_email_smtp_yoksa_false_ve_raise_yok(monkeypatch):
+    for k in ("SMTP_HOST", "SMTP_USER", "SMTP_PASS"):
+        monkeypatch.delenv(k, raising=False)
+    assert alerting.send_ops_email("konu", "metin") is False
 
-    class _BadSentry:
-        def capture_message(self, *a, **kw):
-            raise RuntimeError("boom")
 
-    # P0 tier + sentry hatası -> exception yutulmalı
-    alerting.emit_alert("DQV_SV_DATA", "detail", _sentry=_BadSentry())
+def test_send_ops_email_gonderir_ve_hatayi_yutar(monkeypatch):
+    monkeypatch.setenv("SMTP_HOST", "smtp.test")
+    monkeypatch.setenv("SMTP_USER", "u@test")
+    monkeypatch.setenv("SMTP_PASS", "x")
+    sent = {}
+
+    class _SMTP:
+        def __init__(self, host, port, timeout=0):
+            sent["host"] = host
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def ehlo(self): pass
+        def starttls(self): pass
+        def login(self, u, p): pass
+        def sendmail(self, frm, to, body): sent["to"] = to; sent["body"] = body
+
+    monkeypatch.setattr(alerting.smtplib, "SMTP", _SMTP)
+    assert alerting.send_ops_email("veri tazeliği", "metin") is True
+    assert sent["to"] == ["iletisim@borsapusula.com"]
+
+    class _Boom(_SMTP):
+        def login(self, u, p): raise RuntimeError("boom")
+
+    monkeypatch.setattr(alerting.smtplib, "SMTP", _Boom)
+    assert alerting.send_ops_email("x", "y") is False
 
 
 # ── runner ───────────────────────────────────────────────────────────────────
@@ -149,7 +170,8 @@ if __name__ == "__main__":
         test_emit_alert_repeat_within_window_suppressed,
         test_emit_alert_different_ticker_not_deduped,
         test_emit_alert_window_expiry_flushes_with_suppressed_count,
-        test_emit_alert_never_raises_on_sentry_exception,
+        test_send_ops_email_smtp_yoksa_false_ve_raise_yok,
+        test_send_ops_email_gonderir_ve_hatayi_yutar,
     ]
     for t in mp_tests:
         mp = MonkeyPatch()

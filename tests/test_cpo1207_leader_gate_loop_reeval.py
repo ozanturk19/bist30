@@ -39,34 +39,6 @@ def _window_after(src, marker, size=400):
     return src[idx: idx + size]
 
 
-# ── gemini-prefetch ──────────────────────────────────────────────────────
-
-def test_prefetch_worker_checks_leader_inside_loop():
-    src = _read_app()
-    body = _extract_function_body(src, "_prefetch_news_worker")
-    assert body, "_prefetch_news_worker() bulunamadı"
-    while_idx = body.index("while True:")
-    guard_window = body[while_idx: while_idx + 700]
-    assert "_is_gemini_leader()" in guard_window, (
-        "_prefetch_news_worker döngüsü leader durumunu her turda kontrol etmiyor — "
-        "CPO-1207 §1'in tam konusu bu"
-    )
-
-
-def test_prefetch_thread_starts_unconditionally():
-    src = _read_app()
-    idx = src.index("_prefetch_thread = threading.Thread(")
-    window = src[idx: idx + 600]
-    assert "_prefetch_thread.start()" in window
-    # Eski desende .start() bir `if _is_gemini_leader():` bloğunun İÇİNDE idi.
-    start_idx = window.index("_prefetch_thread.start()")
-    before_start = window[:start_idx]
-    assert "if _is_gemini_leader():" not in before_start, (
-        "gemini-prefetch thread'i hâlâ module-load-time leader kapısının "
-        "arkasında başlıyor — non-leader worker thread'i hiç doğuramaz"
-    )
-
-
 # ── Freshness monitor ────────────────────────────────────────────────────
 
 def test_freshness_monitor_checks_leader_inside_loop():
@@ -147,8 +119,4 @@ def test_health_payload_exposes_leaders_block():
     )
     assert '"notify":' in window and "_is_notify_leader()" in window, (
         "health.leaders.notify alanı yok/yanlış"
-    )
-    assert '"prefetch_thread_alive":' in window and "_prefetch_thread.is_alive()" in window, (
-        "health.leaders.prefetch_thread_alive alanı yok/yanlış — reload sonrası "
-        "'prefetch canlı mı' sorusu yine journalctl/lsof gerektirir"
     )

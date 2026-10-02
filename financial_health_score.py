@@ -28,7 +28,15 @@ AYRI ve daha sert bir kapı — dipnot skoru göstermeye devam eder, bu kapı
 skoru hiç üretmez.
 
 Bantlar: 0-49 kırmızı, 50-69 sarı, 70-100 yeşil (Site Contract, sabit).
+
+D-21 (O2, kanon §3) — yönlü BorsaPusula Skoru, `BP_DIRECTIONAL=1` bayrağıyla:
+    BP = 0,6 × Temel + 0,4 × Trend payı
+    Trend payı: Güçlü Trend max(50, TG) · Yatay 50 · Trend Bozuldu min(50, 100 − TG)
+Bayrak kapalıyken (varsayılan) sonuç birebir eski formüldür. Alan adı aynı
+(borsapusula_skoru), tüketen arayüz değişmez. Simülasyon: tools/bp_yonlu_sim.py.
 """
+
+import os
 
 import sector_stats
 
@@ -100,12 +108,42 @@ CATEGORY_LABELS = {
 # kaldıraç metrikleri gerçekten hesaplanabiliyor (mevduat bankası bilanço
 # yapısına sahip değiller). Liste elle tutuluyor çünkü kod tabanında
 # "mevduat bankası" ayrımını yapan başka bir sektör alt-kırılımı yok.
-LEVERAGE_NA_TICKERS = {
+BANK_TICKERS = {
     "AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
     "ALBRK", "KLNMA", "TSKB", "SKBNK",  # mevduat bankaları
+}
+LEVERAGE_NA_TICKERS = BANK_TICKERS | {
     "SAHOL",  # holding, ağırlıklı finansal iştirak yapısı
     "YESIL",  # GYO, bilanço yapısı benzer şekilde uyumsuz
 }
+
+# D-15: sektöre uygun temel metrikler. Sigortada cari oran/hızlı oran/net borç ÷
+# FAVÖK anlamsız (bilanço teknik karşılıklardan oluşur; Yahoo'da bir değer gelse
+# de ANHYT "Kaldıraç 98,6" gibi yanıltıcı bir puan üretiyordu) → Kaldıraç N/A.
+# Bankada ayrıca faaliyet nakit akışı mevduat/kredi hareketini yansıtır, işletme
+# nakit akışı değildir (FCF/satış, pozitif çeyrek, OCF değişkenliği) → Nakit
+# Akışı da N/A. Sektör adı (D-23 KAP kovası) ya da elle liste yeter; GYO'da
+# metrikler hesaplanabildiği için kapsam dışı (EKGYO/ISGYO tamlık 0,93).
+INSURER_TICKERS = {"ANHYT", "AKGRT", "TURSG", "ANSGR", "AGESA", "RAYSG"}
+SECTOR_INSURER, SECTOR_BANK = "Sigorta", "Bankacılık"
+
+# Tamlık bu değerin altındaysa `limited_data` bayrağı; sıralama havuzları
+# (home_fields.featured_pool) aynı eşikle dışlar.
+LIMITED_DATA_BELOW = 0.6
+
+
+def structural_na(ticker, sector):
+    """Bu hisse için yapısal olarak UYGULANAMAZ kategoriler (CATEGORIES sırasıyla).
+
+    Bankada Kaldıraç + Nakit Akışı, sigortada Kaldıraç, LEVERAGE_NA_TICKERS'ta
+    (holding/GYO artığı) Kaldıraç. Diğer hisselerde boş."""
+    if ticker in BANK_TICKERS or sector == SECTOR_BANK:
+        na = {"kaldirac", "nakit_akisi"}
+    elif ticker in INSURER_TICKERS or sector == SECTOR_INSURER or ticker in LEVERAGE_NA_TICKERS:
+        na = {"kaldirac"}
+    else:
+        return []
+    return [c for c in CATEGORIES if c in na]
 
 
 def _band(score):
@@ -143,7 +181,8 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
 
     Çıktı: {"temel_analiz_skoru": int|None, "data_completeness": float,
             "categories_complete": bool, "band": str|None,
-            "categories": {kategori: skor}, "categories_na": [kategori, ...]}
+            "categories": {kategori: skor}, "categories_na": [kategori, ...],
+            "limited_data": bool}  (D-15: tamlık < %60, uygulanabilir metrik payda)
 
     categories_na (CPO-1617), categories dict'inde eksik olan kategorilerden
     hangilerinin GEÇİCİ veri boşluğu değil, ticker'ın sektör/bilanço yapısı
@@ -179,8 +218,11 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         }
     category_scores = {}
     metrics_with_data = 0
+    categories_na = structural_na(ticker_fundamentals.get("ticker"), sector)
 
     for cat_name, cat in CATEGORIES.items():
+        if cat_name in categories_na:
+            continue  # yapısal N/A: veri gelse bile puanlanmaz (D-15)
         metric_scores = []
         for metric, reverse in cat["metrics"]:
             value = ticker_fundamentals.get(metric)
@@ -191,14 +233,11 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         if metric_scores:
             category_scores[cat_name] = sum(metric_scores) / len(metric_scores)
 
-    data_completeness = round(metrics_with_data / TOTAL_METRIC_COUNT, 2)
+    # Payda: bu hisse için UYGULANABİLİR metrikler (D-15) — bankada 14 değil 8;
+    # yapısal N/A veri eksikliği sayılmaz.
+    applicable = sum(len(c["metrics"]) for n, c in CATEGORIES.items() if n not in categories_na)
+    data_completeness = round(metrics_with_data / applicable, 2)
     categories_complete = len(category_scores) == len(CATEGORIES)
-
-    ticker = ticker_fundamentals.get("ticker")
-    categories_na = [
-        c for c in CATEGORIES
-        if c not in category_scores and c == "kaldirac" and ticker in LEVERAGE_NA_TICKERS
-    ]
 
     if not category_scores or metrics_with_data < MIN_METRICS_FOR_SCORE:
         return {
@@ -208,6 +247,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             "band": None,
             "categories": {},
             "categories_na": categories_na,
+            "limited_data": data_completeness < LIMITED_DATA_BELOW,
         }
 
     total_weight = sum(CATEGORIES[c]["weight"] for c in category_scores)
@@ -221,6 +261,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         "band": _band(round(score)),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
         "categories_na": categories_na,
+        "limited_data": data_completeness < LIMITED_DATA_BELOW,
     }
 
 
@@ -273,18 +314,53 @@ def build_rationale(categories, data_completeness, categories_na=None):
         na_labels = ", ".join(CATEGORY_LABELS.get(c, c) for c in categories_na)
         sentence += f" {na_labels} kategorisi bu hissenin sektör/bilanço yapısı gereği hesaplanamaz; skor kalan kategorilere göre hesaplanmıştır."
     elif data_completeness is not None and data_completeness < 0.6:
-        sentence += " Bazı finansal veriler eksik olduğu için skor sınırlı veriyle hesaplanmıştır."
+        sentence += " Şirketin raporlarında bazı kalemler yok; bu alanlar puana katılmadı."
 
     return sentence
 
 
-def compute_borsapusula_score(teknik_skor, temel_skor, weights=None):
+BP_DIRECTIONAL_ENV = "BP_DIRECTIONAL"
+
+
+def bp_directional_enabled():
+    """D-21 bayrağı: yalnız BP_DIRECTIONAL=1 açar (süreç ortamından okunur)."""
+    return os.environ.get(BP_DIRECTIONAL_ENV, "").strip() == "1"
+
+
+def trend_share(state, teknik_skor):
+    """Kanon §3 trend payı → (pay, eksik).
+
+    state: motorun iç anahtarı — "AL" Güçlü Trend, "BEKLE" Yatay, "SAT" Trend
+    Bozuldu. Yön var ama Teknik Güç yoksa ya da durum bilinmiyorsa pay nötr
+    50 sayılır ve eksik=True döner (partial)."""
+    if state in ("AL", "SAT"):
+        if teknik_skor is None:
+            return 50.0, True
+        tg = float(teknik_skor)
+        return (max(50.0, tg) if state == "AL" else min(50.0, 100.0 - tg)), False
+    return 50.0, state != "BEKLE"
+
+
+def compute_borsapusula_score(teknik_skor, temel_skor, weights=None, state=None, directional=None):
     """BorsaPusula kompozit skoru — basit ağırlıklı ortalama.
 
     teknik_skor: mevcut signal_strength (compose_score çıktısı, YENİDEN
     HESAPLAMA YOK, doğrudan okunur). Biri None ise kompozit mevcut tek
-    bileşene düşer + partial=True taşır."""
+    bileşene düşer + partial=True taşır.
+
+    D-21: directional (None → BP_DIRECTIONAL bayrağı) açıkken teknik payın
+    yerine trend_share(state, teknik_skor) girer. Temel yoksa skor üretilmez
+    (None; Sınırlı veri) — trend payı tek başına şirket puanı değildir.
+    Dönen sözlüğe "trend_payi" eklenir (hesabın izi)."""
     w = weights or {"temel": 0.6, "teknik": 0.4}
+    if directional is None:
+        directional = bp_directional_enabled()
+    if directional:
+        if temel_skor is None:
+            return {"borsapusula_skoru": None, "partial": True}
+        pay, eksik = trend_share(state, teknik_skor)
+        return {"borsapusula_skoru": round(temel_skor * w["temel"] + pay * w["teknik"]),
+                "partial": eksik, "trend_payi": pay}
     if temel_skor is not None and teknik_skor is not None:
         composite = temel_skor * w["temel"] + teknik_skor * w["teknik"]
         return {"borsapusula_skoru": round(composite), "partial": False}
@@ -293,3 +369,36 @@ def compute_borsapusula_score(teknik_skor, temel_skor, weights=None):
     if teknik_skor is not None:
         return {"borsapusula_skoru": round(teknik_skor), "partial": True}
     return {"borsapusula_skoru": None, "partial": True}
+
+
+def build_score_entry(fdata, sector, stocks_with_fundamentals, teknik_skor, state=None, directional=None):
+    """Gün sonu puanlama turunun hisse kaydı (app._run_eod_scoring_pass →
+    _financial_health_cache, last_health_scores.json, scores/<gün>.json).
+
+    D-21: app.py'den birebir taşındı (yerelde iki bayrak durumuyla test
+    edilir). state: o turdaki durum (results[].signal). Bayrak açıkken kayda
+    "bp_trend" = {"durum", "pay"} eklenir; kapalıyken kayıt eskisiyle aynı."""
+    health = compute_health_score(fdata, sector, stocks_with_fundamentals)
+    composite = compute_borsapusula_score(teknik_skor, health.get("temel_analiz_skoru"),
+                                          state=state, directional=directional)
+    entry = {
+        "teknik_analiz_skoru": teknik_skor,
+        "temel_analiz_skoru": health.get("temel_analiz_skoru"),
+        "borsapusula_skoru": composite.get("borsapusula_skoru"),
+        "data_completeness": health.get("data_completeness"),
+        "categories_complete": health.get("categories_complete"),
+        "partial": composite.get("partial"),
+        "band": health.get("band"),
+        "categories": health.get("categories"),
+        "categories_na": health.get("categories_na") or [],
+        "limited_data": bool(health.get("limited_data")),
+    }
+    if "trend_payi" in composite:
+        entry["bp_trend"] = {"durum": state, "pay": composite["trend_payi"]}
+    # CPO-1531 Faz 3: deterministik gerekçe cümlesi hemen hesaplanır (Gemini
+    # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
+    # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
+    entry["temel_analiz_aciklamasi"] = build_rationale(
+        entry["categories"], entry["data_completeness"], entry["categories_na"]
+    ) + " Yatırım tavsiyesi değildir."
+    return entry

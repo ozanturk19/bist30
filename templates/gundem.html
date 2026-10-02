@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{#- C-63: tek açıklama metni (3 meta); tarih D-06 eod_label'dan, yoksa "Son seansta". -#}{%- set _gdesc -%}{% if ssr_signal_summary %}{{ (ssr_eod_label ~ ' kapanışında') if ssr_eod_label else 'Son seansta' }} BIST'te {{ ssr_signal_summary.al }} güçlü trend var; {% if ssr_new_signals %}{{ ssr_new_signals|length }} hissenin trend durumu değişti.{% else %}trend durumu değişen hisse yok.{% endif %}{% else %}Son seansta durum değiştiren BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}{%- endset -%}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
 <meta name="description" content="{{ _gdesc }}">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/gundem">
 <meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
 <meta property="og:description" content="{{ _gdesc }}">
@@ -20,15 +20,15 @@
   {"@type":"ListItem","position":2,"name":"Piyasa Gündem Merkezi","item":"https://borsapusula.com/gundem"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=13e1ddc7">
-<link rel="stylesheet" href="/static/css/data-art.css?v=d9121b8e">
-<script src="/static/bp-vocab.js?v=17025fc9" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=b8cb8e11">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/gundem.css') }}">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button>
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
@@ -70,18 +70,6 @@
       kutu 0x0) ve `aria-live` da olu aliyordu. Artik <main> icinde,
       gorunur. Yazan JS DEGISMEDI -- ayni id. -#}
   <p class="da-updated" id="updatedAt" role="status" aria-live="polite">{% if ssr_updated_at %}Güncellendi: {{ ssr_updated_at }}{% else %}Yükleniyor…{% endif %}</p>
-
-  <!-- AI Makro Özeti -->
-  <div id="macroSummaryBox" class="da-panel da-panel--accent ai-summary-box" role="status" aria-live="polite" style="display:none">
-    <div class="ai-sum-row">
-      <span class="ai-sum-icon"><span aria-hidden="true">🤖</span></span>
-      <div>
-        <div class="ai-sum-eyebrow">AI Piyasa Özeti</div>
-        <div id="macroSummaryText" class="ai-sum-text"></div>
-        <div id="macroSummaryTime" class="ai-sum-time"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- Stats -->
   <div class="stats-row" id="statsRow" role="status" aria-live="polite">
@@ -155,7 +143,7 @@
           <span class="dot" style="background:var(--bp-gold)"></span>
           Bilanço Takvimi
         </h2>
-        <a href="/bilanco-takvimi" class="da-tap" aria-label="Tümü — bilanço takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
+        <a href="/takvim?tur=bilanco" class="da-tap" aria-label="Tümü — takvim" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
         <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:var(--bp-radius-md);padding:12px 14px">
@@ -184,14 +172,14 @@
       </div>
     </div>
 
-    <!-- Makro Haberler -->
+    <!-- Şirket bildirimleri (C-65 26.09: RSS başlıkları kaynak adı + dış bağlantıyla kalktı) -->
     <div class="section">
       <div class="section-hdr">
         <h2 class="section-title">
           <span class="dot dot-macro"></span>
-          Makro Haberler
+          Şirket bildirimleri
         </h2>
-        <span class="section-sub" id="macroNewsUpdatedAt">—</span>
+        <a href="/haberler" class="section-sub" style="color:var(--bp-brand);text-decoration:none;font-weight:600">Tümü →</a>
       </div>
       <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
         <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
@@ -227,7 +215,7 @@
      renderCard `bpIndNum`/`bpSignalAgeText`i cagiriyor ve `loadGundem()` parse
      aninda basliyor — cagri async devamda oldugu icin pratikte yetisiyordu, ama
      bu sadece agin betikten yavas olmasina dayanan bir SIRA SANSI idi. -->
-<script src="/static/bp-format.js?v=63228ae2"></script>
+<script src="{{ static_v('bp-format.js') }}"></script>
 
 <script>
 /* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,
@@ -412,7 +400,7 @@ async function loadGundem() {
              erken kapatıp kalanı "boş/mükerrer <a>" olarak DOM'a yaziyordu.
              temettu_takvimi.html/bilanco_takvimi.html'deki ayni desen (div
              role=link + inner <a onclick=stopPropagation>) buraya da taşındı. */
-          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="da-tap" aria-label="${escapeHtml(item.ticker)} KAP bildirimi (yeni sekmede açılır)" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const kapHref = `<a href="/haberler?hisse=${encodeURIComponent(item.ticker || '')}" onclick="event.stopPropagation()" class="da-tap" aria-label="${escapeHtml(item.ticker)} bildirimleri" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">Bildirimler →</a>`;  /* C-65: dış KAP bağlantısı yerine site içi akış */
           const etTicker = escapeHtml(item.ticker);
           return `<div class="news-card" data-ticker="${etTicker}" role="link" tabindex="0"
             onclick="window.location.href='/hisse/'+this.dataset.ticker"
@@ -492,72 +480,40 @@ async function loadEconCalendar() {
 
 let _macroNewsSeq = 0;  /* r144: gundem.html ile ayni visibilitychange-race deseni */
 async function loadMacroNewsSection() {
+  /* C-65 (26.09): kendi bildirim akışımız; her satır site içi kalıcı bildirim
+     sayfasına gider, kaynak etiketi ve dış bağlantı yok (kanon §2.8/§4). */
   const grid = document.getElementById('macroNewsGrid');
-  const upEl = document.getElementById('macroNewsUpdatedAt');
   if (!grid) return;
   const mySeq = ++_macroNewsSeq;
   try {
-    const res  = await fetch('/api/macro-news');
+    const res  = await fetch('/api/haberler?adet=8');
     const data = await res.json();
     if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
     if (mySeq !== _macroNewsSeq) return;  // daha yeni bir cagri baslamis, bu yaniti at
-    if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
     const items = data.items || [];
     if (!items.length) {
-      grid.innerHTML = '<div class="da-panel da-empty">Makro haber bekleniyor…</div>';
+      grid.innerHTML = '<div class="da-panel da-empty">Şu an bildirim yok.</div>';
       return;
     }
+    const dm = d => { const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(d || ''); return m ? m[2] + '.' + m[1] : ''; };
     grid.innerHTML = items.slice(0, 8).map(item => {
-      return `<a href="${safeHref(item.url)}" target="_blank" rel="noopener"
+      return `<a href="${escapeHtml(item.href || '/haberler')}"
         style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);padding:10px 14px;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
-        <span style="font-size:9px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;background:rgba(var(--bp-text3-rgb),.1);border:1px solid rgba(var(--bp-text3-rgb),.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.source)}</span>
-        <span style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4;font-weight:500;flex:1">${escapeHtml(item.title)}</span>
-        <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.date_str||item.published||'')} <span aria-hidden="true">↗</span></span><span class="sr-only"> (yeni sekmede açılır)</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:700;color:var(--bp-text2);white-space:nowrap;flex-shrink:0;margin-top:1px">${escapeHtml(item.ticker || '')}</span>
+        <span style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4;font-weight:500;flex:1;min-width:0;overflow-wrap:anywhere">${escapeHtml(item.title || item['class'] || '')}</span>
+        <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(dm(item.day) + (item.time ? ' ' + item.time : ''))}</span>
       </a>`;
     }).join('');
   } catch(e) {
     if (mySeq !== _macroNewsSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
-    grid.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Makro haberler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadMacroNewsSection()">Tekrar dene</button></div>';
+    grid.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadMacroNewsSection()">Tekrar dene</button></div>';
   }
-}
-
-async function loadMacroSummary() {
-  try {
-    const res  = await fetch('/api/macro-summary');
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    const txt  = (data.summary || '').trim();
-    if (!txt) return;
-    const box  = document.getElementById('macroSummaryBox');
-    const el   = document.getElementById('macroSummaryText');
-    const tm   = document.getElementById('macroSummaryTime');
-    /* 20.09 CPO: `hidden` (ozet 48 saatten eski) dalinda panel GORUNUR kalip
-       "Ozet hazirlanamadi, gundem basliklarina bakin." basiyordu. Canlida cache
-       10.09 10:22'de donmus durumda, yani sayfanin EN UST icerigi 10 gundur
-       "AI PIYASA OZETI" baslikli bos bir vaat kutusuydu. Bilgi tasimayan panel
-       gosterilmez (Maksimum Sadelik); kullanici asagidaki gercek gundem
-       basliklarini zaten goruyor. Backend tazeleme sorunu CPO-1676 ile DEV1'de. */
-    if (data.hidden) {
-      console.info('makro ozet 48s+ bayat (uretim: ' + (data.generated_date||'?') + '), panel gizli');
-      return;
-    }
-    if (el) el.textContent = txt;
-    if (tm) {
-      if (data.stale_warning && data.generated_date && data.generated_at) {
-        tm.textContent = '⚠️ Bu özet ' + data.generated_date + ' saat ' + data.generated_at + '\'de üretildi';
-      } else if (data.generated_at) {
-        tm.textContent = 'Oluşturuldu: ' + data.generated_at;
-      }
-    }
-    if (box) box.style.display = '';
-  } catch(e) { console.error('makro ozet yuklenemedi', e); }
 }
 
 loadGundem();
 loadEconCalendar();
 loadMacroNewsSection();
-loadMacroSummary();
 // 5 dakikada bir otomatik yenile
 /* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
    Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
@@ -592,13 +548,13 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ── Makro Ticker ── */
-(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
+/* makro şerit bp-search.js'te kendiliğinden başlar (C-15) */
 </script>
-<script src="/static/bp-search.js?v=660f20ac" defer></script>
-<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+<script src="{{ static_v('js/bp-tooltip.js') }}"></script>
 <!-- K-BU: bp-format.js YUKARI tasindi (satir ~229) — stale-banner.js TR takvim
      gunu icin onun kanonunu cagirir, sirasi hala ONCE. -->
-<script src="/static/stale-banner.js?v=60bb4d13"></script>
+<script src="{{ static_v('stale-banner.js') }}"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

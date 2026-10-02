@@ -1,6 +1,10 @@
-"""Faz 12 P2.4 — DQV multi-tier alerting (monitoring-only, non-blocking)"""
+"""Faz 12 P2.4 — DQV multi-tier alerting (monitoring-only, non-blocking)
+
+D-13: alarm tek kanal e-posta (send_ops_email); Telegram ve Sentry silindi."""
 
 import os
+import smtplib
+from email.mime.text import MIMEText
 import time
 import logging
 import threading
@@ -22,7 +26,7 @@ DQV_TIER = {
     "DQV_SV_CHART": "P0",
 }
 
-# CPO-1155 §2: aynı (event, ticker, tier) tekrar ederse ALERT.md/Sentry/log
+# CPO-1155 §2: aynı (event, ticker, tier) tekrar ederse ALERT.md/log
 # spam olmaz — pencere içinde bastırılır, ilk görülüşte ve pencere kapanınca
 # "+N suppressed" özetiyle geçer. Process-local (worker başına), disk/IPC yok
 # — amaç tek bir kronik olayın binlerce satır üretmesini önlemek, kesin
@@ -50,14 +54,12 @@ def _classify_severity(default_tier, errors):
     return "P1"
 
 
-def emit_alert(event: str, detail: str = "", ticker: str = None, _sentry=None, errors=None):
+def emit_alert(event: str, detail: str = "", ticker: str = None, errors=None):
     """
     Non-blocking DQV alert. Tier derived from DQV_TIER (default P1),
     downgraded via _classify_severity when `errors` (schema_validator
     error list) indicates non-structural drift.
-    P0: ALERT.md append + logger.warning + sentry.capture_message(level='error')
-    P1: ALERT.md append + logger.warning
-    _sentry: sentry_sdk module if available, else None
+    P0/P1: ALERT.md append + logger.warning (e-posta yalnız send_ops_email çağıranlarda)
     All exceptions swallowed — never raises.
     """
     try:
@@ -79,13 +81,6 @@ def emit_alert(event: str, detail: str = "", ticker: str = None, _sentry=None, e
 
         logger.warning("ALERT_%s %s%s: %s%s", tier, event, ticker_tag, detail, suffix)
         _append_alert_md(line)
-
-        if tier == "P0" and _sentry is not None:
-            try:
-                _sentry.capture_message(
-                    f"ALERT_P0 {event}{ticker_tag}: {detail}{suffix}", level="error")
-            except Exception as _se:
-                logger.warning("Sentry P0 capture failed: %s", _se)
     except Exception as _e:
         logger.warning("emit_alert exception: %s", _e)
 
@@ -96,3 +91,29 @@ def _append_alert_md(line: str):
             f.write(line + "\n")
     except Exception as _e:
         logger.warning("ALERT.md append failed: %s", _e)
+
+
+def send_ops_email(subject: str, text: str) -> bool:
+    """Sistem alarmı e-postası (tek kanal, D-13). Alıcı ADMIN_MAIL
+    (varsayılan iletisim@borsapusula.com). SMTP eksik/hata → False, asla raise etmez."""
+    host = os.environ.get("SMTP_HOST", "")
+    user = os.environ.get("SMTP_USER", "")
+    pw = os.environ.get("SMTP_PASS", "")
+    if not (host and user and pw):
+        return False
+    to = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
+    try:
+        msg = MIMEText(text, "plain", "utf-8")
+        msg["Subject"] = f"[BorsaPusula alarm] {subject}"
+        msg["From"] = os.environ.get("SMTP_FROM", "BorsaPusula <noreply@borsapusula.com>")
+        msg["To"] = to
+        with smtplib.SMTP(host, int(os.environ.get("SMTP_PORT", "587") or 587), timeout=15) as srv:
+            srv.ehlo()
+            srv.starttls()
+            srv.login(user, pw)
+            srv.sendmail(user, [to], msg.as_string())
+        logger.info("Alarm e-postası gönderildi: %s", subject)
+        return True
+    except Exception as e:
+        logger.warning("Alarm e-postası gönderilemedi (%s): %s", subject, e)
+        return False

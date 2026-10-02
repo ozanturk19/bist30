@@ -34,11 +34,15 @@
 
   /* ── "Finansalları nasıl?" betimi: kategori skorlarından, şirkete yargı yok (kanon §2.4) ── */
   var CATN = { karlilik: 'kârlılık', nakit_akisi: 'nakit akışı', kaldirac: 'borç durumu', degerleme_buyume: 'değerleme/büyüme' };
+  /* C-22c: Temel v2 (D-40c) 5 eksen; cevap değerlemeyi kullanmaz (arka uç `cevap` ile aynı kural) */
+  var CATN2 = { kalite: 'kalite', buyume: 'büyüme', bilanco: 'bilanço sağlığı', temettu: 'temettü' };
+  var CATL = { kalite: 'kalite', degerleme: 'değerleme', buyume: 'büyüme', bilanco: 'bilanço sağlığı', temettu: 'temettü' };
   function cap(t) { return t.charAt(0).toLocaleUpperCase('tr-TR') + t.slice(1); }
   function finAns(c) {
     if (!c) return null;
-    var a = Object.keys(CATN).filter(function (k) { return c[k] != null; })
-      .map(function (k) { return [CATN[k], c[k]]; }).sort(function (x, y) { return y[1] - x[1]; });
+    var N = c.kalite != null || c.buyume != null ? CATN2 : CATN;
+    var a = Object.keys(N).filter(function (k) { return c[k] != null; })
+      .map(function (k) { return [N[k], c[k]]; }).sort(function (x, y) { return y[1] - x[1]; });
     if (!a.length) return null;
     var st = a.filter(function (x) { return x[1] >= 70; }), wk = a.filter(function (x) { return x[1] < 50; });
     if (st.length && wk.length) return cap(st[0][0]) + ' güçlü, ' + wk[wk.length - 1][0] + ' zayıf';
@@ -68,10 +72,10 @@
   /* ── Hazır listeler: her biri paylaşılabilir adres (?liste=…) ── */
   var PRESETS = [
     { id: 'hacim-onayli', l: 'Güçlü Trend + Hacim Onaylı', rule: 'Trend koşullarının hepsi sağlanıyor; 5 günlük ortalama hacim, 20 günlük ortalamanın en az 1,2 katı (RVOL ≥ 1,20).', set: { durum: ['g'] }, x: function (r) { return r.ho; } },
-    { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü; skor finansallardan %60, trendden %40 pay alıyor.', set: { bp: 70 } },
+    { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü.', set: { bp: 70 } },
     { id: 'yeni-sinyal', l: 'Yeni sinyal (≤3 seans)', rule: 'Trend durumu son 3 seans içinde değişen hisseler.', x: function (r) { return r.d != null && r.d <= 3; } },
     { id: 'trend-bozuldu-son-seans', l: 'Son seansta Trend Bozuldu', rule: function () { return 'Yükseliş trendi ' + (ASOF || 'son') + ' seansında bozulan hisseler.'; }, set: { durum: ['b'] }, x: function (r) { return r.d != null && r.d <= 1; } },
-    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skor 70 ve üstü, finansal verisi tam; trend henüz Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
+    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
   var PRE = {};
   PRESETS.forEach(function (p) { PRE[p.id] = p; });
 
@@ -81,14 +85,15 @@
     return '<span class="tv-bp' + (cls ? ' ' + cls : '') + (soft ? ' soft' : '') + '" style="--v:' + Math.max(0, Math.min(100, v)) + '"><b>' + v + (sup ? '<sup>*</sup>' : '') + '</b><i></i></span>';
   }
   function catCol(key, h) {
-    return { h: h, num: 1, tip: CATN[key].charAt(0).toLocaleUpperCase('tr-TR') + CATN[key].slice(1) + ' kategorisinin skoru (0–100).',
+    var nm = CATN[key] || CATL[key];
+    return { h: h, num: 1, tip: nm.charAt(0).toLocaleUpperCase('tr-TR') + nm.slice(1) + ' kategorisinin skoru (0–100).',
       v: function (r) { return r.cat ? r.cat[key] : null; },
-      cell: function (r) { var v = r.cat ? r.cat[key] : null; if (v != null) return String(Math.round(v)); return mut(r.te == null ? 'Sınırlı veri' : (r.na.indexOf(key) >= 0 ? 'Uygulanmaz' : 'Veri yok')); } };
+      cell: function (r) { var v = r.cat ? r.cat[key] : null; if (v != null) return String(Math.round(v)); return mut(r.te == null ? 'Skor yok' : (r.na.indexOf(key) >= 0 ? (r.g === 'Bankacılık' ? 'Bankada yok' : (r.g === 'Sigorta' ? 'Sigortada yok' : 'Kullanılmaz')) : 'Veri yok')); } };
   }
   function cush(r) { return (r.p && r.sl != null) ? (r.p - r.sl) / r.p * 100 : null; }
   var C = {
-    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40; trend skoru olmayan hissede yalnız finansallar.', v: function (r) { return r.bp; },
-      cell: function (r) { return r.bp == null ? mut('Sınırlı veri') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
+    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
+      cell: function (r) { return r.bp == null ? mut('Skor yok') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
       cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },
     p: { h: 'Fiyat', num: 1, v: function (r) { return r.p; }, cell: function (r) { return r.p == null ? mut('Fiyat yok') : nf2.format(r.p) + ' ' + mut('₺'); } },
@@ -100,17 +105,22 @@
       cell: function (r) { var q = cush(r); if (q == null) return mut('Veri yok'); return nf2.format(r.sl) + ' ' + mut('₺') + '<span class="sub">fiyatın %' + nf1.format(Math.abs(q)) + ' ' + (r.sl < r.p ? 'altında' : 'üstünde') + '</span>'; } },
     rv: { h: 'RVOL', num: 1, tip: '5 günlük ortalama hacim / 20 günlük ortalama hacim.', v: function (r) { return r.rv; }, cell: function (r) { return r.rv == null ? mut('Veri yok') : nf2.format(r.rv) + '×'; } },
     d: { h: 'Durum yaşı', num: 1, tip: 'Hisse kaç işlem günüdür bu trend durumunda.', v: function (r) { return r.d; }, cell: function (r) { return r.d == null ? mut('Veri yok') : (r.d <= 1 ? 'son seans' : r.d + ' gün'); } },
-    te: { h: 'Temel skor', tip: 'Kârlılık, nakit akışı, borç durumu, değerleme ve büyüme (0–100). * Sınırlı veri.', v: function (r) { return r.te; },
-      cell: function (r) { return r.te == null ? mut('Sınırlı veri') : bar(r.te, 'cy', false, r.sv) + (r.fa ? '<span class="sub">' + esc(r.fa) + '</span>' : ''); } },
+    te: { h: 'Temel skor', tip: 'Kârlılık, nakit akışı, borç durumu, değerleme ve büyüme (0–100).', v: function (r) { return r.te; },
+      cell: function (r) { return r.te == null ? mut('Skor yok') : bar(r.te, 'cy', false) + (r.fa ? '<span class="sub">' + esc(r.fa) + '</span>' : ''); } },
     kar: catCol('karlilik', 'Kârlılık'),
     nak: catCol('nakit_akisi', 'Nakit akışı'),
     kal: catCol('kaldirac', 'Borç durumu'),
-    deg: catCol('degerleme_buyume', 'Değerleme / büyüme')
+    deg: catCol('degerleme_buyume', 'Değerleme / büyüme'),
+    kli: catCol('kalite', 'Kalite'),
+    dgr: catCol('degerleme', 'Değerleme'),
+    buy: catCol('buyume', 'Büyüme'),
+    bil: catCol('bilanco', 'Bilanço sağlığı'),
+    tem: catCol('temettu', 'Temettü')
   };
   var COLS = { genel: ['bp', 'tr', 'p', 'c', 'g'], teknik: ['bp', 'adx', 'dist', 'rv', 'd'], temel: ['bp', 'te', 'kar', 'nak', 'kal', 'deg'] };
   var ASC = { t: 1, g: 1 };
-  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'RVOL', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme' };
-  var SSLUG = { t: 'kod', bp: 'bp', tr: 'durum-yasi', d: 'durum-yasi', p: 'fiyat', c: 'degisim', g: 'sektor', adx: 'adx', dist: 'donus-seviyesi', rv: 'rvol', te: 'temel', kar: 'karlilik', nak: 'nakit-akisi', kal: 'borc-durumu', deg: 'degerleme-buyume' };
+  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'RVOL', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme', kli: 'Kalite', dgr: 'Değerleme', buy: 'Büyüme', bil: 'Bilanço sağlığı', tem: 'Temettü' };
+  var SSLUG = { t: 'kod', bp: 'bp', tr: 'durum-yasi', d: 'durum-yasi', p: 'fiyat', c: 'degisim', g: 'sektor', adx: 'adx', dist: 'donus-seviyesi', rv: 'rvol', te: 'temel', kar: 'karlilik', nak: 'nakit-akisi', kal: 'borc-durumu', deg: 'degerleme-buyume', kli: 'kalite', dgr: 'degerleme', buy: 'buyume', bil: 'bilanco', tem: 'temettu' };
   function slug(s) { return bpTrFold(String(s)).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
   /* ── Durum ── */
@@ -278,12 +288,23 @@
     var hl = $('tvLegHl');
     if (hl) hl.innerHTML = any ? '<i class="k on"></i><b>' + rows.length + '</b> hisse filtreyle eşleşiyor' : 'Her çizgi bir hisse; sıralama tablodaki gibi';
   }
+  /* C-70 K07: dar ekranda çip satırı kayarsa etkin çip solma bölgesinin dışında, tam görünür kalır (hisse.js C-07 deseni). */
+  function keepInView(bar, el) {
+    if (!bar || bar.scrollWidth <= bar.clientWidth) return;
+    var l = el.getBoundingClientRect().left - bar.getBoundingClientRect().left + bar.scrollLeft, r = l + el.offsetWidth, pad = 32;
+    if (r - l > bar.clientWidth - pad) bar.scrollLeft = l;
+    else if (l < bar.scrollLeft) bar.scrollLeft = Math.max(0, l - 8);
+    else if (r > bar.scrollLeft + bar.clientWidth - pad) bar.scrollLeft = r - bar.clientWidth + pad;
+  }
+  /* Yazı tipi yüklenince çip genişliği değişir; etkin çip yeniden hizalanır. */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { var a = document.querySelector('.tv-chip.on'); if (a) keepInView(a.parentElement, a); });
   function bar2(rows) {
     var f = st.f, n = nAct(f);
     [].forEach.call(document.querySelectorAll('.tv-chip'), function (a) {
       var on = f.preset === a.getAttribute('data-id');
       a.classList.toggle('on', on);
       if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      if (on) keepInView(a.parentElement, a);
     });
     var fn = $('tvFn');
     fn.hidden = !n; fn.textContent = n || '';
@@ -293,7 +314,6 @@
     if (typeof rule === 'function') rule = rule();
     $('tvInfo').innerHTML = '<b>' + rows.length + ' hisse</b> · ' + (rule ? esc(rule) : 'Sıralama: ' + SORTL[st.sort.k] + ' ' + (st.sort.dir < 0 ? '↓' : '↑'));
     [].forEach.call(document.querySelectorAll('.tv-seg button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === st.cols)); });
-    $('tvFnote').hidden = !(WIDE.matches && st.cols === 'temel');
   }
   function fkey(el) { var a = el && el.closest && el.closest('[data-act]'); return a ? [a.getAttribute('data-act'), a.getAttribute('data-k') || '', a.getAttribute('data-f') || '', a.getAttribute('data-v') || '', a.getAttribute('data-id') || ''].join('|') : null; }
   function byKey(scope, key) { var els = scope.querySelectorAll('[data-act]'); for (var i = 0; i < els.length; i++) if (fkey(els[i]) === key) return els[i]; return null; }
@@ -327,6 +347,7 @@
     if (!LOADED) { $('tvPanelB').innerHTML = '<div class="tv-empty">Veriler yükleniyor…</div>'; $('tvPanelF').innerHTML = ''; }
     var sh = $('tvPanel').querySelector('.tv-sheet');
     release = window.bpTrapFocus ? window.bpTrapFocus(sh, closePanel) : null;
+    if (!release) sh.onkeydown = function (e) { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } };  // focus-trap.js yüklenmezse Esc yedeği
     var x = sh.querySelector('.tv-xbtn'); if (x) x.focus();
   }
   function closePanel() {
@@ -397,6 +418,7 @@
       ROWS.forEach(function (r) { COUNT[r.s]++; sc[r.g] = (sc[r.g] || 0) + 1; });
       SEK = Object.keys(sc).sort(function (a, b) { if (a === 'Diğer') return 1; if (b === 'Diğer') return -1; return sc[b] - sc[a] || cmp(a, b); }).map(function (k) { return [k, k, sc[k]]; });
       ASOF = (typeof bpFormatTrDateLong === 'function' && d.updated_at) ? (bpFormatTrDateLong(String(d.updated_at).split(' ')[0]) || '') : '';
+      if (ROWS.some(function (r) { return r.cat && r.cat.kalite != null; })) COLS.temel = ['bp', 'te', 'kli', 'dgr', 'buy', 'bil', 'tem'];
       LOADED = true;
       resolveSectors();
       head();

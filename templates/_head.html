@@ -16,9 +16,9 @@
 <meta charset="UTF-8">
 {% if head_analytics|default(true) %}{% include '_analytics.html' %}
 {% endif %}<meta name="viewport" content="width=device-width, initial-scale=1.0{{ head_viewport_extra|default('') }}">
-<link rel="manifest" href="/static/manifest.json?v=287c7b00">
+<link rel="manifest" href="{{ static_v('manifest.json') }}">
 <meta name="theme-color" content="{{ head_theme_color|default('#0e0e12') }}">
-<link rel="apple-touch-icon" href="/static/icon-192.png?v=933a8452">
+<link rel="apple-touch-icon" href="{{ static_v('icon-192.png') }}">
 {%- if head_ios_standalone|default(false) %}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,15 +30,15 @@
     space-grotesk.woff2 = variable wght 400-700; bricolage-800.woff2 = 800, opsz 72 sabit.
     Ikisi de latin + latin-ext (Turkce) + ₺ alt kumesi; kaynak google/fonts (OFL).
     "SG Fallback": font gelene kadar Arial olculeri Space Grotesk'e esitlenir (CLS). -#}
-<link rel="preload" href="/static/fonts/space-grotesk.woff2?v=5ac34783" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/static/fonts/bricolage-800.woff2?v=c76bd7c0" as="font" type="font/woff2" crossorigin>
-<style>@font-face{font-family:'Space Grotesk';src:url('/static/fonts/space-grotesk.woff2?v=5ac34783') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}@font-face{font-family:'Bricolage Grotesque';src:url('/static/fonts/bricolage-800.woff2?v=c76bd7c0') format('woff2');font-weight:500 800;font-style:normal;font-display:swap}@font-face{font-family:'SG Fallback';src:local('Arial'),local('ArialMT'),local('Helvetica'),local('Roboto');size-adjust:108.7%;ascent-override:90.5%;descent-override:26.9%;line-gap-override:0%}</style>
-<link rel="stylesheet" href="/static/css/shared.css?v=8fb82747">
-<script>
-/* PWA Service Worker kaydi (offline onbellek) -- DEV2-r103 (bughunt):
+<link rel="preload" href="{{ static_v('fonts/space-grotesk.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ static_v('fonts/bricolage-800.woff2') }}" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:'Space Grotesk';src:url('{{ static_v('fonts/space-grotesk.woff2') }}') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}@font-face{font-family:'Bricolage Grotesque';src:url('{{ static_v('fonts/bricolage-800.woff2') }}') format('woff2');font-weight:500 800;font-style:normal;font-display:swap}@font-face{font-family:'SG Fallback';src:local('Arial'),local('ArialMT'),local('Helvetica'),local('Roboto');size-adjust:108.7%;ascent-override:90.5%;descent-override:26.9%;line-gap-override:0%}</style>
+<link rel="stylesheet" href="{{ static_v('css/shared.css') }}">
+{# PWA Service Worker kaydi (offline onbellek) -- DEV2-r103 (bughunt):
    eskiden sadece index.html'de vardi, 29/30 sablon hic kaydetmiyordu.
    T2.1 kanonik head bloguna tasindi ki her sayfa (ozellikle /hisse/<ticker>,
-   SEO'nun ana giris noktasi) SW'yi kaydetsin. */
+   SEO'nun ana giris noktasi) SW'yi kaydetsin. #}
+<script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { scope: '/' })
     .catch(e => console.warn('SW register fail:', e));

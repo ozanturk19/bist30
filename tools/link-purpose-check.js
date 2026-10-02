@@ -59,7 +59,7 @@ const KILL_FIX = process.argv.includes('--kill-fix');
 const PAGES = [
   '/', '/ozet', '/tarama', '/gundem', '/hisseler', '/sektor-harita',
   '/hisse/ASELS', '/hisse/GARAN', '/karsilastir', '/portfolio',
-  '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/blog/rsi-gostergesi-nedir',
+  '/takvim', '/blog', '/blog/rsi-gostergesi-nedir',
   '/metodoloji', '/hakkinda', '/iletisim', '/profil', '/yasal', '/gizlilik',
 ];
 

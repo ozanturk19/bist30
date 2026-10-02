@@ -7,11 +7,9 @@
   }
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
-    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
     position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
 
-  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
   /* ── Stats Row ── */
   .stats-row {
@@ -130,48 +128,14 @@
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    header { padding: 12px 16px; }
-    .container { padding: 16px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     .stat-num  { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: 1fr; }
   }
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--bp-border);
-    min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap;
-  }
-  .macro-bar::before, .macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px;
-    pointer-events:none; z-index:var(--bp-z-raised);
-  }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track {
-    display:inline-flex; align-items:center;
-    animation:macroScroll 40s linear infinite;will-change:transform; height:32px;
-  }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  /* K-AZ: `top:50%` seridin safe-area DOLGUSUNU da iceren kutusuna gore
-     ortaliyordu -> PWA'da dugmenin ust ~24px'i centigin altinda kaliyordu
-     (olculdu, inset=47px). Dolgunun yarisi geri eklendi; inset=0'da deger
-     BIREBIR ayni (50%). */
-  .macro-pause-btn { position: absolute; right: 2px; top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item {
-    display:inline-flex; align-items:center; gap:8px;
-    padding:0 20px; border-right:1px solid var(--bp-border);
-    font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit;
-  }
-  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
   /* CPO-DEV2-104: ikincil/arşiv icerik toggle.
      21.09 (K-W): `.bp-detail-toggle*` kopyası data-art.css §7'ye taşındı
      (bu kopya kanonikle birebir aynıydı — sapan /ozet'inkiydi). */
-
 
   /* ══ Data-Art dil aktarımı — gundem.html (20.09, Pazar) ══
      hisse.html + tarama.html + sektor_harita.html + portfoy.html bitti (bkz. memory
@@ -276,39 +240,6 @@
          21.09 (K-V): sinif kanonik `.da-empty` oldu; yüzey/degrade artik
          `.da-panel`den geliyor, burada yalniz GRID DELTASI kaliyor. */
   .stock-grid > .da-empty { grid-column: 1 / -1; }
-
-  /* 5 ── AI Piyasa Özeti paneli: şablondaki uzun inline style buraya taşındı
-         (token'suz ham mor rgba() değeri kanonik --bp-art-violet-rgb'ye alındı —
-         style-guard ham renkleri ancak burada görüyor) ve .da-recap-panel dilinde
-         sol aksan şeridi + radius-20 kazandı. */
-  /* 20.09: `.da-panel.da-panel--accent` ilkeli gövdeyi + sol şeridi veriyor;
-     buradaki DELTA panelin kendi cyan→violet tintli zemini, kenarlık rengi ve
-     iç boşluğu. Şerit rengi artık --da-accent ile (elle border-left DEĞİL). */
-  .ai-summary-box {
-    --da-accent: var(--bp-accent-cyan);
-    --da-glow-rgb: var(--bp-accent-cyan-rgb);
-    --da-glow-a: .10;
-    --da-glow-size: 200px;
-    background: linear-gradient(135deg, rgba(var(--bp-accent-cyan-rgb),.07) 0%, rgba(var(--bp-art-violet-rgb),.05) 100%);
-    /* DİKKAT: düz `border-color` yazılırsa SOL kenarı da ezer ve
-       `.da-panel--accent`in 3px cyan şeridini soluklaştırır (gundem.css
-       data-art.css'ten SONRA yükleniyor). Yalnızca 3 kenar. */
-    border-top-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    border-right-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    border-bottom-color: rgba(var(--bp-accent-cyan-rgb),.18);
-    padding: 14px 18px;
-    margin-bottom: 16px;
-  }
-  .ai-sum-row  { display: flex; align-items: flex-start; gap: 10px; position: relative; }
-  .ai-sum-icon { font-size: var(--bp-text-xl); flex-shrink: 0; margin-top: 1px; }
-  .ai-sum-eyebrow {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-xs); font-weight: 700;
-    color: var(--bp-accent-cyan);
-    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px;
-  }
-  .ai-sum-text { font-size: var(--bp-text-base); color: var(--bp-text2); line-height: 1.6; }
-  .ai-sum-time { font-size: var(--bp-text-2xs); color: var(--bp-text3); margin-top: 4px; }
 
   /* 6 ── Sinyal rozeti: ana sayfanın .da-badge tipografisi (Space Grotesk,
          .08em tracking). Renk semantiği (yeşil/kırmızı/nötr) DEĞİŞMEDİ. */

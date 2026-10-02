@@ -17,14 +17,12 @@
    yeri o taramada görülmemişti (orada `toISOString`, burada `getDate()`:
    aynı hata, farklı yazım).
    Kanon yüklenmemişse (bp-format.js sayfada yoksa) TARİH ÜRETİLMEZ: null
-   döner ve çağıran zaten var olan "son güncelleme zamanı doğrulanamıyor"
-   dürüst metnine düşer — yanlış bir günü basmaktansa hiç basmamak. */
+   döner ve çağıran tarihsiz kısa metne düşer — yanlış bir günü basmaktansa hiç basmamak. */
 function bpFmtUpdateDate(ageS) {
-  if (typeof bpTrDatePartsAt !== 'function') return null;
+  if (typeof bpTrDatePartsAt !== 'function' || typeof BP_TR_MONTHS === 'undefined') return null;
   var t = bpTrDatePartsAt(Date.now() - ageS * 1000);
   if (!t) return null;
-  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
-  return p2(t.d) + '.' + p2(t.m);
+  return t.d + ' ' + BP_TR_MONTHS[t.m - 1];
 }
 
 function bpUpdateStaleBanner(dq, ageS, refreshing) {
@@ -36,19 +34,22 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
   /* K-BL: tarih üretilemediyse (kanon yok) "bilinmiyor" dalı kullanılır —
      aşağıdaki üç dal da dateTxt'i yalnız hasAge ile koşulluyordu. */
   if (!dateTxt) hasAge = false;
-  var suffix = refreshing === true ? ' Yenileniyor...' : '';
+  /* C-74 K5/K7 (02.10): "Yenileniyor..." eki ve "olabilir/doğrulanamıyor"
+     cümleleri kalktı; banner kesin ve tarihli konuşur: "Son veri 25 Eylül
+     kapanışı · yeni kapanış verisi gecikti." */
+  var suffix = '';
   if (dq === 'critical') {
     var critTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir — güncel veri şu an alınamıyor.'
-      : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · yeni kapanış verisi alınamıyor.'
+      : 'Yeni kapanış verisi alınamıyor.';
     if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = 'var(--bp-sat)'; }
     banner.style.background  = 'rgba(var(--bp-sat-rgb),0.12)';
     banner.style.borderColor = 'var(--bp-sat)';
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir.'
-      : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · yeni kapanış verisi gecikti.'
+      : 'Yeni kapanış verisi gecikti.';
     if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
     banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
     banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';
@@ -69,8 +70,8 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
        "veri şu an hiç alınamıyor") değil; gösterilen fiyat GERÇEK, sadece
        beklenen işlem gününden eski. */
     var eksikTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem günü kapanışı henüz alınamadı.'
-      : 'Son işlem günü kapanışı henüz alınamadı — gösterilen veriler daha eski.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · son işlem gününün kapanış verisi gecikti.'
+      : 'Son işlem gününün kapanış verisi gecikti.';
     if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
     banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
     banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';
@@ -87,36 +88,26 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
 }
 
 /* tarama/hisseler/sinyal_performans — /api/data (216 kayıt) çekmiyorlar, hafif
-   /api/data-quality endpoint'ini (CPO-1121 §1) 60s'de bir çekip aynı fonksiyona post eder. */
+   /api/data-quality endpoint'ini (CPO-1121 §1) okuyup aynı fonksiyona post eder.
+   C-09 (26.09): 60 sn'lik setInterval kalktı (EOD: veri günde bir değişir).
+   Yüklemede bir kez + sekme görünür olunca en fazla 15 dk'da bir okunur.
+   Sayfa gizli yüklenirse ilk okuma görünür olunca yapılır (bughunt-12/13.09). */
 var _dqEverLoaded = false;
+var _dqLastFetch = 0;
 function bpPollDataQuality() {
-  /* bughunt-13.09: bpLoadMacroBar'daki AYNI kilit bug'ı burada da vardı —
-     hidden iken KOŞULSUZ atlanıyordu, sayfa hidden yüklenip visibilitychange
-     hiç ateşlenmezse stale-banner hiçbir zaman ilk kontrolünü yapamıyordu
-     (bkz. bpLoadMacroBar fix'i, aynı prensip: hiç veri gelmediyse hidden'dan
-     bağımsız dene, zaten yüklendiyse hidden'da boşa pil harcama). */
-  if (document.hidden && _dqEverLoaded) return;
+  _dqLastFetch = Date.now();
   fetch('/api/data-quality', {cache: 'no-store', signal: AbortSignal.timeout(10000)})
     .then(function(r) { return r.json(); })
     .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); _dqEverLoaded = true; })
-    .catch(function(e) { console.error('data-quality polling basarisiz', e); });
+    .catch(function(e) { console.error('data-quality okunamadi', e); });
 }
-var _dqPollInterval = null;
-var _dqVisListenerAdded = false;
+var _dqStarted = false;
 function bpStartDataQualityPolling() {
-  if (_dqPollInterval) return;
+  if (_dqStarted) return;
+  _dqStarted = true;
   bpPollDataQuality();
-  _dqPollInterval = setInterval(bpPollDataQuality, 60000);
-  /* bughunt-12.09: bpLoadMacroBar ile ayni desendeki bug — sayfa document.hidden
-     iken yuklenirse ilk poll no-op donuyordu, sekme gorunur olunca da hicbir
-     yerde tekrar denenmiyordu (60s'lik interval de arka planda tarayicilar
-     tarafindan suspend edilebiliyor). Tum 8 sayfa bu fonksiyonu TEK cagri
-     noktasindan kullandigi icin fix burada merkezi, sablon basina tekrar
-     gerekmiyor (r98/bpLoadMacroBar fix'iyle ayni ilke). */
-  if (!_dqVisListenerAdded) {
-    _dqVisListenerAdded = true;
-    document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) bpPollDataQuality();
-    });
-  }
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) return;
+    if (!_dqEverLoaded || Date.now() - _dqLastFetch >= 15 * 60 * 1000) bpPollDataQuality();
+  });
 }

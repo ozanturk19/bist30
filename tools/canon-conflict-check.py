@@ -73,7 +73,7 @@ def _rules(css, src):
                             k, v = part.split(':', 1)
                             k = k.strip().lower()
                             if k and not k.startswith('--'):
-                                v = ' '.join(v.split()).rstrip('!important').strip()
+                                v = re.sub(r'\s*!important$', '', ' '.join(v.split())).strip()  # rstrip('!important') karakter kumesi siliyordu: 'center' -> 'cente'
                                 decls[k] = re.sub(r'\s*,\s*', ',', v)
                     for s in sel.split(','):
                         out.append((media + ' '.join(s.split()), decls, src))

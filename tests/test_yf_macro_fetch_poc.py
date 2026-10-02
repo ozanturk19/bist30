@@ -92,6 +92,107 @@ def test_fetch_values_are_floats():
     assert isinstance(result["prev_close"], float)
 
 
+# ── D-P0-2809a: prev_pct (regularMarketChangePercent) ──────────────────────────
+
+def test_fetch_future_adds_prev_pct_from_info():
+    """`=F` sembollerde info.regularMarketChangePercent varsa prev_pct/pct dolmalı."""
+    import yf_macro_fetch
+    import unittest.mock as mock
+
+    fi = _fake_fast_info(97.44, 105.69)  # fast_info.previous_close spliced/bayat
+    fake_ticker = type("T", (), {
+        "fast_info": fi,
+        "info": {"regularMarketChangePercent": -2.7738962},
+    })()
+
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_macro_fetch.fetch("BZ=F")
+
+    assert result["pct"] == -2.7738962
+    assert abs(result["prev_pct"] - 97.44 / (1 - 0.027738962)) < 1e-6
+    # regresyon: prev_pct'ten hesaplanan degisim Yahoo'nun kendi pct'siyle eslesmeli
+    change = (result["price"] - result["prev_pct"]) / result["prev_pct"] * 100
+    assert round(change, 2) == -2.77
+
+
+def test_fetch_non_future_skips_prev_pct():
+    """`=F` olmayan semboller (ornek: =X, .IS) info cagirmaz, prev_pct eklenmez."""
+    import yf_macro_fetch
+    import unittest.mock as mock
+
+    fi = _fake_fast_info(38.45, 38.20)
+    fake_ticker = type("T", (), {"fast_info": fi})()  # .info tanimsiz — cagrilirsa AttributeError
+
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_macro_fetch.fetch("USDTRY=X")
+
+    assert "prev_pct" not in result
+    assert "pct" not in result
+
+
+def test_fetch_future_missing_pct_falls_back_silently():
+    """info.regularMarketChangePercent None/eksikse hata firlatmadan devam eder."""
+    import yf_macro_fetch
+    import unittest.mock as mock
+
+    fi = _fake_fast_info(97.44, 105.69)
+    fake_ticker = type("T", (), {"fast_info": fi, "info": {}})()
+
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_macro_fetch.fetch("BZ=F")
+
+    assert "prev_pct" not in result
+    assert not result.get("error")
+
+
+def test_fetch_daily_prev_same_contract_flag():
+    """same_contract: hacim orani <10x ve open/prev_close sapmasi <%3 ise True."""
+    import yf_macro_fetch
+    import unittest.mock as mock
+    import pandas as pd
+
+    fi = _fake_fast_info(104.32, 105.69)
+    hist = pd.DataFrame({
+        "Close":  [103.08, 106.6, 104.32],
+        "Open":   [103.0, 106.5, 104.0],
+        "Volume": [1000, 1100, 1050],
+    })
+    fake_ticker = type("T", (), {
+        "fast_info": fi,
+        "history": lambda self, **kw: hist,
+        "info": {},
+    })()
+
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_macro_fetch.fetch("BZ=F", daily_prev=True)
+
+    assert result["same_contract"] is True
+
+
+def test_fetch_daily_prev_same_contract_false_on_volume_spike():
+    """Devir gunu tipik olarak hacim sicramasi + open/kapanis sapmasi buyur -> False."""
+    import yf_macro_fetch
+    import unittest.mock as mock
+    import pandas as pd
+
+    fi = _fake_fast_info(97.44, 105.69)
+    hist = pd.DataFrame({
+        "Close":  [103.08, 106.6, 97.44],
+        "Open":   [103.0, 106.5, 96.0],    # yeni kontrat: onceki kapanistan cok uzak acilis
+        "Volume": [1000, 1200, 15000],      # devir gunu hacim sicramasi
+    })
+    fake_ticker = type("T", (), {
+        "fast_info": fi,
+        "history": lambda self, **kw: hist,
+        "info": {},
+    })()
+
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_macro_fetch.fetch("BZ=F", daily_prev=True)
+
+    assert result["same_contract"] is False
+
+
 # ── subprocess contract tests ─────────────────────────────────────────────────
 
 def test_subprocess_missing_args():

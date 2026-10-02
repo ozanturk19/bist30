@@ -149,6 +149,7 @@ NESIR = re.compile(
 # `fold_map` ayrica CAKISMAYI SESSIZ GECMEZ: iki farkli etiket ayni anahtara
 # katlanirsa biri sessizce kaybolacagi yerde ValueError atar.
 from _tr import tr_fold as tr_lower, fold_map
+from _page_js import with_page_js
 
 
 UNI = re.compile(r"\\u([0-9a-fA-F]{4})")
@@ -167,7 +168,7 @@ def nesir_kontrol(labels, arlk):
     lower = fold_map(labels)
     bulgular, sayac = [], 0
     for f in sorted((ROOT / "templates").glob("*.html")):
-        text = coz(f.read_text(encoding="utf-8"))
+        text = coz(with_page_js(f.name, f.read_text(encoding="utf-8")))
         for m in NESIR.finditer(text):
             et = tr_lower(m.group("etiket").strip())
             if et not in lower:
@@ -209,7 +210,7 @@ def main():
         print(f"  {ad}: kanonik {cfg['canon_fn']}() -> " +
               " · ".join(f"{e}{op}{v:g}" for op, v, e in sirali))
         for f in hedefler:
-            text = f.read_text(encoding="utf-8")
+            text = with_page_js(f.name, f.read_text(encoding="utf-8"))
             for op, num, etiket, pos in merdivenleri_bul(text, cfg["labels"], var_re):
                 if etiket not in canon_num:
                     continue  # taban/else dali -- sayisi yok

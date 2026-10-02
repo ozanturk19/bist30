@@ -169,38 +169,6 @@ def test_at_least_75_functions_directly_hold_lock_sanity_check():
     )
 
 
-def test_news_ttl_for_not_called_inside_get_ai_news_lock_block():
-    """CPO-1270'in bulduğu spesifik call-site #1 — regresyon durumunda hangi
-    satırın bozulduğunu doğrudan işaret eder (genel testten bağımsız, ayrı
-    başarısızlık mesajı için)."""
-    tree = _parse_app()
-    funcs = _collect_functions(tree)
-    assert "get_ai_news" in funcs, "get_ai_news() bulunamadı"
-    for n in funcs["get_ai_news"]:
-        for w in _find_lock_withs(n):
-            called = _collect_call_names(w)
-            assert "_news_ttl_for" not in called, (
-                "get_ai_news() bir with _lock: bloğu İÇİNDE _news_ttl_for() "
-                "çağırıyor — _news_ttl_for() kendisi de _lock alıyor (non-"
-                "reentrant) => kalıcı self-deadlock (CPO-1270 P0-3, DEV-1598 fix)"
-            )
-
-
-def test_news_ttl_for_not_called_inside_prefetch_worker_lock_block():
-    """CPO-1270'in bulduğu spesifik call-site #2."""
-    tree = _parse_app()
-    funcs = _collect_functions(tree)
-    assert "_prefetch_news_worker" in funcs, "_prefetch_news_worker() bulunamadı"
-    for n in funcs["_prefetch_news_worker"]:
-        for w in _find_lock_withs(n):
-            called = _collect_call_names(w)
-            assert "_news_ttl_for" not in called, (
-                "_prefetch_news_worker() bir with _lock: bloğu İÇİNDE "
-                "_news_ttl_for() çağırıyor — kalıcı self-deadlock riski "
-                "(CPO-1270 P0-3, DEV-1598 fix)"
-            )
-
-
 def test_news_ttl_for_itself_deadlocks_on_naive_reentry():
     """Mekanizmanın kendisini canlı threading.Lock ile kanıtlar: _news_ttl_for
     aynı thread tarafından _lock ZATEN tutulurken çağrılırsa gerçekten asılır.

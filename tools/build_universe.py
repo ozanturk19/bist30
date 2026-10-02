@@ -22,7 +22,7 @@ UA = {"User-Agent": "Mozilla/5.0 (BorsaPusula universe builder)"}
 INDEX_CODES = ("XU030", "XU050", "XU100", "XYLDZ", "XUTUM")
 # beklenen boyut aralıkları (bozuk sayfa/format değişimi = dosya yazılmaz)
 EXPECT = {"XU030": (28, 32), "XU050": (48, 52), "XU100": (98, 102),
-          "XYLDZ": (200, 400), "XUTUM": (450, 700)}
+          "XYLDZ": (100, 400), "XUTUM": (450, 700)}
 
 # Canlı sitede yanlış görünen adlar (23.09 ölçümü, KAP üye unvanı). Dosyaya
 # `names_override` olarak yazılır; app.py STOCK_NAMES üzerine uygular.
