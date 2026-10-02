@@ -303,7 +303,7 @@
             {%- set ry = ((tl.y or 0) - (grp.y or 0)) / grp.h * 100 -%}
             {%- set rw = tl.w / grp.w * 100 -%}
             {%- set rh = tl.h / grp.h * 100 %}
-            <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if stl }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ av }}{% if lim %}, {{ lim }}{% endif %}{% if stl %}, veri gecikmeli{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ vt }}</span>{% if limsp %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if limsp == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
+            <a class="hm-t {{ cls }}{{ ' dark' if dark }}{{ ' lim ' ~ lim if lim }}{{ ' stale' if stl }}" href="/hisse/{{ tl.t }}" data-t="{{ tl.t }}" style="--x:{{ '%.3f'|format(rx) }}%;--y:{{ '%.3f'|format(ry) }}%;--w:{{ '%.3f'|format(rw) }}%;--h:{{ '%.3f'|format(rh) }}%;--k:{{ '%.3f'|format(k) }}" aria-label="{{ tl.t }}{% if r.n %}, {{ r.n }}{% endif %}, {{ av }}{% if lim %}, {{ lim }}{% endif %}{% if stl %}, kapanış verisi gelmedi{% endif %}"><span class="hm-tk" aria-hidden="true">{{ tl.t }}</span><span class="hm-v" aria-hidden="true">{{ vt }}</span>{% if limsp %}<span class="hm-lim" aria-hidden="true">{{ '▲ TAVAN' if limsp == 'tavan' else '▼ TABAN' }}</span>{% endif %}{% if r.n %}<span class="sr-only">{{ r.n }}</span>{% endif %}</a>
           {%- endfor %}
           </div>
         </div>
@@ -319,7 +319,7 @@
         </div>
         <span>Gün sonu değişim</span>
         {%- if _na.any %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Değişim verisi yok</span>{% endif %}
-        {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>{% endif %}
+        {%- if _na.stale %}<span class="hm-lg-sw"><i class="na" aria-hidden="true"></i>Kapanış verisi gelmedi</span>{% endif %}
       </div>
       <p class="hm-src">Kutu büyüklüğü piyasa değeri, renk gün sonu değişimi; ±%3 ve üstü en koyu tonda.</p>
       {%- if not _h1 %}
@@ -334,7 +334,7 @@
         </div>
         <span data-lg-name>{{ _pinfo[3] }}</span>
         <span class="hm-lg-sw" data-lg-na{% if not (_mode == 'chg' and _na.any) %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Değişim verisi yok</span>
-        <span class="hm-lg-sw" data-lg-stale{% if not _na.stale %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Veri gecikmeli</span>
+        <span class="hm-lg-sw" data-lg-stale{% if not _na.stale %} hidden{% endif %}><i class="na" aria-hidden="true"></i>Kapanış verisi gelmedi</span>
       </div>
       <div class="hm-legend" data-lg="bp"{% if _mode != 'bp' %} hidden{% endif %}>
         <div>

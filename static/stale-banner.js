@@ -17,14 +17,12 @@
    yeri o taramada görülmemişti (orada `toISOString`, burada `getDate()`:
    aynı hata, farklı yazım).
    Kanon yüklenmemişse (bp-format.js sayfada yoksa) TARİH ÜRETİLMEZ: null
-   döner ve çağıran zaten var olan "son güncelleme zamanı doğrulanamıyor"
-   dürüst metnine düşer — yanlış bir günü basmaktansa hiç basmamak. */
+   döner ve çağıran tarihsiz kısa metne düşer — yanlış bir günü basmaktansa hiç basmamak. */
 function bpFmtUpdateDate(ageS) {
-  if (typeof bpTrDatePartsAt !== 'function') return null;
+  if (typeof bpTrDatePartsAt !== 'function' || typeof BP_TR_MONTHS === 'undefined') return null;
   var t = bpTrDatePartsAt(Date.now() - ageS * 1000);
   if (!t) return null;
-  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
-  return p2(t.d) + '.' + p2(t.m);
+  return t.d + ' ' + BP_TR_MONTHS[t.m - 1];
 }
 
 function bpUpdateStaleBanner(dq, ageS, refreshing) {
@@ -36,19 +34,22 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
   /* K-BL: tarih üretilemediyse (kanon yok) "bilinmiyor" dalı kullanılır —
      aşağıdaki üç dal da dateTxt'i yalnız hasAge ile koşulluyordu. */
   if (!dateTxt) hasAge = false;
-  var suffix = refreshing === true ? ' Yenileniyor...' : '';
+  /* C-74 K5/K7 (02.10): "Yenileniyor..." eki ve "olabilir/doğrulanamıyor"
+     cümleleri kalktı; banner kesin ve tarihli konuşur: "Son veri 25 Eylül
+     kapanışı · yeni kapanış verisi gecikti." */
+  var suffix = '';
   if (dq === 'critical') {
     var critTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir — güncel veri şu an alınamıyor.'
-      : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · yeni kapanış verisi alınamıyor.'
+      : 'Yeni kapanış verisi alınamıyor.';
     if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = 'var(--bp-sat)'; }
     banner.style.background  = 'rgba(var(--bp-sat-rgb),0.12)';
     banner.style.borderColor = 'var(--bp-sat)';
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir.'
-      : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · yeni kapanış verisi gecikti.'
+      : 'Yeni kapanış verisi gecikti.';
     if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
     banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
     banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';
@@ -69,8 +70,8 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
        "veri şu an hiç alınamıyor") değil; gösterilen fiyat GERÇEK, sadece
        beklenen işlem gününden eski. */
     var eksikTxt = hasAge
-      ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem günü kapanışı henüz alınamadı.'
-      : 'Son işlem günü kapanışı henüz alınamadı — gösterilen veriler daha eski.';
+      ? 'Son veri ' + dateTxt + ' kapanışı · son işlem gününün kapanış verisi gecikti.'
+      : 'Son işlem gününün kapanış verisi gecikti.';
     if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
     banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
     banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';

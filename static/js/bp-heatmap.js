@@ -306,7 +306,7 @@
     card.appendChild(row('BorsaPusula Skoru', (typeof r.bp === 'number') ? String(r.bp) : '—'));
     card.appendChild(row('Trend', trLabel(r.tr) + ((r.tr && r.days > 0) ? ' · ' + r.days + ' gündür' : '')));
     if (r.lim === 'tavan' || r.lim === 'taban') card.appendChild(row('Günlük limit', r.lim === 'tavan' ? 'Tavan' : 'Taban'));
-    if (r.stale) card.appendChild(mk('div', 'c-note', 'Veri gecikmeli'));
+    if (r.stale) card.appendChild(mk('div', 'c-note', 'Bu günün kapanış verisi gelmedi'));
     var go = mk('a', 'c-go', 'Hisse sayfası →');
     go.href = '/hisse/' + encodeURIComponent(t);
     card.appendChild(go);

@@ -725,11 +725,11 @@
       badge = document.createElement('span');
       badge.className = 'macro-stale-badge';
       badge.setAttribute('role', 'img');
-      badge.setAttribute('aria-label', 'Veriler gecikmeli olabilir');
+      badge.setAttribute('aria-label', 'Şerit verisi gecikti');
       // K-AH: `title` burada OLU idi -- asagidaki pointer-events:none yuzunden
       // masaustunde bile hic acilmiyordu. [data-tip] + pointer-events:auto ile
       // aciklama hover/odak/dokunma ile erisilebilir hale geldi.
-      badge.setAttribute('data-tip', 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)');
+      badge.setAttribute('data-tip', 'Şeritte son okunan değerler duruyor; yeni veri gecikti.');
       badge.tabIndex = 0;
       badge.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.8V8l2 1.4"/></svg>';
       badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit';
