@@ -215,6 +215,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             "band": _band(s.get("temel_analiz_skoru")),
             "categories": s.get("categories") or {},
             "categories_na": s.get("categories_na") or [],
+            "limited_data": bool((v2.get("detay") or {}).get("limited_data")),
         }
     category_scores = {}
     metrics_with_data = 0
