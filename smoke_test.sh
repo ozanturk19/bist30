@@ -49,6 +49,9 @@ for page in "/" "/hisse/THYAO" "/sektor-harita" "/portfolio" "/sinyal-performans
   if [ "$page" = "/sinyal-performans" ] && [ "$status" = "301" ]; then  # /tarama'ya kasıtlı redirect (app.py:12553)
     continue
   fi
+  if [ "$page" = "/portfolio" ] && [ "$status" = "301" ]; then  # /takip'e kasıtlı redirect (D-25b, 1a3dc7ff)
+    continue
+  fi
   if [ "$status" != "200" ] && [ "$status" != "400" ] && [ "$status" != "404" ]; then  # /profil without/invalid token returns 404 (9dcb721)
     echo "❌ FAIL: ${page} returned ${status}"
     exit 1
