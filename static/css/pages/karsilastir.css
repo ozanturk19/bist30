@@ -36,7 +36,7 @@
   .ticker-input {
     background: var(--bp-bg); border: 1px solid var(--bp-field-border);   /* K-Q */
     color: var(--bp-text); border-radius:var(--bp-radius); padding: 11px 12px;
-    font-size: var(--bp-text-lg); font-family: var(--bp-font-mono); text-transform: uppercase;
+    font-size: var(--bp-text-lg); font-family: inherit; font-variant-numeric: tabular-nums; text-transform: uppercase;
     width: 100px; outline: none; transition: border-color .15s;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px. 19.09: dikey padding
      8px->11px, 375px'te olculen 37px yukseklik ~44px asgari dokunma hedefine
@@ -121,7 +121,7 @@
   .compare-table th.row-label { border-right: 1px solid var(--bp-border); }
   .compare-table tr:last-child th.row-label { border-bottom: none; }
 
-  .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); }
+  .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-variant-numeric: tabular-nums; }
   .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; margin-right: auto; }
   .col-kap    {
     display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text3);
@@ -140,7 +140,7 @@
   .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .badge.bkl { background: rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
-  .mono { font-family: var(--bp-font-mono); font-size: var(--bp-text-base); }
+  .mono { font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); }
   .up   { color: var(--bp-al); }
   .dn   { color: var(--bp-sat); }
   /* K-BP (21.09): YON EKSENININ UCUNCU HALI. Burada .neu YOKTU, bu yuzden
@@ -208,7 +208,7 @@
   .ac-item:last-child { border-bottom: none; }
   .ac-item:hover, .ac-item.active { background: rgba(var(--bp-accent-cyan-rgb),.18); }
   .ac-item-ticker {
-    font-family: var(--bp-font-mono); font-size: var(--bp-text-base); font-weight: 700;
+    font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); font-weight: 700;
     color: var(--bp-text); letter-spacing: .3px;
   }
   .ac-item-name {
@@ -252,7 +252,7 @@
     letter-spacing: .02em;
   }
   .score-big {
-    font-size: var(--bp-text-22); font-weight: 800; font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-22); font-weight: 800; font-variant-numeric: tabular-nums;
     line-height: 1;
   }
   .score-big small { font-size: var(--bp-text-sm); color: var(--bp-text3); font-weight: 500; }
@@ -311,9 +311,10 @@
     margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--bp-border-subtle);
   }
   .cmp-mticker-link { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-  .cmp-mticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); color: var(--bp-text); }
+  .cmp-mticker { font-size: var(--bp-text-xl); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .cmp-mname { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
-  .cmp-mscore { display: flex; justify-content: center; padding: 4px 0 14px; }
+  .cmp-mscore { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0 14px; }
+  .cmp-mscore-lbl { font-size: var(--bp-text-xs); color: var(--bp-text3); text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
   .cmp-msep {
     font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
     color: var(--bp-accent-cyan); background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
@@ -333,7 +334,10 @@
   /* ── Responsive ── */
   @media (max-width: 600px) {
     .search-bar { padding: 12px; }
-    .ticker-input { width: 80px; }
+    /* C-70 K21: telefonda 2x2 izgara (80 px tek sutun yerine) */
+    .ticker-inputs { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .ac-wrap { min-width: 0; }
+    .ticker-input { width: 100%; }
     .ac-dropdown { min-width: 200px; }
     .score-bar-wrap { width: 80px; }
   }
