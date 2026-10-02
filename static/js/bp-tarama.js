@@ -139,7 +139,11 @@
     if (f.preset && PRE[f.preset].x && !PRE[f.preset].x(r)) return false;
     return true;
   }
-  function nAct(f) { return (f.durum.length ? 1 : 0) + (f.bp ? 1 : 0) + (f.temel ? 1 : 0) + (f.sektor.length ? 1 : 0) + (f.preset && PRE[f.preset].x ? 1 : 0); }
+  /* C-71 K36: hazır liste tek filtre sayılır; yalnız listenin üstüne eklenen seçimler ayrıca sayılır (rozet = paneldeki etkin öğe). */
+  function nAct(f) {
+    var b = f.preset ? withPreset(f.preset) : blank();
+    return (f.preset ? 1 : 0) + (f.durum.join() !== b.durum.join() && f.durum.length ? 1 : 0) + (f.bp !== b.bp && f.bp ? 1 : 0) + (f.temel !== b.temel && f.temel ? 1 : 0) + (f.sektor.length ? 1 : 0);
+  }
   function isOpen(k) {
     if (Object.prototype.hasOwnProperty.call(st.open, k)) return st.open[k];
     if (k === 'g') return true;
@@ -220,7 +224,7 @@
     var s = st.sort, on = s.k === k;
     return '<th scope="col" class="' + cl + ' th-sortable" aria-sort="' + (on ? (s.dir < 0 ? 'descending' : 'ascending') : 'none') + '"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="' + k + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + label + '<span class="ar" aria-hidden="true">' + (on ? (s.dir < 0 ? '↓' : '↑') : '↕') + '</span></button></th>';
   }
-  function emptyHTML() { return '<div class="tv-empty"><b>' + (ASOF ? esc(ASOF) + ' kapanışında bu' : 'Bu') + ' koşulları sağlayan hisse yok.</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
+  function emptyHTML() { return '<div class="tv-empty"><b>' + (ASOF ? esc(ASOF) + ' kapanışında bu' : 'Bu') + ' koşulları sağlayan hisse yok.</b>Filtrelerden birini gevşet ya da baştan başla.' + (nAct(st.f) ? '<button type="button" class="tv-eclr" data-act="clear">Filtreleri temizle</button>' : '') + '</div>'; }
   function tableHTML(rows) {
     var cs = COLS[cols()], ncol = cs.length + 1, body = '', srt = sorter();
     GROUPS.forEach(function (G) {
@@ -274,11 +278,16 @@
     $('tvLeg').innerHTML = '<span><i class="k g"></i><b>' + COUNT.g + '</b> Güçlü Trend</span><span><i class="k y"></i><b>' + COUNT.y + '</b> Yatay</span><span><i class="k b"></i><b>' + COUNT.b + '</b> Trend Bozuldu</span><span class="hl" id="tvLegHl"></span>';
     var strip = ROWS.slice().sort(function (a, b) { return 'gyb'.indexOf(a.s) - 'gyb'.indexOf(b.s) || (b.bp || 0) - (a.bp || 0) || cmp(a.t, b.t); });
     $('tvStrip').innerHTML = strip.map(function (r) { return '<i class="' + r.s + '" data-t="' + esc(r.t) + '"></i>'; }).join('');
+    /* C-71 K36: sonuç vermeyen hazır liste soluk, aria-disabled ve sıranın sonunda (telefonda ilk tam görünen çip boş liste açmaz). */
+    var zero = [];
     PRESETS.forEach(function (p) {
       var f = withPreset(p.id), n = ROWS.filter(function (r) { return pass(f, r); }).length;
-      var a = document.querySelector('.tv-chip[data-id="' + p.id + '"] .cn');
-      if (a) a.textContent = n;
+      var a = document.querySelector('.tv-chip[data-id="' + p.id + '"]');
+      if (!a) return;
+      a.querySelector('.cn').textContent = n;
+      if (n) a.removeAttribute('aria-disabled'); else { a.setAttribute('aria-disabled', 'true'); zero.push(a); }
     });
+    zero.forEach(function (a) { a.parentElement.appendChild(a); });
   }
   function strip(rows) {
     var any = nAct(st.f) > 0, on = {};
@@ -362,7 +371,7 @@
   function act(a, e) {
     var d = a.dataset, f = st.f;
     switch (d.act) {
-      case 'preset': if (e) e.preventDefault(); st.f = (f.preset === d.id) ? blank() : withPreset(d.id); resetView(); break;
+      case 'preset': if (e) e.preventDefault(); if (a.getAttribute('aria-disabled') === 'true' && f.preset !== d.id) return; st.f = (f.preset === d.id) ? blank() : withPreset(d.id); resetView(); break;
       case 'panel': if (st.panel) closePanel(); else openPanel(); return;
       case 'close': closePanel(); return;
       case 'set':
