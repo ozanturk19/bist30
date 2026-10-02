@@ -15,6 +15,7 @@ Kilitler:
 app.py py3.9'da içe aktarılamaz: jinja2 ile doğrudan render; veri D-42 fikstürü
 (tests/fixtures/heatmap_20260923.json) → heatmap.build + heatmap.layout (route ile aynı yardımcılar).
 """
+import html
 import json
 import os
 import re
@@ -145,7 +146,7 @@ def _day(**over):
 def test_day_page_head_meta_and_jsonld():
     out = _day()
     h1 = re.findall(r"<h1[^>]*>(.*?)</h1>", out, re.S)
-    assert len(h1) == 1 and re.sub(r"<[^>]+>|\s+", " ", h1[0]).split() == "BIST100 ısı haritası · 23 Eylül 2026".split()
+    assert len(h1) == 1 and re.sub(r"<[^>]+>|\s+", " ", html.unescape(h1[0])).split() == "BIST100 ısı haritası · 23 Eylül 2026".split()
     assert '<link rel="canonical" href="%s">' % PERMA in out
     img = "https://borsapusula.com/harita/%s.png" % DAY
     for k, v in (("og:image", img), ("og:image:width", "1200"), ("og:image:height", "630"), ("og:url", PERMA)):
