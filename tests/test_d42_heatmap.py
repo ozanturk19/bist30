@@ -189,11 +189,12 @@ def test_payload_schema_and_size():
     assert set(snap["counts"]) == {"up", "down", "flat"}
     assert set(snap["xu100"]) == {"close", "ch"} and set(snap["xu100"]["ch"]) == {"d1", "w1", "m1", "ytd", "y1"}
     for r in snap["rows"]:
-        assert list(r) == ["t", "n", "g", "sub", "mcap", "p", "ch", "bp", "tr", "days", "lim", "stale"]
+        assert list(r) == ["t", "n", "g", "sub", "mcap", "p", "ch", "bp", "tr", "days", "sd", "lim", "stale"]
         assert list(r["ch"]) == ["d1", "w1", "m1", "ytd", "y1"]
         assert isinstance(r["mcap"], float) and r["mcap"] > 0
         assert r["tr"] in ("guclu", "yatay", "bozuk", None) and r["lim"] in ("tavan", "taban", None)
         assert r["days"] is None or isinstance(r["days"], int)
+        assert r["sd"] is None or isinstance(r["sd"], str)
         assert r["bp"] is None or 0 <= r["bp"] <= 100
         assert r["g"] and r["n"]
     aefes = next(r for r in snap["rows"] if r["t"] == "AEFES")
@@ -212,6 +213,16 @@ def test_payload_schema_and_size():
     text = json.dumps(snap, ensure_ascii=False)
     for bad in ("bugün", "dün", "Ücretsiz", "TP1", "hedef"):
         assert bad not in text
+
+
+def test_sd_field_from_row_signal_date():
+    """CPO-1812: kutu `sd` = stock sözlüğündeki signal_date (GG.AA.YYYY), /api/tarama ile aynı kaynak."""
+    rows = {t: dict(r, bar_date=FX["asof"]) for t, r in FX["rows"].items()}
+    rows["AEFES"]["signal_date"] = "04.09.2026"
+    snap = _snap(rows=rows)
+    r = {x["t"]: x for x in snap["rows"]}
+    assert r["AEFES"]["sd"] == "04.09.2026"
+    assert r["GARAN"]["sd"] is None                 # fikstürde signal_date yok
 
 
 def test_quality_gate_blocks_thin_snapshot():

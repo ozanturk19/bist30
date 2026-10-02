@@ -184,7 +184,7 @@ def mcap_tl(close, shares, reported):
 
 def build(asof_iso, members, official, rows, fund, scores, sectors, names, xu100_series, updated_at):
     """Sözleşme sözlüğü. official = resmi_kapanis arşiv kaydı; rows = {t: analiz satırı
-    (bar_date, period_ret, signal, signal_bars, price)}; fund = {t: temel veri};
+    (bar_date, period_ret, signal, signal_bars, signal_date, price)}; fund = {t: temel veri};
     scores = {t: BorsaPusula skoru}; sectors = {t: KAP alt sektörü}; names = {t: ad}."""
     offs = (official or {}).get("stocks") or {}
     out, notes = [], []
@@ -213,6 +213,7 @@ def build(asof_iso, members, official, rows, fund, scores, sectors, names, xu100
             "mcap": round(m / 1e9, 2) if m else None, "p": round(p, 2), "ch": ch,
             "bp": scores.get(t), "tr": TREND.get(row.get("signal")),
             "days": int(sb) if isinstance(sb, (int, float)) else None,
+            "sd": row.get("signal_date"),  # CPO-1812: kart "X'ten beri" metni bpSinceText(sd) ile
             "lim": limit_flag(p, prev) if off else None, "stale": bool(stale),
         })
     out.sort(key=lambda r: (-(r["mcap"] or 0), r["t"]))
