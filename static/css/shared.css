@@ -119,8 +119,8 @@ textarea {
    Onun yerine SARMALAYAN `label` kapsama alındı (`label[for]` değil `label`:
    /'ın KVKK onayı `<label class="da-sub-kvkk"><input class="da-check">` ile
    SARMAL kurulmuş, `for` yok — ölçümle çıktı, varsayımla değil).
-   GECİKME NOTU: `transition:opacity` taşıyan 3 kontrolde (.bp-fab-up .2s,
-   /unsubscribe .box .btn .15s, /offline .15s) sönme animasyonlu olur. Bu
+   GECİKME NOTU: `transition:opacity` taşıyan 2 kontrolde (/unsubscribe
+   .box .btn .15s, /offline .15s) sönme animasyonlu olur. Bu
    geçişler bu katmandan ÖNCE de vardı, yeni regresyon değil.
    POZİTİF KONTROL (gerçek fare, canlı): `.da-chip` mousedown anında
    `matches(':active')=true`, computed `opacity` 1 → **0.72**. */
@@ -284,6 +284,16 @@ html {
   .mobile-bottom-nav .mbn-icon svg { width: 19px; height: 19px; }
   .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; }
   html body { padding-bottom: calc(52px + 6px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+
+/* ── C-71 K38 (02.10): KISA DİKEY EKRANDA MAKRO ŞERİT YAPIŞMAZ ─────────────
+   320×640'ta /hisse'de üst yapışkanlar 137 px + alt gezinme 73 px = ekranın
+   %33'ü. Yatay kuralla (K-AY) aynı çare, yalnız makro şerit için: şerit sayfa
+   başında durur, kaydırınca yukarı çıkar; header ekranın tepesine yapışır.
+   `relative` (static değil): ⏸ düğmesinin kapsayan bloğu korunur. */
+@media (orientation: portrait) and (max-height: 700px) {
+  :root { --bp-chrome-macro: 0px; }
+  #macroBar, .macro-bar { position: relative !important; }
 }
 
 /* ── Makro şerit: TEK KAYNAK (C-15) ──────────────────────────────────────────

@@ -800,26 +800,8 @@
   /* C-19: Ozet dibindeki tek <details> (Hap Bilgi / SSS / Metodoloji). */
   .hx-more > .bp-detail-toggle-body > *{ margin-bottom:14px; }
 
-    /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
-    .bp-fab-up {
-      position: fixed; bottom: 24px; right: 16px; z-index: var(--bp-z-fab-up);
-      width: 44px; height: 44px;
-      background: rgba(var(--bp-al-rgb),0.92);
-      color: var(--bp-bg); border: none; border-radius: 50%;
-      cursor: pointer; box-shadow: var(--bp-shadow-sm);
-      display: none; align-items: center; justify-content: center;
-      transition: opacity 0.2s, transform 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bp-fab-up.visible { display: flex; }
-    .bp-fab-up:active { transform: scale(0.92); }
-    .bp-fab-up svg { width: 22px; height: 22px; stroke-width: 2.4; }
-    /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
-       sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
-    @media (max-width: 900px) {
-      .bp-fab-up { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
-    }
-  
+    /* C-71 K38 (02.10): "Üste çık" düğmesi kaldırıldı — telefonda değer sütununu örtüyordu;
+       üste dönüş alt gezinme ve tarayıcının kendi hareketiyle zaten var (Maksimum Sadelik). */
 
   /* ══ C-20 (25.09): Ozet hero v2 + "3 Soruda" (C-M1 v2 taslagi, O16a=B) ═══════════════════
      Renkler yalniz token; yesil/kirmizi yalniz fiyat degisiminde; BP halkasi yesil (kimlik),

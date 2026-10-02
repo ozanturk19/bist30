@@ -2028,23 +2028,6 @@ window._bpApplyTooltips = _applyTooltipVisibility;
   var segments = document.querySelectorAll('.da-tabs [role="tab"]');
   if (!segments.length) return;
 
-  // SPEC-017 v2 Faz A P1-5: FAB sadece scrollY > 2×viewport (önceki 400px abluka yarattı)
-  var fab = document.getElementById('bpFabUp');
-  if (fab) {
-    fab.addEventListener('click', function(){
-      window.bpScrollTop();
-    });
-    var fabT;
-    window.addEventListener('scroll', function(){
-      if (fabT) cancelAnimationFrame(fabT);
-      fabT = requestAnimationFrame(function(){
-        var threshold = Math.max(600, window.innerHeight * 2);
-        if (window.scrollY > threshold) fab.classList.add('visible');
-        else fab.classList.remove('visible');
-      });
-    }, {passive: true});
-  }
-
   /* Sekme -> panel gorunurlugu TEK kanondan yonetilir: her panelin kendi
      `data-tab-content` niteligi (asagida). K-CP (22.09): burada ayrica bir
      ALL_PANELS/SHOW_FOR_TAB ID listesi vardi -- ayni is icin IKINCI bir kanon.
