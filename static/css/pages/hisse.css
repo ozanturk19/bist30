@@ -218,7 +218,7 @@
   .week52-cap {
     position: absolute;
     top: 13px;
-    font-family: var(--bp-font-mono);
+    font-variant-numeric: tabular-nums;
     font-size: var(--bp-text-xs);
     font-weight: 700;
     color: var(--bp-text);
@@ -245,7 +245,7 @@
     color: var(--bp-text3);
   }
   .week52-endval {
-    font-family: var(--bp-font-mono);
+    font-variant-numeric: tabular-nums;
     font-size: var(--bp-text-xs); font-weight: 700;
     letter-spacing: -0.2px;
   }
@@ -751,7 +751,7 @@
   .qf-row { display: flex; flex-direction: column; gap: 3px; }
   .qf-row dt { font-size: var(--bp-text-xs); color: var(--bp-text3); }
   .qf-row dd {
-    font-family: var(--bp-font-mono);
+    font-variant-numeric: tabular-nums;
     font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text);
     margin: 0; letter-spacing: -0.2px;
   }
@@ -1093,7 +1093,7 @@
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .bp-spark-val {
-      font-family: var(--bp-font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text);
       letter-spacing: -0.2px;
     }
