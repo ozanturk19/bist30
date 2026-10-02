@@ -344,7 +344,7 @@ def test_build_score_entry_both_flag_states(bp_flag, stock_pool):
         assert (tb["borsapusula_skoru"], tb["partial"]) == (58, False)   # 33,6 + 24,8 = 58,4
         assert (ya["borsapusula_skoru"], ya["partial"]) == (41, True)    # Yatay: BP = Temel
         assert list(tb) == ENTRY_KEYS + ["temel_analiz_aciklamasi"]      # kayıt biçimi eskisiyle aynı
-    assert tb["temel_analiz_aciklamasi"].endswith(" Yatırım tavsiyesi değildir.")
+    assert tb["temel_analiz_aciklamasi"] and not tb["temel_analiz_aciklamasi"].endswith(" Yatırım tavsiyesi değildir.")
 
 
 def test_canli_check_flags_bad_and_legacy_entries(stock_pool, tmp_path):

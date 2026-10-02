@@ -6612,7 +6612,7 @@ def get_company_summary(ticker):
     faaliyet = (k.get("faaliyet_konusu") or "").strip()
     if not faaliyet:
         return None
-    return f"{k.get('kisa_ad') or STOCK_NAMES.get(ticker, ticker)} — KAP faaliyet konusu: {faaliyet}"
+    return f"{k.get('kisa_ad') or STOCK_NAMES.get(ticker, ticker)} — Faaliyet konusu: {faaliyet}"
 
 
 def _news_ttl_for(ticker: str) -> int:
@@ -7411,7 +7411,7 @@ def get_ai_signal_explanation(ticker, signal_data):
 
     # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
     # AI tab ASLA boş/takılı kalmaz.
-    fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"] + " Yatırım tavsiyesi değildir."
+    fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"]
     return fallback_text, "algorithmic"
 
 
@@ -8316,7 +8316,7 @@ def stock_page(ticker):
         # da hedef dili olduğu için (D-39, kalıcı kural) cevaptan çıktı.
         seo_faq.append({
             "q": f"{ticker} hissesinin teknik görünümü nasıl?",
-            "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
+            "a": "Teknik göstergeler: " + ", ".join(_parts) + ".",
         })
     if company_summary:
         seo_faq.append({

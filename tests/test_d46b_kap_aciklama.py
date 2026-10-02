@@ -40,7 +40,7 @@ def test_names_from_kap_and_summary_without_gemini():
             assert app.STOCK_NAMES[t] == k["kisa_ad"], t
     assert app.STOCK_NAMES["SMART"] == "Smartiks Yazılım"
     enery = app.get_company_summary("ENERY")
-    assert enery and "— KAP faaliyet konusu:" in enery and "gaz" in enery.lower()
+    assert enery and "— Faaliyet konusu:" in enery and "gaz" in enery.lower()
     assert app.get_company_summary("YOKBOYLEBIR") is None
     assert not hasattr(app, "_generate_company_summary")
     nof = [t for t, k in KAP.items() if not k.get("faaliyet_konusu")]

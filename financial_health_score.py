@@ -428,5 +428,5 @@ def build_score_entry(fdata, sector, stocks_with_fundamentals, teknik_skor, stat
     # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
     entry["temel_analiz_aciklamasi"] = build_rationale(
         entry["categories"], entry["data_completeness"], entry["categories_na"]
-    ) + " Yatırım tavsiyesi değildir."
+    )
     return entry
