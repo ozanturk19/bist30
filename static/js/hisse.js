@@ -1367,7 +1367,8 @@ function hxFillFund(f, divRow) {
   }
   const note = document.getElementById('q2Note');
   if (note) {
-    const basis = k && k.basis === 'yabanci_para' ? 'Şirketin işlevsel para birimi döviz; oranlar TL\'ye çevrilmiş finansallardan.' : null;
+    const _cn = { USD: 'dolar', EUR: 'euro', GBP: 'sterlin' }[f.financial_currency] || 'döviz';   /* C-74 K6 */
+    const basis = k && k.basis === 'yabanci_para' ? 'Şirket rakamlarını ' + _cn + ' ile açıklıyor; burada TL\'ye çevrilmiş hali var.' : null;
     const noMed = V && rows.length && !V.hasMed ? (V.v2 ? 'Sektörde karşılaştırma için yeterli şirket yok.' : 'Sektörde karşılaştırma için yeterli şirket yok; bu yüzden ucuz ya da pahalı denmiyor.') : (V && V.wide ? 'Sektörde yeterli şirket olmadığı için piyasa geneline göre.' : null);
     const cur = f.financial_currency || 'TRY';
     const txt = basis || noMed || (cur !== 'TRY' && !rows.length ? 'Şirket finansallarını ' + cur + ' cinsinden raporluyor; F/K ve PD/DD bu yüzden hesaplanmıyor.' : null);
@@ -1781,7 +1782,7 @@ function _tvGrowth(k) {
   }
   const notes = ['Her yılın değişimi, şirketin o yılki raporundaki kendi karşılaştırmasından.'];
   if ((k.dusen_yillar || []).length) notes.push(Math.max.apply(null, k.dusen_yillar) + ' ve öncesi raporlar enflasyon düzeltmesi içermediği için grafikte yok.');
-  if (qs.length) notes.push('Dördüncü çeyrek ayrıca açıklanmıyor.');
+  if (qs.length) notes.push('Şirketler 4. çeyreği ayrıca açıklamaz; yıllık rapordan hesaplanır.');
   const n = _tvEl('tvBuyumeN'); n.textContent = notes.join(' '); n.hidden = false;
   _tvGrowthDraw();
   return true;
