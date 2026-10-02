@@ -175,7 +175,7 @@
   }
   .term-num {
     display: inline-block; margin-left: 5px; padding: 1px 6px;
-    font-family: var(--bp-font-mono); font-size: var(--bp-text-2xs); font-weight: 500;
+    font-variant-numeric: tabular-nums; font-size: var(--bp-text-2xs); font-weight: 500;
     color: var(--bp-text3); background: rgba(var(--bp-brand-rgb), .10);
     border-radius: var(--bp-radius-sm); vertical-align: middle; letter-spacing: .2px;
   }

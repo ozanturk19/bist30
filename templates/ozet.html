@@ -34,17 +34,6 @@
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% include '_header.html' %}
 
-<div style="max-width:1100px;margin:0 auto;padding:14px 24px 0;display:flex;justify-content:flex-end">
-  <div style="display:flex;align-items:center;gap:8px">
-    <select id="dateSelector" class="da-select"
-      aria-label="Geçmiş özet tarihi seç"
-      data-current="{{ historical_date if historical_date else '' }}"
-      style="background-color:var(--bp-surface2);border:1px solid var(--bp-field-border);color:var(--bp-text3);padding:9px 28px 9px 11px;border-radius:var(--bp-radius);cursor:pointer"
-      onchange="goToDate(this.value)">
-      <option value="">📅 Geçmiş Tarih Seç</option>
-    </select>
-  </div>
-</div>
 <script>
 // Load available snapshot dates for the selector
 fetch('/api/ozet/snapshots').then(r=>r.json()).then(d=>{
@@ -70,7 +59,16 @@ function goToDate(date) {
 
 {% include '_stale_banner.html' %}
 
+<div class="oz-head">
 {% call bpf.pagehead('Kapanış Özeti') %}{% if not loading and stocks %}{{ bpf.day_month(today_str) }} kapanışı: <span class="da-num">{{ al_list|length }}</span> Güçlü Trend, <span class="da-num">{{ bekle_list|length }}</span> Yatay, <span class="da-num">{{ sat_list|length }}</span> Trend Bozuldu.{% endif %}{% endcall %}
+  {#- C-70 K22: seçici başlıkla aynı satırda, sağ kenarı H1'in sağ kenarı -#}
+  <select id="dateSelector" class="da-select oz-date"
+    aria-label="Geçmiş özet tarihi seç"
+    data-current="{{ historical_date if historical_date else '' }}"
+    onchange="goToDate(this.value)">
+    <option value="">Geçmiş tarih seç</option>
+  </select>
+</div>
 
 {% if loading %}
 <div style="text-align:center;padding:60px;color:var(--bp-text3)">
@@ -147,6 +145,7 @@ function goToDate(date) {
 {% if total > 0 %}
 <div class="section-box da-panel" style="margin-bottom:20px">
   <h2 class="section-title"><span aria-hidden="true">🏭</span> Sektör Sinyal Nabzı</h2>
+  <p class="sr-note">Çubuk, sektördeki hisselerden Güçlü Trend'de olanların payını gösterir.</p>
   <div class="sector-nabzi" id="sectorNabzi">
     {% for sector_name, sector_stocks in stocks|groupby('sector') %}
     {% set ns = namespace(al=0) %}
@@ -157,11 +156,11 @@ function goToDate(date) {
       <div class="sr-name">{{ sector_name }}</div>
       <div class="sr-bar-wrap">
         <div class="sr-bar">
-          <div class="sr-fill" style="width:{{ al_pct }}%;background:{% if al_pct >= 50 %}var(--bp-al){% elif al_pct >= 30 %}var(--bp-gold){% else %}var(--bp-sat){% endif %}"></div>
+          <div class="sr-fill" style="width:{{ al_pct }}%"></div>
         </div>
       </div>
       <div class="sr-stats">
-        <span class="sr-pct {% if al_pct >= 50 %}sr-al-c{% elif al_pct >= 30 %}sr-mid-c{% else %}sr-low-c{% endif %}">%{{ al_pct }}</span>
+        <span class="sr-pct{% if al_pct == 0 %} sr-zero{% endif %}">%{{ al_pct }}</span>
         <span class="sr-cnt">{{ ns.al }}/{{ stotal }}</span>
       </div>
     </div>
@@ -183,7 +182,6 @@ function goToDate(date) {
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
         {{ s.signal|signal_label }}
       </div>
-      <div class="sc-new"><span aria-hidden="true">⚡</span> {{ today_str }} kapanışında oluştu</div>
     </a>
     {% endfor %}
   </div>
@@ -209,17 +207,8 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
-      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺
-          {# K-CC: `ret >= 0` giris fiyatindan HIC uzaklasmamis pozisyonu YESIL +
-               "+0,0%" yapiyordu (22.09 canli: 1 AL karti). Jinja yon kanonu. #}
-          <span class="sc-ret {{ bpf.dir_class(ret, 1, 'sc-ret-pos,sc-ret-neg,sc-ret-neu') }}">{{ bpf.pct_text(ret, 1) }}</span>
-        </div>
-      {% elif s.signal_price %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺</div>
-      {% endif %}
+      <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
+      {#- C-74 K11 (02.10, O29): "Sinyal fiyatı + getiri" satiri kalkti; durum baslangic tarihi yeter. -#}
     </a>
     {% endfor %}
   </div>
@@ -245,18 +234,8 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
-      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺
-          {# CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
-               degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
-               CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) #}
-          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ bpf.pct_text(ret, 1) }}</span>
-        </div>
-      {% elif s.signal_price %}
-        <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }} ₺</div>
-      {% endif %}
+      <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
+      {#- C-74 K11 (02.10, O29): "Sinyal fiyatı + getiri" satiri kalkti; durum baslangic tarihi yeter. -#}
     </a>
     {% endfor %}
   </div>

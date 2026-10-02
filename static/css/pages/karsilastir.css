@@ -228,47 +228,6 @@
     padding: 10px 16px !important; text-align: left !important;
     border-top: 1px solid rgba(var(--bp-accent-cyan-rgb),.25);
   }
-  .score-row td {
-    background: rgba(var(--bp-accent-cyan-rgb),.04);
-    padding: 16px 12px !important;
-  }
-  .score-row th.row-label {
-    background: rgba(var(--bp-accent-cyan-rgb),.06) !important;
-    color: var(--bp-text2);
-    padding: 16px 12px !important;
-  }
-  .score-cell { display: flex; flex-direction: column; gap: 6px; align-items: center; }
-  .score-cell.winner {
-    border: 2px solid var(--bp-gold);
-    border-radius:var(--bp-radius-md);
-    padding: 8px 4px;
-    background: rgba(var(--bp-gold-rgb),.06);
-    box-shadow: 0 0 14px rgba(var(--bp-gold-rgb),.18);
-  }
-  .winner-badge {
-    font-size: var(--bp-text-xs);
-    font-weight: 700;
-    color: var(--bp-gold);
-    letter-spacing: .02em;
-  }
-  .score-big {
-    font-size: var(--bp-text-22); font-weight: 800; font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-  .score-big small { font-size: var(--bp-text-sm); color: var(--bp-text3); font-weight: 500; }
-  .score-bar-wrap {
-    width: 110px; height: 6px; border-radius:var(--bp-radius-sm);
-    background: rgba(var(--bp-text3-rgb),.2); overflow: hidden;
-  }
-  .score-bar-fill {
-    height: 100%; border-radius:var(--bp-radius-sm);
-    background: linear-gradient(90deg, var(--bp-brand), var(--bp-al));
-    transition: width .4s ease;
-  }
-  .score-verdict {
-    font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase;
-    letter-spacing: .5px; margin-top: 2px;
-  }
 
   .help-icon {
     display: inline-flex; align-items: center; justify-content: center;
@@ -301,10 +260,6 @@
     border-color: var(--bp-bkl-bd);
     border-radius: var(--bp-radius-lg); padding: 14px 16px;
   }
-  .cmp-mcard-winner {
-    border: 2px solid var(--bp-gold);
-    box-shadow: 0 0 14px rgba(var(--bp-gold-rgb),.18);
-  }
   .cmp-mcard-notfound { opacity: .6; }
   .cmp-mtop {
     display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
@@ -313,8 +268,6 @@
   .cmp-mticker-link { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
   .cmp-mticker { font-size: var(--bp-text-xl); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .cmp-mname { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
-  .cmp-mscore { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0 14px; }
-  .cmp-mscore-lbl { font-size: var(--bp-text-xs); color: var(--bp-text3); text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
   .cmp-msep {
     font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
     color: var(--bp-accent-cyan); background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
@@ -339,6 +292,5 @@
     .ac-wrap { min-width: 0; }
     .ticker-input { width: 100%; }
     .ac-dropdown { min-width: 200px; }
-    .score-bar-wrap { width: 80px; }
   }
 

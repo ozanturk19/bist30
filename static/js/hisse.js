@@ -807,11 +807,9 @@ function renderSummary(s, signalData) {
     const hpRvolRow = document.getElementById('hpRvolRow');
     const hpRvolVal = document.getElementById('hpRvolVal');
     if (hpRvolRow && hpRvolVal && rvolVal != null) {
-      const cls = isPremium ? 'ok' : (rvolVal >= 1.0 ? 'weak' : 'bad');
-      hpRvolVal.className = 'hp-row-val ' + cls;
-      hpRvolVal.innerHTML = `${rvolVal.toFixed(2).replace('.', ',')}×` +
-        /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
-        (isPremium ? ' <span class="hp-tag premium" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ Hacim Onaylı</span>' : '');
+      /* C-74 K10 (02.10): renk (ok/weak/bad) ve "Hacim Onaylı" rozeti yargiydi -- yalniz sayi. */
+      hpRvolVal.className = 'hp-row-val';
+      hpRvolVal.textContent = `${rvolVal.toFixed(2).replace('.', ',')}×`;
       hpRvolRow.style.display = '';
     }
 
@@ -819,51 +817,18 @@ function renderSummary(s, signalData) {
     const hpSvolRow = document.getElementById('hpSvolRow');
     const hpSvolVal = document.getElementById('hpSvolVal');
     if (hpSvolRow && hpSvolVal && vr != null) {
-      const isStrongBreakout = vr >= 1.7;
-      const cls = isStrongBreakout ? 'ok' : (vr >= 1.2 ? 'weak' : 'bad');
-      hpSvolVal.className = 'hp-row-val ' + cls;
-      const tag = isStrongBreakout
-        ? ' <span class="hp-tag confirmed" data-tip="Sinyal günü hacim ortalamayı belirgin geçti" tabindex="0">✓ TEYİTLİ</span>'
-        : '';
-      hpSvolVal.innerHTML = `${vr.toFixed(2).replace('.', ',')}×${tag}`;
+      hpSvolVal.className = 'hp-row-val';
+      hpSvolVal.textContent = `${vr.toFixed(2).replace('.', ',')}×`;
       hpSvolRow.style.display = '';
     }
 
-    /* Yorum: ikisinin kombinasyonu */
+    /* C-74 K10 (02.10): "zayif/guclu/kivilcim/birikim" yorumlari yerine betim.
+       `vr == null` bilinmiyor demektir (K-BT), cumle kurulmaz. */
     const hpSummary = document.getElementById('hpSummary');
     if (hpSummary) {
-      let txt = '';
-      /* K-BT ek (22.09): `vr == null` BILINMIYOR demektir, "dusuk" DEMEZ.
-         `signal_vol_ratio` sinyal GUNUNUN hacmidir; aktif sinyali olmayan
-         hissede hic hesaplanmaz -- canli olcum 22.09: 138/217 hissede NULL.
-         Eski dal `(vr == null || vr < 1.0)` ile ikisini AYNI kefeye koyuyordu
-         ve **42 hissede** "sinyal gunu hacmi DUSUK" diye basiyordu; hemen
-         ustundeki satir ise ayni anda "Sinyal gunu hacim: —" (bilinmiyor)
-         diyordu. Bu cumle K-BT fix'ine kadar panelin silinmesi yuzunden
-         GORUNMUYORDU; panel gorunur olunca kapatildi. (K-V kanonu: bos bir
-         deger bir OLCUM degildir.) */
-      if (vr == null) {
-        txt = rvolVal == null ? ''
-          : rvolVal >= 1.20
-            ? 'RVOL güçlü. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
-            : rvolVal >= 1.0
-              ? 'RVOL ortalama seviyede. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
-              : 'RVOL zayıf. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.';
-      } else if (isPremium && vr >= 1.7) {
-        txt = 'İkisi de güçlü — Hacim hem yapısal hem sinyal günü güçlü.';
-      } else if (isPremium && vr < 1.7) {
-        txt = 'RVOL güçlü, sinyal günü sessiz — yavaş kıvılcımlanan trend.';
-      } else if (!isPremium && vr >= 1.7) {
-        txt = 'Sinyal günü güçlü patladı ama RVOL henüz yükselmemiş.';
-      } else if (rvolVal != null && rvolVal >= 1.20 && vr < 1.0) {
-        txt = 'RVOL güçlü; sinyal günü hacmi düşük — kademeli birikim.';
-      } else if (rvolVal != null && rvolVal < 1.0 && vr != null && vr >= 1.2) {
-        txt = 'Sinyal günü orta hacim ama RVOL düşük.';
-      } else if (rvolVal != null && rvolVal >= 1.0 && vr != null && vr >= 1.0) {
-        txt = 'Hacim profili ortalama seviyede — net üstünlük yok.';
-      } else if (vr != null && rvolVal != null) {
-        txt = 'RVOL ve sinyal günü hacmi ikisi de zayıf.';
-      }
+      const x = (v) => v.toFixed(2).replace('.', ',');
+      let txt = rvolVal != null ? `Son 5 günün hacmi 20 günlük ortalamanın ${x(rvolVal)} katı.` : '';
+      if (vr != null) txt += (txt ? ' ' : '') + `Sinyal günündeki hacim ortalamanın ${x(vr)} katıydı.`;
       hpSummary.textContent = txt;
     }
   })();
@@ -989,20 +954,10 @@ function renderSummary(s, signalData) {
        46,5 · MGROS 47,1 · MAVI 51,0), yani "trend bozuldu" denen hissede
        "İdeal Giriş Penceresi" yaziyordu. Tek kanon: bp-format.js
        `bpRsiZoneText` (/karsilastir ayni fonksiyonu kullanir). */
-    const zone = bpRsiZoneText(signalData.rsi_zone, s.signal);
-    // ind-bull yeşil (Aşırı Satım, Sağlıklı Momentum), ind-bear kırmızı (Aşırı Alım), ind-neutral gri
-    // P0-2 (CPO-DEV2-031/033): sağlıklı bölge yeşili sadece yükseliş sinyalinde — SAT'ta
-    // sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
-    const rIdeal = s.signal === 'AL' && rsi >= 45 && rsi < 60;
-    const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' :
-                   (rsi < 30 || rIdeal) ? 'ind-badge ind-bull' :
-                   'ind-badge ind-neutral';
-    const rsiIcon = rsi >= 80 ? '🔴' : rsi >= 70 ? '⚠️' :
-                    rIdeal ? '✅' :
-                    rsi < 30 ? '🔵' : '';
-    const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
-    indHtml += `<span class="${rsiCls}">RSI ${bpIndNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi. 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde Sağlıklı Momentum — diğer sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım." aria-label="RSI açıklamasını göster">?</button>`;
+    /* C-74 K10 (02.10): bolge adi (Dip Toparlanmasi, Asiri Alim, Dikkatli...) ve
+       yesil/kirmizi rozet yone beklenti yukluyordu -- /karsilastir gibi yalniz sayi. */
+    indHtml += `<span class="ind-badge ind-neutral">RSI ${bpIndNum(rsi)}</span>` +
+      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi; son günlerdeki yükseliş ve düşüşlerin büyüklüğünü karşılaştırır." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
@@ -1024,7 +979,7 @@ function renderSummary(s, signalData) {
   if (signalData && signalData.vol_ratio != null) {
     const vr = signalData.vol_ratio;
     if (vr >= 1.5) {
-      const vrTip = 'Günlük Hacim Oranı — son seans hacmi / 20 günlük ortalama. Bu sayfadaki RVOL (5 günlük ort. / 20 günlük ort.) FARKLI bir sayıdır.';
+      const vrTip = 'Günlük Hacim Oranı — son seans hacmi / 20 günlük ortalama. Hacim Profili’ndeki 5 günlük oran farklı bir sayıdır.';
       indHtml += `<span class="ind-badge ind-volume" data-tip="${vrTip}" tabindex="0">Hacim Oranı ${_trNum(vr)}×<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
     }
   }
@@ -1034,102 +989,6 @@ function renderSummary(s, signalData) {
   window._bpApplyTooltips && window._bpApplyTooltips();
 
   /* C-20: AI sekmesiyle birlikte cakisma notu (#sigConflictNote) kalkti. */
-}
-
-/* ── Sinyal mini istatistik satırı ─────────────────── */
-function renderMiniStats(history) {
-  const el = document.getElementById('sigMiniStats');
-  if (!el) return;
-  const alCount  = history.filter(h => h.signal === 'AL').length;
-  const satCount = history.filter(h => h.signal === 'SAT').length;
-  let avgStr = '—';
-  const dates = history.map(h => { const p = bpParseTrDate(h.date); return p ? new Date(Date.UTC(p.y, p.m - 1, p.d)) : null; }).filter(d => d && !isNaN(d)).sort((a,b) => a-b);
-  if (dates.length > 1) {
-    const totalDays = (dates[dates.length-1] - dates[0]) / 86400000;
-    avgStr = Math.round(totalDays / (dates.length - 1)) + ' gün';
-  }
-  el.innerHTML = `
-    <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-brand)">${history.length}</div>
-      <div class="sig-stat-lbl">📊 Toplam Sinyal</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val bp-al-text">${alCount}</div>
-      <div class="sig-stat-lbl">▲ Güçlü Trend</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val bp-sat-text">${satCount}</div>
-      <div class="sig-stat-lbl">▼ Trend Bozuldu</div>
-    </div>
-    <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-gold)">${avgStr}</div>
-      <div class="sig-stat-lbl">⏱ Ort. Sinyal Aralığı</div>
-    </div>`;
-}
-
-/* ── Sinyal geçmişi ─────────────────────────────────── */
-function renderHistory(history, currentPrice, liveSignal) {
-  const tbody = document.getElementById('historyBody');
-  if (!history || history.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="da-empty">Geçmiş bulunamadı</td></tr>';
-    renderMiniStats([]);
-    return;
-  }
-  renderMiniStats(history);
-  const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // Getiri hesabı:
-  //   history[0] = en yeni (aktif) sinyal → anlık fiyatla karşılaştır
-  //   history[idx] için kapanış fiyatı = history[idx-1].price (onu kapatan daha yeni sinyal)
-  // CPO-DEV2-080(2): SAT sinyalleri long-only üründe kazanç/kayıp gibi yeşil/
-  // kırmızı gösterilmez ([[project_long_only_ihlali_sat_dali]], aynı desen
-  // CPO-DEV2-074#2'de sinyal_performans.html'e uygulanmıştı) — gerçek (ters
-  // çevrilmemiş) fiyat hareketi nötr gri renkte gösterilir, gizlenmez.
-  const _SAT_TIP = 'Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
-  tbody.innerHTML = history.map((h, idx) => {
-    const icon = h.signal === 'AL' ? '▲' : '▼';
-    let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
-
-    // CPO-1637 Seçenek 2: backend artık BEKLE'ye dönüşü `closed_at_price`/
-    // `closed_at_date` ile bu kaydın üzerinde işaretliyor — varsa bu GERÇEK
-    // kapanış, idx'ten bağımsız olarak "aktif" değil "(kapandı)" olarak
-    // gösterilir (idx===0 olsa bile artık canlı fiyatla karıştırılmaz).
-    const isReallyActive = (idx === 0 && h.signal === liveSignal && h.closed_at_price == null);
-    let exitPrice = null, activeTag = '';
-    if (isReallyActive) {
-      exitPrice = parseFloat(currentPrice) || 0;
-      activeTag = ' <span class="hist-active">(aktif)</span>';
-    } else if (h.closed_at_price != null) {
-      exitPrice = h.closed_at_price;
-    } else if (idx > 0) {
-      // Fallback: closed_at yok (doğrudan karşı yöne flip, BEKLE arada değil)
-      // — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
-      const exitH = history[idx - 1];
-      exitPrice = exitH ? exitH.price : null;
-    }
-
-    if (exitPrice != null && h.price) {
-      const ret  = ((exitPrice - h.price) / h.price * 100);
-      if (h.signal === 'SAT') {
-        retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${bpFormatPct(ret, 1)}${activeTag}</td>`;
-      } else {
-        const isGain = ret > 0;
-        const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-        retHtml = `<td style="color:${clr};font-weight:600;font-size:var(--bp-text-sm)">${bpFormatPct(ret, 1)}${activeTag}</td>`;
-      }
-    } else if (idx === 0) {
-      // Hâlâ aktif olmayan (liveSignal'e uymuyor) ama kapanış fiyatı da yok
-      // — beklenmeyen edge case, uydurmaktansa boş bırakılıyor.
-      retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">(kapandı)</td>';
-    }
-
-    return `<tr>
-      <td>${h.date}</td>
-      <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabel(h.signal)}</span></td>
-      <td>${fmt(h.price)}&nbsp;₺</td>
-      ${retHtml}
-    </tr>`;
-  }).join('');
 }
 
 /* ── Veri yükle — chart + /api/data paralel ─────────── */
@@ -1156,12 +1015,8 @@ function _showChartStatus(msg, withRetryBtn) {
   // C-20: baslikta durum hapi (#hpSignal) yok; nihai hatada yalniz gecmis/gostergeler isaretlenir.
   if (withRetryBtn) {
     if (window.showToast) showToast(msg, 'error');
-    const historyBody = document.getElementById('historyBody');
-    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div></td></tr>';
     const indRow = document.getElementById('indRow');
     if (indRow) indRow.innerHTML = '<span class="ind-badge ind-neutral">Veri yüklenemedi</span>';
-    const sigMiniStats = document.getElementById('sigMiniStats');
-    if (sigMiniStats) sigMiniStats.innerHTML = '<div class="da-empty" style="grid-column:1/-1">Veri yüklenemedi</div>';
   }
 }
 
@@ -1223,7 +1078,6 @@ function _bpRenderOzetFromChart(ch) {
   _bpOzetChartDone = true;
   try { hxChartSetData((ch.ohlc || []).map(b => [b.time, +b.close])); } catch (e) { console.warn('hx chart', e); }
   try { hxFillDI(ch.summary); } catch (e) { console.warn('hx di', e); }
-  renderHistory(ch.signal_history, ch.summary?.price, ch.summary?.signal);
   renderCommentary(ch.commentary);
   if (ch.summary) renderSummary(ch.summary, BP_SSR.ticker ? BP_SSR : null);
 }
@@ -1381,7 +1235,7 @@ function hxFillNews(data) {
   const ul = document.getElementById('hxNewsL');
   if (!ul) return;
   const items = (data && data.disclosures) || [];
-  if (!items.length) { ul.innerHTML = '<li class="hx-news-e">Listelenecek bildirim şu an yok.</li>'; return; }
+  if (!items.length) { const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none'; return; }
   const fmtD = s => { const p = String(s || '').split(' ')[0].split('.'); return p.length === 3 ? (+p[0]) + ' ' + _HX_AY[+p[1] - 1] : ''; };
   ul.innerHTML = items.slice(0, 3).map(d =>
     '<li><time>' + escHtml(fmtD(d.date)) + '</time><div><b>' + escHtml((d.summary || d.subject || '').trim()) + '</b>' +
@@ -1393,12 +1247,12 @@ function loadOzetExtras() {
     const f = fj && fj.fundamentals && Object.keys(fj.fundamentals).length ? fj.fundamentals : null;
     const row = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
     hxFillFund(f, row);
-    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Veri yok'; }
+    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Temel skor hesaplanmadı'; }
   });
   /* C-25c: "Son haberler" ilk ekranin altinda -- /kap blok yaklasinca istenir */
   const ul = document.getElementById('hxNewsL');
   const load = () => _bpKapJSON().then(hxFillNews).catch(() => {
-    if (ul) ul.innerHTML = '<li class="hx-news-e">Bildirimler yüklenemedi.</li>';
+    const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none';
   });
   if (!ul || !('IntersectionObserver' in window)) { load(); return; }
   const io = new IntersectionObserver(es => {
@@ -1412,8 +1266,6 @@ function loadOzetChart() {
     if (json && json.chart) _bpRenderOzetFromChart(json.chart);
   }).catch(err => {
     console.warn('[ozet] grafik verisi alinamadi', err);
-    const historyBody = document.getElementById('historyBody');
-    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4"><div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Sinyal geçmişi yüklenemedi.</span><button type="button" class="da-retry" onclick="_bpOzetChartDone=false;loadOzetChart()">Tekrar dene</button></div></td></tr>';
   });
 }
 
@@ -1705,7 +1557,7 @@ function _tvBand(b, W) {
   if (b.med != null) vals.push(b.med);
   if (!vals.length) return '';
   const mx = Math.max.apply(null, vals) * 1.12, L = 8, R = W - 8, X = v => L + v / mx * (R - L);
-  let s = '<svg class="tv-svg tv-band" viewBox="0 0 ' + W + ' 58" role="img" aria-label="' + escHtml(b.n + ': yıl sonu değerleri, son kapanış ve sektör ortancası') + '">' +
+  let s = '<svg class="tv-svg tv-band" viewBox="0 0 ' + W + ' 58" role="img" aria-label="' + escHtml(b.n + ': yıl sonu değerleri, son kapanış ve sektörün orta değeri') + '">' +
     '<rect class="tv-band-bg" x="' + L + '" y="22" width="' + (R - L) + '" height="10" rx="5"/>';
   if (pts.length) {
     const lo = Math.min.apply(null, pts.map(x => x.v)), hi = Math.max.apply(null, pts.map(x => x.v));
@@ -1890,7 +1742,7 @@ const TV_CHK = {
   aktif_karliligi_artti: ['Aktif kârlılığı arttı', 'lvl2'], nakit_akisi_kardan_buyuk: ['Nakit akışı kârdan büyük', 'cmp'],
   uv_borc_orani_dustu: ['Uzun vadeli borç oranı düştü', 'lvl2'], cari_oran_artti: ['Cari oran arttı', 'x2'],
   yeni_pay_yok: ['Yeni pay çıkarılmadı', 'pay'], brut_marj_artti: ['Brüt marj arttı', 'lvl2'], aktif_devir_artti: ['Aktif devir hızı arttı', 'x2'],
-  net_kar_pozitif: ['Net kâr pozitif', 'money1'], ozsermaye_karliligi_ortanca_ustu: ['Özsermaye kârlılığı banka ortancasının üstünde', 'med'],
+  net_kar_pozitif: ['Net kâr pozitif', 'money1'], ozsermaye_karliligi_ortanca_ustu: ['Özsermaye kârlılığı bankaların orta değerinin üstünde', 'med'],
   kredi_mevduat_100_alti: ['Krediler mevduatı aşmıyor', 'lvl'], ozkaynak_varliktan_hizli: ['Özkaynak büyümesi varlık büyümesine yetişti', 'grow'],
   gider_gelir_40_alti: ['Gider / gelir oranı %40 veya altı', 'lvl'] };
 const TV_CHK_KISA = { aktif_karliligi_pozitif: 'aktif kârlılığı', isletme_nakit_akisi_pozitif: 'işletme nakit akışı', aktif_karliligi_artti: 'aktif kârlılığındaki değişim',
@@ -1911,7 +1763,7 @@ function _tvChkVal(it, kind) {
   if (kind === 'money1') return _tvMoney(c);
   if (kind === 'cmp') return it.gecti ? 'nakit > kâr' : 'nakit ≤ kâr';
   if (kind === 'pay') return it.gecti ? 'sermaye aynı' : 'sermaye arttı';
-  if (kind === 'med') return _tvLvl(c) + ' · ortanca ' + _tvLvl(p);
+  if (kind === 'med') return _tvLvl(c) + ' · bankaların orta değeri ' + _tvLvl(p);
   if (kind === 'grow') return _tvChg(c) + ' · varlık ' + _tvChg(p);
   return '';
 }
@@ -1919,7 +1771,8 @@ function _tvChecks(k) {
   const s = k.saglamlik;
   if (!s || !s.maddeler || !s.toplam) return false;
   const by = {}; s.maddeler.forEach(m => { by[m.k] = m; });
-  _tvEl('tvSaglamlikU').textContent = (s.yontem === 'piotroski' ? '9 maddelik bilinen yöntem (Piotroski) · ' : 'Bankaya uygun 5 madde · ') + s.yil + ' ile ' + (s.yil - 1);
+  /* C-74 K9: .tv-unit büyük harf + lang=tr → "PİOTROSKİ"; özel ad lang=en ile korunur. */
+  _tvEl('tvSaglamlikU').innerHTML = (s.yontem === 'piotroski' ? '9 maddelik bilinen yöntem (<span lang="en">Piotroski</span>) · ' : 'Bankaya uygun 5 madde · ') + (+s.yil) + ' ile ' + (s.yil - 1);
   _tvEl('tvSaglamlikP').innerHTML = '<b>' + s.puan + '</b><span>/ ' + s.toplam + '</span>';
   const grp = TV_CHK_GRP[s.yontem] || [];
   const okN = g => g[1].filter(x => by[x] && by[x].gecti === true).length, allN = g => g[1].filter(x => by[x] && by[x].gecti != null).length;
@@ -2067,7 +1920,10 @@ function _tvRender(f, divRow) {
     const _b = TV_BASIS[k.basis] || 'TL';   /* C-74 K2: şablon adı + 'nominal' iç dil, gösterilmez */
     per.textContent = 'Son rapor: ' + (k.son_rapor_etiket || '') + (_b !== 'TL' ? ' · ' + _b : '');
     per.hidden = false;
-    _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + (k.son_rapor_etiket || '') + ' dönemine kadar. Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.';
+    if (k.son_rapor_etiket) {
+      _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + k.son_rapor_etiket + ' dönemine kadar.';
+      _tvEl('tvDisc').hidden = false;
+    }
   } else {
     _tvHide('tvPrep', false);
   }
@@ -2123,75 +1979,6 @@ async function loadFundamentals() {
   } catch (e) {
     _tvEl('tvGrid').hidden = true;
     _tvEl('tvErr').hidden = false;
-  }
-}
-
-/* ── Çoklu Zaman Dilimi ───────────────────────────── */
-async function loadMTF() {
-  try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/mtf');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const grid = document.getElementById('mtfGrid');
-    if (!grid) return;
-
-    const tfs = [
-      { key: 'daily',   label: '📅 Günlük',    short: '1D' },
-      { key: 'weekly',  label: '📆 Haftalık',  short: '1W' },
-      { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
-    ];
-
-    /* K-BY eki: SAT zemini tint oldugu icin metin K-P kanonu --bp-sat-on-tint. */
-    const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat-on-tint)' : 'var(--bp-bkl)';
-    /* K-BY: AYNI UCLU KOSULUN iki dali iki ayri kanaldandi -- SAT ve BEKLE
-       token okurken AL ham hex yaziyordu (iki yesil tonu, ikisi de
-       tokens.css'te YOK) ve karsiliklari (--bp-al-bg / --bp-al-bd) zaten
-       VARDI; portfolio.css .signal-AL/.signal-SAT ciftini tam olarak boyle
-       esliyor. Canli: 217 sayfanin 6'sinda 11 AL karti boyaniyordu. */
-    const sigBg    = s => s === 'AL' ? 'var(--bp-al-bg)' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
-    const sigBord  = s => s === 'AL' ? 'var(--bp-al-bd)' : s === 'SAT' ? 'var(--bp-sat-bd-tint)' : 'var(--bp-border)';
-    const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
-
-    /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
-    if (tfs.every(tf => !json[tf.key])) {
-      grid.innerHTML = '<div style="grid-column:1/-1;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:16px;text-align:center;color:var(--bp-text3);font-size:var(--bp-text-base);line-height:1.6">Bu hisse için zaman dilimi verisi henüz yok. Sinyal oluştuğunda burada güncellenir.</div>';
-      return;
-    }
-
-    const mtfRots = [-.9, .7, -.6, .8];
-    grid.innerHTML = tfs.map((tf, idx) => {
-      const rot = mtfRots[idx % mtfRots.length];
-      const d = json[tf.key];
-      if (!d) return `
-        <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:14px;padding:14px;text-align:center">
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:6px">${tf.label}</div>
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Veri yok</div>
-        </div>`;
-
-      const bg   = sigBg(d.signal);
-      const col  = sigColor(d.signal);
-      const bord = sigBord(d.signal);
-      const arr  = sigArrow(d.signal);
-      const lbl  = sigLabel(d.signal);
-      const scoreBar = d.bull_score >= d.bear_score
-        ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
-          ).join('')}</div>`
-        : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?col:'var(--bp-border)'}"></div>`
-          ).join('')}</div>`;
-
-      return `
-        <div class="mtf-card" style="background:${bg};border:1px solid ${bord};border-radius:14px;padding:14px;text-align:center;--rot:${rot}deg;box-shadow:0 12px 28px -18px ${col}">
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-bottom:8px">${tf.label}</div>
-          <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
-          <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-top:4px">ADX ${_trNum(d.adx)}</div>
-          ${scoreBar}
-        </div>`;
-    }).join('');
-  } catch(e) {
-    const grid = document.getElementById('mtfGrid');
-    if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm)">Yüklenemedi</div>';
   }
 }
 
@@ -2286,10 +2073,6 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       else if (tab === 'haberler') { loadKapDisclosures(); }
     } catch (e) { console.warn('sekme verisi yuklenemedi: ' + tab, e); }
   }
-  var _odt = document.getElementById('ozetDetailToggle');
-  if (_odt) _odt.addEventListener('toggle', function once() {
-    if (_odt.open) { _odt.removeEventListener('toggle', once); loadMTF(); }
-  });
 
   function applyTab(tab, opts) {
     opts = opts || {};

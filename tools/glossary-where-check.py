@@ -53,7 +53,7 @@ TERIM_IFADELERI = {
     "Teknik Güç Skoru 0–100":               ["Teknik Güç"],
     "Trend Gücü ADX":                       ["Trend Gücü"],
     "Günlük Hacim Oranı son seans / 20g":   ["Günlük Hacim Oranı"],
-    "RVOL 5g / 20g":                        ["RVOL"],
+    "Hacim oranı 5 gün / 20 gün":           ["Hacim oranı"],  # C-74 K9: RVOL → açık ad
     "💎 Yüksek Skor · Orta Skor":           ["Yüksek Skor", "Orta Skor"],
     "⭐ Hacim Onaylı":                      ["Hacim Onaylı"],
     "BorsaPusula Skoru 0–100":              ["BorsaPusula Skoru"],

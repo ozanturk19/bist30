@@ -55,8 +55,7 @@
      yapılandırılmış veride yoktu — AI motorları JSON-LD'yi HTML'den daha
      güvenilir sayar. #}
   "additionalProperty": [
-    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_score is not none %},
-    {"@type": "PropertyValue", "name": "Teknik Güç Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
+    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_adx is not none %},
     {# CPO-1649: |int KESER (13.5→13), FAQ metni app.py:8080'de {:.0f} kullanıyor
        (13.5→14, round-half) — aynı sayfada iki farklı yuvarlama kuralı "3 farklı
        sayı" çelişkisine katkıda bulunuyordu. |round FAQ ile aynı davranışa (en
@@ -353,11 +352,11 @@
         </div>
         <div class="week52-ends">
           <span class="week52-end">
-            <span class="week52-endlbl">52H Düşük</span>
+            <span class="week52-endlbl">En düşük</span>
             <span id="w52low" class="week52-endval bp-sat-text">—</span>
           </span>
           <span class="week52-end week52-end-hi">
-            <span class="week52-endlbl">52H Yüksek</span>
+            <span class="week52-endlbl">En yüksek</span>
             <span id="w52high" class="week52-endval bp-al-text">—</span>
           </span>
         </div>
@@ -388,7 +387,7 @@
 {%- elif _st %}{{ _N[_st[0][0]]|capitalize }} öne çıkıyor
 {%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
 {%- else %}Dengeli; belirgin zayıf alan yok{% endif -%}
-{%- else -%}Veri bekleniyor{%- endif -%}
+{%- else -%}Temel skor hesaplanmadı{%- endif -%}
 {%- endmacro -%}
 {#- C-22c: Temel v2 (D-40c `hs.temel_v2`) -- alan yoksa bugunku 4 kategori aynen kalir. -#}
 {%- set _tv2 = hs.temel_v2 if (hs_available and hs.temel_v2) else none -%}
@@ -454,8 +453,8 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Temel skor verilmedi</p>
         <p class="hx-qp">{{ tv2_limited(_tv2)|trim }}</p>
         {% else %}
-        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Veri bekleniyor</p>
-        <p class="hx-qp">Bu hisse için son gün sonu turu temel skoru üretmedi.</p>
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Temel skor hesaplanmadı</p>
+        <p class="hx-qp">Bu hisse için temel skor henüz hesaplanmadı.</p>
         {% endif %}
       </div>
       {#- Q2 -- Fiyati makul mu? /fundamentals (Ozet'te bir kez) ile dolar; C-22b: Temel sekmesiyle
@@ -477,7 +476,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="hx-q">
         <h3 class="hx-qq">Trend destekliyor mu?</h3>
         <p class="hx-ans"><span class="hx-dot hx-dot--{{ 'g' if _qs == 'AL' else ('b' if _qs == 'SAT' else 'y') }}" aria-hidden="true"></span>
-          {%- if _qs == 'AL' %}Evet · {{ _q.signal_bars }} gündür{% elif _qs == 'SAT' %}Hayır · Trend Bozuldu{% else %}Henüz değil · Yatay{% endif %}</p>
+          {%- if _qs == 'AL' %}Evet · {{ bpf.since(_q.signal_date) or 'Güçlü Trend' }}{% elif _qs == 'SAT' %}Hayır · Trend Bozuldu{% else %}Henüz değil · Yatay{% endif %}</p>
         <p class="hx-why">
           {%- if _qs == 'AL' %}Güçlü Trend {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ altına inerse (fiyatın %{{ _gaps }} altı) trend bozulur.{% endif %}
           {%- elif _qs == 'SAT' %}Trend Bozuldu {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ üstüne çıkmadan (fiyatın %{{ _gaps }} üstü) trend desteklemiyor.{% endif %}
@@ -545,6 +544,8 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 
 
 
+{#- C-74 K11: tablo ve coklu zaman dilimi kalkinca Yatay'da bu acilirda yalniz sozluk cumlesi kaliyordu → acilir yalniz Guclu Trend / Trend Bozuldu'da. -#}
+{% if ssr_signal and ssr_signal.signal in ('AL', 'SAT') %}
 <details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
     <summary class="bp-detail-toggle-summary">
       <span class="bp-detail-toggle-label">Teknik ayrıntılar</span>
@@ -569,13 +570,12 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
        zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
        kardes bir bileseni yok etmemeli). #}
   {#- C-21a (25.09): Yatay'da Hacim Profili gosterilmez (plan C-21a); panel yalniz Guclu Trend / Trend Bozuldu'da. -#}
-  {% if ssr_signal and ssr_signal.signal in ('AL', 'SAT') %}
   <div class="entry-analysis-section" id="volumeProfileSection">
     <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
     <div class="hacim-profili">
       <div class="hp-row-line" id="hpRvolRow" style="display:none">
         <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
-        <span class="hp-row-text"><abbr tabindex="0" data-tip="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</abbr> (5 gün / 20 gün):</span>
+        <span class="hp-row-text"><abbr tabindex="0" data-tip="Son 5 seansın ortalama hacmi / son 20 seansın ortalama hacmi">Hacim oranı</abbr> (5 gün / 20 gün):</span>
         <span class="hp-row-val" id="hpRvolVal">—</span>
       </div>
       <div class="hp-row-line" id="hpSvolRow" style="display:none">
@@ -586,49 +586,12 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
-  {% endif %}
 
-  {# Çoklu Zaman Dilimi #}
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
-    <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
-      <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
-    </div>
-  </div>
-
-  {# Sinyal Mini İstatistik Satırı #}
-  <div class="sig-stats-row" id="sigMiniStats">
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
-    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
-  </div>
-
-  {# Sinyal Geçmişi #}
-  <div class="history-section" tabindex="0" role="region" aria-label="Sinyal geçmişi tablosu (dar ekranda yana kaydırılabilir)">
-    <h2 class="section-title">Sinyal Geçmişi
-      <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
-    </h2>
-    <table class="history-table">
-      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, kapanış fiyatı ve getiri</caption>
-      <thead>
-        <tr>
-          <th scope="col">Tarih</th>
-          <th scope="col">Sinyal</th>
-          <th scope="col">Kapanış</th>
-          <th scope="col">Getiri</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody">
-        <tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Yükleniyor…</td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
-  </div>
-
-
+  {#- C-74 K10/K11 (02.10, O29): Coklu Zaman Dilimi, sinyal mini istatistikleri ve getirili
+      Sinyal Gecmisi tablosu kalkti — tarihli durum listesi Grafik sekmesinde (Son 6 durum degisimi). -#}
     </div>
   </details>
+{% endif %}
 
 
   {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir
@@ -665,7 +628,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </details>
     {% endif %}
     {% endif %}
-    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
+    <div class="content-meta">Şirket profili · Faaliyet konusu</div>
   </section>
   {% endif %}
 
@@ -698,8 +661,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
       <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
       <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
-      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
-      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
+      {% if hs_available and hs.temel_analiz_skoru is not none %}<div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{{ hs.temel_analiz_skoru }}/100</dd></div>{% endif %}
       {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
       {% endif %}
@@ -738,7 +700,6 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   </div>
     </div>
   </details>
-  <p class="hx-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
   </div>{# /panel-ozet #}
 
   {#- C-22 + C-22b (25.09): Temel sekmesi v2 -- onayli taslak v3 (C-M6, O16e=B, O22=B).
@@ -828,7 +789,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </section>
   </div>
   <p class="tv-err" id="tvErr" hidden>Finansal veri şu an alınamadı. <button type="button" class="da-retry" id="tvRetry">Tekrar dene</button></p>
-  <p class="hx-disc" id="tvDisc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+  <p class="hx-disc" id="tvDisc" hidden></p>
   </div>{# /panel-temel #}
   
 
@@ -884,7 +845,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 
 </main>
 
-{% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
+{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 <script src="{{ static_v('bp-format.js') }}"></script>
 <script src="{{ static_v('stale-banner.js') }}"></script>

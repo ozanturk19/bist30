@@ -24,7 +24,7 @@
   var TR = { g: 'Güçlü Trend', y: 'Yatay', b: 'Trend Bozuldu' };
   var GROUPS = [
     { k: 'g', d: 'Trend koşullarının hepsi sağlanıyor' },
-    { k: 'y', d: 'Koşulların bir kısmı sağlanıyor; yön henüz belli değil' },
+    { k: 'y', d: 'Beş koşul birlikte sağlanmıyor' },
     { k: 'b', d: 'Yükseliş trendi bozuldu; trend desteklemiyor' }];
   var SLUG = { g: 'guclu-trend', y: 'yatay', b: 'trend-bozuldu' };
   var CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
@@ -61,7 +61,7 @@
       var cat = s.categories || m.categories || null;
       return {
         t: s.ticker, n: (s.name || '').replace(' A.Ş.', ''), g: s.sector || 'Diğer', s: SIG[s.signal] || 'y',
-        d: s.signal_bars, p: s.price, c: s.change_pct, bp: pick(s, m, 'borsapusula_skoru'), te: te,
+        d: s.signal_bars, sd: s.signal_date, p: s.price, c: s.change_pct, bp: pick(s, m, 'borsapusula_skoru'), te: te,
         sv: te != null && dc != null && dc < 0.8, cat: cat, na: s.categories_na || m.categories_na || [],
         fa: te != null ? finAns(cat) : null, adx: s.adx, sl: s.sl_level, rv: s.rvol, ho: !!s.is_premium,
         stale: !!(s.stale_reason || s.data_quality === 'stale')
@@ -71,11 +71,11 @@
 
   /* ── Hazır listeler: her biri paylaşılabilir adres (?liste=…) ── */
   var PRESETS = [
-    { id: 'hacim-onayli', l: 'Güçlü Trend + Hacim Onaylı', rule: 'Trend koşullarının hepsi sağlanıyor; 5 günlük ortalama hacim, 20 günlük ortalamanın en az 1,2 katı (RVOL ≥ 1,20).', set: { durum: ['g'] }, x: function (r) { return r.ho; } },
+    { id: 'hacim-onayli', l: 'Güçlü Trend + Hacim Onaylı', rule: 'Trend koşullarının hepsi sağlanıyor; 5 günlük ortalama hacim, 20 günlük ortalamanın en az 1,2 katı', set: { durum: ['g'] }, x: function (r) { return r.ho; } },
     { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü.', set: { bp: 70 } },
     { id: 'yeni-sinyal', l: 'Yeni sinyal (≤3 seans)', rule: 'Trend durumu son 3 seans içinde değişen hisseler.', x: function (r) { return r.d != null && r.d <= 3; } },
     { id: 'trend-bozuldu-son-seans', l: 'Son seansta Trend Bozuldu', rule: function () { return 'Yükseliş trendi ' + (ASOF || 'son') + ' seansında bozulan hisseler.'; }, set: { durum: ['b'] }, x: function (r) { return r.d != null && r.d <= 1; } },
-    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
+    { id: 'kaliteli-trend-bekliyor', l: 'Finansalları güçlü, trendi Yatay', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
   var PRE = {};
   PRESETS.forEach(function (p) { PRE[p.id] = p; });
 
@@ -92,10 +92,10 @@
   }
   function cush(r) { return (r.p && r.sl != null) ? (r.p - r.sl) / r.p * 100 : null; }
   var C = {
-    bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
+    bp: { h: 'Skor', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
       cell: function (r) { return r.bp == null ? mut('Skor yok') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
-      cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },
+      cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : bpSinceText(r.sd)) + '</span>' : ''); } },
     p: { h: 'Fiyat', num: 1, v: function (r) { return r.p; }, cell: function (r) { return r.p == null ? mut('Fiyat yok') : nf2.format(r.p) + ' ' + mut('₺'); } },
     c: { h: 'Değişim', num: 1, tip: 'Son seansın bir önceki kapanışa göre değişimi.', v: function (r) { return r.c; },
       cell: function (r) { return '<span class="' + bpDirClass(r.c, 2, ['u', 'd', '']) + '">' + bpFormatPct(r.c, 2) + '</span>'; } },
@@ -103,7 +103,7 @@
     adx: { h: 'ADX', num: 1, tip: 'Trend gücü. 25 ve üstü, Güçlü Trend koşullarından biri.', v: function (r) { return r.adx; }, cell: function (r) { return r.adx == null ? mut('Veri yok') : nf1.format(r.adx); } },
     dist: { h: 'Trend dönüş seviyesi', tip: 'Supertrend çizgisi: trend durumunun değiştiği fiyat.', v: cush,
       cell: function (r) { var q = cush(r); if (q == null) return mut('Veri yok'); return nf2.format(r.sl) + ' ' + mut('₺') + '<span class="sub">fiyatın %' + nf1.format(Math.abs(q)) + ' ' + (r.sl < r.p ? 'altında' : 'üstünde') + '</span>'; } },
-    rv: { h: 'RVOL', num: 1, tip: '5 günlük ortalama hacim / 20 günlük ortalama hacim.', v: function (r) { return r.rv; }, cell: function (r) { return r.rv == null ? mut('Veri yok') : nf2.format(r.rv) + '×'; } },
+    rv: { h: 'Hacim oranı', num: 1, tip: '5 günlük ortalama hacim / 20 günlük ortalama hacim.', v: function (r) { return r.rv; }, cell: function (r) { return r.rv == null ? mut('Veri yok') : nf2.format(r.rv) + '×'; } },
     d: { h: 'Durum yaşı', num: 1, tip: 'Hisse kaç işlem günüdür bu trend durumunda.', v: function (r) { return r.d; }, cell: function (r) { return r.d == null ? mut('Veri yok') : (r.d <= 1 ? 'son seans' : r.d + ' gün'); } },
     te: { h: 'Temel skor', tip: 'Kârlılık, nakit akışı, borç durumu, değerleme ve büyüme (0–100).', v: function (r) { return r.te; },
       cell: function (r) { return r.te == null ? mut('Skor yok') : bar(r.te, 'cy', false) + (r.fa ? '<span class="sub">' + esc(r.fa) + '</span>' : ''); } },
@@ -119,7 +119,7 @@
   };
   var COLS = { genel: ['bp', 'tr', 'p', 'c', 'g'], teknik: ['bp', 'adx', 'dist', 'rv', 'd'], temel: ['bp', 'te', 'kar', 'nak', 'kal', 'deg'] };
   var ASC = { t: 1, g: 1 };
-  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'RVOL', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme', kli: 'Kalite', dgr: 'Değerleme', buy: 'Büyüme', bil: 'Bilanço sağlığı', tem: 'Temettü' };
+  var SORTL = { t: 'Hisse kodu', bp: 'BorsaPusula Skoru', tr: 'Durum yaşı', d: 'Durum yaşı', p: 'Fiyat', c: 'Değişim', g: 'Sektör', adx: 'ADX', dist: 'Dönüş seviyesine uzaklık', rv: 'Hacim oranı', te: 'Temel skor', kar: 'Kârlılık', nak: 'Nakit akışı', kal: 'Borç durumu', deg: 'Değerleme / büyüme', kli: 'Kalite', dgr: 'Değerleme', buy: 'Büyüme', bil: 'Bilanço sağlığı', tem: 'Temettü' };
   var SSLUG = { t: 'kod', bp: 'bp', tr: 'durum-yasi', d: 'durum-yasi', p: 'fiyat', c: 'degisim', g: 'sektor', adx: 'adx', dist: 'donus-seviyesi', rv: 'rvol', te: 'temel', kar: 'karlilik', nak: 'nakit-akisi', kal: 'borc-durumu', deg: 'degerleme-buyume', kli: 'kalite', dgr: 'degerleme', buy: 'buyume', bil: 'bilanco', tem: 'temettu' };
   function slug(s) { return bpTrFold(String(s)).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
@@ -220,7 +220,7 @@
     var s = st.sort, on = s.k === k;
     return '<th scope="col" class="' + cl + ' th-sortable" aria-sort="' + (on ? (s.dir < 0 ? 'descending' : 'ascending') : 'none') + '"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="' + k + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + label + '<span class="ar" aria-hidden="true">' + (on ? (s.dir < 0 ? '↓' : '↑') : '↕') + '</span></button></th>';
   }
-  function emptyHTML() { return '<div class="tv-empty"><b>Bu seçimle eşleşen hisse yok</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
+  function emptyHTML() { return '<div class="tv-empty"><b>' + (ASOF ? esc(ASOF) + ' kapanışında bu' : 'Bu') + ' koşulları sağlayan hisse yok.</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
   function tableHTML(rows) {
     var cs = COLS[cols()], ncol = cs.length + 1, body = '', srt = sorter();
     GROUPS.forEach(function (G) {
@@ -260,7 +260,7 @@
     h += fg('BorsaPusula Skoru', 'finansallar %60 · trend %40', one('bp', [[0, 'Tümü'], [50, '50+'], [60, '60+'], [70, '70+']], f.bp));
     h += fg('Finansalları nasıl?', 'Temel skor', one('temel', [[0, 'Tümü'], [50, '50+'], [70, '70+']], f.temel));
     h += fg('Trend destekliyor mu?', '', many('durum', [['g', 'Güçlü Trend', COUNT.g], ['y', 'Yatay', COUNT.y], ['b', 'Trend Bozuldu', COUNT.b]], f.durum));
-    h += fg('Sırala', '', one('sort', [['bp', 'BP Skoru'], ['c', 'Değişim'], ['te', 'Temel skor'], ['t', 'Ada göre']], st.sort.k), 'tv-fg-sort');
+    h += fg('Sırala', '', one('sort', [['bp', 'BorsaPusula Skoru'], ['c', 'Değişim'], ['te', 'Temel skor'], ['t', 'Ada göre']], st.sort.k), 'tv-fg-sort');
     h += '</div><div>' + fg('Sektör', '', many('sektor', SEK, f.sektor)) + '</div></div>';
     return h;
   }

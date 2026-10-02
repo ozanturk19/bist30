@@ -73,7 +73,7 @@
   .art-live-title { font-size:var(--bp-text-sm); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
   .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-border); }
   .art-live-t { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-22); font-weight:800; }
-  .art-live-v { flex:1; min-width:0; font-family:var(--bp-font-mono); font-size:var(--bp-text-md); color:var(--bp-text2); }
+  .art-live-v { flex:1; min-width:0; font-variant-numeric:tabular-nums; font-size:var(--bp-text-md); color:var(--bp-text2); }
   .art-live-v[data-dir="up"] { color:var(--bp-al); } .art-live-v[data-dir="down"] { color:var(--bp-sat); }
   .art-live-go { color:var(--bp-text3); }
   .art-live-row:hover .art-live-go, .art-live-row:focus-visible .art-live-go { color:var(--bp-text); }

@@ -60,7 +60,7 @@
   "applicationCategory": "FinanceApplication", "applicationSubCategory": "Stock Market Analysis", "operatingSystem": "Web Browser",
   "browserRequirements": "Requires JavaScript. Requires HTML5.", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
   "inLanguage": "tr", "isAccessibleForFree": true, "publisher": { "@id": "https://borsapusula.com/#organization" },
-  "featureList": ["Algoritmik teknik analiz sinyalleri", "Hisse bazlı sinyal geçmişi", "Hacim onaylı (RVOL) sinyal filtresi", "Sektör ısı haritası", "Bilanço takvimi", "Hisse karşılaştırma"]
+  "featureList": ["Şirket finansalları ve değerleme", "Gün sonu trend durumu", "BIST100 ısı haritası", "Hisse tarama", "Bilanço takvimi", "Hisse karşılaştırma"]
 }
 </script>
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
@@ -177,19 +177,19 @@
     {%- for s in _gt %}
     {%- set _bp = s.borsapusula_skoru if (s.borsapusula_skoru is defined and s.borsapusula_skoru is not none) else none %}
     <li><a class="hp-card" href="/hisse/{{ s.ticker }}" data-t="{{ s.ticker }}">
-      <span class="hp-card-r1"><b class="hp-tk">{{ s.ticker }}</b>{% if s.is_new_signal %}<span class="hp-pill hp-pill--new">YENİ</span>{% elif s.signal_bars %}<span class="hp-pill">{{ s.signal_bars }} gündür</span>{% endif %}</span>
+      <span class="hp-card-r1"><b class="hp-tk">{{ s.ticker }}</b>{% if s.is_new_signal %}<span class="hp-pill hp-pill--new">YENİ</span>{% elif s.signal_date and bpf.since(s.signal_date)|string %}<span class="hp-pill">{{ bpf.since(s.signal_date) }}</span>{% endif %}</span>
       <span class="hp-nm">{{ s.name or '' }}</span>
       <span class="hp-pr"><b class="da-num">{{ s.price|tr_price }} ₺</b> <span class="da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span></span>
       <span class="hp-fin">
-        <span class="hp-ring"><span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (_bp ~ ' / 100') if _bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _bp or 0 }} 100"/></svg><b class="da-ring-num">{{ _bp if _bp is not none else '—' }}</b></span><small aria-hidden="true">BP Skoru</small></span>
+        <span class="hp-ring"><span class="da-ring da-ring--sm da-ring--bp" role="img" aria-label="BorsaPusula Skoru {{ (_bp ~ ' / 100') if _bp is not none else 'hesaplanmadı' }}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="da-ring-track" cx="50" cy="50" r="44"/><circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="{{ _bp or 0 }} 100"/></svg><b class="da-ring-num">{{ _bp if _bp is not none else '—' }}</b></span><small aria-hidden="true">Skor</small></span>
         <span class="hp-fin-tx" data-fin></span>
       </span>
     </a></li>
     {%- endfor %}
   </ul>
   {%- if (_sc.al or 0) > _gt|length %}<p class="hp-more"><a href="/tarama?durum=guclu-trend" class="da-tap">Tümü ({{ _sc.al }}) →</a></p>{% endif %}
-  {%- else %}
-  <p class="hp-empty">{% if _sc.total %}<span class="hp-asof">{{ _asl }}</span>: Güçlü Trend'de hisse yok.{% else %}Veriler hazırlanıyor…{% endif %}</p>
+  {%- elif _sc.total %}
+  <p class="hp-empty"><span class="hp-asof">{{ _asl }}</span>: Güçlü Trend'de hisse yok.</p>
   {%- endif %}
 </section>
 
@@ -246,6 +246,7 @@
     Değerleme = hisse "Fiyatı makul mü?" kanonu (`valuation`: sektör ortancasına oran); neden = `fin_answer`. -#}
 {%- set _ft = ssr_featured or [] -%}
 {%- set _vl = {'ucuz': ('Ucuz tarafta', 'ucuz'), 'makul': ('Makul', 'makul'), 'pahali': ('Pahalı tarafta', 'pahali'), 'karisik': ('Karışık', 'mix')} %}
+{%- if _ft %}
 <section class="da-section hp-blk" id="one-cikan" aria-labelledby="hpFtT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
@@ -263,11 +264,10 @@
       </a></li>
       {%- endfor %}
     </ol>
-    {%- else %}
-    <p class="hp-nw-e">Şu an kurala uyan şirket yok.</p>
     {%- endif %}
   </div>
 </section>
+{%- endif %}
 
 {#- C-30: Son seansta değişenler — SSR (D-53 `ssr_gundem`, /api/gundem ile aynı kaynak; BEKLE'ye dönüş listelenmez).
     long-only: Trend Bozuldu'ya geçenler sessiz koyu çip, kırmızı yok. -#}
@@ -505,7 +505,7 @@
       if (!real.length) {
         if (d.loading === true && _daDataTries < DA_DATA_MAX_TRIES) {
           _daDataTries++;
-          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionLoading(id, 'Veriler hazırlanıyor…'); });
+          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionLoading(id, ''); });
           setTimeout(daLoadData, DA_DATA_RETRY_MS);
         } else {
           DA_DATA_BLOCKS.forEach(function(id){ daShowSectionEmpty(id, 'Şu an gösterilecek hisse verisi yok.'); });
@@ -556,7 +556,7 @@
       return '<div class="da-tile ' + dirCls + ' ' + sizeCls + '" tabindex="0" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
         '<div><div class="chg ' + chgCls + ' da-num"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + bpDirSign(s.score, 0) + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
-        '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
+        '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · Hacim oranı ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
       '</div>';
     }).join('') + '</div>';
     el.innerHTML = html;

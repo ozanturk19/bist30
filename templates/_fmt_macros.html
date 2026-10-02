@@ -85,6 +85,24 @@
 {%- endif -%}
 {%- endmacro -%}
 
+{# C-74 K8 (02.10): "17 gündür" yerine "4 Eylül'den beri" — `bpSinceText`
+   (bp-format.js) aynası. 0 gün → "Son seanstan beri" · bilinmiyor → boş. #}
+{%- macro since(sd) -%}
+{%- set t = signal_date_text(sd)|string -%}
+{%- if t != '—' -%}
+{%- if (sd|signal_age_days) == 0 -%}Son seanstan beri
+{%- else -%}
+{%- set w = t.split(' ') -%}
+{%- if w|length > 2 -%}
+{%- set y = w[2]|int -%}
+{{ t }}{{ (["", "'den", "'den", "'ten", "'ten", "'ten", "'dan", "'den", "'den", "'dan"][y % 10]) if y % 10 else (["", "'dan", "'den", "'dan", "'tan", "'den", "'dan", "'den", "'den", "'dan"][(y // 10) % 10]) }} beri
+{%- else -%}
+{{ t }}{{ {'Ocak':"'tan",'Şubat':"'tan",'Mart':"'tan",'Nisan':"'dan",'Mayıs':"'tan",'Haziran':"'dan",'Temmuz':"'dan",'Ağustos':"'tan",'Eylül':"'den",'Ekim':"'den",'Kasım':"'dan",'Aralık':"'tan"}[w[1]] }} beri
+{%- endif -%}
+{%- endif -%}
+{%- endif -%}
+{%- endmacro -%}
+
 {#- C-18a: görünür sayfa başlığı (`.da-pagehead`, data-art.css §7a) — H1 +
     tek veri cümlesi (≤ ~75 karakter: 320px'te 2 satıra sığar, göreli zaman
     yok, kanon §2). Kullanım: {% call bpf.pagehead('Başlık') %}cümle{% endcall %} -#}

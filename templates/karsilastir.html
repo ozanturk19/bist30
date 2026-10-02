@@ -6,18 +6,18 @@
    kaldirilan "R/R" vaadi sablonda duzeltildi, canli meta hala "R/R" diyordu.
    Gercek kaynak app.py'dir (CPO-1758, DEV1). Buradaki metin yalnizca
    rota page_description vermezse devreye girer. #}
-<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 {% if tickers_param %}<meta name="robots" content="noindex,follow">{% endif %}
 <meta property="og:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta property="og:url"         content="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -123,7 +123,7 @@
     <div class="da-empty da-empty--page">
       <h2>Karşılaştırma Aracı</h2>
       <p>En az 2 hisse sembolü girin ve karşılaştırın.<br>
-         ADX, RSI, Supertrend Seviyesi, temel oranlar ve daha fazlası yan yana.</p>
+         BorsaPusula Skoru, trend durumu, temel oranlar ve daha fazlası yan yana.</p>
     </div>
   </div>
 </main>
@@ -136,11 +136,7 @@ const TICKERS_PARAM = "{{ tickers_param }}";
 const ROW_LABELS = [
   { key: '_sep_tech',     label: 'TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
-  // CPO-1610: /hisse hero'daki kompozit skorla AYNI alan (hs.borsapusula_skoru) — ayrı,
-  // açıkça etiketli satır. "Yatırım Skoru" (üstteki scoreRow) SADECE Teknik Güç'tür,
-  // bu ikisi artık aynı sayı gibi karışmıyor.
   { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Finansallar %60, trend %40.' },
-  { key: 'is_premium',    label: 'Hacim Onaylı', help: 'Güçlü Trend sinyali olan ve 5 günlük hacim ortalaması son 20 gün ortalamasının 1,20 katından yüksek olan hisseler.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
@@ -153,22 +149,15 @@ const ROW_LABELS = [
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
   { key: '_sep_fund',     label: 'TEMEL ANALİZ', isSep: true },
-  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve F/DD oranlarının sektör ortancasıyla karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
+  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve PD/DD oranlarının aynı sektördeki şirketlerle karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
-  { key: 'pb_ratio',       label: 'F/DD Oranı' },
-  { key: 'eps',            label: 'HBK (₺)' },
-  { key: 'roe',            label: 'Öz Sermaye Getirisi (ROE)' },
+  { key: 'pb_ratio',       label: 'PD/DD' },
+  { key: 'eps',            label: 'Hisse başına kâr (₺)' },
+  { key: 'roe',            label: 'Özsermaye kârlılığı' },
   { key: 'dividend_yield', label: 'Temettü Verimi' },
 ];
 
-
-function renderPremium(s) {
-  if (!s) return '<span class="muted">—</span>';
-  return s.is_premium
-    ? '<span class="badge" style="background:var(--bp-volume-bg);color:var(--bp-volume);border:1px solid var(--bp-volume-bd);font-weight:700">Hacim Onaylı</span>'
-    : '<span class="muted" style="font-size:var(--bp-text-xs)">—</span>';
-}
 
 function renderSignal(s) {
   if (!s) return '<span class="muted">—</span>';
@@ -197,8 +186,8 @@ function renderAdx(v, label) {
   const cl = n>=25 ? 'up' : 'muted';
   // Etiket sunucudan gelir (business_rules.derive_adx_label — CPO-1196 D0 #4); "Trend" eki
   // kaldırıldı — sinyal etiketiyle (Güçlü Trend/Trend Bozuldu) karışıyordu.
-  const lbl = label || 'Zayıf';
-  return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+  /* C-74 K10 (02.10): "Güçlü/Zayıf" etiketi kalktı -- yalniz sayi (kanon §2.4). */
+  return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span>`;
 }
 
 function renderRsi(v, zone, signal) {
@@ -212,9 +201,8 @@ function renderRsi(v, zone, signal) {
   // 15.09 CPO-1656 fix: bölge etiketi artık sunucudan gelir (business_rules.derive_rsi_zone —
   // ADX'teki CPO-1648 deseniyle aynı), kendi bağımsız >70/<30 eşiğimiz kanonikle tutarsızdı
   // (TUPRS RSI=70.6 burada "Aşırı Alım" derken /hisse'de "Dikkatli" diyordu).
-  const lbl = zone || '';
-  const cl = zone === 'Aşırı Alım' ? 'dn' : zone === 'Aşırı Satım' ? 'up' : '';
-  return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+  /* C-74 K10 (02.10): bolge etiketi yone beklenti yukluyordu -- yalniz sayi, renk notr. */
+  return `<span class="mono">${n.toFixed(1).replace('.', ',')}</span>`;
 }
 
 /* K-DI: bant -> hucre. Sozcukler ve renk kefeleri /hisse Temel karti ile
@@ -260,7 +248,6 @@ function renderCell(key, s) {
   const v = s[key];
   switch(key) {
     case 'signal':        return renderSignal(v);
-    case 'is_premium':    return renderPremium(s);
     case 'price':         return renderPrice(v);
     case 'change_pct':    return renderChg(v);
     case 'adx':           return renderAdx(v, s.adx_label);
@@ -294,7 +281,7 @@ function renderCell(key, s) {
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
     // dogru "bekleniyor" durumu — sahte/varsayilan sayi YOK (hisse.html ile ayni durus).
     case 'borsapusula_skoru': {
-      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)">Veri bekleniyor</span>';
+      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)">Hesaplanmadı</span>';
       if (v == null) return '<span class="muted">—</span>';
       // bughunt-13.09 (CPO-1628, DEV1 band alanini ekledi): hisse.html
       // hero'daki AYNI kanonik banti (financial_health_score.py _band()) —
@@ -349,72 +336,22 @@ function renderCell(key, s) {
          Temel karti ayni turda 'Basabas'/'Negatif'e gecti; kapi (cross_surface)
          iki yuzeyi bagli tutuyor, band kumesi burada da ayni olmali. Negatif ROE
          'zayif getiri' degil, OZ SERMAYE ERIMESIdir. */
-      const cl  = '';   /* C-70 K21: ROE notr renk */
-      const lbl = n > 20 ? 'Güçlü'  : n > 10 ? 'Orta' : n > 0 ? 'Zayıf' : n === 0 ? 'Başabaş' : 'Negatif';
-      return `<span class="${cl} mono">${bpPctLevel(n, 1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+      /* C-74 K10 (02.10): "Güçlü/Orta/Zayıf" sirkete yargi (kanon §2.4) -- yalniz sayi. */
+      return `<span class="mono">${bpPctLevel(n, 1)}</span>`;
     }
     case 'dividend_yield': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
-      if (n === 0) return '<span class="mono">%0,00</span> <span style="font-size:10px;color:var(--bp-text3)">Yok</span>';
-      /* K-BX eki: /hisse'de 0 < verim < 4 bandinin adi "Standart"; burada
-         bu band ADSIZ kaliyordu -- ayni ucluden biri sessizdi. */
-      const cl  = n >= 4 ? 'up' : 'mid';
-      const lbl = n >= 4 ? 'Yüksek' : 'Standart';
-      return `<span class="${cl} mono">${bpPctLevel(n, 2)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+      /* C-74 K10 (02.10): "Yok/Standart/Yüksek" etiketi kalktı -- yalniz sayi. */
+      return `<span class="mono">${bpPctLevel(n, 2)}</span>`;
     }
     default:              return v != null ? String(v) : '<span class="muted">—</span>';
   }
 }
 
-// ── Teknik Güç — kanonik signal_strength + tier (CPO-DEV2-053/055) ──────
-// Önceden bu dosyanın kendi bağımsız calcScore() fonksiyonu vardı (tech+fund, 0-100,
-// signal/ADX/R-R/bull_score+temel veriden yeniden hesaplıyordu) — /hisse ve /tarama'nın
-// gösterdiği compose_score()'tan TAMAMEN farklı bir sayı üretiyordu (kanıt: BJKAS aynı an
-// hisse.html'de 95/Yüksek Skor, karsilastir.html'de 65/İyi gösteriyordu, "kazanan" 🏆
-// işaretini de bu sahte skor belirliyordu — CPO-DEV2-053 raporu). Artık backend'in
-// analyze()'de zaten hesapladığı signal_strength+tier alanları doğrudan gösteriliyor,
-// ikinci bir skor icat edilmiyor. Temel analiz verileri (F/K, ROE, F/DD, temettü) ayrı
-// satırlar olarak tabloda kalmaya devam ediyor, ama artık skora/kazanana karışmıyorlar.
-const TIER_META = {
-  // CPO-1682 terim netlestirmesi: etiketler 'Güçlü Sinyal'/'Standart' idi — "Güçlü
-  // Sinyal" sinyal TÜRÜ olan "Güçlü Trend" ile karışıyordu. Artık rozet, annote
-  // ettiği sayının (Teknik Güç Skoru) bandını söylüyor; "Sinyal" kelimesi sitede
-  // yalnızca yönü (Güçlü Trend / Trend Bozuldu / Yatay) ifade ediyor.
-  guclu_sinyal: { color: 'var(--bp-art-violet)', label: 'Yüksek Skor' },
-  standart:     { color: 'var(--bp-brand)', label: 'Orta Skor' },
-};
-
-function verdictFor(tier) {
-  // K-CW: rozetsiz bandın adı burada 'Nötr' idi; /metodoloji sözlüğünün ve
-  // /tarama ipucunun kanonik adı "rozetsiz" — aynı bant için iki ad kalmasın.
-  return TIER_META[tier] || { color: 'var(--bp-text3)', label: 'Rozetsiz' };
-}
-
-function renderScoreCell(s, isWinner) {
-  if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
-  // bughunt-12.09: signal_strength Yatay/BEKLE sinyallerde null (uygulanamaz) döner,
-  // önceki `|| 0` bunu "0/100 Nötr" olarak gösterip gerçekten sıfır puanlanmış gibi
-  // yanıltıyordu — sayfanın kendi null-gösterim deseniyle (— ) tutarlı hale getirildi.
-  if (s.signal_strength == null) return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="muted" style="font-size:20px">—</span><span class="muted" style="font-size:11px;line-height:1.3;max-width:110px;text-align:center">Yatay sinyalde hesaplanmaz</span></div>';
-  const total = s.signal_strength;
-  const v = verdictFor(s.tier);
-  const winnerCls = isWinner ? ' winner' : '';
-  const winnerBadge = isWinner ? '<div class="winner-badge">En yüksek</div>' : '';
-  return `
-    <div class="score-cell${winnerCls}">
-      ${winnerBadge}
-      <div class="score-big" style="color:${v.color}">
-        ${total}<small> / 100</small>
-      </div>
-      <div class="score-bar-wrap">
-        <div class="score-bar-fill" style="width:${total}%"></div>
-      </div>
-      <div class="score-verdict" style="color:${v.color}">${v.label}</div>
-    </div>
-  `;
-}
-
+/* C-74 K10 (02.10): ikinci skor "Teknik Güç" (signal_strength + Yüksek/Orta Skor
+   rozeti + "En yüksek" kazanan) kullanici yuzeyinden kalktı -- yalniz BorsaPusula
+   Skoru + 5 kosul (gri-dil envanteri K10). */
 // bug-hunt r27: /api/karsilastir ticker/name alanlarını kaçışsız innerHTML'e yazıyordu
 // (defense-in-depth — backend'e de whitelist eklendi, bu ek koruma katmanı)
 function buildTable(stocks) {
@@ -433,7 +370,7 @@ function buildTable(stocks) {
     const inner = `
         <div class="col-ticker">${escapeHtml(s.ticker)}</div>
         <div class="col-name" title="${escapeHtml(s.name||'')}">${s.found ? escapeHtml(s.name||'') : '<span class="muted">Bulunamadı</span>'}</div>
-        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap"><span aria-hidden="true">KAP ↗</span><span class="sr-only">${escapeHtml(s.ticker)} KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span></a>` : ''}
+        ${s.found ? `<a href="/haberler?hisse=${encodeURIComponent(s.ticker)}" class="col-kap"><span aria-hidden="true">Bildirimler</span><span class="sr-only">${escapeHtml(s.ticker)} şirket bildirimleri</span></a>` : ''}
       `;
     return `
     <th class="col-hdr" scope="col">
@@ -442,26 +379,6 @@ function buildTable(stocks) {
         : `<div style="color:inherit">${inner}</div>`}
     </th>`;
   }).join('');
-
-  // ── Teknik Güç satırı (kazananı belirle, kanonik signal_strength) ──
-  // CPO-1572 (10.09): long-only — SAT sinyali skor yüksek olsa da 🏆 "En Yüksek"
-  // kazanamaz, sadece AL sinyalleri yarışır (Ozan: SAT güçlü/kazanan gösterilmesin).
-  // CPO-1610: "Yatırım Skoru" adı belirsizdi (kompozit BorsaPusula Skoru ile karışıyordu,
-  // bu SADECE signal_strength/teknik). hisse.html'in qf-row etiketiyle ("Teknik Güç Skoru")
-  // aynı vocabulary'e hizalandı — ayrı "BorsaPusula Skoru" satırı ROW_LABELS'ta eklendi.
-  const scores = stocks.map(s => s.found && s.signal === 'AL' ? (s.signal_strength || 0) : -1);
-  const maxScore = Math.max(...scores);
-  const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
-  const scoreCells = stocks.map((s, i) => {
-    const isWinner = (i === winnerIdx) && s.found && active.length > 1;
-    return `<td>${renderScoreCell(s, isWinner)}</td>`;
-  }).join('');
-  const scoreRow = `
-    <tr class="score-row">
-      <th class="row-label" scope="row" style="font-size:var(--bp-text-sm);color:var(--bp-text2)">Teknik Güç</th>
-      ${scoreCells}
-    </tr>
-  `;
 
   const rows = ROW_LABELS.map(({key, label, isSep, help}) => {
     if (isSep) {
@@ -477,7 +394,7 @@ function buildTable(stocks) {
     <table class="compare-table">
       <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
       <thead><tr><th class="row-label" scope="col" style="background:var(--bp-surface)"></th>${headers}</tr></thead>
-      <tbody>${scoreRow}${rows}</tbody>
+      <tbody>${rows}</tbody>
     </table>
   </div>`;
 }
@@ -491,33 +408,26 @@ function buildMobileCards(stocks) {
   const active = stocks.filter(s => s.found);
   if (active.length === 0) return '';
 
-  // CPO-1572 (10.09): long-only — bkz. buildComparisonTable üstteki not, aynı kural
-  const scores = stocks.map(s => s.found && s.signal === 'AL' ? (s.signal_strength || 0) : -1);
-  const maxScore = Math.max(...scores);
-  const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
-
   const cards = stocks.map((s, i) => {
     if (!s.found) {
       return `<div class="cmp-mcard da-panel cmp-mcard-notfound">
         <div class="cmp-mtop"><span class="cmp-mticker">${escapeHtml(s.ticker)}</span><span class="muted" style="font-size:var(--bp-text-sm)">Bulunamadı</span></div>
       </div>`;
     }
-    const isWinner = (i === winnerIdx) && active.length > 1;
     const header = `
       <div class="cmp-mtop">
         <a href="/hisse/${escapeHtml(s.ticker)}" class="cmp-mticker-link">
           <span class="cmp-mticker">${escapeHtml(s.ticker)}</span>
           <span class="cmp-mname">${escapeHtml(s.name||'')}</span>
         </a>
-        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap"><span aria-hidden="true">KAP ↗</span><span class="sr-only">${escapeHtml(s.ticker)} KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span></a>` : ''}
+        ${s.found ? `<a href="/haberler?hisse=${encodeURIComponent(s.ticker)}" class="col-kap"><span aria-hidden="true">Bildirimler</span><span class="sr-only">${escapeHtml(s.ticker)} şirket bildirimleri</span></a>` : ''}
       </div>`;
-    const scoreHtml = `<div class="cmp-mscore"><span class="cmp-mscore-lbl">Teknik Güç</span>${renderScoreCell(s, isWinner)}</div>`;
     const rowsHtml = ROW_LABELS.map(({key, label, isSep, help}) => {
       if (isSep) return `<div class="cmp-msep">${label}</div>`;
       const helpHtml = help ? ` <span class="help-icon" tabindex="0" data-tip="${help}">i</span>` : '';
       return `<div class="cmp-mrow"><span class="cmp-mrow-label">${label}${helpHtml}</span><span class="cmp-mrow-val">${renderCell(key, s)}</span></div>`;
     }).join('');
-    return `<div class="cmp-mcard da-panel${isWinner ? ' cmp-mcard-winner' : ''}">${header}${scoreHtml}${rowsHtml}</div>`;
+    return `<div class="cmp-mcard da-panel">${header}${rowsHtml}</div>`;
   }).join('');
 
   return `<div class="cmp-mcards" role="list" aria-label="Karşılaştırma sonuçları, hisse başına kart">${cards}</div>`;
@@ -536,7 +446,7 @@ function bpCompareEmptyHtml(n) {
     ? '1 hisse seçildi. Karşılaştırmak için en az 1 hisse daha ekleyin.'
     : 'En az 2 hisse sembolü girin ve karşılaştırın.';
   return '<div class="da-empty da-empty--page"><h2>Karşılaştırma Aracı</h2><p>' + lead +
-         '<br>ADX, RSI, Supertrend Seviyesi, temel oranlar ve daha fazlası yan yana.</p></div>';
+         '<br>BorsaPusula Skoru, trend durumu, temel oranlar ve daha fazlası yan yana.</p></div>';
 }
 
 async function doCompare(opts) {
@@ -557,7 +467,6 @@ async function doCompare(opts) {
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
         <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="da-skel da-skel--line" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><th class="row-label" scope="row">Teknik Güç</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
             return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line"></div></td>`).join('')}</tr>`;

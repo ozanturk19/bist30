@@ -71,9 +71,9 @@
 </div>
 {%- endif %}
 
+{%- if _tk %}
 <div class="bl-sec">
   <h3>Sonraki işlem günü takvimi</h3>
-  {%- if _tk %}
   <ul class="bl-cal">
     {%- for e in _tk %}<li>
       <span class="bl-ct">{{ e.time or ({'temettu': 'Temettü', 'bilanco': 'Rapor', 'makro': 'Veri'}[e.kind] if e.kind in ['temettu', 'bilanco', 'makro'] else '') }}</span>
@@ -83,7 +83,5 @@
       {%- else %}{{ e.ticker or '' }}{% endif %}</span>
     </li>{% endfor %}
   </ul>
-  {%- else %}
-  <p class="bl-none">Takvimde kayıtlı bilanço, temettü ya da makro veri yok. <a href="/takvim">Takvim</a></p>
-  {%- endif %}
 </div>
+{%- endif %}
