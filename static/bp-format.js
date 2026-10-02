@@ -144,6 +144,24 @@ function bpSignalAgeText(signalDate) {
   return age + ' gün';
 }
 
+/* C-74 K8 (02.10): gün sayısı yerine başlangıç tarihi — "4 Eylül'den beri"
+   ("17 gündür" bir yerde işlem günü, başka yerde takvim günü sayıyordu).
+   Yıl içinde bulunulan yıl değilse eklenir: "4 Eylül 2025'ten beri".
+   0 gün → "Son seanstan beri" · bilinmiyor → ''. Şablon aynası:
+   _fmt_macros.html `since`. */
+var BP_TR_MONTH_ABL = ["'tan", "'tan", "'tan", "'dan", "'tan", "'dan", "'dan", "'tan", "'den", "'den", "'dan", "'tan"];
+var BP_TR_DIGIT_ABL = ["", "'den", "'den", "'ten", "'ten", "'ten", "'dan", "'den", "'den", "'dan"];
+var BP_TR_TENS_ABL = ["", "'dan", "'den", "'dan", "'tan", "'den", "'dan", "'den", "'den", "'dan"];
+function bpSinceText(signalDate) {
+  var sd = bpParseTrDate(signalDate), age = bpSignalDateAgeDays(signalDate);
+  if (!sd || age === null) return '';
+  if (age === 0) return 'Son seanstan beri';
+  var t = bpTodayTr(), s = sd.d + ' ' + BP_TR_MONTHS[sd.m - 1];
+  if (t.y === sd.y) return s + BP_TR_MONTH_ABL[sd.m - 1] + ' beri';
+  var u = sd.y % 10;
+  return s + ' ' + sd.y + (u ? BP_TR_DIGIT_ABL[u] : BP_TR_TENS_ABL[Math.floor(sd.y / 10) % 10]) + ' beri';
+}
+
 /* Dar alanlar için kısa biçim: "3G" · bilinmiyorsa "—". */
 function bpSignalAgeShort(signalDate) {
   var age = bpSignalDateAgeDays(signalDate);

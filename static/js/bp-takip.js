@@ -110,7 +110,7 @@
   function norm(it) {
     return {
       t: String(it.ticker || '').toUpperCase(), n: it.name || '', sig: it.signal || null, k: KEY[it.signal] || 'n',
-      p: num(it.price), c: num(it.change_pct), bars: num(it.signal_bars), prev: it.prev_signal || null,
+      p: num(it.price), c: num(it.change_pct), bars: num(it.signal_bars), sd: it.signal_date || null, prev: it.prev_signal || null,
       bp: num(it.bp != null ? it.bp : it.borsapusula_skoru), q: num(it.qty), cost: num(it.cost)
     };
   }
@@ -151,7 +151,7 @@
   }
   function trSub(r) {
     if (changed(r)) return 'son seansta' + (r.prev ? ' · önceki: ' + esc(sigLabel(r.prev)) : '');
-    return r.bars !== null ? r.bars + ' gündür' : '';
+    return (r.sd && typeof bpSinceText === 'function') ? bpSinceText(r.sd) : '';
   }
   function phone() { return MQ.matches; }
   function modeNow() {

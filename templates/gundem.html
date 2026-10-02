@@ -46,7 +46,7 @@
   <div class="sc-metrics">
     {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
-    {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ bpf.signal_age(s.signal_date) }}</strong></div>{% endif %}
+    {% if s.signal_date %}<div class="sc-metric"><strong>{{ bpf.since(s.signal_date) }}</strong></div>{% endif %}
     {# C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). #}
   </div>
   <div class="sc-footer">
@@ -264,7 +264,7 @@ function renderCard(s, isNew) {
      yaşıyordu. C-63: SSR aynası _fmt_macros.html `signal_age` ("Son seans" /
      "N gün"), bpSignalAgeText ile birebir (tests/test_c63_son_seans_etiketleri.py). */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
-    metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
+    metrics.push(`<div class="sc-metric"><strong>${bpSinceText(s.signal_date)}</strong></div>`);
   /* C-52 (24.09): R/R metriği kalktı — teknik hedef dili yok (kanon §2). */
 
   const newMark = isNew ? `<span class="new-badge">Yeni</span>` : '';

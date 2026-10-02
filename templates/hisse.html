@@ -477,7 +477,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="hx-q">
         <h3 class="hx-qq">Trend destekliyor mu?</h3>
         <p class="hx-ans"><span class="hx-dot hx-dot--{{ 'g' if _qs == 'AL' else ('b' if _qs == 'SAT' else 'y') }}" aria-hidden="true"></span>
-          {%- if _qs == 'AL' %}Evet · {{ _q.signal_bars }} gündür{% elif _qs == 'SAT' %}Hayır · Trend Bozuldu{% else %}Henüz değil · Yatay{% endif %}</p>
+          {%- if _qs == 'AL' %}Evet · {{ bpf.since(_q.signal_date) or 'Güçlü Trend' }}{% elif _qs == 'SAT' %}Hayır · Trend Bozuldu{% else %}Henüz değil · Yatay{% endif %}</p>
         <p class="hx-why">
           {%- if _qs == 'AL' %}Güçlü Trend {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ altına inerse (fiyatın %{{ _gaps }} altı) trend bozulur.{% endif %}
           {%- elif _qs == 'SAT' %}Trend Bozuldu {{ bpf.signal_date_phrase(_q.signal_date) }}.{% if _gap is not none %} Kapanış {{ _sl|tr_price }} ₺ üstüne çıkmadan (fiyatın %{{ _gaps }} üstü) trend desteklemiyor.{% endif %}

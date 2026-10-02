@@ -177,7 +177,7 @@
     {%- for s in _gt %}
     {%- set _bp = s.borsapusula_skoru if (s.borsapusula_skoru is defined and s.borsapusula_skoru is not none) else none %}
     <li><a class="hp-card" href="/hisse/{{ s.ticker }}" data-t="{{ s.ticker }}">
-      <span class="hp-card-r1"><b class="hp-tk">{{ s.ticker }}</b>{% if s.is_new_signal %}<span class="hp-pill hp-pill--new">YENİ</span>{% elif s.signal_bars %}<span class="hp-pill">{{ s.signal_bars }} gündür</span>{% endif %}</span>
+      <span class="hp-card-r1"><b class="hp-tk">{{ s.ticker }}</b>{% if s.is_new_signal %}<span class="hp-pill hp-pill--new">YENİ</span>{% elif s.signal_date and bpf.since(s.signal_date)|string %}<span class="hp-pill">{{ bpf.since(s.signal_date) }}</span>{% endif %}</span>
       <span class="hp-nm">{{ s.name or '' }}</span>
       <span class="hp-pr"><b class="da-num">{{ s.price|tr_price }} ₺</b> <span class="da-num {{ bpf.dir_class(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</span></span>
       <span class="hp-fin">

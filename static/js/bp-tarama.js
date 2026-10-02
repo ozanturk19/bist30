@@ -61,7 +61,7 @@
       var cat = s.categories || m.categories || null;
       return {
         t: s.ticker, n: (s.name || '').replace(' A.Ş.', ''), g: s.sector || 'Diğer', s: SIG[s.signal] || 'y',
-        d: s.signal_bars, p: s.price, c: s.change_pct, bp: pick(s, m, 'borsapusula_skoru'), te: te,
+        d: s.signal_bars, sd: s.signal_date, p: s.price, c: s.change_pct, bp: pick(s, m, 'borsapusula_skoru'), te: te,
         sv: te != null && dc != null && dc < 0.8, cat: cat, na: s.categories_na || m.categories_na || [],
         fa: te != null ? finAns(cat) : null, adx: s.adx, sl: s.sl_level, rv: s.rvol, ho: !!s.is_premium,
         stale: !!(s.stale_reason || s.data_quality === 'stale')
@@ -95,7 +95,7 @@
     bp: { h: 'BP Skoru', num: 1, tip: 'BorsaPusula Skoru (0–100): finansallar %60, trend %40.', v: function (r) { return r.bp; },
       cell: function (r) { return r.bp == null ? mut('Skor yok') : '<span class="sr-only">BorsaPusula Skoru </span>' + bar(r.bp, '', r.s === 'b'); } },
     tr: { h: 'Trend', tip: 'Trend durumu ve kaç işlem günüdür sürdüğü.', v: function (r) { return r.d; },
-      cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : r.d + ' gündür') + '</span>' : ''); } },
+      cell: function (r) { return '<span class="pill ' + r.s + '">' + TR[r.s] + '</span>' + (r.d ? '<span class="sub">' + (r.d <= 1 ? 'son seansta' : bpSinceText(r.sd)) + '</span>' : ''); } },
     p: { h: 'Fiyat', num: 1, v: function (r) { return r.p; }, cell: function (r) { return r.p == null ? mut('Fiyat yok') : nf2.format(r.p) + ' ' + mut('₺'); } },
     c: { h: 'Değişim', num: 1, tip: 'Son seansın bir önceki kapanışa göre değişimi.', v: function (r) { return r.c; },
       cell: function (r) { return '<span class="' + bpDirClass(r.c, 2, ['u', 'd', '']) + '">' + bpFormatPct(r.c, 2) + '</span>'; } },

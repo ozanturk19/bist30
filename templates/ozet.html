@@ -207,7 +207,7 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
+      <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺
@@ -243,7 +243,7 @@ function goToDate(date) {
           Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
           gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
           arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
-      <div class="sc-meta">{{ bpf.signal_age(s.signal_date) }} · {{ s.signal_date or '—' }}</div>
+      <div class="sc-meta">{{ bpf.since(s.signal_date) or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Sinyal fiyatı: {{ s.signal_price|tr_price }}&nbsp;₺
