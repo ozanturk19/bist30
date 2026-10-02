@@ -129,6 +129,9 @@ def test_health_score_known_pool(stock_pool):
 def test_health_score_leverage_na_bank(stock_pool):
     # D-15: mevduat bankasında Kaldıraç + Nakit Akışı yapısal N/A — nakit metrikleri
     # veri olarak gelse de puanlanmaz; payda 14 değil 8 (uygulanabilir metrik).
+    # D-58: brüt marj/FAVÖK marjı/FD-FAVÖK bankada kavram olarak yok (BANK_INSURER_
+    # METRIC_NA) — 8 değil 5 uygulanabilir metrik (gross_margin skorlanmıyor, ama
+    # tesadüfen karlılık ortalaması değişmiyor: (100+20)/2 = (100+20+60)/3 = 60).
     rows = [dict(POOL5[0], ticker="GARAN")] + POOL5[1:]
     pool = stock_pool("Bankacılık", rows)
     r = fhs.compute_health_score(pool[0], "Bankacılık", pool)
@@ -136,7 +139,7 @@ def test_health_score_leverage_na_bank(stock_pool):
     assert r["categories"] == {"karlilik": 60.0, "degerleme_buyume": 60.0}
     assert r["temel_analiz_skoru"] == 60
     assert r["categories_na"] == ["nakit_akisi", "kaldirac"]
-    assert r["data_completeness"] == 0.62        # 5 / 8 uygulanabilir metrik
+    assert r["data_completeness"] == 0.8         # 4 / 5 uygulanabilir metrik (D-58)
     assert r["limited_data"] is False
 
 
@@ -149,7 +152,9 @@ def test_health_score_insurer_leverage_na_even_with_data(stock_pool):
     r = fhs.compute_health_score(pool[0], "Sigorta", pool)
     assert "kaldirac" not in r["categories"] and r["categories_na"] == ["kaldirac"]
     assert set(r["categories"]) == {"karlilik", "nakit_akisi", "degerleme_buyume"}
-    assert r["data_completeness"] == 0.73        # 8 / 11 uygulanabilir metrik (kaldıraç sayılmaz)
+    # D-58: brüt marj/FAVÖK marjı/FD-FAVÖK sigortada da kavram olarak yok —
+    # 11 değil 8 uygulanabilir metrik (kaldıraç + bu 3 metrik sayılmaz).
+    assert r["data_completeness"] == 0.88        # 7 / 8 uygulanabilir metrik (D-58)
 
 
 def test_health_score_structural_na_by_sector_or_ticker():
@@ -159,6 +164,28 @@ def test_health_score_structural_na_by_sector_or_ticker():
     assert fhs.structural_na("AGESA", "Diğer") == ["kaldirac"]                           # listeden
     assert fhs.structural_na("SAHOL", "Holding ve Yatırım") == ["kaldirac"]              # eski liste
     assert fhs.structural_na("THYAO", "Ulaştırma") == []
+
+
+def test_health_score_structural_na_metrics_bank_insurer():
+    # D-58: brüt marj/FAVÖK marjı/FD-FAVÖK banka VE sigortada yapısal N/A;
+    # revenue_growth kasıtlı dışarıda (bazı bankalarda dolu, kavramsal olarak geçerli).
+    expected = {"gross_margin", "ebitda_margin", "ev_to_ebitda"}
+    assert fhs.structural_na_metrics("GARAN", "Bankacılık") == expected
+    assert fhs.structural_na_metrics("YENIBANKA", "Bankacılık") == expected             # sektörden
+    assert fhs.structural_na_metrics("ANHYT", "Sigorta") == expected
+    assert fhs.structural_na_metrics("THYAO", "Ulaştırma") == frozenset()
+    assert "revenue_growth" not in expected
+
+
+def test_health_score_bank_reaches_featured_threshold_with_partial_data(stock_pool):
+    # D-58 kabulü: ALBRK örneği (pe/pb/roe/profit_margin dolu, revenue_growth
+    # eksik, gross/ebitda/ev yapısal N/A) → tamlık >= 0,8 (Öne Çıkan eşiği).
+    row0 = dict(POOL5[0], ticker="ALBRK", pb_ratio=.66)
+    row0.pop("revenue_growth", None)
+    pool = stock_pool("Bankacılık", [row0] + POOL5[1:])
+    r = fhs.compute_health_score(pool[0], "Bankacılık", pool)
+    assert r["data_completeness"] == 0.8         # 4 / 5 uygulanabilir metrik
+    assert r["limited_data"] is False
     assert fhs.structural_na("EKGYO", "Gayrimenkul") == []                               # GYO kapsam dışı
     assert fhs.structural_na("ISFIN", "Finansal Hizmetler") == []                        # leasing: hesaplanabilir
 

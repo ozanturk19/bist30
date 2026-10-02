@@ -127,6 +127,17 @@ LEVERAGE_NA_TICKERS = BANK_TICKERS | {
 INSURER_TICKERS = {"ANHYT", "AKGRT", "TURSG", "ANSGR", "AGESA", "RAYSG"}
 SECTOR_INSURER, SECTOR_BANK = "Sigorta", "Bankacılık"
 
+# D-58 (02.10): kategori genel olarak uygulanabilir olsa da (karlılık, değerleme/
+# büyüme) banka/sigortada brüt kâr marjı / FAVÖK marjı / FD-FAVÖK kavramı YOK —
+# yfinance'da COGS/EBITDA satırı hiç gelmiyor (canlı doğrulandı: 10/10 banka +
+# 4/4 sigortada sürekli None). Geçici veri boşluğu değil, YAPISAL — tamlık
+# paydasından düşer (D-15 ile aynı mantık, kategori yerine tekil metrik
+# düzeyinde); zaten hep None oldukları için skor/category_scores etkilenmez.
+# revenue_growth kasıtlı DIŞARIDA: bazı bankalarda (GARAN vb.) dolu geliyor,
+# kavramsal olarak sigortada da (prim büyümesi) geçerli — gerçek veri boşluğu,
+# yapısal N/A değil.
+BANK_INSURER_METRIC_NA = {"gross_margin", "ebitda_margin", "ev_to_ebitda"}
+
 # Tamlık bu değerin altındaysa `limited_data` bayrağı; sıralama havuzları
 # (home_fields.featured_pool) aynı eşikle dışlar.
 LIMITED_DATA_BELOW = 0.6
@@ -144,6 +155,16 @@ def structural_na(ticker, sector):
     else:
         return []
     return [c for c in CATEGORIES if c in na]
+
+
+def structural_na_metrics(ticker, sector):
+    """D-58: kategori uygulanabilir sayılsa da YAPISAL OLARAK yok sayılan tekil
+    metrikler (bkz. BANK_INSURER_METRIC_NA docstring'i) — veri gelse bile
+    puanlanmaz, tamlık paydasına girmez."""
+    if (ticker in BANK_TICKERS or sector == SECTOR_BANK
+            or ticker in INSURER_TICKERS or sector == SECTOR_INSURER):
+        return BANK_INSURER_METRIC_NA
+    return frozenset()
 
 
 def _band(score):
@@ -220,12 +241,15 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     category_scores = {}
     metrics_with_data = 0
     categories_na = structural_na(ticker_fundamentals.get("ticker"), sector)
+    metric_na = structural_na_metrics(ticker_fundamentals.get("ticker"), sector)
 
     for cat_name, cat in CATEGORIES.items():
         if cat_name in categories_na:
             continue  # yapısal N/A: veri gelse bile puanlanmaz (D-15)
         metric_scores = []
         for metric, reverse in cat["metrics"]:
+            if metric in metric_na:
+                continue  # yapısal N/A (D-58): veri gelse bile puanlanmaz
             value = ticker_fundamentals.get(metric)
             score = _metric_score(metric, value, sector, stocks_with_fundamentals, reverse, ticker_fundamentals)
             if score is not None:
@@ -234,9 +258,12 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         if metric_scores:
             category_scores[cat_name] = sum(metric_scores) / len(metric_scores)
 
-    # Payda: bu hisse için UYGULANABİLİR metrikler (D-15) — bankada 14 değil 8;
-    # yapısal N/A veri eksikliği sayılmaz.
-    applicable = sum(len(c["metrics"]) for n, c in CATEGORIES.items() if n not in categories_na)
+    # Payda: bu hisse için UYGULANABİLİR metrikler (D-15/D-58) — bankada 14
+    # değil 5, sigortada 11 değil 8; yapısal N/A veri eksikliği sayılmaz.
+    applicable = sum(
+        1 for n, c in CATEGORIES.items() if n not in categories_na
+        for m, _ in c["metrics"] if m not in metric_na
+    )
     data_completeness = round(metrics_with_data / applicable, 2)
     categories_complete = len(category_scores) == len(CATEGORIES)
 
