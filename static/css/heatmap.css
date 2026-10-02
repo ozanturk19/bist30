@@ -1,8 +1,6 @@
 /* ═══ static/css/heatmap.css — BIST100 ısı haritası bileşeni (templates/_heatmap.html + static/js/bp-heatmap.js)
-   C-29 (25.09): /sektor-harita tam sayfası bu dosyayı kullanır. İlk blok pages/index.css'teki C-55
-   bloğunun BİREBİR kopyasıdır (ana sayfa o dosyayı kullanmaya devam ediyor; index.html'e dokunmamak
-   için). C-28 ana sayfa düzeni birleşince ana sayfa da bu dosyaya bağlanır ve index.css'teki kopya
-   silinir (tek kaynak). Tam sayfa eklemeleri yalnız .hm-full altında: ana sayfayı etkilemez. */
+   TEK KAYNAK (C-71 K34, 03.10): ana sayfa, /sektor-harita ve /harita/<gün> bu dosyayı yükler; ana sayfaya
+   özgü birkaç kural pages/index.css'te. Tam sayfa eklemeleri yalnız .hm-full altında. */
 /* ═══ C-55 (24.09): BIST100 ısı haritası — templates/_heatmap.html + static/js/bp-heatmap.js ═══
    Onaylı taslak C-M5 (O16d=A, ilk açılış Değişim O20=A). Renk yalnız token'dan:
    nötr zemin (--hm-n) + yön tonu bindirmesi rgba(--bp-al-rgb | --bp-sat-rgb, --k);
@@ -37,7 +35,7 @@
 .hm .hm-t:hover{z-index:var(--bp-z-raised);box-shadow:inset 0 0 0 2px rgba(var(--bp-text-rgb),.85);filter:brightness(1.08)}
 .hm .hm-t:focus-visible{z-index:var(--bp-z-raised);outline:2px solid var(--bp-accent-cyan);outline-offset:-2px}
 .hm-tk{position:absolute;left:7px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--fs,11px);line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
-.hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:calc(var(--fs,11px) * .74);line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
+.hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:max(9px,calc(var(--fs,11px) * .74));line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
 .hm-lim{position:absolute;right:5px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-text-2xs);line-height:1;letter-spacing:.08em;padding:3px 5px;border-radius:var(--bp-radius-4);background:rgba(var(--bp-bg-rgb),.45);color:var(--bp-text);white-space:nowrap}
 .hm .hm-off{display:none}
 /* JS yokken (SSR): aralık saydam kenarla; sığmayan yazı kutu boyuna göre gizli (kırpılmaz) */
@@ -64,7 +62,7 @@
 .hm-lg-sw i{width:12px;height:12px;border-radius:var(--bp-radius-sm);background-color:var(--hm-n);background-image:repeating-linear-gradient(135deg,rgba(var(--bp-text-rgb),.3) 0 2px,transparent 2px 5px)}
 .hm-src{margin:0;font-size:var(--bp-text-sm);color:var(--bp-text3);max-width:60ch}
 /* Mini kart (bp-heatmap.js doldurur) */
-.hm .hm-card{position:absolute;z-index:var(--bp-z-dropdown);scroll-margin:100px 0 96px;width:min(268px,calc(100% - 16px));padding:14px 15px 12px;border-radius:var(--bp-radius-14);background:rgba(var(--bp-surface-rgb),.97);border:1px solid var(--bp-border2);box-shadow:var(--bp-shadow-lg);font-size:var(--bp-text-base)}
+.hm .hm-card{position:absolute;z-index:var(--bp-z-dropdown);scroll-margin:100px 0 96px;width:min(268px,calc(100% - 16px));padding:14px 15px 12px;border-radius:var(--bp-radius-14);background:var(--bp-surface);border:1px solid var(--bp-border2);box-shadow:var(--bp-shadow-lg);font-size:var(--bp-text-base)}
 .hm-card .c-top{display:flex;gap:8px;align-items:baseline;min-width:0}
 .hm-card .c-top b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-text-17)}
 .hm-card .c-top span{color:var(--bp-text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -97,7 +95,7 @@
 /* ═══ C-68 (25.09): "Paylaş" — _heatmap.html _share() + bp-heatmap.js paylaşım bloğu ═══
    <details>/<summary>: JS kapalıyken de açılır (iki düz bağlantı). Başlığın üst satırında
    (üst yazı solda, düğme sağda); satır düğme boyunda, negatif kenar boşluğuyla başlığı itmez.
-   pages/index.css'teki C-68 bloğunun BİREBİR kopyası (C-28'de tek kaynağa iner). */
+   */
 .hm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:-6px 0 2px}
 .hm-top .da-eyebrow{margin-bottom:0}
 .hm-share{position:relative;flex:none;margin-left:auto}
@@ -146,9 +144,9 @@
 /* Tavan/taban yalnız Değişim · 1G'de (kutu halkası JS/SSR'da `lim` sınıfıyla, etiket burada) */
 .hm-full:not(.hm-lim-on) .hm-lim{display:none}
 /* Grup etiketi: sığmayan önce değerini, sonra kendini gizler; yeri varsa iki satıra kırılır (JS) */
-.hm-full .hm-gl i:empty{display:none}
-.hm-full .hm-gl.hm-gl2{height:auto;align-items:flex-start;white-space:normal}
-.hm-full .hm-gl.hm-gl2 b{white-space:normal;text-overflow:clip;line-height:1.25}
+.hm .hm-gl i:empty{display:none}
+.hm .hm-gl.hm-gl2{height:auto;align-items:flex-start;white-space:normal}
+.hm .hm-gl.hm-gl2 b{white-space:normal;text-overflow:clip;line-height:1.25}
 /* JS kapalıyken yazı ölçülemez: dar grupta önce değer, daha darda etiket gizlenir (üç nokta yerine) */
 .hm-full .hm-g{container-type:inline-size}
 @container (max-width:159.98px){.hm-full:not(.js) .hm-gl i{display:none}}

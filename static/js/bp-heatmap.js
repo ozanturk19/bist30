@@ -143,17 +143,17 @@
   }
   function unplace(el) { el.style.left = el.style.top = el.style.width = el.style.height = ''; }
 
-  var LABEL_H = 20, GROUP_GAP = 7, TILE_GAP = 2, STACK_MAX = 560, MIN_T = 6;
+  var LABEL_H = 20, GROUP_GAP = 7, TILE_GAP = 2, STACK_MAX = 560, MIN_T = 12;
   var cq = !!(window.CSS && CSS.supports && CSS.supports('container-type', 'inline-size'));
 
   /* Aşırı oranlı grupta (Savunma: ASELS 1.708 / ALTNY 14 Mrd) squarify son
      küçük kutuya 1-2px'lik şerit bırakır: bağlantı görünmez olur. Böyle kutunun
-     YERLEŞİM ağırlığı (lv) 6px kalınlığa ulaşana dek ikiye katlanır; gerçek
+     YERLEŞİM ağırlığı (lv) 12px kalınlığa (C-71 K34: dokunulabilir en ince kare) ulaşana dek ikiye katlanır; gerçek
      piyasa değeri (value) grup yüksekliğinde ve kartta aynen kalır. */
   function layoutTiles(g, W, H, ratio) {
     var nodes = g.tiles, it, bad;
     nodes.forEach(function (n) { n.lv = n.value; });
-    for (it = 0; it < 6; it++) {
+    for (it = 0; it < 10; it++) {
       nodes.sort(function (a, b) { return b.lv - a.lv; });
       tileRect(nodes, W, H, TILE_GAP, ratio);
       bad = false;
@@ -208,15 +208,31 @@
     if (!stack) {
       groups.forEach(function (g) { g.el.style.display = ''; });
       var H = map.clientHeight || Math.round(Wi / 1.6);
-      var Wg = Wi + GROUP_GAP, Hg = H + GROUP_GAP;
+      var Wg = Wi + GROUP_GAP, Hg = H + GROUP_GAP, thin = false;
       groups.forEach(function (g) {
-        var x0 = Math.round(g.x / 100 * Wg), y0 = Math.round(g.y / 100 * Hg);
-        var x1 = Math.max(x0, Math.round((g.x + g.w) / 100 * Wg - GROUP_GAP));
-        var y1 = Math.max(y0, Math.round((g.y + g.h) / 100 * Hg - GROUP_GAP));
-        var gw = x1 - x0, gh = y1 - y0;
+        g.x0 = Math.round(g.x / 100 * Wg); g.y0 = Math.round(g.y / 100 * Hg);
+        g.x1 = Math.max(g.x0, Math.round((g.x + g.w) / 100 * Wg - GROUP_GAP));
+        g.y1 = Math.max(g.y0, Math.round((g.y + g.h) / 100 * Hg - GROUP_GAP));
+        if (g.x1 - g.x0 < MIN_T || g.y1 - g.y0 < MIN_T) thin = true;
+      });
+      /* C-71 K34: sunucu yerleşimi bu genişlikte tek kareli küçük sektörü (Spor 25×6 @820)
+         dokunulamayacak kadar ince bırakırsa gruplar kutulardaki gibi istemcide yeniden dizilir. */
+      if (thin) {
+        var gs = groups.slice(), it;
+        gs.forEach(function (g) { g.lv = g.value; });
+        for (it = 0; it < 10; it++) {
+          gs.sort(function (a, b) { return b.lv - a.lv; });
+          tileRect(gs, Wi, H, GROUP_GAP, 1.15);
+          thin = false;
+          gs.forEach(function (g) { if (g.x1 - g.x0 < MIN_T || g.y1 - g.y0 < MIN_T) { g.lv *= 2; thin = true; } });
+          if (!thin) break;
+        }
+      }
+      groups.forEach(function (g) {
+        var x0 = g.x0, y0 = g.y0, gw = g.x1 - g.x0, gh = g.y1 - g.y0;
         var lh = (gh >= 56 && gw >= 64) ? LABEL_H : 0;
         place(g.el, x0, y0, gw, gh);
-        if (FULL) lh = fitLabel(g, gw, gh, lh);
+        lh = fitLabel(g, gw, gh, lh);
         if (g.lbl) g.lbl.classList.toggle('hm-off', !lh);
         g.inner.style.top = lh + 'px';
         g.inner.style.height = '';
@@ -232,7 +248,7 @@
         used += h + LABEL_H + 14;
         unplace(g.el);
         if (g.lbl) g.lbl.classList.remove('hm-off');
-        if (FULL && g.lbl) g.lbl.classList.remove('hm-gl2');
+        if (g.lbl) g.lbl.classList.remove('hm-gl2');
         g.inner.style.top = '';
         g.inner.style.height = h + 'px';
         layoutTiles(g, Wi, h, 1.1);
@@ -297,8 +313,9 @@
     PER.forEach(function (p) {
       var c = mk('div', (FULL && p[0] === sel) ? 'on' : null);
       c.appendChild(mk('em', null, p[1]));
-      var pv = ch[p[0]];   /* 5 dar hücre: |%| >= 100 tam sayı, yoksa 1 ondalık */
-      c.appendChild(mk('span', dirCls(pv, 1), bpFormatPct(pv, (typeof pv === 'number' && Math.abs(pv) >= 100) ? 0 : 1)));
+      var pv = ch[p[0]], ap = (typeof pv === 'number') ? Math.abs(pv) : 0;   /* 5 dar hücre: |%| < 10 iki ondalık (üstteki değişimle aynı), < 100 bir, üstü tam sayı */
+      var pf = ap >= 100 ? 0 : (ap >= 10 ? 1 : 2);
+      c.appendChild(mk('span', dirCls(pv, pf), bpFormatPct(pv, pf)));
       per.appendChild(c);
     });
     card.appendChild(per);
