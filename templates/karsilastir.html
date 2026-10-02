@@ -281,7 +281,7 @@ function renderCell(key, s) {
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
     // dogru "bekleniyor" durumu — sahte/varsayilan sayi YOK (hisse.html ile ayni durus).
     case 'borsapusula_skoru': {
-      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)">Veri bekleniyor</span>';
+      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)">Hesaplanmadı</span>';
       if (v == null) return '<span class="muted">—</span>';
       // bughunt-13.09 (CPO-1628, DEV1 band alanini ekledi): hisse.html
       // hero'daki AYNI kanonik banti (financial_health_score.py _band()) —
