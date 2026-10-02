@@ -365,6 +365,8 @@ def ssr_context(payload, stocks, today):
     late_n = sum(len(g["events"]) for g in groups if g["late"])
     # hafta seridi: bu haftanin pazartesisinden son olaya kadar (en fazla SERIT_HAFTA hafta)
     start = today - timedelta(days=today.weekday())
+    if today.weekday() >= 5:  # Cmt/Paz: bitmis haftayla acilmasin, gelecek Pazartesiden basla
+        start += timedelta(days=7)
     last = _d(groups[-1]["date"]) if groups else today
     kinds = {}
     for r in rows:

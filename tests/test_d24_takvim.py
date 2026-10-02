@@ -189,6 +189,15 @@ def test_ssr_context():
     assert empty["groups"] == [] and empty["counts"]["all"] == 0 and empty["weeks"]
 
 
+def test_ssr_context_hafta_sonu_serit_gelecek_haftadan_baslar():
+    pazar = date(2026, 9, 27)  # Cumartesi/Pazar: bitmis haftayla acilmasin
+    p = _build(estimates={"THYAO": "2026-11-05"}, today=pazar)
+    s = tk.ssr_context(p, {}, pazar)
+    w0 = s["weeks"][0]
+    assert w0["days"][0]["date"] == "2026-09-28"  # gelecek Pazartesi
+    assert not any(d["past"] for w in s["weeks"] for d in w["days"])
+
+
 _YASAK = re.compile(r"\b(AL|SAT|BEKLE)\b|Bugün|bugün|Yarın|yarın|Hak kullanım|Ücretsiz|KAP|Yahoo|hedef|Hedef|tavsiye")
 
 
