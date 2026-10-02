@@ -1,3 +1,3 @@
 {% extends '_base.html' %}{% import '_error_page.html' as err with context %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<meta name="robots" content="noindex">
 {{ err.head(ticker ~ ' — Borsadan Çekildi', ticker ~ ' hissesi artık işlem görmüyor.') }}
-{% endblock %}{% block body %}{% call err.page('410', ticker ~ ' hissesi artık işlem görmüyor') %}Bu hisse Borsa İstanbul'dan çekildi ya da başka bir şirketle birleşti; verileri artık güncellenmiyor.{% endcall %}{% endblock %}
+{% endblock %}{% block body %}{% call err.page('410', ticker ~ ' hissesi artık işlem görmüyor') %}Borsa İstanbul'dan çekildi ya da birleşti; verileri güncellenmiyor.{% endcall %}{% endblock %}

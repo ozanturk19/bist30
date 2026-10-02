@@ -59,7 +59,7 @@
 {%- if _hm_ok %}
   {% with hm_full=true, hm_mode=_mode, hm_per=_per, hm_path='/sektor-harita' %}{% include '_heatmap.html' %}{% endwith %}
 {%- else %}
-  {% call bpf.pagehead('BIST100 Isı Haritası') %}Hisseler sektörlerine göre: kutu büyüklüğü piyasa değeri, renk değişim, BorsaPusula Skoru ya da trend durumu.{% endcall %}
+  {% call bpf.pagehead('BIST100 Isı Haritası') %}Kutu büyüklüğü piyasa değeri; renk değişim, Skor ya da trend durumu.{% endcall %}
   <div class="da-panel da-empty da-empty--page hm-empty" role="status">
     <h2 class="da-empty-title">Harita hazır değil</h2>
     <p>Isı haritası her işlem günü resmi kapanıştan sonra hazırlanır. Hisselere sektörüne göre <a href="/tarama">taramadan</a> bakabilirsin.</p>

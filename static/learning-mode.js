@@ -148,7 +148,8 @@
           showPop(this, t, d);
         };
       }(term, def));
-      el.appendChild(btn);
+      /* C-70 K23: <a> içinde <button> geçersiz HTML; bağlantıysa hemen ardına */
+      if (el.tagName === 'A') el.parentNode.insertBefore(btn, el.nextSibling); else el.appendChild(btn);
     }
   }
 

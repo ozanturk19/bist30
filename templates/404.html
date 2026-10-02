@@ -1,3 +1,3 @@
 {% extends '_base.html' %}{% import '_error_page.html' as err with context %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<meta name="robots" content="noindex,follow">
 {{ err.head('Sayfa Bulunamadı', "Aradığınız sayfa bulunamadı. BorsaPusula'da hisse arayın ya da sık kullanılan sayfalara geçin.") }}
-{% endblock %}{% block body %}{% call err.page('404', 'Bu sayfa bulunamadı') %}Sayfa taşınmış ya da kaldırılmış olabilir. Bir hisse arayın ya da aşağıdaki sayfalardan birine geçin.{% endcall %}{% endblock %}
+{% endblock %}{% block body %}{% call err.page('404', 'Bu sayfa bulunamadı') %}Bu adreste sayfa yok. Bir hisse arayın ya da aşağıdan bir sayfa seçin.{% endcall %}{% endblock %}

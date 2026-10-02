@@ -47,13 +47,13 @@
       <span class="tldr-icon"><span aria-hidden="true">🟢</span></span>
       <span class="tldr-label">Güçlü Trend</span>
       <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend ▲ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; DI+ &gt; DI− &nbsp;+&nbsp; EMA12 &gt; EMA99 &nbsp;+&nbsp; Haftalık ▲</span>
+      <span class="tldr-formula">Supertrend&nbsp;▲ + ADX&nbsp;≥&nbsp;25 + DI+&nbsp;&gt;&nbsp;DI− + EMA12&nbsp;&gt;&nbsp;EMA99 + Haftalık&nbsp;▲</span>
     </div>
     <div class="tldr-row tldr-red">
       <span class="tldr-icon"><span aria-hidden="true">🔴</span></span>
       <span class="tldr-label">Trend Bozuldu</span>
       <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; DI− &gt; DI+ &nbsp;+&nbsp; EMA12 &lt; EMA99 &nbsp;+&nbsp; Haftalık ▼</span>
+      <span class="tldr-formula">Supertrend&nbsp;▼ + ADX&nbsp;≥&nbsp;25 + DI−&nbsp;&gt;&nbsp;DI+ + EMA12&nbsp;&lt;&nbsp;EMA99 + Haftalık&nbsp;▼</span>
     </div>
     <div class="tldr-row tldr-gray">
       <span class="tldr-icon"><span aria-hidden="true">⚪</span></span>
@@ -129,6 +129,16 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   DI+ > DI− ise alış yönünde; DI− > DI+ ise satış yönünde güç var demektir.
 </p>
 
+<h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
+<p>
+  Üstel Hareketli Ortalama (EMA) çaprazlaması, orta ve uzun dönem trend yönünü teyit eder.
+</p>
+<ul>
+  <li><strong>EMA12 &gt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin üzerinde <span role="img" aria-label="anlamına gelir">→</span> Yükseliş</li>
+  <li><strong>EMA12 &lt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin altında <span role="img" aria-label="anlamına gelir">→</span> Düşüş</li>
+</ul>
+<p>Grafiklerde EMA12 <span style="color:var(--bp-brand)">mavi</span>, EMA99 <span style="color:var(--bp-accent-yellow)">sarı</span> renkle gösterilir. İkisi arasındaki dolgu, yön değiştikçe yeşil/kırmızıya döner.</p>
+
 <h2 id="rsi">RSI — Göreceli Güç Endeksi</h2>
 <p>
   RSI (Relative Strength Index), fiyat hareketlerinin hızını ve büyüklüğünü ölçer.
@@ -161,16 +171,6 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   trendin yanında bir anlam taşır. Trend Bozuldu ya da Yatay görünümdeki bir hissede
   aynı RSI aralığı ayrıca bir şey söylemez; bu yüzden o durumda nötr adlandırılır. Bant sınırları (45–60) her iki halde de aynıdır.
 </p>
-
-<h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
-<p>
-  Üstel Hareketli Ortalama (EMA) çaprazlaması, orta ve uzun dönem trend yönünü teyit eder.
-</p>
-<ul>
-  <li><strong>EMA12 &gt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin üzerinde <span role="img" aria-label="anlamına gelir">→</span> Yükseliş</li>
-  <li><strong>EMA12 &lt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin altında <span role="img" aria-label="anlamına gelir">→</span> Düşüş</li>
-</ul>
-<p>Grafiklerde EMA12 <span style="color:var(--bp-brand)">mavi</span>, EMA99 <span style="color:var(--bp-accent-yellow)">sarı</span> renkle gösterilir. İkisi arasındaki dolgu, yön değiştikçe yeşil/kırmızıya döner.</p>
 
 <h2 id="haftalik-trend">Haftalık trend filtresi</h2>
 <p>
@@ -207,7 +207,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
    RVOL/"Premium" karışıklığı ve rozet-düşürme kuralı (gerçek ürün mantığı)
    korundu, sadece kısaltıldı. #}
 <p>
-  0-100 arası <strong>Teknik Güç Skoru</strong>, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>+hacim+teyit+RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir). Sinyalin <em>yönünü</em> değil, o yönün arkasındaki teknik teyidin <em>gücünü</em> ölçer.
+  0-100 arası <strong>Teknik Güç Skoru</strong>, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>, hacim, teyit ve RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir). Sinyalin <em>yönünü</em> değil, o yönün arkasındaki teknik teyidin <em>gücünü</em> ölçer.
 </p>
 <p style="font-family:var(--bp-font-mono);font-size:0.92em">
   ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p)
