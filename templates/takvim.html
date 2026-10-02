@@ -70,12 +70,12 @@
       <div class="tk-wk"><div class="tk-wk-l{% if w.ay_basi %} mo{% endif %}">{{ w.label }}</div><div class="tk-wk-d">
 {%- for d in w.days -%}
 {%- set nk = d.kinds|length -%}
-<button type="button" class="tk-dy{% if d.past %} past{% endif %}{% if d.now %} now{% endif %}{% if d.off %} off{% endif %}{% if d.half %} half{% endif %}" data-d="{{ d.date }}" aria-pressed="false"{% if d.now %} aria-current="date"{% endif %}{% if d.past or not nk %} disabled{% endif %} aria-label="{{ d.etiket }}{% if d.not %}, {{ d.not.not|lower }}{% endif %}: {% if nk %}{{ nk }} olay{% else %}olay yok{% endif %}"><span class="wd" aria-hidden="true">{{ d.harf }}</span><span class="dn" aria-hidden="true">{{ d.gun_no }}</span><span class="dots" aria-hidden="true">{% for k in d.kinds %}<i class="tk-k {{ k }}"></i>{% endfor %}</span><span class="xn" aria-hidden="true">{% if nk > 8 %}+{{ nk - 8 }}{% endif %}</span></button>
+<button type="button" class="tk-dy{% if d.past %} past{% endif %}{% if d.now %} now{% endif %}{% if d.off %} off{% endif %}{% if d.half %} half{% endif %}" data-d="{{ d.date }}" aria-pressed="false"{% if d.now %} aria-current="date"{% endif %}{% if d.past or not nk %} disabled{% endif %} aria-label="{{ d.etiket }}{% if d.not %}, {{ d.not.not|lower }}{% endif %}: {% if nk %}{{ nk }} olay{% else %}olay yok{% endif %}"><span class="wd" aria-hidden="true">{{ d.harf }}</span><span class="dn" aria-hidden="true">{{ d.gun_no }}</span><span class="dots" aria-hidden="true">{% for k in d.kinds %}<i class="tk-k {{ k }}"></i>{% endfor %}</span><span class="xn" aria-hidden="true"><i class="xd">{% if nk > 4 %}+{{ nk - 4 }}{% endif %}</i><i class="xm">{% if nk > 3 %}+{{ nk - 3 }}{% endif %}</i></span></button>
 {%- endfor -%}
 </div></div>
 {%- endfor %}
     </div>
-    <div class="tk-strip-f"><span><i class="tk-k t" aria-hidden="true"></i>Temettü</span><span><i class="tk-k b" aria-hidden="true"></i>Bilanço</span><span><i class="tk-k m" aria-hidden="true"></i>Makro</span><span><i class="tk-sw now" aria-hidden="true"></i>{{ T.asof_label }}</span><span><i class="tk-sw off" aria-hidden="true"></i>Borsa kapalı ya da yarım gün</span></div>
+    <div class="tk-strip-f"><span><i class="tk-k t" aria-hidden="true"></i>Temettü</span><span><i class="tk-k b" aria-hidden="true"></i>Bilanço</span><span><i class="tk-k m" aria-hidden="true"></i>Makro</span>{% if T.weeks|map(attribute="days")|sum(start=[])|selectattr("now")|list %}<span><i class="tk-sw now" aria-hidden="true"></i>{{ T.asof_label }}</span>{% endif %}<span><i class="tk-sw off" aria-hidden="true"></i>Borsa kapalı ya da yarım gün</span></div>
   </section>
 
   <div class="tk-grid">
@@ -96,27 +96,27 @@
 {%- if e.kind == 'temettu' %}
           <a class="tk-ev t stock" href="/hisse/{{ e.ticker }}" data-cat="temettu" data-d="{{ e.date }}" data-t="{{ e.ticker }}">
             <span class="tk-ev-k" aria-hidden="true">{{ IC_COIN|safe }}<i class="tk-k t"></i></span>{{ mc(e) }}
-            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.name }}<em>{{ 'tek ödeme' if e.taksit == 'tek' else 'taksit ' ~ e.taksit }}</em></span><span class="tk-ev-s">{% if e.date_kind == 'tahmini' %}<span class="tk-tz">genel kurul bekleniyor</span>{% endif %}Temettü <b>{{ g.gun }}</b><span class="pay"> · ödeme {{ gun(e.pay_date) }}</span><span class="cd"> · <span data-cd="{{ e.date }}">{{ kalan(e, g) }}</span></span></span></span>
+            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.name }}</span><em>{{ 'tek ödeme' if e.taksit == 'tek' else 'taksit ' ~ e.taksit }}</em></span><span class="tk-ev-s">{% if e.date_kind == 'tahmini' %}<span class="tk-tz">genel kurul bekleniyor</span>{% endif %}Temettü<span class="dt"> <b>{{ g.gun }}</b></span><span class="pay"> · ödeme {{ gun(e.pay_date) }}</span><span class="cd"> · <span data-cd="{{ e.date }}">{{ kalan(e, g) }}</span></span></span></span>
             <span class="tk-ev-n"><span class="amt"><b>{{ tl(e.brut_tl) }}</b> <small>brüt</small></span>{% if e.yield_pct is not none %}{% set verim = ('%.2f'|format(e.yield_pct))|replace('.', ',') %}<span class="yld"><b>%{{ verim }}</b> <small>verim</small></span>{% endif %}</span>
             <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
           </a>
 {%- elif e.kind == 'bilanco' and e.ticker %}
           <a class="tk-ev b stock" href="/hisse/{{ e.ticker }}" data-cat="bilanco" data-sub="rapor" data-d="{{ e.date }}" data-t="{{ e.ticker }}">
             <span class="tk-ev-k" aria-hidden="true">{{ IC_DOC|safe }}<i class="tk-k b"></i></span>{{ mc(e) }}
-            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.name }}<em>{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'finansal rapor' }}</em></span><span class="tk-ev-s"><span class="tk-tz{% if e.date_kind == 'kesin' %} ks{% endif %}">{{ e.date_kind }}</span><span class="ph">{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'Finansal rapor' }}</span><span class="dk">{% if e.date_kind == 'tahmini' %}Şirket tarihi henüz açıklamadı{% else %}Şirket tarihi açıkladı{% endif %}</span></span></span>
-            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
+            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.name }}</span><em>{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'finansal rapor' }}</em></span><span class="tk-ev-s"><span class="tk-tz{% if e.date_kind == 'kesin' %} ks{% endif %}">{{ e.date_kind }}</span><span class="ph">{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'Finansal rapor' }}</span><span class="dk">{% if e.date_kind == 'tahmini' %}Şirket tarihi henüz açıklamadı{% else %}Şirket tarihi açıkladı{% endif %}</span></span></span>
+            <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
           </a>
 {%- elif e.kind == 'bilanco' %}
           <div class="tk-ev b dl" data-cat="bilanco" data-sub="son_gun" data-d="{{ e.date }}">
             <span class="tk-ev-k" aria-hidden="true">{{ IC_DOC|safe }}<i class="tk-k b"></i></span><span class="tk-box"><b>Son gün</b><span>yasal süre</span></span>
-            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.title }}</span><span class="tk-ev-s">{{ e.detail }}</span></span>
-            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
+            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.title }}</span></span><span class="tk-ev-s">{{ e.detail }}</span></span>
+            <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
           </div>
 {%- else %}
           <div class="tk-ev m" data-cat="makro" data-d="{{ e.date }}">
             <span class="tk-ev-k" aria-hidden="true">{{ IC_PULSE|safe }}<i class="tk-k m"></i></span><span class="tk-box"><b>{{ e.time }}</b><span>{{ 'Türkiye' if e.region == 'TR' else 'ABD' }}</span></span>
-            <span class="tk-ev-b"><span class="tk-ev-t">{{ e.title }}{% if e.period %}<em>{{ e.period }}</em>{% endif %}</span><span class="tk-ev-s"><span class="ph"><span class="rg">{{ e.region }}</span>{{ e.time }} · </span>{{ e.detail }}</span></span>
-            <span class="tk-ev-n"></span><span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
+            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.title }}</span>{% if e.period %}<em>{{ e.period }}</em>{% endif %}</span><span class="tk-ev-s"><span class="ph"><span class="rg">{{ e.region }}</span>{{ e.time }} · </span>{{ e.detail }}</span></span>
+            <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span><span class="tk-chev" aria-hidden="true"></span>
           </div>
 {%- endif %}
 {%- endfor %}
@@ -220,7 +220,7 @@
     root.querySelectorAll('.tk-dy').forEach(function(b){
       var d = b.dataset.d, ks = (byD[d] || []).sort(function(x, y){ return 'tbm'.indexOf(x) - 'tbm'.indexOf(y); });
       b.querySelector('.dots').innerHTML = ks.map(function(k){ return '<i class="tk-k ' + k + '"></i>'; }).join('');
-      b.querySelector('.xn').textContent = ks.length > 8 ? '+' + (ks.length - 8) : '';
+      var n = ks.length; b.querySelector('.xd').textContent = n > 4 ? '+' + (n - 4) : ''; b.querySelector('.xm').textContent = n > 3 ? '+' + (n - 3) : '';
       var none = !ks.length || b.classList.contains('past');
       b.disabled = none;
       b.setAttribute('aria-label', b.getAttribute('aria-label').replace(/: .*$/, ': ' + (ks.length ? ks.length + ' olay' : 'olay yok')));
@@ -314,7 +314,7 @@
   try { tur = new URLSearchParams(location.search).get('tur'); } catch (e) { console.warn('tur parametresi okunamadi:', e); }
   setF(tur || 'all', false);
   if (sc) {
-    var now = sc.querySelector('.tk-dy.now');
+    var now = sc.querySelector('.tk-dy.now') || sc.querySelector('.tk-dy:not(.past)');
     if (now && sc.clientWidth < 700) { sc.scrollLeft += now.getBoundingClientRect().left - sc.getBoundingClientRect().left - 2; }
     requestAnimationFrame(arrows);
   }

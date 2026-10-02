@@ -49,13 +49,14 @@
 .tk-dy:hover:not(:disabled){background:rgba(var(--bp-text-rgb),.07)}
 .tk-dy .wd{font:600 11px/1 var(--tk-num);letter-spacing:.06em;color:var(--bp-text3)}
 .tk-dy .dn{font:700 14px/1.1 var(--tk-num);font-variant-numeric:tabular-nums}
-.tk-dy .dots{display:grid;grid-template-columns:repeat(2,6px);grid-auto-rows:6px;gap:2px;margin-top:2px}
+.tk-dy .dots{display:grid;grid-template-columns:repeat(2,6px);grid-auto-rows:6px;gap:2px}
 .tk-dy .dots .tk-k{width:6px;height:6px;vertical-align:0}
 .tk-dy .dots .tk-k.t{box-shadow:0 0 6px rgba(var(--tk-kt-rgb),.55)}
 .tk-dy .dots .tk-k.b{box-shadow:0 0 6px rgba(var(--tk-kb-rgb),.45)}
 .tk-dy .dots .tk-k.m{box-shadow:0 0 6px rgba(var(--tk-km-rgb),.6)}
-.tk-dy .dots .tk-k:nth-child(n+9){display:none}
-.tk-dy .xn{font:600 11px/1 var(--tk-num);color:var(--bp-text2)}
+.tk-dy .dots .tk-k:nth-child(n+5){display:none}
+.tk-dy .xn{font:600 10px/1 var(--tk-num);color:var(--bp-text2)}
+.tk-dy .xn i{font-style:normal}.tk-dy .xn .xm{display:none}
 .tk-dy:disabled{cursor:default;background:transparent}
 .tk-dy:disabled .dn{color:var(--bp-text3)}
 .tk-dy.past{opacity:.45}
@@ -113,14 +114,16 @@ a.tk-ev:hover{background:rgba(var(--bp-text-rgb),.03)}
 .tk-box b{font:700 15px/1.25 var(--tk-num);font-variant-numeric:tabular-nums;color:var(--bp-text)}
 .tk-box span{font:500 13px/1.3 var(--tk-num);color:var(--bp-text3)}
 .tk-ev-b{min-width:0}
-.tk-ev-t{display:block;font:600 15px/1.3 var(--tk-num);color:var(--bp-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tk-ev-t em{font-style:normal;font-weight:500;color:var(--bp-text3);margin-left:6px}
+.tk-ev-t{display:flex;align-items:baseline;min-width:0;font:600 15px/1.3 var(--tk-num);color:var(--bp-text);white-space:nowrap}
+.tk-ev-t .nm{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tk-ev-t em{flex:none;font-style:normal;font-weight:500;color:var(--bp-text3);margin-left:6px}
 .tk-ev-s{display:block;margin-top:2px;font:500 14px/1.35 var(--tk-num);color:var(--bp-text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk-ev-s b{color:var(--bp-text);font-weight:700}
 .tk-ev-s .rg{display:inline-block;font:700 10.5px/1.55 var(--tk-num);letter-spacing:.08em;color:var(--bp-text2);border:1px solid var(--bp-border2);border-radius:4px;padding:0 4px;margin-right:6px;vertical-align:1px}
 .tk-ev .cd,.tk-ev .ph{display:none}
 .tk-tz{display:inline-block;font:600 12px/1.5 var(--tk-num);color:var(--bp-text2);border:1px dashed var(--bp-ctl-border);border-radius:99px;padding:0 8px;margin-right:8px;vertical-align:1px}
 .tk-tz.ks{border-style:solid;border-color:var(--bp-border2);color:var(--bp-text)}
+.tk-ev:not(.t) .tk-ev-b{grid-column:span 2}
 .tk-ev-n{text-align:right;font-variant-numeric:tabular-nums;min-width:0}
 .tk-ev-n .amt,.tk-ev-n .yld{display:block;white-space:nowrap}
 .tk-ev-n .amt b{font:700 16px/1.3 var(--tk-num);color:var(--bp-text)}
@@ -169,7 +172,7 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text3)
 .tk-how dd b{color:var(--bp-text);font-weight:600}
 .tk-disc{margin:26px 0 0;padding-top:14px;border-top:1px solid var(--bp-border);font-size:12.5px;color:var(--bp-text3)}
 
-@media (max-width:1100px){
+@media (max-width:1360px){
   .tk-grid{grid-template-columns:minmax(0,1fr)}
   .tk-side{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
   .tk-wk{flex-basis:calc((100% - 4 * 14px) / 5)}
@@ -197,6 +200,8 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text3)
   .tk-dy{scroll-snap-align:start;height:50px;gap:2px;padding-top:4px;border-radius:9px}
   .tk-dy .dots{grid-template-columns:repeat(3,6px)}
   .tk-dy .dots .tk-k:nth-child(n+4){display:none}
+  .tk-dy .xn{position:absolute;top:5px;right:5px}
+  .tk-dy .xn .xd{display:none}.tk-dy .xn .xm{display:inline}
   .tk-wk-l{font-size:12px;margin-bottom:4px}
   .tk-fnote{margin:6px 0 8px;font-size:12.5px}
   .tk-dg{display:block;border-top:0;padding:0;scroll-margin-top:4px}
@@ -217,7 +222,8 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text3)
   .tk-ev-t{grid-area:l1;font-size:15px}
   .tk-ev.stock .tk-ev-t{display:none}
   .tk-ev-s{grid-area:l2;margin:0;font-size:14px}
-  .tk-ev .dk,.tk-ev .pay{display:none}
+  .tk-ev .dk,.tk-ev .pay,.tk-ev .dt{display:none}
+  .tk-ev .cd{white-space:nowrap}
   .tk-ev .ph{display:inline}
   .tk-ev.t .cd{display:inline}
   .tk-ev-n{display:contents}
