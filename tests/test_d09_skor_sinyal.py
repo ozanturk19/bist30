@@ -473,3 +473,18 @@ def test_d47_signal_conditions_flags_ile_birebir(st_dir, adx, di_p, di_m, e12, e
     assert by_id["ema1299"]["ok"] == (e12 > e99) == flags["e12_bull"]
     assert by_id["weekly_ema20"]["ok"] == (weekly_dir == 1)
     assert by_id["weekly_ema20"]["value"] == weekly_dir
+
+
+def test_d47_signal_conditions_tak_cik_yeni_kosul(monkeypatch):
+    """D-47 kabul: 6. bir koşul YALNIZ kayda 1 satır eklenerek çalışır —
+    build_signal_conditions() koşul sayısına göre değişmeden onu da üretir."""
+    extra = {
+        "id": "demo_extra", "label": "Demo koşul",
+        "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+            adx > di_p, round(adx - di_p, 1), None),
+    }
+    monkeypatch.setattr(br, "SIGNAL_CONDITIONS", br.SIGNAL_CONDITIONS + [extra])
+    conds = br.build_signal_conditions(1, 30, 20, 10, 12.0, 10.0, 1)
+    assert len(conds) == 6
+    assert conds[-1] == {"id": "demo_extra", "label": "Demo koşul", "ok": True,
+                          "value": 10.0, "threshold": None}

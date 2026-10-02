@@ -331,39 +331,48 @@ def signal_from_indicators(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir)
 
 
 # D-47: sinyal kuralları tak-çıkar — 5 koşulun okunabilir kaydı (id, Türkçe
-# etiket). API `conditions` alanı ve ileride /metodoloji (C-42) aynı kayıttan
-# okur; yeni koşul eklemek bu listeye 1 satır demek. trend_flags/classify_signal
+# etiket, hesap fonksiyonu). API `conditions` alanı ve ileride /metodoloji
+# (C-42) aynı kayıttan okur; yeni koşul eklemek bu listeye 1 satır + 1 test
+# demek — build_signal_conditions() her koşulu kaydındaki `compute`'tan
+# türetir, koşul sayısına göre değişmez. trend_flags/classify_signal
 # DEĞİŞMEZ — motorun zaten hesapladığı oyları etiketleyip dışa açar.
+SIGNAL_RULESET = "v1"  # koşul kaydı değişince (ekleme/kaldırma) artar
+
 SIGNAL_CONDITIONS = [
-    {"id": "supertrend",   "label": "Supertrend yönü"},
-    {"id": "adx",          "label": f"ADX ≥ {TREND_ADX_MIN:.0f}"},
-    {"id": "di",           "label": "DI+ > DI-"},
-    {"id": "ema1299",      "label": "EMA12 > EMA99"},
-    {"id": "weekly_ema20", "label": "Haftalık EMA20 yönü"},
+    {"id": "supertrend", "label": "Supertrend yönü",
+     "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+        st_dir == 1,
+        "Yukarı" if st_dir == 1 else ("Aşağı" if st_dir == -1 else None),
+        None)},
+    {"id": "adx", "label": f"ADX ≥ {TREND_ADX_MIN:.0f}",
+     "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+        adx >= TREND_ADX_MIN, round(float(adx), 1), TREND_ADX_MIN)},
+    {"id": "di", "label": "DI+ > DI-",
+     "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+        di_p > di_m, f"{di_p:.1f}/{di_m:.1f}", None)},
+    {"id": "ema1299", "label": "EMA12 > EMA99",
+     "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+        e12 > e99, round(float(e12 - e99), 2), 0)},
+    {"id": "weekly_ema20", "label": "Haftalık EMA20 yönü",
+     "compute": lambda st_dir, adx, di_p, di_m, e12, e99, weekly_dir: (
+        weekly_dir == 1, weekly_dir, None)},
 ]
 
 
 def build_signal_conditions(st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir):
-    """5 koşulun `{id, label, ok, value, threshold}` listesi (D-47).
+    """Kayıttaki koşulların `{id, label, ok, value, threshold}` listesi (D-47).
 
     `ok` her koşulun YUKARI (bull) okunuşudur — trend_flags()'in zaten
     hesapladığı karşılaştırmalardan türer, ikinci bir sinyal kanonu açmaz.
+    Koşul sayısı `SIGNAL_CONDITIONS` kaydından gelir (bugün 5) — yeni bir
+    koşul kayda eklenince bu fonksiyon DEĞİŞMEDEN onu da üretir.
     """
-    adx_ok = adx >= TREND_ADX_MIN
-    labels = {c["id"]: c["label"] for c in SIGNAL_CONDITIONS}
-    return [
-        {"id": "supertrend", "label": labels["supertrend"], "ok": st_dir == 1,
-         "value": "Yukarı" if st_dir == 1 else ("Aşağı" if st_dir == -1 else None),
-         "threshold": None},
-        {"id": "adx", "label": labels["adx"], "ok": bool(adx_ok),
-         "value": round(float(adx), 1), "threshold": TREND_ADX_MIN},
-        {"id": "di", "label": labels["di"], "ok": di_plus > di_minus,
-         "value": f"{di_plus:.1f}/{di_minus:.1f}", "threshold": None},
-        {"id": "ema1299", "label": labels["ema1299"], "ok": e12 > e99,
-         "value": round(float(e12 - e99), 2), "threshold": 0},
-        {"id": "weekly_ema20", "label": labels["weekly_ema20"], "ok": weekly_dir == 1,
-         "value": weekly_dir, "threshold": None},
-    ]
+    out = []
+    for c in SIGNAL_CONDITIONS:
+        ok, value, threshold = c["compute"](st_dir, adx, di_plus, di_minus, e12, e99, weekly_dir)
+        out.append({"id": c["id"], "label": c["label"], "ok": bool(ok),
+                     "value": value, "threshold": threshold})
+    return out
 
 
 def compose_score(adx, vol_ratio, bull_score, confirmed, rsi, signal="AL"):
