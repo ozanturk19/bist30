@@ -30,5 +30,5 @@
 </nav>
 <script src="{{ static_v('js/focus-trap.js') }}" defer></script>
 <script>
-(function(){var p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(function(el){if(el.dataset.route.split(' ').some(function(r){return r==='/'?p==='/':p.startsWith(r);})){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
+(function(){var p=window.location.pathname;if(/\/bildirim(\/|$)/.test(p))p='/haberler';document.querySelectorAll('.mbn-item[data-route]').forEach(function(el){if(el.dataset.route.split(' ').some(function(r){return r==='/'?p==='/':p.startsWith(r);})){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
 </script>

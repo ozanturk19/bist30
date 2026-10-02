@@ -12,19 +12,15 @@
     line-height: 1.7;
     min-height: 100vh;
   }
-  header {
-    background: var(--bp-surface);
-    border-bottom: 1px solid var(--bp-border);
-    position: sticky;
-    top: 0;
-    z-index:var(--bp-z-dropdown);
-  }
+  /* C-71 K30: header kuralı shared.css'te tek kaynak (makro şeritsiz sayfada top 0). */
+  header { background: var(--bp-surface); }
 
 
   .hh-alpha-bar {
     background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     padding: 10px 14px; margin: 0 0 12px;
-    display: flex; gap: 6px; flex-wrap: wrap;
+    /* C-71 K30: harf ızgarası — son satırda tek harf yetim kalmaz, sütunlar hizalı */
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px;
   }
   .hh-alpha-link {
     position: relative;

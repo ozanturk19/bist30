@@ -301,6 +301,22 @@ html {
   #macroBar, .macro-bar { position: relative !important; }
 }
 
+/* ── C-71 K30 (02.10): KABUK TEK KAYNAK ─────────────────────────────────────
+   /haberler, /takvim, /bulten, /takip ve hata sayfalarının CSS'inde body/header
+   sıfırlaması yoktu: gövdede 8 px boşluk, yapışmayan saydam başlık (700 px
+   kaydırınca başlık ekran dışı). Kanonik kural burada; sayfa CSS'i yalnız
+   farkı ezer (`:where` → özgüllük 0). Makro şerit taşımayan sayfada header
+   ekranın tepesine yapışır. */
+body { margin: 0; }
+:root:not(:has(#macroBar)) { --bp-chrome-macro: 0px; }
+:where(body > header) {
+  background: var(--bp-bg);
+  border-bottom: 1px solid var(--bp-border);
+  position: sticky;
+  top: var(--bp-anchor-macro);
+  z-index: var(--bp-z-dropdown);
+}
+
 /* ── Makro şerit: TEK KAYNAK (C-15) ──────────────────────────────────────────
    Önceden 11 sayfa CSS'inde ayrı kopya vardı (yazı boyu/kenarlık/etiket rengi
    sayfadan sayfaya kayıyordu). Sayfa CSS'inde `.macro-bar`, `.macro-item`,
