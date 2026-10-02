@@ -153,6 +153,7 @@ const ROW_LABELS = [
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
   { key: '_sep_fund',     label: 'TEMEL ANALİZ', isSep: true },
+  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve F/DD oranlarının sektör ortancasıyla karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
   { key: 'pb_ratio',       label: 'F/DD Oranı' },
@@ -281,6 +282,13 @@ function renderCell(key, s) {
       const _d = _p > 0 ? (_n - _p) / _p * 100 : null;
       const _rel = _d == null ? '' : (Math.abs(_d) < 0.05 ? 'fiyatla aynı' : `fiyatın ${bpPctLevel(Math.abs(_d), 1)} ${_d < 0 ? 'altında' : 'üstünde'}`);
       return `<span class="mono">${_txt}&nbsp;₺</span>` + (_rel ? `<span class="sl-role">${_rel}</span>` : '');
+    }
+    /* C-70 K21 (02.10): CPO-1811 degerleme.h -- /hisse Temel kartinin HX_TV2.h'si,
+       ayni sozcukler; renk notr (yon rengi yok). Hukum yoksa '—'. */
+    case 'degerleme': {
+      const _h = v && v.h;
+      const _w = _h === 'ucuz' ? 'Ucuz tarafta' : _h === 'makul' ? 'Makul' : _h === 'pahali' ? 'Pahalı tarafta' : _h === 'karisik' ? 'Karışık' : '';
+      return _w ? `<span>${_w}</span>` : '<span class="muted">—</span>';
     }
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
