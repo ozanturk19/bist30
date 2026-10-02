@@ -599,7 +599,7 @@ LEG_CAP, LEG_NOTE = "Gün sonu değişim", "Kutu büyüklüğü: piyasa değeri"
 
 
 def _SWATCHES(flags):
-    return ((flags.get("stale"), "Veri gecikmeli"), (flags.get("na"), "Değişim verisi yok"))
+    return ((flags.get("stale"), "Kapanış verisi gelmedi"), (flags.get("na"), "Değişim verisi yok"))
 
 
 def _legend_width(sp, flags):

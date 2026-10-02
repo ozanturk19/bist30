@@ -202,7 +202,7 @@ def test_kare_min_label_sizes(renders):
 
 def test_stale_rows_get_legend_swatch():
     _, meta = hi.render(_fx(), "og")    # canlı 25.09 dosyası: 100/100 bayat (onarım öncesi)
-    assert meta["flags"]["stale"] and "Veri gecikmeli" in meta["texts"]
+    assert meta["flags"]["stale"] and "Kapanış verisi gelmedi" in meta["texts"]
 
 
 def test_render_is_deterministic(renders):
