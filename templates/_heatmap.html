@@ -192,9 +192,9 @@
       <div class="da-eyebrow">Piyasa haritası</div>
       {%- endif %}
       {%- if _h1 %}
-      <h1 class="hm-title da-display" id="hmTitle">{{ _h1[0] }} <span>· {{ _h1[1] }}</span></h1>
+      <h1 class="hm-title da-display" id="hmTitle">{{ _h1[0] }}&nbsp;<span>·</span> <span>{{ _h1[1] }}</span></h1>
       {%- else %}
-      <h2 class="hm-title da-display" id="hmTitle">BIST100 <span>· {{ hm.asof_label }} kapanışı</span></h2>
+      <h2 class="hm-title da-display" id="hmTitle">BIST100&nbsp;<span>·</span> <span>{{ hm.asof_label }} kapanışı</span></h2>
       {%- endif %}
       <p class="hm-thesis">{{ _thesis_chg(_n, _up, _dn, _fl, _xu, _tv, _tb) }}</p>
     </div>
@@ -203,7 +203,7 @@
     <div class="hm-head">
       <div class="hm-hl">
         <div class="da-eyebrow">Sektör haritası</div>
-        <h1 class="hm-title da-display" id="hmTitle">{{ hm.universe or 'BIST100' }} ısı haritası <span>· {{ hm.asof_label }} kapanışı</span></h1>
+        <h1 class="hm-title da-display" id="hmTitle">{{ hm.universe or 'BIST100' }} ısı haritası&nbsp;<span>·</span> <span>{{ hm.asof_label }} kapanışı</span></h1>
         <p class="hm-thesis" id="hmThesis" aria-live="polite">
         {%- if _mode == 'bp' -%}
           {%- if _bps -%}

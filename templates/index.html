@@ -153,7 +153,7 @@
     <div class="hp-strip" role="img" aria-label="{{ _sc.total }} hissenin durumu: {{ _g }} Güçlü Trend, {{ _y }} Yatay, {{ _b }} Trend Bozuldu">
       {%- for _ in range(_g) %}<i class="g"></i>{% endfor %}{% for _ in range(_y) %}<i class="y"></i>{% endfor %}{% for _ in range(_b) %}<i class="b"></i>{% endfor -%}
     </div>
-    <p class="hp-uni-cap">{{ _sc.total }} hissenin <span class="hp-nw1"><span class="hp-k g" aria-hidden="true"></span><b>{{ bpf.poss(_g) }}</b> Güçlü Trend</span> · <span class="hp-nw1"><span class="hp-k y" aria-hidden="true"></span><b>{{ bpf.poss(_y) }}</b> Yatay</span> · <span class="hp-nw1"><span class="hp-k b" aria-hidden="true"></span><b>{{ bpf.poss(_b) }}</b> Trend Bozuldu</span></p>
+    <p class="hp-uni-cap">{{ _sc.total }} hissenin <span class="hp-nw1"><span class="hp-k g" aria-hidden="true"></span><b>{{ bpf.poss(_g) }}</b> Güçlü Trend</span>&nbsp;· <span class="hp-nw1"><span class="hp-k y" aria-hidden="true"></span><b>{{ bpf.poss(_y) }}</b> Yatay</span>&nbsp;· <span class="hp-nw1"><span class="hp-k b" aria-hidden="true"></span><b>{{ bpf.poss(_b) }}</b> Trend Bozuldu</span></p>
   </div>
   {%- endif %}
 </section>

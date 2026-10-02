@@ -314,7 +314,7 @@ header{
 .hm{--hm-n:var(--bp-surface3);padding:clamp(16px,2.4vw,26px);--da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.10;--da-glow-size:420px;--da-glow-y:-55%}
 .hm-head{margin-bottom:clamp(14px,2vw,20px)}
 .hm-title{font-weight:800;font-size:clamp(1.55rem,3.2vw,2.35rem);line-height:1.02;letter-spacing:-.03em;margin:0 0 6px}
-.hm-title span{color:var(--bp-text3);font-weight:700}
+.hm-title span{color:var(--bp-text3);font-weight:700;white-space:nowrap}
 .hm-thesis{margin:0;color:var(--bp-text2);font-size:var(--bp-text-15);max-width:76ch}
 .hm-thesis b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:var(--bp-text);white-space:nowrap}
 .hm-thesis .up{color:var(--bp-al)}

@@ -1216,7 +1216,7 @@ function hxFillFund(f, divRow) {
   const an = document.getElementById('q2An');
   if (an && f.analyst_target != null && f.analyst_count && HX_PRICE) {
     const up = (f.analyst_target / HX_PRICE - 1) * 100;
-    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b> · fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' + (up > 0 ? 'üstünde' : (up < 0 ? 'altında' : 'düzeyinde')) + ' · ' + f.analyst_count + ' analist';
+    an.innerHTML = 'Analist hedef ortalaması <b>' + _hxNF2.format(f.analyst_target) + ' ₺</b>\u00a0· fiyatın <b>' + bpPctLevel(Math.abs(up), 1) + '</b> ' + (up > 0 ? 'üstünde' : (up < 0 ? 'altında' : 'düzeyinde')) + '\u00a0· ' + f.analyst_count + '\u00a0analist';   /* C-71 K32: ayırıcı satır başına düşmez */
     an.hidden = false;
   }
   const note = document.getElementById('q2Note');
