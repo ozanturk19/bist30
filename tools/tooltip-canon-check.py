@@ -59,7 +59,8 @@ NATIVE_FOCUSABLE = {'a', 'button', 'input', 'select', 'textarea', 'summary'}
 # 30.09 C-70 K12: hisse "Algoritmamizin Onaylari" bolumu (Aciklama dugmesi data-tip) kalkti: 33 -> 32.
 # 01.10 C-74 K1: hisse "Ne anlama geliyor?" basligindaki "Kural tabanli" rozeti (data-tip) kalkti: 32 -> 31.
 # 02.10 C-74 K11: hisse Sinyal Gecmisi + /ozet Trend Bozuldu getiri ipucu ("kazanc/kayip olarak gosterilmez") kalkti: 31 -> 29.
-MIN_TIPS      = 29
+# 02.10 C-74 K10: hisse Hacim Profili "Hacim Onaylı" + "TEYİTLİ" rozet ipuclari kalkti: 29 -> 27.
+MIN_TIPS      = 27
 # 21.09 (K-AU): gercek sayi artik 0 oldugu icin ">=1" tabani kapiyi surekli
 # "korlesmis" (cikis 2) yapardi. Sifir bir kapsam yalani OLMASIN diye taban
 # yerine POZITIF KONTROL var: css_attr_tooltips()'in mantigi sentetik bir

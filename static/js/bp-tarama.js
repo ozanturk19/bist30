@@ -24,7 +24,7 @@
   var TR = { g: 'Güçlü Trend', y: 'Yatay', b: 'Trend Bozuldu' };
   var GROUPS = [
     { k: 'g', d: 'Trend koşullarının hepsi sağlanıyor' },
-    { k: 'y', d: 'Koşulların bir kısmı sağlanıyor; yön henüz belli değil' },
+    { k: 'y', d: 'Beş koşul birlikte sağlanmıyor' },
     { k: 'b', d: 'Yükseliş trendi bozuldu; trend desteklemiyor' }];
   var SLUG = { g: 'guclu-trend', y: 'yatay', b: 'trend-bozuldu' };
   var CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
@@ -75,7 +75,7 @@
     { id: 'bp-70', l: 'BP ≥ 70', rule: 'BorsaPusula Skoru 70 ve üstü.', set: { bp: 70 } },
     { id: 'yeni-sinyal', l: 'Yeni sinyal (≤3 seans)', rule: 'Trend durumu son 3 seans içinde değişen hisseler.', x: function (r) { return r.d != null && r.d <= 3; } },
     { id: 'trend-bozuldu-son-seans', l: 'Son seansta Trend Bozuldu', rule: function () { return 'Yükseliş trendi ' + (ASOF || 'son') + ' seansında bozulan hisseler.'; }, set: { durum: ['b'] }, x: function (r) { return r.d != null && r.d <= 1; } },
-    { id: 'kaliteli-trend-bekliyor', l: 'Kaliteli, trend bekliyor', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
+    { id: 'kaliteli-trend-bekliyor', l: 'Finansalları güçlü, trendi Yatay', rule: 'Temel skoru 70 ve üstü, trendi Yatay.', set: { durum: ['y'], temel: 70 }, x: function (r) { return !r.sv; } }];
   var PRE = {};
   PRESETS.forEach(function (p) { PRE[p.id] = p; });
 

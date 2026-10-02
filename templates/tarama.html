@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
-<meta name="description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın. Hazır listeler: Güçlü Trend + Hacim Onaylı, BP ≥ 70, yeni sinyal, kaliteli ve trend bekleyen şirketler.">
+<meta name="description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın. Hazır listeler: Güçlü Trend + Hacim Onaylı, BP ≥ 70, yeni sinyal, finansalları güçlü ve trendi Yatay şirketler.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
 <meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
 <meta property="og:description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın.">
@@ -71,7 +71,7 @@
       <a class="tv-chip" href="/tarama?liste=bp-70" data-act="preset" data-id="bp-70">BP ≥ 70<span class="cn"></span></a>
       <a class="tv-chip" href="/tarama?liste=yeni-sinyal" data-act="preset" data-id="yeni-sinyal">Yeni sinyal (≤3 seans)<span class="cn"></span></a>
       <a class="tv-chip" href="/tarama?liste=trend-bozuldu-son-seans" data-act="preset" data-id="trend-bozuldu-son-seans">Son seansta Trend Bozuldu<span class="cn"></span></a>
-      <a class="tv-chip" href="/tarama?liste=kaliteli-trend-bekliyor" data-act="preset" data-id="kaliteli-trend-bekliyor">Kaliteli, trend bekliyor<span class="cn"></span></a>
+      <a class="tv-chip" href="/tarama?liste=kaliteli-trend-bekliyor" data-act="preset" data-id="kaliteli-trend-bekliyor">Finansalları güçlü, trendi Yatay<span class="cn"></span></a>
     </div>
   </div>
   {#- Panel .tv-bar'in ICINDE degil: dar ekranda cubuk yapiskan (kendi yigin baglami) ve alt panel alt gezinmenin ustune cikamazdi. #}
@@ -97,7 +97,7 @@
       <thead><tr><th scope="col" class="c-hs th-sortable" aria-sort="none"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="t">Hisse<span class="ar" aria-hidden="true">↕</span></button></th><th scope="col" class="c-bp num th-sortable" aria-sort="descending"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="bp">BP Skoru<span class="ar" aria-hidden="true">↓</span></button></th><th scope="col" class="c-tr th-sortable" aria-sort="none"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="tr">Trend<span class="ar" aria-hidden="true">↕</span></button></th><th scope="col" class="c-p num th-sortable" aria-sort="none"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="p">Fiyat<span class="ar" aria-hidden="true">↕</span></button></th><th scope="col" class="c-c num th-sortable" aria-sort="none"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="c">Değişim<span class="ar" aria-hidden="true">↕</span></button></th><th scope="col" class="c-g th-sortable" aria-sort="none"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="g">Sektör<span class="ar" aria-hidden="true">↕</span></button></th></tr></thead>
       {#- Guclu Trend grubunun sayisi SSR'da ancak ssr_rows'ta baska durumdan satir da varsa kesin (grup ilk 30'a sigdi). #}
       <tbody class="grp g open">{{ gh('g', 'Güçlü Trend', 'Trend koşullarının hepsi sağlanıyor', sr_g|length if sr_g|length < ssr_rows|length else 0, true) }}{% for s in sr_g %}{{ ssr_row(s, 'g') }}{% endfor %}</tbody>
-      <tbody class="grp y">{{ gh('y', 'Yatay', 'Koşulların bir kısmı sağlanıyor; yön henüz belli değil', 0, false) }}{% for s in sr_y %}{{ ssr_row(s, 'y', ' tv-nojs') }}{% endfor %}</tbody>
+      <tbody class="grp y">{{ gh('y', 'Yatay', 'Beş koşul birlikte sağlanmıyor', 0, false) }}{% for s in sr_y %}{{ ssr_row(s, 'y', ' tv-nojs') }}{% endfor %}</tbody>
       <tbody class="grp b">{{ gh('b', 'Trend Bozuldu', 'Yükseliş trendi bozuldu; trend desteklemiyor', 0, false) }}</tbody>
     </table></div>
   </div>

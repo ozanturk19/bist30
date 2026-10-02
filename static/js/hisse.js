@@ -807,11 +807,9 @@ function renderSummary(s, signalData) {
     const hpRvolRow = document.getElementById('hpRvolRow');
     const hpRvolVal = document.getElementById('hpRvolVal');
     if (hpRvolRow && hpRvolVal && rvolVal != null) {
-      const cls = isPremium ? 'ok' : (rvolVal >= 1.0 ? 'weak' : 'bad');
-      hpRvolVal.className = 'hp-row-val ' + cls;
-      hpRvolVal.innerHTML = `${rvolVal.toFixed(2).replace('.', ',')}×` +
-        /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
-        (isPremium ? ' <span class="hp-tag premium" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ Hacim Onaylı</span>' : '');
+      /* C-74 K10 (02.10): renk (ok/weak/bad) ve "Hacim Onaylı" rozeti yargiydi -- yalniz sayi. */
+      hpRvolVal.className = 'hp-row-val';
+      hpRvolVal.textContent = `${rvolVal.toFixed(2).replace('.', ',')}×`;
       hpRvolRow.style.display = '';
     }
 
@@ -819,51 +817,18 @@ function renderSummary(s, signalData) {
     const hpSvolRow = document.getElementById('hpSvolRow');
     const hpSvolVal = document.getElementById('hpSvolVal');
     if (hpSvolRow && hpSvolVal && vr != null) {
-      const isStrongBreakout = vr >= 1.7;
-      const cls = isStrongBreakout ? 'ok' : (vr >= 1.2 ? 'weak' : 'bad');
-      hpSvolVal.className = 'hp-row-val ' + cls;
-      const tag = isStrongBreakout
-        ? ' <span class="hp-tag confirmed" data-tip="Sinyal günü hacim ortalamayı belirgin geçti" tabindex="0">✓ TEYİTLİ</span>'
-        : '';
-      hpSvolVal.innerHTML = `${vr.toFixed(2).replace('.', ',')}×${tag}`;
+      hpSvolVal.className = 'hp-row-val';
+      hpSvolVal.textContent = `${vr.toFixed(2).replace('.', ',')}×`;
       hpSvolRow.style.display = '';
     }
 
-    /* Yorum: ikisinin kombinasyonu */
+    /* C-74 K10 (02.10): "zayif/guclu/kivilcim/birikim" yorumlari yerine betim.
+       `vr == null` bilinmiyor demektir (K-BT), cumle kurulmaz. */
     const hpSummary = document.getElementById('hpSummary');
     if (hpSummary) {
-      let txt = '';
-      /* K-BT ek (22.09): `vr == null` BILINMIYOR demektir, "dusuk" DEMEZ.
-         `signal_vol_ratio` sinyal GUNUNUN hacmidir; aktif sinyali olmayan
-         hissede hic hesaplanmaz -- canli olcum 22.09: 138/217 hissede NULL.
-         Eski dal `(vr == null || vr < 1.0)` ile ikisini AYNI kefeye koyuyordu
-         ve **42 hissede** "sinyal gunu hacmi DUSUK" diye basiyordu; hemen
-         ustundeki satir ise ayni anda "Sinyal gunu hacim: —" (bilinmiyor)
-         diyordu. Bu cumle K-BT fix'ine kadar panelin silinmesi yuzunden
-         GORUNMUYORDU; panel gorunur olunca kapatildi. (K-V kanonu: bos bir
-         deger bir OLCUM degildir.) */
-      if (vr == null) {
-        txt = rvolVal == null ? ''
-          : rvolVal >= 1.20
-            ? 'RVOL güçlü. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
-            : rvolVal >= 1.0
-              ? 'RVOL ortalama seviyede. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
-              : 'RVOL zayıf. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.';
-      } else if (isPremium && vr >= 1.7) {
-        txt = 'İkisi de güçlü — Hacim hem yapısal hem sinyal günü güçlü.';
-      } else if (isPremium && vr < 1.7) {
-        txt = 'RVOL güçlü, sinyal günü sessiz — yavaş kıvılcımlanan trend.';
-      } else if (!isPremium && vr >= 1.7) {
-        txt = 'Sinyal günü güçlü patladı ama RVOL henüz yükselmemiş.';
-      } else if (rvolVal != null && rvolVal >= 1.20 && vr < 1.0) {
-        txt = 'RVOL güçlü; sinyal günü hacmi düşük — kademeli birikim.';
-      } else if (rvolVal != null && rvolVal < 1.0 && vr != null && vr >= 1.2) {
-        txt = 'Sinyal günü orta hacim ama RVOL düşük.';
-      } else if (rvolVal != null && rvolVal >= 1.0 && vr != null && vr >= 1.0) {
-        txt = 'Hacim profili ortalama seviyede — net üstünlük yok.';
-      } else if (vr != null && rvolVal != null) {
-        txt = 'RVOL ve sinyal günü hacmi ikisi de zayıf.';
-      }
+      const x = (v) => v.toFixed(2).replace('.', ',');
+      let txt = rvolVal != null ? `Son 5 günün hacmi 20 günlük ortalamanın ${x(rvolVal)} katı.` : '';
+      if (vr != null) txt += (txt ? ' ' : '') + `Sinyal günündeki hacim ortalamanın ${x(vr)} katıydı.`;
       hpSummary.textContent = txt;
     }
   })();
@@ -989,20 +954,10 @@ function renderSummary(s, signalData) {
        46,5 · MGROS 47,1 · MAVI 51,0), yani "trend bozuldu" denen hissede
        "İdeal Giriş Penceresi" yaziyordu. Tek kanon: bp-format.js
        `bpRsiZoneText` (/karsilastir ayni fonksiyonu kullanir). */
-    const zone = bpRsiZoneText(signalData.rsi_zone, s.signal);
-    // ind-bull yeşil (Aşırı Satım, Sağlıklı Momentum), ind-bear kırmızı (Aşırı Alım), ind-neutral gri
-    // P0-2 (CPO-DEV2-031/033): sağlıklı bölge yeşili sadece yükseliş sinyalinde — SAT'ta
-    // sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
-    const rIdeal = s.signal === 'AL' && rsi >= 45 && rsi < 60;
-    const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' :
-                   (rsi < 30 || rIdeal) ? 'ind-badge ind-bull' :
-                   'ind-badge ind-neutral';
-    const rsiIcon = rsi >= 80 ? '🔴' : rsi >= 70 ? '⚠️' :
-                    rIdeal ? '✅' :
-                    rsi < 30 ? '🔵' : '';
-    const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
-    indHtml += `<span class="${rsiCls}">RSI ${bpIndNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi. 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde Sağlıklı Momentum — diğer sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım." aria-label="RSI açıklamasını göster">?</button>`;
+    /* C-74 K10 (02.10): bolge adi (Dip Toparlanmasi, Asiri Alim, Dikkatli...) ve
+       yesil/kirmizi rozet yone beklenti yukluyordu -- /karsilastir gibi yalniz sayi. */
+    indHtml += `<span class="ind-badge ind-neutral">RSI ${bpIndNum(rsi)}</span>` +
+      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi; son günlerdeki yükseliş ve düşüşlerin büyüklüğünü karşılaştırır." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
