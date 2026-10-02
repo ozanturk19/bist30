@@ -628,7 +628,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </details>
     {% endif %}
     {% endif %}
-    <div class="content-meta">Şirket profili · KAP faaliyet konusu</div>
+    <div class="content-meta">Şirket profili · Faaliyet konusu</div>
   </section>
   {% endif %}
 
@@ -700,7 +700,6 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   </div>
     </div>
   </details>
-  <p class="hx-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
   </div>{# /panel-ozet #}
 
   {#- C-22 + C-22b (25.09): Temel sekmesi v2 -- onayli taslak v3 (C-M6, O16e=B, O22=B).
@@ -790,7 +789,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </section>
   </div>
   <p class="tv-err" id="tvErr" hidden>Finansal veri şu an alınamadı. <button type="button" class="da-retry" id="tvRetry">Tekrar dene</button></p>
-  <p class="hx-disc" id="tvDisc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+  <p class="hx-disc" id="tvDisc" hidden></p>
   </div>{# /panel-temel #}
   
 
@@ -846,7 +845,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 
 </main>
 
-{% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
+{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 <script src="{{ static_v('bp-format.js') }}"></script>
 <script src="{{ static_v('stale-banner.js') }}"></script>

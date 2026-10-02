@@ -1919,7 +1919,10 @@ function _tvRender(f, divRow) {
     const _b = TV_BASIS[k.basis] || 'TL';   /* C-74 K2: şablon adı + 'nominal' iç dil, gösterilmez */
     per.textContent = 'Son rapor: ' + (k.son_rapor_etiket || '') + (_b !== 'TL' ? ' · ' + _b : '');
     per.hidden = false;
-    _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + (k.son_rapor_etiket || '') + ' dönemine kadar. Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.';
+    if (k.son_rapor_etiket) {
+      _tvEl('tvDisc').textContent = 'Finansallar son açıklanan ' + k.son_rapor_etiket + ' dönemine kadar.';
+      _tvEl('tvDisc').hidden = false;
+    }
   } else {
     _tvHide('tvPrep', false);
   }
