@@ -335,7 +335,7 @@
   @media (max-width: 600px) {
     .search-bar { padding: 12px; }
     /* C-70 K21: telefonda 2x2 izgara (80 px tek sutun yerine) */
-    .ticker-inputs { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .ticker-inputs { display: grid; grid-template-columns: 1fr 1fr; flex: 1 1 100%; }
     .ac-wrap { min-width: 0; }
     .ticker-input { width: 100%; }
     .ac-dropdown { min-width: 200px; }
