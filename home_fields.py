@@ -47,7 +47,7 @@ def fin_answer(entry):
         if v2.get("cevap"):
             return v2["cevap"]
         if v2.get("limited_data"):
-            return "Sınırlı veri"
+            return "Temel skor verilmedi"
     cats = entry.get("categories")
     if not isinstance(cats, dict):
         return None

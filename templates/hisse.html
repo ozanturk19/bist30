@@ -377,7 +377,7 @@
     (kategori skorlari; >=70 guclu, <50 zayif: financial_health_score esikleri; sirkete yargi yok). -#}
 {%- macro fin_answer(hs, hs_available) -%}
 {%- if hs_available and hs.temel_v2 and hs.temel_v2.cevap -%}{{ hs.temel_v2.cevap }}
-{%- elif hs_available and hs.temel_v2 and hs.temel_v2.limited_data -%}Sınırlı veri
+{%- elif hs_available and hs.temel_v2 and hs.temel_v2.limited_data -%}Temel skor verilmedi
 {%- elif hs_available and hs.categories -%}
 {%- set _N = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme'} -%}
 {%- set _ord = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}

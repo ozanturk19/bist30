@@ -8228,12 +8228,16 @@ def stock_page(ticker):
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
     # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
+    # CPO-1806 (gri dil envanteri K1, O29): "algoritmik sinyal" jargonu kalkar,
+    # kapanış tarihi + 5 koşuldan kaçının sağlandığı sade cümlede verilir.
+    _faq_date_label = derive_signal_date_label((ssr_signal or {}).get("bar_date"))
+    _faq_n_ok = sum(1 for c in (ssr_signal or {}).get("conditions") or () if c.get("ok"))
     seo_faq = []
     seo_faq.append({
         "q": f"{ticker} hissesinin güncel teknik sinyali nedir?",
-        "a": (f"{ticker} için güncel algoritmik sinyal: {sig_label}. "
-              f"BorsaPusula teknik göstergeleri (Supertrend, ADX, EMA12/EMA99) baz alır. "
-              f"Yatırım tavsiyesi değildir."),
+        "a": (f"{ticker}'nin trend durumu"
+              + (f" {_faq_date_label} kapanışında" if _faq_date_label else "")
+              + f" {sig_label}. Beş koşuldan {_faq_n_ok}'i sağlanıyor."),
     })
     if price:
         # CPO-1496: TR locale formatlayıcısından geçmeden ham Python float basılıyordu

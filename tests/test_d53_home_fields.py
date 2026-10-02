@@ -49,7 +49,7 @@ def test_fin_answer_v2_cevap_ve_sinirli_veri():
     hs = {"categories": {"karlilik": 80}, "temel_v2": {"cevap": "Kalite güçlü, değerleme makul"}}
     assert hf.fin_answer(hs) == _jinja(tpl, hs) == "Kalite güçlü, değerleme makul"
     hs = {"categories": {"karlilik": 80}, "temel_v2": {"limited_data": True}}
-    assert hf.fin_answer(hs) == _jinja(tpl, hs) == "Sınırlı veri"
+    assert hf.fin_answer(hs) == _jinja(tpl, hs) == "Temel skor verilmedi"
 
 
 def test_fin_answer_kayit_yok():

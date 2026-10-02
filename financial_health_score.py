@@ -294,7 +294,7 @@ def build_rationale(categories, data_completeness, categories_na=None):
         na_labels = ", ".join(CATEGORY_LABELS.get(c, c) for c in categories_na)
         sentence += f" {na_labels} kategorisi bu hissenin sektör/bilanço yapısı gereği hesaplanamaz; skor kalan kategorilere göre hesaplanmıştır."
     elif data_completeness is not None and data_completeness < 0.6:
-        sentence += " Bazı finansal veriler eksik olduğu için skor sınırlı veriyle hesaplanmıştır."
+        sentence += " Şirketin raporlarında bazı kalemler yok; bu alanlar puana katılmadı."
 
     return sentence
 
