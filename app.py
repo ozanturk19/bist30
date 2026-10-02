@@ -11562,16 +11562,19 @@ def og_image_png():
 def _normalize_tickers(raw, limit=4):
     """`tickers=` query-param'ını /karsilastir sayfası ve /api/karsilastir için
     TEK ortak mantıkla normalize eder (CPO-1630 P2): trim + upper + whitelist +
-    alfabetik dedup + limit. Önceden sayfa sorted(set(...)) kullanırken API
-    dict.fromkeys(...) (giriş sırası) kullanıyordu — aynı ticker seti farklı
-    sırayla girilince limit'in kestiği 4'lü farklılaşabiliyordu.
+    dedup + limit. CPO-1811: kullanıcının girdiği SIRA korunur (yalnız büyük harf
+    + tekilleştirme) — önceden alfabetik sıralanıyordu, `?tickers=THYAO,AKBNK`
+    canonical'ı `AKBNK,THYAO`'ya 301 atıyordu (kullanıcı sırası kayboluyordu).
     CPO-1783: endeks ticker'ları (INDEX_TICKERS) burada elenir — /karsilastir
     ve /api/karsilastir AYNI fonksiyonu kullanır, tek eleme iki yüzeyi kapatır."""
-    return sorted({
-        t.strip().upper() for t in raw.split(",")
-        if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
-        and t.strip().upper() not in INDEX_TICKERS
-    })[:limit]
+    seen = set()
+    out = []
+    for t in raw.split(","):
+        tu = t.strip().upper()
+        if re.match(r"^[A-Z0-9]{1,10}$", tu) and tu not in INDEX_TICKERS and tu not in seen:
+            seen.add(tu)
+            out.append(tu)
+    return out[:limit]
 
 
 # ── Hisse Karşılaştırma ──────────────────────────────────────────────────────
@@ -11726,6 +11729,10 @@ def api_karsilastir():
             # eşik (financial_health_score._band, 50/70) — karsilastir.html kendi
             # eşiğini yeniden icat etmesin (feedback_puan_tutarlilik_kanonik).
             "band": _fhs._band(hs_data.get("borsapusula_skoru")) if (hs_data and _FHS_AVAILABLE) else None,
+            # CPO-1811: /hisse Temel kartının değerleme hükmüyle AYNI kaynak
+            # (home_fields.valuation — HX_TV2.h'nin SSR'daki kökeni, D-40c tv2
+            # hükmü/sektör ortancası); yeni hesap icat edilmedi.
+            "degerleme":      {"h": home_fields.valuation(hs_data, fund)},
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
