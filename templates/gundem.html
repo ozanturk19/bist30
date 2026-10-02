@@ -387,7 +387,7 @@ async function loadGundem() {
       const newsUpEl = document.getElementById('newsUpdatedAt');
       if (newsData.updated_at) newsUpEl.textContent = newsData.updated_at;
       if (!items.length) {
-        newsEl.innerHTML = '<div class="da-panel da-empty">Haber verisi bekleniyor…</div>';
+        newsEl.innerHTML = ''; const newsSec = newsEl.closest('.section'); if (newsSec) newsSec.style.display = 'none';
       } else {
         newsEl.innerHTML = items.map(item => {
           const isAl  = item.signal === 'AL';

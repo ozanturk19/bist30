@@ -188,8 +188,8 @@
     {%- endfor %}
   </ul>
   {%- if (_sc.al or 0) > _gt|length %}<p class="hp-more"><a href="/tarama?durum=guclu-trend" class="da-tap">Tümü ({{ _sc.al }}) →</a></p>{% endif %}
-  {%- else %}
-  <p class="hp-empty">{% if _sc.total %}<span class="hp-asof">{{ _asl }}</span>: Güçlü Trend'de hisse yok.{% else %}Veriler hazırlanıyor…{% endif %}</p>
+  {%- elif _sc.total %}
+  <p class="hp-empty"><span class="hp-asof">{{ _asl }}</span>: Güçlü Trend'de hisse yok.</p>
   {%- endif %}
 </section>
 
@@ -246,6 +246,7 @@
     Değerleme = hisse "Fiyatı makul mü?" kanonu (`valuation`: sektör ortancasına oran); neden = `fin_answer`. -#}
 {%- set _ft = ssr_featured or [] -%}
 {%- set _vl = {'ucuz': ('Ucuz tarafta', 'ucuz'), 'makul': ('Makul', 'makul'), 'pahali': ('Pahalı tarafta', 'pahali'), 'karisik': ('Karışık', 'mix')} %}
+{%- if _ft %}
 <section class="da-section hp-blk" id="one-cikan" aria-labelledby="hpFtT">
   <div class="hp-blk-h">
     <h2 class="hp-blk-t da-display" id="hpFtT">Öne çıkan şirketler</h2>
@@ -263,11 +264,10 @@
       </a></li>
       {%- endfor %}
     </ol>
-    {%- else %}
-    <p class="hp-nw-e">Şu an kurala uyan şirket yok.</p>
     {%- endif %}
   </div>
 </section>
+{%- endif %}
 
 {#- C-30: Son seansta değişenler — SSR (D-53 `ssr_gundem`, /api/gundem ile aynı kaynak; BEKLE'ye dönüş listelenmez).
     long-only: Trend Bozuldu'ya geçenler sessiz koyu çip, kırmızı yok. -#}
@@ -505,7 +505,7 @@
       if (!real.length) {
         if (d.loading === true && _daDataTries < DA_DATA_MAX_TRIES) {
           _daDataTries++;
-          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionLoading(id, 'Veriler hazırlanıyor…'); });
+          DA_DATA_BLOCKS.forEach(function(id){ daShowSectionLoading(id, ''); });
           setTimeout(daLoadData, DA_DATA_RETRY_MS);
         } else {
           DA_DATA_BLOCKS.forEach(function(id){ daShowSectionEmpty(id, 'Şu an gösterilecek hisse verisi yok.'); });

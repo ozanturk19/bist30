@@ -1381,7 +1381,7 @@ function hxFillNews(data) {
   const ul = document.getElementById('hxNewsL');
   if (!ul) return;
   const items = (data && data.disclosures) || [];
-  if (!items.length) { ul.innerHTML = '<li class="hx-news-e">Listelenecek bildirim şu an yok.</li>'; return; }
+  if (!items.length) { const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none'; return; }
   const fmtD = s => { const p = String(s || '').split(' ')[0].split('.'); return p.length === 3 ? (+p[0]) + ' ' + _HX_AY[+p[1] - 1] : ''; };
   ul.innerHTML = items.slice(0, 3).map(d =>
     '<li><time>' + escHtml(fmtD(d.date)) + '</time><div><b>' + escHtml((d.summary || d.subject || '').trim()) + '</b>' +
@@ -1393,12 +1393,12 @@ function loadOzetExtras() {
     const f = fj && fj.fundamentals && Object.keys(fj.fundamentals).length ? fj.fundamentals : null;
     const row = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
     hxFillFund(f, row);
-    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Veri yok'; }
+    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Temel skor hesaplanmadı'; }
   });
   /* C-25c: "Son haberler" ilk ekranin altinda -- /kap blok yaklasinca istenir */
   const ul = document.getElementById('hxNewsL');
   const load = () => _bpKapJSON().then(hxFillNews).catch(() => {
-    if (ul) ul.innerHTML = '<li class="hx-news-e">Bildirimler yüklenemedi.</li>';
+    const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none';
   });
   if (!ul || !('IntersectionObserver' in window)) { load(); return; }
   const io = new IntersectionObserver(es => {

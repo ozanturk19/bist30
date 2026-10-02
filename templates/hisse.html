@@ -388,7 +388,7 @@
 {%- elif _st %}{{ _N[_st[0][0]]|capitalize }} öne çıkıyor
 {%- elif _wk %}{{ _N[_wk[-1][0]]|capitalize }} zayıf, diğerleri dengeli
 {%- else %}Dengeli; belirgin zayıf alan yok{% endif -%}
-{%- else -%}Veri bekleniyor{%- endif -%}
+{%- else -%}Temel skor hesaplanmadı{%- endif -%}
 {%- endmacro -%}
 {#- C-22c: Temel v2 (D-40c `hs.temel_v2`) -- alan yoksa bugunku 4 kategori aynen kalir. -#}
 {%- set _tv2 = hs.temel_v2 if (hs_available and hs.temel_v2) else none -%}
@@ -454,8 +454,8 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Temel skor verilmedi</p>
         <p class="hx-qp">{{ tv2_limited(_tv2)|trim }}</p>
         {% else %}
-        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Veri bekleniyor</p>
-        <p class="hx-qp">Bu hisse için son gün sonu turu temel skoru üretmedi.</p>
+        <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Temel skor hesaplanmadı</p>
+        <p class="hx-qp">Bu hisse için temel skor henüz hesaplanmadı.</p>
         {% endif %}
       </div>
       {#- Q2 -- Fiyati makul mu? /fundamentals (Ozet'te bir kez) ile dolar; C-22b: Temel sekmesiyle
@@ -699,7 +699,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
       <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
       <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
-      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
+      {% if hs_available and hs.temel_analiz_skoru is not none %}<div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{{ hs.temel_analiz_skoru }}/100</dd></div>{% endif %}
       {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
       {% endif %}

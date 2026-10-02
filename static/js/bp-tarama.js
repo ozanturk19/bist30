@@ -220,7 +220,7 @@
     var s = st.sort, on = s.k === k;
     return '<th scope="col" class="' + cl + ' th-sortable" aria-sort="' + (on ? (s.dir < 0 ? 'descending' : 'ascending') : 'none') + '"><button type="button" class="thb th-sort-btn" data-act="sort" data-k="' + k + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + label + '<span class="ar" aria-hidden="true">' + (on ? (s.dir < 0 ? '↓' : '↑') : '↕') + '</span></button></th>';
   }
-  function emptyHTML() { return '<div class="tv-empty"><b>Bu seçimle eşleşen hisse yok</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
+  function emptyHTML() { return '<div class="tv-empty"><b>' + (ASOF ? esc(ASOF) + ' kapanışında bu' : 'Bu') + ' koşulları sağlayan hisse yok.</b>Filtrelerden birini gevşet ya da Temizle ile baştan başla.</div>'; }
   function tableHTML(rows) {
     var cs = COLS[cols()], ncol = cs.length + 1, body = '', srt = sorter();
     GROUPS.forEach(function (G) {
