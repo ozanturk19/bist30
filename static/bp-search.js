@@ -69,8 +69,6 @@
     /* ── Anti-CLS: reserve space for async-loaded sections ── */
     + '#gundemSec{min-height:230px}'
     + '#statsBar,.stats-bar{min-height:78px}'
-    /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
-    + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
     /* Logo boyutu + header{flex,60px} kurallari C-08 (26.09) ile _bp_critical_css.html'e tasindi: defer
        betik ilk boyamadan SONRA uyguladigi icin nav ikinci satirdan birinciye zipliyordu (takvim CLS 0,19-0,44). */
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */

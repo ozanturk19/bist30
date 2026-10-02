@@ -66,7 +66,7 @@
   /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
      sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
   @media (max-width: 900px) {
-    .hib-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
+    .hib-toast { bottom: calc(24px + var(--bp-mbn-h) + env(safe-area-inset-bottom)); }
   }
   .pos { color: var(--bp-al); }
   .neg { color: var(--bp-sat); }

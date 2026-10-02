@@ -34,15 +34,10 @@
     // .mobile-bottom-nav, shared.css) z-index üstünlüğüyle (toast=9999 >
     // sticky=200) nav'ı görsel+tıklama olarak kapatıyordu. Medya
     // sorgusuyla mobilde nav yüksekliği kadar ofset ekleniyor.
-    // r101 bug-hunt: tek 64px sabiti sadece 769-900px aralığında dogruydu —
-    // bp-search.js'in .mbn-inner kuralı ≤768px'te nav yüksekliğini 72px+8px
-    // padding = 80px'e çıkarıyor (shared.css'teki taban 64px'i override
-    // ediyor), banner o aralıkta 9px nav'ın üstünü kaplıyordu. İki dosya
-    // birbirinden bağımsız, senkronize olmayan sabitler taşıyordu — banner
-    // artık aynı 768px kırılma noktasını izliyor, her iki aralıkta da doğru.
+    // C-71 K29: alt gezinme yüksekliği shared.css'teki tek token'dan (--bp-mbn-h) okunur;
+    // eski 64/80 sabitleri box-sizing'e göre 7 px boşluk bırakıyordu.
     var offsetStyle = document.createElement('style');
-    offsetStyle.textContent = '@media (max-width:900px){ #ga-consent-banner{bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important} }'
-      + '@media (max-width:768px){ #ga-consent-banner{bottom:calc(80px + env(safe-area-inset-bottom,0px)) !important} }';
+    offsetStyle.textContent = '@media (max-width:900px){ #ga-consent-banner{bottom:calc(var(--bp-mbn-h,0px) + env(safe-area-inset-bottom,0px)) !important;padding-bottom:12px !important} }';
     document.head.appendChild(offsetStyle);
 
     var banner = document.createElement('div');
@@ -59,8 +54,8 @@
       '<span style="flex:1 1 240px;min-width:0">Bu site, deneyimi iyileştirmek için analiz çerezleri kullanır. Kabul ediyor musunuz? '
       + '<a href="/gizlilik" style="color:var(--bp-brand,#b8c3ff)">Detay</a></span>'
       + '<span style="display:flex;gap:8px;flex-shrink:0">'
-      + '<button type="button" id="ga-consent-accept" style="background:var(--bp-brand,#b8c3ff);color:var(--bp-bg,#0e0e12);border:none;border-radius:6px;padding:7px 14px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer">Kabul Et</button>'
-      + '<button type="button" id="ga-consent-reject" style="background:transparent;color:var(--bp-text3,#909097);border:1px solid var(--bp-border,#2a2a2c);border-radius:6px;padding:7px 14px;font-size:var(--bp-text-base);cursor:pointer">Reddet</button>'
+      + '<button type="button" id="ga-consent-accept" style="background:var(--bp-brand,#b8c3ff);color:var(--bp-bg,#0e0e12);border:none;border-radius:6px;padding:7px 14px;min-height:44px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer">Kabul Et</button>'
+      + '<button type="button" id="ga-consent-reject" style="background:transparent;color:var(--bp-text3,#909097);border:1px solid var(--bp-border,#2a2a2c);border-radius:6px;padding:7px 14px;min-height:44px;font-size:var(--bp-text-base);cursor:pointer">Reddet</button>'
       + '</span>';
     document.body.appendChild(banner);
 

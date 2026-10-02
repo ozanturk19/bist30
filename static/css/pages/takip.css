@@ -328,7 +328,7 @@
     .tk-onb > p { font-size: 14px; }
     .tk-how ul { grid-template-columns: minmax(0, 1fr); }
     .tk-how { margin-top: 28px; }
-    .tk-toasts { bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 12px); }
+    .tk-toasts { bottom: calc(var(--bp-mbn-h) + env(safe-area-inset-bottom, 0px) + 12px); }
     .tk-toast .tk-tm { white-space: normal; }
     .tk-login { max-width: none; }
     .tk-inp { width: 124px; height: 44px; }

@@ -36,7 +36,10 @@ textarea {
     border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
-  .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
+  /* C-71 K29: nav yüksekliği TEK token (--bp-mbn-h = nav dış yüksekliği, safe-area hariç).
+     Eskiden 64 (burada) / 72+8 (bp-search.js) / 52 (yatay) üç sabitti; box-sizing'e göre
+     sayfadan sayfaya 73↔81 px oynuyor, çerez bandı 80'e sabit olduğu için arada 7 px kalıyordu. */
+  .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); box-sizing: border-box; height: calc(var(--bp-mbn-h) - 1px); max-width: 600px; margin: 0 auto; }
   .mbn-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 4px; text-decoration: none; color: var(--bp-text3); font-size: var(--bp-text-sm); font-weight: 600;
@@ -62,7 +65,7 @@ textarea {
      bkz. master-donusum-programi §5 satir 4 / DEV2-021). */
   @media (max-width: 900px) {
     .mobile-bottom-nav { display: block; }
-    body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+    body { padding-bottom: calc(var(--bp-mbn-h) + 8px + env(safe-area-inset-bottom, 0px)); }
     /* Touch target 44px — F14 */
     .header-search-btn { min-width: 44px; min-height: 44px; }
     .hib-action-btn { min-height: 44px; }
@@ -239,11 +242,17 @@ html { -webkit-tap-highlight-color: transparent; }
   --bp-anchor-header: calc(var(--bp-anchor-macro) + var(--bp-chrome-header) + env(safe-area-inset-top, 0px));
   --bp-sticky-top: calc(var(--bp-anchor-header) + var(--bp-chrome-extra) + 6px);
   --bp-sticky-bottom: 0px;
+  --bp-mbn-h: 0px;
 }
 @media (max-width: 900px) {
   /* .mobile-bottom-nav bu kırılımda görünür (yukarıda, aynı eşik).
-     73px = .mbn-inner 64px + üst çizgi + etkin sekme göstergesi (canlı ölçüm). */
-  :root { --bp-sticky-bottom: calc(73px + env(safe-area-inset-bottom, 0px) + 6px); }
+     C-71 K29: nav yüksekliği --bp-mbn-h'den okunur (tek kaynak). */
+  :root { --bp-mbn-h: 65px; --bp-sticky-bottom: calc(var(--bp-mbn-h) + env(safe-area-inset-bottom, 0px) + 6px); }
+}
+@media (max-width: 768px) {
+  :root { --bp-mbn-h: 73px; }
+  .mbn-inner { padding-bottom: 8px; }
+  .mbn-item { padding-top: 6px; }
 }
 html {
   scroll-padding-top: var(--bp-sticky-top);
@@ -268,7 +277,7 @@ html {
   :root {
     --bp-chrome-macro: 0px;
     --bp-chrome-header: 0px;
-    --bp-sticky-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 6px);
+    --bp-mbn-h: 53px;
   }
   /* ⛔ `static` DEGIL `relative`: `#macroBar` `.macro-pause-btn`in
      (position:absolute; top:0; bottom:0) KAPSAYAN BLOGUDUR. `static`
@@ -276,14 +285,10 @@ html {
      bir serit haline geliyordu -- olculdu, K-AY'nin kendi regresyonuydu.
      `relative` yapiskanligi kaldirir, kapsama blogunu KORUR. */
   #macroBar, .macro-bar, header { position: relative !important; }
-  /* bp-search.js aynı kuralı `@media (max-width:768px)` altında !important
-     ile yazıyor; ondan SONRA enjekte edildiği için burada daha YÜKSEK
-     ÖZGÜLLÜK gerekiyor (kaynak sırası değil, özgüllük kazanır). */
-  .mobile-bottom-nav .mbn-inner { height: 52px !important; }
+  .mobile-bottom-nav .mbn-inner { padding-bottom: 0; }
   .mobile-bottom-nav .mbn-icon { width: 20px; height: 20px; }
   .mobile-bottom-nav .mbn-icon svg { width: 19px; height: 19px; }
-  .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; }
-  html body { padding-bottom: calc(52px + 6px + env(safe-area-inset-bottom, 0px)) !important; }
+  .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; padding-top: 0; }
 }
 
 /* ── C-71 K38 (02.10): KISA DİKEY EKRANDA MAKRO ŞERİT YAPIŞMAZ ─────────────
