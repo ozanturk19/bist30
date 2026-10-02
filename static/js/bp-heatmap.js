@@ -559,7 +559,7 @@
       el.style.setProperty('--k', p.k.toFixed(3));
       if (n.v) n.v.textContent = p.vt;
       var t = el.getAttribute('data-t');
-      el.setAttribute('aria-label', t + (r.n ? ', ' + r.n : '') + ', ' + p.av + (lim ? ', ' + lim : '') + (stale ? ', veri gecikmeli' : ''));
+      el.setAttribute('aria-label', t + (r.n ? ', ' + r.n : '') + ', ' + p.av + (lim ? ', ' + lim : '') + (stale ? ', kapanış verisi gelmedi' : ''));
     });
     /* grup etiketi değeri */
     groups.forEach(function (g) {
