@@ -979,7 +979,7 @@ function renderSummary(s, signalData) {
   if (signalData && signalData.vol_ratio != null) {
     const vr = signalData.vol_ratio;
     if (vr >= 1.5) {
-      const vrTip = 'Günlük Hacim Oranı — son seans hacmi / 20 günlük ortalama. Bu sayfadaki RVOL (5 günlük ort. / 20 günlük ort.) FARKLI bir sayıdır.';
+      const vrTip = 'Günlük Hacim Oranı — son seans hacmi / 20 günlük ortalama. Hacim Profili’ndeki 5 günlük oran farklı bir sayıdır.';
       indHtml += `<span class="ind-badge ind-volume" data-tip="${vrTip}" tabindex="0">Hacim Oranı ${_trNum(vr)}×<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
     }
   }
@@ -1557,7 +1557,7 @@ function _tvBand(b, W) {
   if (b.med != null) vals.push(b.med);
   if (!vals.length) return '';
   const mx = Math.max.apply(null, vals) * 1.12, L = 8, R = W - 8, X = v => L + v / mx * (R - L);
-  let s = '<svg class="tv-svg tv-band" viewBox="0 0 ' + W + ' 58" role="img" aria-label="' + escHtml(b.n + ': yıl sonu değerleri, son kapanış ve sektör ortancası') + '">' +
+  let s = '<svg class="tv-svg tv-band" viewBox="0 0 ' + W + ' 58" role="img" aria-label="' + escHtml(b.n + ': yıl sonu değerleri, son kapanış ve sektörün orta değeri') + '">' +
     '<rect class="tv-band-bg" x="' + L + '" y="22" width="' + (R - L) + '" height="10" rx="5"/>';
   if (pts.length) {
     const lo = Math.min.apply(null, pts.map(x => x.v)), hi = Math.max.apply(null, pts.map(x => x.v));
@@ -1742,7 +1742,7 @@ const TV_CHK = {
   aktif_karliligi_artti: ['Aktif kârlılığı arttı', 'lvl2'], nakit_akisi_kardan_buyuk: ['Nakit akışı kârdan büyük', 'cmp'],
   uv_borc_orani_dustu: ['Uzun vadeli borç oranı düştü', 'lvl2'], cari_oran_artti: ['Cari oran arttı', 'x2'],
   yeni_pay_yok: ['Yeni pay çıkarılmadı', 'pay'], brut_marj_artti: ['Brüt marj arttı', 'lvl2'], aktif_devir_artti: ['Aktif devir hızı arttı', 'x2'],
-  net_kar_pozitif: ['Net kâr pozitif', 'money1'], ozsermaye_karliligi_ortanca_ustu: ['Özsermaye kârlılığı banka ortancasının üstünde', 'med'],
+  net_kar_pozitif: ['Net kâr pozitif', 'money1'], ozsermaye_karliligi_ortanca_ustu: ['Özsermaye kârlılığı bankaların orta değerinin üstünde', 'med'],
   kredi_mevduat_100_alti: ['Krediler mevduatı aşmıyor', 'lvl'], ozkaynak_varliktan_hizli: ['Özkaynak büyümesi varlık büyümesine yetişti', 'grow'],
   gider_gelir_40_alti: ['Gider / gelir oranı %40 veya altı', 'lvl'] };
 const TV_CHK_KISA = { aktif_karliligi_pozitif: 'aktif kârlılığı', isletme_nakit_akisi_pozitif: 'işletme nakit akışı', aktif_karliligi_artti: 'aktif kârlılığındaki değişim',
@@ -1763,7 +1763,7 @@ function _tvChkVal(it, kind) {
   if (kind === 'money1') return _tvMoney(c);
   if (kind === 'cmp') return it.gecti ? 'nakit > kâr' : 'nakit ≤ kâr';
   if (kind === 'pay') return it.gecti ? 'sermaye aynı' : 'sermaye arttı';
-  if (kind === 'med') return _tvLvl(c) + ' · ortanca ' + _tvLvl(p);
+  if (kind === 'med') return _tvLvl(c) + ' · bankaların orta değeri ' + _tvLvl(p);
   if (kind === 'grow') return _tvChg(c) + ' · varlık ' + _tvChg(p);
   return '';
 }
@@ -1771,7 +1771,8 @@ function _tvChecks(k) {
   const s = k.saglamlik;
   if (!s || !s.maddeler || !s.toplam) return false;
   const by = {}; s.maddeler.forEach(m => { by[m.k] = m; });
-  _tvEl('tvSaglamlikU').textContent = (s.yontem === 'piotroski' ? '9 maddelik bilinen yöntem (Piotroski) · ' : 'Bankaya uygun 5 madde · ') + s.yil + ' ile ' + (s.yil - 1);
+  /* C-74 K9: .tv-unit büyük harf + lang=tr → "PİOTROSKİ"; özel ad lang=en ile korunur. */
+  _tvEl('tvSaglamlikU').innerHTML = (s.yontem === 'piotroski' ? '9 maddelik bilinen yöntem (<span lang="en">Piotroski</span>) · ' : 'Bankaya uygun 5 madde · ') + (+s.yil) + ' ile ' + (s.yil - 1);
   _tvEl('tvSaglamlikP').innerHTML = '<b>' + s.puan + '</b><span>/ ' + s.toplam + '</span>';
   const grp = TV_CHK_GRP[s.yontem] || [];
   const okN = g => g[1].filter(x => by[x] && by[x].gecti === true).length, allN = g => g[1].filter(x => by[x] && by[x].gecti != null).length;

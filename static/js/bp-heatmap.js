@@ -625,7 +625,7 @@
         : (st.mode === 'bp' ? (a.b != null ? a.b : -1e9) : a.tg);
       var c = li.querySelector('.hm-sr-chg'), b = li.querySelector('.hm-sr-bp'), t = li.querySelector('.hm-sr-tr');
       if (c) { c.className = 'hm-sr-m hm-sr-chg ' + (bpDirClass(a.c, 1, ['up', 'dn', 'neu']) || '') + (st.mode === 'chg' ? ' on' : ''); c.textContent = bpFormatPct(a.c, 1); }
-      if (b) { b.className = 'hm-sr-m hm-sr-bp' + (st.mode === 'bp' ? ' on' : ''); b.textContent = 'BP ort. ' + (a.b != null ? a.b : '—'); }
+      if (b) { b.className = 'hm-sr-m hm-sr-bp' + (st.mode === 'bp' ? ' on' : ''); b.textContent = 'Ort. skor ' + (a.b != null ? a.b : '—'); }
       if (t) { t.className = 'hm-sr-m hm-sr-tr' + (a.tg ? ' up' : '') + (st.mode === 'tr' ? ' on' : ''); t.textContent = a.tg + ' Güçlü Trend'; }
       items.push({ li: li, key: key, idx: idx });
     });

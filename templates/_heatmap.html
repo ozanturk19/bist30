@@ -234,7 +234,7 @@
         <div class="hm-ctl-top"><a class="hm-arc" href="/harita">Geçmiş günler</a>{{ _share(_sh.perma, _sh.href, _sh.img, _sh.kare, _sh.text, _sh.ttl, _sh.fname, _sh.view) }}
         {%- endif %}
         <div class="hm-seg" role="group" aria-label="Renk ölçüsü">
-          {%- for m, lbl in [('chg', 'Değişim'), ('bp', 'BP Skoru'), ('tr', 'Trend')] %}
+          {%- for m, lbl in [('chg', 'Değişim'), ('bp', 'Skor'), ('tr', 'Trend')] %}
           <a class="hm-sw" href="{{ _href(_path, m, _per, _MQ, _PQ) }}" data-m="{{ m }}"{% if m == _mode %} aria-current="true"{% endif %}>{{ lbl }}</a>
           {%- endfor %}
         </div>
@@ -387,7 +387,7 @@
     </p>
     <ol class="hm-sl" id="hmSl">
       {%- for s in _sl|sort(attribute='key', reverse=true) %}
-      <li class="hm-sr" data-g="{{ s.g }}"><a class="hm-sr-g" href="/tarama?sector={{ s.g|urlencode }}">{{ s.g }}</a><span class="hm-sr-n">{{ s.n }} hisse</span><span class="hm-sr-ms"><span class="hm-sr-m hm-sr-chg {{ bpf.dir_class(s.c, 1, 'up,dn,neu') }}{{ ' on' if _mode == 'chg' }}">{{ bpf.pct_text(s.c, 1) }}</span><span class="hm-sr-m hm-sr-bp{{ ' on' if _mode == 'bp' }}">BP ort. {{ s.b if s.b is not none else '—' }}</span><span class="hm-sr-m hm-sr-tr{{ ' up' if s.tg }}{{ ' on' if _mode == 'tr' }}">{{ s.tg }} Güçlü Trend</span></span></li>
+      <li class="hm-sr" data-g="{{ s.g }}"><a class="hm-sr-g" href="/tarama?sector={{ s.g|urlencode }}">{{ s.g }}</a><span class="hm-sr-n">{{ s.n }} hisse</span><span class="hm-sr-ms"><span class="hm-sr-m hm-sr-chg {{ bpf.dir_class(s.c, 1, 'up,dn,neu') }}{{ ' on' if _mode == 'chg' }}">{{ bpf.pct_text(s.c, 1) }}</span><span class="hm-sr-m hm-sr-bp{{ ' on' if _mode == 'bp' }}">Ort. skor {{ s.b if s.b is not none else '—' }}</span><span class="hm-sr-m hm-sr-tr{{ ' up' if s.tg }}{{ ' on' if _mode == 'tr' }}">{{ s.tg }} Güçlü Trend</span></span></li>
       {%- endfor %}
     </ol>
   </section>

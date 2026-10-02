@@ -6,18 +6,18 @@
    kaldirilan "R/R" vaadi sablonda duzeltildi, canli meta hala "R/R" diyordu.
    Gercek kaynak app.py'dir (CPO-1758, DEV1). Buradaki metin yalnizca
    rota page_description vermezse devreye girer. #}
-<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 {% if tickers_param %}<meta name="robots" content="noindex,follow">{% endif %}
 <meta property="og:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta property="og:url"         content="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
+<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, özsermaye kârlılığı, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -149,12 +149,12 @@ const ROW_LABELS = [
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
   { key: '_sep_fund',     label: 'TEMEL ANALİZ', isSep: true },
-  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve F/DD oranlarının sektör ortancasıyla karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
+  { key: 'degerleme',      label: 'Değerleme', help: 'F/K ve PD/DD oranlarının aynı sektördeki şirketlerle karşılaştırması; hisse sayfasındaki Temel kartıyla aynı hüküm.' },
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
-  { key: 'pb_ratio',       label: 'F/DD Oranı' },
-  { key: 'eps',            label: 'HBK (₺)' },
-  { key: 'roe',            label: 'Öz Sermaye Getirisi (ROE)' },
+  { key: 'pb_ratio',       label: 'PD/DD' },
+  { key: 'eps',            label: 'Hisse başına kâr (₺)' },
+  { key: 'roe',            label: 'Özsermaye kârlılığı' },
   { key: 'dividend_yield', label: 'Temettü Verimi' },
 ];
 

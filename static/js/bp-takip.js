@@ -354,7 +354,7 @@
   }
   function tableHTML() {
     var pf = modeNow() === 'pf', L = S.items, ncol = pf ? 8 : 5, body = '';
-    var th = '<thead><tr><th scope="col">Hisse</th><th scope="col">BP Skoru</th><th scope="col">Trend</th><th scope="col" class="num">Fiyat<span class="tk-ths">son seans</span></th>' +
+    var th = '<thead><tr><th scope="col">Hisse</th><th scope="col">Skor</th><th scope="col">Trend</th><th scope="col" class="num">Fiyat<span class="tk-ths">son seans</span></th>' +
       (pf ? '<th scope="col" class="num">Adet</th><th scope="col" class="num">Maliyet</th><th scope="col" class="num">Kâr/zarar</th>' : '') + '<th scope="col"><span class="sr-only">İşlemler</span></th></tr></thead>';
     function rows(Ar) { return Ar.slice().sort(order).map(function (r) { return rowD(r, ncol, pf); }).join(''); }
     if (pf) {
