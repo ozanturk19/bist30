@@ -216,6 +216,37 @@ def test_onem_ratio_try_fx_and_missing():
     assert kf.compute_onem(am, None, "Yeni İş İlişkisi") is None
 
 
+def test_bilanco_for_cpo1816_3_sayi_tek_cumle():
+    # Sanayi (ASTOR idx 4): hasilat + net kar + faaliyet nakit dolu, net kar cumlesi oncelikli.
+    b = kf.bilanco_for("ASTOR", 4, KAP_FIN)
+    assert b["donem"] == "2026 ilk yarı"
+    assert b["hasilat"] == 21174000000 and b["net_kar"] == 3000000000 and b["faaliyet_nakit"] == 2800000000
+    assert b["degisim"]["net_kar_pct"] == 20.0
+    assert b["cumle"] == "Net kâr önceki yılın aynı dönemine göre %20,0 arttı."
+    # Banka (GARAN idx 4): net kar yok -> cumle "net faiz geliri" etiketiyle, faaliyet_nakit None.
+    bk = kf.bilanco_for("GARAN", 4, KAP_FIN)
+    assert bk["hasilat"] == 5000000000 and bk["net_kar"] is None and bk["faaliyet_nakit"] is None
+    assert bk["cumle"] == "Net faiz geliri önceki yılın aynı dönemine göre %25,0 arttı."
+    # Kismi veri (EKGYO idx 2): hasilat var, karsilastirma/net kar yok -> genel cumle, 500 yok.
+    part = kf.bilanco_for("EKGYO", 2, KAP_FIN)
+    assert part["hasilat"] == 99829173000 and part["net_kar"] is None
+    assert part["degisim"] == {"hasilat_pct": None, "net_kar_pct": None}
+    assert part["cumle"] == "2025 dönemi finansal raporu yayımlandı."
+    # Rapor bulunamadi / kayit yok -> None (kart cizilmez).
+    assert kf.bilanco_for("ASTOR", 999, KAP_FIN) is None
+    assert kf.bilanco_for("YOKYOK", 1, KAP_FIN) is None
+
+
+def test_public_item_attaches_bilanco_only_for_finansal_rapor():
+    it = kf.normalize(_row(1666965), UNIVERSE)   # Yeni İş İlişkisi -- Finansal Rapor degil
+    assert "bilanco" not in kf.public_item(it, {}, KAP_FIN)
+    fr = dict(it, subject="Finansal Rapor", ticker="ASTOR", id=4, tickers=["ASTOR"])
+    pub = kf.public_item(fr, {}, KAP_FIN)
+    assert pub["bilanco"]["net_kar"] == 3000000000
+    missing = dict(it, subject="Finansal Rapor", ticker="ASTOR", id=12345, tickers=["ASTOR"])
+    assert kf.public_item(missing, {}, KAP_FIN)["bilanco"] is None
+
+
 def test_summary_sentence_rule_based_descriptive():
     it = kf.normalize(_row(1666965), UNIVERSE)
     am = kf.pick_amount(it["subject"], it["title"], _detail(1666965))

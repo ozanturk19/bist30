@@ -386,11 +386,11 @@ class Store:
 
 # ----------------------------------------------------------------------------- sorgu / API bicimi
 
-def public_item(it, names=None):
+def public_item(it, names=None, kap_fin_dir=None):
     """API'ye giden kopya: ic iz (_src, via) yok, dis baglanti yok."""
     names = names or {}
     ts = it["ts"]
-    return {
+    out = {
         "id": it["id"],
         "date": ts,
         "day": ts[:10],
@@ -408,6 +408,9 @@ def public_item(it, names=None):
         "filter": it.get("filter"),
         "href": "/hisse/%s/bildirim/%d" % (it["ticker"], it["id"]),
     }
+    if it.get("subject") == "Finansal Rapor":
+        out["bilanco"] = bilanco_for(it["ticker"], it["id"], kap_fin_dir)
+    return out
 
 
 def query(items, page=1, per_page=50, filt=None, tickers=None, include_rutin=False, day=None):
@@ -842,6 +845,60 @@ def fmt_amount(value, cur):
     if txt.endswith(",00"):
         txt = txt[:-3]
     return "%s %s" % (txt, _CUR_SIGN.get(cur, cur))
+
+
+def _bilanco_val(rep, key, col="cur"):
+    it = (rep.get("items") or {}).get(key)
+    return None if not it else it.get(col)
+
+
+def bilanco_for(ticker, disclosure_id, kap_fin_dir=None):
+    """CPO-1816: Finansal Rapor bildirimine ait 3 sayi + tek cumle (D-40a0 kaydindan,
+    acik veriden; kendi TUFE duzeltmemiz yok). Kayit henuz uretilmemisse (kap_fin_loop
+    arkada calisiyor) ya da bu rapor icin hasilat/net kar hic yoksa None -> kart cizilmez.
+
+    yearly_change() raporun kendi kumulatif cari/karsilastirma sutununu kullanir -- yillik
+    raporda 'bu yil vs gecen yil', ara donem raporunda da 'bu donem(kumulatif) vs gecen yilin
+    ayni donemi(kumulatif)' anlamina gelir (KAP'in 'Cari Donem'/'Onceki Donem' sutunlari)."""
+    try:
+        import kap_financials as kf
+        import kap_temel_v2 as kt2
+    except ImportError:
+        return None
+    rec = kf.load_record(ticker, kap_fin_dir)
+    if not rec:
+        return None
+    rep = next((r for r in (rec.get("reports") or []) if r.get("idx") == disclosure_id), None)
+    if not rep:
+        return None
+    mult = rep.get("mult") or 1
+    is_bank = rep.get("format") == "banka"
+    rev_key, rev_label = ("net_interest_income", "net faiz geliri") if is_bank else ("revenue", "hasılat")
+    rev = _bilanco_val(rep, rev_key)
+    net_kar = _bilanco_val(rep, "net_income_parent")
+    cfo = None if is_bank else _bilanco_val(rep, "cfo")
+    if rev is None and net_kar is None:
+        return None
+    chg = kf.yearly_change(rep)
+    rev_pct = (chg.get(rev_key) or {}).get("pct")
+    kar_pct = (chg.get("net_income_parent") or {}).get("pct")
+    donem = kt2.period_label(rep["fy"], rep["period"])
+    if net_kar is not None and kar_pct is not None:
+        cumle = "Net kâr önceki yılın aynı dönemine göre %s %s." % (
+            fmt_pct(abs(kar_pct)), "arttı" if kar_pct >= 0 else "azaldı")
+    elif rev is not None and rev_pct is not None:
+        cumle = "%s%s önceki yılın aynı dönemine göre %s %s." % (
+            rev_label[0].upper(), rev_label[1:], fmt_pct(abs(rev_pct)), "arttı" if rev_pct >= 0 else "azaldı")
+    else:
+        cumle = "%s dönemi finansal raporu yayımlandı." % donem
+    return {
+        "donem": donem,
+        "hasilat": round(rev * mult) if rev is not None else None,
+        "net_kar": round(net_kar * mult) if net_kar is not None else None,
+        "faaliyet_nakit": round(cfo * mult) if cfo is not None else None,
+        "degisim": {"hasilat_pct": rev_pct, "net_kar_pct": kar_pct},
+        "cumle": cumle,
+    }
 
 
 def compute_onem(amount, revenue, subject, fx_rate=None, fx_date=None):
