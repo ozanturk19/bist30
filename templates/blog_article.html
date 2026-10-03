@@ -106,7 +106,7 @@
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
 <!-- Makro Ticker -->
-<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat"><svg class="mp-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="mp-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 12.5 8 5 12.8z" fill="currentColor"/></svg></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+{% include '_macro_bar.html' %}
 {% include '_header.html' %}
 
 <main class="container container--read" id="main-content" tabindex="-1">

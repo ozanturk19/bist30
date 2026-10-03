@@ -830,7 +830,7 @@
     var p = bar.getAttribute('data-paused') !== 'true';
     bar.setAttribute('data-paused', String(p));
     b.setAttribute('aria-pressed', String(p));
-    b.setAttribute('aria-label', p ? 'Haber şeridini devam ettir' : 'Haber şeridini duraklat');
+    b.setAttribute('aria-label', p ? 'Piyasa şeridini devam ettir' : 'Piyasa şeridini duraklat');
   });
 
 
