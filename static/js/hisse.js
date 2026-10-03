@@ -1187,7 +1187,15 @@ function hxFillFund(f, divRow) {
   if (f) {
     set('hxfMcap', now && now.piyasa_degeri ? _tvMoney(now.piyasa_degeri) : (f.market_cap && f.market_cap.value != null ? (_fmtMoneyObj(f.market_cap) || '—') : '—'));
     set('hxfRoe', now && now.ozsermaye_karliligi != null ? bpPctLevel(now.ozsermaye_karliligi, 1) : (f.roe != null ? bpPctLevel(f.roe, 1) : '—'));
-    set('hxfMargin', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : '—');
+    /* D-P0-2809b: marj sablona gore KAP'tan -- banka "Gider / gelir", sigorta gizli,
+       sanayi/GYO son yilin net kar marji; KAP kaydi yoksa eski alan. */
+    const yr = k && k.oranlar && k.yillar && k.yillar.length ? k.oranlar[String(k.yillar[k.yillar.length - 1])] : null;
+    const bank = k && k.sablon === 'banka', ins = k && k.sablon === 'sigorta';
+    const mRow = document.getElementById('hxfMarginRow'), mLbl = document.getElementById('hxfMarginLbl');
+    if (mRow) mRow.hidden = !!ins;
+    if (mLbl) mLbl.textContent = bank ? 'Gider / gelir' : 'Net kâr marjı';
+    const mv = k ? (yr ? yr[bank ? 'gider_gelir' : 'net'] : null) : f.profit_margin;
+    set('hxfMargin', mv != null ? bpPctLevel(mv, 1) : '—');
   }
   if (k && k.temettu) {
     set('hxfDiv', k.temettu.odeme_var && HX_PRICE ? bpPctLevel(k.temettu.brut_toplam / HX_PRICE * 100, 2) : 'Ödeme yok', !k.temettu.odeme_var);

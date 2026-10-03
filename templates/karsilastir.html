@@ -149,7 +149,6 @@ const ROW_LABELS = [
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
   { key: 'pb_ratio',       label: 'PD/DD' },
-  { key: 'eps',            label: 'Hisse başına kâr (₺)' },
   { key: 'roe',            label: 'Özsermaye kârlılığı' },
   { key: 'dividend_yield', label: 'Temettü Verimi' },
 ];
@@ -314,7 +313,6 @@ function renderCell(key, s) {
       const n = parseFloat(v);
       return _valuationCell(n.toFixed(2).replace('.', ','), null);
     }
-    case 'eps':           { if (v == null) return '<span class="muted">—</span>'; const n = parseFloat(v), cl = n < 0 ? 'dn' : ''; return `<span class="mono ${cl}">${n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`; }
     /* K-BX eki (22.09) — AYNI SAYI, IKI SAYFA, IKI KEFE. Bu sutun ROE'yi
        15/7 esikleriyle ve "Iyi/Orta/Zayif" sozcukleriyle bantliyordu;
        /hisse'nin Temel karti ise 20/10 ve "Guclu/Orta/Zayif" ile. CANLI
