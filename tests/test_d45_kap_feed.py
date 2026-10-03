@@ -237,6 +237,20 @@ def test_bilanco_for_cpo1816_3_sayi_tek_cumle():
     assert kf.bilanco_for("YOKYOK", 1, KAP_FIN) is None
 
 
+def test_bilanco_for_cpo1820_onceki_ve_etiket():
+    # Sanayi (ASTOR idx 4): onceki donem TL'ye cevrilmis, etiket "Hasılat".
+    b = kf.bilanco_for("ASTOR", 4, KAP_FIN)
+    assert b["onceki"] == {"hasilat": 18000000000, "net_kar": 2500000000}
+    assert b["etiket"] == "Hasılat"
+    # Banka (GARAN idx 4): etiket "Net faiz geliri", net kar yok -> onceki.net_kar None.
+    bk = kf.bilanco_for("GARAN", 4, KAP_FIN)
+    assert bk["onceki"] == {"hasilat": 4000000000, "net_kar": None}
+    assert bk["etiket"] == "Net faiz geliri"
+    # Kismi veri (EKGYO idx 2): prev None -> onceki tamami None.
+    part = kf.bilanco_for("EKGYO", 2, KAP_FIN)
+    assert part["onceki"] == {"hasilat": None, "net_kar": None}
+
+
 def test_public_item_attaches_bilanco_only_for_finansal_rapor():
     it = kf.normalize(_row(1666965), UNIVERSE)   # Yeni İş İlişkisi -- Finansal Rapor degil
     assert "bilanco" not in kf.public_item(it, {}, KAP_FIN)

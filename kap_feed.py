@@ -882,6 +882,8 @@ def bilanco_for(ticker, disclosure_id, kap_fin_dir=None):
     chg = kf.yearly_change(rep)
     rev_pct = (chg.get(rev_key) or {}).get("pct")
     kar_pct = (chg.get("net_income_parent") or {}).get("pct")
+    rev_prev = (chg.get(rev_key) or {}).get("prev")
+    kar_prev = (chg.get("net_income_parent") or {}).get("prev")
     donem = kt2.period_label(rep["fy"], rep["period"])
     if net_kar is not None and kar_pct is not None:
         cumle = "Net kâr önceki yılın aynı dönemine göre %s %s." % (
@@ -897,6 +899,11 @@ def bilanco_for(ticker, disclosure_id, kap_fin_dir=None):
         "net_kar": round(net_kar * mult) if net_kar is not None else None,
         "faaliyet_nakit": round(cfo * mult) if cfo is not None else None,
         "degisim": {"hasilat_pct": rev_pct, "net_kar_pct": kar_pct},
+        "onceki": {
+            "hasilat": round(rev_prev * mult) if rev_prev is not None else None,
+            "net_kar": round(kar_prev * mult) if kar_prev is not None else None,
+        },
+        "etiket": rev_label[0].upper() + rev_label[1:],
         "cumle": cumle,
     }
 
