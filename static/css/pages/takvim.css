@@ -122,7 +122,6 @@ a.tk-ev:hover{background:rgba(var(--bp-text-rgb),.03)}
 .tk-ev-s .rg{display:inline-block;font:700 10.5px/1.55 var(--tk-num);letter-spacing:.08em;color:var(--bp-text2);border:1px solid var(--bp-border2);border-radius:4px;padding:0 4px;margin-right:6px;vertical-align:1px}
 .tk-ev .cd,.tk-ev .ph{display:none}
 .tk-tz{display:inline-block;font:600 12px/1.5 var(--tk-num);color:var(--bp-text2);border:1px dashed var(--bp-ctl-border);border-radius:99px;padding:0 8px;margin-right:8px;vertical-align:1px}
-.tk-tz.ks{border-style:solid;border-color:var(--bp-border2);color:var(--bp-text)}
 .tk-ev:not(.t) .tk-ev-b{grid-column:span 2}
 .tk-ev-n{text-align:right;font-variant-numeric:tabular-nums;min-width:0}
 .tk-ev-n .amt,.tk-ev-n .yld{display:block;white-space:nowrap}

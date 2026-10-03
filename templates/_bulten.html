@@ -79,7 +79,7 @@
       <span class="bl-ct">{{ e.time or ({'temettu': 'Temettü', 'bilanco': 'Rapor', 'makro': 'Veri'}[e.kind] if e.kind in ['temettu', 'bilanco', 'makro'] else '') }}</span>
       <span>{%- if e.title %}{{ e.title }}{% if e.period and e.period not in e.title %} <small>{{ e.period }}</small>{% endif %}
       {%- elif e.kind == 'temettu' and e.ticker %}<a href="/hisse/{{ e.ticker }}">{{ e.ticker }}</a> temettü hak kullanımı
-      {%- elif e.kind == 'bilanco' and e.ticker %}<a href="/hisse/{{ e.ticker }}">{{ e.ticker }}</a> finansal rapor (tahmini tarih)
+      {%- elif e.kind == 'bilanco' and e.ticker %}<a href="/hisse/{{ e.ticker }}">{{ e.ticker }}</a> finansal rapor
       {%- else %}{{ e.ticker or '' }}{% endif %}</span>
     </li>{% endfor %}
   </ul>

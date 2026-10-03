@@ -85,7 +85,7 @@
     <section class="tk-ag" id="tkAg" aria-labelledby="tkAgH">
       <h2 class="tk-sr" id="tkAgH">Tarihe göre olaylar</h2>
       <p class="tk-fnote" data-fn="temettu" hidden>Kapsamdaki şirketlerin açıklanmış <b>{{ C.temettu }} ödemesi</b> · tutarlar brüt, pay başına{% if T.fiyat_label %} · verim {{ T.fiyat_label }} kapanışına göre{% endif %}</p>
-      <p class="tk-fnote" data-fn="bilanco" hidden>{% if D %}<b>{{ D.tahmini }} tahmini tarih</b> ve yasal son günler · tarihi belli olmayan {{ D.tarihsiz }} şirket ayrı listede{% else %}Şirketlerin finansal rapor tarihleri{% endif %}</p>
+      <p class="tk-fnote" data-fn="bilanco" hidden>{% if D %}Şirketlerin açıkladığı rapor tarihleri ve yasal son günler · tarihi belli olmayan {{ D.tarihsiz }} şirket ayrı listede{% else %}Şirketlerin finansal rapor tarihleri{% endif %}</p>
       <p class="tk-fnote" data-fn="makro" hidden>Türkiye ve ABD'nin veri ve faiz kararı günleri · saatler Türkiye saati</p>
       <p class="tk-fnote" data-fn="takip" hidden>Takip listendeki hisselerin olayları</p>
 {%- for g in T.groups %}
@@ -106,7 +106,7 @@
 {%- elif e.kind == 'bilanco' and e.ticker %}
           <a class="tk-ev b stock" href="/hisse/{{ e.ticker }}" data-cat="bilanco" data-sub="rapor" data-d="{{ e.date }}" data-t="{{ e.ticker }}">
             <span class="tk-ev-k" aria-hidden="true">{{ IC_DOC|safe }}<i class="tk-k b"></i></span>{{ mc(e) }}
-            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.name }}</span><em>{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'finansal rapor' }}</em></span><span class="tk-ev-s"><span class="tk-tz{% if e.date_kind == 'kesin' %} ks{% endif %}">{{ e.date_kind }}</span><span class="ph">{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'Finansal rapor' }}</span><span class="dk">{% if e.date_kind == 'tahmini' %}Şirket tarihi henüz açıklamadı{% else %}Şirket tarihi açıkladı{% endif %}</span></span></span>
+            <span class="tk-ev-b"><span class="tk-ev-t"><span class="nm">{{ e.name }}</span><em>{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'finansal rapor' }}</em></span><span class="tk-ev-s"><span class="ph">{{ (D.ad ~ ' raporu') if D and e.donem == D.donem else 'Finansal rapor' }}</span><span class="dk">Şirket tarihi açıkladı</span></span></span>
             <span class="tk-ev-c{% if e.kalan is defined and e.kalan <= 7 %} soon{% endif %}" data-cd="{{ e.date }}">{{ kalan(e, g) }}</span>{{ IC_CHEV|safe }}
           </a>
 {%- elif e.kind == 'bilanco' %}
@@ -136,9 +136,11 @@
         <div class="tk-c-ey"><i class="tk-k b" aria-hidden="true"></i>Bilanço dönemi</div>
         <h2 id="tkSsnH">{{ D.ad|capitalize }} raporları ne zaman?</h2>
         <p>{{ D.uzun|capitalize }} raporlar için yasal son gün {% for s in D.son_gunler %}{{ gun(s.date) }} ({{ s.kapsam|lower }}){% if not loop.last %}, {% endif %}{% endfor %}.</p>
-        <svg class="tk-plot" id="tkPlot" viewBox="0 0 284 112" role="img" aria-label="{{ D.ad|capitalize }} raporlarının tahmini tarihleri ve yasal son günler" hidden></svg>
+        <svg class="tk-plot" id="tkPlot" viewBox="0 0 284 112" role="img" aria-label="{{ D.ad|capitalize }} raporlarının açıklanan tarihleri ve yasal son günler" hidden></svg>
         <div class="tk-ssn-st">
-          <div><b>{{ D.tahmini }}</b><span>tahmini tarih</span></div>
+{%- if D.tahmini %}
+          <div><b>{{ D.tahmini }}</b><span>tarih açıkladı</span></div>
+{%- endif %}
           <div><b>{{ D.tarihsiz }}</b><span>tarihi belli değil</span></div>
 {%- if D.aciklandi %}
           <div><b>{{ D.aciklandi }}</b><span>açıklandı</span></div>
@@ -161,7 +163,7 @@
         <h2 id="tkHowH">Takvim nasıl okunur?</h2>
         <dl>
           <div><dt><i class="tk-k t" aria-hidden="true"></i>Temettü</dt><dd><b>Temettü</b>: pay bu tarihte kâr payı olmadan işlem görmeye başlar; ödeme genellikle iki iş günü sonra hesaba geçer. Tutar pay başına brüt{% if T.fiyat_label %}; verim = brüt tutar ÷ {{ T.fiyat_label }} kapanışı{% endif %}.</dd></div>
-          <div><dt><i class="tk-k b" aria-hidden="true"></i>Bilanço</dt><dd><span class="tk-tz">tahmini</span>şirket tarihi henüz açıklamadı. <span class="tk-tz ks">kesin</span>şirket açıkladı.</dd></div>
+          <div><dt><i class="tk-k b" aria-hidden="true"></i>Bilanço</dt><dd>Şirketin açıkladığı rapor tarihi ve yasal son gün. Tarihini açıklamayan şirketler ayrı listede.</dd></div>
           <div><dt><i class="tk-k m" aria-hidden="true"></i>Makro</dt><dd>Türkiye ve ABD'nin veri ve faiz kararı günleri; saatler Türkiye saati.</dd></div>
           <div><dt>Şerit</dt><dd>Bir nokta bir olay; güne dokununca liste o tarihe gider. <i class="tk-sw now" aria-hidden="true"></i> sayfayı açtığın tarih, <i class="tk-sw off" aria-hidden="true"></i> borsanın kapalı ya da yarım gün olduğu gün.</dd></div>
           <div><dt>Kalan gün</dt><dd>Sayfayı açtığın tarihe göre sayılır; olay o güne denk gelirse sayı yerine tarih yazar.</dd></div>
@@ -295,7 +297,7 @@
     var dt = e.target.closest && e.target.closest('details[open]');
     if (dt) { dt.open = false; dt.querySelector('summary').focus(); }
   });
-  /* 3. ceyrek nokta grafigi: tahmini tarihler (kare = bilanco) + kesikli yasal son gunler */
+  /* 3. ceyrek nokta grafigi: aciklanan rapor tarihleri (kare = bilanco) + kesikli yasal son gunler */
   (function plot(){
     var svg = document.getElementById('tkPlot'); if (!svg) return;
     var est = rows.filter(function(r){ return r.dataset.sub === 'rapor'; }).map(function(r){ return [r.dataset.d, r.dataset.t]; });
