@@ -11417,19 +11417,19 @@ def llms_txt():
                                 "[%s](https://borsapusula.com/kesfet/%s)" % (kesfet.BASLIK[k], kesfet.SLUG[k])
                                 for k in kesfet.LISTS) + "\n- [Hisse Tarayıcı]", 1)
     if _tpl_ready("haberler.html"):  # D-45/C-57: sayfa canlıysa listelenir
-        body = body.replace("- [Blog]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
+        body = body.replace("- [Borsa Okulu (Blog)]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
                             "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
-                            "/hisse/{TICKER}/bildirim/{NO}\n- [Blog]", 1)
+                            "/hisse/{TICKER}/bildirim/{NO}\n- [Borsa Okulu (Blog)]", 1)
         if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
-            body = body.replace("- [Blog]", "  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): "
+            body = body.replace("- [Borsa Okulu (Blog)]", "  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): "
                                 "şirket bildirimleri türe göre (?tur=finansal-rapor, temettu, sermaye, genel-kurul, "
-                                "ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar\n- [Blog]", 1)
+                                "ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar\n- [Borsa Okulu (Blog)]", 1)
         if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
-            body = body.replace("- [Blog]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
+            body = body.replace("- [Borsa Okulu (Blog)]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
                                 "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "
                                 "sayfa: /bulten/YYYY-AA-GG" + (
                                     "; tüm bültenler: https://borsapusula.com/bulten/arsiv"
-                                    if _bulten_page_ready("bulten_arsiv.html") else "") + "\n- [Blog]", 1)
+                                    if _bulten_page_ready("bulten_arsiv.html") else "") + "\n- [Borsa Okulu (Blog)]", 1)
     return Response(body, mimetype="text/plain")
 
 

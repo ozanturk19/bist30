@@ -99,3 +99,8 @@ def test_sitemap_and_llms_list_bildirimler(client):
     assert "/haberler/bildirimler</loc>" in sm
     ll = client.get("/llms.txt").get_data(as_text=True)
     assert "https://borsapusula.com/haberler/bildirimler" in ll
+    # CPO-1814: yanlış çapa ("- [Blog]") gerçek satırla ("- [Borsa Okulu (Blog)]")
+    # eşleşmediği için bu üç ek sessizce düşüyordu.
+    assert ll.count("- [Haberler]") == 1
+    assert ll.count("- [Şirket bildirimleri]") == 1
+    assert ll.count("- [Akşam Bülteni]") == 1
