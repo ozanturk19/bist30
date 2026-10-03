@@ -13,6 +13,11 @@
       { "ad": "varsayilan" },
       { "ad": "ilk-ziyaret", "ilk_ziyaret": true }
     ] },
+    { "ad": "kesfet", "yol": "/kesfet", "durumlar": [
+      { "ad": "kaliteli-makul" },
+      { "ad": "istikrarli-temettu", "yol": "/kesfet/istikrarli-temettu" },
+      { "ad": "sektorune-gore-ucuz", "yol": "/kesfet/sektorune-gore-ucuz" }
+    ] },
     { "ad": "tarama", "yol": "/tarama", "durumlar": [
       { "ad": "varsayilan" },
       { "ad": "bp-70", "yol": "/tarama?liste=bp-70" },
