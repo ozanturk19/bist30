@@ -5,16 +5,16 @@
   {% set _sd = kapsam_disi.metin %}
 {% elif ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
   {% set _st = ticker ~ ' Trend Bozuldu — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
 {% elif ssr_signal %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
 {% else %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Gün sonu güncelleme.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') trend durumu ve şirket analizi. Supertrend, ADX ve EMA göstergeleriyle gün sonu analizi.' %}
 {% endif %}
 {% if kapsam_disi %}<meta name="robots" content="noindex, follow">{% endif %}
 <title>{{ _st }}</title>
@@ -41,7 +41,7 @@
   "@context": "https://schema.org",
   "@type": "FinancialProduct",
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
-  "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Gün sonu güncelleme.",
+  "description": "{{ ticker }} hissesi için Supertrend, ADX ve EMA göstergeleriyle trend durumu ve şirket analizi. Gün sonu güncelleme.",
   "url": "https://borsapusula.com/hisse/{{ ticker }}",{# K-DM: "Diğer" siniflandirilamayanlarin catch-all kovasi; makine-okunur
        bir kategori/anahtar-kelime olarak "Diğer hisseleri" bilgi tasimaz. #}{% if sector and sector != 'Diğer' %}
   "category": "{{ sector }}",{% endif %}
@@ -143,7 +143,7 @@
   <div class="da-panel hx-oos-note" role="note">
     <h2 class="section-title">Neden analiz yok?</h2>
     <p>{{ kapsam_disi.metin }}</p>
-    <p class="hx-oos-links"><a href="/tarama">Kapsamdaki hisseleri tara</a> · <a href="/">Piyasa haritası</a></p>
+    <p class="hx-oos-links"><a href="/tarama">Hisseleri tara</a> · <a href="/">Piyasa haritası</a></p>
   </div>
   {% if company_summary %}
   <div class="da-panel hx-oos-note">
@@ -739,7 +739,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </ul>
     {% endif %}
   </section>
-  <p class="tv-prep" id="tvPrep" hidden>Ayrıntılı finansal veri hazırlanıyor; bu hisse için özet göstergeler gösteriliyor.</p>
+  <p class="tv-prep" id="tvPrep" hidden>Bu hisse için temel göstergelerin özeti gösteriliyor.</p>
   <div class="tv-grid" id="tvGrid" aria-busy="true" hidden>
     <section class="tv-pan" id="tvBuyume" aria-labelledby="tvBuyumeH">
       <div class="tv-ph"><div><h3 id="tvBuyumeH">Büyüme</h3><p class="tv-unit" id="tvBuyumeU">Yıllık değişim</p></div><div class="tv-segs" id="tvBuyumeSeg"></div></div>

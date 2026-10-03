@@ -34,7 +34,7 @@
        Ogrenme Modu acikken bu terimde "?" dugmesi HIC cikmiyordu. Ustelik
        /metodoloji'nin "Karistirilmamasi Gerekenler" bolumu tam da bu terimi
        aciklamak icin yazilmis. Tanim o bolumun kanonuyla birebir. */
-    'sinyal': 'Sinyalin YÖNÜ — yalnızca Güçlü Trend, Trend Bozuldu ya da Yatay olur; sayı değildir. Gücü/kalitesi ayrı anılır: Teknik Güç Skoru ve BorsaPusula Skoru.'
+    'sinyal': 'Sinyalin YÖNÜ — yalnızca Güçlü Trend, Trend Bozuldu ya da Yatay olur; sayı değildir. Gücü ayrı anılır: BorsaPusula Skoru.'
   };
 
   /* Eski açma/kapama tercihi artık okunmuyor; tarayıcıda kalan kaydı sil

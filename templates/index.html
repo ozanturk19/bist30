@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Üç soruda BIST: finansallar, değerleme ve trend | BorsaPusula</title>
 <meta name="description" content="Her akşam kapanıştan sonra {% if ssr_signal_counts and ssr_signal_counts.total %}{{ ssr_signal_counts.total }} {% endif %}BIST şirketini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?{% if ssr_signal_counts and ssr_signal_counts.total and ssr_bist_level and ssr_bist_level.close is not none %} BIST100 son kapanışı {{ ssr_bist_level.close|tr_price }}; {{ ssr_signal_counts.total }} hisseden {{ bpf.poss(ssr_signal_counts.al) }} Güçlü Trend'de.{% endif %}">
-<meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
+<meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/">
 <!-- Open Graph -->
@@ -56,7 +56,7 @@
 {
   "@context": "https://schema.org", "@type": "WebApplication", "@id": "https://borsapusula.com/#webapp",
   "name": "BIST100 Sinyal Paneli", "url": "https://borsapusula.com",
-  "description": "BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı Güçlü Trend / Trend Bozuldu / Yatay sinyalleri.",
+  "description": "BIST100 + ek hisseler için gün sonu trend ve şirket analizi. Supertrend, ADX ve EMA12/99 göstergelerine dayalı Güçlü Trend / Trend Bozuldu / Yatay sinyalleri.",
   "applicationCategory": "FinanceApplication", "applicationSubCategory": "Stock Market Analysis", "operatingSystem": "Web Browser",
   "browserRequirements": "Requires JavaScript. Requires HTML5.", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
   "inLanguage": "tr", "isAccessibleForFree": true, "publisher": { "@id": "https://borsapusula.com/#organization" },
