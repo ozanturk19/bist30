@@ -418,7 +418,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         </div>
         <div class="hx-bp-tx">
           <div class="hx-bp-l">BorsaPusula Skoru</div>
-          <div class="hx-bp-f">{% if hs.partial %}Finansallardan hesaplandı{% else %}Finansallar %60 · Trend %40{% endif %}</div>
+          <div class="hx-bp-f">{% if hs.partial %}Finansallardan hesaplandı{% elif hs.bp_trend %}Finansallar %60 · Trend %40 (yönlü){% else %}Finansallar %60 · Trend %40{% endif %}</div>
         </div>
       </div>
       {% endif %}
