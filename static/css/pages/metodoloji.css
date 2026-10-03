@@ -189,3 +189,22 @@
   @media (max-width: 600px) {
     .term-row { grid-template-columns: 1fr; gap: 5px; padding: 11px 13px; }
   }
+
+/* C-42 (03.10): Skor bölümü — ağırlık çubuğu, üç durum, teknik detay, SSS */
+.mt-sec { margin: 8px 0 28px; }
+.mt-sec h2 { margin: 0 0 8px; }
+.mt-bar { display: flex; height: 36px; border-radius: 10px; overflow: hidden; margin: 14px 0; font-size: 13px; font-weight: 600; }
+.mt-bar span { display: flex; align-items: center; padding: 0 12px; min-width: 0; white-space: nowrap; }
+.mt-bar-f { flex: 60 1 0; background: rgba(var(--bp-brand-rgb), .22); color: var(--bp-text); }
+.mt-bar-t { flex: 40 1 0; background: rgba(var(--bp-al-rgb), .18); color: var(--bp-text); }
+.mt-states { display: grid; gap: 8px; margin: 0 0 12px; }
+.mt-states > div { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 4px 12px; align-items: baseline; }
+.mt-states dt { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.mt-states dd { margin: 0; color: var(--bp-text-2); }
+.mt-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.mt-dot.g { background: var(--bp-al); } .mt-dot.y { background: var(--bp-text-2); } .mt-dot.b { background: var(--bp-sat); }
+.mt-td, .mt-faq { border: 1px solid var(--bp-border); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
+.mt-td summary, .mt-faq summary { cursor: pointer; font-weight: 600; min-height: 24px; }
+.mt-td p, .mt-faq p { margin: 8px 0 0; color: var(--bp-text-2); }
+.mt-td code { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .mt-states > div { grid-template-columns: 1fr; } }

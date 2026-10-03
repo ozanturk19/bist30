@@ -1,17 +1,17 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Rehberi | BorsaPusula</title>
-<meta name="description" content="BorsaPusula'nın kullandığı algoritmik teknik analiz metodolojisi. Supertrend(10,3), ADX≥25 ve EMA12/99 göstergelerinin nasıl çalıştığı ve nasıl yorumlandığı açıklanıyor.">
-<meta name="keywords" content="supertrend nasıl kullanılır, ADX indikatörü nedir, EMA crossover stratejisi, BIST teknik analiz, algoritmik borsa sinyali">
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Skor ve sinyaller nasıl hesaplanır? | BorsaPusula</title>
+<meta name="description" content="BorsaPusula Skoru, trend durumu ve temel skorun hangi kurallarla hesaplandığı: finansallar %60, trend %40; beş koşullu trend durumu; şirketlerin açıkladığı rakamlarla gün sonu verisi.">
+<meta name="keywords" content="BorsaPusula Skoru nasıl hesaplanır, trend durumu, supertrend nedir, ADX nedir, temel skor, BIST şirket analizi">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/metodoloji">
-<meta property="og:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99 | borsapusula.com">
-<meta property="og:description" content="BorsaPusula sinyal motorunun teknik temeli: 5 koşul aynı anda sağlandığında Güçlü Trend oluşur.">
+<meta property="og:title"       content="Skor ve sinyaller nasıl hesaplanır? | BorsaPusula">
+<meta property="og:description" content="BorsaPusula Skoru: finansallar %60, trend %40. Trend durumu beş koşulla belirlenir; veriler şirketlerin açıkladığı rakamlar ve gün sonu fiyatıdır.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/metodoloji">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99 | borsapusula.com">
-<meta name="twitter:description" content="BorsaPusula sinyal motorunun teknik temeli: 5 koşul aynı anda sağlandığında Güçlü Trend oluşur.">
+<meta name="twitter:title"       content="Skor ve sinyaller nasıl hesaplanır? | BorsaPusula">
+<meta name="twitter:description" content="BorsaPusula Skoru: finansallar %60, trend %40. Trend durumu beş koşulla belirlenir; veriler şirketlerin açıkladığı rakamlar ve gün sonu fiyatıdır.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -20,6 +20,9 @@
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
   {"@type":"ListItem","position":2,"name":"Metodoloji","item":"https://borsapusula.com/metodoloji"}
 ]}
+</script>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "BorsaPusula Skoru neyi gösterir?", "acceptedAnswer": {"@type": "Answer", "text": "Şirketin finansallarını ve fiyat trendini tek sayıda birleştirir: Temel skor %60, trend payı %40 ağırlık taşır. Trend payı Güçlü Trend'de en az 50, Yatay'da 50, Trend Bozuldu'da en çok 50'dir; bozulan trend skoru yükseltmez."}}, {"@type": "Question", "name": "Güçlü Trend, Yatay ve Trend Bozuldu ne anlama gelir?", "acceptedAnswer": {"@type": "Answer", "text": "Üçü de fiyat trendinin betimidir. Fiyatın trend dönüş seviyesinin (Supertrend) üstünde olması, ADX'in 25 ve üstünde olması, DI+'nın DI−'dan büyük olması, EMA 12'nin EMA 99'un üstünde olması ve haftalık trendin yukarı olması birlikte sağlanınca Güçlü Trend; aynı koşullar aşağı yönde sağlanınca Trend Bozuldu; ikisi de değilse Yatay yazar. Hiçbiri bir işlem çağrısı değildir."}}, {"@type": "Question", "name": "Veriler ne zaman güncellenir?", "acceptedAnswer": {"@type": "Answer", "text": "Fiyat, skor ve trend durumu her işlem günü kapanıştan sonra bir kez hesaplanır ve tarihiyle yazılır. Finansallar, şirket yeni bir rapor açıkladıktan sonra güncellenir."}}, {"@type": "Question", "name": "Neden kendi enflasyon düzeltmenizi yapmıyorsunuz?", "acceptedAnswer": {"@type": "Answer", "text": "Şirketin açıkladığı rakamdan başka bir rakam üretmemek için. Enflasyon muhasebesi uygulayan şirket, karşılaştırmayı kendi raporunda aynı paranın alım gücüyle zaten yapar; biz o karşılaştırmayı gösteririz."}}]}
 </script>
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
@@ -34,7 +37,24 @@
 {% include '_header.html' %}
 
 <main class="container container--read" id="main-content" tabindex="-1">
-{% call bpf.pagehead('Metodoloji') %}Trend durumu beş koşulla belirlenir: Supertrend, ADX, DI, EMA dizilimi ve haftalık trend.{% endcall %}
+{% call bpf.pagehead('Skor ve sinyaller nasıl hesaplanır?') %}Her akşam BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Bu sayfa, cevapların hangi kurallarla üretildiğini anlatır.{% endcall %}
+
+<section class="mt-sec" id="skor" aria-labelledby="mtSkorH">
+  <h2 id="mtSkorH">BorsaPusula Skoru nasıl hesaplanır?</h2>
+  <p>BorsaPusula Skoru 0 ile 100 arasında tek bir sayıdır. Şirketin finansalları (Temel skor) %60, fiyat trendi %40 ağırlık taşır. Trend payı yönlüdür: yükseliş trendi skoru yukarı çeker, bozulan trend aşağı çeker, yön belli değilse trend nötr kalır.</p>
+  <div class="mt-bar" role="img" aria-label="Skorun ağırlıkları: finansallar yüzde 60, trend yüzde 40">
+    <span class="mt-bar-f">Finansallar · %60</span><span class="mt-bar-t">Trend · %40</span>
+  </div>
+  <dl class="mt-states">
+    <div><dt><i class="mt-dot g" aria-hidden="true"></i>Güçlü Trend</dt><dd>Trend payı 50 ile 100 arası; skoru yukarı çeker.</dd></div>
+    <div><dt><i class="mt-dot y" aria-hidden="true"></i>Yatay</dt><dd>Trend payı 50; skor finansallara göre oluşur.</dd></div>
+    <div><dt><i class="mt-dot b" aria-hidden="true"></i>Trend Bozuldu</dt><dd>Trend payı 0 ile 50 arası; skoru yükseltmez.</dd></div>
+  </dl>
+  <details class="mt-td">
+    <summary>Teknik detay</summary>
+    <p><code>Skor = 0,60 × Temel skor + 0,40 × trend payı</code>. Güçlü Trend ve Trend Bozuldu'da trend payının 50'den uzaklığı, trendin ne kadar güçlü teyit edildiğine göre <a class="jargon-term" data-term="adx" href="#adx">ADX</a>, hacim, durumun en az 3 işlem günüdür sürmesi ve RSI'dan hesaplanır; Yatay'da trend payı 50'dir.</p>
+  </details>
+</section>
 
 <!-- TL;DR Özet Kart -->
 <div class="tldr-card da-panel da-panel--accent">
@@ -126,7 +146,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
 <p>
   <strong>DI+ (Positive Directional Index)</strong> yükseliş baskısını,
   <strong>DI− (Negative Directional Index)</strong> düşüş baskısını ölçer.
-  DI+ > DI− ise alış yönünde; DI− > DI+ ise satış yönünde güç var demektir.
+  DI+ > DI− ise yükseliş baskısı, DI− > DI+ ise düşüş baskısı ağır basıyor demektir.
 </p>
 
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
@@ -155,21 +175,8 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   <li><code>RSI ≥ 80</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Alım</li>
 </ul>
 <p>
-  BorsaPusula'da RSI, <strong>Teknik Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
-  Güçlü Trend sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; Trend Bozuldu sinyalinde
-  RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Teknik Güç Skoru'nun 100
-  puanlık toplamına ölçeklendiğinde aşağıdaki "RSI bölgesi ~13p" değerine karşılık gelir).
-  Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
-</p>
-{# K-CB (22.09): bu sayfa "RSI 45–60 → İdeal Giriş Penceresi"ni KOŞULSUZ yazıyordu.
-   22.09'daki K-BS/CPO-1745 düzeltmesinden sonra ürün artık o adı yalnız Güçlü Trend
-   sinyalinde basıyor; diğerlerinde "Nötr Bölge". Canlı 22.09: bu bantta 46 hisse var
-   ve 45'i Güçlü Trend DEĞİL — yani sitede en sık görülen ad metodolojide HİÇ
-   geçmiyordu. Vaat içeren bir ad, onu doğuran koşulla birlikte yazılır. #}
-<p>
-  <strong>Neden koşullu?</strong> "Sağlıklı momentum" ancak yönü yukarı gösteren bir
-  trendin yanında bir anlam taşır. Trend Bozuldu ya da Yatay görünümdeki bir hissede
-  aynı RSI aralığı ayrıca bir şey söylemez; bu yüzden o durumda nötr adlandırılır. Bant sınırları (45–60) her iki halde de aynıdır.
+  RSI trend durumunu belirleyen koşullardan biri değildir; skorun trend payında teyit ölçülerinden biridir ve hisse sayfasında yalnız sayı olarak gösterilir.
+  70 üstü fiyatın kısa sürede hızlı yükseldiğini, 30 altı hızlı düştüğünü betimler.
 </p>
 
 <h2 id="haftalik-trend">Haftalık trend filtresi</h2>
@@ -197,29 +204,8 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
 
 <div class="signal-box da-panel da-panel--accent sat">
   <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 5 koşul aynı anda: ST aşağı + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99 + haftalık trend aşağı.<br>
-  <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyal yükseliş trendinin bozulduğunu betimler.</small>
+  <small class="bp-text-muted">Yükseliş trendinin bozulduğunu betimler; bir işlem çağrısı değildir.</small>
 </div>
-
-<h2 id="sinyal-gucu">Teknik Güç Skoru</h2>
-{# bughunt-13.09 (finansal-analist workflow §2.7): ~90 kelimelik nesir +
-   eski /gucu-yuksek sayfa-migrasyon notu (iç-SEO detayı, kullanıcı için
-   değersiz) silindi — formül ve rozet eşiği yoğun 2 satıra indirildi.
-   RVOL/"Premium" karışıklığı ve rozet-düşürme kuralı (gerçek ürün mantığı)
-   korundu, sadece kısaltıldı. #}
-<p>
-  0-100 arası <strong>Teknik Güç Skoru</strong>, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>, hacim, teyit ve RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir). Sinyalin <em>yönünü</em> değil, o yönün arkasındaki teknik teyidin <em>gücünü</em> ölçer.
-</p>
-<p>
-  ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p)
-</p>
-<p>
-  70+ → "Yüksek Skor" · 56–69 → "Orta Skor" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
-</p>
-<p>
-  Düşük likidite (20 günlük ort. hacim 5 Mn ₺ altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
-  Skor'un hacim bileşeni <strong>Günlük Hacim Oranı</strong>dır (son seans hacmi / 20 günlük ort.). Sayfalarda ayrıca gösterilen <strong>Hacim oranı</strong> ise <strong>farklı bir sayıdır</strong> (5 günlük ort. / 20 günlük ort.) — ikisini karıştırmayın, aşağıdaki terim listesinde ayrı ayrı tanımlı.
-  Bu rozet, hacim teyidini gösteren <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: skor rozeti skorun bandını, Hacim Onaylı hacmin teyidini söyler.
-</p>
 
 <h2 id="terimler">Terimler — Karıştırılmaması Gerekenler</h2>
 <p>
@@ -280,13 +266,25 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
 </ul>
 {%- endif %}
 
-<h2>Veri Kaynağı</h2>
+<h2 id="veri-ilkeleri">Veri ilkeleri</h2>
+<ul>
+  <li><strong>Şirketin açıkladığı rakam:</strong> Her finansal rakam, şirketin yayımladığı finansal rapordan gelir.</li>
+  <li><strong>Kendi düzeltmemiz yok:</strong> Rakamları kendi seçtiğimiz bir enflasyon oranıyla yeniden hesaplamayız. Büyüme, şirketin kendi raporundaki karşılaştırmadır.</li>
+  <li><strong>Gün sonu, tarihiyle:</strong> Fiyat, skor ve trend durumu her işlem günü kapanıştan sonra hesaplanır ve kapanış tarihiyle yazılır.</li>
+  <li><strong>Eksik veri gizlenmez:</strong> Güncellenemeyen veri son tarihiyle ve uyarıyla gösterilir. Verisi yetersiz hisseye skor verilmez ve listelere girmez.</li>
+</ul>
 <p>
-  Günlük barlar (1d interval, 2 yıl geçmiş) kullanılır. Sinyal hesaplamaları tamamen Python/NumPy ile yapılır.
-  Haftalık trend için haftalık barlar (1wk, 1 yıl) kullanılır.
+  <strong>Enflasyon muhasebesinde yıllar neden art arda dizilmez?</strong> Enflasyon muhasebesi (TMS 29) uygulayan şirket, her yıllık raporunda geçen yılın rakamlarını yeni yılın parasıyla yeniden yazar; aynı yıl iki raporda iki farklı rakamla yer alır. Farklı raporlardaki tutarları art arda dizmek büyümeyle enflasyonu karıştırır; biz her yılın değişimini o yılın kendi raporundan alırız.
 </p>
-<p>Veriler <strong>her işlem günü akşamı</strong>, piyasa kapanışından sonra güncellenir. BorsaPusula, orta ve uzun vadeli yatırımcılar için gün sonu verisiyle çalışır.</p>
+<p>
+  <strong>&laquo;Son 12 ay&raquo; kârı:</strong> F/K ve özsermaye kârlılığı son yıllık rapordaki net kâr, artı içinde bulunulan yılın son ara dönem raporunda açıklanan farkla (bu yılın dönemi eksi geçen yılın aynı dönemi; ikisi de aynı rapordan) hesaplanır. Kâr, ana ortaklığa düşen net kârdır.
+</p>
 
+<h2 id="sss">Sık sorulanlar</h2>
+<details class="mt-faq"><summary>BorsaPusula Skoru neyi gösterir?</summary><p>Şirketin finansallarını ve fiyat trendini tek sayıda birleştirir: Temel skor %60, trend payı %40 ağırlık taşır. Trend payı Güçlü Trend'de en az 50, Yatay'da 50, Trend Bozuldu'da en çok 50'dir; bozulan trend skoru yükseltmez.</p></details>
+<details class="mt-faq"><summary>Güçlü Trend, Yatay ve Trend Bozuldu ne anlama gelir?</summary><p>Üçü de fiyat trendinin betimidir. Fiyatın trend dönüş seviyesinin (Supertrend) üstünde olması, ADX'in 25 ve üstünde olması, DI+'nın DI−'dan büyük olması, EMA 12'nin EMA 99'un üstünde olması ve haftalık trendin yukarı olması birlikte sağlanınca Güçlü Trend; aynı koşullar aşağı yönde sağlanınca Trend Bozuldu; ikisi de değilse Yatay yazar. Hiçbiri bir işlem çağrısı değildir.</p></details>
+<details class="mt-faq"><summary>Veriler ne zaman güncellenir?</summary><p>Fiyat, skor ve trend durumu her işlem günü kapanıştan sonra bir kez hesaplanır ve tarihiyle yazılır. Finansallar, şirket yeni bir rapor açıkladıktan sonra güncellenir.</p></details>
+<details class="mt-faq"><summary>Neden kendi enflasyon düzeltmenizi yapmıyorsunuz?</summary><p>Şirketin açıkladığı rakamdan başka bir rakam üretmemek için. Enflasyon muhasebesi uygulayan şirket, karşılaştırmayı kendi raporunda aynı paranın alım gücüyle zaten yapar; biz o karşılaştırmayı gösteririz.</p></details>
 
 </article>
 </main>
