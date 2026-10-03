@@ -135,6 +135,37 @@ def test_print_end_to_end_with_fake_gemini(appmod, monkeypatch):
 
 
 @needs_app
+def test_weekend_print_uses_last_business_day_v1(appmod, monkeypatch):
+    # CPO-1815 (03.10): hafta sonu baskısı v1'in son iş günü (≤3 gün önce) kapanışını kullanır;
+    # hafta içi beklenmedik kaçırılmış baskıda (>3 gün ya da hafta içi "bugün" eşleşmiyor) bayat sayılır.
+    with open(os.path.join(FX, "v1_baski.json"), encoding="utf-8") as f:
+        v1 = json.load(f)   # date=2026-10-01 (Perşembe), close_day=2026-10-01
+    captured = {}
+
+    def fake_run_edition(now, slot, call_model, v1_doc=None, close_day=None, **kw):
+        captured["v1"] = v1_doc
+        captured["close_day"] = close_day
+        return {"durum": "aday_yetersiz", "madde": 0}
+
+    monkeypatch.setattr(appmod.haber_gundem, "load_latest", lambda: v1)
+    monkeypatch.setattr(appmod.gundem_haber, "run_edition", fake_run_edition)
+    monkeypatch.setattr(appmod, "_KAP_STORE", type("S", (), {"available": lambda s: False})())
+    monkeypatch.setattr(appmod.gemini_budget, "status", lambda: {})
+    monkeypatch.setattr(appmod.gundem_haber, "read_cb_state", lambda p: {})
+
+    appmod._gundem_haber_print(datetime(2026, 10, 3, 10, 31), "hafta_sonu")   # Cmt, v1 2 gün önce
+    assert captured["v1"] is v1 and captured["close_day"] == v1_date("2026-10-01")
+
+    appmod._gundem_haber_print(datetime(2026, 10, 7, 8, 35), "sabah")        # Çar, hafta içi kaçırılmış baskı
+    assert captured["v1"] is None and captured["close_day"] is None
+
+
+def v1_date(s):
+    from datetime import datetime as _dt
+    return _dt.strptime(s, "%Y-%m-%d").date()
+
+
+@needs_app
 def test_gemini_call_body_json_mode(appmod, monkeypatch):
     sent = {}
 

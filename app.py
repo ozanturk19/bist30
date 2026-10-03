@@ -9858,8 +9858,15 @@ def _gundem_haber_usage():
 
 def _gundem_haber_print(now, slot):
     v1 = haber_gundem.load_latest()
-    if not v1 or v1.get("date") != now.date().isoformat():
-        v1 = None   # bayat v1 baskısının rakamları olgu olarak verilmez
+    if v1 and v1.get("date") != now.date().isoformat():
+        # CPO-1815 (03.10): hafta sonu baskısı v1'in son iş günü (en çok 3 gün önce, uzun hafta
+        # sonu/tatil) rakamlarını "son kapanış tarihiyle" kullanır; daha eskisi bayat sayılır.
+        try:
+            v1_date = datetime.strptime(v1["date"], "%Y-%m-%d").date()
+        except (KeyError, ValueError):
+            v1_date = None
+        if not (v1_date and now.weekday() >= 5 and 0 <= (now.date() - v1_date).days <= 3):
+            v1 = None   # bayat v1 baskısının rakamları olgu olarak verilmez
     try:
         close_day = datetime.strptime((v1 or {}).get("close_day") or "", "%Y-%m-%d").date()
     except ValueError:

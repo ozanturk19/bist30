@@ -78,6 +78,7 @@ COPY_NGRAM = 8              # kaynakla ortak 8 sözcüklük dizi = kopya (≤7 s
 OZET_MAX, BASLIK_MAX = 260, 70
 AUDIT_KEEP_DAYS = 30
 SLOTS = (("sabah", 8, 30), ("aksam", 19, 30))
+WEEKEND_SLOT = ("hafta_sonu", 10, 30)   # CPO-1815 (03.10): Cmt/Paz tek baskı, v1 bağımsız
 LATE_MAX_H = 4              # süreç baskı saatinde kapalıysa en çok 4 saat gecikmeyle basılır
 KATEGORILER = ("Türkiye", "Dünya", "Piyasa", "Şirketler", "Merkez bankaları", "Emtia")
 
@@ -464,11 +465,16 @@ def done_keys(base_dir=None):
 
 def due(now, done, has_latest=True):
     """Hafta içi; saati geçmiş (≤LATE_MAX_H) ve henüz basılmamış baskı -> 'sabah'|'aksam'|None.
+    Cmt/Paz: tek baskı WEEKEND_SLOT saatinde (CPO-1815, 03.10) -> 'hafta_sonu'|None.
     İlk kurulumda (latest yok) hemen bir baskı."""
     if not has_latest and not done:
         # ilk kurulum: hiç baskı/iz yoksa hemen bir baskı (sonrası normal takvim)
         return "sabah" if now.hour < 12 else "aksam"
     if now.weekday() >= 5:
+        name, hh, mm = WEEKEND_SLOT
+        t = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+        if t <= now <= t + timedelta(hours=LATE_MAX_H) and slot_key(now, name) not in done:
+            return name
         return None
     pick = None
     for name, hh, mm in SLOTS:
@@ -482,7 +488,10 @@ def due(now, done, has_latest=True):
 
 def v1_ready(now, slot, v1_printed):
     """Gündem v1 (kendi verimiz) aynı baskıda basıldı mı? Basılmadıysa baskı saatinden 30 dk sonra
-    v1'siz devam edilir (F olguları boş kalır, basın maddeleri yine yazılır)."""
+    v1'siz devam edilir (F olguları boş kalır, basın maddeleri yine yazılır).
+    Hafta sonu baskısı v1'den bağımsızdır (v1 hafta içi son iş gününde basar, CPO-1815) -> hemen hazır."""
+    if slot == WEEKEND_SLOT[0]:
+        return True
     if "%s-%s" % (now.date().isoformat(), slot) in (v1_printed or ()):
         return True
     hh, mm = [(h, m) for n, h, m in SLOTS if n == slot][0]
@@ -490,9 +499,16 @@ def v1_ready(now, slot, v1_printed):
 
 
 def window_start(now, slot):
-    """Aday penceresi: önceki baskı saatinden 2 saat öncesi; en az 14 saat geriye."""
+    """Aday penceresi: önceki baskı saatinden 2 saat öncesi; en az 14 saat geriye.
+    Hafta sonu: önceki baskı Cmt ise Cuma 19:30, Paz ise Cmt WEEKEND_SLOT saati."""
     if slot == "aksam":
         prev = now.replace(hour=8, minute=30, second=0, microsecond=0)
+    elif slot == WEEKEND_SLOT[0]:
+        y = now.date() - timedelta(days=1)
+        if y.weekday() >= 5:
+            prev = datetime(y.year, y.month, y.day, WEEKEND_SLOT[1], WEEKEND_SLOT[2])
+        else:
+            prev = datetime(y.year, y.month, y.day, 19, 30)
     else:
         d = now.date() - timedelta(days=1)
         while d.weekday() >= 5:
@@ -790,7 +806,8 @@ def material(cands, ev, exclude=()):
 
 
 def build_prompt(cands, ev, now, slot, n=MAX_ITEMS, exclude=(), feedback=None):
-    label = "%s %s" % (baski_label(now).split(" · ")[0], "sabah" if slot == "sabah" else "akşam")
+    _etiket = {"sabah": "sabah", "aksam": "akşam", WEEKEND_SLOT[0]: "hafta sonu"}.get(slot, "akşam")
+    label = "%s %s" % (baski_label(now).split(" · ")[0], _etiket)
     tarih = "%d %s %d %s" % (now.day, _TR_MONTHS[now.month - 1], now.year, _TR_DAYS[now.weekday()])
     extra = ""
     if feedback:
@@ -1085,7 +1102,7 @@ def assemble(accepted, now, slot):
         top = max(out, key=lambda x: x["_pubs"])
         if top["_pubs"] >= 3:
             top["onemli"] = True
-    base = 1 if slot == "sabah" else 11
+    base = 1 if slot in ("sabah", WEEKEND_SLOT[0]) else 11
     ymd = now.strftime("%Y%m%d")
     maddeler = []
     for n, it in enumerate(out):

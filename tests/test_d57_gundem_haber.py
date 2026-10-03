@@ -592,6 +592,19 @@ def test_due_slots():
     assert gh.due(sat, {"2026-10-02-aksam"}, has_latest=False) is None
 
 
+def test_due_slots_hafta_sonu():
+    # CPO-1815 (03.10): Cmt/Paz tek baskı 10:30, ≤4 saat gecikmeyle
+    sat = datetime(2026, 10, 3)
+    at = lambda h, m: sat.replace(hour=h, minute=m)
+    assert gh.due(at(10, 29), set()) is None
+    assert gh.due(at(10, 31), set()) == "hafta_sonu"
+    assert gh.due(at(14, 29), set()) == "hafta_sonu"
+    assert gh.due(at(14, 31), set()) is None                          # 4 saatten geç: atlanır
+    assert gh.due(at(10, 31), {"2026-10-03-hafta_sonu"}) is None      # aynı gün ikinci kez basılmaz
+    sun = datetime(2026, 10, 4, 10, 31)
+    assert gh.due(sun, set()) == "hafta_sonu"
+
+
 def test_v1_ready_and_window():
     d = datetime(2026, 10, 1, 8, 35)
     assert gh.v1_ready(d, "sabah", {"2026-10-01-sabah"})
@@ -600,3 +613,10 @@ def test_v1_ready_and_window():
     mon = datetime(2026, 10, 5, 8, 30)
     assert gh.window_start(mon, "sabah") == datetime(2026, 10, 2, 17, 30)   # Cuma akşam baskısından
     assert gh.window_start(datetime(2026, 10, 1, 19, 30), "aksam") == datetime(2026, 10, 1, 5, 30)
+
+
+def test_v1_ready_and_window_hafta_sonu():
+    # Hafta sonu baskısı v1'den bağımsız basar (v1 hafta içi son iş gününde basar, CPO-1815)
+    assert gh.v1_ready(datetime(2026, 10, 3, 10, 31), "hafta_sonu", set())
+    assert gh.window_start(datetime(2026, 10, 3, 10, 30), "hafta_sonu") == datetime(2026, 10, 2, 17, 30)   # Cmt ← Cuma 19:30
+    assert gh.window_start(datetime(2026, 10, 4, 10, 30), "hafta_sonu") == datetime(2026, 10, 3, 8, 30)    # Paz ← Cmt 10:30
