@@ -5,7 +5,7 @@ Kilitler:
      (static/bp-format.js `bpSignalAgeText`) aynı girdi için AYNI çıkar. JS node
      ile gerçekten koşar (kaynak grep'i yetmez). Gündem kartı SSR'dan sonra JS
      ile yeniden çizildiği için ayrışma ekranda "flaş" olarak görünür.
-  2. gundem.html ve ozet.html, D-06 alanı (`eod_label`) VARKEN ve YOKKEN render
+  2. ozet.html (gundem.html C-32 ile silindi), D-06 alanı (`eod_label`) VARKEN ve YOKKEN render
      olur: başlık "Son seansta değişenler · 24 Eylül" / tarihsiz; D-06 öncesi
      closed_message (göreli zamanlı) basılmaz.
   3. Kabul taraması: gundem/ozet/hisse/metodoloji şablonları + bp-format.js
@@ -151,19 +151,6 @@ def _stock(t, sig, sd, sector="Banka"):
 _GLOBALS = {"og_image_url": "/og-image.png", "should_track": False, "cf_beacon_token": ""}
 
 
-def _gundem(**kw):
-    ctx = dict(_GLOBALS,
-               ssr_new_signals=[_stock("AAA", "AL", "24.09.2026"), _stock("BBB", "SAT", "24.09.2026")],
-               ssr_strong_al=[_stock("CCC", "AL", "23.09.2026"), _stock("DDD", "AL", "10.09.2026")],
-               ssr_signal_summary={"al": 40, "sat": 60, "bekle": 115, "total": 215},
-               ssr_bilanco_upcoming=[], ssr_market_open=False,
-               # D-06 öncesi sunucu metni (göreli zaman taşır, basılmamalı)
-               ssr_closed_message="BIST seansı kapandı — yarınki seansta yeni sinyaller görünecek.",
-               ssr_updated_at="24.09.2026 19:11:26")
-    ctx.update(kw)
-    return _env().get_template("gundem.html").render(**ctx)
-
-
 def _visible(html):
     html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.S | re.I)
     html = re.sub(r"<style\b[^>]*>.*?</style>", " ", html, flags=re.S | re.I)
@@ -176,36 +163,6 @@ def _text(html):
 
 
 _REL = re.compile(r"(?i)(?<!\w)(bugün\w*|dün(?:kü|den|ün|ü)?|günün|yarın\w*)(?!\w)")
-
-
-def test_gundem_d06_oncesi_tarihsiz():
-    html = _gundem()
-    txt = _text(html)
-    assert "Son seansta değişenler 2 hisse" in txt
-    # C-74 K8: gün sayısı yerine başlangıç tarihi
-    _u = html_lib.unescape(txt)
-    assert "Son seanstan beri" in _u and "23 Eylül'den beri" in _u and "10 Eylül'den beri" in _u
-    assert "Süre " not in txt and "gündür" not in txt
-    assert "Son seansta BIST'te 40 güçlü trend var; 2 hissenin trend durumu değişti." in html
-    assert not _REL.findall(_visible(html)), _REL.findall(_visible(html))
-
-
-def test_gundem_d06_oncesi_bos_liste_eski_metni_basmaz():
-    html = _gundem(ssr_new_signals=[])
-    assert "yarınki" not in _visible(html)
-    assert "Son seansta durum değiştiren hisse yok" in _text(html)
-    assert 'content="Son seansta BIST\'te 40 güçlü trend var; trend durumu değişen hisse yok."' in html
-
-
-def test_gundem_d06_sonrasi_tarihli():
-    html = _gundem(ssr_eod_label="24 Eylül",
-                   ssr_closed_message="24 Eylül kapanışında trend durumu değişen hisse yok.")
-    assert "Son seansta değişenler · 24 Eylül 2 hisse" in _text(html)
-    assert "24 Eylül kapanışında BIST'te 40 güçlü trend var" in html
-    assert not _REL.findall(_visible(html))
-    bos = _gundem(ssr_new_signals=[], ssr_eod_label="24 Eylül",
-                  ssr_closed_message="24 Eylül kapanışında trend durumu değişen hisse yok.")
-    assert "24 Eylül kapanışında trend durumu değişen hisse yok." in _text(bos)
 
 
 def _ozet(**kw):
@@ -260,7 +217,7 @@ def _surfaces(path):
     return parts + [src]
 
 
-@pytest.mark.parametrize("rel", ["templates/gundem.html", "templates/ozet.html",
+@pytest.mark.parametrize("rel", ["templates/ozet.html",
                                  "templates/hisse.html", "templates/metodoloji.html",
                                  "static/bp-format.js"])
 def test_goreli_gun_adi_yok(rel):
