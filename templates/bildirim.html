@@ -47,6 +47,8 @@
 {%- set it = b.item -%}
 {%- set AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
 {%- macro trdate(iso) -%}{%- set p = iso[:10].split('-') -%}{{ p[2]|int }} {{ AY[p[1]|int - 1] }} {{ p[0] }}{%- endmacro -%}
+{#- Buyuk TL tutari: "25,8 milyar ₺" (eksi isaret U+2212). -#}
+{%- macro tl(v) -%}{%- set a = v|abs -%}{{ '−' if v < 0 else '' }}{% if a >= 1e12 %}{{ ('%.1f'|format(a / 1e12))|replace('.', ',') }} trilyon{% elif a >= 1e9 %}{{ ('%.1f'|format(a / 1e9))|replace('.', ',') }} milyar{% elif a >= 1e6 %}{{ ('%.1f'|format(a / 1e6))|replace('.', ',') }} milyon{% else %}{{ ('%.0f'|format(a / 1e3)) }} bin{% endif %} ₺{%- endmacro -%}
 {%- macro ring(v) -%}{%- set c = 113.1 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="40" height="40" aria-hidden="true"><circle class="rg0" cx="20" cy="20" r="18" fill="none" stroke-width="4"/><circle class="rg1" cx="20" cy="20" r="18" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}"/></svg>{%- endmacro -%}
 <main class="hb hb-doc" id="main-content" tabindex="-1">
   <ol class="hb-bc" aria-label="Konum">
@@ -68,6 +70,35 @@
       {% if o.fx %}<b>{{ o.amount_txt }}</b> × {{ o.fx.rate_txt }} ₺ ({{ trdate(o.fx.date)[:-5] }} kuru) ≈ <b>{{ o.amount_try_txt }}</b>{% else %}<b>{{ o.amount_txt }}</b>{% endif %}
       · {{ o.rev_year }} hasılatı <b>{{ o.rev_txt }}</b>{% if o.approx %} · döviz tutar çevrildiği için “~”{% endif %}
     </p>
+  </section>
+  {% endif %}
+
+  {#- C-57 / CPO-1816: Finansal Rapor bildirimi -> raporun 3 rakami (D-40a0 kaydi, aciklanan veri).
+      Zarar donemi yuzdesiz yazilir (zarar/kar gecisinde yuzde okunmaz). -#}
+  {%- set bl = it.bilanco -%}
+  {% if bl and (bl.hasilat is not none or bl.net_kar is not none) %}
+  {%- set rev_lbl = bl.etiket or ('Net faiz geliri' if bl.faaliyet_nakit is none else 'Hasılat') -%}
+  {%- set dg = bl.degisim or {} -%}
+  <section class="hb-sec hb-fin" aria-labelledby="hbFinH">
+    <h2 id="hbFinH">{{ bl.donem }} raporunda rakamlar nasıl?</h2>
+    {#- Yuzde |onceki| tabanli: onceki donem zararsa "+%112" kar artisi gibi okunur. `onceki` alani
+        (CPO-istek) gelene kadar %100 ustu kar degisimi yuzdesiz yazilir. -#}
+    {%- set np = bl.net_kar -%}{%- set pp = dg.net_kar_pct -%}{%- set prev = (bl.onceki or {}).get('net_kar') -%}
+    {%- set kar_pct_ok = np is not none and np >= 0 and pp is not none and ((prev is not none and prev > 0) or (prev is none and pp <= 100)) -%}
+    {%- set rev_txt = (rev_lbl ~ ' önceki yılın aynı dönemine göre ' ~ pct_text(dg.hasilat_pct|abs, 1)|replace('+', '') ~ ' ' ~ ('arttı' if dg.hasilat_pct >= 0 else 'azaldı') ~ '.') if (bl.hasilat is not none and dg.hasilat_pct is not none) else '' -%}
+    <p class="hb-fin-s">
+      {%- if np is not none and np < 0 %}Şirket {{ bl.donem }} dönemini {{ tl(np|abs) }} net zararla kapattı.{% if rev_txt %} {{ rev_txt }}{% endif %}
+      {%- elif np is not none and prev is not none and prev < 0 %}Şirket {{ bl.donem }} dönemini {{ tl(np) }} net kârla kapattı; önceki yılın aynı döneminde {{ tl(prev|abs) }} net zarar vardı.
+      {%- elif kar_pct_ok %}Net kâr önceki yılın aynı dönemine göre {{ pct_text(pp|abs, 1)|replace('+', '') }} {{ 'arttı' if pp >= 0 else 'azaldı' }}.
+      {%- elif np is not none %}Şirket {{ bl.donem }} dönemini {{ tl(np) }} net kârla kapattı.{% if rev_txt %} {{ rev_txt }}{% endif %}
+      {%- else %}{{ rev_txt or bl.cumle }}{% endif -%}
+    </p>
+    <dl class="hb-fin-g">
+      {% if bl.hasilat is not none %}<div><dt>{{ rev_lbl }}</dt><dd><b>{{ tl(bl.hasilat) }}</b>{% if dg.hasilat_pct is not none %}<small class="{{ dir_class(dg.hasilat_pct, 1) }}">{{ pct_text(dg.hasilat_pct, 1) }} <span>önceki yılın aynı dönemine göre</span></small>{% endif %}</dd></div>{% endif %}
+      {% if np is not none %}<div><dt>{{ 'Net zarar' if np < 0 else 'Net kâr' }}</dt><dd><b>{{ tl(np|abs) }}</b>{% if kar_pct_ok %}<small class="{{ dir_class(pp, 1) }}">{{ pct_text(pp, 1) }} <span>önceki yılın aynı dönemine göre</span></small>{% endif %}</dd></div>{% endif %}
+      {% if bl.faaliyet_nakit is not none %}<div><dt>Faaliyetlerden nakit</dt><dd><b>{{ tl(bl.faaliyet_nakit) }}</b></dd></div>{% endif %}
+    </dl>
+    <p class="hb-fin-n">Rakamlar şirketin KAP'a gönderdiği rapordan; değişim, raporun önceki yılın aynı dönemi sütunuyla karşılaştırmadır.</p>
   </section>
   {% endif %}
 
