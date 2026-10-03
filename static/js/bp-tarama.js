@@ -348,8 +348,8 @@
   function openPanel() {
     if (st.panel) return;
     st.panel = true;
-    var bar = $('tvBar');
-    $('tvPanel').style.setProperty('--tv-pop-top', (bar.offsetTop + bar.offsetHeight - 2) + 'px');  // masaüstü: çubuğun hemen altı
+    placePanel(true);
+    document.documentElement.classList.add('tv-lock');  // C-71 K35: panel açıkken sayfa kaymaz
     $('tvPanel').hidden = false;
     $('tvFbtn').setAttribute('aria-expanded', 'true');
     render();
@@ -359,9 +359,22 @@
     if (!release) sh.onkeydown = function (e) { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } };  // focus-trap.js yüklenmezse Esc yedeği
     var x = sh.querySelector('.tv-xbtn'); if (x) x.focus();
   }
+  /* C-71 K35: masaüstünde panel ekrana sabit; çubuğun altında yer azsa önce çubuk başlığın altına kaydırılır,
+     panel yüksekliği ekranın altında 16 px kalacak şekilde sınırlanır (gövde içeride kayar). */
+  function placePanel(first) {
+    if (!WIDE.matches) return;
+    var bar = $('tvBar'), r = bar.getBoundingClientRect(), hd = document.querySelector('body > header');
+    var top0 = hd ? hd.getBoundingClientRect().bottom : 0;
+    if (first && (r.bottom > innerHeight * 0.45 || r.top < top0)) { window.scrollBy(0, r.top - top0 - 8); r = bar.getBoundingClientRect(); }
+    var P = $('tvPanel').style;
+    P.setProperty('--tv-pop-top', Math.round(r.bottom - 2) + 'px');
+    P.setProperty('--tv-pop-left', Math.round(r.left + 20) + 'px');
+  }
+  window.addEventListener('resize', function () { if (st.panel) placePanel(false); });
   function closePanel() {
     if (!st.panel) return;
     st.panel = false;
+    document.documentElement.classList.remove('tv-lock');
     $('tvPanel').hidden = true;
     $('tvFbtn').setAttribute('aria-expanded', 'false');
     if (release) { var r = release; release = null; r(); } else $('tvFbtn').focus();

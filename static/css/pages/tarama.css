@@ -190,6 +190,22 @@
     .tv-tb .c-tr .sub { display: block; margin-left: 0; margin-top: 2px; }
     .tv-pcols { grid-template-columns: 1fr; }
   }
+  /* C-71 K35: ≥820 — Filtre düğmesi ilk çip satırıyla hizalı; panel ekrana sabit ve ekrana sığar (JS konumlar);
+     uzun listede sütun başlıkları yapışkan (overflow:clip kaydırma kabı oluşturmaz). */
+  html.tv-lock { overflow: hidden; scrollbar-gutter: stable; }
+  @media (min-width: 820px) {
+    .tv-bar { align-items: flex-start; }
+    .tv-vsep { margin-top: 8px; }
+    .tv-sheet { position: fixed; left: var(--tv-pop-left, 20px); width: min(740px, calc(100vw - var(--tv-pop-left, 20px) - 20px)); max-height: calc(100vh - var(--tv-pop-top, 200px) - 16px); max-height: calc(100dvh - var(--tv-pop-top, 200px) - 16px); }
+    .tv-sh-h, .tv-sh-f { flex: none; }
+    .tv-sh-b { flex: 0 1 auto; min-height: 0; }
+    .tv-tbw { overflow: clip; }
+    .tv-tb thead th { position: sticky; top: var(--bp-anchor-header); z-index: 2; background: var(--bp-surface); }
+    .tv-tb th.c-bp { white-space: nowrap; }
+  }
+  @media (min-width: 820px) and (max-width: 1099.98px) {
+    .tv-tb .c-te .sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  }
   @media (prefers-reduced-motion: reduce) { .tv-strip i, .ghb .chev { transition: none; } }
   @media (max-width: 480px) { .tv-bar { flex-wrap: wrap; } .tv-chip { white-space: normal; } }
 
