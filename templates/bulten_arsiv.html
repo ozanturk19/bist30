@@ -27,7 +27,7 @@
 {%- set _ttl = 'Akşam Bülteni arşivi' -%}
 {%- set _items = [] -%}
 {%- for it in A[:60] -%}{%- set _ = _items.append({'@type': 'ListItem', 'position': loop.index, 'url': 'https://borsapusula.com/bulten/' ~ it.tarih, 'name': 'Akşam Bülteni · ' ~ (it.tarih[8:10]|int) ~ ' ' ~ _MO[it.tarih[5:7]|int - 1] ~ ' ' ~ it.tarih[:4]}) -%}{%- endfor -%}
-{%- set _desc = 'Borsa İstanbul her işlem günü nasıl kapandı? BIST100 kapanışı ve değişimi, günün tek cümlelik özeti; her günün bülteni kalıcı sayfada.' -%}
+{%- set _desc = 'Borsa İstanbul her işlem günü nasıl kapandı? BIST100 kapanışı ve değişimi, tek cümlelik gün özeti; her tarihin bülteni kalıcı sayfada.' -%}
 {% block head %}<title>{{ _ttl }} | BorsaPusula</title>
 <meta name="description" content="{{ _desc }}">
 <link rel="canonical" href="{{ _url }}">
@@ -64,7 +64,7 @@
     <div class="blv-lead">
       <p class="blv-ey">Akşam Bülteni <b>· Arşiv</b></p>
       <h1 id="arH">Borsa her gün nasıl kapandı?</h1>
-      <p>Her işlem günü kapanıştan sonra hazırlanan bültenler: BIST100 kapanışı, ısı haritası, en çok hareket eden hisseler, durumu değişenler, sektörler ve takvim. Bir güne dokun, o günün bültenini aç.</p>
+      <p>Her işlem günü kapanıştan sonra hazırlanan bültenler: BIST100 kapanışı, ısı haritası, en çok hareket eden hisseler, durumu değişenler, sektörler ve takvim. Bir tarihe dokun, o tarihin bültenini aç.</p>
     </div>
   </section>
   {%- set _months = [] %}{%- set _by = {} %}
