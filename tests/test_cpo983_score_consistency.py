@@ -32,27 +32,31 @@ def _extract_function_body(src, func_name):
 
 def test_gucu_yuksek_reads_cached_signal_strength():
     """gucu_yuksek() ayrı bir sayfa/hesap değil — FAZ4-T4.2'de /tarama'ya 301
-    redirect'e konsolide edildi (CPO-DEV2-010 onaylı). Artık kendi _mscore'unu
-    hesaplamıyor; tutarlılık, aynı cache + aynı sort=signal_strength yolunu
-    paylaşan tek sayfa olmasıyla yapısal olarak garanti ediliyor (eski
-    pattern-match testinden daha güçlü bir güvence)."""
+    redirect'e konsolide edildi (CPO-DEV2-010 onaylı). D-25a'da bu, kendi
+    dedike route fonksiyonundan çıkıp diğer 25 eski yolla birlikte tek
+    REDIRECTS sözlüğü + tek _legacy_redirect view'a taşındı. Artık kendi
+    _mscore'unu hesaplamıyor; tutarlılık, aynı cache + aynı
+    sort=signal_strength yolunu paylaşan tek sayfa olmasıyla yapısal olarak
+    garanti ediliyor (eski pattern-match testinden daha güçlü bir güvence)."""
     src = _read_app()
-    body = _extract_function_body(src, "gucu_yuksek")
-    assert body, "gucu_yuksek() bulunamadı"
-    assert '"/tarama?signal=AL&sort=signal_strength"' in body, (
-        "gucu_yuksek() artik /tarama?signal=AL&sort=signal_strength'e redirect "
-        "etmiyor — CPO-983 tutarlilik garantisi (ayni sayfa=ayni skor) bozulmus "
+    assert re.search(
+        r'"/gucu-yuksek"\s*:\s*"/tarama\?signal=AL&sort=signal_strength"', src
+    ), (
+        "REDIRECTS[\"/gucu-yuksek\"] artik /tarama?signal=AL&sort=signal_strength'e "
+        "eslenmiyor — CPO-983 tutarlilik garantisi (ayni sayfa=ayni skor) bozulmus "
         "olabilir, inceleyin"
     )
 
 
 def test_gucu_yuksek_does_not_recompute_compose_score():
-    """gucu_yuksek() compose_score()'u canlı yeniden çağırmamalı (tek kaynak: analyze())."""
+    """/gucu-yuksek'i servis eden view (_legacy_redirect, D-25a) compose_score()'u
+    canlı yeniden çağırmamalı (tek kaynak: analyze()) — zaten bir REDIRECTS
+    sözlük lookup'ından başka iş yapmıyor, bu testin garantisi yapısal."""
     src = _read_app()
-    body = _extract_function_body(src, "gucu_yuksek")
-    assert body, "gucu_yuksek() bulunamadı"
+    body = _extract_function_body(src, "_legacy_redirect")
+    assert body, "_legacy_redirect() bulunamadı (D-25a REDIRECTS view'ı)"
     assert "compose_score(" not in body, (
-        "gucu_yuksek() compose_score()'u tekrar çağırıyor — bu, analyze()'daki "
+        "_legacy_redirect() compose_score()'u çağırıyor — bu, analyze()'daki "
         "F5 AI Sentiment ayarını atlayarak hisse detay sayfasından farklı bir "
         "sayı üretir (CPO-983 regresyonu)"
     )

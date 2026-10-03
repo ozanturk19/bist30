@@ -5675,17 +5675,6 @@ def api_hisse_lite(ticker):
     return _resp
 
 
-# ── T4.1 (Master Donusum FAZ4 KALDIR): /heatmap tam yetim sayfa idi (0 ic
-# link, sitemap disi, tier/premium taksonomisine bagli, CPO-1191/1197
-# ihlallerinin en yogun oldugu sayfa) - kaldirildi, /api/heatmap'in tek
-# tuketicisi heatmap.js'ti (baska tuketici yok, dogrulandi). 301 hedefi
-# /sektor-harita: ayni "sektor bazli AL/SAT/BEKLE gorsellestirme" islevini
-# gorur, tier kavramina bagli degil.
-@app.route("/heatmap")
-def heatmap_page():
-    return redirect("/sektor-harita", code=301)
-
-
 # ── D-54: paylaşılabilir ısı haritası — /harita/<gün> kalıcı sayfa + PNG görseller ──────────────
 def _harita_page_ready():
     """harita_gun.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /harita ve
@@ -7945,26 +7934,69 @@ def api_chart_xu100():
 # bu route hiçbir canlı sayfadan tetiklenemeyen öksüz kod yoluydu (yalnız doğrudan
 # URL/bot erişiminde 2y OHLC'yi senkron hesaplayıp Yahoo bütçesini boşa tüketiyordu).
 
-# ── Kaldırılan sayfalar (CPO-DEV2-036, Ozan kararı 19.08.2026): BIST odaklı sadeleşme ──
-# Kripto/Emtia/ABD ayrı sayfaları kaldırıldı — üst kayan makro bar (/api/macro) değişmeden kalır.
-# Backlink/bookmark/arama-motoru kayıtları için 404 yerine anasayfaya 301 yönlendirme.
-_REMOVED_ASSET_ROUTES = (
-    "/btc", "/eth", "/sol", "/bnb", "/altin", "/gumus", "/petrol", "/dogalgaz",
-    "/kripto", "/emtialar", "/abd", "/abd/sp500", "/abd/nasdaq",
-)
+# ── D-25a: eski/kaldırılmış yolların tek kaynaklı 301 tablosu ────────────────
+# Önceden 12 ayrı route fonksiyonu + bu döngü aynı işi (kalıcı yönlendirme)
+# tekrar tekrar yapıyordu; artık tek sözlük + tek view (url_map'te tek
+# yönlendirme view'ı). Kripto/Emtia/ABD sayfaları (CPO-DEV2-036, Ozan kararı
+# 19.08.2026: BIST odaklı sadeleşme — üst kayan makro bar /api/macro değişmeden
+# kalır), T4.1/T4.2 (Master Dönüşüm FAZ4: /heatmap, /sektorler, /sektor,
+# /sinyaller, /sinyal-performans, /gucu-yuksek birleşti), CPO-1191/1195/1585
+# (/backtest, /virtual-portfolio), D-24 (/api/bilanco-takvimi), D-25b
+# (/portfolio) ve eski /nasdaq, /sp500 sayfaları. 14 günlük nginx taban ölçümü:
+# `plans/2026-09-23-denetim/seo-taban.md` (dış referer 0).
+REDIRECTS = {
+    "/heatmap": "/sektor-harita",
+    "/sektorler": "/sektor-harita",
+    "/sektor": "/sektor-harita",
+    "/sinyaller": "/tarama",
+    "/sinyal-performans": "/tarama",
+    "/backtest": "/tarama",
+    "/gucu-yuksek": "/tarama?signal=AL&sort=signal_strength",
+    "/nasdaq": "/",
+    "/sp500": "/",
+    "/portfolio": "/takip",
+    "/virtual-portfolio": "/takip",
+    "/api/bilanco-takvimi": "/api/takvim",
+    "/btc": "/", "/eth": "/", "/sol": "/", "/bnb": "/",
+    "/altin": "/", "/gumus": "/", "/petrol": "/", "/dogalgaz": "/",
+    "/kripto": "/", "/emtialar": "/",
+    "/abd": "/", "/abd/sp500": "/", "/abd/nasdaq": "/",
+}
 
-for _removed_path in _REMOVED_ASSET_ROUTES:
-    def _make_removed_redirect(_p=_removed_path):
-        def _removed_redirect():
-            return redirect("/", code=301)
-        return _removed_redirect
-    app.add_url_rule(_removed_path, endpoint=f"removed_asset_{_removed_path.strip('/').replace('/', '_')}",
-                      view_func=_make_removed_redirect())
 
-
+@app.route("/heatmap")
+@app.route("/sektorler")
+@app.route("/sektor")
+@app.route("/sinyaller")
+@app.route("/sinyal-performans")
+@app.route("/backtest")
+@app.route("/gucu-yuksek")
+@app.route("/nasdaq")
+@app.route("/sp500")
+@app.route("/portfolio")
+@app.route("/virtual-portfolio")
+@app.route("/api/bilanco-takvimi")
+@app.route("/btc")
+@app.route("/eth")
+@app.route("/sol")
+@app.route("/bnb")
+@app.route("/altin")
+@app.route("/gumus")
+@app.route("/petrol")
+@app.route("/dogalgaz")
+@app.route("/kripto")
+@app.route("/emtialar")
+@app.route("/abd")
+@app.route("/abd/sp500")
+@app.route("/abd/nasdaq")
 @app.route("/abd/<ticker>")
-def abd_stock_page(ticker):
-    return redirect("/", code=301)
+def _legacy_redirect(**_kwargs):
+    # tek view, REDIRECTS tablosundaki (ya da bilinmeyen /abd/<ticker>
+    # ticker'ı icin varsayilan "/") hedefe 301. @app.route literal string
+    # kullanir (add_url_rule donguyu degil) ki tools/crawler-channel-check.py
+    # G4 R5 JSON-LD rota taramasi bu yollari gormeye devam etsin.
+    target = REDIRECTS.get(request.path, "/")
+    return redirect(target, code=301)
 
 # ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
 def _fmt_tl(v):
@@ -12130,16 +12162,6 @@ def ozet_page():
         stock_names=STOCK_NAMES)
 
 
-# ── Güçlü Momentum Listesi (T4.2: /tarama'ya birlestirildi) ─────────────────
-@app.route("/gucu-yuksek")
-def gucu_yuksek():
-    """T4.2 (Master Donusum Programi FAZ4): ayri sayfa /tarama AL-sinyal + signal_strength
-    sort preset'ine 301 ile birlesti. Ayni _cache["data"], ayni signal_strength siralamasi
-    -- /tarama zaten ayni isi yapiyordu (CPO-DEV2-010 onayli, kod-degistiren+onay-gerektirmeyen).
-    Skor formulu aciklamasi /metodoloji#sinyal-gucu'ye tasindi."""
-    return redirect("/tarama?signal=AL&sort=signal_strength", code=301)
-
-
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
 @app.route("/metodoloji")
 def metodoloji():
@@ -12219,12 +12241,6 @@ def yasal():
 
 
 # ── Blog ──────────────────────────────────────────────────────────────────────
-@app.route("/portfolio")
-def portfolio():
-    # D-25b: eski tarayıcı-yerel (localStorage) portföy sayfası C-41/D-50 ile
-    # hesap tabanlı /takip'e taşındı; portfolio.html artık render edilmiyor.
-    return redirect("/takip", code=301)
-
 
 # ── Sunucu Taraflı Portföy (UUID Token Bazlı) ─────────────────────────────────
 _PF_DIR = os.path.join(_APP_DIR, "portfolios")
@@ -12489,26 +12505,6 @@ def _inject_bp_rules():
     return dict(bp_rules=BP_RULES)
 
 
-@app.route("/sinyaller")
-def redirect_sinyaller():
-    return redirect("/tarama", 301)
-
-
-@app.route("/sinyal-performans")
-def sinyal_performans():
-    # CPO-1585 İş 1: sayfa /tarama'ya birlestirildi, eski bookmark/backlink
-    # 404 yemesin diye decorator kaldı, govde kalici redirect'e cevrildi.
-    return redirect("/tarama", code=301)
-
-
-@app.route("/nasdaq")
-def _redir_nasdaq():
-    return redirect("/", code=301)
-
-@app.route("/sp500")
-def _redir_sp500():
-    return redirect("/", code=301)
-
 @app.route("/hisseler")
 def hisseler_hub():
     """SEO hub — Tüm BIST hisseleri sektör + alfabetik. SSR ile 215 internal link."""
@@ -12547,16 +12543,6 @@ def hisseler_hub():
         letters_sorted=letters_sorted,
         total_count=len(all_pairs),
     )
-
-
-@app.route("/sektorler")
-def redirect_sektorler():
-    return redirect("/sektor-harita", 301)
-
-
-@app.route("/sektor")
-def sektor():
-    return redirect("/sektor-harita", 301)
 
 
 @app.route("/sektor-harita")
@@ -12802,13 +12788,6 @@ def get_earnings_data():
     if cached:
         return cached
     return {"estimates": {}, "updated_at": "—"}
-
-
-@app.route("/api/bilanco-takvimi")
-@limiter.limit("60 per minute")
-def api_bilanco_takvimi():
-    """D-24: dönem kovalamalı eski uç kalktı; tek kaynak /api/takvim."""
-    return redirect("/api/takvim", code=301)
 
 
 @app.route("/api/bilanco-mini")
@@ -13983,22 +13962,6 @@ def _get_blog_cache():
         _BLOG_NORMALIZED_CACHE = [_normalize_article(a) for a in _live_articles]
         logger.info("Blog önbelleği hazırlandı: %d makale", len(_BLOG_NORMALIZED_CACHE))
     return _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
-
-
-# CPO-1191 Karar 5: interaktif /backtest sayfası + özel-strateji API'leri kaldırıldı
-# (template attic/backtest.html, kod git geçmişinde). Kalıcı 301 → /tarama (CPO-1585:
-# /sinyal-performans de /tarama'ya birleştiği için çifte 301 zincirine düşülmesin diye).
-@app.route("/backtest")
-def backtest_page():
-    return redirect("/tarama", code=301)
-
-
-# CPO-1191 Karar 6: /virtual-portfolio kaldırıldığında 301 eklenmemişti (CPO-1195 §5) —
-# dış link/bookmark/arama indeksi 404 yiyordu. /backtest ile aynı muamele.
-# D-25b: /portfolio artık kendisi /takip'e 301 — çifte zincire düşmemek için doğrudan hedef.
-@app.route("/virtual-portfolio")
-def virtual_portfolio_redirect():
-    return redirect("/takip", code=301)
 
 
 BLOG_NEW_BADGE_DAYS = 14  # r33: "Yeni" rozeti için eşik — yayın tarihinden itibaren kaç gün
