@@ -219,33 +219,24 @@ def _son_rapor(rec):
 
 def bilanco(tickers, names, recs, estimates, today):
     """-> (olaylar, tarihsizler, donem_ozeti). Sezonun donemi icin her sirket tek durumda:
-    aciklandi (rapor yayimlandi, tarihiyle) | tahmini tarihli olay | tarihsiz."""
+    aciklandi (rapor yayimlandi, tarihiyle) | tarihsiz. Disaridan (yfinance) tahmini tarih
+    olay olarak gosterilmez -- yalniz aciklanan veri ilkesi (CPO-1815, O29); `estimates`
+    bugun kullanilmiyor, sirket kendi (kesin) tarihini aciklayinca ayri bir yoldan girecek."""
     iso = today.isoformat()
     sz = sezon(today)
     events, undated, published = [], [], []
     for t in tickers:
         rec = recs.get(t)
         son = _son_rapor(rec)
-        banka = bool((rec or {}).get("flags", {}).get("banka")) if rec else None
-        est = estimates.get(t)
-        if est and est < iso:
-            est = None  # gecmiste kalan tahmin tasinmaz
         if sz:
             if son and _donem_key(son["donem"]) >= _donem_key(sz["donem"]):
                 published.append({"ticker": t, "name": names.get(t, t), "date": son["date"]})
                 continue
-            if est and not (sz["baslangic"] <= est <= _gun_ekle(sz["son_gunler"][-1][0], 30)):
-                est = None  # sezon penceresi disindaki tahmin baska bir doneme ait olabilir
             donem = sz["donem"]
-        else:
-            donem = sonraki_donem(son["donem"]) if son else None
-        if est:
-            events.append({"id": "b-%s-%s" % (t, est), "date": est, "kind": "bilanco", "sub": "rapor",
-                           "date_kind": "tahmini", "ticker": t, "name": names.get(t, t),
-                           "donem": donem, "banka": banka, "son_rapor": son})
-        elif sz:
             undated.append({"ticker": t, "name": names.get(t, t), "kind": "bilanco",
                             "donem": donem, "son_rapor": son})
+        else:
+            donem = sonraki_donem(son["donem"]) if son else None
     for dl, kapsam in (sz["son_gunler"] if sz else ()):
         if dl >= iso:
             events.append({"id": "s-%s" % dl, "date": dl, "kind": "bilanco", "sub": "son_gun",

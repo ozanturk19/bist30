@@ -89,24 +89,24 @@ def test_temettu_ozeti_24_ay_siniri():
     assert tu["next"]["brut"] == 6.7469533 and tu["last"]["brut"] == 10.3799282
 
 
-def test_bilanco_aciklanan_rapor_ve_tahmini_tarih():
+def test_bilanco_aciklanan_rapor_disaridan_tahmin_olay_uretmez():
+    """CPO-1815 (O29, yalniz aciklanan veri ilkesi): yfinance 'estimates' verilse de
+    bilanco icin tahmini tarihli olay uretilmez -- sirket acyklamadiysa tarihsiz listede."""
     recs = _recs()
     recs["AKBNK"] = {"schema_version": 1, "derived": {"son_rapor": {"donem": "2026/09", "yayin": "2026-09-22T18:30"}},
                      "flags": {"banka": True}}
     est = {"THYAO": "2026-11-05", "GARAN": "2026-10-28", "TUPRS": "2026-09-01", "AKBNK": "2026-10-27"}
     p = _build(recs, est)
-    th = _ev(p, "bilanco", "THYAO")
-    assert len(th) == 1 and th[0]["date_kind"] == "tahmini" and th[0]["donem"] == "2026/09"
-    assert th[0]["son_rapor"] == {"donem": "2026/06", "date": "2026-08-05"}
-    assert _ev(p, "bilanco", "GARAN")[0]["banka"] is True
+    assert _ev(p, "bilanco", "THYAO") == [] and _ev(p, "bilanco", "GARAN") == []
+    assert all(e.get("sub") != "rapor" for e in _ev(p, "bilanco"))  # hic tahmini olay yok
     und = {u["ticker"]: u for u in p["undated"]}
-    assert "TUPRS" in und and und["TUPRS"]["son_rapor"]["date"] == "2026-08-04"  # gecmis tahmin atildi
+    assert "THYAO" in und and und["THYAO"]["son_rapor"] == {"donem": "2026/06", "date": "2026-08-05"}
+    assert "TUPRS" in und and und["TUPRS"]["son_rapor"]["date"] == "2026-08-04"
     assert "AKBNK" not in und and _ev(p, "bilanco", "AKBNK") == []  # donem aciklandi
     oz = p["bilanco_donemi"]
-    assert oz["donem"] == "2026/09" and oz["aciklandi"] == 1 and oz["tahmini"] == 2
+    assert oz["donem"] == "2026/09" and oz["aciklandi"] == 1 and oz["tahmini"] == 0
     assert oz["son_aciklananlar"][0] == {"ticker": "AKBNK", "name": "AKBNK", "date": "2026-09-22"}
     assert oz["tarihsiz"] == len(p["undated"])
-    assert all(e["date_kind"] == "tahmini" for e in _ev(p, "bilanco") if e["sub"] == "rapor")
 
 
 def test_bilanco_yasal_son_gunler():
@@ -144,8 +144,8 @@ def test_siralama_sayac_ve_gunler():
 def test_kayit_yoksa_bos_uydurma_yok():
     p = tk.build(["TUPRS", "THYAO"], NAMES, {}, {"THYAO": "2026-11-05"}, PRICES, TODAY)
     assert _ev(p, "temettu") == [] and p["kap_kayit"] == 0
-    assert [e["ticker"] for e in _ev(p, "bilanco") if e["sub"] == "rapor"] == ["THYAO"]
-    assert [u["ticker"] for u in p["undated"]] == ["TUPRS"]
+    assert [e["ticker"] for e in _ev(p, "bilanco") if e["sub"] == "rapor"] == []  # tahmin olay uretmez
+    assert sorted(u["ticker"] for u in p["undated"]) == ["THYAO", "TUPRS"]
 
 
 def test_load_kap_records(tmp_path):
@@ -164,9 +164,9 @@ def test_donem_ozeti():
 
 
 def test_ssr_context():
-    p = _build(estimates={"THYAO": "2026-11-05"})
+    p = _build()
     stocks = {"TUPRS": {"change_pct": -0.06, "borsapusula_skoru": 59, "signal": "BEKLE"},
-              "THYAO": {"change_pct": 1.2, "borsapusula_skoru": 61, "signal": "AL"}}
+              "ASTOR": {"change_pct": 1.2, "borsapusula_skoru": 61, "signal": "AL"}}
     s = tk.ssr_context(p, stocks, TODAY)
     assert s["asof_label"] == "24 Eylül Perşembe"
     g = {x["date"]: x for x in s["groups"]}
@@ -174,7 +174,7 @@ def test_ssr_context():
     assert g["2026-09-30"]["gun"] == "30 Eylül" and g["2026-09-30"]["hafta_gunu"] == "Çarşamba"
     tu = g["2026-09-30"]["events"][0]
     assert tu["hisse"] == {"change_pct": -0.06, "bp": 59, "durum": "y"} and tu["kalan"] == 6
-    assert g["2026-11-05"]["events"][0]["hisse"]["durum"] == "g"
+    assert g["2026-10-15"]["events"][0]["hisse"]["durum"] == "g"
     assert s["more_after"] == "2026-11-15" and s["more_label"] == "16 Kasım"
     assert g["2026-11-19"]["late"] and not g["2026-11-09"]["late"]
     assert s["late_n"] == sum(len(x["events"]) for x in s["groups"] if x["late"])
