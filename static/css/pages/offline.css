@@ -36,7 +36,6 @@ body{
 @keyframes offPulse{0%,100%{opacity:.85}50%{opacity:.18}}
 @media (prefers-reduced-motion:reduce){.off-dot{animation:none}}
 
-.off-icon{font-size:var(--bp-text-40);line-height:1;display:block;margin-bottom:12px}
 .off-card h1{
   font-weight:800;letter-spacing:-.025em;
   font-size:clamp(1.35rem,4.5vw,1.65rem);line-height:1.2;

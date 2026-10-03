@@ -37,7 +37,7 @@
     <h2>Bize Ulaşın</h2>
 
     <div class="contact-row">
-      <div class="contact-icon"><span aria-hidden="true">📧</span></div>
+      <div class="contact-icon"><svg class="da-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></svg></div>
       <div>
         <div class="contact-lbl">E-posta</div>
         <div class="contact-val"><a class="da-tap" href="mailto:iletisim@borsapusula.com">iletisim@borsapusula.com</a></div>
@@ -64,11 +64,11 @@
         <label class="cf-label" for="cfSubject">Konu</label>
         <select class="cf-input da-select" id="cfSubject" required>
           <option value="" selected disabled>Seçiniz…</option>
-          <option value="Site Hatası (buton, görünüm)">🐛 Site Hatası (buton, görünüm)</option>
-          <option value="Öneri">💡 Öneri</option>
-          <option value="Veri Hatası (fiyat, sinyal)">📊 Veri Hatası (fiyat, sinyal)</option>
-          <option value="İşbirliği">🤝 İşbirliği</option>
-          <option value="Diğer">❓ Diğer</option>
+          <option value="Site Hatası (buton, görünüm)">Site Hatası (buton, görünüm)</option>
+          <option value="Öneri">Öneri</option>
+          <option value="Veri Hatası (fiyat, sinyal)">Veri Hatası (fiyat, sinyal)</option>
+          <option value="İşbirliği">İşbirliği</option>
+          <option value="Diğer">Diğer</option>
         </select>
       </div>
       <div class="cf-row">
@@ -198,7 +198,7 @@ async function submitForm(e) {
       if (kvkkEl) kvkkEl.disabled = true;   // (3)
       btn.style.display = 'none';
       msg.className = 'cf-msg cf-msg--on cf-msg--ok';
-      msg.innerHTML = '✅ Mesajınız iletildi.<br><span class="cf-msg-sub">1–3 iş günü içinde yanıt veriyoruz.</span>';
+      msg.innerHTML = 'Mesajınız iletildi.<br><span class="cf-msg-sub">1–3 iş günü içinde yanıt veriyoruz.</span>';
     } else {
       cfShowMsg('Hata: ' + (d.error || 'Bilinmeyen hata'), 'err');
       btn.disabled = false;
@@ -225,7 +225,7 @@ window.addEventListener('pageshow', (ev) => {
 </script>
 
   <div class="disclaimer">
-    <span aria-hidden="true">⚠️</span> <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
+    <svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
     Finansal danışmanlık talepleri yanıtlanmaz. Hisse veya piyasa yorumu için lütfen lisanslı
     bir yatırım danışmanına başvurun.
   </div>

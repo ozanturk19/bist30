@@ -26,7 +26,7 @@
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<script>document.documentElement.classList.add('js');</script>
 <a href="#main-content" class="skip-link">Ana içeriğe atla</a>
-{% with hdr_icon = '📅', hdr_title = 'Takvim', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_title = 'Takvim', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
 {%- from '_fmt_macros.html' import pct_text, dir_class -%}
 {#- C-36: /takvim birlesik sayfa (taslak v2, plans/mockups/takvim.html). Baglam `takvim`
     arka uctan (D-24 takvim.ssr_context); yoksa ya da bossa sayfa 500 vermez, bos durum

@@ -167,7 +167,7 @@
   {%- set _sr = (ssr_signal.stale_reason or '') ~ '' %}
   <div class="hisse-stale-box" data-stale="1" role="note"
        style="background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-md);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-stale);line-height:1.5">
-    <span aria-hidden="true">⚠️</span>
+    <svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     <strong>{% if _st_ts %}Son veri {{ '%02d.%02d'|format(_st_d, _st_m) }} · güncellenmiyor{% else %}Bu hissenin verisi güncellenmiyor{% endif %}</strong>
     {%- if _sr.startswith('insufficient_history:') %}
     — Bu hissenin fiyat geçmişi kısa ({{ _sr.split(':')[1].split('<')[0] }} gün); analiz 120 gün dolunca başlar.
@@ -214,7 +214,7 @@
         <h1 class="hx-tk">{{ ticker }}</h1>
         <span class="hx-nm" title="{{ name }}">{{ name }}</span>
         {% if sector %}<span class="hx-chip">{{ sector }}</span>{% endif %}
-        {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><span aria-hidden="true">⚠</span> Anomal</span>{% endif %}
+        {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><svg class="da-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Anomal</span>{% endif %}
       </div>
       <div class="hx-price da-display" id="hpPrice">{{ _px|tr_price if _px is not none else '—' }}<small>₺</small></div>
       <div class="hx-chg">
@@ -563,15 +563,13 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
        kardes bir bileseni yok etmemeli). #}
   {#- C-21a (25.09): Yatay'da Hacim Profili gosterilmez (plan C-21a); panel yalniz Guclu Trend / Trend Bozuldu'da. -#}
   <div class="entry-analysis-section" id="volumeProfileSection">
-    <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
+    <h2 class="section-title">Hacim Profili</h2>
     <div class="hacim-profili">
       <div class="hp-row-line" id="hpRvolRow" style="display:none">
-        <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
         <span class="hp-row-text"><abbr tabindex="0" data-tip="Son 5 seansın ortalama hacmi / son 20 seansın ortalama hacmi">Hacim oranı</abbr> (5 gün / 20 gün):</span>
         <span class="hp-row-val" id="hpRvolVal">—</span>
       </div>
       <div class="hp-row-line" id="hpSvolRow" style="display:none">
-        <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
         <span class="hp-row-text">Sinyal günü hacim:</span>
         <span class="hp-row-val" id="hpSvolVal">—</span>
       </div>
@@ -605,7 +603,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
   {# SPEC-011 L4 — Şirket Hakkında (sunucu önbelleğindeki şirket açıklaması; kaynak D-46b) #}
   <section class="da-panel content-card" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
+    <h2 class="section-title" id="company-summary-heading">{{ ticker }} Hakkında</h2>
     {% if _cs_paras %}
     <p class="content-para">{{ _cs_paras[0] }}</p>
     {% if _cs_paras|length > 1 %}
@@ -646,7 +644,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
        (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
        context'inden — yeni hesaplama yok, uydurma sayı yok. #}
   <div class="quickfacts-card">
-    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
+    <h2 class="quickfacts-title">{{ ticker }} — Hap Bilgi</h2>
     <dl class="quickfacts-list">
       <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
       <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
@@ -672,7 +670,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   {% if seo_faq %}
   {# SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) #}
   <section class="da-panel content-card faq-card" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <h2 class="section-title" id="faq-heading">{{ ticker }} — Sıkça Sorulan Sorular</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
       <dt class="faq-q">{{ item.q }}</dt>
@@ -825,7 +823,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
         <div style="font-size:var(--bp-text-xs);color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
         <div style="font-size:var(--bp-text-base);font-weight:600;color:var(--bp-text);line-height:1.4">{{ b.title }}</div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:5px">{{ b.mins }} dk okuma</div>
       </a>
       {% endfor %}
     </div>

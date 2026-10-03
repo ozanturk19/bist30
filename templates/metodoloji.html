@@ -44,19 +44,19 @@
   </h2>
   <div class="tldr-rows">
     <div class="tldr-row tldr-green">
-      <span class="tldr-icon"><span aria-hidden="true">🟢</span></span>
+      <span class="tldr-icon"><span class="tldr-dot"></span></span>
       <span class="tldr-label">Güçlü Trend</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">Supertrend&nbsp;▲ + ADX&nbsp;≥&nbsp;25 + DI+&nbsp;&gt;&nbsp;DI− + EMA12&nbsp;&gt;&nbsp;EMA99 + Haftalık&nbsp;▲</span>
     </div>
     <div class="tldr-row tldr-red">
-      <span class="tldr-icon"><span aria-hidden="true">🔴</span></span>
+      <span class="tldr-icon"><span class="tldr-dot"></span></span>
       <span class="tldr-label">Trend Bozuldu</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">Supertrend&nbsp;▼ + ADX&nbsp;≥&nbsp;25 + DI−&nbsp;&gt;&nbsp;DI+ + EMA12&nbsp;&lt;&nbsp;EMA99 + Haftalık&nbsp;▼</span>
     </div>
     <div class="tldr-row tldr-gray">
-      <span class="tldr-icon"><span aria-hidden="true">⚪</span></span>
+      <span class="tldr-icon"><span class="tldr-dot"></span></span>
       <span class="tldr-label">Yatay</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">5 koşulun tamamı aynı yönde değil</span>
@@ -120,7 +120,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
 <ul>
   <li><code>ADX &lt; 18</code> <span role="img" aria-label="anlamına gelir">→</span> Zayıf, yatay piyasa</li>
   <li><code>ADX 18–25</code> <span role="img" aria-label="anlamına gelir">→</span> Orta güçte trend oluşuyor</li>
-  <li><code>ADX ≥ 25</code> <span role="img" aria-label="anlamına gelir">→</span> Güçlü trend <span aria-hidden="true">✅</span> (sinyal üretilir)</li>
+  <li><code>ADX ≥ 25</code> <span role="img" aria-label="anlamına gelir">→</span> Güçlü trend (sinyal üretilir)</li>
   <li><code>ADX ≥ 40</code> <span role="img" aria-label="anlamına gelir">→</span> Çok güçlü trend</li>
 </ul>
 <p>
@@ -213,12 +213,12 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
   ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p)
 </p>
 <p>
-  70+ → 💎 "Yüksek Skor" · 56–69 → "Orta Skor" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
+  70+ → "Yüksek Skor" · 56–69 → "Orta Skor" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
 </p>
 <p>
   Düşük likidite (20 günlük ort. hacim 5 Mn ₺ altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
   Skor'un hacim bileşeni <strong>Günlük Hacim Oranı</strong>dır (son seans hacmi / 20 günlük ort.). Sayfalarda ayrıca gösterilen <strong>Hacim oranı</strong> ise <strong>farklı bir sayıdır</strong> (5 günlük ort. / 20 günlük ort.) — ikisini karıştırmayın, aşağıdaki terim listesinde ayrı ayrı tanımlı.
-  Bu rozet, hacim teyidini gösteren <span aria-hidden="true">⭐</span> <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: <span aria-hidden="true">💎</span> skorun bandını, <span aria-hidden="true">⭐</span> hacmin teyidini söyler.
+  Bu rozet, hacim teyidini gösteren <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: skor rozeti skorun bandını, Hacim Onaylı hacmin teyidini söyler.
 </p>
 
 <h2 id="terimler">Terimler — Karıştırılmaması Gerekenler</h2>
@@ -251,7 +251,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşa
       <span class="term-where">Hisse sayfası, anasayfa</span></dd>
   </div>
   <div class="term-row">
-    <dt><span aria-hidden="true">⭐</span> Hacim Onaylı</dt>
+    <dt>Hacim Onaylı</dt>
     <dd>Hacim teyidi de bulunan Güçlü Trend sinyalleri (Güçlü Trend <strong>ve</strong> 5 günlük hacim oranı ≥ 1,20).
       <span class="term-where">Tarama hazır listesi</span></dd>
   </div>

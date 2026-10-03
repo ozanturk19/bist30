@@ -56,7 +56,7 @@ const HISSE_NAME = window.BP.name;
 const BP_SSR = window.BP.ssr;
 window._bpLastSignalData = BP_SSR.ticker ? BP_SSR : null;
 
-/* ── ⭐ Portfolio + 🔔 Watchlist toggle (LOCAL STORAGE) ── */
+/* ── Portfolio + Watchlist toggle (LOCAL STORAGE) ── */
 const HIB_PF_KEY    = 'bp_portfolio';
 const HIB_WATCH_KEY = 'bp_watchlist_v2';        // Faz 1 #2: versionleme (yalnız bu sayfada; giriş yoksa TEK kaynak)
 const HIB_WATCH_KEY_LEGACY = 'bp_watchlist';    // migration kaynağı
@@ -902,7 +902,7 @@ function renderSummary(s, signalData) {
     {
       label: 'Vade Uyumu',
       detail: (e12Bull ? 'Kısa > Uzun' : e12Bear ? 'Kısa < Uzun' : 'Eşit') +
-        (_emaDb && _emaDb.deadband ? ' · ⚠️ kararsızlık bölgesi' : ''),
+        (_emaDb && _emaDb.deadband ? ' · kararsızlık bölgesi' : ''),
       techDetail: 'EMA12: ' + _e12s + ' · EMA99: ' + _e99s +
         /* K-BS: basilan cift, yazilan sonucu desteklemeli. */
         bpNumPairNote(_e12s, _e99s, _emaDir) +
@@ -1009,7 +1009,7 @@ function _showChartStatus(msg, withRetryBtn) {
      gecti — bu sayfada ucuncu, sitede besinci elle-yazilmis "Tekrar dene"
      dugmesiydi. Yukleniyor dali (spinner) aynen kaldi: o bir HATA degil. */
   el.innerHTML = withRetryBtn
-    ? '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> ' +
+    ? '<div class="da-empty da-empty--error" role="alert"><span><svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' +
       msg + '</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div>'
     : '<div class="da-spin"></div> ' + msg;
   // C-20: baslikta durum hapi (#hpSignal) yok; nihai hatada yalniz gecmis/gostergeler isaretlenir.
@@ -1382,7 +1382,7 @@ async function loadKapDisclosures() {
     listEl.style.display = '';
 
   } catch(e) {
-    loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
+    loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
   }
 }
 

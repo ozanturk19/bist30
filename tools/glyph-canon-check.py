@@ -43,10 +43,7 @@ KANON = {
 #   Anahtar artik ICERIK. Satir degisirse muafiyet DUSER; bu kasitlidir: degisen
 #   satir yeniden gozden gecirilmelidir. Kullanilmayan muafiyet de HATADIR
 #   (asagida olculur) — beyaz liste curumesin.
-GOZDEN_GECIRILMIS = {
-    ("hisse.html", "/* ── ⭐ Portfolio + 🔔 Watchlist toggle (LOCAL STORAGE) ── */"):
-        "JS bolum yorumu — kullaniciya gorunmez (⭐ Portfolio toggle basligi)",
-}
+GOZDEN_GECIRILMIS = {}  # C-71 K27 (03.10): son muafiyetin yorumundaki emoji silindi
 
 # bir glifin "etiketi": ayni HTML etiketindeki data-tip + glifi iceren metin parcasi
 TAG_RE = re.compile(r"<[^<>]*>")

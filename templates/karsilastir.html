@@ -109,7 +109,7 @@
          kullanicisi kopyalayamiyordu. Yanindaki kardes kontrol (.compare-btn)
          zaten gercek <button>; ayni satirda iki kanon vardi (52. ders). -->
     <button type="button" id="shareBtn" class="share-btn" onclick="copyShareUrl(event)">
-      <span aria-hidden="true">🔗</span> Linki Kopyala
+      Linki Kopyala
     </button>
     <span id="shareCopyStatus" class="sr-only" role="status" aria-live="polite"></span>
   </div>
@@ -502,7 +502,7 @@ async function doCompare(opts) {
 function copyShareUrl(e) {
   e.preventDefault();
   const url = window.location.href;
-  const _shareBtnDefault = '<span aria-hidden="true">🔗</span> Linki Kopyala';
+  const _shareBtnDefault = 'Linki Kopyala';
   const _showCopied = () => {
     const btn = document.getElementById('shareBtn');
     if (btn) { btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }

@@ -407,7 +407,7 @@
     var el = document.getElementById(containerId);
     if (!el) return;
     /* 21.09 (K-W): kanonik `.da-empty` ailesi — ayrım tint zemin + kenarlık + ⚠ ikon + eylem düğmesi. */
-    el.innerHTML = daWrapState(el, '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.</span><button type="button" class="da-retry">Tekrar dene</button></div>');
+    el.innerHTML = daWrapState(el, '<div class="da-empty da-empty--error" role="alert"><span><svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.</span><button type="button" class="da-retry">Tekrar dene</button></div>');
     var btn = el.querySelector('button');
     if (btn) btn.addEventListener('click', retryFn);
   }
@@ -575,7 +575,7 @@
     try {
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
         var panel = document.getElementById('heroSubForm');
-        if (panel) panel.innerHTML = '<div class="da-sub-done">✅ Zaten abonesin; durumu değişen hisseler her işlem günü akşamı e-postana gelecek.</div>';
+        if (panel) panel.innerHTML = '<div class="da-sub-done">Zaten abonesin; durumu değişen hisseler her işlem günü akşamı e-postana gelecek.</div>';
       }
     } catch(e) { console.warn('bp_sub cookie kontrolu basarisiz', e); }
   }
@@ -608,9 +608,9 @@
         if (typeof window.bpRecordSubscribe === 'function' && data.token) {
           window.bpRecordSubscribe({ token: data.token, email: data.email, name: data.name });
         }
-        if (form) form.innerHTML = '<div class="da-sub-done">✅ ' + esc2(data.message || 'Abone oldunuz!') + '</div>';
+        if (form) form.innerHTML = '<div class="da-sub-done">' + esc2(data.message || 'Abone oldunuz!') + '</div>';
       } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
-        if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + esc2(data.message) + '</span>';
+        if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">' + esc2(data.message) + '</span>';
         if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
       } else {
         if (msg) msg.innerHTML = '<span class="bp-sat-text">' + esc2(data.error || 'Bir hata oluştu.') + '</span>';

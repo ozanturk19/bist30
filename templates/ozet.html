@@ -72,7 +72,6 @@ function goToDate(date) {
 
 {% if loading %}
 <div style="text-align:center;padding:60px;color:var(--bp-text3)">
-  <div style="font-size:var(--bp-text-32);margin-bottom:12px">⏳</div>
   Sinyal verisi yükleniyor, lütfen bekleyin…
   <br><br>
   <a href="/" style="color:var(--bp-accent-cyan)">Ana sayfaya dön</a>
@@ -83,7 +82,6 @@ function goToDate(date) {
 <!-- Geçmiş tarih bandı -->
 <div style="background:rgba(var(--bp-gold-rgb),.08);border:1px solid rgba(var(--bp-gold-rgb),.25);border-radius:var(--bp-radius-md);
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-  <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
     {% if via_auto_fallback %}
     <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Son İşlem Günü — {{ today_str }}</span>
@@ -118,7 +116,7 @@ function goToDate(date) {
   </div>
   <div class="counter-card da-panel">
     <div class="counter-num num-new">{{ new_signals|length }}</div>
-    <div class="counter-lbl"><span aria-hidden="true">⚡</span> Yeni Sinyal</div>
+    <div class="counter-lbl">Yeni Sinyal</div>
   </div>
 </div>
 
@@ -144,7 +142,7 @@ function goToDate(date) {
 <!-- Sektör Sinyal Nabzı -->
 {% if total > 0 %}
 <div class="section-box da-panel" style="margin-bottom:20px">
-  <h2 class="section-title"><span aria-hidden="true">🏭</span> Sektör Sinyal Nabzı</h2>
+  <h2 class="section-title">Sektör Sinyal Nabzı</h2>
   <p class="sr-note">Çubuk, sektördeki hisselerden Güçlü Trend'de olanların payını gösterir.</p>
   <div class="sector-nabzi" id="sectorNabzi">
     {% for sector_name, sector_stocks in stocks|groupby('sector') %}
@@ -172,7 +170,7 @@ function goToDate(date) {
 <!-- Son seansta değişenler (C-63: today_str D-06'dan sonra son EOD günü) -->
 {% if new_signals %}
 <div class="section-box da-panel">
-  <h2 class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} kapanışında değişenler{% else %}Son seansta değişenler · {{ today_str }}{% endif %}</h2>
+  <h2 class="section-title">{% if historical_date %}{{ today_str }} kapanışında değişenler{% else %}Son seansta değişenler · {{ today_str }}{% endif %}</h2>
   <div class="stock-grid">
     {% for s in new_signals %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
@@ -274,7 +272,7 @@ function goToDate(date) {
        border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius-lg);padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
+      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px">Günlük Özeti E-postayla Al</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Sinyal değişimi olan işlem günlerinde, akşam 19:00'da özet gelen kutunuzda — iptal her zaman.</div>
     </div>
     {#- 21.09 (CPO) CANLI BÖLGE: bu sarmalayıcı `role="status" aria-live="polite"`
@@ -366,9 +364,9 @@ async function ozSubmitSub() {
     const form = document.getElementById('ozSubForm');
     const msg  = document.getElementById('ozSubMsg');
     if (data.ok) {
-      if (form) form.innerHTML = '<div style="color:var(--bp-ok);font-size:var(--bp-text-base);font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
+      if (form) form.innerHTML = '<div style="color:var(--bp-ok);font-size:var(--bp-text-base);font-weight:600">' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
-      if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escSub(data.message) + '</span>';
+      if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">' + _escSub(data.message) + '</span>';
       if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
     } else {
       if (msg) msg.innerHTML = '<span class="bp-sat-text">' + _escSub(data.error || 'Bir hata oluştu.') + '</span>';

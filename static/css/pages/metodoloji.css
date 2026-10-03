@@ -122,7 +122,10 @@
     background: rgba(var(--bp-bg-rgb),.55); border-radius:var(--bp-radius-md); padding: 10px 14px;
     font-size: var(--bp-text-base); font-weight: 500;
   }
-  .tldr-icon { font-size: var(--bp-text-lg); flex-shrink: 0; }
+  .tldr-icon { flex-shrink: 0; width: 18px; display: inline-flex; justify-content: center; }
+  .tldr-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bp-text3); }
+  .tldr-green .tldr-dot { background: var(--bp-al); }
+  .tldr-red   .tldr-dot { background: var(--bp-sat); }
   .tldr-label { font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 96px; }
   .tldr-eq { color: var(--bp-text3); font-size: var(--bp-text-sm); margin: 0 4px; }
   .tldr-formula { color: var(--bp-text2); font-family: var(--bp-font-mono); font-size: var(--bp-text-sm); }

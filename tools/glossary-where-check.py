@@ -55,7 +55,7 @@ TERIM_IFADELERI = {
     "Günlük Hacim Oranı son seans / 20g":   ["Günlük Hacim Oranı"],
     "Hacim oranı 5 gün / 20 gün":           ["Hacim oranı"],  # C-74 K9: RVOL → açık ad
     "💎 Yüksek Skor · Orta Skor":           ["Yüksek Skor", "Orta Skor"],
-    "⭐ Hacim Onaylı":                      ["Hacim Onaylı"],
+    "Hacim Onaylı":                        ["Hacim Onaylı"],  # C-71 K27: emoji kalktı
     "BorsaPusula Skoru 0–100":              ["BorsaPusula Skoru"],
 }
 
