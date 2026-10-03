@@ -7,13 +7,11 @@
 
   var GLOSSARY = {
     'adx': 'Trend gücü göstergesi (0–100). 25 üstü güçlü trend demek, 18 altı zayıf/yatay piyasa, arası orta güçte.',
-    /* K-CH (22.09): bu tanim "45-60 ideal giris penceresi"ni KOSULSUZ yaziyordu.
-       Urun K-BS/CPO-1745'ten beri o adi YALNIZ Guclu Trend sinyalinde basiyor
-       (app.py:116, bp-format.js:396, metodoloji.html:145). Canli olcum 22.09:
-       RSI 45-60 bandinda 46 hisse var, 45'i Guclu Trend DEGIL -- yani Ogrenme
-       Modu'nu acan kullanici ekranda "Notr Bolge" yazarken sozlukten "ideal
-       giris penceresi" okuyordu. Vaat iceren ad, onu doguran kosulla yazilir. */
-    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde Sağlıklı Momentum — diğer tüm sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
+    /* CPO-1819 (03.10): bolge adi enumerasyonu (Dip Toparlanmasi, Nötr Bölge,
+       Asiri Alim...) kaldirildi -- urun bu adlari artik hic basmiyor (C-74
+       K10 /hisse+/karsilastir yalniz sayi gosterir, /metodoloji listesi
+       kalkti). Sozluk de ayni betimi (0-100 araligi) kullaniyor. */
+    'rsi': 'Göreceli Güç Endeksi (0–100). Momentumu ölçer: 70 üstü fiyatın kısa sürede hızlı yükseldiğini, 30 altı hızlı düştüğünü gösterir.',
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',
     'ema': 'Üstel hareketli ortalama — son verilere daha çok ağırlık verir. EMA12 kısa, EMA99 uzun vadeyi temsil eder.',

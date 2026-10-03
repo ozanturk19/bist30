@@ -402,13 +402,7 @@ function bpIndNum(v) {
       kendisini yanlis okutur. Gercek fark %0,137 — yani sonuc DOGRU, GOSTERIM
       eksik. Sayiyi buyutemedigimiz yerde (chart ozeti 1 ondalikta geliyor)
       dogru davranis, farki UZLASTIRAN kisa bir not dusmektir.
-      `dir`: 1 => "a > b" iddia edildi, -1 => "a < b", 0 => iddia yok.
-
-   2) RSI BOLGE ADI BIR VAAT TASIYABILIR. `rsi_zone` backend'de sinyalden
-      BAGIMSIZ turetilir; "Ideal Giris Penceresi" (RSI 45-60) long-only bir
-      urunde ancak AL sinyaliyle anlamlidir. Canli 22.09: bu bolge adini tasiyan
-      46 hissenin **45'i AL DEGIL** (FROTO/MGROS/MAVI dahil 3'u SAT). Rengi
-      CPO-DEV2-031/033 zaten notrlemisti — KELIMELER kalmisti. */
+      `dir`: 1 => "a > b" iddia edildi, -1 => "a < b", 0 => iddia yok. */
 function bpNumPairNote(aStr, bStr, dir) {
   if (!dir || aStr == null || bStr == null) return '';
   var a = parseFloat(String(aStr).replace(',', '.'));
@@ -419,27 +413,6 @@ function bpNumPairNote(aStr, bStr, dir) {
   return shown === 0
     ? ' (gösterilen basamakta eşit)'
     : ' (gösterilen değerler yuvarlanmış)';
-}
-
-function bpRsiZoneText(zone, signal) {
-  var z = zone || '';
-  /* K-CB (22.09): AYNI BOLGE ICIN UC YAZIM vardi. CPO-1745 ayni duzeltmeyi
-     kaynaga da tasidi ama BASKA bir dizeyle: business_rules.derive_rsi_zone
-     "Nötr Bölge (RSI 45-60)" dondururken bu fonksiyon "Nötr bölge" yaziyordu.
-     Canli 22.09: /api/karsilastir FROTO/MGROS/MAVI icin "Nötr Bölge (RSI
-     45-60)", /api/data (EOD cache) ayni hisseler icin hala "İdeal Giriş
-     Penceresi" -> /hisse "Nötr bölge", /karsilastir "Nötr Bölge (RSI 45-60)"
-     basiyordu; ustelik bir sonraki EOD turunda /hisse'nin yazimi da kendi
-     kendine degisecekti (kaynak dizesi degistigi icin).
-     Tek kanon burada: hangi kaynaktan gelirse gelsin tek ad "Nötr Bölge"
-     (kardes bolge adlari gibi Baslik Bicimi, parantezli aralik YOK -- RSI
-     sayisi rozetin hemen yaninda zaten basili). */
-  if (z.indexOf('Nötr') === 0) return 'Nötr Bölge';
-  /* C-60 (24.09, kanon §2.2): islem yonetimi dili yok -- bant adi "Sağlıklı
-     Momentum" (eski ad eslemesi 24.09 EOD sonrasi kalkti). */
-  if (z.indexOf('Sağlıklı Momentum') === 0)
-    return signal === 'AL' ? 'Sağlıklı Momentum' : 'Nötr Bölge';
-  return z;
 }
 
 /* ── K-CB (22.09): BAR PENCERESI BEYANI — TEK KANON ──────────────────────

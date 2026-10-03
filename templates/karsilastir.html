@@ -184,17 +184,9 @@ function renderAdx(v, label) {
   return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span>`;
 }
 
-function renderRsi(v, zone, signal) {
+function renderRsi(v, signal) {
   if (v == null) return '<span class="muted">—</span>';
   const n = parseFloat(v);
-  /* K-BS (22.09): "İdeal Giriş Penceresi" long-only bir urunde ancak AL
-     sinyaliyle bir vaat tasir; `rsi_zone` backend'de sinyalden bagimsiz
-     turetilir. Canli 22.09: 46 hissede bu bolge adi, 45'i AL DEGIL (3'u SAT).
-     Tek kanon bp-format.js `bpRsiZoneText` (/hisse ayni fonksiyonu kullanir). */
-  zone = bpRsiZoneText(zone, signal);
-  // 15.09 CPO-1656 fix: bölge etiketi artık sunucudan gelir (business_rules.derive_rsi_zone —
-  // ADX'teki CPO-1648 deseniyle aynı), kendi bağımsız >70/<30 eşiğimiz kanonikle tutarsızdı
-  // (TUPRS RSI=70.6 burada "Aşırı Alım" derken /hisse'de "Dikkatli" diyordu).
   /* C-74 K10 (02.10): bolge etiketi yone beklenti yukluyordu -- yalniz sayi, renk notr. */
   return `<span class="mono">${n.toFixed(1).replace('.', ',')}</span>`;
 }
@@ -245,7 +237,7 @@ function renderCell(key, s) {
     case 'price':         return renderPrice(v);
     case 'change_pct':    return renderChg(v);
     case 'adx':           return renderAdx(v, s.adx_label);
-    case 'rsi':           return renderRsi(v, s.rsi_zone, s.signal);
+    case 'rsi':           return renderRsi(v, s.signal);
     /* C-71 K39 (03.10): "Sinyal Süresi" satırı kalktı — yaş duvar saatiyle sayılıyordu
        (Cumartesi, Cuma sinyaline "1 gün"); tarih satırı aynı bilgiyi tarihle verir. */
     case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${bpSignalDateLabel(v) || v}</span>` : '<span class="muted">—</span>';

@@ -11,7 +11,6 @@ from business_rules import (
     validate_date_range,
     validate_stocks_list,
     derive_adx_label,
-    derive_rsi_zone,
     derive_ema_deadband,
 )
 from datetime import date
@@ -169,66 +168,6 @@ def test_adx_label_invalid_defaults_zayif():
     assert derive_adx_label("n/a") == "Zayıf"
 
 
-# ── derive_rsi_zone (CPO-1656 — tek kaynaklı RSI bölge eşiği) ─────────────────
-# TUPRS RSI=70.6 örneği: /hisse ve /api/data bunu "Dikkatli" gösterirken
-# /karsilastir kendi bağımsız >70 mantığıyla "(Aşırı Alım)" gösteriyordu.
-# Aşağıdaki sınır testleri derive_rsi_zone'un kanonik (<70 Dikkatli, >=80
-# Aşırı Alım) eşiğini kilitler.
-
-def test_rsi_zone_asiri_satim():
-    assert derive_rsi_zone(29.9) == "Aşırı Satım"
-
-def test_rsi_zone_dip_toparlanma_lower_bound():
-    assert derive_rsi_zone(30) == "Dip Toparlanması"
-
-def test_rsi_zone_ideal_giris_lower_bound():
-    assert derive_rsi_zone(45, "AL") == "Sağlıklı Momentum"
-
-def test_rsi_zone_trend_guclenior_lower_bound():
-    assert derive_rsi_zone(60) == "Trend Güçleniyor"
-
-def test_rsi_zone_dikkatli_lower_bound():
-    assert derive_rsi_zone(70) == "Dikkatli"
-
-def test_rsi_zone_dikkatli_upper_bound_tuprs_ornegi():
-    assert derive_rsi_zone(70.6) == "Dikkatli"  # karsilastir eskiden "(Aşırı Alım)" derdi
-
-def test_rsi_zone_asiri_alim_lower_bound():
-    assert derive_rsi_zone(80) == "Aşırı Alım"
-
-def test_rsi_zone_none_returns_none():
-    assert derive_rsi_zone(None) is None
-
-def test_rsi_zone_invalid_returns_none():
-    assert derive_rsi_zone("n/a") is None
-
-
-# ── derive_rsi_zone sinyal-koşullu (CPO-1745 — "İdeal Giriş Penceresi" vaadi) ─
-# Canlı 22.09: RSI 45-60 aralığındaki 46 hissenin 45'i AL değildi (3'ü SAT:
-# FROTO/MGROS/MAVI) ama hepsi "İdeal Giriş Penceresi" gösteriyordu — long-only
-# üründe AL olmayan bir sinyalde giriş vaadi vermek yanıltıcı. signal=='AL'
-# değilse "Nötr Bölge" döner (frontend zaten bpRsiZoneText() ile aynı
-# düzeltmeyi yapıyordu — bkz. static/bp-format.js).
-#
-# CPO-1759 (22.09): parantezli "(RSI 45-60)" aralığı KALDIRILDI — diğer beş
-# bölge adının hiçbiri aralık taşımıyor, RSI sayısı zaten rozetin yanında
-# basılı; ham /api/data tüketicileri (frontend'in üzerinden geçmeyenler)
-# kaynakta duran ve sitede hiç görünmeyen bir dize alıyordu.
-
-def test_rsi_zone_ideal_giris_sat_sinyalinde_notr():
-    assert derive_rsi_zone(45, "SAT") == "Nötr Bölge"
-
-def test_rsi_zone_ideal_giris_bekle_sinyalinde_notr():
-    assert derive_rsi_zone(59.9, "BEKLE") == "Nötr Bölge"
-
-def test_rsi_zone_ideal_giris_signal_verilmezse_notr():
-    assert derive_rsi_zone(50) == "Nötr Bölge"
-
-def test_rsi_zone_disi_bolgeler_signal_etkilemez():
-    assert derive_rsi_zone(29.9, "SAT") == "Aşırı Satım"
-    assert derive_rsi_zone(70.6, "BEKLE") == "Dikkatli"
-
-
 # ── derive_ema_deadband (CPO-1656 EK YANIT Seçenek B — UI-only rozet) ─────────
 # ISCTR canlı örneği (CPO-1656): EMA12=13.4147/EMA99=13.4293, fark %0.109 —
 # eşiğin (%0.15) altında, "kararsızlık bölgesi" True olmalı.
@@ -295,11 +234,6 @@ if __name__ == "__main__":
         test_adx_label_zayif, test_adx_label_orta_lower_bound, test_adx_label_orta_upper_bound,
         test_adx_label_guclu_lower_bound, test_adx_label_guclu_upper_bound, test_adx_label_cok_guclu,
         test_adx_label_none_defaults_zayif, test_adx_label_invalid_defaults_zayif,
-        test_rsi_zone_asiri_satim, test_rsi_zone_dip_toparlanma_lower_bound,
-        test_rsi_zone_ideal_giris_lower_bound, test_rsi_zone_trend_guclenior_lower_bound,
-        test_rsi_zone_dikkatli_lower_bound, test_rsi_zone_dikkatli_upper_bound_tuprs_ornegi,
-        test_rsi_zone_asiri_alim_lower_bound, test_rsi_zone_none_returns_none,
-        test_rsi_zone_invalid_returns_none,
         test_ema_deadband_isctr_ornegi_true, test_ema_deadband_uzak_degerler_false,
         test_ema_deadband_esik_altinda_true, test_ema_deadband_esikte_false,
         test_ema_deadband_none_input, test_ema_deadband_invalid_input,

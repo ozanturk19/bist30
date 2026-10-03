@@ -17,10 +17,12 @@ olarak dogrulandi (22.09, /api/data 217 hisse + tarayici olcumu):
      `ind-bull` (= --bp-al) ile boyuyordu -> vol_ratio >= 3 olan 4 hissenin
      DORDU DE BEKLE, ikisi o gun dusmus (SASA -1,70% · USAK -3,85%).
 
-  C) BOLGE ADI BIR VAAT TASIR. `rsi_zone` sinyalden bagimsiz turetilir;
-     "İdeal Giriş Penceresi" long-only bir urunde ancak AL'da anlamlidir.
-     Canli: bu bolge adini tasiyan 46 hissenin 45'i AL DEGIL (3'u SAT).
-     Tek kanon bp-format.js `bpRsiZoneText(zone, signal)`.
+  C) BOLGE ADI BIR VAAT TASIR. "İdeal Giriş Penceresi" long-only bir
+     urunde ancak AL'da anlamlidir. Canli: bu bolge adini tasiyan 46
+     hissenin 45'i AL DEGIL (3'u SAT). CPO-1819 ile urun bu adi (ve
+     uretim mekanizmasini) hic basmiyor; bu eksen artik yalniz adin ham
+     literal olarak geri sizmadigini (metodoloji/blog disinda, kosulsuz)
+     dogrular.
 
 YORUMLAR SOYULUR (K-BN dersi 35 + K-BQ dersi 42: soyulan yorum ayni uzunlukta
 BOSLUGA cevrilir, satir numarasi kaymaz; yakinlik pencereleri ANLAMLI karakter
@@ -46,16 +48,12 @@ FALLBACK_OK = re.compile(r'_siInd')
 VOL_ID = re.compile(r'(?<![a-zA-Z])(r_?vol|avg_?rvol|vol_ratio|volratio|vr)(?![a-zA-Z])')
 DIR_CLASS = re.compile(r'\b(ind-(?:bull|bear)|tech-row-(?:bull|bear)|tile-(?:up|down)|sc-chg\s+(?:up|dn))\b')
 
-# ── C) rsi_zone kanonu ─────────────────────────────────────────────────────
-RSI_ZONE_USE = re.compile(r'\brsi_zone\b')
-RSI_ZONE_CANON = re.compile(r'\bbpRsiZoneText\s*\(')
-# Bolge adini ham metin olarak basan yuzeyler (kanondan gecmeden)
+# ── C) retire edilmis bolge adi ─────────────────────────────────────────────
+# Bolge adini ham metin olarak basan yuzeyler (CPO-1819: urun hic uretmiyor)
 IDEAL_LITERAL = re.compile(r'İdeal Giriş Penceresi')
 
 TARGET_EXT = ('.html', '.js')
 SCAN_DIRS = ('templates', 'static')
-# bp-format.js kanonun KENDISI: bpRsiZoneText govdesinde 'İdeal Giriş' gecer.
-CANON_FILE = 'static/bp-format.js'
 
 
 def _blank(t):
@@ -110,30 +108,25 @@ def check_tree(root):
                              % DIR_CLASS.search(line).group(1),
                              raw_lines[i - 1].strip()[:150]))
 
-        # C) rsi_zone tuketen bir dosya kanonu cagirmiyorsa
-        if rel != CANON_FILE:
-            if RSI_ZONE_USE.search(src) and not RSI_ZONE_CANON.search(src):
-                ln = next((i for i, l in enumerate(lines, 1) if RSI_ZONE_USE.search(l)), 0)
-                viol.append((rel, ln, 'C', '`rsi_zone` basiliyor ama bpRsiZoneText kanonundan gecmiyor',
-                             raw_lines[ln - 1].strip()[:150] if ln else ''))
-            for i, line in enumerate(lines, 1):
-                if IDEAL_LITERAL.search(line) and 'metodoloji' not in rel and 'blog' not in rel:
-                    # Kosulsuz ham literal (ozet.html gibi ZATEN AL-filtreli
-                    # listeler haric: orada baslik kendi filtresinin altinda).
-                    # K-CH (22.09): bu kural "KOSULSUZ ham literal" diyordu ama
-                    # kosulu HIC test etmiyordu -- yalnizca iki YOL (metodoloji,
-                    # blog) muafti. Oysa muafiyetin gerekcesi yol degil TUR:
-                    # o yuzeyler adi RENDER etmiyor, TANIMLIYOR ve kosulunu de
-                    # yaziyor. Ayni tur `static/learning-mode.js` sozlugunde de
-                    # var (Ogrenme Modu = /metodoloji'nin satir-ici hali).
-                    # Kural artik beyanina uyuyor: adi KOSULUYLA BIRLIKTE yazan
-                    # bir satir (hem "Güçlü Trend" hem "Nötr Bölge" geciyorsa)
-                    # kanonu ogretiyordur, ihlal etmez. Yol muafiyeti yerine
-                    # genellenebilir kosul testi -- her yuzey icin gecerli.
-                    ogretici = 'Güçlü Trend' in line and 'Nötr Bölge' in line
-                    if 'ideal_al' not in line and 'İdeal Giriş Noktası' not in line and not ogretici:
-                        viol.append((rel, i, 'C', 'bolge adi ham literal olarak basiliyor',
-                                     raw_lines[i - 1].strip()[:150]))
+        # C) retire edilmis bolge adi ham literal olarak geri sizmis mi
+        for i, line in enumerate(lines, 1):
+            if IDEAL_LITERAL.search(line) and 'metodoloji' not in rel and 'blog' not in rel:
+                # Kosulsuz ham literal (ozet.html gibi ZATEN AL-filtreli
+                # listeler haric: orada baslik kendi filtresinin altinda).
+                # K-CH (22.09): bu kural "KOSULSUZ ham literal" diyordu ama
+                # kosulu HIC test etmiyordu -- yalnizca iki YOL (metodoloji,
+                # blog) muafti. Oysa muafiyetin gerekcesi yol degil TUR:
+                # o yuzeyler adi RENDER etmiyor, TANIMLIYOR ve kosulunu de
+                # yaziyor. Ayni tur `static/learning-mode.js` sozlugunde de
+                # var (Ogrenme Modu = /metodoloji'nin satir-ici hali).
+                # Kural artik beyanina uyuyor: adi KOSULUYLA BIRLIKTE yazan
+                # bir satir (hem "Güçlü Trend" hem "Nötr Bölge" geciyorsa)
+                # kanonu ogretiyordur, ihlal etmez. Yol muafiyeti yerine
+                # genellenebilir kosul testi -- her yuzey icin gecerli.
+                ogretici = 'Güçlü Trend' in line and 'Nötr Bölge' in line
+                if 'ideal_al' not in line and 'İdeal Giriş Noktası' not in line and not ogretici:
+                    viol.append((rel, i, 'C', 'bolge adi ham literal olarak basiliyor',
+                                 raw_lines[i - 1].strip()[:150]))
     return viol
 
 

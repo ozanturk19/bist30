@@ -62,7 +62,7 @@ RAW_FIELD   = re.compile(r"\b(\w{1,20})\.(\w{1,30})\b")
 
 # Metin/tarih alanlari: `? ... : ''` bunlarda mesru (bos metin = bos hucre).
 TEXT_FIELDS = {'ticker', 'name', 'sector', 'signal', 'date', 'signal_date',
-               'entry_quality', 'rsi_zone', 'adx_label', 'tier', 'kap_url'}
+               'entry_quality', 'adx_label', 'tier', 'kap_url'}
 
 def _blank(t):
     return ''.join('\n' if ch == '\n' else ' ' for ch in t)

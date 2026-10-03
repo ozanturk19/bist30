@@ -944,18 +944,11 @@ function renderSummary(s, signalData) {
       `<button type="button" class="ind-help" data-tip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" aria-label="${ind.label} açıklamasını göster">?</button>`;
   }).join('');
 
-  /* RSI14 badge — Faz 1 #3: 6-zone */
+  /* RSI14 badge — C-74 K10 (02.10): bolge adi (Dip Toparlanmasi, Asiri Alim,
+     Dikkatli...) ve yesil/kirmizi rozet yone beklenti yukluyordu -- /karsilastir
+     gibi yalniz sayi, backend artik bolge etiketi uretmiyor. */
   if (signalData && signalData.rsi != null) {
     const rsi = signalData.rsi;
-    /* K-BS (22.09): P0-2 "İdeal Giriş" RENGINI notrlemisti, KELIMELERI kalmisti.
-       `rsi_zone` backend'de sinyalden BAGIMSIZ turetilir; long-only bir urunde
-       "İdeal Giriş Penceresi" ancak AL sinyaliyle bir vaat tasir. Canli 22.09:
-       bu bolge adini tasiyan 46 hissenin **45'i AL DEGIL** — 3'u SAT (FROTO
-       46,5 · MGROS 47,1 · MAVI 51,0), yani "trend bozuldu" denen hissede
-       "İdeal Giriş Penceresi" yaziyordu. Tek kanon: bp-format.js
-       `bpRsiZoneText` (/karsilastir ayni fonksiyonu kullanir). */
-    /* C-74 K10 (02.10): bolge adi (Dip Toparlanmasi, Asiri Alim, Dikkatli...) ve
-       yesil/kirmizi rozet yone beklenti yukluyordu -- /karsilastir gibi yalniz sayi. */
     indHtml += `<span class="ind-badge ind-neutral">RSI ${bpIndNum(rsi)}</span>` +
       `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi; son günlerdeki yükseliş ve düşüşlerin büyüklüğünü karşılaştırır." aria-label="RSI açıklamasını göster">?</button>`;
   }

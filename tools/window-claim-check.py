@@ -20,12 +20,6 @@ Canli 22.09 olcumu (217 hisse, /api/hisse/<T>/chart + /api/data + /api/karsilast
   * 52-hafta barinin kismi dali `bars_used + ' Günlük Aralık'` yaziyordu;
     `bars_used` bir BAR sayacidir (canli: 215/215 hissede 252 -> dal su an
     OLU, ama yazim yanlisti).
-  * RSI bolge adi UC yazimdaydi: frontend "Nötr bölge", backend (CPO-1745)
-    "Nötr Bölge (RSI 45-60)", /metodoloji ise bu adi HIC bilmiyor, hala
-    kosulsuz "İdeal Giriş Penceresi" diyordu. Canli: bu bantta 46 hisse,
-    45'i AL DEGIL -- yani sitede en sik gorulen ad hicbir yerde tanimli
-    degildi.
-
 Kapi hatanin YAZIMINI degil KENDISINI arar (52. ders):
 
   A) SSR'DA DONMUS PENCERE IDDIASI — bir `aria-label` icinde LITERAL bir
@@ -45,15 +39,6 @@ Kapi hatanin YAZIMINI degil KENDISINI arar (52. ders):
      tam buydu: `aria-label="' + _lbl + '"` masumdu, `_lbl` ise
      `'Son 30 gün: ' + ...` diye kuruluyordu ve veri 30 SEANS'ti. (A ekseni
      yalnizca oznitelikteki literalleri gorur; bu eksen onun kor noktasi.)
-
-  C) GOSTERILEN BOLGE ADI BELGELENMIS OLMALI — RSI bolge adlarini ureten
-     her kaynak (bp-format.js `bpRsiZoneText`, business_rules
-     `derive_rsi_zone`, app.py fallback kopyasi) yalnizca /metodoloji'de
-     YAZAN adlari dondurebilir; belgelenen her ad da en az bir kaynaktan
-     uretilebilmelidir. Karsilastirma AD uzerinden yapilir: sondaki
-     aciklayici parantez (`... (RSI 45-60)`) soyulur, BUYUK/kucuk harf
-     soyulmaz -- "Nötr bölge" ile "Nötr Bölge" AYNI ad DEGILDIR, ikisi
-     ekranda iki farkli dizedir.
 
 Kullanim:
   python3 tools/window-claim-check.py             # calisan agac
@@ -75,14 +60,6 @@ TERNARY = re.compile(
     r'[><]=?\s*(\d{2,4})\s*\?\s*([\'"][^\'"]{0,40}[\'"])\s*:\s*([^;\n]{0,80})')
 UNIT_IN_STR = re.compile(r'[\'"][^\'"]*' + UNIT + r'[^\'"]*[\'"]')
 CANON_FILE = os.path.join('static', 'bp-format.js')
-
-# C) RSI bolge adlari
-ZONE_SRC = {
-    os.path.join('static', 'bp-format.js'): 'bpRsiZoneText',
-    'business_rules.py': 'derive_rsi_zone',
-    'app.py': 'derive_rsi_zone',
-}
-PAREN_TAIL = re.compile(r'\s*\([^()]*\)\s*$')
 
 
 def _blank(t):
@@ -181,86 +158,6 @@ def axis_d(rel, src, bad):
                         f"veriden gelmeli (dizi uzunlugundan), elle yazilmaktan degil."))
 
 
-def _documented_zones(root):
-    p = os.path.join(root, 'templates', 'metodoloji.html')
-    if not os.path.exists(p):
-        return set()
-    src = strip_comments(open(p, encoding='utf-8', errors='replace').read())
-    m = re.search(r'<h2[^>]*id="rsi".*?</ul>', src, re.S)
-    if not m:
-        return set()
-    block = m.group(0)
-    names = set()
-    for li in re.findall(r'<li>(.*?)</li>', block, re.S):
-        txt = re.sub(r'<[^>]+>', ' ', li)
-        txt = txt.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
-        # `RSI ...` kod parcasini ve ok isaretini at, kalan adlari topla
-        txt = re.sub(r'RSI\s*[<>≥≤]?=?\s*[\d–\-—]*\s*', ' ', txt)
-        for part in re.split(r'→|,', txt):
-            part = re.sub(r'\s+', ' ', part).strip(' .;')
-            part = re.sub(r'^(?:anlamına gelir|Güçlü Trend sinyalinde|diğer tüm sinyallerde|'
-                          r've|veya|de|da)\s+', '', part).strip()
-            if not part or len(part) < 4:
-                continue
-            if part[0].isupper() or part[0] in 'İÖÜŞÇĞ':
-                names.add(part)
-    return names
-
-
-def _produced_zones(root):
-    out = {}
-    for rel, fn in ZONE_SRC.items():
-        p = os.path.join(root, rel)
-        if not os.path.exists(p):
-            continue
-        raw = open(p, encoding='utf-8', errors='replace').read()
-        src = strip_py_comments(raw) if rel.endswith('.py') else strip_comments(raw)
-        i = src.find('def ' + fn) if rel.endswith('.py') else src.find('function ' + fn)
-        if i < 0:
-            continue
-        # fonksiyon govdesi: bir sonraki top-level def/function'a kadar
-        nxt = re.search(r'\n(?:def |function )', src[i + 5:])
-        body = src[i: i + 5 + (nxt.start() if nxt else len(src))]
-        for lit in re.findall(r'return\s+([^\n]+)', body):
-            # Dizeleri SIRAYLA tuket: `"A" if x else "B"` yaziminda iki literal
-            # ARASINDAKI metin ("\" if x else \"") bir literal SANILMASIN.
-            for tok in re.finditer(r'"[^"\n]*"|\'[^\'\n]*\'', lit):
-                s = tok.group(0)[1:-1]
-                if len(s) >= 3:
-                    out.setdefault(s, set()).add(rel)
-    return out
-
-
-def axis_c(root, bad):
-    doc = _documented_zones(root)
-    if not doc:
-        bad.append(('templates/metodoloji.html', 0, 'C',
-                    "RSI bolge listesi okunamadi — belgelenen ad kumesi bos."))
-        return
-    prod = _produced_zones(root)
-    if not prod:
-        bad.append((CANON_FILE, 0, 'C', "RSI bolge adi ureten kaynak bulunamadi."))
-        return
-    doc_names = {PAREN_TAIL.sub('', d).strip() for d in doc}
-    # C-60 (24.09): eski ad bpRsiZoneText'te "Sağlıklı Momentum"a iner;
-    # kaynak DEV-CPO-1793 (3) ile degisene kadar gecis eslemesi.
-    RENAMED = {'İdeal Giriş Penceresi': 'Sağlıklı Momentum'}
-    for name, files in sorted(prod.items()):
-        bare = PAREN_TAIL.sub('', name).strip()
-        bare = RENAMED.get(bare, bare)
-        if bare in doc_names:
-            continue
-        bad.append((sorted(files)[0], 0, 'C',
-                    f"urun \"{name}\" bolge adini basiyor ama /metodoloji bu adi "
-                    f"BILMIYOR (belgeli adlar: {', '.join(sorted(doc_names))})."))
-    prod_bare = {PAREN_TAIL.sub('', n).strip() for n in prod}
-    for d in sorted(doc_names):
-        if d not in prod_bare:
-            bad.append(('templates/metodoloji.html', 0, 'C',
-                        f"/metodoloji \"{d}\" adini belgeliyor ama hicbir kaynak "
-                        f"bu adi uretmiyor — belge urunun onunde."))
-
-
 def scan_tree(root):
     bad = []
     for sub, exts in SCAN:
@@ -275,7 +172,6 @@ def scan_tree(root):
                 axis_a(rel, src, bad)
                 axis_b(rel, src, bad)
                 axis_d(rel, src, bad)
-    axis_c(root, bad)
     return bad
 
 
@@ -294,14 +190,13 @@ def main():
     bad = scan_tree(root)
     tag = f" (ref {ref})" if ref else ""
     if not bad:
-        print(f"K-CB OK — pencere beyanlari veriden turuyor, bolge adlari belgeli{tag}.")
+        print(f"K-CB OK — pencere beyanlari veriden turuyor{tag}.")
         return 0
     print(f"K-CB KIRIK — {len(bad)} ihlal{tag}:")
     for rel, ln, kind, msg in sorted(bad):
         print(f"  [{kind}] {rel}:{ln}  {msg}")
     print("\n  Kanon: ekranda yazan pencere CIZILEN VERIDEN turer; bar sayisindan")
-    print("         pencere metni ureten tek yer bp-format.js `bpBarWindowText`;")
-    print("         gosterilen her RSI bolge adi /metodoloji'de aynen yazar.")
+    print("         pencere metni ureten tek yer bp-format.js `bpBarWindowText`.")
     return 1
 
 

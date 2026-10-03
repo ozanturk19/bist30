@@ -32,16 +32,10 @@ LADDERS = {
         # kanonik fonksiyonun kendi govdesinde degisken "a"/"adx"; JS'te s.adx
         "var": r"^(a|adx|_?adx\w*|\w*\.adx\w*)$",
     },
-    "RSI (bolge etiketi)": {
-        "canon_fn": "derive_rsi_zone",
-        "labels": ["Aşırı Satım", "Dip Toparlanması",
-                   "Sağlıklı Momentum", "Trend Güçleniyor", "Dikkatli", "Aşırı Alım"],
-        "var": r"^(r|rsi|_?rsi\w*|\w*\.rsi\w*)$",
-    },
 }
 
-# C-60 (24.09, kanon §2.2): RSI 45-60 bandinin adi "Sağlıklı Momentum";
-# eski ad eslemesi 24.09 EOD sonrasi kalkti (/api/data eski adi tasimiyor).
+# CPO-1819: RSI bolge merdiveni urun hic basmadigi icin kaldirildi (ad
+# tamamen silindi, kanonik fonksiyon da artik yok); LADDERS artik yalniz ADX tasir.
 ALIAS = {}
 
 
@@ -236,8 +230,9 @@ def main():
     # kapsam kaybi olmaz. Taban duserse once NEDEN dustugunu olc.
     # C-34 (24.09): /tarama v2'de ADX bant nesri (40+/25-40/18-25 ipuclari) ve hacim
     # oran bandi ipuclari kalkti (sutun ipucu yalniz 'ADX 25 ve ustu kosulu' diyor) -> 9'dan 6'ya.
-    # 02.10 C-74 K10: hisse RSI ipucu bolge adlarini (6 bolge) artik saymiyor -- yalniz sayi -> 6'dan 1'e.
-    TABAN_KOD, TABAN_NESIR = 11, 1
+    # 03.10 CPO-1819: RSI merdiveni LADDERS'tan tamamen cikti (urun hic bolge
+    # adi basmiyor) -- taban RSI'nin kod/nesir payini dusup yalniz ADX'e indi.
+    TABAN_KOD, TABAN_NESIR = 6, 1
     if toplam_kopya < TABAN_KOD or nesir_toplam < TABAN_NESIR:
         print(f"\n  ✗ KAPSAM KAYBI: kod {toplam_kopya}/{TABAN_KOD}, nesir {nesir_toplam}/{TABAN_NESIR}")
         print("    Dedektor daha az sey olcuyor -- 'sapma yok' ciktisi artik kanit degil.")

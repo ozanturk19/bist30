@@ -187,48 +187,10 @@ def derive_adx_label(adx):
     return "Zayıf"
 
 
-# CPO-1656: /api/data (app.py, Faz 1 #3) ve /api/karsilastir farklı eşiklerle
-# (kanonik <70 vs karsilastir'in kendi >70) çelişen RSI bölge etiketi
-# üretiyordu — aynı TUPRS RSI=70.6 için biri "Dikkatli" biri "(Aşırı Alım)"
-# gösteriyordu. derive_adx_label ile aynı desen: tek kaynak burada.
-#
-# CPO-1745 (22.09): "İdeal Giriş Penceresi" (RSI 45-60) sinyalden BAĞIMSIZ
-# üretiliyordu — long-only üründe ancak AL sinyaliyle anlamlı bir vaat, ama
-# canlı ölçümde bu adı taşıyan hisselerin çoğu AL değildi (bazıları SAT).
-# Frontend zaten bpRsiZoneText() ile bu ismi signal!='AL' iken "Nötr bölge"ye
-# çeviriyordu (bp-format.js) — aynı düzeltme artık kaynakta da var, ham
-# /api/data tüketicileri (frontend'in üzerinden geçmeyenler) de doğru metni alır.
+# D-19 BP_RULES ihracı için eşik tablosu (bölge-adı üreten fonksiyon CPO-1819
+# ile kaldırıldı; tablo window.BP_RULES.rsi_bands tüketicisi için kalır).
 RSI_ZONE_BANDS = ((30, "Aşırı Satım"), (45, "Dip Toparlanması"), (60, "Sağlıklı Momentum"),
                   (70, "Trend Güçleniyor"), (80, "Dikkatli"))  # < üst sınır; 80 ve üstü "Aşırı Alım"
-
-
-def derive_rsi_zone(rsi, signal=None):
-    """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
-
-    Eşikler: <30 Aşırı Satım · 30-45 Dip Toparlanması · 45-60 Sağlıklı
-    Momentum · 60-70 Trend Güçleniyor · 70-80 Dikkatli · >=80 Aşırı Alım.
-
-    `signal` verilirse (AL/SAT/BEKLE): "Sağlıklı Momentum" yalnız AL
-    sinyalinde döner, aksi halde "Nötr Bölge" — bu isim AL olmayan bir
-    sinyalde olumlu vaat taşımasın diye (CPO-1745; ad C-60 ile "Sağlıklı Momentum"). Parantezli aralık
-    YOK (CPO-1759): diğer beş bölge adının hiçbiri aralık taşımıyor,
-    RSI sayısı zaten rozetin yanında basılı.
-    """
-    try:
-        r = float(rsi)
-    except (TypeError, ValueError):
-        return None
-    if r < 30:
-        return "Aşırı Satım"
-    if r < 45:
-        return "Dip Toparlanması"
-    if r < 60:
-        return "Sağlıklı Momentum" if signal == "AL" else "Nötr Bölge"
-    if r < 70:
-        return "Trend Güçleniyor"
-    if r < 80:
-        return "Dikkatli"
-    return "Aşırı Alım"
 
 
 # CPO-1656 EK YANIT: EMA12/EMA99 kriterinde histerezis/ölü-bant YOK, salt

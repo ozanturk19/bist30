@@ -42,9 +42,9 @@ def sentences(text):
             yield p
 
 # ── R1: retire edilmis kanon — KOSULSUZ "İdeal Giriş Penceresi" ────────────
-# business_rules.derive_rsi_zone (CPO-1745): bu ad YALNIZ signal=='AL'
-# (Güçlü Trend) icin doner, aksi halde "Nötr Bölge". Kosulu tasimayan her
-# yazim, urunun artik basmadigi bir adi ogretiyor demektir.
+# CPO-1745: bu ad YALNIZ signal=='AL' (Güçlü Trend) icin gecerliydi, aksi
+# halde "Nötr Bölge" (CPO-1819 ile urun bu adi hic uretmiyor artik). Kosulu
+# tasimayan her yazim, urunun artik basmadigi bir adi ogretiyor demektir.
 IDEAL = 'İdeal Giriş Penceresi'
 IDEAL_COND = ('Güçlü Trend', 'Nötr Bölge', 'yalnız', 'yalnızca', 'varsa',
               'verdiğinde', 'ise ')

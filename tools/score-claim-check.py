@@ -21,7 +21,7 @@ NEDEN (22.09.2026):
        KOSULSUZ. K-CH (08915eb) bu iddiayi static/learning-mode.js'te,
        CPO-1769 (29147f3) sablon inline JS'te kapatmisti — ama bu kopya
        `ideal giriş` diye YAZILMISTI: iki kapi da Turkce harfi aradigi
-       icin dizeyi hic gormedi. Ayni satirda badge `bpRsiZoneText` ile
+       icin dizeyi hic gormedi. Ayni satirda badge bolge-adi fonksiyonuyla
        "Nötr Bölge" basiyordu; rozet ile yanindaki `?` celisiyordu.
 
 KAPININ OLCTUGU (hatanin YAZIMINI degil KENDISINI — 56. ders):

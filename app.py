@@ -98,7 +98,6 @@ except ImportError:
 try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
     from business_rules   import derive_adx_label
-    from business_rules   import derive_rsi_zone                # CPO-1656: tek kaynak
     from business_rules   import derive_ema_deadband            # CPO-1656 EK YANIT: Seçenek B (UI-only rozet)
     from business_rules   import is_signal_from_today          # CPO-1335
     from business_rules   import derive_signal_date_label      # CPO-1335
@@ -130,17 +129,6 @@ except ImportError as _dqv_import_err:
         if a >= 25: return "Güçlü"
         if a >= 18: return "Orta"
         return "Zayıf"
-    def derive_rsi_zone(rsi, signal=None):  # fallback: business_rules.derive_rsi_zone ile BIREBIR AYNI kalmali
-        try:
-            r = float(rsi)
-        except (TypeError, ValueError):
-            return None
-        if r < 30: return "Aşırı Satım"
-        if r < 45: return "Dip Toparlanması"
-        if r < 60: return "Sağlıklı Momentum" if signal == "AL" else "Nötr Bölge"
-        if r < 70: return "Trend Güçleniyor"
-        if r < 80: return "Dikkatli"
-        return "Aşırı Alım"
     def derive_ema_deadband(e12, e99):  # fallback: business_rules.derive_ema_deadband ile BIREBIR AYNI kalmali
         try:
             e12f = float(e12); e99f = float(e99)
@@ -2060,15 +2048,6 @@ def analyze(ticker_base):
         # AL/SAT nüdge'i riski" gerekçesiyle reddetti. Nötr yaş bilgisi artık
         # signal_age_phrase Jinja filtresiyle SSR (hisse.html hero/quickfacts).
 
-        # ── RSI Bölge Rozeti (Faz 1 #3) — spec Bölüm 3.3 ────────────────────
-        # CPO-1656: kanonik derive_rsi_zone()'a taşındı (tek kaynak, aşağıdaki
-        # eşikler business_rules.py:derive_rsi_zone ile BIREBIR AYNI kalmali) —
-        # önceden /api/karsilastir kendi bağımsız (>70 Aşırı Alım) eşiğini
-        # kullanıyordu, aynı hissede iki sayfa zıt yorum üretiyordu.
-        # CPO-1745: signal iletiliyor — "İdeal Giriş Penceresi" artık yalnız
-        # AL'da, AL olmayanda "Nötr Bölge (RSI 45-60)" (kaynakta dogru, vaat yok).
-        rsi_zone = derive_rsi_zone(rsi_val, signal)
-
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
         # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
@@ -2184,7 +2163,6 @@ def analyze(ticker_base):
             # SIGNAL_CONDITIONS kaydından (indicators'ı DEĞİŞTİRMEZ, ek alan).
             "conditions":      build_signal_conditions(st_val, adx_val, di_p, di_m, e12, e99, weekly_dir),
             "rsi":             rsi_val,
-            "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
             "earnings_warning": earnings_warning,  # Faz 1 #5: 7 gün içinde bilanço uyarısı
             "vol_ratio":       vol_ratio,
             "vol_confirmed":   vol_confirmed,
@@ -11850,12 +11828,6 @@ def api_karsilastir():
             "adx":            adx_val,
             "adx_label":      derive_adx_label(adx_val) if adx_val is not None else None,  # CPO-1196 D0 #4
             "rsi":            s.get("rsi"),
-            # CPO-1656: kanonik derive_rsi_zone() — karsilastir.html'in kendi
-            # bağımsız (>70 Aşırı Alım) eşiği ADX'teki CPO-1648 deseninin
-            # RSI'ya hiç uygulanmamış hâliydi, aynı hissede /hisse ile zıt
-            # yorum üretiyordu (backend alanı burada açılır, frontend ayrı fix'te tüketir).
-            # CPO-1745: signal iletiliyor, AL olmayanda "Nötr Bölge (RSI 45-60)".
-            "rsi_zone":       derive_rsi_zone(s.get("rsi"), s.get("signal")),
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
             "is_premium":     s.get("is_premium", False),

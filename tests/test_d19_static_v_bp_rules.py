@@ -21,37 +21,17 @@ def _old_adx(a):
     return "Zayıf"
 
 
-def _old_rsi(r, signal=None):
-    if r < 30:
-        return "Aşırı Satım"
-    if r < 45:
-        return "Dip Toparlanması"
-    if r < 60:
-        return "Sağlıklı Momentum" if signal == "AL" else "Nötr Bölge"
-    if r < 70:
-        return "Trend Güçleniyor"
-    if r < 80:
-        return "Dikkatli"
-    return "Aşırı Alım"
-
-
 def test_tablo_esikleri_eski_davranisla_ayni():
     for i in range(-5, 1200):
         v = i / 10.0
         assert br.derive_adx_label(v) == _old_adx(v)
-        for sig in (None, "AL", "SAT", "BEKLE"):
-            assert br.derive_rsi_zone(v, sig) == _old_rsi(v, sig)
     assert br.derive_adx_label(None) == "Zayıf"
-    assert br.derive_rsi_zone("x") is None
 
 
 def test_tablolar_fonksiyonlarla_ayni():
     for esik, etiket in br.ADX_LABEL_BANDS:
         assert br.derive_adx_label(esik) == etiket
         assert br.derive_adx_label(esik - 0.01) != etiket
-    for ust, etiket in br.RSI_ZONE_BANDS:
-        assert br.derive_rsi_zone(ust - 0.01, "AL") == etiket
-        assert br.derive_rsi_zone(ust, "AL") != etiket
 
 
 def test_bp_rules_tablolardan_turer():
