@@ -188,12 +188,12 @@ details.hb-full[open] summary::after{content:'−'}
   .bl-card{padding:18px 16px 14px;border-radius:18px}
   .hb-gd{padding:18px 16px 14px;border-radius:18px}
   .hb-gd-cols{grid-template-columns:minmax(0,1fr)}
-  .hb-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc tm" "bd bd" "on on";gap:8px 10px;padding:12px 6px}
+  .hb-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc tm" "bd bd";gap:8px 10px;padding:12px 6px}
   .hb-row time{grid-area:tm;align-self:start}
   .hb-row .hb-mc{grid-area:mc;flex-direction:row;align-items:center;gap:10px;background:none;border:0;padding:0}
   .hb-row .hb-mc .l1{gap:8px}
   .hb-row .hb-bd{grid-area:bd}
-  .hb-row .hb-on{grid-area:on;display:flex;align-items:center;gap:10px}
+  .hb-row .hb-on{grid-column:1/-1;display:flex;align-items:center;gap:10px}
   .hb-row .hb-on:empty{display:none}
   .hb-row .hb-on small{flex:none}
   .hb-row .hb-on b{margin:0;font-size:16px;flex:none}
