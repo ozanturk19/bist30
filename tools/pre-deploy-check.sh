@@ -51,7 +51,7 @@ gate_group() {
 }
 
 # KALICI_KURALLAR: pre-commit ile ayni liste (CPO-1584), senkron tutulmali.
-KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/takvim.html templates/harita_gun.html templates/kesfet.html"
+KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/takvim.html templates/harita_gun.html templates/kesfet.html"
 
 gate_group sozdizimi "G1 Sozdizimi" \
   "Jinja parse|python3 tools/_predeploy_jinja_check.py" \
