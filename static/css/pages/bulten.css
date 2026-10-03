@@ -5,6 +5,7 @@
    --bp-state-broken); kırmızı yalnız fiyat değişiminde. Düzen kap genişliğine göre (container blv). */
 .blv{--bl-disp:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;--bl-num:'Space Grotesk',system-ui,sans-serif;--bl-n:var(--bp-surface3);container:blv / inline-size;color:var(--bp-text);padding-bottom:40px}
 .blv a:not(.hm-t){color:var(--bp-brand)}
+.blv .hv-tabs a{color:var(--bp-text3)}.blv .hv-tabs a:hover,.blv .hv-tabs a[aria-current="page"]{color:var(--bp-text)}
 .blv-pg,.blv-mr,.blv-dr,.blv-kr,.blv-ar,.blv-ix,.blv-hero,.blv-dg{box-sizing:border-box}
 /* yön rengi yalnız sayfanın kendi öğelerinde — ısı haritası kutuları (.hm-t) kendi kontrast kuralını taşır */
 .blv .up:not(.hm-t){color:var(--bp-al)}
