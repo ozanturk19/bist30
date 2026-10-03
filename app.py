@@ -8317,14 +8317,11 @@ def stock_page(ticker):
             "q": f"{ticker} hisse fiyatı ne kadar?",
             "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} ₺{_chg_txt}.",
         })
-    if adx_val is not None or score is not None:
-        _parts = []
-        if adx_val is not None:
-            _parts.append(f"ADX {_tr1(adx_val)} (trend gücü)")
-        if score is not None:
-            _parts.append(f"Teknik Güç Skoru {score}/100")
+    if adx_val is not None:
+        _parts = [f"ADX {_tr1(adx_val)} (trend gücü)"]
         # D-02 (O8): getiri vaadi gibi duran "prim potansiyeli" sorusu kalktı; R/R oranı
         # da hedef dili olduğu için (D-39, kalıcı kural) cevaptan çıktı.
+        # CPO-1818: "Teknik Güç Skoru" atfı kalktı (O29/K10 ile sitenin her yerinden kalkmıştı).
         seo_faq.append({
             "q": f"{ticker} hissesinin teknik görünümü nasıl?",
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ".",
@@ -11513,10 +11510,10 @@ def humans_txt():
     Standards: HTML5, CSS3, ECMAScript 2022
     Components: Lightweight Charts
     Software: Python (Flask), JavaScript (Vanilla), Cloudflare CDN
-    Methodology: Algoritmik teknik analiz — Supertrend(10,3) + ADX(14) + EMA12/99
+    Methodology: Gün sonu trend (Supertrend, ADX, EMA) + KAP'ta açıklanan finansallarla şirket analizi
 
 /* MISSION */
-    Türk yatırımcılarına şeffaf, ücretsiz, algoritmik BIST sinyal aracı sunmak.
+    Türk yatırımcılarına şeffaf, gün sonu BIST trend ve şirket analizi sunmak.
     Sinyal üretim kuralları /metodoloji sayfasında açıkça yayımlanır;
     geçmiş performans gelecekteki getiriyi garanti etmez.
 """
