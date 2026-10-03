@@ -56,69 +56,19 @@
   </details>
 </section>
 
-<!-- TL;DR Özet Kart -->
-<div class="tldr-card da-panel da-panel--accent">
-  <h2 class="tldr-title">
-    <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    Özet — 5 Koşul, 3 Durum
-  </h2>
-  <div class="tldr-rows">
-    <div class="tldr-row tldr-green">
-      <span class="tldr-icon"><span class="tldr-dot"></span></span>
-      <span class="tldr-label">Güçlü Trend</span>
-      <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend&nbsp;▲ + ADX&nbsp;≥&nbsp;25 + DI+&nbsp;&gt;&nbsp;DI− + EMA12&nbsp;&gt;&nbsp;EMA99 + Haftalık&nbsp;▲</span>
-    </div>
-    <div class="tldr-row tldr-red">
-      <span class="tldr-icon"><span class="tldr-dot"></span></span>
-      <span class="tldr-label">Trend Bozuldu</span>
-      <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend&nbsp;▼ + ADX&nbsp;≥&nbsp;25 + DI−&nbsp;&gt;&nbsp;DI+ + EMA12&nbsp;&lt;&nbsp;EMA99 + Haftalık&nbsp;▼</span>
-    </div>
-    <div class="tldr-row tldr-gray">
-      <span class="tldr-icon"><span class="tldr-dot"></span></span>
-      <span class="tldr-label">Yatay</span>
-      <span class="tldr-eq">=</span>
-      <span class="tldr-formula">5 koşulun tamamı aynı yönde değil</span>
-    </div>
-  </div>
-  <p class="tldr-note">
-    Günlük göstergeler aynı yönde olsa bile sinyal beşinci koşul olan <strong>haftalık trend filtresinden</strong> de geçmek
-    zorundadır — haftalık EMA20 ters yöndeyse (ya da hissenin haftalık geçmişi yetersizse) sinyal
-    üretilmez, Yatay'da kalır. <a href="#haftalik-trend">Haftalık trend filtresi &rarr;</a>
-  </p>
-</div>
+<section class="mt-sec" id="kosullar" aria-labelledby="mtKosulH">
+  <h2 id="mtKosulH">Trend durumu hangi 5 koşula bakar?</h2>
+  <p>Beşi de yukarıyı gösterirse <strong>Güçlü Trend</strong>, beşi de aşağıyı gösterirse <strong>Trend Bozuldu</strong>, karışıksa <strong>Yatay</strong> yazar.</p>
+  <ol class="mt-check">
+    <li><a href="#supertrend">Supertrend</a><span>Fiyat trend dönüş seviyesinin üstünde mi, altında mı?</span></li>
+    <li><a href="#adx">ADX</a><span>25 ve üstünde mi? Trend yeterince güçlü mü?</span></li>
+    <li><a href="#adx">DI+ / DI−</a><span>Hangisi büyük? Gücün yönünü verir.</span></li>
+    <li><a href="#ema">EMA 12 / EMA 99</a><span>Kısa ortalama uzun ortalamanın üstünde mi?</span></li>
+    <li><a href="#haftalik-trend">Haftalık trend</a><span>Haftalık EMA 20 aynı yönde mi? Haftalık geçmişi yetersiz hisse Yatay'da kalır.</span></li>
+  </ol>
+</section>
 
 <article class="prose">
-
-<!-- bughunt-13.09 (finansal-analist workflow §2.6): "Nasıl Çalışır?" nesri
-     yukarıdaki TL;DR kart ile birebir aynı bilgiyi tekrarlıyordu — silindi,
-     sıfır bilgi kaybı (aynı formül TL;DR'da + kriter detayları aşağıdaki
-     criteria-grid'de zaten var). -->
-<h2>Nasıl Çalışır?</h2>
-
-<div class="criteria-grid">
-  <div class="criterion da-panel">
-    <div class="crit-num">①</div>
-    <div class="crit-name">Supertrend(10,3)</div>
-    <div class="crit-desc">Trend yönü ve destek/direnç seviyesi. ATR tabanlı dinamik kanal.</div>
-  </div>
-  <div class="criterion da-panel">
-    <div class="crit-num">②</div>
-    <div class="crit-name">ADX ≥ 25</div>
-    <div class="crit-desc">Trend gücü ölçer. 25 üzeri güçlü trend, DI+ / DI− yönü verir.</div>
-  </div>
-  <div class="criterion da-panel">
-    <div class="crit-num">③</div>
-    <div class="crit-name">EMA12 / EMA99</div>
-    <div class="crit-desc">Kısa ve uzun dönem ortalama kesişimi. EMA12 > EMA99 yükseliş.</div>
-  </div>
-</div>
-
-<div class="formula-box da-panel da-panel--accent">
-Güçlü Trend  <span role="img" aria-label="anlamına gelir">→</span>  ST yukarı  AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
-Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST aşağı   AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
-</div>
 
 <h2 id="supertrend">1. Supertrend Göstergesi</h2>
 <p>

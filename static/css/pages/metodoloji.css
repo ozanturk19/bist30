@@ -67,87 +67,17 @@
   /* .da-panel'in CIPLAK METIN dugumu tasiyan kullanicilar icin savunma.
      Paylasilan katmandaki `.da-panel > *{position:relative}` yalnizca ELEMENT
      cocuklari parilti ::before'unun UZERINE cikarir; dogrudan panelin icinde
-     duran metin dugumleri (bu sayfada .formula-box / .signal-box / .disclaimer)
+     duran metin dugumleri (bu sayfada .signal-box / .disclaimer)
      boyle bir kancaya sahip degil ve boyama sirasinda konumlandirilmis
      ::before'un ALTINDA kalir. isolation:isolate panele bir yigin baglami
      kurar, z-index:-1 de pariltiyi zemin ile icerik ARASINA yerlestirir. */
-  .formula-box, .signal-box, .disclaimer { isolation: isolate; }
-  .formula-box::before, .signal-box::before, .disclaimer::before { z-index: -1; }
+  .signal-box, .disclaimer { isolation: isolate; }
+  .signal-box::before, .disclaimer::before { z-index: -1; }
 
   /* .da-panel deltasi — zemin/kenar/radius paylasilan katmandan gelir. */
   .signal-box { padding: 20px; margin: 16px 0; --da-glow-size: 220px; --da-glow-a: .14; }
   .signal-box.al  { --da-accent: var(--bp-al);  --da-glow-rgb: var(--bp-al-rgb); }
   .signal-box.sat { --da-accent: var(--bp-sat); --da-glow-rgb: var(--bp-sat-rgb); }
-
-  .criteria-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin: 16px 0;
-  }
-  .criterion { border-radius: var(--bp-radius-xl); padding: 16px; --da-glow-size: 150px; --da-glow-a: .07; --da-glow-rgb: var(--bp-accent-cyan-rgb); }
-  .crit-num   { font-size: var(--bp-text-28); font-weight: 800; color: var(--bp-accent-cyan); line-height: 1; }
-  .crit-name  { font-size: var(--bp-text-md); font-weight: 600; color: var(--bp-text); margin: 6px 0 4px; }
-  .crit-desc  { font-size: var(--bp-text-sm); color: var(--bp-text3); }
-
-  .formula-box {
-    padding: 16px 18px;
-    margin: 16px 0;
-    font-family: var(--bp-font-mono);
-    font-size: var(--bp-text-base);
-    color: var(--bp-accent-cyan);
-    --da-accent: var(--bp-accent-cyan);
-    --da-glow-rgb: var(--bp-accent-cyan-rgb);
-    --da-glow-size: 200px; --da-glow-a: .10;
-  }
-
-  /* TL;DR Özet Kart */
-  .tldr-card {
-    padding: 22px 26px;
-    margin-bottom: 28px;
-    --da-accent: var(--bp-accent-cyan);
-    --da-glow-rgb: var(--bp-accent-cyan-rgb);
-    --da-glow-size: 320px; --da-glow-a: .13;
-  }
-  .tldr-title {
-    font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px;
-    margin-top: 0;   /* K-AM: artik <h2> */
-    margin-bottom: 14px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .tldr-rows { display: flex; flex-direction: column; gap: 8px; }
-  .tldr-row {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(var(--bp-bg-rgb),.55); border-radius:var(--bp-radius-md); padding: 10px 14px;
-    font-size: var(--bp-text-base); font-weight: 500;
-  }
-  .tldr-icon { flex-shrink: 0; width: 18px; display: inline-flex; justify-content: center; }
-  .tldr-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bp-text3); }
-  .tldr-green .tldr-dot { background: var(--bp-al); }
-  .tldr-red   .tldr-dot { background: var(--bp-sat); }
-  .tldr-label { font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 96px; }
-  .tldr-eq { color: var(--bp-text3); font-size: var(--bp-text-sm); margin: 0 4px; }
-  .tldr-formula { color: var(--bp-text2); font-family: var(--bp-font-mono); font-size: var(--bp-text-sm); }
-  /* C-70 K23: telefonda formül kendi satırına iner (320'de kutudan taşıyor, 390'da "DI+ / > DI−" bölünüyordu) */
-  @media (max-width: 600px) {
-    .tldr-row { flex-wrap: wrap; }
-    .tldr-eq { display: none; }
-    .tldr-formula { flex: 1 1 100%; min-width: 0; padding-left: 34px; }
-  }
-  .tldr-green .tldr-label { color: var(--bp-al); }
-  .tldr-red   .tldr-label { color: var(--bp-sat); }
-  .tldr-gray  .tldr-label { color: var(--bp-text3); }
-  /* CPO 20.09: "Hepsi Bu Kadar" iddiasi haftalik trend gate'ini yok sayiyordu
-     — TL;DR karti artik 4. kapiyi de gosteriyor. */
-  .tldr-note {
-    margin: 14px 0 0; padding-top: 13px;
-    border-top: 1px solid var(--bp-border);
-    font-size: var(--bp-text-sm); line-height: 1.6; color: var(--bp-text3);
-  }
-  .tldr-note strong { color: var(--bp-text2); }
-  .tldr-note a { color: var(--bp-accent-cyan); text-decoration: none; white-space: nowrap; }
-  .tldr-note a:hover { text-decoration: underline; }
 
   .disclaimer {
     padding: 18px 20px;
@@ -208,3 +138,11 @@
 .mt-td p, .mt-faq p { margin: 8px 0 0; color: var(--bp-text-2); }
 .mt-td code { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .mt-states > div { grid-template-columns: 1fr; } }
+/* C-42 dilim 2: TL;DR karti + kriter izgarasi + formul kutusu -> tek 5 kosul listesi */
+.mt-check { list-style: none; counter-reset: mtk; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.mt-check li { counter-increment: mtk; display: grid; grid-template-columns: 1.75rem 9.5rem minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 10px 14px; border: 1px solid var(--bp-border); border-radius: 10px; }
+.mt-check li::before { content: counter(mtk); font-weight: 700; color: var(--bp-text-2); font-variant-numeric: tabular-nums; }
+.mt-check a { font-weight: 600; color: var(--bp-text); text-decoration: none; }
+.mt-check a:hover { text-decoration: underline; }
+.mt-check span { color: var(--bp-text-2); }
+@media (max-width: 480px) { .mt-check li { grid-template-columns: 1.75rem minmax(0, 1fr); } .mt-check span { grid-column: 2; } }
