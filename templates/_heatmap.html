@@ -13,7 +13,7 @@
     çıktısı C-55 ile BİREBİR aynıdır):
       hm_full   true → renk modu + dönem anahtarları, H1 başlık, sektör sıralaması
       hm_mode   'chg' | 'bp' | 'tr'                  (Değişim / BP Skoru / Trend)
-      hm_per    'd1' | 'w1' | 'm1' | 'ytd' | 'y1'    (1G / 1H / 1A / YB / 1Y)
+      hm_per    'd1' | 'w1' | 'm1' | 'ytd' | 'y1'    (Gün / Hafta / Ay / Yılbaşı / Yıl)
       hm_path   anahtar bağlantılarının yolu (ör. '/sektor-harita'); JS kapalıyken
                 bağlantı sayfayı o durumla yeniden açar, JS açıkken yerinde boyar.
       Evren (C-58 kancası): tam sayfa başlığı görüntünün `universe` alanından okunur
@@ -161,7 +161,7 @@
 {%- set _per = hm_per if (_full and _mode == 'chg' and hm_per is defined and hm_per in ('d1', 'w1', 'm1', 'ytd', 'y1')) else 'd1' -%}
 {%- if _full -%}
   {#- (kod, düğme, okunan ad, lejant adı, açıklama cümlesi, cümle öneki, sıralama cümlesi) — bp-heatmap.js PER ile aynı -#}
-  {%- set _PER = [('d1', '1G', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'), ('w1', '1H', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'), ('m1', '1A', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'), ('ytd', 'YB', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'), ('y1', '1Y', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime')] -%}
+  {%- set _PER = [('d1', 'Gün', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'), ('w1', 'Hafta', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'), ('m1', 'Ay', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'), ('ytd', 'Yılbaşı', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'), ('y1', 'Yıl', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime')] -%}
   {%- set _CAP = {'d1': 3, 'w1': 6, 'm1': 12, 'ytd': 50, 'y1': 80} -%}
   {%- set _MQ = {'chg': 'degisim', 'bp': 'bp', 'tr': 'trend'} -%}
   {%- set _PQ = {'d1': '1g', 'w1': '1h', 'm1': '1a', 'ytd': 'yb', 'y1': '1y'} -%}

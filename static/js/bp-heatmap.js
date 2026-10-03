@@ -17,7 +17,7 @@
 
    C-29 (25.09.2026) tam sayfa — YALNIZ kök `data-hm-full` taşıyorsa
    (/sektor-harita). Ana sayfa bu özniteliği taşımaz: oradaki davranış C-55 ile aynı.
-     5) Renk modu (Değişim / BP Skoru / Trend) ve dönem (1G/1H/1A/YB/1Y) anahtarları
+     5) Renk modu (Değişim / BP Skoru / Trend) ve dönem (Gün/Hafta/Ay/Yılbaşı/Yıl) anahtarları
         yerinde boyar: kutu sınıfı + --k + metin + okunan ad, grup değeri, cümle,
         lejant, açıklama, sektör sıralaması. Kurallar _heatmap.html _paint() ve
         şablon cümleleriyle BİREBİR (biri değişirse öteki de).
@@ -262,7 +262,7 @@
   /* ── Mini kart ─────────────────────────────────────────────────────── */
   var canCard = !!card && typeof bpFormatPct === 'function' && typeof bpDirClass === 'function';
   var pinned = null, shownFor = null, lastPointer = '';
-  var PER = [['d1', '1G'], ['w1', '1H'], ['m1', '1A'], ['ytd', 'YB'], ['y1', '1Y']];
+  var PER = [['d1', 'Gün'], ['w1', 'Hafta'], ['m1', 'Ay'], ['ytd', 'Yılbaşı'], ['y1', 'Yıl']];
   var TR_SIG = { guclu: 'AL', yatay: 'BEKLE', bozuk: 'SAT' };
 
   function mk(tag, cls, text) {
@@ -306,7 +306,7 @@
     var pr = mk('div', 'c-price');
     pr.appendChild(mk('strong', null, price(r.p)));
     pr.appendChild(mk('span', 'c-ch ' + dirCls(ch[sel], 2), bpFormatPct(ch[sel], 2)));
-    var asof = sel === 'd1' ? data.asof_label : perInfo(sel)[1];
+    var asof = sel === 'd1' ? data.asof_label : perInfo(sel)[2];
     if (asof) pr.appendChild(mk('span', 'c-asof', asof));
     card.appendChild(pr);
     var per = mk('div', 'c-per');
@@ -406,11 +406,11 @@
   /* ── C-29: tam sayfa (yalnız data-hm-full) ─────────────────────────── */
   /* (kod, düğme, okunan ad, lejant adı, açıklama cümlesi, cümle öneki, sıralama cümlesi) — _heatmap.html _PER */
   var PERS = [
-    ['d1', '1G', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'],
-    ['w1', '1H', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'],
-    ['m1', '1A', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'],
-    ['ytd', 'YB', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'],
-    ['y1', '1Y', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime']
+    ['d1', 'Gün', '1 gün', 'Gün sonu değişim', 'gün sonu değişimi', '', 'gün sonu değişime'],
+    ['w1', 'Hafta', '1 hafta', '1 haftalık değişim', '1 haftalık değişim', '1 haftada ', '1 haftalık değişime'],
+    ['m1', 'Ay', '1 ay', '1 aylık değişim', '1 aylık değişim', '1 ayda ', '1 aylık değişime'],
+    ['ytd', 'Yılbaşı', 'yılbaşından beri', 'Yılbaşından beri değişim', 'yılbaşından beri değişim', 'Yılbaşından beri ', 'yılbaşından beri değişime'],
+    ['y1', 'Yıl', '1 yıl', '1 yıllık değişim', '1 yıllık değişim', '1 yılda ', '1 yıllık değişime']
   ];
   var CAP = { d1: 3, w1: 6, m1: 12, ytd: 50, y1: 80 };
   var MQ = { chg: 'degisim', bp: 'bp', tr: 'trend' }, PQ = { d1: '1g', w1: '1h', m1: '1a', ytd: 'yb', y1: '1y' };

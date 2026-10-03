@@ -693,12 +693,12 @@ function buildChart(d) {
     updateLeg(p && p.time != null ? Math.round(+p.time) : n - 1);   /* G26: time 0 gecerli */
   });
 
-  /* Getiri seridi: 1H · 1A · 3A · YB · 1Y (son kapanisa gore). */
+  /* Getiri seridi: 1 hafta · 1 ay · 3 ay · Yilbasi · 1 yil (son kapanisa gore). */
   (function(){
     const last = d.ohlc[n - 1].close, yr = _idxToDay[n - 1].slice(0, 4);
     let ybIdx = -1;
     for (let i = n - 1; i >= 0; i--) { if (_idxToDay[i].slice(0, 4) !== yr) { ybIdx = i; break; } }
-    const cells = [['1H', n - 1 - 5], ['1A', n - 1 - 21], ['3A', n - 1 - 63], ['YB', ybIdx], ['1Y', n - 1 - 252]]
+    const cells = [['1 hafta', n - 1 - 5], ['1 ay', n - 1 - 21], ['3 ay', n - 1 - 63], ['Yılbaşı', ybIdx], ['1 yıl', n - 1 - 252]]
       .filter(function(c){ return c[1] >= 0; })
       .map(function(c){
         const v = (last / d.ohlc[c[1]].close - 1) * 100;
