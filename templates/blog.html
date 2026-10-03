@@ -39,7 +39,7 @@
   {#- C-43 (26.09): en yeni yazı 2/3 genişlikte, yanında öğrenme yolu; altta kart yerine liste. -#}
   <div class="bo-top">
     <a href="/blog/{{ f.slug }}" class="bo-feature">
-      <span class="bo-kicker">En yeni · {{ f.cat }}</span>
+      <span class="bo-kicker">{% if f.is_new %}En yeni · {% endif %}{{ f.cat }}</span>
       <h2 class="bo-feature-title">{{ f.title }}</h2>
       <p class="bo-feature-desc">{{ f.desc }}</p>
       <span class="bo-meta">{{ f.mins }} dk okuma · {{ f.date_fmt or f.date }}</span>
@@ -71,7 +71,7 @@
 
   <ol class="bo-list" id="grid">
     {% for a in _sorted %}
-    <li class="blog-card" data-cat="{{ a.cat }}" data-title="{{ a.title }}" data-desc="{{ a.desc }}">
+    <li class="blog-card"{% if loop.first %} data-feat="1"{% endif %} data-cat="{{ a.cat }}" data-title="{{ a.title }}" data-desc="{{ a.desc }}">
       <a href="/blog/{{ a.slug }}" class="bo-row">
         <span class="bo-row-cat">{{ a.cat }}{% if a.is_new %}<span class="bc-new">Yeni</span>{% endif %}</span>
         <h3 class="bo-row-title">{{ a.title }}</h3>
@@ -154,7 +154,8 @@ function filterBlog() {
     const catMatch = _activeCat === 'Tümü' || card.dataset.cat === _activeCat;
     const textMatch = !q || trFold(card.dataset.title).includes(q) || trFold(card.dataset.desc).includes(q)
                        || trFold(card.dataset.cat).includes(q);
-    const isMatch = catMatch && textMatch;
+    /* C-71 K41: öne çıkan yazı filtresiz listede tekrar etmez; filtreli görünümde kalır. */
+    const isMatch = catMatch && textMatch && (filtering || !card.dataset.feat);
     if (isMatch) matched++;
     const show = isMatch && (filtering || matched <= _blogShownCount);
     card.style.display = show ? '' : 'none';
