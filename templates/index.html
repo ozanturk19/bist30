@@ -610,7 +610,7 @@
         }
         if (form) form.innerHTML = '<div class="da-sub-done">' + esc2(data.message || 'Abone oldunuz!') + '</div>';
       } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
-        if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">' + esc2(data.message) + '</span>';
+        if (msg) msg.innerHTML = '<span class="bp-text-muted">' + esc2(data.message) + '</span>';
         if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
       } else {
         if (msg) msg.innerHTML = '<span class="bp-sat-text">' + esc2(data.error || 'Bir hata oluştu.') + '</span>';

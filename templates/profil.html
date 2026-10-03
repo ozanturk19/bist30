@@ -44,7 +44,7 @@
 
   <div class="submit-row">
     <button type="submit" class="btn" id="profileSubmit">
-      <span aria-hidden="true">✓</span> Profili Kaydet
+      Profili Kaydet
     </button>
     <a href="/" class="btn btn-secondary" aria-label="Atla — profili doldurmadan ana sayfaya dön">Atla</a>
   </div>
@@ -129,7 +129,7 @@ document.querySelectorAll('.opt').forEach(btn => {
 //       `<span aria-hidden="true">✓</span>` sarmalayicisini yok ediyordu;
 //       geri yuklerken '✓ Profili Kaydet' duz metin olarak yazildigi icin
 //       ekran okuyucu bundan sonra "onay isareti" diye okuyordu.
-const PROFILE_BTN_HTML = '<span aria-hidden="true">✓</span> Profili Kaydet';
+const PROFILE_BTN_HTML = 'Profili Kaydet';
 
 function profileMsg(text, kind) {
   const el = document.getElementById('profileMsg');

@@ -133,7 +133,7 @@ function goToDate(date) {
   </div>
   <div class="bar-labels">
     <span class="bp-al-text">Güçlü %{{ al_pct }}</span>
-    <span style="color:var(--bp-text3)">{{ total }} hisse</span>
+    <span>{{ total }} hisse</span>
     <span class="bp-sat-text">Bozuldu %{{ sat_pct }}</span>
   </div>
 </div>
@@ -366,7 +366,7 @@ async function ozSubmitSub() {
     if (data.ok) {
       if (form) form.innerHTML = '<div style="color:var(--bp-ok);font-size:var(--bp-text-base);font-weight:600">' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
-      if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">' + _escSub(data.message) + '</span>';
+      if (msg) msg.innerHTML = '<span class="bp-text-muted">' + _escSub(data.message) + '</span>';
       if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
     } else {
       if (msg) msg.innerHTML = '<span class="bp-sat-text">' + _escSub(data.error || 'Bir hata oluştu.') + '</span>';

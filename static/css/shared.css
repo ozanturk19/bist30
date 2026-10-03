@@ -373,3 +373,71 @@ body { margin: 0; }
 .container--read { max-width: var(--bp-container-read); }
 .container--wide { max-width: var(--bp-container-wide); }
 @media (max-width: 600px) { .container { padding: 16px; } }
+
+/* C-47 (04.10): arama katmanı + başlık sağ bölümü + EOD çipi — eskiden
+   bp-search.js çalışma anında <style id="bp-search-css"> olarak enjekte ederdi;
+   ham hex token'a çevrildi; nav kırılımları
+   kritik satır-içi CSS'ten sonra gelmediği için bir kademe özgül (.bp-main-nav .bp-nav-item). Kanonik nav/logo kuralları _bp_critical_css.html'de. */
+.header-search-btn{transition:all .15s;padding:0;font-family:inherit}
+.header-search-btn:hover{background:var(--bp-surface2);border-color:var(--bp-ctl-border-hover);color:var(--bp-text)}
+.bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}
+.bp-search-overlay.open{display:flex}
+.bp-search-modal{width:min(560px,calc(100vw - 32px));background:var(--bp-surface);border:1px solid var(--bp-line);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:calc(100vh - 120px);display:flex;flex-direction:column}
+.bp-search-input-wrap{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bp-line);cursor:text}
+.bp-search-input-icon{width:18px;height:18px;color:var(--bp-text-3);flex-shrink:0}
+#bpSearchInput{flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--bp-text);font-family:"Space Grotesk",system-ui,sans-serif;min-width:0;padding:6px 0;margin:0;min-height:24px;-webkit-appearance:none;appearance:none}
+#bpSearchInput::-webkit-search-cancel-button,#bpSearchInput::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+#bpSearchInput::placeholder{color:var(--bp-text-3)}
+.bp-search-close{background:var(--bp-raised);border:1px solid var(--bp-line);color:var(--bp-text-2);width:28px;height:28px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-family:inherit;padding:0}
+.bp-search-close:hover{background:var(--bp-surface3);color:var(--bp-text)}
+.bp-search-results{flex:1;overflow-y:auto;padding:6px 6px 12px}
+.bp-search-empty{padding:24px;text-align:center;color:var(--bp-text-3);font-size:13px}
+.bp-search-section-title{font-family:"Space Grotesk",system-ui,sans-serif;font-size:10px;font-weight:700;color:var(--bp-text-3);text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px 6px}
+.bp-search-result{display:grid;grid-template-columns:64px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:var(--bp-text);border-radius:8px;transition:background .12s;font-size:13px}
+.bp-search-result:hover,.bp-search-result.bp-sel{background:var(--bp-raised)}
+.bp-sr-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:var(--bp-text);font-size:13px}
+.bp-sr-name{color:var(--bp-text-2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bp-sr-price{font-variant-numeric:tabular-nums;font-size:12px;color:var(--bp-text-2)}
+.bp-sr-chg{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;min-width:56px;text-align:right}
+.bp-sr-chg.bp-pos{color:var(--bp-up)}
+.bp-sr-chg.bp-neg{color:var(--bp-down)}
+.bp-sr-chg.bp-neu{color:var(--bp-text-3)}
+.bp-search-topic{display:block;padding:9px 12px;text-decoration:none;color:var(--bp-text);border-radius:8px;font-size:13px;transition:background .12s}
+.bp-search-topic:hover,.bp-search-topic.bp-sel{background:var(--bp-raised)}
+@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}
+.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}
+.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.bp-search-result{grid-template-columns:56px 1fr auto}
+.bp-sr-price{display:none}
+}
+#gundemSec{min-height:230px}
+#statsBar,.stats-bar{min-height:78px}
+header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}
+header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}
+header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}
+.bp-main-nav{-ms-overflow-style:none}
+.bp-nav-item svg{width:13px;height:13px;opacity:0.65;flex-shrink:0}
+.bp-nav-item:hover svg{opacity:1}
+.bp-nav-item[aria-current="page"] svg{opacity:1}
+@media (min-width:1500px){.bp-main-nav .bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}
+header .bp-main-nav{gap:6px}
+}
+@media (max-width:1100px){.bp-main-nav .bp-nav-item{padding:7px 10px;letter-spacing:0.4px;gap:4px}
+header .bp-main-nav{gap:3px}
+}
+@media (max-width:1000px){.bp-main-nav .bp-nav-item{padding:7px 8px;font-size:10.5px;gap:3px}
+}
+.bp-header-right{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
+.bp-eod-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-text3-rgb),0.08);border:1px solid rgba(var(--bp-text3-rgb),0.20);color:var(--bp-text-3);font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}
+.bp-eod-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex-shrink:0}
+@media (max-width:768px){.bp-eod-chip{font-size:10px;padding:4px 7px}
+}
+@media (max-width:480px){.bp-eod-chip{display:none!important}
+}
+/* Sayfa geçişi çapraz solma (eskiden bp-search.js #bp-vt-css enjeksiyonu). */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
+@keyframes bp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
+/* Makro şerit gecikme rozeti (eskiden bp-search.js satır-içi cssText). */
+.macro-stale-badge { position: absolute; top: 2px; left: 6px; font-size: 10px; line-height: 1; opacity: .75; z-index: 4; pointer-events: auto; cursor: help; color: inherit; }

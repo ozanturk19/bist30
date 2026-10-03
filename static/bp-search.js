@@ -1,7 +1,7 @@
 /* ============================================================
    BorsaPusula Site Search v1.0 — self-contained module
    ------------------------------------------------------------
-   • Auto-injects CSS + overlay HTML on first run
+   • Auto-injects overlay HTML on first run (CSS: shared.css)
    • Exposes: window.bpOpenSearch()
    • Trigger: any element with class "header-search-btn" OR
               any element with onclick="bpOpenSearch()"
@@ -26,93 +26,8 @@
   }
 
   // ---- CSS ----
-  // K-CY (22.09): "hardcoded hex so it works on any page" gerekcesi ARTIK GECERLI
-  // DEGIL -- tokens.css bp-search.js'i yukleyen 20 sayfanin hepsinde <head>'de.
-  // Ham hex, tokens.css degisince bu dosyanin SESSIZCE eski palette kalmasi
-  // demekti (K-BG'nin grafik dosyasinda olculen kusurunun aynisi).
-  // Ayrica `.header-search-btn`in gorunum ozellikleri (zemin/kenarlik/yaricap/
-  // renk) `_bp_critical_css.html`te ZATEN kanonik olarak tanimli; buradaki kopya
-  // birebir ayni degerleri ikinci kez yaziyordu. Yalniz kanonigin tasimadigi
-  // gecis + hover burada kaldi. Kapi: tools/canon-css-dup-check.py
-  var CSS = ''
-    + '.header-search-btn{transition:all .15s;padding:0;font-family:inherit}'
-    + '.header-search-btn:hover{background:var(--bp-surface2);border-color:var(--bp-ctl-border-hover);color:var(--bp-text)}'
-    + '.bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}'
-    + '.bp-search-overlay.open{display:flex}'
-    + '.bp-search-modal{width:min(560px,calc(100vw - 32px));background:#141416;border:1px solid #2a2a2c;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:calc(100vh - 120px);display:flex;flex-direction:column}'
-    + '.bp-search-input-wrap{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid #2a2a2c;cursor:text}'
-    + '.bp-search-input-icon{width:18px;height:18px;color:#909097;flex-shrink:0}'
-    + '#bpSearchInput{flex:1;background:none;border:none;outline:none;font-size:15px;color:#e5e1e4;font-family:"Space Grotesk",system-ui,sans-serif;min-width:0;padding:6px 0;margin:0;min-height:24px;-webkit-appearance:none;appearance:none}'
-    + '#bpSearchInput::-webkit-search-cancel-button,#bpSearchInput::-webkit-search-decoration{-webkit-appearance:none;appearance:none}'
-    + '#bpSearchInput::placeholder{color:#909097}'
-    + '.bp-search-close{background:#1c1b1f;border:1px solid #2a2a2c;color:#c7c5cd;width:28px;height:28px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-family:inherit;padding:0}'
-    + '.bp-search-close:hover{background:#201f21;color:#e5e1e4}'
-    + '.bp-search-results{flex:1;overflow-y:auto;padding:6px 6px 12px}'
-    + '.bp-search-empty{padding:24px;text-align:center;color:#909097;font-size:13px}'
-    + '.bp-search-section-title{font-family:"Space Grotesk",system-ui,sans-serif;font-size:10px;font-weight:700;color:#909097;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px 6px}'
-    + '.bp-search-result{display:grid;grid-template-columns:64px 1fr auto auto;align-items:center;gap:8px;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;transition:background .12s;font-size:13px}'
-    + '.bp-search-result:hover,.bp-search-result.bp-sel{background:#1c1b1f}'
-    + '.bp-sr-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:#e5e1e4;font-size:13px}'
-    + '.bp-sr-name{color:#c7c5cd;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}'
-    + '.bp-sr-price{font-variant-numeric:tabular-nums;font-size:12px;color:#c7c5cd}'
-    + '.bp-sr-chg{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;min-width:56px;text-align:right}'
-    + '.bp-sr-chg.bp-pos{color:#00e290}.bp-sr-chg.bp-neg{color:#f85149}.bp-sr-chg.bp-neu{color:#909097}'
-    + '.bp-search-topic{display:block;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;font-size:13px;transition:background .12s}'
-    + '.bp-search-topic:hover,.bp-search-topic.bp-sel{background:#1c1b1f}'
-    /* K-AZ: tam ekran mobil varyant `top:0`dan basliyordu ve safe-area payi YOKTU —
-       PWA/standalone'da (viewport-fit=cover) arama kutusu ve ✕ kapat dugmesi
-       TAMAMEN centigin/durum cubugunun altinda kaliyordu (olculdu: inset=47px'te
-       ikisi de %100 guvensiz bolgede). Sonuc listesi de ev gostergesinin altina
-       tasiyordu. 100vh -> 100dvh: iOS'ta URL cubugu kadar TASIYORDU (ayni ders
-       unsubscribe.css'te yazili), vh satiri dvh desteklemeyen tarayici yedegi. */
-    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 1fr auto}.bp-sr-price{display:none}}'
-    /* ── Anti-CLS: reserve space for async-loaded sections ── */
-    + '#gundemSec{min-height:230px}'
-    + '#statsBar,.stats-bar{min-height:78px}'
-    /* Logo boyutu + header{flex,60px} kurallari C-08 (26.09) ile _bp_critical_css.html'e tasindi: defer
-       betik ilk boyamadan SONRA uyguladigi icin nav ikinci satirdan birinciye zipliyordu (takvim CLS 0,19-0,44). */
-    /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
-    + 'header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
-    + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
-    + 'header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}'
-    /* ── Unified Nav (bp-main-nav) — K-CY (22.09): TEK KANON ──
-       BU BLOK ESKIDEN kanonik nav stilinin TAM BIR IKINCI KOPYASIYDI ve runtime'da
-       <head>'in SONUNA enjekte edildigi icin `_bp_critical_css.html`teki kanonigi
-       20 sayfanin HEPSINDE eziyordu (canli olculdu 22.09): aktif nav ogesi
-       `--bp-al` (AL sinyali yesili #00e290) ile boyaniyor, kanonik `--bp-brand`
-       hap (pill + rotate(-1deg)) hic gorunmuyordu -- kenarlik brand, metin AL
-       yesili, yani TEK OGE IKI SOZLUKTEN boyaniyordu. Ayrica durum anahtari da
-       ikileşmişti: kanonik CSS `[aria-current="page"]`, bu kopya `.active`.
-       COZUM: cakisan kurallar (.bp-main-nav / .bp-nav-item taban+hover / .active /
-       .bp-nav-more-wrap / 900px) BURADAN SILINDI -- kanonik `_bp_critical_css.html`
-       artik gercekten kanonik. Burada YALNIZ kanonigin tasimadigi acilir menu ve
-       ikon/olcek kurallari kalir, hepsi tokens.css'ten okur. */
-    + '.bp-main-nav{-ms-overflow-style:none}'
-    + '.bp-nav-item svg{width:13px;height:13px;opacity:0.65;flex-shrink:0}'
-    + '.bp-nav-item:hover svg{opacity:1}'
-    + '.bp-nav-item[aria-current="page"] svg{opacity:1}'
-    /* On wider screens: bump up padding/font slightly */
-    + '@media (min-width:1500px){.bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}.bp-main-nav{gap:6px}}'
-    /* On tighter screens: shrink */
-    + '@media (max-width:1100px){.bp-nav-item{padding:7px 10px;letter-spacing:0.4px;gap:4px}.bp-main-nav{gap:3px}}'
-    + '@media (max-width:1000px){.bp-nav-item{padding:7px 8px;font-size:10.5px;gap:3px}}'
-    /* ── Header-right uniform actions: EOD çipi + search (all pages) ── */
-    + '.bp-header-right{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}'
-    /* C-03: EOD çipi — eski saat rozetinin nötr gri dili korunur. */
-    + '.bp-eod-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
-    + '.bp-eod-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
-    + '@media (max-width:768px){.bp-eod-chip{font-size:10px;padding:4px 7px}}'
-    + '@media (max-width:480px){.bp-eod-chip{display:none!important}}';
-    /* C-03: Yenile düğmesi kalktı — veri günde bir (EOD) değişir, sayfa içi
-       yenileme yeni veri getirmez; tarayıcı yenilemesi yeterli. */
-
-  // Inject CSS
-  if (!document.getElementById('bp-search-css')) {
-    var style = document.createElement('style');
-    style.id = 'bp-search-css';
-    style.textContent = CSS;
-    document.head.appendChild(style);
-  }
+  // C-47 (04.10): arama katmanı ve EOD çipi stilleri static/css/shared.css'te
+  // (her sayfada _head.html ile yüklenir); çalışma anı <style> enjeksiyonu kalktı.
 
   // ---- Data layer ----
   var _syms = null;
@@ -730,7 +645,6 @@
       badge.setAttribute('data-tip', 'Şeritte son okunan değerler duruyor; yeni veri gecikti.');
       badge.tabIndex = 0;
       badge.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.8V8l2 1.4"/></svg>';
-      badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit';
       bar.appendChild(badge);
     }
     badge.style.display = isStale ? 'inline' : 'none';
@@ -836,18 +750,7 @@
 
   // ── View Transitions API + perceived performance polish ──
   function bpEnableTransitions() {
-    // 1. CSS injection: cross-fade
-    if (!document.getElementById('bp-vt-css')) {
-      const s = document.createElement('style');
-      s.id = 'bp-vt-css';
-      s.textContent = `
-        @view-transition { navigation: auto; }
-        ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
-        @keyframes bp-fade-in  { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-        ::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
-      `;
-      document.head.appendChild(s);
-    }
+    // 1. Sayfa geçişi çapraz solma: CSS shared.css'te (C-47, 04.10).
 
     // 1b. iOS Safari `:active` kilidi (K-AA, 21.09)
     // `a[href^="/"]{-webkit-tap-highlight-color:transparent}` buradan KALDIRILDI —
