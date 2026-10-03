@@ -58,11 +58,10 @@
   <h1>{{ b.headline }}</h1>
   <p class="hb-sum">{{ it.summary }}</p>
 
-  {% if it.onem %}{%- set o = it.onem -%}
+  {% if it.onem and it.onem.pct >= 0.1 %}{%- set o = it.onem -%}
   <section class="hb-onc" aria-labelledby="hbOnH">
-    <small id="hbOnH">Önem oranı</small>
+    <small id="hbOnH">{{ o.basis.split(' / ')[0] }}, {{ o.rev_year }} hasılatına oranı</small>
     <b class="big">{{ o.txt }}</b>
-    <p>{{ o.basis|replace(' / ', ' ÷ ') }}</p>
     <span class="hb-bar" aria-hidden="true"><i style="width:{{ '%.0f'|format(([o.pct, 50]|min) * 2) }}%"></i></span>
     <div class="hb-scale" aria-hidden="true"><span>0</span><span>%25</span><span>%50 ve üstü</span></div>
     <p class="hb-calc">
@@ -92,7 +91,7 @@
     <span class="go">{{ mc.t }} hisse sayfası →</span>
   </a>
 
-  <details class="hb-full"{% if not facts and not it.onem %} open{% endif %}>
+  <details class="hb-full"{% if not facts and not (it.onem and it.onem.pct >= 0.1) %} open{% endif %}>
     <summary>Bildirimin tam metni</summary>
     <div class="in">
       {% if b.has_text %}
@@ -114,7 +113,7 @@
       <li><a href="{{ s.href }}">
         <span class="hb-d"><span class="hb-cl">{{ s['class'] }}</span><time datetime="{{ s.date }}">{{ trdate(s.date) }}</time></span>
         <span class="hb-s">{{ s.title }}</span>
-        <span class="hb-o hb-on">{% if s.onem %}<small>Önem oranı</small><b>{{ s.onem.txt }}</b>{% endif %}</span>
+        <span class="hb-o hb-on">{% if s.onem and s.onem.pct >= 0.1 %}<small>Hasılata oranı</small><b>{{ s.onem.txt }}</b>{% endif %}</span>
       </a></li>
       {% endfor %}
     </ul>

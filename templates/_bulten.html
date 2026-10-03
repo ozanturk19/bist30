@@ -66,7 +66,7 @@
 <div class="bl-sec">
   <h3>Öne çıkan bildirimler</h3>
   <ul class="bl-kb">
-    {%- for k in _kb %}<li><a href="{{ k.href or ('/hisse/' ~ k.ticker) }}"><b>{{ k.ticker }}</b><span>{{ k.title }}</span>{% if k.onem %}<small>Önem oranı {{ k.onem }}</small>{% endif %}</a></li>{% endfor %}
+    {%- for k in _kb %}<li><a href="{{ k.href or ('/hisse/' ~ k.ticker) }}"><b>{{ k.ticker }}</b><span>{{ k.title }}</span>{% if k.onem %}<small>Hasılata oranı {{ k.onem }}</small>{% endif %}</a></li>{% endfor %}
   </ul>
 </div>
 {%- endif %}
