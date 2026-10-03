@@ -820,7 +820,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   {% if related_blog %}
   <div data-tab-content="always" style="margin-bottom:16px">
     <h2 class="section-title" style="margin-bottom:10px">İlgili Okumalar</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+    <div class="read-grid" data-n="{{ related_blog|length }}" style="--n:{{ related_blog|length }}">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
         <div style="font-size:var(--bp-text-xs);color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>

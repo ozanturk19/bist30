@@ -1156,6 +1156,9 @@
 .tv-prep, .tv-err { margin: 0 0 14px; font-size: var(--bp-text-base); color: var(--bp-text3); }
 .tv-err { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .tv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+/* C-71 K33b: tek sayıda panel kalınca sonuncu tam satır (boş hücre 0); grafik yarım genişlikte kalır */
+.tv-grid > .tv-pan:nth-child(odd of .tv-pan:not([hidden])):nth-last-child(1 of .tv-pan:not([hidden])) { grid-column: 1 / -1; }
+@media (min-width: 981px) { .tv-grid > .tv-pan:nth-child(odd of .tv-pan:not([hidden])):nth-last-child(1 of .tv-pan:not([hidden])) > :not(.tv-ph) { max-width: calc(50% - 9px); } }
 .tv-pan { min-width: 0; padding: 16px 18px 18px; border-radius: var(--bp-radius-16); border: 1px solid var(--bp-border); background: var(--bp-surface); }
 .tv-ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .tv-ph > div:first-child { min-width: 0; }
@@ -1232,6 +1235,11 @@
 .tv-divs span { display: block; font: 600 var(--bp-text-xs) 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text3); }
 .tv-divs b { font: 700 1.15rem/1.3 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 #panel-temel > .hx-disc { margin-top: 18px; }
+
+/* C-71 K33b: İlgili okumalar — kart sayısı kadar sütun (en çok 4), 980 altı 4 kart 2+2, 600 altı tek sütun */
+.read-grid { display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 980px) { .read-grid[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .read-grid[data-n] { grid-template-columns: 1fr; } }
 
 @media (max-width: 980px) {
   .tv-hero { grid-template-columns: 1fr; }
