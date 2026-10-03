@@ -149,7 +149,7 @@
             <span style="font-size:var(--bp-text-2xs);padding:1px 7px;border-radius:var(--bp-radius-lg);background:{{ 'rgba(var(--bp-gold-rgb),.12)' if is_active else 'rgba(var(--bp-text3-rgb),.08)' }};border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};color:{{ dot_clr }};margin-left:auto">{{ 'Aktif' if is_active else 'Yaklaşıyor' }}</span>
           </div>
           <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:3px">{{ p.desc }}</div>
-          <div style="font-size:var(--bp-text-xs);color:{{ dot_clr }};font-weight:500">{{ p.days_label }}</div>
+          <div style="font-size:var(--bp-text-xs);color:{{ dot_clr }};font-weight:500">{#- C-71 K39 (03.10): sayacın hedefi yazılır -#}{%- set _d = p.end if is_active else p.start -%}{{ 'Son tarih' if is_active else 'Başlangıç' }} {{ _d[8:10]|int }} {{ ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][_d[5:7]|int - 1] }} · {{ p.days_label }}</div>
         </div>{% endfor %}</div>
     </div>
 
@@ -366,7 +366,7 @@ async function loadGundem() {
               <span style="font-size:var(--bp-text-2xs);padding:1px 7px;border-radius:var(--bp-radius-lg);background:${badgeBg};border:1px solid ${badgeBrd};color:${dotClr};margin-left:auto">${isActive ? 'Aktif' : 'Yaklaşıyor'}</span>
             </div>
             <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:3px">${p.desc}</div>
-            <div style="font-size:var(--bp-text-xs);color:${dotClr};font-weight:500">${p.days_label}</div>
+            <div style="font-size:var(--bp-text-xs);color:${dotClr};font-weight:500">${isActive ? 'Son tarih' : 'Başlangıç'} ${bpFormatTrDateLong((isActive ? p.end : p.start).split('-').reverse().join('.')) || ''} · ${p.days_label}</div>
           </div>`;
         }).join('');
       }

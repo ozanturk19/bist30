@@ -138,7 +138,6 @@ const ROW_LABELS = [
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
   { key: 'rsi',           label: 'RSI (14)' },
   { key: 'signal_date',   label: 'Sinyal Tarihi' },
-  { key: 'signal_bars',   label: 'Sinyal Süresi' },
   { key: 'sl_level',      label: 'Trend dönüş seviyesi (Supertrend)', help: 'Fiyat bu seviyenin üzerinde kaldıkça trend yukarı yönlü sayılır; altına inerse trend döner.' },
   /* C-52 (24.09): TP1/TP2 ve Giriş Kalitesi satırları kalktı — teknik hedef ve
      işlem yönetimi dili yok (kanon §2.2). */
@@ -247,9 +246,9 @@ function renderCell(key, s) {
     case 'change_pct':    return renderChg(v);
     case 'adx':           return renderAdx(v, s.adx_label);
     case 'rsi':           return renderRsi(v, s.rsi_zone, s.signal);
-    /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
-    case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
-    case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${v}</span>` : '<span class="muted">—</span>';
+    /* C-71 K39 (03.10): "Sinyal Süresi" satırı kalktı — yaş duvar saatiyle sayılıyordu
+       (Cumartesi, Cuma sinyaline "1 gün"); tarih satırı aynı bilgiyi tarihle verir. */
+    case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${bpSignalDateLabel(v) || v}</span>` : '<span class="muted">—</span>';
     /* K-BQ (21.09): iki kusur birden. (1) Satirin KENDI yardim metni "sinyal yonu ne
        olursa olsun her zaman hesaplanir" derken deger SAT'ta gizleniyordu — sayfa kendi
        aciklamasiyla celisiyordu; ad zaten "Supertrend Seviyesi", yani gizlenmesi gereken
