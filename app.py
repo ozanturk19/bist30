@@ -7934,6 +7934,10 @@ REDIRECTS = {
     "/altin": "/", "/gumus": "/", "/petrol": "/", "/dogalgaz": "/",
     "/kripto": "/", "/emtialar": "/",
     "/abd": "/", "/abd/sp500": "/", "/abd/nasdaq": "/",
+    # D-25a Faz 2 / C-32: iceriginin anasayfaya tasinmasiyla ciplak /ozet ve
+    # /gundem artik ayri sayfa degil (/ozet/<tarih> arsivi ve /api/gundem
+    # ayri route'larda kalir, bu tabloya girmez).
+    "/ozet": "/", "/gundem": "/",
 }
 
 
@@ -7963,6 +7967,8 @@ REDIRECTS = {
 @app.route("/abd/sp500")
 @app.route("/abd/nasdaq")
 @app.route("/abd/<ticker>")
+@app.route("/ozet")
+@app.route("/gundem")
 def _legacy_redirect(**_kwargs):
     # tek view, REDIRECTS tablosundaki (ya da bilinmeyen /abd/<ticker>
     # ticker'ı icin varsayilan "/") hedefe 301. @app.route literal string
@@ -11173,7 +11179,6 @@ def sitemap():
         # K-CK: mimari EOD-only (K-CE kanonu). "hourly" bu kanalda da bir
         # gun-ici iddiasidir -- sayfa gunde BIR kez, EOD turunda tazelenir.
         {"loc": "/",            "priority": "1.0", "changefreq": "daily"},
-        {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly", "lastmod": _tpl_lastmod("metodoloji.html", today)},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly", "lastmod": _tpl_lastmod("hakkinda.html", today)},
@@ -11224,7 +11229,6 @@ def sitemap():
             _lastmod = (_snap or {}).get("updated_at", d)[:10]
             pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
     pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
-    pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     # D-59/C-56: Keşfet listeleri (şablon yayındaysa); her liste kendi paylaşılabilir adresinde.
     # /kesfet kökü varsayılan listeyi gösterir ve kanonik adresi o listenin adresidir: sitemap'te yok.
     if _tpl_ready("kesfet.html"):
@@ -11383,8 +11387,6 @@ def llms_txt():
 - [Piyasa](https://borsapusula.com/): "Üç soruda BIST" — son kapanışta BIST100, öne çıkan şirketler, durum değiştirenler, sektör ısı haritası
 - [Keşfet (Hisse Tarayıcı)](https://borsapusula.com/tarama): BorsaPusula Skoru, finansal skor, trend, sektör, fiyat ve değerleme filtreleriyle tarama
 - [Sektörler](https://borsapusula.com/sektor-harita): hisselerin kapanış günü değişimi, piyasa değerine göre kutular ve KAP sektör grupları
-- [Piyasa Gündemi](https://borsapusula.com/gundem): son seansta trend durumu değişen hisseler
-- [Günlük Özet](https://borsapusula.com/ozet): Güçlü Trend / Trend Bozuldu / Yatay dağılımı
 - [Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
 - [Takvim](https://borsapusula.com/takvim): şirketlerin temettü ve finansal rapor tarihleri, Türkiye ve ABD veri günleri
@@ -11977,24 +11979,6 @@ def _compute_gundem_data():
     }
 
 
-@app.route("/gundem")
-def gundem_page():
-    # CPO-1587 Faz 2: aynı hesaplamanın (new_signals/strong_al/...) SSR context'i
-    # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
-    _g = _compute_gundem_data()
-    return render_template(
-        "gundem.html",
-        ssr_new_signals=_g["new_signals"],
-        ssr_strong_al=_g["strong_al"],
-        ssr_signal_summary=_g["signal_summary"],
-        ssr_bilanco_upcoming=_g["bilanco_upcoming"],
-        ssr_market_open=_g["market_open"],
-        ssr_closed_message=_g["closed_message"],
-        ssr_eod_label=_g["eod_label"],        # D-06: "Son seansta değişenler · 23 Eylül"
-        ssr_updated_at=_g["updated_at"],
-    )
-
-
 @app.route("/api/gundem")
 @limiter.limit("30 per minute")
 def api_gundem():
@@ -12066,80 +12050,6 @@ def api_ozet_snapshots():
     except Exception as e:
         logger.error("Snapshot list: %s", e)
         return safe_json({"dates": []})
-
-
-# ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
-@app.route("/ozet")
-def ozet_page():
-    # CPO-DEV2-076 (B) / DEV2-328 r102: bugün gerçek işlem günü değilse (hafta
-    # sonu/tatil) canlı _cache ile bugünün tarihini basıyorduk ama veri donmuş
-    # son işlem gününe (ör. Cuma) aitti -- SEO title/meta yanıltıcıydı. Zaten
-    # var olan arşiv mekanizmasını (historical_date, /ozet/<tarih>) en son
-    # mevcut snapshot gününe tetikleyerek aynı tek kaynağa çeviriyoruz.
-    with _lock:
-        stocks = list(_cache["data"])
-        loading = len(stocks) == 0
-
-    # CPO-1498: is_trading_day() sadece hafta içi/tatil bakar, SAATİ bilmiyor —
-    # hafta içi sabah 00:00-10:00 TR arası (piyasa henüz açılmadan) cache hâlâ
-    # önceki işlem gününün (ör. Cuma) verisini taşırken is_trading_day() True
-    # döner ve fallback hiç tetiklenmezdi. Anasayfadaki api_market_summary()
-    # gibi cache'in GERÇEK tazelik tarihine (kanonik p90 updated_at) bakıp
-    # bugünden farklıysa da aynı arşiv fallback'ini tetikliyoruz.
-    #
-    # CPO-1588: yukarıdaki tarih-karşılaştırma SAATİ hesaba katmadığı için
-    # piyasa AÇIKKEN de (10:00-18:2x TR) tetikleniyordu — EOD-only mimaride
-    # kapanışa kadar cache'in "dün"e ait olması BEKLENEN durum, "geçmiş
-    # görünüm" değil. Tarih-karşılaştırmasını sadece CPO-1498'in asıl hedefi
-    # olan pencereye (piyasa henüz açılmadan, saat < 10:00 TR) sınırlıyoruz.
-    _needs_archive_fallback = not is_trading_day()
-    if not _needs_archive_fallback and stocks:
-        _now_tr = datetime.now(_TZ_TR)
-        if _now_tr.hour < 10:
-            _upd_at = _data_quality_snapshot(stocks).get("updated_at")
-            if _upd_at:
-                try:
-                    _upd_date = datetime.strptime(_upd_at, "%d.%m.%Y %H:%M:%S").date()
-                    _needs_archive_fallback = _upd_date != _now_tr.date()
-                except Exception:
-                    pass
-
-    if _needs_archive_fallback:
-        try:
-            _files = sorted([
-                f.replace(".json", "")
-                for f in os.listdir(_SNAPSHOTS_DIR)
-                if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
-            ], reverse=True)
-            if _files:
-                return ozet_gecmis(_files[0], via_auto_fallback=True)
-        except Exception as e:
-            logger.debug("ozet_page tatil-fallback hatasi: %s", e)
-
-    # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
-    stocks = [s for s in stocks if s.get("ticker") != "XU030"]
-
-    al_list    = [s for s in stocks if s["signal"] == "AL"]
-    sat_list   = [s for s in stocks if s["signal"] == "SAT"]
-    bekle_list = [s for s in stocks if s["signal"] == "BEKLE"]
-    # CPO-1335: donmuş is_new_signal yerine okuma-anı signal_date kontrolü.
-    # CPO-1666 #3: /gundem'in (satır ~10589) zaten uyguladığı "BEKLE değil"
-    # filtresi burada eksikti — bir hisse BEKLE'ye dönüp signal_date bugüne
-    # sıfırlandığında "Sinyal Değişenler"de sanki yeni AL/SAT sinyaliymiş gibi
-    # görünüyordu.
-    # D-06: referans gün takvim değil verideki son EOD günü (/gundem ile aynı);
-    # seans içinde liste önceki kapanışın değişimlerini gösterir, tarih de onun.
-    _eod_day = last_eod_day(stocks)
-    new_signals = [s for s in stocks
-                   if _eod_day and is_signal_from_today(s.get("signal_date"), today=_eod_day)
-                   and s.get("signal") != "BEKLE"]
-
-    today_str = (_eod_day or datetime.now(_TZ_TR).date()).strftime("%d.%m.%Y")
-    return render_template("ozet.html",
-        stocks=stocks, loading=loading,
-        al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
-        new_signals=new_signals, today_str=today_str,
-        stock_names=STOCK_NAMES)
 
 
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
