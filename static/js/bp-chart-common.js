@@ -181,7 +181,7 @@
       'position:absolute;display:none;padding:8px 10px;background:var(--bp-surface);' +
       'border:1px solid var(--bp-line);border-radius:6px;color:var(--bp-text);font-size:11px;' +
       'line-height:1.55;font-variant-numeric:tabular-nums;pointer-events:none;' +
-      'z-index:var(--bp-z-chart-legend);white-space:nowrap;box-shadow:var(--bp-shadow-pop)';
+      'z-index:30;white-space:nowrap;box-shadow:var(--bp-shadow-pop)';
     elMain.style.position = 'relative';
     elMain.appendChild(tip);
 

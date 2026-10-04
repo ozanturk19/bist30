@@ -1,13 +1,13 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-dc2b67b3';
+const CACHE = 'borsapusula-42da6217';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç).
    C-26: CACHE ve STATIC elle yazılmaz — tools/sw_manifest.py üretir (pre-deploy 11. adım). */
 const STATIC = [
-  '/static/css/data-art.css?v=a7f2a127',
+  '/static/css/data-art.css?v=7aaf40c4',
   '/static/css/pages/offline.css?v=bdcb8feb',
-  '/static/css/shared.css?v=e3eb88ef',
-  '/static/css/tokens.css?v=f8e30f92',
+  '/static/css/shared.css?v=4f6f375b',
+  '/static/css/tokens.css?v=6de57080',
   '/static/favicon.svg?v=6834d771',
   '/static/fonts/bricolage-800.woff2?v=c76bd7c0',
   '/static/fonts/space-grotesk.woff2?v=5ac34783',

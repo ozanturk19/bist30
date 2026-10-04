@@ -134,8 +134,8 @@
   }
   .q-ideal  { background: rgba(var(--bp-al-rgb),.18);  color:var(--bp-up); }
   .q-iyi    { background: rgba(var(--bp-accent-cyan-rgb),.18);  color:var(--bp-art-cyan); }
-  .q-dikkat { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
-  .q-uzak   { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
+  .q-dikkat { background: rgba(var(--bp-stale-rgb),.18);  color:var(--bp-warn); }
+  .q-uzak   { background: rgba(var(--bp-stale-rgb),.18);  color:var(--bp-warn); }
   .q-none   { color: var(--bp-text-3); }
 
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }

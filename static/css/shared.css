@@ -168,9 +168,9 @@ body { margin: 0; }
 .macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
 .macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
 
-.container { max-width: var(--bp-container-app); margin: 0 auto; padding: 24px; }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .container--read { max-width: var(--bp-container-read); }
-.container--wide { max-width: var(--bp-container-wide); }
+.container--wide { max-width: 1360px; }
 @media (max-width: 600px) { .container { padding: 16px; } }
 
 .header-search-btn{transition:all .15s;padding:0;font-family:inherit}

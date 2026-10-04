@@ -197,7 +197,7 @@ label:has(> .da-check){min-height:24px}
 }
 
 .da-empty--error{
-  background:rgba(var(--bp-danger-rgb),.08);
+  background:rgba(var(--bp-sat-rgb),.08);
   border:1px solid var(--bp-danger-line);
   border-radius:var(--bp-r-md);
   color:var(--bp-danger);
@@ -221,7 +221,7 @@ label:has(> .da-check){min-height:24px}
   cursor:pointer;flex-shrink:0;
   transition:background .15s;
 }
-.da-retry:hover{background:rgba(var(--bp-danger-rgb),.12)}
+.da-retry:hover{background:rgba(var(--bp-sat-rgb),.12)}
 
 .bp-detail-toggle{margin-bottom:20px}
 .bp-detail-toggle-summary{

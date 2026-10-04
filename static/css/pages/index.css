@@ -231,7 +231,7 @@ header{
 }
 
 .da-mosaic{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-flow:dense;gap:12px}
-.da-tile{border-radius:var(--bp-r-md);border:1px solid var(--bp-line);padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:104px;position:relative;overflow:hidden;transition:transform var(--bp-dur-slower) cubic-bezier(.2,.8,.2,1),border-color var(--bp-dur-slow);opacity:0;transform:translateY(18px)}
+.da-tile{border-radius:var(--bp-r-md);border:1px solid var(--bp-line);padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:104px;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color var(--bp-dur-slow);opacity:0;transform:translateY(18px)}
 .da-tile.in-view{opacity:1;transform:translateY(0)}
 .da-tile:hover{transform:translateY(-5px) scale(1.012);border-color:var(--bp-border2)}
 .da-tile-pos{background:rgba(var(--bp-al-rgb),var(--a))}

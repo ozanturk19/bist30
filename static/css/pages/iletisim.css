@@ -52,7 +52,7 @@
 
   .cf-input.cf-invalid {
     border-color: var(--bp-danger);
-    box-shadow: 0 0 0 3px rgba(var(--bp-danger-rgb), .14);
+    box-shadow: 0 0 0 3px rgba(var(--bp-sat-rgb), .14);
   }
   .cf-consent-row { margin-bottom: 14px; }
   .cf-consent {
@@ -89,8 +89,8 @@
   .cf-msg-sub  { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
   .disclaimer {
-    background: linear-gradient(135deg, rgba(var(--bp-danger-rgb),.07) 0%, rgba(var(--bp-danger-rgb),.02) 100%);
-    border: 1px solid rgba(var(--bp-danger-rgb),.2);
+    background: linear-gradient(135deg, rgba(var(--bp-sat-rgb),.07) 0%, rgba(var(--bp-sat-rgb),.02) 100%);
+    border: 1px solid rgba(var(--bp-sat-rgb),.2);
     border-left: 3px solid var(--bp-danger);
     border-radius: var(--bp-r-sm);
     padding: 14px 16px; color: var(--bp-text-2);
