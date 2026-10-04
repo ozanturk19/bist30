@@ -179,6 +179,8 @@
   opacity:.4;
   mix-blend-mode:overlay;
 }
+/* C-49: ≤768 px'te kapalı — tam ekran sabit katman + blend mobilde her kaydırmada yeniden birleştirme maliyeti, 3 px doku küçük ekranda seçilmiyor */
+@media (max-width:768px){.da-grain{display:none}}
 
 /* ── Kanonik footer (20.09) ────────────────────────────────────────────────
    templates/_footer.html'in stil katmani. 20.09'a kadar index.html'in <style>
