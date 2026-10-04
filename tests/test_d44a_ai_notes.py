@@ -95,3 +95,35 @@ def test_facts_block_is_valid_jsonlines():
     assert len(lines) == len(FACTS)
     for line, fact in zip(lines, FACTS):
         assert json.loads(line) == fact
+
+
+# D-44a kalan #1 — bildirim özeti (tarifi §1: 1 cümle, ≤180 karakter). build_bildirim_facts()
+# canlı siteye HTTP çeker, bu dosyada test edilmiyor (build_facts ile aynı sözleşme); yalnız
+# paylaşılan validate_note()'un max_len parametresi ve bildirim sistem metni test edilir.
+BILDIRIM_FACTS = [
+    {"id": "F1", "t": "Bildirilen tutar", "v": "1,23 milyar €"},
+    {"id": "F2", "t": "Tutarın 2025 hasılatına oranı", "v": "yaklaşık %38"},
+]
+
+
+def test_validate_note_accepts_bildirim_length_under_180():
+    raw = _note("Aselsan, Roketsan ile tedarik sözleşmesi imzaladı ({F1}); tutar {F2}.", ["F1", "F2"])
+    ok, rendered, reason = an.validate_note(raw, BILDIRIM_FACTS, max_len=180)
+    assert ok is True and reason is None
+    assert len(rendered) <= 180
+
+
+def test_validate_note_rejects_bildirim_over_180_but_under_420():
+    note = "Aselsan, Roketsan ile imzaladığı sözleşme kapsamında savunma sanayii alanında " \
+           "uzun bir tedarik ve teknoloji aktarımı anlaşması yürüteceğini, bu sürecin yıllar " \
+           "sürecek kapsamlı bir ortaklığa dönüşeceğini açıkladı ({F1})."
+    raw = _note(note, ["F1"])
+    ok_420, _, _ = an.validate_note(raw, BILDIRIM_FACTS, max_len=420)
+    ok_180, _, reason_180 = an.validate_note(raw, BILDIRIM_FACTS, max_len=180)
+    assert ok_420 is True
+    assert ok_180 is False and "uzunluk" in reason_180
+
+
+def test_bildirim_system_prompt_forbids_same_banned_language():
+    assert "AL / SAT / BEKLE" in an.SYSTEM_PROMPT_BILDIRIM
+    assert "180 karakter" in an.SYSTEM_PROMPT_BILDIRIM
