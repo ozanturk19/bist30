@@ -127,3 +127,59 @@ def test_validate_note_rejects_bildirim_over_180_but_under_420():
 def test_bildirim_system_prompt_forbids_same_banned_language():
     assert "AL / SAT / BEKLE" in an.SYSTEM_PROMPT_BILDIRIM
     assert "180 karakter" in an.SYSTEM_PROMPT_BILDIRIM
+
+
+# D-44a kalan #2 — bülten metni (tarifi §1 ürün 4: 3-4 cümle, ≤500 karakter). build_bulten_facts()
+# canlı /api/bulten/<tarih>'e HTTP çeker, bu dosyada test edilmiyor; yalnız paylaşılan
+# validate_note()'un max_len=500 ile çalışması ve bülten sistem metni test edilir.
+BULTEN_FACTS = [
+    {"id": "F1", "t": "BIST100 kapanış", "v": "12.270,18"},
+    {"id": "F2", "t": "BIST100 günlük değişim", "v": "%0,17"},
+    {"id": "F3", "t": "Yükselen hisse sayısı", "v": "61"},
+    {"id": "F4", "t": "Düşen hisse sayısı", "v": "35"},
+]
+
+
+def test_validate_note_accepts_bulten_length_under_500():
+    note = ("BIST100 {F1} puandan {F2} yükselişle kapandı. Endekste {F3} hisse yükselirken "
+            "{F4} hisse düştü. Sektörler arasında ayrışma sürdü. Trend durumu Yatay seyretti.")
+    raw = _note(note, ["F1", "F2", "F3", "F4"])
+    ok, rendered, reason = an.validate_note(raw, BULTEN_FACTS, max_len=500)
+    assert ok is True and reason is None
+    assert len(rendered) <= 500
+
+
+def test_validate_note_rejects_bulten_bare_number():
+    raw = _note("BIST100 %0,17 yükselişle kapandı ({F1}).", ["F1"])
+    ok, _, reason = an.validate_note(raw, BULTEN_FACTS, max_len=500)
+    assert ok is False and "çıplak rakam" in reason
+
+
+def test_bulten_system_prompt_forbids_banned_language_and_states_length():
+    assert "AL / SAT / BEKLE" in an.SYSTEM_PROMPT_BULTEN
+    assert "500 karakter" in an.SYSTEM_PROMPT_BULTEN
+    assert "3-4 cümle" in an.SYSTEM_PROMPT_BULTEN
+
+
+def test_build_bulten_facts_shape_from_sample_payload(monkeypatch):
+    sample = {
+        "tarih": "2026-10-02",
+        "bist100": {"kapanis": 12270.18, "degisim_pct": 0.17},
+        "sayim": {"n": 100, "up": 61, "down": 35, "flat": 4},
+        "isi_haritasi_ozet": [{"sektor": "Tekstil ve Deri", "ortalama_degisim_pct": 7.04, "hisse_sayisi": 1}],
+        "onemli_bildirimler": [{"company": "Emlak Konut GYO", "onem": "%18,5"}],
+        "durum_degisimleri": [{"ticker": "TURSG"}],
+    }
+    monkeypatch.setattr(an, "_get_json", lambda path, base_url, timeout=15: sample)
+    facts, payload = an.build_bulten_facts("2026-10-02", "https://example.test")
+    assert payload["tarih"] == "2026-10-02"
+    fact_texts = {f["t"] for f in facts}
+    assert {"BIST100 kapanış", "BIST100 günlük değişim", "Yükselen hisse sayısı",
+            "Düşen hisse sayısı", "En güçlü sektör", "Öne çıkan KAP bildirimi sayısı",
+            "Trend durumu değişen hisse sayısı"} <= fact_texts
+
+
+def test_build_bulten_facts_returns_none_when_bulten_missing(monkeypatch):
+    monkeypatch.setattr(an, "_get_json", lambda path, base_url, timeout=15: {})
+    facts, payload = an.build_bulten_facts(None, "https://example.test")
+    assert facts is None and payload is None

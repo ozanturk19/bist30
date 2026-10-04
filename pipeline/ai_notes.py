@@ -51,7 +51,10 @@ _BANNED_PATTERNS = [
     r"(?i)\b(bugün|dün|yarın|günün)\b",
     r"(?i)(KAP'a göre|kaynak\s*:|reuters|bloomberg|anadolu ajansı)",
 ]
-_DATE_OK = re.compile(r"\b(19|20)\d{2}\b|\b\d{1,2}\s+(Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık)\b")
+# BIST100/BIST30 (ve XU100/XU030): endeks adının kendisi rakam taşıyor (bülten modu), olgu değil.
+_DATE_OK = re.compile(
+    r"\b(19|20)\d{2}\b|\b\d{1,2}\s+(Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık)\b"
+    r"|\bBIST\s?(100|30)\b|\bXU0?(100|30)\b")
 
 # D-44a kalan #1 — bildirim özeti (tarifi §1: 1 cümle, ≤180 karakter). Girdi: bildirimin kendi
 # KAP metni (/api/bildirim/<id>) + varsa onem (tutar/oran) olguları — web araması yok.
@@ -63,6 +66,24 @@ Yasak: AL / SAT / BEKLE ve "al", "sat", "almalı", "satmalı", "fırsat", "tavsi
 teknik hedef dili (hedef fiyat, TP, kâr al, potansiyel, yükseliş beklentisi); \
 göreli zaman ("bugün", "dün", "yarın", "günün"); kaynak adı ("KAP'a göre", "Reuters"); şirkete yargı.
 Tek cümle, en fazla 180 karakter. Çıktı YALNIZ JSON: {"note": "...", "facts_used": ["F1"], "lang": "tr"}
+"""
+
+# D-44a kalan #2 — bülten metni (tarifi §1 ürün 4: 3-4 cümle, EOD sonrası, `/bulten/<tarih>`).
+# Girdi: D-45'in zaten dondurduğu `data/bulten/<gün>.json` (bist100, sayim, hareketliler,
+# durum_degisimleri, isi_haritasi_ozet, onemli_bildirimler) — web araması yok, yeni veri yok.
+# Not: Gündem maddesi (tarifi §1 ürün 3) zaten D-57/gundem_haber.py'de üretim kodu + kendi
+# doğrulayıcısıyla (BASLIK_MAX=70, OZET_MAX=260, yasak dil dahil) canlıdır — burada tekrar
+# edilmez (bkz. ~/ops plan D-57); bu modül yalnız tarifinin henüz karşılığı olmayan 4. ürününü
+# (bülten metni) kapsar.
+SYSTEM_PROMPT_BULTEN = """Rolün: BorsaPusula için günün BIST100 bültenini 3-4 cümleyle özetleyen editör.
+Sana günün kapanış olguları ({Fn} kimlikli) verilir. HİÇBİR sayıyı kendi kelimelerinle YAZMA — \
+sayı gerekiyorsa yalnız verilen {Fn} kimliğini kullan; tarih ve gün adı hariç çıplak rakam yazma.
+Yasak: AL / SAT / BEKLE ve "al", "sat", "almalı", "satmalı", "fırsat", "tavsiye", "önerilir"; \
+teknik hedef dili (hedef fiyat, TP, kâr al, potansiyel, yükseliş beklentisi); \
+göreli zaman ("bugün", "dün", "yarın", "günün"); kaynak adı ("KAP'a göre", "Reuters"); yargı.
+Sıra: (1) BIST100'ün günü nasıl kapattığı, (2) yükselen/düşen hisse dengesi ya da öne çıkan sektör, \
+(3) öne çıkan bir KAP bildirimi ya da trend durumu değişimi varsa tek cümle, (4) kapanış tek cümle.
+3-4 cümle, toplam en fazla 500 karakter. Çıktı YALNIZ JSON: {"note": "...", "facts_used": ["F1","F3"], "lang": "tr"}
 """
 
 
@@ -197,6 +218,46 @@ def build_bildirim_facts(idx, base_url):
         "fields": [f"{lbl}: {val}" for lbl, val in fields[:15]],
     }
     return facts, item, raw_context
+
+
+def build_bulten_facts(tarih, base_url):
+    """Bülten olguları (D-45 dondurmuş JSON'dan — yeni veri çekilmez)."""
+    path = f"/api/bulten/{tarih}" if tarih else "/api/bulten/latest"
+    payload = _get_json(path, base_url)
+    if not payload or not payload.get("bist100"):
+        return None, None
+    facts = []
+    n = [0]
+
+    def add(t, v):
+        if v is None:
+            return None
+        n[0] += 1
+        fid = f"F{n[0]}"
+        facts.append({"id": fid, "t": t, "v": v})
+        return fid
+
+    b100 = payload.get("bist100") or {}
+    add("BIST100 kapanış", _tr_num(b100.get("kapanis"), 2))
+    add("BIST100 günlük değişim", _tr_pct(b100.get("degisim_pct")))
+    sayim = payload.get("sayim") or {}
+    if sayim.get("up") is not None and sayim.get("down") is not None:
+        add("Yükselen hisse sayısı", str(sayim["up"]))
+        add("Düşen hisse sayısı", str(sayim["down"]))
+    isi = payload.get("isi_haritasi_ozet") or []
+    if isi:
+        en_guclu = isi[0]
+        add("En güçlü sektör", en_guclu.get("sektor"))
+        add("En güçlü sektör ortalama değişim", _tr_pct(en_guclu.get("ortalama_degisim_pct")))
+    onemli = payload.get("onemli_bildirimler") or []
+    if onemli:
+        add("Öne çıkan KAP bildirimi sayısı", str(len(onemli)))
+        ilk = onemli[0]
+        add("En önemli bildirim", f"{ilk.get('company')} ({ilk.get('onem')})")
+    durum = payload.get("durum_degisimleri") or []
+    if durum:
+        add("Trend durumu değişen hisse sayısı", str(len(durum)))
+    return facts, payload
 
 
 def call_gemini(model, system_prompt, user_content, api_key, timeout=25):
@@ -397,11 +458,75 @@ def write_bildirim_report(rows, spent, out_path):
         f.write("\n".join(lines))
 
 
+def run_bulten_pilot(tarihler, base_url, api_key, budget_usd, out_path):
+    """D-44a kalan #2 — bülten metni (tarifi §1/§5: 1 bülten, 2 model yan yana)."""
+    spent = [0.0]
+    rows = []
+    for tarih in tarihler:
+        try:
+            facts, payload = build_bulten_facts(tarih, base_url)
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
+            rows.append({"tarih": tarih or "latest", "error": f"veri çekilemedi: {e}"})
+            continue
+        if not facts:
+            rows.append({"tarih": tarih or "latest", "error": "bülten bulunamadı / boş (503?)"})
+            continue
+        gercek_tarih = payload.get("tarih", tarih or "latest")
+        user_content = f"Olgular (bülten {gercek_tarih}):\n{facts_block(facts)}"
+        model_results = {}
+        for model in MODELS:
+            if spent[0] >= budget_usd:
+                model_results[model] = {"skipped": "pilot bütçesi doldu"}
+                continue
+            text, usage, err = call_gemini(model, SYSTEM_PROMPT_BULTEN, user_content, api_key)
+            if err:
+                model_results[model] = {"error": err}
+                continue
+            cost = gemini_budget.cost_usd(model, usage.get("promptTokenCount", 0) or 0,
+                                           usage.get("candidatesTokenCount", 0) or 0)
+            spent[0] += cost
+            ok, rendered, reason = validate_note(text, facts, max_len=500)
+            model_results[model] = {"ok": ok, "raw": text, "rendered": rendered,
+                                     "reason": reason, "cost_usd": round(cost, 6)}
+            time.sleep(1)
+        rows.append({"tarih": gercek_tarih, "facts": facts, "models": model_results})
+    write_bulten_report(rows, spent[0], out_path)
+    return rows, spent[0]
+
+
+def write_bulten_report(rows, spent, out_path):
+    lines = ["# D-44a kalan #2 — AI bülten metni pilotu (yan yana)", "",
+              f"Modeller: {', '.join(MODELS)}. Toplam ölçülen maliyet: ${spent:.4f}", ""]
+    for row in rows:
+        lines.append(f"## Bülten {row['tarih']}")
+        if row.get("error"):
+            lines.append(f"- HATA: {row['error']}")
+            lines.append("")
+            continue
+        lines.append("**Olgular:** " + "; ".join(f"{f['id']}={f['t']}={f['v']}" for f in row["facts"]))
+        lines.append("")
+        for model, res in row["models"].items():
+            lines.append(f"**{model}:**")
+            if res.get("skipped"):
+                lines.append(f"- atlandı: {res['skipped']}")
+            elif res.get("error"):
+                lines.append(f"- hata: {res['error']}")
+            elif res["ok"]:
+                lines.append(f"- ✅ geçti (${res['cost_usd']}): {res['rendered']}")
+            else:
+                lines.append(f"- ❌ reddedildi ({res['reason']}): ham çıktı: {res['raw']!r}")
+            lines.append("")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
-    p.add_argument("--mode", choices=["sirket", "bildirim"], default="sirket")
+    p.add_argument("--mode", choices=["sirket", "bildirim", "bulten"], default="sirket")
     p.add_argument("--tickers", default="THYAO,GARAN,TUPRS,BIMAS,ASELS")
     p.add_argument("--ids", default="", help="bildirim modu: virgülle ayrılmış KAP bildirim id'leri")
+    p.add_argument("--tarihler", default="", help="bulten modu: virgülle ayrılmış YYYY-AA-GG (boş=latest)")
     p.add_argument("--base-url", default=DEFAULT_BASE_URL)
     p.add_argument("--budget-usd", type=float, default=1.0)
     p.add_argument("--out", default="plans/2026-09-23-denetim/ai-pilot.md")
@@ -416,6 +541,11 @@ def main(argv=None):
         ids = [int(x) for x in args.ids.split(",") if x.strip()]
         rows, spent = run_bildirim_pilot(ids, args.base_url, api_key, args.budget_usd, out_path)
         print(f"Bitti. {len(rows)} bildirim, toplam ${spent:.4f}. Rapor: {out_path}")
+        return 0
+    if args.mode == "bulten":
+        tarihler = [t.strip() for t in args.tarihler.split(",") if t.strip()] or [None]
+        rows, spent = run_bulten_pilot(tarihler, args.base_url, api_key, args.budget_usd, out_path)
+        print(f"Bitti. {len(rows)} bülten, toplam ${spent:.4f}. Rapor: {out_path}")
         return 0
     tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
     rows, spent = run_pilot(tickers, args.base_url, api_key, args.budget_usd, out_path)
