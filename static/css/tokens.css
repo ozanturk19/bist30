@@ -201,7 +201,6 @@
      KURAL: bir rengin hex'i degisirse kanal degeri de AYNI commit'te
      degismeli. Ikisi ayni blokta duruyor ki ayrisamasinlar. */
   --bp-bg-rgb:       14, 14, 18;
-  --bp-surface-rgb:  20, 20, 22;
   --bp-border-rgb:   42, 42, 44;
   --bp-text-rgb:     229, 225, 228;
   --bp-text3-rgb:    144, 144, 151;
@@ -217,8 +216,6 @@
   --bp-warn-rgb:  var(--bp-caution-rgb);
   --bp-ok-rgb:     0, 226, 144;
   --bp-danger-rgb: 248, 81, 73;
-
-  /* Compat aliases — eski stil kodlarıyla uyumluluk */
 }
 
 /* CPO-DEV2-042 P1-UX-3: html arka planı yoksa iOS Safari rubber-band
@@ -270,8 +267,7 @@ body {
 
 :root {
   /* ── v1 ÖLÇEK (C-14, 27.09; kanon docs/URUN-VE-TASARIM.md §5.4-5.5, denetim tasarim-sistemi §9.2-9.5) ──
-     Yeni kod YALNIZ bu adları kullanır. Eski adlar dosyanın sonundaki
-     "DEPRECATED alias" bloğunda; göç bileşen bazlı, C-49 bloğu siler. */
+     Yeni kod YALNIZ bu adları kullanır (C-49, 04.10: takma ad bloğu silindi). */
   /* Tip: 8 kademe */
   --bp-type-hero: clamp(56px, 8vw, 88px);
   --bp-type-display: clamp(32px, 4.5vw, 52px);
@@ -296,7 +292,6 @@ body {
   --bp-space-6: 32px;
   --bp-space-7: 48px;
   --bp-space-8: 64px;
-  --bp-hairline: 1px;
   /* Köşe: 4 kademe (daire için 50%) */
   --bp-r-sm: 6px;
   --bp-r-md: 10px;
@@ -316,10 +311,7 @@ body {
   --bp-up: #00e290;
   --bp-down: #f85149;
   --bp-flat: #909097;
-  --bp-up-tint: rgba(var(--bp-al-rgb), 0.08);
   --bp-up-line: rgba(var(--bp-al-rgb), 0.32);
-  --bp-down-tint: rgba(var(--bp-sat-rgb), 0.08);
-  --bp-down-line: rgba(var(--bp-sat-rgb), 0.32);
   --bp-down-on-tint: #ff7b72;
   --bp-caution: #f5c949;  /* C-48: tek dikkat sarısı (değerlendirme, veri durumu, EMA99); hacim ayrı: --bp-volume */
   /* C-48 rol ayrımı: --bp-up/--bp-down (=--bp-up/--bp-down) YALNIZ yön ve sinyal.
@@ -352,18 +344,12 @@ body {
   --bp-dur-slow: 0.25s;
   --bp-dur-slower: 0.40s;
   --bp-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --bp-bp-md: 768px;
   --bp-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', system-ui, monospace;
 }
 
 @media (max-width: 600px) {
   :root { --bp-type-title: 20px; --bp-type-stat: 26px; }
 }
-
-/* C-49 (04.10): takma ad bloğu şablon/CSS/JS için 0; bu üç ad yalnız app.py +
-   blog_content.py satır-içi HTML'i için durur (CPO-1821, DEV) — onlar
-   --bp-type-* adına geçince silinir. */
-:root { --bp-text-sm: 13px; --bp-text-md: 15px; --bp-text-lg: 15px; }
 
 /* bughunt-r28: T7.5.6 nav/footer "kismi" rozeti kurali kaldirildi — hedefledigi
    /kripto, /emtialar, /abd rotalari 19.08 BIST Odakli Sadelesme (CPO-DEV2-036)
