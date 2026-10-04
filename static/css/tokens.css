@@ -361,59 +361,34 @@ body {
 }
 
 /* ── DEPRECATED alias (C-14, 27.09) — yeni kodda KULLANILMAZ ──
-   Değeri v1 kademesiyle birebir aynı olanlar var() ile bağlı; diğerleri
-   bugünkü değerini korur (piksel farkı 0) ve bileşen göçünde en yakın
-   kademeye oturur. C-49 bu bloğu siler. */
+   C-49 (04.10): v1'e birebir bağlı takma adlar silindi (kullanım 0).
+   Kalanlar ölçek dışı değer taşır; bileşen göçünde en yakın kademeye
+   oturup bu bloktan çıkar. */
 :root {
-  --bp-surface2: var(--bp-raised);
-  --bp-border: var(--bp-line);
-  --bp-ctl-border: var(--bp-line-strong);
-  --bp-text2: var(--bp-text-2);
-  --bp-text3: var(--bp-text-3);
-  --bp-al: var(--bp-up);
-  --bp-al-bd: var(--bp-up-line);
-  --bp-sat: var(--bp-down);
-  --bp-sat-bd: var(--bp-danger-line);
-  --bp-sat-on-tint: var(--bp-down-on-tint);
-  --bp-bkl: var(--bp-flat);
-  --bp-gold: var(--bp-caution);
-  --bp-accent-cyan: var(--bp-art-cyan);
-  --accent: var(--bp-brand);
-  --bp-radius: var(--bp-r-sm);
   --bp-radius-sm: 3px;
   --bp-text-2xs: 10px;
-  --bp-text-xs: var(--bp-type-xs);
   --bp-text-sm: 12px;
-  --bp-text-base: var(--bp-type-sm);
   --bp-text-md: 14px;
-  --bp-text-15: var(--bp-type-body);
   --bp-text-lg: 16px;
   --bp-text-17: 17px;
-  --bp-text-xl: var(--bp-type-lg);
   --bp-text-2xl: 20px;
   --bp-text-22: 22px;
-  --bp-text-26: 26px;
   --bp-text-28: 28px;
-  --bp-text-32: 32px;
   --bp-text-36: 36px;
   --bp-text-40: 40px;
   --bp-text-42: 42px;
   --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
   --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
-  --bp-shadow-lg: var(--bp-shadow-modal);
   --bp-radius-xs: 2px;
   --bp-radius-4: 4px;
   --bp-radius-md: 8px;
   --bp-radius-7: 7px;
-  --bp-radius-lg: var(--bp-r-md);
   --bp-radius-xl: 12px;
-  --bp-radius-pill: var(--bp-r-pill);
   --bp-radius-5: 5px;
   --bp-radius-9: 9px;
   --bp-radius-11: 11px;
   --bp-radius-14: 14px;
   --bp-radius-16: 16px;
-  --bp-radius-20: var(--bp-r-lg);
 }
 
 /* bughunt-r28: T7.5.6 nav/footer "kismi" rozeti kurali kaldirildi — hedefledigi

@@ -888,7 +888,7 @@ const step = async (ad, fn) => {
       if (i < 0) return null;
       return body.slice(i, body.indexOf('}', i) + 1);
     };
-    const yasak = /--bp-al|--bp-sat/;
+    const yasak = /--bp-(al|sat|up|down)\b/;
     for (const k of ['.ok', '.weak', '.bad', ' .hp-tag.confirmed']) {
       const r = kural(k);
       if (!r) return bad('K-BO /hisse', 'kural bulunamadi: hp-row-val' + k + ' (olcum gecersiz)');
@@ -1333,8 +1333,8 @@ const step = async (ad, fn) => {
       const cs = getComputedStyle(document.documentElement);
       return {
         cizgi: top[0], cizgiPx: top[1], cizgiPay: Math.round(pay * 100), opakPx: opak, dpr: devicePixelRatio,
-        sat: cs.getPropertyValue('--bp-sat').trim(),
-        al: cs.getPropertyValue('--bp-al').trim(),
+        sat: cs.getPropertyValue('--bp-down').trim(),
+        al: cs.getPropertyValue('--bp-up').trim(),
         valColor: getComputedStyle(val).color,
         pillColor: getComputedStyle(pill).color,
         pillCls: pill.className,

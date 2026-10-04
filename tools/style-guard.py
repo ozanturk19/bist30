@@ -219,9 +219,9 @@ OLU_PALET = {
     "#70b1ff": ("--bp-brand", "eski GitHub mavi (acik ton)"),
     "#3b82f6": ("--bp-brand", "Tailwind blue-500"),
     "#1d4ed8": ("--bp-brand", "Tailwind blue-700"),
-    "#3fb950": ("--bp-al", "eski GitHub yesili"),
-    "#8b949e": ("--bp-text3", "eski GitHub grisi (mavi tonlu)"),
-    "#c9d1d9": ("--bp-text2", "eski GitHub metin rengi"),
+    "#3fb950": ("--bp-up", "eski GitHub yesili"),
+    "#8b949e": ("--bp-text-3", "eski GitHub grisi (mavi tonlu)"),
+    "#c9d1d9": ("--bp-text-2", "eski GitHub metin rengi"),
     "#e6edf3": ("--bp-text", "eski GitHub parlak metin"),
     "#0d1117": ("--bp-bg", "eski GitHub zemin"),
     "#161b22": ("--bp-surface", "eski GitHub yuzey"),
@@ -234,12 +234,12 @@ OLU_PALET = {
     #    #1e2d45 x63, #94a3b8 x42, #1a2030 x11, #f0883e x5, #1a2438 x2,
     #    #64748b x1, #1c2128 x1. 20.09'un ilk blog temizligi (4036bef) bunlari
     #    KACIRDI cunku yalniz o gunku 11 denylist degerini ariyordu.
-    "#1e2d45": ("--bp-border", "eski navy kenar (tablo hucresi)"),
-    "#1a2438": ("--bp-surface2", "eski navy kart zemini"),
-    "#1a2030": ("--bp-surface2", "eski navy kutu zemini"),
-    "#1c2128": ("--bp-surface2", "eski GitHub yuzey (koyu varyant)"),
-    "#94a3b8": ("--bp-text3", "Tailwind slate-400 (mavi tonlu ikincil metin)"),
-    "#64748b": ("--bp-text3", "Tailwind slate-500 (mavi tonlu ikincil metin)"),
+    "#1e2d45": ("--bp-line", "eski navy kenar (tablo hucresi)"),
+    "#1a2438": ("--bp-raised", "eski navy kart zemini"),
+    "#1a2030": ("--bp-raised", "eski navy kutu zemini"),
+    "#1c2128": ("--bp-raised", "eski GitHub yuzey (koyu varyant)"),
+    "#94a3b8": ("--bp-text-3", "Tailwind slate-400 (mavi tonlu ikincil metin)"),
+    "#64748b": ("--bp-text-3", "Tailwind slate-500 (mavi tonlu ikincil metin)"),
     "#f0883e": ("--bp-warn", "eski GitHub turuncu -> dikkat/orta-risk amber"),
     # ── 20.09 ucuncu tur (/sektor-harita isi haritasi gradyani) ─────────────
     # Sektor kartlarinin renk bandi 7 adimli ham-hex bir gradyandi; 4 adimi
@@ -249,9 +249,9 @@ OLU_PALET = {
     # (bunlar hicbir token'a esit degil), K-E ise yalniz denylist'tekileri
     # (bunlar listede degildi). Yani "ne kanonik ne denylist'te" olan bir hex
     # hicbir kapida gorunmuyor; denylist'i genisletmek bu sinifin TEK savunmasi.
-    "#34d399": ("--bp-al", "Tailwind emerald-400"),
-    "#6ee7b7": ("--bp-al", "Tailwind emerald-300"),
-    "#f97066": ("--bp-sat", "Tailwind red-400"),
+    "#34d399": ("--bp-up", "Tailwind emerald-400"),
+    "#6ee7b7": ("--bp-up", "Tailwind emerald-300"),
+    "#f97066": ("--bp-down", "Tailwind red-400"),
 }
 # K-E kapsami: K-B'nin dosyalari + gercek JS dosyalari (tooltip/toast gibi
 # kullaniciya GORUNEN renkleri orada uretiliyor). VENDOR dosyasi haric —

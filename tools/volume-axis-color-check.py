@@ -34,6 +34,8 @@ import os, re, sys, subprocess, tempfile, tarfile, io
 FORBIDDEN = {
     '--bp-al': 'YON rengi (yukselis yesili)',
     '--bp-sat': 'YON rengi (dusus kirmizisi)',
+    '--bp-up': 'YON rengi (yukselis yesili)',
+    '--bp-down': 'YON rengi (dusus kirmizisi)',
     '--bp-gold': 'PREMIUM/altin ekseni',
     '--bp-accent-yellow': 'sari aksan / EMA99 ekseni',
     '--bp-warn': 'DEGERLENDIRME (dikkat/orta-risk) ekseni',

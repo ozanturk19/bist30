@@ -68,6 +68,11 @@ def canon_values(css_text):
     return {("#" + h).lower() for h in HEX.findall(body)}
 
 
+LEGACY = {"--bp-surface2": "--bp-raised", "--bp-border": "--bp-line",
+          "--bp-text2": "--bp-text-2", "--bp-text3": "--bp-text-3",
+          "--bp-al": "--bp-up", "--bp-sat": "--bp-down", "--bp-bkl": "--bp-flat"}
+
+
 def canon_map(css_text):
     """--bp-token -> deger (yorumsuz govdeden)."""
     body = re.sub(r"/\*.*?\*/", "", css_text, flags=re.S)
@@ -76,6 +81,11 @@ def canon_map(css_text):
     # C-14: DEPRECATED alias (`--bp-al: var(--bp-up)`) v1 adinin degerini tasir
     alias = dict(re.findall(r"(--bp-[a-z0-9-]+)\s*:\s*var\((--bp-[a-z0-9-]+)\)\s*;", body))
     for k, v in alias.items():
+        if v in out:
+            out.setdefault(k, out[v])
+    # C-49 (04.10): takma ad blogu silindi; app.py yorumlarindaki eski adlar
+    # (# --bp-al vb.) v1 adinin degeriyle eslenir.
+    for k, v in LEGACY.items():
         if v in out:
             out.setdefault(k, out[v])
     return out

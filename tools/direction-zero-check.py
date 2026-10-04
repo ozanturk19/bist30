@@ -39,7 +39,7 @@ Kullanim:
 import os, re, sys, subprocess, tempfile, tarfile, io
 
 DIR_MARK = re.compile(
-    r"--bp-al\b|--bp-sat\b|#00e290|#f85149|#ff7875"
+    r"--bp-(?:al|sat|up|down)\b|#00e290|#f85149|#ff7875"
     r"|'up'|\"up\"|'down'|\"down\"|'dn'|\"dn\""
     r"|pos-pnl|neg-pnl|sum-green|sum-red|chg-pos|chg-neg"
     r"|score-positive|score-negative"
