@@ -1,15 +1,11 @@
-/* ==== extracted from templates/sektor_harita.html (T2.5) ==== */
-
   * { margin:0; padding:0; box-sizing:border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-type-body); min-height:100vh; }
-  /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
-     sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank
-     deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */
+
   header {
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8); height: 60px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .logo-link { align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
-  /* C-29: tam ekran isi haritasi -> genis kap (anasayfanin 1360'ina yakin) */
+
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-flat); }

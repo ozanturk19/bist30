@@ -1,5 +1,3 @@
-/* C-44 (26.09): ortak düzen prose.css'te; burada yalnız Hakkında'nın deltası.
-   Üç soru kartı: numara + soru + tek cümle. Mobilde alt alta. */
 .hk-qs { list-style: none; margin: 16px 0 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .prose .hk-qs { margin-left: 0; }
 .hk-q { display: flex; flex-direction: column; gap: 6px; padding: 16px 16px 18px; margin: 0; min-width: 0; }

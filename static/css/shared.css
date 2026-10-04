@@ -1,21 +1,3 @@
-/* ── K-DP: MARKA FONTU KONTROL OGELERINE MIRAS KALMIYORDU ──────────────────
-   <button>/<input>/<select>/<textarea> font-family'yi MIRAS ALMAZ; UA
-   stylesheet'i kendi sistem fontunu dayatir. Sitede bu, kontrol kontrol
-   `font-family: inherit` YAZILARAK cozulmeye calisilmisti -- 14 dosyada 26
-   kez. Yani kanon yoktu, el emegi vardi; yazmayi unutulan her kontrol
-   sessizce Arial'da kaliyordu.
-
-   Canli olcum 22.09 (getComputedStyle, govde "Space Grotesk"):
-     /portfolio  17 METINLI kontrol Arial -- kullanicinin yazdigi "THYAO",
-                 Adet ve Fiyat girdileri, "+ Ekle", "Cloud Sync", "CSV"...
-     /karsilastir ana CTA ".compare-btn" (Karsilastir) Arial
-     /hisse      "Tekrar dene", /tarama ".search-clear", her sayfada
-                 ".macro-pause-btn"
-   Data-Art dilinde yazi tipi birincil marka tasiyicisi; bu dogrudan gorunur
-   bir kirilma. Tek kanon buraya yaziliyor: ELEMAN ozgullugunde (0,0,1), yani
-   kendi yazi tipini BILEREK secen her sinif kurali (ticker girdisinin
-   ui-monospace'i, .mbn-item'in gövde fontu) uzerine yazmaya devam eder.
-   [[reference_k_turu_olcum_dersleri_hub]] · 171. ders: ayni is, tek kanon. */
 button,
 input,
 select,
@@ -23,22 +5,14 @@ textarea {
   font-family: inherit;
 }
 
-/* ==== extracted from templates/_mobile_nav_partial.html (T2.5) ==== */
-
-  /* CPO 10.09: denetimde jank-riski işaretlendi — arkaplan zaten %96 opak
-     (blur'un görsel katkısı minimal), sitenin her sayfasında her zaman
-     görünen sabit bir eleman + üst makro şeridin sürekli animasyonuyla
-     aynı anda GPU compositing bütçesini paylaşıyordu. Kaldırıldı. */
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index:var(--bp-z-sticky);
-    background: var(--bp-bg); /* C-71 K37: opak yapışkan yüzey (0,99 alfa + blur yok = sızıntı) */
+    background: var(--bp-bg);
     border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
-  /* C-71 K29: nav yüksekliği TEK token (--bp-mbn-h = nav dış yüksekliği, safe-area hariç).
-     Eskiden 64 (burada) / 72+8 (bp-search.js) / 52 (yatay) üç sabitti; box-sizing'e göre
-     sayfadan sayfaya 73↔81 px oynuyor, çerez bandı 80'e sabit olduğu için arada 7 px kalıyordu. */
+
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); box-sizing: border-box; height: calc(var(--bp-mbn-h) - 1px); max-width: 600px; margin: 0 auto; }
   .mbn-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -60,112 +34,27 @@ textarea {
     box-shadow: 0 0 10px rgba(var(--bp-brand-rgb),.55);
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-brand-rgb),.45)); stroke-width: 2.1; }
-  /* T2.4 — kanonik kirilim 900px'te TEK (eskiden 768px, .bp-main-nav'in
-     900px esiginden farkliydi; 769-900px araliginda IKI nav da gizliydi,
-     bkz. master-donusum-programi §5 satir 4 / DEV2-021). */
+
   @media (max-width: 900px) {
     .mobile-bottom-nav { display: block; }
     body { padding-bottom: calc(var(--bp-mbn-h) + 8px + env(safe-area-inset-bottom, 0px)); }
-    /* Touch target 44px — F14 */
+
     .header-search-btn { min-width: 44px; min-height: 44px; }
     .hib-action-btn { min-height: 44px; }
     .mc-bell { min-width: 44px; min-height: 44px; }
-    /* r110 bug-hunt: .filter-btn 28.5px yukseklikteydi (index.html + bilanco_takvimi.html, 11 buton) */
+
     .filter-btn { min-height: 44px; }
   }
 
-  /* Logo mobilde kucultulur (768px = index.css'teki header-yukseklik kirilim
-     noktasiyla ayni, 56px header'a rahat sigmasi icin — desktop boyutu
-     (215x56, _header.html) 60px header'a sigsa da 56px'e cok yakin kalirdi). */
   @media (max-width: 768px) {
     .bp-logo { width: 169px; height: auto; }
   }
 
-/* ── K-AA: BASMA (DOKUNMA) GERİ BİLDİRİMİ — KANONİK KATMAN (21.09 CPO) ──────
-   K-Z'nin kendi itirafındaki 1. madde: ":active = dokunma geri bildirimi ve
-   bu eksende neredeyse HİÇ kural yok." Ölçüldü (tools/press-feedback-check.js,
-   375×812 canlı, 9 yüzey): 1073 dokunulabilir kontrolün **532'sinde** basma
-   anında HİÇBİR görsel geri bildirim yoktu.
-
-   Masaüstünde bu soruyu :hover cevaplar. Dokunmatikte :hover YOKTUR ve bu
-   sitede hover kurallarının çoğu zaten `@media (hover:hover)` arkasında —
-   yani mobilde HİÇ uygulanmaz (ölçüm: /sektor-harita'da 125 kontrol tam
-   olarak bu durumda). Geriye tarayıcının varsayılan tap-highlight'ı kalıyordu
-   ve o da tutarsızdı: 6 CSS dosyası + bp-search.js onu kapatıyor, geri
-   kalanda açık kalıyordu.
-
-   ⛔ ÖLÇÜM HİPOTEZİMİ ÇÜRÜTTÜ: "koyu zeminde varsayılan vurgu görünmez"
-   diye başladım; Chrome'un varsayılanı rgba(0,0,0,.18) DEĞİL,
-   rgba(51,181,229,.4) çıktı ve #141416 üzerinde 2.23:1 ile GÖRÜNÜR. Yani
-   sorun görünmezlik değil TUTARSIZLIK + marka dışı mavi flaş. Karar: varsayılan
-   vurgu site genelinde kapatılır (html üzerinden — özellik kalıtsaldır, tek
-   satır yeter) ve yerine Data-Art'ın kendi basma dili konur.
-
-   NEDEN `opacity`: her kontrol tipinde çalışan TEK ilkel — ikon-only düğme,
-   çipi, kart, satır-içi bağlantı, alt-bilgi linki. `transform:scale` 223
-   kartlı /ozet'te repaint maliyeti getirir; `background` ise zemini olmayan
-   kontrollerde (satır-içi bağlantı) hiçbir şey yapmaz.
-   NEDEN `transition` YOK: basma geri bildirimi ANINDA olmalı; ayrıca
-   `transition` kısayolu ilgili ögelerin mevcut geçişlerini (.mr-card'ın
-   border/background/transform'u) EZERDİ — sessiz regresyon.
-   NEDEN `:where()`: içerideki seçici listesi 0 özgüllük katar, kural (0,1,0)
-   kalır; sayfa-özel CSS ezmek isterse tek sınıf yeter, !important gerekmez.
-   İÇ İÇE KONTROL: ölçüldü — 9 yüzeyin 7'sinde 0; yalnız /bilanco-takvimi'nde
-   46 (`.stock-card > .sc-ticker-link`) ve /hisse'de 6 var. Orada iki katman
-   birden sönüyor (.72² = .52) — "daha kuvvetli basıldı" okunuyor, kusur değil.
-   ÇATIŞMA TARAMASI: site genelinde etkileşimli ögeye `opacity` yazan tek
-   kural `.box .btn:hover{opacity:.9}` (/unsubscribe, hover — mobilde hiç
-   tetiklenmez). Kaynak sırası tuzağı (bkz. aşağıdaki print notu) bu yüzden
-   ısırmıyor; yeni sayfa CSS'i `opacity` yazarsa bu katman sessizce düşer.
-   MUAFİYET — onay kutusu/radyo: basma geri bildirimi KENDİ durum değişimidir
-   (işaret anında görünür), native kutuya opacity yazmak bunu bulanıklaştırır.
-   Onun yerine SARMALAYAN `label` kapsama alındı (`label[for]` değil `label`:
-   /'ın KVKK onayı `<label class="da-sub-kvkk"><input class="da-check">` ile
-   SARMAL kurulmuş, `for` yok — ölçümle çıktı, varsayımla değil).
-   GECİKME NOTU: `transition:opacity` taşıyan 2 kontrolde (/unsubscribe
-   .box .btn .15s, /offline .15s) sönme animasyonlu olur. Bu
-   geçişler bu katmandan ÖNCE de vardı, yeni regresyon değil.
-   POZİTİF KONTROL (gerçek fare, canlı): `.da-chip` mousedown anında
-   `matches(':active')=true`, computed `opacity` 1 → **0.72**. */
-/* ── K-DR / CPO-1791: YATAY-TAŞMA GUARD'I TEK KANON ───────────────────────
-   Bu kural 22.09.2026'da 15 sayfa CSS'inde ÜÇ FARKLI YAZIMLA duruyordu
-   (`html{clip}` · `html{hidden}` · `body{hidden}`), 8 sayfada ise HİÇ yoktu.
-   Üçü aynı işi yapmıyor — 320px'te canlı POZİTİF KONTROL (sayfaya
-   `right:-60px` bir öge enjekte edilip `window.scrollTo(300,0)` denendi):
-     html+body{overflow-x:clip}  -> scrollX 0   → guard TUTUYOR
-     body{overflow-x:hidden}     -> scrollX 60  → guard ETKİSİZ (5 sayfa:
-        portfolio · ozet · sektor_harita · bilanco_takvimi · temettu_takvimi)
-     html{overflow-x:hidden}     -> scrollX 60  → guard ETKİSİZ (3 sayfa:
-        404 · unsubscribe · profil); `hidden` bir KAYDIRMA KABI kurar, tekerlek/
-        dokunuşu keser ama belge programatik olarak (odak sıçraması, script)
-        hâlâ kayar; `clip` kaydırma kabı KURMAZ.
-   Yani "guard'lı" 15 sayfanın 8'inde guard yalnızca yazıyordu, ölçmüyordu.
-
-   NEDEN `clip`, `hidden` DEĞİL: `overflow-x:hidden` diğer ekseni `auto`ya
-   zorlar ve kaydırma kabı kurar → içerideki `position:sticky` çocuklar kırılır
-   (bu sayfada sticky tablo başlıkları var). `clip` yalnız kırpar.
-   Eski Safari (<16) `clip` bilmez → guard'sız kalır; bu, bugünkü 8 guard'sız
-   sayfanın durumuyla AYNI ve ölçümde hiçbir sayfanın gerçek taşması yok
-   (23 sayfa × 3 genişlik, tek istisna /hisse'nin `.score-section::before`
-   dekoratif `inset:-60px` ışıması — kasıtlı bleed, guard onu içeride tutuyor).
-
-   ⚠️ Bu guard, kırpılan içeriği GİZLEDİĞİ için KAPI 83
-   (`tools/clipped-content-check.mjs`) ile birlikte anlamlıdır: guard belge
-   kaymasını keser, kapı 83 öge düzeyinde "kırpıldı ama ulaşılamıyor"u arar.
-   Guard'ı buradan kaldıran, kapı 83'ü de gözden geçirmek zorundadır. */
 html, body { overflow-x: clip; }
 
 html { -webkit-tap-highlight-color: transparent; }
 :where(a[href], button, summary, label, input[type="submit"], input[type="button"], [role="button"], [role="tab"], [role="link"]):active { opacity: .72; }
 
-/* PRINT-STYLESHEET-MISSING fix (r123 bug-hunt): sitede hicbir @media print
-   katmani yoktu (0/24 CSS, 0/29+ sablon dogrulandi) - kullanici Ctrl+P /
-   "PDF olarak kaydet" yaptiginda sticky/fixed header + alt navigasyon her
-   sayfada tekrarlanip koyu tema arka planiyla icerigi golgeliyordu, ayrica
-   print-color-adjust olmadan koyu-tema metin rengi (acik) beyaz kagitta
-   okunmaz kalabiliyordu. shared.css TEK KAYNAK (_head.html -> tum sablonlar),
-   sayfa-ozel CSS'ler sonradan yuklendigi icin ayni ozguldukte kaynak sirasi
-   kazanir - !important zorunlu. */
 @media print {
   * {
     background: #fff !important;
@@ -191,62 +80,20 @@ html { -webkit-tap-highlight-color: transparent; }
   }
 }
 
-/* ── K-AG: KLAVYE ODAĞI YAPIŞKAN BANTLARIN ALTINDA KAYBOLUYORDU ────────────
-   WCAG 2.2 · SC 2.4.11 "Focus Not Obscured (Minimum)" (AA).
-
-   Sitenin her sayfasında ÜST ÜSTE yapışkan bantlar var:
-     makro şerit (top:0, 32px) + header (top:calc(32px+inset), 60px+inset)
-   ve mobilde ALTTA `.mobile-bottom-nav` (position:fixed; bottom:0, bu dosya).
-   Tarayıcı Tab/Shift+Tab'da odaklanan elemanı "en yakın kenara" kaydırır:
-   ileri giderken ALT kenara (alt navigasyonun altına), GERİYE giderken ÜST
-   kenara (makro şerit + header'ın altına). Odak halkası çizilir ama
-   GÖRÜNMEZ — kullanıcı nerede olduğunu kaybeder.
-
-   Canlı ölçüm (tools/focus-obscured-check.js — 20 sayfa × 2 genişlik ×
-   2 yön, gerçek `el.focus()` + elementFromPoint ızgarası): onlarca odak
-   TAMAMEN örtülüydü. Odak GÖRÜNÜRLÜĞÜ (focus-visible-check.js) bu boyutu
-   ölçmez — halkanın VARLIĞINI sorar, GÖRÜLEBİLİRLİĞİNİ değil.
-
-   Kanonik çare `scroll-padding`: kaydırma kabının "görünür" saydığı alanı
-   bantlar kadar içeri çeker; hem odak kaydırmasını hem çapa (#id)
-   atlamalarını hem de `scrollIntoView()` çağrılarını aynı anda düzeltir.
-   ⛔ Bu çare `metodoloji.css`'te TEK SAYFA için zaten yazılmıştı ve
-   genelleştirilmemişti — dedektörde /metodoloji'nin TEK "OK" sayfa çıkması
-   çarenin doğruluğunun canlı pozitif kontrolü oldu (kapsam yalanı dersi).
-
-   Bant yüksekliği SAYFAYA GÖRE değişir, kural değişmez → ölçü token'dır:
-     varsayılan (makro şerit + header)      : 32 + 60 + 2×inset
-       (header'ın top'ı da yüksekliği de inset taşır — bu yüzden ×2)
-     /hisse/*  (+ .bp-segments, 57px)       : pages/hisse.css'te ezilir
-     iç sayfalar (makro şerit YOK, header 60): ilgili sayfa CSS'inde ezilir
-   +6px pay `:focus-visible{outline:2px; outline-offset:2px}` halkasının
-   kutunun 4px DIŞINA taşması içindir — kutuyu sığdırmak halkayı kesiyordu. */
-/* ── K-AY (21.09): ÜST YAPIŞKAN ZİNCİRİN ÖLÇÜSÜ ARTIK TEK YERDE ──────────
-   Bu ölçü daha önce 13 ayrı yerde ELLE yazılıydı (10 sayfa header'ı +
-   2 yapışkan thead + .bp-segments) ve ÜÇÜ header'ın KENDİ safe-area payını
-   saymıyordu: header `top:32px+inset` VE `min-height:60px+inset` taşır,
-   yani alt kenarı 92px DEĞİL `92px + 2×inset`tir. Çentikli bir telefonda
-   (PWA/standalone, inset≈30-59px) ölçüm:
-     /hisse  .bp-segments  → header'ın altında 50-55px, yani sekme şeridinin
-                             TAMAMI kayboluyordu (top:92px sabit yazılmıştı)
-     /tarama, /karşılaştır  yapışkan thead → bir inset kadar örtülüydü
-   Artık üç çapa da bu değişkenlerden türüyor; ölçü değişirse hepsi izler. */
 :root {
-  --bp-chrome-macro: 32px;   /* makro şerit yüksekliği */
-  --bp-chrome-header: 60px;  /* header yüksekliği (inset hariç) */
-  --bp-chrome-extra: 0px;    /* sayfa-yerel 3. yapışkan şerit (hisse/tarama ezer) */
-  /* makro şeridin ALTI = sayfa header'larının yapışma noktası */
+  --bp-chrome-macro: 32px;
+  --bp-chrome-header: 60px;
+  --bp-chrome-extra: 0px;
+
   --bp-anchor-macro: calc(var(--bp-chrome-macro) + env(safe-area-inset-top, 0px));
-  /* header'ın ALTI = yapışkan thead / sekme şeridinin yapışma noktası.
-     env() İKİ KEZ geçer çünkü inset'i hem header'ın top'ı hem yüksekliği taşır. */
+
   --bp-anchor-header: calc(var(--bp-anchor-macro) + var(--bp-chrome-header) + env(safe-area-inset-top, 0px));
   --bp-sticky-top: calc(var(--bp-anchor-header) + var(--bp-chrome-extra) + 6px);
   --bp-sticky-bottom: 0px;
   --bp-mbn-h: 0px;
 }
 @media (max-width: 900px) {
-  /* .mobile-bottom-nav bu kırılımda görünür (yukarıda, aynı eşik).
-     C-71 K29: nav yüksekliği --bp-mbn-h'den okunur (tek kaynak). */
+
   :root { --bp-mbn-h: 65px; --bp-sticky-bottom: calc(var(--bp-mbn-h) + env(safe-area-inset-bottom, 0px) + 6px); }
 }
 @media (max-width: 768px) {
@@ -259,31 +106,13 @@ html {
   scroll-padding-bottom: var(--bp-sticky-bottom);
 }
 
-
-/* ── K-AY: TELEFONU YAN ÇEVİREN KULLANICI EKRANIN YARISINI KAYBEDİYORDU ───
-   WCAG 2.1 · SC 1.3.4 "Orientation" (AA) + SC 1.4.10 "Reflow" (AA).
-
-   Yatay tutulan bir telefonda viewport yüksekliği 375px'e düşer. Sitenin
-   üç kalıcı bandı (makro şerit 33 + header 60 + alt gezinme 73 = 166px)
-   bu ekranın %44'ünü yiyordu; /hisse'de dördüncü bant (.bp-segments 55px)
-   ile birlikte **%59** — kullanıcıya 155px'lik bir okuma penceresi kalıyordu.
-   Canlı ölçüm: tools/landscape-viewport-check.js (13 sayfa × 667/812×375).
-
-   Çare: kısa ekranda üst zincir SABİTLENMEZ (yok edilmez — sayfanın başında
-   durmaya devam eder, yalnız kaydırınca yukarı çıkar), alt gezinme sıkışır.
-   Ölçü değişkenleri de sıfırlanır, böylece sayfa-yerel yapışkan şeritler
-   (thead, .bp-segments) kendiliğinden ekranın tepesine yapışır. */
 @media (orientation: landscape) and (max-height: 500px) {
   :root {
     --bp-chrome-macro: 0px;
     --bp-chrome-header: 0px;
     --bp-mbn-h: 53px;
   }
-  /* ⛔ `static` DEGIL `relative`: `#macroBar` `.macro-pause-btn`in
-     (position:absolute; top:0; bottom:0) KAPSAYAN BLOGUDUR. `static`
-     yapinca dugme ilk kapsayan bloga (viewport) gerilip 375px'lik gorunmez
-     bir serit haline geliyordu -- olculdu, K-AY'nin kendi regresyonuydu.
-     `relative` yapiskanligi kaldirir, kapsama blogunu KORUR. */
+
   #macroBar, .macro-bar, header { position: relative !important; }
   .mobile-bottom-nav .mbn-inner { padding-bottom: 0; }
   .mobile-bottom-nav .mbn-icon { width: 20px; height: 20px; }
@@ -291,22 +120,11 @@ html {
   .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; padding-top: 0; }
 }
 
-/* ── C-71 K38 (02.10): KISA DİKEY EKRANDA MAKRO ŞERİT YAPIŞMAZ ─────────────
-   320×640'ta /hisse'de üst yapışkanlar 137 px + alt gezinme 73 px = ekranın
-   %33'ü. Yatay kuralla (K-AY) aynı çare, yalnız makro şerit için: şerit sayfa
-   başında durur, kaydırınca yukarı çıkar; header ekranın tepesine yapışır.
-   `relative` (static değil): ⏸ düğmesinin kapsayan bloğu korunur. */
 @media (orientation: portrait) and (max-height: 700px) {
   :root { --bp-chrome-macro: 0px; }
   #macroBar, .macro-bar { position: relative !important; }
 }
 
-/* ── C-71 K30 (02.10): KABUK TEK KAYNAK ─────────────────────────────────────
-   /haberler, /takvim, /bulten, /takip ve hata sayfalarının CSS'inde body/header
-   sıfırlaması yoktu: gövdede 8 px boşluk, yapışmayan saydam başlık (700 px
-   kaydırınca başlık ekran dışı). Kanonik kural burada; sayfa CSS'i yalnız
-   farkı ezer (`:where` → özgüllük 0). Makro şerit taşımayan sayfada header
-   ekranın tepesine yapışır. */
 body { margin: 0; }
 :root:not(:has(#macroBar)) { --bp-chrome-macro: 0px; }
 :where(body > header) {
@@ -317,12 +135,6 @@ body { margin: 0; }
   z-index: var(--bp-z-dropdown);
 }
 
-/* ── Makro şerit: TEK KAYNAK (C-15) ──────────────────────────────────────────
-   Önceden 11 sayfa CSS'inde ayrı kopya vardı (yazı boyu/kenarlık/etiket rengi
-   sayfadan sayfaya kayıyordu). Sayfa CSS'inde `.macro-bar`, `.macro-item`,
-   `.macro-pause-btn`, `.header-search-btn` yazılmaz; ana sayfanın "Piyasalar"
-   rozetli çeşidi `.macro-bar--home`. Arama düğmesinin görünümü
-   `_bp_critical_css.html`te, hover'ı `bp-search.js`te (kapı: canon-css-dup-check). */
 .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-line); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
 .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
 .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
@@ -330,8 +142,7 @@ body { margin: 0; }
 .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; will-change:transform; height:32px; }
 @media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state:paused; } }
 @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-/* K-AZ: `top:50%` şeridin safe-area dolgusunu da içeren kutusuna göre ortalıyordu
-   (PWA'da düğmenin üstü çentiğin altında kalıyordu); dolgunun yarısı geri eklendi. */
+
 .macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text-3); font-size:var(--bp-type-sm); line-height:1; cursor:pointer; padding:0; }
 .macro-pause-btn:hover, .macro-pause-btn:focus-visible { color:var(--bp-text); }
 .macro-pause-btn svg { width:12px; height:12px; }
@@ -340,19 +151,12 @@ body { margin: 0; }
 .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-line); font-size:var(--bp-type-sm); height:32px; text-decoration:none; color:inherit; }
 .macro-item-lbl { font-weight:600; color:var(--bp-text-2); }
 
-/* ── Ana sayfa çeşidi (.macro-bar--home, eski index.css) ──
-   CPO-1558: onaylı mockup'ta makro şerit header'ın ÜSTÜNDE — sıra değişti,
-   şimdi #macroBar top:0'a sabitleniyor, header hemen altına (top:32px).
-   Ayrıca: .macro-live ("Canlı" rozeti) z-index'i yoktu, #macroTrack'in
-   transform:translateX ile kayan marquee'si (yeni stacking context) DOM
-   sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
-   (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
 .macro-bar--home{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-line);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
 .macro-bar--home::before,.macro-bar--home::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
 .macro-bar--home::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
 .macro-bar--home::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
 .macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text-3);border-right:1px solid var(--bp-line);background:var(--bp-surface)}
-/* C-03: nabız ve camgöbeği ışıma "canlı akış" izlenimi veriyordu (veri EOD) → sabit nötr nokta. */
+
 .macro-bar--home .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex:none}
 .macro-bar--home .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
 .macro-bar--home:hover .macro-track{animation-play-state:paused}
@@ -360,24 +164,15 @@ body { margin: 0; }
 .macro-bar--home[data-paused="true"] .macro-track{animation-play-state:paused !important}
 .macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text)}
 .macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text-2);letter-spacing:.2px}
-/* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
-   24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
+
 .macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
 .macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
-/* ── Sayfa kabı: TEK KAYNAK (C-15) ───────────────────────────────────────────
-   Önceden 14 sayfa CSS'inde ayrı `.container` vardı (578/680/820/860/1100/
-   1200/1400 genişlik, 10-40px iç boşluk karışık). Sayfa CSS'inde `.container`
-   yazılmaz; genişlik 3 token: varsayılan uygulama 1200, `container--read`
-   (metin sayfaları) 760, `container--wide` (hisse, ısı haritası) 1360. */
+
 .container { max-width: var(--bp-container-app); margin: 0 auto; padding: 24px; }
 .container--read { max-width: var(--bp-container-read); }
 .container--wide { max-width: var(--bp-container-wide); }
 @media (max-width: 600px) { .container { padding: 16px; } }
 
-/* C-47 (04.10): arama katmanı + başlık sağ bölümü + EOD çipi — eskiden
-   bp-search.js çalışma anında <style id="bp-search-css"> olarak enjekte ederdi;
-   ham hex token'a çevrildi; nav kırılımları
-   kritik satır-içi CSS'ten sonra gelmediği için bir kademe özgül (.bp-main-nav .bp-nav-item). Kanonik nav/logo kuralları _bp_critical_css.html'de. */
 .header-search-btn{transition:all .15s;padding:0;font-family:inherit}
 .header-search-btn:hover{background:var(--bp-raised);border-color:var(--bp-ctl-border-hover);color:var(--bp-text)}
 .bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}
@@ -434,10 +229,10 @@ header .bp-main-nav{gap:3px}
 }
 @media (max-width:480px){.bp-eod-chip{display:none!important}
 }
-/* Sayfa geçişi çapraz solma (eskiden bp-search.js #bp-vt-css enjeksiyonu). */
+
 @view-transition { navigation: auto; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
 @keyframes bp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 ::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
-/* Makro şerit gecikme rozeti (eskiden bp-search.js satır-içi cssText). */
+
 .macro-stale-badge { position: absolute; top: 2px; left: 6px; font-size: 10px; line-height: 1; opacity: .75; z-index: 4; pointer-events: auto; cursor: help; color: inherit; }

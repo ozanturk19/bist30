@@ -1,10 +1,3 @@
-/* ==== /offline — PWA çevrimdışı yedeği ====
-   20.09.2026 Data-Art turu. Bu sayfanın TEK kısıtı: ağ YOKKEN çizilir.
-   Bu yüzden yüklediği her dosya (tokens.css, data-art.css, bu dosya) ayrıca
-   static/sw.js'in STATIC precache listesinde DE bulunmak zorundadır — aksi
-   hâlde tam da işe yarayacağı anda stilsiz açılır (bu turun 1. bulgusu).
-   Panel reçetesi elle kopyalanmaz: .da-panel data-art.css'ten gelir. */
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   min-height:100dvh;
@@ -21,7 +14,7 @@ body{
   padding:34px 30px 30px;
   text-align:center;
 }
-/* Data-Art imzası: marka satırı + nabız noktası (bağlantı yokken "sönük" nabız) */
+
 .off-brand{
   display:inline-flex;align-items:center;gap:9px;
   font-family:'Space Grotesk',system-ui,sans-serif;
@@ -46,8 +39,7 @@ body{
   line-height:1.65;max-width:34ch;margin:0 auto;
 }
 .off-retry{
-  /* WCAG 2.5.5: onceki hal 36px yuksekti; bu sayfanin TEK eylemi ve
-     neredeyse her zaman telefonda aciliyor. */
+
   display:inline-flex;align-items:center;justify-content:center;
   min-height:44px;
   margin-top:22px;

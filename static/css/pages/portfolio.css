@@ -1,7 +1,5 @@
-/* ==== extracted from templates/portfolio.html (T2.5) ==== */
-
   * { margin:0; padding:0; box-sizing:border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-type-body); min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
   .page-sub   { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
@@ -12,12 +10,11 @@
   .sum-pct  { font-size:var(--bp-type-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
   .sum-lbl  { font-size:var(--bp-type-xs); color:var(--bp-text-3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:var(--bp-up); } .sum-red{ color:var(--bp-down); } .sum-blue{ color:var(--bp-art-cyan); }
-  /* K-BP (21.09): K/Z TAM SIFIR — pozisyon guncel fiyattan eklendiginde ilk
-     gorulen hal — "+0,00 ₺" YESIL yaziliyordu. Kar yokken kar rengi yok. */
+
   .sum-neutral{ color:var(--bp-text-2); }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:16px; }
-  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-r-sm); padding:7px 12px; font-size:var(--bp-type-body); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border);  color:var(--bp-text); border-radius:var(--bp-r-sm); padding:7px 12px; font-size:var(--bp-type-body); outline:none; }
   .add-bar input:focus { border-color:var(--bp-art-cyan); }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
@@ -26,14 +23,7 @@
   .add-lbl { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
 
   .pf-table { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  /* CPO-DEV2-100'un ">=900px'te tablo viewport'a sigar" varsayimi 15.09 fresh-ground-audit'te
-     YANLIS cikti: 12 sutunlu tablo .container'in sabit max-width:1100px tavanina (padding sonrasi
-     ~1052px kullanilabilir alan) gercek verideki genislikten (olculen ~1077px+) daha dar kaliyor —
-     viewport 1200px+ olsa bile .container büyümeyi durdurdugu icin duzelmiyor, Duzenle/Sil butonlari
-     erisilemez hale geliyordu. Statik bir breakpoint (900px yerine baska bir sayi) bu sorunu COZMEZ
-     cunku "sigma" viewport genisligine degil, GERCEK VERI genisligine bagli (ticker/PnL rakamlarinin
-     uzunlugu degisken). Cozum: JS (_pfCheckTableOverflow, portfolio.html) render sonrasi gercekten
-     olcup sadece GERCEKTEN sigdiginda .pf-fits class'i ekliyor — statik breakpoint yerine dinamik olcum. */
+
   .pf-table.pf-fits { overflow-x: visible; }
   table { width:100%; border-collapse:collapse; }
   thead th { background:var(--bp-raised); padding:10px 14px; text-align:left; font-size:var(--bp-type-xs); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-line); white-space:nowrap; position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-dropdown); }
@@ -41,18 +31,14 @@
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:var(--bp-raised); }
   td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-type-sm); }
-  /* K-U: dolu portfoy tablosu HIC olculmemisti (localStorage bos basliyor) —
-     hisse baglantisi 42.5x16 idi, WCAG 2.5.8 AA altinda. Hucre ici tek baglanti
-     "cumle ici satir-ici" muafiyetine girmez. */
+
   .ticker-link { font-weight:700; color:var(--bp-text); text-decoration:none;
                  display:inline-flex; align-items:center; min-height:24px; }
   .ticker-link:hover { color:var(--bp-art-cyan); }
 
   .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-r-md); font-size:var(--bp-type-xs); font-weight:600; }
   .signal-AL    { background:var(--bp-al-bg); color:var(--bp-up); border:1px solid var(--bp-up-line); }
-  /* K-BY eki: zemin artik TINT -> K-P kurali geregi metin --bp-down-on-tint
-     (tint uzerinde --bp-down 4,63:1'e duser; on-tint 6,15:1). Kenar da cip
-     esine (--bp-sat-bd-tint) alindi; --bp-danger-line hata yuzeylerinde kaldi. */
+
   .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-down-on-tint); border:1px solid var(--bp-sat-bd-tint); }
   .signal-BEKLE { background:rgba(var(--bp-text3-rgb),.15); color:var(--bp-flat); border:1px solid rgba(var(--bp-text3-rgb),.3); }
 
@@ -60,17 +46,6 @@
   .neg-pnl { color:var(--bp-down); font-weight:600; }
   .neu-pnl { color:var(--bp-text-3); }
 
-  /* ⛔ K-U (21.09) — YIKICI ISABET HATASI, canli olculdu ve TIKLAMAYLA kanitlandi.
-     Iki dugme de 23x21'di ve ikisi de 44x44 `::before` halosu tasiyordu. Halolar
-     dugmelerin KENDISINDEN iki kat genis, aralari ise ~6px: `.btn-del` DOM'da
-     SONRA geldigi icin ustte boyaniyor ve halosu `.btn-edit`i TAMAMEN ortuyordu.
-     Masaustu tabloda (1280px) `.btn-edit` MERKEZI dahil 5/5 prob `.btn-del`e
-     dusuyordu; gercek fare tiklamasi ✎ Duzenle'nin tam ortasina yapildiginda
-     pozisyon SILINIYORDU (2 -> 1) — `removePosition()` onay sormaz, geri alinmaz.
-     Mobil kartta merkez dogru, yalniz +12px sag prob komsuya tasiyordu (4/5).
-     data-art.css'in kendi notu bu durumu zaten tarif ediyor: "Yogun arayuzde
-     (yan yana rozetler) halo'lar birbiriyle de cakisir — orada zaten gercek
-     buyutme gerekir." Halolar kaldirildi, dugmelerin KENDISI 32x32 yapildi. */
   .btn-del, .btn-edit {
     display:inline-flex; align-items:center; justify-content:center;
     min-width:32px; min-height:32px; padding:0;
@@ -80,7 +55,6 @@
   .btn-del:hover  { color:var(--bp-danger); }
   .btn-edit:hover { color:var(--bp-brand); }
 
-  /* Export / Import toolbar */
   .pf-actions {
     display: flex; gap: 8px; align-items: center;
     margin-bottom: 12px; flex-wrap: wrap;
@@ -95,25 +69,16 @@
   .btn-action::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
   .btn-action svg { width: 14px; height: 14px; flex-shrink: 0; }
   .btn-action:hover { border-color: var(--bp-brand); color: var(--bp-brand); }
-  /* 19.09: "Temizle" (kalıcı silme) diğer zararsız aksiyon butonlarıyla (JSON/CSV/
-     İçe Aktar) rest state'de görsel olarak birebir aynıydı — sadece hover'da
-     kırmızıya dönüyordu, yani kullanıcı tıklamadan önce ayrımı hiç görmüyordu. */
+
   .btn-action.danger { border-color: rgba(var(--bp-danger-rgb),.72); color: var(--bp-danger); }
   .btn-action.danger:hover { border-color: var(--bp-danger); color: var(--bp-down-on-tint); background: rgba(var(--bp-danger-rgb),.08); }
-  /* 21.09 (K-AT): `display:none` bir <input type="file">'i SEKME SIRASINDAN
-     tamamen cikarir. Tetikleyici sadece onu SARAN <label> oldugu ve label da
-     odaklanabilir olmadigi icin "İçe Aktar" YALNIZCA FAREYLE calisiyordu —
-     klavye kullanicisi yedek dosyasindan portfoyunu geri yukleyemiyordu
-     (WCAG 2.1.1 Klavye, A seviyesi; canli /portfolio'da input.focus() sonrasi
-     document.activeElement BODY kaliyordu). Gorsel olarak gizli ama
-     ODAKLANABILIR kalip (.sr-only ile ayni) + halkayi saran label tasir. */
+
   #importFileInput {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
   label.btn-action:focus-within { outline: 2px solid var(--bp-brand); outline-offset: 2px; }
 
-  /* Import modal */
   .import-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: var(--bp-raised); border: 1px solid var(--bp-line); border-radius:var(--bp-r-sm);
@@ -126,9 +91,6 @@
     .import-toast { bottom: calc(24px + var(--bp-mbn-h) + env(safe-area-inset-bottom)); }
   }
 
-  /* 21.09 (K-V): `.empty-msg` kanonik `.da-empty` katina alindi. */
-
-  /* localStorage uyarı banner */
   .ls-warning {
     display:flex; align-items:flex-start; gap:12px;
     background:rgba(var(--bp-gold-rgb),.06); border:1px solid rgba(var(--bp-gold-rgb),.2);
@@ -146,7 +108,6 @@
   .ls-warning-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .ls-warning-close:hover { color:var(--bp-caution); }
 
-  /* T7.4: canlı veri/grafik fetch hatası banner'ı */
   .pf-fetch-error {
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;
     background:rgba(var(--bp-danger-rgb),.08); border:1px solid var(--bp-danger-line);
@@ -162,14 +123,6 @@
 
   @media(max-width:600px) { thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
-  /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html
-     #mobileResultCards ile ayni desen).
-     r161-bughunt zindex-sticky-overlap: bu bloktaki eski yorum "sticky-header fix'i
-     sadece 769-899px 'tablet' araligini kapsiyor" varsayimi CANLI OLCUMLE CURUTULDU -
-     820px genislikte thead th scroll ile birlikte kayiyor (sticky HIC calismiyor,
-     tabloyla ayni delta ile hareket ediyor), "matris zaten sigar" varsayimi CSS'in
-     overflow-x:auto -> overflow-y:auto zorlamasini (sticky referansini kirmasini)
-     etkilemiyor. Esik 768->899px, T2.4/DEV2-021 emsaliyle hizalandi, boslugu kapatir. ── */
   #pfMobileCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
   @media (max-width:899px) {
     #pfTable { display:none !important; }
@@ -180,8 +133,7 @@
     padding:12px 14px;
   }
   .pf-mtop { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
-  /* K-U: mobil kart esdegeri — 48.3x18 idi (bkz. .ticker-link notu). `.pf-mtop`
-     zaten flex/align-items:center, min-height buyumesi satiri kaydirmaz. */
+
   .pf-mticker { font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); text-decoration:none;
                 display:inline-flex; align-items:center; min-height:24px; }
   .pf-mticker:hover { color:var(--bp-art-cyan); }
@@ -196,7 +148,6 @@
   .pf-mspark { margin-top:10px; }
   .pf-mentry { margin-top:8px; }
 
-  /* F6: Sparkline + Sinyal Asistanı + XU030 */
   .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }
   .btn-entry {
     display:inline-block; padding:2px 7px; border-radius:var(--bp-r-sm); margin-left:5px;
@@ -207,10 +158,6 @@
   .btn-entry:hover { background:rgba(var(--bp-ok-rgb),.2); border-color:var(--bp-ok); }
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
-  /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + ekleme çubuğu;
-     yoğun pf-table/pf-mcard pozisyon listesine (kişi başına farklı sayıda satır
-     olabilir, tekdüze ızgara değil ama yine de yoğun veri) dokunulmadı — aynı
-     "scanability > estetik" gerekçesi diğer sayfalarla tutarlı. ── */
   .sum-card, .add-bar {
     position: relative;
     overflow: hidden;
@@ -228,16 +175,6 @@
   }
   .sum-card > *, .add-bar > * { position: relative; }
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     20.09 — Data-Art unifikasyonu (index/hisse/tarama/sektor-harita ile ayni
-     recete). 09.09'da bu sayfaya SADECE .sum-card/.add-bar kose parıltısı
-     eklenmisti; yuzeylerin kendisi hala duz --bp-surface + radius-lg + jenerik
-     uppercase mikro-etiket diliydi, yani sayfa "konusmuyor"du.
-     Yogun pozisyon tablosuna (satir/hucre) yine DOKUNULMADI — scanability
-     onceligi, tarama.html'deki ayni kararla tutarli.
-     ══════════════════════════════════════════════════════════════════════════ */
-
-  /* 1 ── Yuzeyler: duz zemin -> degrade + radius-20 */
   .sum-card, .add-bar {
     background: linear-gradient(135deg, var(--bp-raised) 0%, var(--bp-surface) 72%);
     border-radius: var(--bp-r-lg);
@@ -247,13 +184,6 @@
     background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .14), transparent 70%);
   }
 
-  /* 2 ── Pozisyon paneli baslik bandi: JSON/CSV/Ice Aktar/Temizle/Cloud Sync
-         araclari sayfanin ortasinda, hangi bolgeye ait olduklari belirsiz
-         sekilde yuzuyordu (ozet kutulariyla ekleme formu ARASINDA) — artik
-         tablonun kendi baslik seridinin icindeler ve serit tabloyla TEK panel
-         olarak birlesiyor (tarama.html .result-header + .table-wrap deseni).
-         Gorsel-gizli <h2>Pozisyonlarım</h2> de burada gorunur hale geldi;
-         ekleme formu kendi (sr-only) "Hisse Ekle" basligini aldi. */
   .pf-panel-header {
     position: relative; overflow: hidden;
     display: flex; align-items: center; justify-content: space-between;
@@ -281,10 +211,6 @@
     border-top: none;
   }
 
-  /* 3 ── Mikro-etiket tipografisi: Space Grotesk + genis tracking.
-         thead bilincli olarak .08em'de tutuldu — 12 kolonlu tablo nowrap,
-         daha genis tracking masaustunde yatay tasma riski yaratir (tarama.css
-         ayni karar). Renk semantigi DEGISMIYOR. */
   .sum-lbl, .add-lbl, .pf-metric-label {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     letter-spacing: .12em;
@@ -294,20 +220,12 @@
     letter-spacing: .08em;
     background: linear-gradient(180deg, var(--bp-raised) 0%, var(--bp-surface) 100%);
   }
-  /* Sayfanin kahramani rakamlar: ozet kutularindaki degerler hizalansin diye
-     tabular-nums (kolonlar arasi zipzip oynama olmasin). */
+
   .sum-num, .sum-pct {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
   }
 
-  /* 4 ── GERCEK BULGU (canli olcum, 20.09): .pf-mcard ile onu saran .pf-table
-         IKISI DE background:var(--bp-surface) idi — olculdu, ikisi de
-         rgb(20,20,22) — yani mobilde kartlar zeminleriyle AYNI renkteydi ve
-         sadece 1px kenarlikla ayrisiyordu ("kart" hissi yok). <900px'te
-         sarmalayici seffaflasiyor (o kirilimda #pfTable zaten gizli, sadece
-         kart tasiyor), kartlar sayfa zemininde gercekten yuzuyor.
-         tarama.html'de bulunan ayni hatanin bu sayfadaki esi. */
   .pf-mcard {
     background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
     border-radius: var(--bp-r-lg);
@@ -321,36 +239,22 @@
       border-radius: var(--bp-r-lg);
       margin-bottom: 10px;
     }
-    /* sarmalayici seffaflasinca bos-durum mesaji zeminsiz kalirdi; kendi
-       yuzeyini aliyor (kartlarla ayni recete). 21.09: sinif `.da-empty`,
-       yuzey reçetesi `.da-panel`in birebir aynisi — DELTA yalniz burada,
-       cunku masaustunde `.pf-table` zaten yuzey veriyor (ic ice panel
-       olmasin diye taban `.da-empty` BILEREK yuzeysiz). */
+
     .da-empty {
       background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
       border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg);
       padding: 40px 20px;
     }
   }
-  /* Dar ekranda baslik + 5 arac butonu tek satira sigmadigi icin butonlar
-     saga dayali dar bir sutuna yigilıyordu (3 satir, baslik ortada asili
-     kaliyordu — canlida goruldu). Baslik kendi satirini aliyor, araclar
-     altinda soldan akiyor. */
+
   @media (max-width: 600px) {
     .pf-panel-header { flex-direction: column; align-items: stretch; gap: 8px; }
     .pf-panel-header .pf-actions { justify-content: flex-start; flex: none; }
   }
 
-  /* C-04 (24.09) — dosya SONUNDA durmali (onceki thead th kurallarini ezer).
-     Tablo kabina sigmadiginda (.pf-fits yok) yatay kaydirma kabi sticky'yi
-     bozuyor ve baslik 2. satirin ustune biniyordu: sigmayan tabloda baslik
-     duragan. Ozet tutarlari: kart overflow:hidden (kose parıltısı) oldugu icin
-     1.000.000,00 ₺ kesiliyordu -> tek satir + kart genisligine gore yazi boyu. */
   .pf-table:not(.pf-fits) thead th { position: static; }
   .sum-card { container-type: inline-size; }
   .sum-num { white-space: nowrap; font-size: min(var(--bp-type-stat), 11cqi); }
-  /* 6 kart masaustunde 7 kolonluk auto-fit'te ~130px'e iniyordu (tutar 14px):
-     >=600px iki satir x 3 kart. Hucre yatay dolgusu 14->10: 13 sutunluk tablo
-     1280/1440'ta kabina sigar (sil dugmesi kabin icinde). */
+
   @media (min-width: 600px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
   .pf-table thead th, .pf-table td { padding-left: 10px; padding-right: 10px; }

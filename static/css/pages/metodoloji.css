@@ -1,18 +1,4 @@
-/* ==== extracted from templates/metodoloji.html (T2.5) ==== */
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  /* 20.09 CPO — CANLI OLCULDU: sayfadaki 8 baslik id'sinin HICBIRINDE
-     scroll-margin yoktu, html'de de scroll-padding. Bir `#adx` baglantisi
-     basligi tam viewport tepesine (top:0) getiriyor, oysa orada YAPISKAN
-     makro serit (33px) + header (60px) duruyor -- elementFromPoint o noktada
-     `span.macro-item` donuyordu, yani baslik FIILEN gorunmuyordu. Site
-     genelinde 8 ayri yerden /metodoloji#... derin baglantisi veriliyor
-     (hisse jargon ipuclari, blog, terim sozlugu), hepsi ayni sonucu
-     veriyordu. Tek kural her mevcut VE gelecek capayi kapsar. */
-  /* K-AG: sayfa-yerel scroll-padding KALDIRILDI — shared.css'teki kanonik
-     --bp-sticky-top / html{scroll-padding-top} devraldi. Bu satir dogru care
-     idi ama TEK SAYFADA kalmisti; dedektorde /metodoloji'nin tek "OK" sayfa
-     cikmasi carenin canli pozitif kontrolu oldu. */
 
   body {
     font-size: var(--bp-type-body);
@@ -27,7 +13,6 @@
     z-index:var(--bp-z-dropdown);
   }
 
-
   .prose h2 {
     font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
     font-size: clamp(1.32rem, 2.6vw, 1.72rem);
@@ -38,8 +23,7 @@
     margin: 38px 0 12px;
     padding-bottom: 10px;
   }
-  /* Data-Art: baslik altinda kisa aksan cizgisi (index.html .da-section-title
-     ritminin metin-agirlikli sayfalardaki karsiligi). */
+
   .prose h2::after {
     content: ''; display: block; width: 42px; height: 2px; margin-top: 10px;
     border-radius: var(--bp-r-pill);
@@ -64,17 +48,9 @@
     font-size: var(--bp-type-sm);
   }
 
-  /* .da-panel'in CIPLAK METIN dugumu tasiyan kullanicilar icin savunma.
-     Paylasilan katmandaki `.da-panel > *{position:relative}` yalnizca ELEMENT
-     cocuklari parilti ::before'unun UZERINE cikarir; dogrudan panelin icinde
-     duran metin dugumleri (bu sayfada .signal-box / .disclaimer)
-     boyle bir kancaya sahip degil ve boyama sirasinda konumlandirilmis
-     ::before'un ALTINDA kalir. isolation:isolate panele bir yigin baglami
-     kurar, z-index:-1 de pariltiyi zemin ile icerik ARASINA yerlestirir. */
   .signal-box, .disclaimer { isolation: isolate; }
   .signal-box::before, .disclaimer::before { z-index: -1; }
 
-  /* .da-panel deltasi — zemin/kenar/radius paylasilan katmandan gelir. */
   .signal-box { padding: 20px; margin: 16px 0; --da-glow-size: 220px; --da-glow-a: .14; }
   .signal-box.al  { --da-accent: var(--bp-up);  --da-glow-rgb: var(--bp-al-rgb); }
   .signal-box.sat { --da-accent: var(--bp-down); --da-glow-rgb: var(--bp-sat-rgb); }
@@ -91,7 +67,6 @@
 
   .mc-pos{color:var(--bp-up);}.mc-neg{color:var(--bp-down);}.mc-neu{color:var(--bp-text-3);}
 
-  /* Terimler — Karıştırılmaması Gerekenler (CPO-1682 terim netleştirmesi) */
   .term-grid { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }
   .term-row {
     display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 4px 18px;
@@ -120,7 +95,6 @@
     .term-row { grid-template-columns: 1fr; gap: 5px; padding: 11px 13px; }
   }
 
-/* C-42 (03.10): Skor bölümü — ağırlık çubuğu, üç durum, teknik detay, SSS */
 .mt-sec { margin: 8px 0 28px; }
 .mt-sec h2 { margin: 0 0 8px; }
 .mt-bar { display: flex; height: 36px; border-radius: 10px; overflow: hidden; margin: 14px 0; font-size: 13px; font-weight: 600; }
@@ -138,7 +112,7 @@
 .mt-td p, .mt-faq p { margin: 8px 0 0; color: var(--bp-text-2); }
 .mt-td code { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .mt-states > div { grid-template-columns: 1fr; } }
-/* C-42 dilim 2: TL;DR karti + kriter izgarasi + formul kutusu -> tek 5 kosul listesi */
+
 .mt-check { list-style: none; counter-reset: mtk; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
 .mt-check li { counter-increment: mtk; display: grid; grid-template-columns: 1.75rem 9.5rem minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 10px 14px; border: 1px solid var(--bp-line); border-radius: 10px; }
 .mt-check li::before { content: counter(mtk); font-weight: 700; color: var(--bp-text-2); font-variant-numeric: tabular-nums; }

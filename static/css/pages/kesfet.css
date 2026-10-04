@@ -1,13 +1,5 @@
-/* C-56 (01.10): Keşfet — orta-uzun vade listeleri (/kesfet, /kesfet/<liste>).
-   Onaylı taslak plans/mockups/temel-v2.html "Keşfet" + O16e=B: sütunlar sabit genişlik,
-   değerleme + trend rozetleri tek grup aynı yerde, mobilde satır tek biçim.
-   Satır ızgarası üç kırılımda aynı DOM: ≥1100 beş sütun (şirket | öne çıkan | değerleme |
-   trend | BP), 761–1099 dört sütun (neden şirketin altında), ≤760 mobil tek biçim
-   ("şirket BP" / "neden" / "rozetler"). Renkler yalnız token. */
-
 .kf .da-pagehead{padding-bottom:10px}
 
-/* ── Liste seçici: dört bağlantı (paylaşılabilir adres), seçili olan aria-current ── */
 .kf-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 22px}
 .kf-tab{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 14px;border:1px solid var(--bp-line);border-radius:var(--bp-r-md);background:var(--bp-surface);color:var(--bp-text-2);text-decoration:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-type-body);line-height:1.25;-webkit-tap-highlight-color:transparent}
 .kf-tab-t{min-width:0}
@@ -17,7 +9,6 @@
 @media (hover:hover) and (pointer:fine){.kf-tab:not([aria-current="page"]):hover{border-color:var(--bp-border2);color:var(--bp-text)}}
 .kf-tab:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}
 
-/* ── Liste başlığı (soru) + kural kutusu ── */
 .kf-q{margin:0 0 10px;font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;line-height:1.15;font-size:clamp(1.25rem,2.2vw,1.6rem);color:var(--bp-text)}
 .kf-rule{display:flex;align-items:flex-start;gap:8px 16px;margin:0 0 14px;padding:11px 14px;border:1px solid var(--bp-line);border-radius:var(--bp-r-md);background:var(--bp-surface);font-size:var(--bp-type-body);line-height:1.5;color:var(--bp-text-2)}
 .kf-rule b{color:var(--bp-text);font-weight:700}
@@ -25,7 +16,6 @@
 .kf-rule-a:hover{text-decoration:underline}
 .kf-rule-a:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px;border-radius:var(--bp-r-sm)}
 
-/* ── Satır ızgarası (başlık ve satır aynı sütunlar) ── */
 .kf-head,.kf-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr) 128px 136px 48px;column-gap:16px;align-items:center}
 .kf-head{padding:0 4px 8px;border-bottom:1px solid var(--bp-line);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bp-text-3)}
 .kf-head span:last-child{text-align:right}
@@ -53,7 +43,6 @@
 .kf-foot{margin:22px 0 4px;max-width:78ch;font-size:var(--bp-type-sm);line-height:1.55;color:var(--bp-text-3)}
 .kf-foot a{color:var(--bp-text-2)}
 
-/* ── Orta genişlik: neden cümlesi şirketin altına, rozet grubu ve BP aynı yerde ── */
 @media (max-width:1099px){
   .kf-head,.kf-row{grid-template-columns:minmax(0,1fr) 128px 136px 48px}
   .kf-head span:nth-child(2){display:none}
@@ -65,14 +54,13 @@
   .kf-bp{grid-area:bp}
 }
 
-/* ── Telefon: tek satır biçimi (taslak .lmob): "şirket BP" / "neden" / "rozetler" ── */
 @media (max-width:760px){
   .kf-tabs{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px}
   .kf .da-pagehead{padding-top:14px}
   .kf-tabs{gap:6px}
   .kf-tab{min-height:48px;padding:6px 12px;font-size:var(--bp-type-sm)}
   .kf-q{margin-bottom:8px}
-  /* kural kutusu: "Yöntem →" metnin sonunda satır içi; dokunma alanı 40 px, satır yüksekliği değişmez */
+
   .kf-rule{display:block;padding:10px 12px;font-size:var(--bp-type-sm);line-height:1.45}
   .kf-rule-a{display:inline-block;min-height:0;margin:-11px 0 -11px 6px;padding:11px 0;font-size:inherit;line-height:inherit}
   .kf-co .sc{display:none}
@@ -84,6 +72,6 @@
   .kf-bp{grid-area:bp;align-self:start}
   .kf-tags{grid-area:tags;display:flex;flex-wrap:wrap;gap:8px}
   .kf-tags > :first-child,.kf-tags > :last-child{grid-area:auto}
-  /* rozet grubu her satırda aynı yerde: değerleme rozeti sabit genişlik ("Pahalı tarafta" sığar) */
+
   .kf-tags > :first-child{min-width:118px;justify-content:center}
 }

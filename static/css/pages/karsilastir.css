@@ -1,7 +1,5 @@
-/* ==== extracted from templates/karsilastir.html (T2.5) ==== */
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body {
     -webkit-font-smoothing: antialiased; font-size: var(--bp-type-body); min-height: 100vh;
   }
@@ -11,12 +9,6 @@
   }
   .page-sub   { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
-
-  /* ── Search Bar ── */
-  /* 20.09 Data-Art: yüzey + kenar + parıltı .da-panel'den geliyor (şablonda
-     `class="search-bar da-panel"`). "tarama/hisse.html ile aynı reçete"
-     yorumu 09.09'dan beri duruyordu ama reçete ELLE kopyalanmıştı — üç kopya
-     ayrı ayrı sürüklenmişti. Burada yalnız delta kalır. */
   .search-bar {
     --da-glow-rgb: var(--bp-art-violet-rgb);
     --da-glow-a: .10;
@@ -34,13 +26,11 @@
   }
   .ticker-inputs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
   .ticker-input {
-    background: var(--bp-bg); border: 1px solid var(--bp-field-border);   /* K-Q */
+    background: var(--bp-bg); border: 1px solid var(--bp-field-border);
     color: var(--bp-text); border-radius:var(--bp-r-sm); padding: 11px 12px;
     font-size: var(--bp-type-body); font-family: inherit; font-variant-numeric: tabular-nums; text-transform: uppercase;
     width: 100px; outline: none; transition: border-color .15s;
-  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px. 19.09: dikey padding
-     8px->11px, 375px'te olculen 37px yukseklik ~44px asgari dokunma hedefine
-     yaklastirildi (Apple HIG/Material). */
+  }
   .ticker-input:focus { border-color: var(--bp-brand); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.14); }
   .ticker-input::placeholder { color: var(--bp-text-3); text-transform: none; font-family: inherit; }
   .compare-btn {
@@ -57,24 +47,18 @@
     border-radius:var(--bp-r-sm); padding: 8px 14px; font-size: var(--bp-type-sm); cursor: pointer;
     transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
     align-items: center; justify-content: center; gap: 5px;
-    /* K-DP: eleman <a>'dan <button>'a gecti -- <button> font-family'yi
-       MIRAS ALMAZ (UA stylesheet'i kendi sistem fontunu dayatir), kardes
-       .compare-btn ile ayni yazi tipinde kalmasi icin acikca devrediyoruz. */
+
     font-family: inherit; font-weight: 500; line-height: 1.2;
   }
   .share-btn::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
   .share-btn:hover { color: var(--bp-text); border-color: var(--bp-ctl-border-hover); }
 
-  /* ── Comparison Table ── */
   .compare-wrap {
     overflow-x: auto;
     border-radius:var(--bp-r-md);
     border: 1px solid var(--bp-line);
   }
-  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
-     thead sticky referansini bozuyordu. >=900px'te ana icerik sutunu .compare-table'in
-     min-width:600px'inden genis - scroll ihtiyaci kalmiyor (karsilastir 2-4 hisse
-     matrisi oldugu icin dar/mobil genislikte hala kasitli yatay scroll gerekiyor). */
+
   @media (min-width:900px) {
     .compare-wrap { overflow-x: visible; }
   }
@@ -85,14 +69,9 @@
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-line);
     padding: 0; text-align: center; font-weight: 700; font-size: var(--bp-type-sm);
   }
-  /* CPO-DEV2-099: hisse isimleri (thead) asagi kaydirinca kayboluyordu -
-     hangi sutunun hangi hisse oldugu gorunmuyordu (Ozan ornegi). Sadece
-     thead (col-hdr) sticky - tbody row-label (sol sutun) etkilenmesin. */
+
   .compare-table thead th {
-    /* 18.09 bughunt: makro-bar (32px+inset) header'in KENDI sticky ofsetine
-       (satir 15) eklidir, ama bu satir sadece "60px = header yuksekligi"
-       varsayimini tasiyip makro-bar payini hic eklemiyordu -- thead
-       header'in alt ~32px'lik kismina biniyordu. */
+
     position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-dropdown);
   }
   .compare-table td {
@@ -110,12 +89,7 @@
     padding: 16px 12px; border-right: 1px solid var(--bp-line);
   }
   .compare-table .col-hdr:last-child { border-right: none; }
-  /* 20.09 CPO: bu iki kenar `rgba(30,45,69,.5)` (= #1e2d45, eski navy palet)
-     yaziyordu. AYNI HUCRENIN alt kenari 14 satir yukarida var(--bp-line)
-     (notr gri) ile boyaniyor, disindaki .compare-wrap cercevesi de oyle —
-     yani tek bir tablo hucresinin alt kenari gri, sag kenari maviydi. Canli
-     olculdu: td border-bottom rgb(42,42,44) vs border-right rgba(30,45,69,.5).
-     Ayni rolu iki paletle boyamak bir bug'dir (CPO-1682 olcutu). */
+
   .compare-table td { border-right: 1px solid var(--bp-line); }
   .compare-table td:last-child { border-right: none; }
   .compare-table th.row-label { border-right: 1px solid var(--bp-line); }
@@ -143,17 +117,12 @@
   .mono { font-variant-numeric: tabular-nums; font-size: var(--bp-type-sm); }
   .up   { color: var(--bp-up); }
   .dn   { color: var(--bp-down); }
-  /* K-BP (21.09): YON EKSENININ UCUNCU HALI. Burada .neu YOKTU, bu yuzden
-     degismeyen hisse (change_pct = 0) `.up` ile YESIL boyaniyordu — ayni
-     hisse /tarama'da `.chg-neu` ile notr griydi. 0 bir yukselis degildir. */
+
   .neu  { color: var(--bp-text-2); }
-  /* K-BX eki (22.09): ORTA band. /hisse'nin `_roeColor`'i orta bandi
-     --bp-caution ile boyuyor; bu sayfada gold sinifi YOKTU, bu yuzden ROE
-     bandi hem esik hem HUE olarak ayrisiyordu. */
+
   .mid  { color: var(--bp-caution); }
   .muted{ color: var(--bp-text-3); }
-  /* K-BQ (21.09): Supertrend seviyesinin FIYATA gore rolu. Bu seviye yon-bagimsiz
-     bir buyukluktur (K-BO) — rol renkle degil metinle soylenir. */
+
   .sl-role {
     display: block; font-size: var(--bp-type-xs);
     font-weight: 600; color: var(--bp-text-3); letter-spacing: .3px; margin-top: 2px;
@@ -169,19 +138,8 @@
   .q-uzak   { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
   .q-none   { color: var(--bp-text-3); }
 
-  /* ── Empty / Loading ──
-     21.09 (K-V): bu sayfanin `.empty-state`i ayni adi tasidigi halde
-     tarama/bilanco/temettu'dakinden FARKLI bir dil konusuyordu (gövde
-     --bp-text-3 vs --bp-text-2, h2 600 vs 700, baslik --bp-text-2 vs --bp-text).
-     Kanonik `.da-empty` katina alindi; burada DELTA kalmadi. h2 basliklari
-     `.da-empty-title` olcegini `.da-empty h2` uzerinden aliyor. */
-
-  /* 21.09 (K-W): `.skeleton` + @keyframes shimmer SİLİNDİ. Bu sayfanınki bir
-     METİN SATIRI yer tutucusuydu (14×80 inline-block) — kanonikte
-     `.da-skel .da-skel--line` olarak yaşıyor (data-art.css §5). */
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
-  /* ── Autocomplete ── */
   .ac-wrap { position: relative; display: inline-block; }
   .ac-dropdown {
     position: absolute; top: calc(100% + 4px); left: 0;
@@ -191,18 +149,12 @@
     display: none;
   }
   .ac-dropdown.open { display: block; }
-  /* 21.09 (K-AU, 2. tasiyici): `.ac-dropdown` da sabit yonluydu — HER ZAMAN
-     asagi acilirdi. Canli olcum (/karsilastir, 320x420 = telefon + klavye acik):
-     4 girdinin 4'unde liste gorunur alanin ALTINA tasiyordu (64/115/118/118px),
-     6 oneriden yalniz 2'si gorunuyordu (gorunur yukseklik %39-40). Asagida yer
-     yoksa ve yukarida daha cok yer varsa JS `.ac-up` ekler; ayrica kalan bosluga
-     gore max-height kelepcelenir, boylece hicbir yonde tasma kalmaz.
-     Ayni kural bp-tooltip.js'in `top<8 -> alta cevir` mantiginin aynadaki esi. */
+
   .ac-dropdown.ac-up { top: auto; bottom: calc(100% + 4px); }
   .ac-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 12px; cursor: pointer; font-size: var(--bp-type-sm);
-    border-bottom: 1px solid var(--bp-line);   /* 20.09: eski navy #1e2d45 -> notr token */
+    border-bottom: 1px solid var(--bp-line);
     transition: background .12s;
   }
   .ac-item:last-child { border-bottom: none; }
@@ -220,7 +172,6 @@
     padding: 12px; color: var(--bp-text-3); font-size: var(--bp-type-sm); text-align: center;
   }
 
-  /* ── Score / Verdict styles ── */
   .row-sep td {
     background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
     color: var(--bp-art-cyan) !important; font-weight: 700; font-size: var(--bp-type-xs);
@@ -238,21 +189,12 @@
   }
   .help-icon:hover, .help-icon:focus-visible { color: var(--bp-text); border-color: var(--bp-border2); }
 
-  /* ── CPO-DEV2-101: mobilde matris yerine per-ticker kart listesi (tarama/portfolio
-     ile ayni esik).
-     r161-bughunt zindex-sticky-overlap: eski yorumdaki "769-899px'te matris zaten
-     sigar/kullanilabilir" varsayimi CANLI OLCUMLE CURUTULDU - 820px genislikte
-     thead th sticky hic calismiyor (sayfa scroll'uyla ayni delta ile kayiyor, .compare-wrap
-     overflow-x:auto oldugu icin overflow-y de auto'ya donusuyor ve sticky referansi
-     viewport degil bu hic kaymayan container oluyor). Esik 768->899px, T2.4/DEV2-021
-     emsaliyle hizalandi, boslugu kapatir. ── */
   .cmp-mcards { display: none; flex-direction: column; gap: 12px; }
   @media (max-width: 899px) {
     .compare-wrap { display: none !important; }
     .cmp-mcards { display: flex; }
   }
-  /* .da-panel deltası (mobil kart) — kenar rengi bu sayfanın kendi seçimi
-     (--bp-bkl-bd), yüzey + parıltı paylaşılan katmandan. */
+
   .cmp-mcard {
     --da-glow-a: .08;
     --da-glow-y: -55%;
@@ -284,10 +226,9 @@
   }
   .cmp-mrow-val { text-align: right; }
 
-  /* ── Responsive ── */
   @media (max-width: 600px) {
     .search-bar { padding: 12px; }
-    /* C-70 K21: telefonda 2x2 izgara (80 px tek sutun yerine) */
+
     .ticker-inputs { display: grid; grid-template-columns: 1fr 1fr; flex: 1 1 100%; }
     .ac-wrap { min-width: 0; }
     .ticker-input { width: 100%; }

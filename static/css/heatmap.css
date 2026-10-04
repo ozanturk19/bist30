@@ -1,11 +1,3 @@
-/* ═══ static/css/heatmap.css — BIST100 ısı haritası bileşeni (templates/_heatmap.html + static/js/bp-heatmap.js)
-   TEK KAYNAK (C-71 K34, 03.10): ana sayfa, /sektor-harita ve /harita/<gün> bu dosyayı yükler; ana sayfaya
-   özgü birkaç kural pages/index.css'te. Tam sayfa eklemeleri yalnız .hm-full altında. */
-/* ═══ C-55 (24.09): BIST100 ısı haritası — templates/_heatmap.html + static/js/bp-heatmap.js ═══
-   Onaylı taslak C-M5 (O16d=A, ilk açılış Değişim O20=A). Renk yalnız token'dan:
-   nötr zemin (--hm-n) + yön tonu bindirmesi rgba(--bp-al-rgb | --bp-sat-rgb, --k);
-   --k sayısını SSR yazar. Etiket rengi (.dark) SSR'da en yüksek kontrasta göre.
-   Aynı bileşen C-29'da /sektor-harita'ya taşınacaksa bu blok ortak dosyaya alınır. */
 .hm{--hm-n:var(--bp-surface3);padding:clamp(16px,2.4vw,26px);--da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.10;--da-glow-size:420px;--da-glow-y:-55%}
 .hm-head{margin-bottom:clamp(14px,2vw,20px)}
 .hm-title{font-weight:800;font-size:clamp(1.55rem,3.2vw,2.35rem);line-height:1.02;letter-spacing:-.03em;margin:0 0 6px}
@@ -38,14 +30,13 @@
 .hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:max(9px,calc(var(--fs,11px) * .74));line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
 .hm-lim{position:absolute;right:5px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-type-xs);line-height:1;letter-spacing:.08em;padding:3px 5px;border-radius:var(--bp-r-sm);background:rgba(var(--bp-bg-rgb),.45);color:var(--bp-text);white-space:nowrap}
 .hm .hm-off{display:none}
-/* JS yokken (SSR): aralık saydam kenarla; sığmayan yazı kutu boyuna göre gizli (kırpılmaz) */
+
 .hm:not(.js) .hm-g{border:3px solid transparent}
 .hm:not(.js) .hm-t{border:1px solid transparent;background-clip:padding-box}
 @container (max-width:46px) or (max-height:18px){.hm:not(.js) .hm-tk{display:none}}
 @container (max-width:56px) or (max-height:34px){.hm:not(.js) .hm-v{display:none}}
 @container (max-width:110px) or (max-height:42px){.hm:not(.js) .hm-lim{display:none}}
-/* Dar kap (<560px): sektörler alt alta, her biri kendi haritasıyla (C-M5 telefon düzeni).
-   Eşik bp-heatmap.js STACK_MAX ile aynı; yükseklik formülü de aynı. */
+
 @container hmb (max-width:559.98px){
   .hm-map{aspect-ratio:auto}
   .hm-g{position:relative;left:auto;top:auto;width:auto;height:auto;border:0;margin-top:14px}
@@ -61,7 +52,7 @@
 .hm-lg-sw{display:inline-flex;align-items:center;gap:6px}
 .hm-lg-sw i{width:12px;height:12px;border-radius:var(--bp-r-sm);background-color:var(--hm-n);background-image:repeating-linear-gradient(135deg,rgba(var(--bp-text-rgb),.3) 0 2px,transparent 2px 5px)}
 .hm-src{margin:0;font-size:var(--bp-type-sm);color:var(--bp-text-3);max-width:60ch}
-/* Mini kart (bp-heatmap.js doldurur) */
+
 .hm .hm-card{position:absolute;z-index:var(--bp-z-dropdown);scroll-margin:100px 0 96px;width:min(268px,calc(100% - 16px));padding:14px 15px 12px;border-radius:var(--bp-r-md);background:var(--bp-surface);border:1px solid var(--bp-border2);box-shadow:var(--bp-shadow-modal);font-size:var(--bp-type-sm)}
 .hm-card .c-top{display:flex;gap:8px;align-items:baseline;min-width:0}
 .hm-card .c-top b{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-type-lg)}
@@ -86,16 +77,11 @@
 .hm-card .c-go:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.hm-t{transition:none}}
 
-/* C-55: 100 kutu = 100 sekme durağı → klavyeyle haritayı atlama bağlantısı (odakta görünür) */
 .hm { position: relative; }
 .hm-skip { position: absolute; left: 12px; top: 12px; z-index: calc(var(--bp-z-raised) + 1); padding: 8px 12px; border-radius: 8px; background: var(--bp-raised); color: var(--bp-text); font-size: 14px; text-decoration: none; transform: translateY(-200%); opacity: 0; pointer-events: none; }
 .hm-skip:focus-visible { transform: none; opacity: 1; pointer-events: auto; outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; }
 .hm-foot:focus { outline: none; }
 
-/* ═══ C-68 (25.09): "Paylaş" — _heatmap.html _share() + bp-heatmap.js paylaşım bloğu ═══
-   <details>/<summary>: JS kapalıyken de açılır (iki düz bağlantı). Başlığın üst satırında
-   (üst yazı solda, düğme sağda); satır düğme boyunda, negatif kenar boşluğuyla başlığı itmez.
-   */
 .hm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:-6px 0 2px}
 .hm-top .da-eyebrow{margin-bottom:0}
 .hm-share{position:relative;flex:none;margin-left:auto}
@@ -115,8 +101,6 @@
 .hm-share-url{box-sizing:border-box;display:block;width:100%;margin-top:6px;padding:8px 10px;border-radius:var(--bp-r-md);border:1px solid var(--bp-border2);background:var(--bp-bg);color:var(--bp-text);font:inherit;font-size:var(--bp-type-sm)}
 @media (pointer:coarse){.hm-share-btn,.hm-share-it{min-height:44px}}
 
-/* ═══ C-29 (25.09): tam sayfa (.hm-full) — renk modu + dönem anahtarları, BP / Trend boyası,
-   sektör sıralaması. Renkler yalnız token'dan; --k sayısını SSR ve bp-heatmap.js yazar. ═══ */
 .hm-full .hm-head{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between}
 .hm-full .hm-hl{flex:1 1 420px;min-width:0}
 .hm-full .hm-title{font-size:clamp(1.75rem,3.4vw,2.75rem)}
@@ -135,19 +119,19 @@
   .hm-full .hm-seg{display:flex}
   .hm-full .hm-sw{flex:1 1 auto;padding:0 6px}
 }
-/* BP Skoru: 50 merkezli, ≥50 yeşil / <50 mor (long-only: kırmızı yok) · Trend: kategorik (kanon §5.3) */
+
 .hm-t.bp-hi{--hm-c:rgba(var(--bp-al-rgb),var(--k,0))}
 .hm-t.bp-lo{--hm-c:rgba(var(--bp-art-violet-rgb),var(--k,0))}
 .hm-t.tr-g{--hm-c:rgba(var(--bp-al-rgb),var(--k,0))}
 .hm-t.tr-y{background-color:var(--bp-state-flat)}
 .hm-t.tr-b{background-color:var(--bp-state-broken);color:var(--bp-state-broken-text)}
-/* Tavan/taban yalnız Değişim · 1G'de (kutu halkası JS/SSR'da `lim` sınıfıyla, etiket burada) */
+
 .hm-full:not(.hm-lim-on) .hm-lim{display:none}
-/* Grup etiketi: sığmayan önce değerini, sonra kendini gizler; yeri varsa iki satıra kırılır (JS) */
+
 .hm .hm-gl i:empty{display:none}
 .hm .hm-gl.hm-gl2{height:auto;align-items:flex-start;white-space:normal}
 .hm .hm-gl.hm-gl2 b{white-space:normal;text-overflow:clip;line-height:1.25}
-/* JS kapalıyken yazı ölçülemez: dar grupta önce değer, daha darda etiket gizlenir (üç nokta yerine) */
+
 .hm-full .hm-g{container-type:inline-size}
 @container (max-width:159.98px){.hm-full:not(.js) .hm-gl i{display:none}}
 @container (max-width:129.98px){.hm-full:not(.js) .hm-gl{display:none}}
@@ -156,15 +140,15 @@
   .hm-full .hm-gl b{white-space:normal;overflow:visible;text-overflow:clip;min-width:0}
   .hm-full .hm-gl i{flex:none}
 }
-/* Lejant: BP ölçeği ve Trend örnekleri (kutularla aynı bindirme) */
+
 .hm-lg-bar--bp{background:linear-gradient(90deg,rgba(var(--bp-art-violet-rgb),.63),rgba(var(--bp-art-violet-rgb),0) 50%,rgba(var(--bp-al-rgb),0) 50%,rgba(var(--bp-al-rgb),.95)),var(--hm-n)}
 .hm-lg-sw i.tr-g{background-image:linear-gradient(rgba(var(--bp-al-rgb),.9),rgba(var(--bp-al-rgb),.9))}
 .hm-lg-sw i.tr-y{background-image:none;background-color:var(--bp-state-flat)}
 .hm-lg-sw i.tr-b{background-image:none;background-color:var(--bp-state-broken);box-shadow:inset 0 0 0 1px var(--bp-border2)}
 .hm-legend[hidden],.hm-lg-sw[hidden]{display:none}
-/* Mini kart: seçili dönem hücresi */
+
 .hm-card .c-per div.on{box-shadow:inset 0 0 0 1px var(--bp-border2)}
-/* Sektör sıralaması (haritanın altında tek sıralı liste) */
+
 .hm-sum{margin-top:clamp(16px,2.4vw,24px);padding:clamp(16px,2.4vw,26px)}
 .hm-sum-title{font-weight:800;font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.15;letter-spacing:-.02em;margin:0 0 6px}
 .hm-sum-sub{margin:0 0 10px;color:var(--bp-text-3);font-size:var(--bp-type-body)}
@@ -172,7 +156,7 @@
 .hm-sr{position:relative;counter-increment:hmsl;display:grid;grid-template-columns:2.2em minmax(0,1fr) auto auto;gap:4px 18px;align-items:baseline;padding:10px 0;border-top:1px solid var(--bp-line)}
 .hm-sr::before{content:counter(hmsl);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;color:var(--bp-text-3)}
 .hm-sr-g{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;font-size:var(--bp-type-body);color:var(--bp-text);text-decoration:none;overflow-wrap:anywhere;min-width:0}
-/* C-71 K28: satırın tamamı sektör bağlantısı (yalnız 19 px'lik ad dokunulabilirdi, kalan 62–82 px ölü alandı) */
+
 .hm-sr-g::after{content:'';position:absolute;inset:0}
 .hm-sr-g:hover{color:var(--bp-brand)}
 .hm-sr-g:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}
@@ -188,9 +172,6 @@
 }
 .hm-empty{margin-top:8px}
 
-/* ═══ C-68 (25.09): tam sayfada "Geçmiş günler" + Paylaş renk anahtarının solunda (aynı satır;
-   dar ekranda anahtar kendi satırına iner) ve kalıcı gün sayfası (templates/harita_gun.html:
-   önceki/sonraki gün, "Bu harita nedir?"). ═══ */
 .hm-full .hm-ctl--sh{margin-left:auto}
 .hm-ctl-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 14px;max-width:100%}
 .hm-ctl-top .hm-share{margin-left:0}
@@ -199,7 +180,7 @@
 .hm-arc:hover{color:var(--bp-brand);text-decoration-color:currentColor}
 .hm-arc:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}
 @media (pointer:coarse){.hm-arc{min-height:44px}}
-/* C-71 K33: tam sayfa haritada (/sektor-harita, /harita/<gün>) bölüm dolgusu 62 px boş bant bırakıyordu → başlık-panel = container boşluğu (24/16 px) */
+
 main.container > #sektorler.da-section{padding:0}
 .hg-pager{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(14px,2vw,20px)}
 .hg-pg{box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--bp-r-pill);border:1px solid var(--bp-line);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-type-body);font-variant-numeric:tabular-nums;text-decoration:none;white-space:nowrap}
@@ -213,9 +194,6 @@ main.container > #sektorler.da-section{padding:0}
 .hg-about a{color:var(--bp-brand)}
 .hg-about a:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}
 
-/* ═══ C-73 (01.10): Akşam Bülteni v2 gömme (_heatmap.html hm_bare) — yalnız .hm-bare altında ═══
-   Bölüm başlığı sayfada; burada kısa sayım satırı + nabız şeridi (100 hisse, en çok düşenden en
-   çok yükselene). Çubuk rengi kutularla aynı: nötr zemin (--hm-n) + yön tonu, oran --k (SSR). */
 .hm-bare .hm-head--bare{margin-bottom:12px}
 .hm-bare .hm-cnt{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);color:var(--bp-text-3);font-variant-numeric:tabular-nums}
 .hm-pulse{position:relative;padding-top:17px;margin-top:10px}

@@ -1,13 +1,8 @@
-/* ═══ static/css/pages/bulten.css — C-73 (01.10) Akşam Bülteni v2 (/bulten/<gün>, /bulten/arsiv) ═══
-   Onaylı taslak plans/mockups/bulten-v2.html (O28=A). Renk yalnız token'dan; çubuklar ısı haritası
-   kutularıyla aynı ölçek: nötr zemin (--bp-surface3) + yön tonu, oran --k (SSR yazar, ±%3 tavan).
-   Durum renkleri trend tokenlarından (Güçlü Trend yeşil · Yatay --bp-state-flat · Trend Bozuldu
-   --bp-state-broken); kırmızı yalnız fiyat değişiminde. Düzen kap genişliğine göre (container blv). */
 .blv{--bl-disp:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;--bl-num:'Space Grotesk',system-ui,sans-serif;--bl-n:var(--bp-surface3);container:blv / inline-size;color:var(--bp-text);padding-bottom:40px}
 .blv a:not(.hm-t){color:var(--bp-brand)}
 .blv .hv-tabs a{color:var(--bp-text-3)}.blv .hv-tabs a:hover,.blv .hv-tabs a[aria-current="page"]{color:var(--bp-text)}
 .blv-pg,.blv-mr,.blv-dr,.blv-kr,.blv-ar,.blv-ix,.blv-hero,.blv-dg{box-sizing:border-box}
-/* yön rengi yalnız sayfanın kendi öğelerinde — ısı haritası kutuları (.hm-t) kendi kontrast kuralını taşır */
+
 .blv .up:not(.hm-t){color:var(--bp-up)}
 .blv .dn:not(.hm-t){color:var(--bp-down)}
 .blv .neu:not(.hm-t){color:var(--bp-text-2)}
@@ -15,7 +10,6 @@
 .blv-crumb a{display:inline-flex;align-items:center;min-height:40px;text-decoration:none}
 .blv-crumb a:hover{text-decoration:underline}
 
-/* Kahraman */
 .blv-hero{position:relative;border-radius:24px;border:1px solid var(--bp-line);background:radial-gradient(70% 120% at 100% 0%,rgba(var(--bp-art-violet-rgb),.13),transparent 58%),radial-gradient(60% 90% at 0% 0%,rgba(var(--bp-accent-cyan-rgb),.07),transparent 62%),var(--bp-surface);padding:clamp(18px,2.6cqi,30px);display:grid;gap:20px 36px;grid-template-columns:minmax(0,1fr)}
 .blv-hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px;grid-column:1/-1}
 .blv-ey{margin:0;font:600 11.5px/1.4 var(--bl-num);letter-spacing:.16em;text-transform:uppercase;color:var(--bp-art-cyan)}
@@ -55,7 +49,6 @@
 .blv-share{margin-left:auto}
 .blv-share .hm-share-btn{min-height:40px}
 
-/* Bölümler */
 .blv-sec{margin-top:clamp(30px,4.2cqi,46px);min-width:0}
 .blv-sec-h{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 16px;margin-bottom:14px}
 .blv-sec-h > div{min-width:0}
@@ -72,7 +65,6 @@
 .blv .hm-more{display:inline-flex;align-items:center;min-height:40px;font:700 13.5px var(--bl-num);text-decoration:none;white-space:nowrap}
 .blv .hm:not(.hm-stack) .hm-more{display:none}
 
-/* Kutularla aynı ton: nötr zemin + yön rengi (--k) */
 .blv-mr .bar i,.blv-skr .pa i{background:var(--bl-n)}
 .blv-mr .bar i.up,.blv-skr .pa i.up{background:color-mix(in srgb,rgb(var(--bp-al-rgb)) calc(var(--k,0) * 100%),var(--bl-n))}
 .blv-mr .bar i.dn,.blv-skr .pa i.dn{background:color-mix(in srgb,rgb(var(--bp-sat-rgb)) calc(var(--k,0) * 100%),var(--bl-n))}
@@ -81,7 +73,6 @@
   .blv-mr .bar i.dn,.blv-skr .pa i.dn{background:rgba(var(--bp-sat-rgb),var(--k,0))}
 }
 
-/* Hareketliler */
 .blv-mv{display:grid;gap:22px 34px;grid-template-columns:minmax(0,1fr)}
 .blv-mvl{list-style:none;margin:0;padding:0}
 .blv-mvl li{border-top:1px solid var(--bp-line)}
@@ -99,7 +90,6 @@
 .blv-mr .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px}
 .blv-mr .pv{text-align:right;font:700 14px var(--bl-num);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-/* Sektörler: sıfır eksenli ıraksak çubuk */
 .blv-sk{--skc:minmax(0,184px) minmax(0,1fr) 58px}
 .blv-sk-ax{display:grid;grid-template-columns:var(--skc);gap:0 12px;font:600 10.5px/1 var(--bl-num);color:var(--bp-text-3);margin-bottom:6px}
 .blv-sk-ax .pa{position:relative;height:14px}
@@ -119,7 +109,6 @@
 .blv-skr .pa i{position:absolute;top:8px;height:14px;border-radius:3px}
 .blv-skr .v{text-align:right;font:700 13px var(--bl-num);font-variant-numeric:tabular-nums;padding-right:4px;white-space:nowrap}
 
-/* Durumu değişenler */
 .blv-st{display:inline-flex;align-items:center;font:600 12px/1.5 var(--bl-num);border-radius:99px;padding:1px 9px;white-space:nowrap}
 .blv-st.g{background:var(--bp-up);color:var(--bp-bg)}
 .blv-st.y{background:var(--bp-state-flat);color:var(--bp-text);box-shadow:inset 0 0 0 1px rgba(var(--bp-text-rgb),.14)}
@@ -154,7 +143,6 @@
 .blv-dr i{font:700 13px var(--bl-num);font-style:normal;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .blv-dr:hover b{color:var(--bp-brand)}
 
-/* Bildirimler */
 .blv-kb{list-style:none;margin:0;padding:0}
 .blv-kb li{border-top:1px solid var(--bp-line)}
 .blv-kb li:first-child{border-top:0}
@@ -169,7 +157,6 @@
 .blv-kr .ob i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--bp-art-violet),var(--bp-art-cyan))}
 .blv-kr .on b{color:var(--bp-text);font-weight:700;font-variant-numeric:tabular-nums}
 
-/* Takvim */
 .blv-cal{list-style:none;margin:0;padding:0}
 .blv-cal li{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--bp-line)}
 .blv-cal li:first-child{border-top:0}
@@ -185,7 +172,6 @@
 .blv-empty{margin:0 0 10px;padding:12px 14px;border-radius:12px;background:var(--bp-surface);border:1px solid var(--bp-line);font-size:13.5px;color:var(--bp-text-2)}
 .blv-cal-h{font:700 11.5px/1 var(--bl-num);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text-3);margin:16px 0 4px}
 
-/* Gezinme + arşiv */
 .blv-pager{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:clamp(30px,4cqi,44px)}
 .blv-pg{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:14px;border:1px solid var(--bp-border2);background:var(--bp-surface);text-decoration:none;min-height:64px;min-width:0}
 .blv a.blv-pg{color:var(--bp-text)}
@@ -206,7 +192,6 @@
 .blv a.blv-ad:hover{border-color:var(--bp-border2)}
 .blv-disc{margin:22px 0 0;font-size:12.5px;color:var(--bp-text-3);max-width:70ch}
 
-/* Arşiv sayfası */
 .blv-arh h1{margin:0 0 10px;font:800 clamp(28px,5cqi,44px)/1.05 var(--bl-disp);letter-spacing:-.035em}
 .blv-arh p{margin:0;color:var(--bp-text-2);max-width:60ch}
 .blv-mo{margin-top:clamp(26px,4cqi,40px)}
@@ -227,14 +212,13 @@
 .blv-ar .x .bar i.up{left:50%;background:color-mix(in srgb,rgb(var(--bp-al-rgb)) calc(var(--k,0) * 100%),var(--bl-n))}
 .blv-ar .x .bar i.dn{right:50%;background:color-mix(in srgb,rgb(var(--bp-sat-rgb)) calc(var(--k,0) * 100%),var(--bl-n))}
 
-/* Geniş kap */
 @container blv (min-width:760px){
   .blv-hero{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start}
   .blv-mv{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .blv-duo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:0 40px;align-items:start}
   .blv-pager{max-width:620px}
 }
-/* Dar kap (telefon) */
+
 @container blv (max-width:520px){
   .blv-mr{grid-template-columns:minmax(0,1fr) 64px 64px;gap:2px 10px}
   .blv-mr .r{display:none}

@@ -1,5 +1,3 @@
-/* C-72 Haberler v2 sekme çubuğu — /haberler, /haberler/bildirimler, /takvim, /bulten (templates/_haber_ui.html tabs()).
-   Sayfa CSS'inden bağımsız: Takvim kendi takvim.css'ini taşır, sekme çubuğu buradan gelir. */
 .hv-i{width:16px;height:16px;flex:none}
 .hv-tabs{display:flex;gap:4px;margin:6px 0 22px;padding:0;border-bottom:1px solid var(--bp-line);background:var(--bp-bg)}
 .hv-tabs a{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 14px;font:600 14px 'Space Grotesk',system-ui,sans-serif;color:var(--bp-text-3);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
@@ -7,7 +5,7 @@
 .hv-tabs a[aria-current="page"]{color:var(--bp-text);border-bottom-color:var(--bp-brand)}
 .hv-tabs a[aria-current="page"] .hv-i{color:var(--bp-brand)}
 .hv-tabs .s{display:none}
-/* yalnız Haberler sayfalarında yapışkan (Takvim'in kendi yapışkan gün başlıkları var) */
+
 .hv .hv-tabs{position:sticky;top:0;z-index:var(--bp-z-sticky)}
 @media (max-width:700px){
   .hv-tabs{gap:0}

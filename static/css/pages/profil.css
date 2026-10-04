@@ -1,18 +1,7 @@
-/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
-   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
-   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
 :root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
 
-/* ==== extracted from templates/profil.html (T2.5) ====
-   20.09 CPO — Data-Art donusumu. Bu sayfa (hos geldin mailindeki linkin
-   indigi tek yer) donusumun basladigi 18.09'dan beri hic siraya girmemisti:
-   duz kutu + duz dikdortgen secenekler + duz dikdortgen kaydet butonu.
-   Govde recetesi (degrade + kenarlik + radius + parilti) artik paylasilan
-   static/css/data-art.css `.da-panel` ilkelinden geliyor; burada SADECE bu
-   sayfanin deltasi duruyor. */
-
   * { box-sizing: border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body {
     margin: 0; padding: 0;
     -webkit-font-smoothing: antialiased;
@@ -45,7 +34,7 @@
     max-width: 540px;
     margin: 0 auto;
   }
-  /* .da-panel deltasi — zemin/kenar/radius/parilti paylasilan katmandan gelir. */
+
   .form-card {
     padding: 28px;
     margin-bottom: 18px;
@@ -93,8 +82,7 @@
     background: var(--bp-surface);
     transform: translateY(-1px);
   }
-  /* K-G kasitli cift (tools/state-order-check.py): secim geri bildirimi
-     hover'dan onceliklidir — secili secenek hover ile bulanmamali. */
+
   .opt.selected {
     border-color: var(--bp-brand);
     background: rgba(var(--bp-brand-rgb),0.10);
@@ -107,9 +95,7 @@
     display: flex; justify-content: center; gap: 12px;
     margin-top: 24px;
   }
-  /* 20.09: zemin --bp-up idi. Site genelinde --bp-up SINYAL isaretidir
-     (nokta/bar/segment, 6 kullanim); buton zemini olarak yalniz bu sayfa ve
-     /unsubscribe sapiyordu -- kanonik CTA zemini --bp-brand (14 emsal). */
+
   .btn {
     display: inline-flex; align-items: center; gap: 7px;
     background: var(--bp-brand);
@@ -154,14 +140,11 @@
     border: 1px solid rgba(var(--bp-ok-rgb),0.30);
     color: var(--bp-ok);
   }
-  /* Form ici dogrulama/hata mesaji — eskiden `alert()` idi (tarayici modali,
-     odagi calar, mobilde sayfa baglamindan kopariyordu). */
+
   .profile-msg { display: none; margin-top: 14px; text-align: center; font-size: var(--bp-type-sm); }
   .profile-msg--on  { display: block; }
   .profile-msg--err { color: var(--bp-danger); }
 
-  /* Basari paneli — eskiden formun KENDI ici innerHTML ile eziliyordu ve
-     form kalici bir role="status" canli bolgesiydi (bkz. sablondaki not). */
   .profile-result {
     padding: 34px 28px;
     text-align: center;
@@ -173,9 +156,6 @@
   .profile-result-title { font-size: var(--bp-type-lg); font-weight: 800; color: var(--bp-ok); margin-bottom: 8px; }
   .profile-result-body  { font-size: var(--bp-type-sm); color: var(--bp-text-2); margin-bottom: 24px; }
 
-  /* ── K-CU eki: alarm listesi ────────────────────────────────────────
-     Alarm e-postasinin isaret ettigi ama var olmayan yuzey. Govde receteci
-     `.da-panel`den gelir; burada yalniz satir duzeni duruyor. */
   .pf-alerts { margin-bottom: 18px; }
   .pf-alerts-title {
     font-size: var(--bp-type-body);
@@ -194,14 +174,14 @@
     color: var(--bp-text-2);
     margin-bottom: 10px;
   }
-  /* Bos durum ile HATA durumu ayri okunur ([[K-BK]]: bos != bilinmiyor). */
+
   .pf-alerts-state--err { color: var(--bp-danger); }
   .pf-alerts-list { list-style: none; margin: 0; padding: 0; }
   .pf-alert-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;                 /* 320px: tasma yerine sarmala */
+    flex-wrap: wrap;
     gap: 10px;
     padding: 12px 0;
     border-top: 1px solid var(--bp-line);
@@ -223,7 +203,7 @@
   }
   .pf-alert-off {
     flex: none;
-    min-height: 44px;                /* dokunma hedefi (WCAG 2.5.8) */
+    min-height: 44px;
     padding: 0 16px;
     border-radius: var(--bp-r-pill);
     border: 1px solid var(--bp-line-strong);

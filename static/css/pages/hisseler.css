@@ -1,25 +1,19 @@
-/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
-   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
-   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
 :root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
 
-/* ==== extracted from templates/hisseler.html (T2.5) ==== */
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body {
     font-size: var(--bp-type-body);
     line-height: 1.7;
     min-height: 100vh;
   }
-  /* C-71 K30: header kuralı shared.css'te tek kaynak (makro şeritsiz sayfada top 0). */
-  header { background: var(--bp-surface); }
 
+  header { background: var(--bp-surface); }
 
   .hh-alpha-bar {
     background: var(--bp-surface); border: 1px solid var(--bp-line); border-radius:var(--bp-r-md);
     padding: 10px 14px; margin: 0 0 12px;
-    /* C-71 K30: harf ızgarası — son satırda tek harf yetim kalmaz, sütunlar hizalı */
+
     display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px;
   }
   .hh-alpha-link {
@@ -43,9 +37,6 @@
   .hh-tab.active { color: var(--bp-text); border-bottom-color: var(--bp-art-cyan); }
   .hh-tab:hover { color: var(--bp-text); }
 
-  /* K-AG: scroll-margin-top:68px kaldirildi — shared.css html{scroll-padding-top}
-     ayni isi TUM capa/odak kaydirmalari icin yapiyor; ikisi birlikte TOPLANIR
-     ve #letter-X atlamalarinda 134px'lik bos bant birakirdi. */
   .hh-section { padding: 16px 0 8px; }
   .hh-section h2 {
     font-size: var(--bp-type-body); font-weight: 800; color: var(--bp-text);

@@ -1,19 +1,15 @@
-/* ==== extracted from templates/tarama.html (T2.5) ==== */
-
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
-    /* CPO-1558: son 2 ham-hex yerel token (--surface/--surface2 kanonikten hafif
-       sapmıştı, --gold hiç aliaslanmamıştı — bkz. reference_sablon_yerel_root_palet_sapmasi) */
+
     --surface:var(--bp-surface); --surface2:var(--bp-raised);
     --border:var(--bp-bkl-bd);
     --text2:var(--bp-text-2); --text3:var(--bp-text-3);
     --al:var(--bp-up); --sat:var(--bp-down); --bkl:var(--bp-flat);
     --brand:var(--bp-brand); --gold:var(--bp-caution);
   }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body { font-size:var(--bp-type-body); min-height:100vh; }
 
-  /* ── Header ── */
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
@@ -21,15 +17,10 @@
   .page-sub   { font-size:var(--bp-type-sm); color:var(--text2); margin-top:1px; }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
-
-  /* ══ C-34 — Tarama v2 (onaylı taslak O16c=A): tek tablo, sütun seti, hazır listeler ══
-     Renkler yalnız token: Güçlü Trend yeşil dolu hap · Yatay arduvaz (--bp-bkl-bd) ·
-     Trend Bozuldu koyu ve sessiz (kırmızı yalnız fiyat düşüşünde, kanon §5.3). */
   .tv { --tv-gut: 20px; position: relative; padding-top: 6px; }
   .tv .mut { color: var(--bp-text-3); font-family: 'Space Grotesk', system-ui, sans-serif; }
   .tv .u { color: var(--bp-up); } .tv .d { color: var(--bp-down); }
 
-  /* sayfa başı: H1 + kapanış damgası + durum şeridi (her çizgi bir hisse) */
   .tv-ph { padding: 18px 0 16px; }
   .tv-ph-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
   .tv-ph h1 { margin: 0; font-size: clamp(32px, 4.4vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -.035em; color: var(--bp-text); }
@@ -48,7 +39,6 @@
   .tv .k.b { box-shadow: inset 0 0 0 1px var(--bp-border2); }
   .tv .k.on { background: var(--bp-brand); }
 
-  /* araç çubuğu: Filtre + hazır liste çipleri */
   .tv-bar { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; border-top: 1px solid var(--bp-line); }
   .tv-fbtn { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 40px; font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: var(--bp-r-md); padding: 8px 14px; cursor: pointer; white-space: nowrap; }
   .tv-fbtn svg { width: 16px; height: 16px; flex: none; }
@@ -66,7 +56,6 @@
   .tv-eclr { display: flex; align-items: center; width: fit-content; min-height: 44px; margin: 14px auto 0; padding: 0 18px; font: 600 14px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: transparent; border: 1px solid var(--bp-line-strong); border-radius: var(--bp-r-pill); cursor: pointer; }
   .tv-eclr:hover { border-color: var(--bp-text-2); }
 
-  /* sonuç satırı: sayı + kural cümlesi · Temizle · sütun seti */
   .tv-stat { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 2px 0 14px; }
   .tv-stat p { margin: 0; flex: 1 1 360px; min-height: 20px; font: 500 13.5px/1.45 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); }
   .tv-stat p b { color: var(--bp-text); font-weight: 700; }
@@ -77,7 +66,6 @@
   .tv-seg button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); box-shadow: inset 0 0 0 1px var(--bp-border2); }
   .tv button:focus-visible, .tv a:focus-visible, .tv [tabindex]:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; }
 
-  /* tablo */
   .tv-tbw { border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg); background: var(--bp-surface); overflow-x: auto; }
   .tv-tb { width: 100%; border-collapse: collapse; font-size: 14px; }
   .tv-tb thead th { font: 600 11px/1.25 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text-3); text-align: left; padding: 0; border-bottom: 1px solid var(--bp-line); white-space: nowrap; vertical-align: bottom; }
@@ -109,14 +97,14 @@
   .tv .pill.g { background: var(--bp-up); color: var(--bp-bg); }
   .tv .pill.y { background: var(--bp-bkl-bd); color: var(--bp-text); }
   .tv .pill.b { background: var(--bp-surface3); color: var(--bp-text-2); box-shadow: inset 0 0 0 1px var(--bp-border2); }
-  /* skor: sayı + çubuk (BP yeşil, Temel camgöbeği — kanon §5.3 kimlik renkleri) */
+
   .tv-bp { display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px; vertical-align: middle; }
   .tv-bp b { min-width: 24px; text-align: right; font: 700 15px 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .tv-bp b sup { font-size: 10px; color: var(--bp-text-3); margin-left: 1px; }
   .tv-bp i { position: relative; display: block; width: 64px; height: 6px; border-radius: var(--bp-r-pill); background: var(--bp-line); overflow: hidden; }
   .tv-bp i::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v, 0) * 1%); border-radius: var(--bp-r-pill); background: var(--bp-up); }
   .tv-bp.soft b { color: var(--bp-text-2); }
-  .tv-tb .tv-bp { pointer-events: none; } /* halka/çubuk tıklaması satır bağlantısına düşsün (C-P0-2809 K05) */
+  .tv-tb .tv-bp { pointer-events: none; }
   .tv-bp.soft i::after { background: rgba(var(--bp-ok-rgb), .38); }
   .tv-bp.cy i::after { background: var(--bp-art-cyan); }
   .tv-tb td.c-te { text-align: left; }
@@ -124,7 +112,7 @@
   .tv-tb .c-te .sub { max-width: 300px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tv-skel b, .tv-skel i::after { visibility: hidden; }
   .tv-skel b::before { content: '00'; }
-  /* gruplar */
+
   .tv-tb .gh th { padding: 0; border-top: 1px solid var(--bp-line); background: linear-gradient(90deg, rgba(var(--bp-text-rgb), .025), transparent 70%); text-align: left; text-transform: none; letter-spacing: 0; }
   .tv-tb thead + tbody .gh th { border-top: 0; }
   .ghb { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 14px; background: transparent; border: 0; color: var(--bp-text-2); font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; text-align: left; cursor: pointer; }
@@ -141,7 +129,6 @@
   .tv-empty { padding: 28px 18px; text-align: center; color: var(--bp-text-3); font-size: 14px; }
   .tv-empty b { display: block; margin-bottom: 4px; color: var(--bp-text); font: 700 16px 'Space Grotesk', system-ui, sans-serif; }
 
-  /* filtre paneli: masaüstünde araç çubuğunun altında açılır kutu */
   .tv-panel[hidden] { display: none; }
   .tv-scrim { position: fixed; inset: 0; z-index: var(--bp-z-sheet); background: transparent; }
   .tv-sheet { position: absolute; left: var(--tv-gut); top: var(--tv-pop-top, 200px); z-index: calc(var(--bp-z-sheet) + 1); width: min(740px, calc(100% - 2 * var(--tv-gut))); display: flex; flex-direction: column; background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: 18px; box-shadow: 0 24px 60px rgba(var(--bp-bg-rgb), .6); }
@@ -176,7 +163,6 @@
   .tv-clr2:disabled { opacity: .4; cursor: default; }
   .tv-pri { color: var(--bp-bg); background: var(--bp-brand); border: 0; }
 
-  /* tablet: 820–1099 — Sektör gizli, sıkı dolgu, trend alt satırı alta */
   @media (max-width: 1099.98px) {
     .tv-tb .hide-t { display: none; }
     .tv-tb td { padding: 8px 10px; }
@@ -190,8 +176,7 @@
     .tv-tb .c-tr .sub { display: block; margin-left: 0; margin-top: 2px; }
     .tv-pcols { grid-template-columns: 1fr; }
   }
-  /* C-71 K35: ≥820 — Filtre düğmesi ilk çip satırıyla hizalı; panel ekrana sabit ve ekrana sığar (JS konumlar);
-     uzun listede sütun başlıkları yapışkan (overflow:clip kaydırma kabı oluşturmaz). */
+
   html.tv-lock { overflow: hidden; scrollbar-gutter: stable; }
   @media (min-width: 820px) {
     .tv-bar { align-items: flex-start; }
@@ -209,9 +194,6 @@
   @media (prefers-reduced-motion: reduce) { .tv-strip i, .ghb .chev { transition: none; } }
   @media (max-width: 480px) { .tv-bar { flex-wrap: wrap; } .tv-chip { white-space: normal; } }
 
-  /* ══ C-35 — dar ekran (<820px): 64px satır [kod | BP halkası | fiyat/değişim] aynı tablodan,
-     yapışkan "Filtre (n)" + hazır liste çubuğu, filtre alt paneli (odak tuzağı + Esc, JS).
-     Bütçe (390×844): ilk sonuç ≤260px (krom 92 + başlık 64 + çubuk 56 + grup 44), sayfa ≤5.000px. ══ */
   @media (max-width: 819.98px) {
     .tv { --tv-gut: 16px; padding: 0 var(--tv-gut) 20px; }
     .tv-ph { padding: 8px 0; }
@@ -219,9 +201,9 @@
     .tv-stamp { font-size: 12.5px; }
     .tv-strip { height: 8px; gap: 0; margin-top: 8px; border-radius: 3px; }
     .tv-leg, .tv-stat, .tv-vsep { display: none; }
-    .tv-bar { position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-sticky-subheader); gap: 8px; margin: 0 calc(-1 * var(--tv-gut)); padding: 5px 0 5px var(--tv-gut); background: var(--bp-bg); border-bottom: 1px solid var(--bp-line); } /* C-71 K37: opak — altından kayan satırlar görünmez */
+    .tv-bar { position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-sticky-subheader); gap: 8px; margin: 0 calc(-1 * var(--tv-gut)); padding: 5px 0 5px var(--tv-gut); background: var(--bp-bg); border-bottom: 1px solid var(--bp-line); }
     .tv-fbtn, .tv-chip { min-height: 44px; }
-    /* C-70 K07: telefonda Filtre düğmesi ikon + rozet; çip satırına yer kalır (erişilebilir ad JS'te aria-label). */
+
     .tv-fl { display: none; }
     .tv-fbtn { padding-left: 13px; padding-right: 13px; }
     .tv-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-right: 28px; scroll-padding-inline: 0 32px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
@@ -266,5 +248,5 @@
   @media (max-width: 480px) { .tv .tv-bar { flex-wrap: nowrap; } .tv .tv-chip { white-space: nowrap; } }
   @media (max-width: 400px) { .tv-stamp .n { display: none; } }
   @media (prefers-reduced-motion: reduce) { .tv-sheet { animation: none; } }
-  /* C-70 K07: 320'de en uzun ön ayar çipi kaydırıcıya tam sığar */
+
   @media (max-width: 359.98px) { .tv .tv-chip { padding: 8px 10px; gap: 6px; } .tv .tv-bar { gap: 6px; } }

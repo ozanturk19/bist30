@@ -1,8 +1,3 @@
-/* C-44 (26.09): reset, gövde, header ve kap kuralları prose.css'te (ortak
-   içerik kabuğu); burada yalnız İletişim'in deltası: dar form kabı + form.
-   20.09 CPO Data-Art dönüşümü: gövde reçetesi `.da-panel` ilkelinden. */
-
-  /* ── .da-panel deltaları ─────────────────────────────────────────────── */
   .card { padding: 28px; }
   .cf-intro {
     --da-accent: var(--bp-art-cyan);
@@ -27,7 +22,6 @@
   .contact-val a { color: var(--bp-brand); text-decoration: none; }
   .contact-val a:hover { text-decoration: underline; }
 
-  /* ── Form ───────────────────────────────────────────────────────────── */
   .cf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
   .cf-row  { margin-bottom: 12px; }
   .cf-label {
@@ -38,32 +32,24 @@
   }
   .cf-input {
     width: 100%;
-    /* 21.09: `background` KISAYOLU degil — bu kural data-art.css'ten SONRA
-       yukleniyor ve kisayol `background-image`i de sifirliyor; `.da-select`in
-       ok isaretini SILIYORDU (appearance:none + ok yok = HIC gostergesi olmayan
-       select). Canli computed olcumde yakalandi. */
+
     background-color: var(--bp-border-subtle);
-    border: 1px solid var(--bp-field-border);   /* K-Q */
+    border: 1px solid var(--bp-field-border);
     border-radius: var(--bp-r-sm);
     padding: 10px 13px;
     color: var(--bp-text);
-    font-size: var(--bp-type-body);   /* 16px — iOS'ta odaklanınca otomatik yakınlaştırmayı engeller */
+    font-size: var(--bp-type-body);
     font-family: inherit;
     transition: border-color var(--bp-dur-base) var(--bp-ease-standard),
                 box-shadow  var(--bp-dur-base) var(--bp-ease-standard);
   }
   .cf-textarea { resize: vertical; line-height: 1.6; }
-  .cf-input:hover { border-color: var(--bp-text-3); }   /* K-Q: hover TABANDAN acik olmali; --bp-border2 (#46464d) artik tabandan KOYUYDU */
+  .cf-input:hover { border-color: var(--bp-text-3); }
   .cf-input:focus {
     border-color: var(--bp-brand);
     box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .16);
   }
-  /* DURUM KURALI VARYANTIN ALTINDA (style-guard K-G): hatalı alan işareti
-     `:focus`tan SONRA geliyor ki odaklanmak kırmızıyı bastırmasın — hata
-     kullanıcı düzeltene kadar görünür kalmalı. Odak görünürlüğünü global
-     `:focus-visible` outline'ı zaten sağlıyor. Bu işaret ESKİDEN inline
-     `style.borderColor` ile basılıyordu; inline stil stylesheet'i yendiği
-     için alan düzeltildikten sonra bile KALICI kırmızı kalıyordu. */
+
   .cf-input.cf-invalid {
     border-color: var(--bp-danger);
     box-shadow: 0 0 0 3px rgba(var(--bp-danger-rgb), .14);
@@ -74,11 +60,9 @@
     font-size: var(--bp-type-xs); color: var(--bp-text-3);
     cursor: pointer; line-height: 1.5;
   }
-  /* kutu stilinin TEK KAYNAGI .da-check (data-art.css, 21.09) — burada yalniz
-     bu formun kendi dikey hizalama delta'si kalir. */
+
   .cf-consent input { margin-top: 3px; }
-  /* .cf-input padding kisayolu .da-select'in padding-right'ini eziyor;
-     ok isaretinin uzerine metin binmesin diye select'e ozel pay: */
+
   select.cf-input { padding-right: 30px; }
   .cf-consent a { color: var(--bp-art-cyan); }
   .cf-submit {
@@ -104,10 +88,6 @@
   .cf-msg--ok  { color: var(--bp-ok); }
   .cf-msg-sub  { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
-  /* Uyarı şeridi — düz kutu yerine sol aksanlı Data-Art şeridi. `.da-panel`
-     KULLANILMADI: içeriği doğrudan panelin içinde duran ÇIPLAK METİN düğümü,
-     yani paylaşılan katmanın bilinen sınırına (`> *` yalnız element
-     çocuklarını parıltının üstüne çıkarır) takılırdı. */
   .disclaimer {
     background: linear-gradient(135deg, rgba(var(--bp-danger-rgb),.07) 0%, rgba(var(--bp-danger-rgb),.02) 100%);
     border: 1px solid rgba(var(--bp-danger-rgb),.2);
@@ -121,6 +101,5 @@
   @media (max-width: 600px) { .card { padding: 20px; } }
   @media (max-width: 500px) { .cf-grid { grid-template-columns: 1fr; } }
 
-  /* r155 gorsel denetim: WCAG 2.5.5 - .btn-action emsaliyle ayni desen, gorunum degismez */
   #cfBtn { position: relative; }
   #cfBtn::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }

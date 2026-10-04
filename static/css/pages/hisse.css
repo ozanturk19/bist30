@@ -1,5 +1,3 @@
-/* ==== extracted from templates/hisse.html (T2.5) ==== */
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -12,10 +10,8 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
-  /* ── Header (glass) ── */
   header {
-    /* SPEC-STICKY-HEADER-v3 fix5: bp-search.js header'a !important min/max-height:60 + display:flex zorluyor.
-       CLS-fix v3.1: CSS'te de aynı değerleri set et → JS'in !important değişikliği layout shift yaratmaz. */
+
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
@@ -41,7 +37,7 @@
   .hib-action-btn.active-bell {
     background: rgba(var(--bp-ok-rgb),0.14); border-color: rgba(var(--bp-ok-rgb),0.55); color: var(--bp-ok);
   }
-  /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
+
   @media (max-width: 720px) {
     .hib-action-btn { height: 44px; padding: 0 11px; font-size: var(--bp-type-sm); }
     .hib-action-btn svg { width: 14px; height: 14px; }
@@ -49,7 +45,6 @@
     .hib-action-bar .hib-action-btn { flex: 1 1 auto; justify-content: center; min-width: 130px; }
   }
 
-  /* Toast */
   .hib-toast {
     position: fixed; left: 50%; bottom: 24px;
     transform: translateX(-50%) translateY(20px);
@@ -63,8 +58,7 @@
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .hib-toast.success { border-color: rgba(var(--bp-ok-rgb),0.4); }
   .hib-toast.warn { border-color: rgba(var(--bp-volume-rgb),0.4); }
-  /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
-     sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
+
   @media (max-width: 900px) {
     .hib-toast { bottom: calc(24px + var(--bp-mbn-h) + env(safe-area-inset-bottom)); }
   }
@@ -81,12 +75,7 @@
     font-weight: 600;
     letter-spacing: 0.3px;
   }
-  /* K-R (21.09): ayni rozet deseninin UCUNCU ismi (.sig-badge takvimlerde,
-     .sig-badge tarama'da, .signal-badge burada). Icindeki jargon baglantisi
-     masaustunde 69.4x14 idi — hedef 24px asgariyi tutmuyordu. */
-  /* K-U: bu kural data-art.css'e (kanonik `.signal-badge > .jargon-term`)
-     tasindi — portfolio.css de ayni ihlali tasiyordu, iki kopya yerine tek
-     kaynak. Buradaki yinelenen bildirim kaldirildi. */
+
   .signal-AL   {
     background: rgba(var(--bp-al-rgb),.10); color: var(--bp-up); border: 1px solid rgba(var(--bp-al-rgb),.35);
     box-shadow: 0 0 8px rgba(var(--bp-al-rgb), 0.18), inset 0 0 8px rgba(var(--bp-al-rgb), 0.05);
@@ -97,7 +86,6 @@
   }
   .signal-BEKLE{ background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-flat); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
 
-  /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
     padding: 2px 8px; border-radius:var(--bp-r-md);
@@ -105,22 +93,7 @@
     color: var(--bp-warn); border: 1px solid rgba(var(--bp-warn-rgb),0.3);
     font-size: var(--bp-type-xs); font-weight: 600; cursor: default;
   }
-  /* ── Container ── */
 
-  /* ── Grafik bölümü (20.09 — Data-Art denetimi, Grafik sekmesi) ──
-     Panel gövdesi bilinçli olarak DÜZ var(--bp-surface) kalıyor: lightweight-charts
-     kendi canvas'ını opak #141416 (= --bp-surface) ile boyuyor, gövdeye degrade
-     verilirsek mum grafiğinin çevresinde görünür bir "yama" dikişi oluşuyor.
-     Data-Art dili bu yüzden grafiğin DOKUNMADIĞI iki şeride taşındı: üst başlık
-     şeridi (degrade + violet glow + eyebrow) ve alt 52-hafta şeridi. */
-  /* K-T (21.09) — DATA-ART DIL TUTARLILIGI, Grafik sekmesi.
-     Bu panel hisse sayfasinin YEDI panelinden TEK DUZ ZEMINLI olaniydi
-     (`background:var(--bp-surface)`), digerlerinin hepsi kanonik
-     `.da-panel` gradyani (135deg surface -> surface2) + parilti tasiyor;
-     ustelik accent seridi tokenin ALFALI kopyasiyla (rgba(...,.55)) yaziliydi,
-     kardeslerinde ise DOLU token var. Gizli sekmede durdugu icin hicbir
-     gorsel denetim turu bunu karsilastirmali gormemisti.
-     Kural (bu turda yazildi): SERIT RENGI = PARILTI RENGI. */
   .chart-section {
     --da-accent: var(--bp-art-violet);
     --da-glow-rgb: var(--bp-art-violet-rgb);
@@ -154,16 +127,12 @@
     font-weight: 700;
     letter-spacing: -0.01em;
   }
-  /* 21.09 (K-W): `.spinner` + @keyframes spin SİLİNDİ — kanonik `.da-spin`
-     (data-art.css §5). Aynı ad tarama.css'te de tanımlıydı, AYRI geometriyle
-     (24px/3px/.7s) ve bu şablondaki altı kullanımın dördü zaten geometriyi
-     inline eziyordu. `#chartLoading` yerleşimi `.da-loading--block`a geçti;
-     burada yalnız grafik alanının yüksekliği (sayfa deltası) kaldı. */
+
   #chartLoading { height: clamp(420px, 60vh, 640px); padding: 0; }
 
   #chartsInner { display: none; }
   #chartMain   { height: clamp(420px, 60vh, 640px); margin: 4px 18px 8px; }
-  /* C-23 (C-M10): donem cipleri, OHLC lejanti, anahtar satiri, getiri seridi. */
+
   .ch-chips { margin-left: auto; display: inline-flex; gap: 2px; padding: 2px; background: var(--bp-bg); border: 1px solid var(--bp-line); border-radius: 11px; }
   .ch-chips button { font: 600 12.5px/1 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); background: transparent; border: 0; border-radius: 9px; padding: 6px 11px; min-width: 40px; min-height: 34px; cursor: pointer; font-variant-numeric: tabular-nums; }
   .ch-chips button:hover { color: var(--bp-text-2); }
@@ -175,7 +144,7 @@
   .ch-l-date { color: var(--bp-text-2); font-weight: 600; }
   .ch-l-ev { color: var(--bp-text-2); }
   .ch-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 6px 18px 0; font-size: var(--bp-type-xs); color: var(--bp-text-3); }
-  /* C-25a: veri gelmeden de satirin yeri ayrilir (gorunmez, erisilebilirlik agacinda yok) -- grafik govdesi sonradan asagi kaymaz. */
+
   .ch-keys[hidden] { display: flex; visibility: hidden; }
   .ch-keys[hidden], .ch-returns[hidden] { display: none; }
   .ch-key { display: inline-flex; align-items: center; gap: 6px; }
@@ -192,7 +161,6 @@
   .ch-ret { display: inline-flex; gap: 6px; align-items: baseline; }
   .ch-ret-k { font-weight: 600; letter-spacing: .04em; }
 
-  /* ── 52 Haftalık Bar ── */
   .week52-bar {
     position: relative;
     padding: 12px 18px 16px;
@@ -210,11 +178,7 @@
     align-items: baseline;
     gap: 10px;
   }
-  /* ── 20.09 Grafik sekmesi Data-Art denetimi: guncel fiyat etiketi seridin
-     ORTASINA sabitlenmisti (justify-content:space-between'in orta ogesi), imlec
-     ise gercek konumdaydi. THYAO'da imlec %24'te, etiket %50'de duruyordu —
-     kullanici barın ortasında bir fiyat gorup "aralığın ortasında" okuyordu.
-     Etiket artik imlece kenetli; uc degerleri kendi etiketlerinin altinda. ── */
+
   .week52-cap {
     position: absolute;
     top: 13px;
@@ -255,8 +219,7 @@
     letter-spacing: .12em; text-transform: uppercase;
     color: var(--bp-art-cyan);
   }
-  /* .week52-range (mono, ortadaki "dusuk — yuksek" ciftinin bicimi) 20.09'da
-     uc etiketlerine tasindigi icin kaldirildi; yerine konum cumlesi geldi. */
+
   .week52-pos {
     font-size: var(--bp-type-xs); font-weight: 600;
     letter-spacing: 0; color: var(--bp-text-3);
@@ -288,7 +251,6 @@
     transition: left 0.4s ease;
   }
 
-  /* ── Teknik Yorum ── */
   .commentary-section {
     background: rgba(var(--bp-brand-rgb),0.05);
     border: 1px solid rgba(var(--bp-brand-rgb),0.15);
@@ -303,7 +265,6 @@
   }
   .commentary-text strong { color: var(--bp-text); }
 
-  /* ── Info cards ── */
   .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -336,7 +297,7 @@
     color: var(--bp-text-3);
     margin-top: 4px;
   }
-  /* ── Giriş Analizi section ── */
+
   .entry-analysis-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-line);
@@ -344,9 +305,7 @@
     padding: 16px 18px;
     margin-bottom: 20px;
   }
-  /* K-BT (22.09): ucuncu kolon "Hacim Profili" idi; artik kendi bolumunde
-     (bkz. hisse.html #volumeProfileSection) cunku girise bagimli erken-return'ler
-     onun DOM'unu siliyordu. Kalan iki kolon: Degerlendirme + Risk/Odul. */
+
   .entry-analysis-grid {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -370,29 +329,20 @@
   }
   .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:var(--bp-type-sm); margin-top:4px; line-height:1.4; flex-wrap:wrap; }
   .hacim-profili .hp-row-text { color:var(--bp-text-2); flex-shrink:0; }
-  /* C-71 K28: RVOL ipucu 17 px yüksekti; isabet alanı ~27 px, görünüm ve satır aynı */
+
   .hacim-profili .hp-row-text abbr[tabindex] { position:relative; cursor:help; }
   .hacim-profili .hp-row-text abbr[tabindex]::after { content:''; position:absolute; inset:-5px -2px; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
-  /* K-BO (21.09): Hacim Profili'nin IKI satiri da (RVOL 5g/20g + sinyal gunu
-     signal_vol_ratio) YON-BAGIMSIZ buyukluklerdir — yuksek hacim cokuste de
-     olusur, dusuk hacim "kotu" degil sadece ince. ok/bad yesil-kirmizi
-     boyanınca panel bir YON iddiasi gibi okunuyordu; ustelik hemen yanindaki
-     `.hp-tag.premium` (⭐ Hacim Onayli) zaten --bp-volume idi: tek satir, iki
-     renk. Emsal: tarama.css .trend-label (ADX, 10.09 BTCIM). Eksen tek renk +
-     notr kademeler. */
+
   .hacim-profili .hp-row-val.ok { color:var(--bp-volume); }
   .hacim-profili .hp-row-val.weak { color:var(--bp-text-2); }
   .hacim-profili .hp-row-val.bad { color:var(--bp-text-3); }
   .hacim-profili .hp-row-val .hp-tag { font-size:var(--bp-type-xs); padding:1px 6px; border-radius:var(--bp-r-sm); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
-  /* K-BO: "✓ TEYITLI" de bir HACIM teyididir (sinyal gunu hacmi ortalamayi
-     gecti) — ⭐ Hacim Onayli ile AYNI eksen, ayni renk. Ikisi metinleriyle
-     ayrilir, renkle degil [[a32bfdc renk tek basina anlam tasimamali]]. */
+
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.08); border:1px solid rgba(var(--bp-volume-rgb),.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-type-sm); color:var(--bp-text-3); font-style:italic; line-height:1.4; }
 
-  /* ── İndikatör badges ── */
   .indicators-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-line);
@@ -400,12 +350,7 @@
     padding: 16px 18px;
     margin-bottom: 20px;
   }
-  /* 20.09 Data-Art: sayfadaki 14 kart basligi TEK hamlede ayni tipografiye
-     getirildi (Space Grotesk + genis tracking = ana sayfanin .da-eyebrow
-     imzasi). Renk bilincli olarak cyan DEGIL text2: cyan bu sayfada
-     eyebrow+dot deseninin (panel etiketi) rengi, 14 basligi da cyan yapmak
-     o ayrimi yok ederdi; --bp-volume (index'in eyebrow rengi) ise burada
-     "Hacim Onayli" anlamini tasiyor, semantik carpisma olurdu. */
+
   .section-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-type-sm);
@@ -416,13 +361,6 @@
     margin-bottom: 12px;
   }
 
-  /* CPO-DEV2-098: Özet sekmesi IA yeniden yapılandırması — ikincil derinlik
-     (indikatör/MTF/geçmiş/temel-analiz/backtest) native <details> ile talep
-     üzerine açılır, varsayılan kapalı.
-     21.09 (K-W): `.bp-detail-toggle*` reçetesi buradan data-art.css §7'ye
-     taşındı — aynı blok gundem.css + ozet.css'te de ayrı ayrı yazılmıştı ve
-     ozet.css'inki sessizce sapmıştı (11px/600/uppercase/text3). Tek kaynak. */
-  /* Screen-reader only — visually hidden but crawlable */
   .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -452,12 +390,7 @@
   .ind-bull    { background: rgba(var(--bp-al-rgb),.15);  color: var(--bp-up); border: 1px solid rgba(var(--bp-al-rgb),.3);  }
   .ind-bear    { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-down-on-tint); border: 1px solid rgba(var(--bp-sat-rgb),.3);  }
   .ind-neutral { background: rgba(var(--bp-text3-rgb),.12); color: var(--bp-flat); border: 1px solid rgba(var(--bp-text3-rgb),.25); }
-  /* K-BS (22.09) — HACIM EKSENI: yon-bagimsiz bir buyukluk, yon rengiyle
-     boyanamaz (K-BO). Rozet `ind-bull` (= --bp-up yukselis yesili) kullaniyordu;
-     kapi 34 token/ham-hex taradigi icin SINIF ADI uzerinden gelen ihlali
-     gormemisti. Hacim ekseninin kanonik rengi --bp-volume (tokens.css
-     CPO-1149/1150) — ayni sayfadaki "⭐ Hacim Onaylı" chip'iyle ayni uclu
-     (--bp-volume / -bg / -bd), tek eksen tek renk. */
+
   .ind-volume  { background: var(--bp-volume-bg); color: var(--bp-volume); border: 1px solid var(--bp-volume-bd); }
   .ind-bull:hover    { border-color: rgba(var(--bp-al-rgb),.6);  box-shadow: 0 0 0 3px rgba(var(--bp-al-rgb),.12); }
   .ind-bear:hover    { border-color: rgba(var(--bp-sat-rgb),.6); box-shadow: 0 0 0 3px rgba(var(--bp-sat-rgb),.12); }
@@ -465,20 +398,11 @@
 
   .ind-detail {
     font-size: var(--bp-type-xs);
-    color: rgba(255,255,255,0.60); /* adequate contrast on tinted badge backgrounds */
+    color: rgba(255,255,255,0.60);
     font-weight: 400;
     margin-left: 4px;
   }
-  /* 21.09 (CPO) — DOKUNMA HEDEFİ: 22×22px, WCAG 2.5.8-AA asgarisinin (24)
-     altındaydı. İLK DENEME görünmez 44×44 `::before` halosuydu (portfolio.css
-     `.ls-warning-close`in kanıtlanmış deseni) — CANLI İSABET TESTİ ÇÜRÜTTÜ:
-     `.ls-warning-close`ta halonun 6/6 probu butona isabet ederken burada
-     0/6 isabet etti, noktalar komşu DIV/SPAN'a düştü. Yani halo deseni
-     EVRENSEL DEĞİL: yalnız hiçbir ata kırpmıyorsa ve üstüne bir şey
-     boyanmıyorsa işler (bu satırda `.ind-help::after` tooltip'i yüzünden
-     zaten taşma kısıtı var, bkz. aşağıdaki ~1021 notu). Dairenin kendisi
-     24px'e çıkarıldı — ata bağımlılığı olmayan tek sağlam çözüm; 2px büyüme
-     gösterge satırının hizasını bozmuyor (canlı doğrulandı). */
+
   .ind-help {
     display: inline-flex; align-items: center; justify-content: center;
     width: 24px; height: 24px; border-radius: 50%;
@@ -489,24 +413,7 @@
     font-family: inherit;
   }
   .ind-help:hover { opacity: 1; background: var(--bp-border2); color: var(--bp-text); }
-  /* 21.09 (K-AU) — `.ind-help::after` (content:attr(data-tooltip)) SILINDI.
-     Sabit yonlu aciliyordu (bottom:130% = HER ZAMAN yukari, left:50% =
-     HER ZAMAN ortali), viewport cevirmesi/kenar kelepcesi YOKTU. Canli olcum
-     (borsapusula.com/hisse/ASELS, 604daef): dugme yapiskan `.macro-bar`in
-     hemen altindayken 4/4 ipucunun ustu gorunur alanin DISINA tasiyordu
-     (75/93/129/165px) — gorunur yukseklik orani %0. 320px'te ayrica 4/4
-     saga tasiyordu (20/35/47/64px) ve `html{overflow-x:clip}` (bkz. ~1021)
-     yuzunden o metin KAYDIRMAYLA DA geri getirilemiyordu (RSI ipucunun her
-     satirinin sag %23'u). Cozum yamamak degil GOC: kanonik [data-tip] +
-     static/js/bp-tooltip.js — position:fixed, `top<8` olunca alta cevirir,
-     `Math.max(8, min(left, vw-tw-8))` ile yatay kelepceler, tap-toggle +
-     Escape + disari-tiklama + aria-describedby zaten icinde.
-     Ayni goc tarama.css'te (bkz. ~475) daha once yapilmisti.
-     `position:relative` de kalkti — tek isi bu ::after'i cipalamakti. */
 
-  /* C-74 K11 (02.10): sinyal mini istatistikleri + Sinyal Gecmisi tablosu kalkti. */
-
-  /* ── İlgili Blog Kartları ── */
   .blog-read-card {
     background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
     border: 1px solid var(--bp-line);
@@ -526,25 +433,12 @@
     transform: rotate(0deg) translateY(-2px);
   }
 
-  /* ── Temel Analiz paneli (Data-Art, 20.09) ──
-     20.09'a kadar sablon icinde inline duz-kutu (surface + duz border +
-     radius-lg) idi; Ozet sekmesinin EN UZUN blogu oldugu icin hero'nun
-     degrade/glow dilinden en cok kopan yuzeydi. Baslik seridi grafik
-     sekmesiyle ayni desene (degrade serit + radial glow) getirildi.
-     Panel GOVDESINE degrade verildi ama ic kutulara (#fundAnalyst,
-     #fundTrendChart) DOKUNULMADI: ikisi de --bp-bg ile opak, degradeyi
-     ustlerinde tasimiyorlar — bu bilincli bir kontrast, "kart icinde
-     kart" ayrimini koruyor. */
   .da-fund-panel {
     margin-bottom: 20px;
     --da-glow-y:-40%;--da-glow-size:260px;
     --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.12;
   }
-  /* Temel Analiz verisi hic yoksa panel gizlenir. Inline style.display DEGIL
-     sinif kullaniliyor: applyTab() eskiden her sekme gecisinde [data-tab-content]
-     panellerinin inline display'ini '' yapiyordu (C-25a'dan beri [data-hx-tab] kurali), yani inline gizleme bir
-     sekme gidip-gelisinde geri aciliyordu (canlida olculdu: none -> block)
-     ve icerigi olmayan bos bir "Temel Analiz" basligi ortaya cikiyordu. */
+
   .da-fund-panel.da-fund-empty { display: none !important; }
   .da-fund-head {
     display: flex; align-items: center; justify-content: space-between;
@@ -555,11 +449,7 @@
   }
   .da-fund-head .section-title { margin: 0; }
   .da-fund-note { font-size: var(--bp-type-xs); color: var(--bp-text-3); }
-  /* Grup etiketleri (Degerleme / Karlilik / Trend / Getiri): renk bilincli
-     olarak cyan DEGIL — cyan bu sayfada panel-seviyesi eyebrow rengi
-     (.da-util-eyebrow), grup-ici alt etiketleri de cyan yapmak o hiyerarsi
-     ayrimini silerdi. Sadece tipografi Data-Art'a (Space Grotesk + .12em)
-     hizalandi. */
+
   .da-fund-group-label {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-type-xs); font-weight: 700;
@@ -573,9 +463,6 @@
     gap: 8px;
   }
 
-  /* ── KAP Bildirimleri ── */
-  /* K-T: gorunum zaten kanonikle AYNIYDI, ama el yazimiyla kopyalanmisti —
-     tek kaynaga alindi (parilti SOLDA kalir: --da-glow-left). */
   .kap-section {
     --da-accent: var(--bp-art-cyan);
     --da-glow-rgb: var(--bp-accent-cyan-rgb);
@@ -586,8 +473,7 @@
     padding: 18px 20px;
     margin-bottom: 20px;
   }
-  /* C-24 (25.09): tek kronolojik zaman cizelgesi -- ay basligi, gun sutunu, notr etiket
-     (kanon: "Ozel durum / Finansal rapor"), trend durumunun basladigi gun ayrac. */
+
   .kap-month {
     font-size: var(--bp-type-xs); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
     color: var(--bp-text-3); margin: 16px 0 2px;
@@ -617,7 +503,6 @@
   .kap-all { margin-top: 12px; min-height: 44px; }
   .kap-empty { margin: 0; font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
-  /* ── Metodoloji notu ── */
   .methodology {
     background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
     border: 1px solid var(--bp-line);
@@ -631,10 +516,6 @@
   }
   .methodology strong { color: var(--bp-text-2); }
 
-  /* SPEC-011 L4 / SPEC-013 — İçerik zenginleştirme blokları.
-     20.09: gövde reçetesi (degrade + kenarlık + radius-20 + parıltı) artık
-     data-art.css `.da-panel` — şablonda `class="da-panel content-card"`.
-     Burada yalnızca sayfaya özgü DELTA kalır. */
   .content-card {
     padding: 18px 20px;
     margin-bottom: 20px;
@@ -652,10 +533,6 @@
     margin-top: 8px;
   }
 
-  /* GEO hap-bilgi kapsülü — sıkı, etiketli istatistik grid'i (bkz.
-     templates/hisse.html "GEO: hap-bilgi kapsülü" yorumu). Bilinçli
-     olarak .faq-q/.faq-a'dan (düz-yazı soru/cevap) farklı bir görsel
-     dil — burası kısa değer listesi, cümle değil. */
   .quickfacts-card {
     position: relative; overflow: hidden;
     background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
@@ -673,7 +550,7 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-type-xs); color: var(--bp-art-cyan); text-transform: uppercase;
     letter-spacing: .12em; font-weight: 700;
-    margin-top: 0;   /* K-AM: artik <h2> */
+    margin-top: 0;
     margin-bottom: 12px;
   }
   .quickfacts-list {
@@ -687,8 +564,7 @@
     font-size: var(--bp-type-sm); font-weight: 700; color: var(--bp-text);
     margin: 0; letter-spacing: -0.2px;
   }
-  /* K-BQ: Supertrend seviyesinin FIYATA GORE rolu (destek/direnc/stop) —
-     sayinin yanindaki ikincil aciklama, deger gibi okunmamali. */
+
   .qf-row dd .qf-sub {
     font-size: var(--bp-type-xs);
     font-weight: 500; color: var(--bp-text-3); letter-spacing: 0;
@@ -750,13 +626,7 @@
     text-overflow: ellipsis;
   }
 
-  /* ── Responsive ── */
-  /* K-DR: bu sayfanın kendi guard'ı (SPEC-STICKY-HEADER-v3 + DEV2-T-MOBOVF-1)
-     shared.css'teki TEK KANONA taşındı — `html, body { overflow-x: clip; }`.
-     Gerekçe orada, ölçümüyle birlikte yazılı. Bu sayfada guard'ın ölçülmüş işi
-     `.score-section::before` (inset:-60px dekoratif ışıma) + `.ind-help::after`
-     tooltip'in belge-seviyesi taşmasını kesmek; 320px'te 48px, 1280px'te 36px. */
-  @media (max-width: 768px) {  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
+  @media (max-width: 768px) {
     .signal-badge  { font-size: var(--bp-type-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     #chartMain    { height: 360px; margin: 4px 14px 6px; }
@@ -764,48 +634,33 @@
     .ch-chips button { flex: 1; min-height: 44px; }
     .ch-legend, .ch-keys, .ch-period, .ch-returns { padding-left: 14px; padding-right: 14px; }
     .ch-ema { min-height: 36px; }
-    /* 20.09: masaustunde 18px olan serit insetleri mobilde de chartMain ile
-       ayni degerde kalmali — aksi halde grafik govdesi seritlerden 4-8px kayiyor. */
+
     .chart-header { padding: 12px 14px; }
     .week52-bar   { padding: 12px 14px 14px; }
     #chartLoading { height: 360px; }
-    .ch-legend { min-height: 42px; }  /* C-25a: telefonda lejant iki satir; yer onceden ayrilir */
+    .ch-legend { min-height: 42px; }
     .ch-keys { min-height: 62px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
-    .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; } /* C-61: 3 kart */
+    .info-grid > .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .chart-section { overflow: hidden; }
   }
   .mc-pos { color: var(--bp-up); }
   .mc-neg { color: var(--bp-down); }
   .mc-neu { color: var(--bp-flat); }
 
-  /* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada UCUNCU bir yapiskan bant var --
-     C-19'dan beri .da-tabs sekme seridi (44px + 1px cizgi). Kanonik
-     --bp-sticky-top bunu --bp-chrome-extra ile toplar (odak seridin altinda kalmaz). */
-  :root { --bp-chrome-extra: 45px; }   /* K-AY */
+  :root { --bp-chrome-extra: 45px; }
 
-  /* ── C-19 (25.09): .da-tabs — 4 sekme, ARIA tabs deseni (C-M10 taslagi, O16i=A).
-     Eski .bp-segments hap seridi + sembol hapi + AI sekmesi kalkti. Aktif sekme
-     marka rengi alt cizgi; yapiskan (header'in hemen alti). Görünüm C-17'den beri data-art.css'te. ── */
-  /* Görünüm kanonda (data-art.css §7e .da-tabs, C-17); burada yalnız konum. */
   .da-tabs{ position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-sticky-subheader); margin:0 0 18px; }
   @media (max-width:768px){ .da-tabs{ margin:0 -12px 14px; padding:0 4px; } }
 
-  /* C-19: "Ne anlama geliyor? · Kural tabanli" karti (eski AI sekmesinin icerigi). */
   .hx-mean{ padding:16px 18px; margin-bottom:16px; }
   .hx-mean-h{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
   .hx-mean-t{ margin:0; font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); }
   .hx-mean-p{ margin:6px 0 0; font-size:var(--bp-type-body); line-height:1.6; color:var(--bp-text-2); }
   .hx-mean-p b{ color:var(--bp-text); }
-  /* C-19: Ozet dibindeki tek <details> (Hap Bilgi / SSS / Metodoloji). */
+
   .hx-more > .bp-detail-toggle-body > *{ margin-bottom:14px; }
 
-    /* C-71 K38 (02.10): "Üste çık" düğmesi kaldırıldı — telefonda değer sütununu örtüyordu;
-       üste dönüş alt gezinme ve tarayıcının kendi hareketiyle zaten var (Maksimum Sadelik). */
-
-  /* ══ C-20 (25.09): Ozet hero v2 + "3 Soruda" (C-M1 v2 taslagi, O16a=B) ═══════════════════
-     Renkler yalniz token; yesil/kirmizi yalniz fiyat degisiminde; BP halkasi yesil (kimlik),
-     grafik notr periwinkle. Fiyat Bricolage 64/40 (.da-display). */
   .hx-top{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:28px; align-items:start; margin:6px 0 22px; }
   .hx-head{ min-width:0; }
   .hx-id{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; min-width:0; }
@@ -829,7 +684,7 @@
   .hx-acts .hx-act--pri.active-bell{ background:rgba(var(--bp-ok-rgb),0.14); border-color:rgba(var(--bp-ok-rgb),0.55); color:var(--bp-ok); }
   .hx-acts .hx-act--ico .hib-action-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hx-acts .hx-act--ico{ position:relative; width:40px; padding:0; justify-content:center; }
-  /* C-21c: 🔔 "Takip et" altindaki e-posta paneli (girissiz kullanici; eski sayfa sonu kutusunun yerine) */
+
   .hx-chart{ position:relative; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-lg); padding:14px 16px 12px; min-width:0; }
   .hx-chart-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .hx-chart-pc{ font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-type-sm); font-weight:600; color:var(--bp-text-2); }
@@ -940,11 +795,6 @@
     .hx-acts .hx-act--ico{ display:none; }
   }
 
-    /* ── Data-Art dil aktarımı: Paylaş/Haber-Akışı kutuları (18.09 — Ozan:
-       "Resmi Kaynaklar amatör görünüyor, hisse sayfası ana sayfayla tasarımsal
-       konuşmuyor"). Ana sayfanın .da-eyebrow/.da-badge/.da-recap-panel dilinden
-       ödünç alınan hisse.html karşılıkları — kanonik paylaşılan dosya değil ama
-       en azından AYNI dili konuşuyor, sonraki sayfalara da taşınabilir. ── */
     .da-util-eyebrow{
       display:inline-flex;align-items:center;gap:7px;
       font-family:'Space Grotesk',system-ui,sans-serif;
@@ -956,12 +806,6 @@
       box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);flex:none;
     }
 
-    /* SEO teknik-ozet seridi — 20.09'a kadar sablon icinde inline duz-kutu
-       (surface + uppercase mikro-etiket) olarak duruyordu, yani Ozan'in
-       "amator" dedigi desenin ta kendisiydi. */
-    /* 20.09: gövde reçetesi (degrade + kenarlık + radius + parıltı) artık
-       static/css/data-art.css `.da-panel` ilkelinde — burada SADECE bu panelin
-       deltası duruyor. Şablonda `da-panel` sınıfı eklendi. */
     .da-techsum-panel{
       padding:16px 20px;margin-bottom:20px;
       --da-glow-y:-50%;--da-glow-left:-5%;--da-glow-x:auto;--da-glow-size:220px;
@@ -969,15 +813,6 @@
     }
     .da-techsum-panel .da-util-eyebrow{margin-bottom:10px}
 
-    /* ── AI Analiz sekmesi (20.09) — sekmenin IKI paneli de sayfanin geri kalanindan
-       FARKLI bir dildeydi: govde sabit bir marka/cyan tintiyle (rgba(brand,.08) ->
-       rgba(29,78,216,.05)) boyaniyordu, oysa hisse.html'deki her Data-Art paneli
-       surface -> surface2 degradesi + tek bir radial parilti kullaniyor. Ustelik
-       ikinci renk duragi (29,78,216 = eski palet blue-700) 3eef645'teki palet
-       gocunden sag kalmis bir kalintiydi. Panel kimligi artik zeminle degil,
-       sol aksan seridi + parilti rengiyle tasiniyor (.da-story-panel emsali). ── */
-    /* Aksan + parıltı .da-panel varsayılanlarıyla (marka mavisi) birebir aynı;
-       bu panelin deltası sadece iç boşluk. */
     .da-ai-panel{ padding:18px 20px;margin-bottom:20px; }
     .da-ai-panel--fund{ --da-accent:var(--bp-art-cyan);--da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10; }
     .da-ai-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -986,10 +821,6 @@
     }
     .da-ai-note{font-size:var(--bp-type-xs);color:var(--bp-text-3)}
 
-    /* ── "Sinyal Özeti" kutusu — 19.09, hisse.html Data-Art denetiminin devamı.
-       Bu kutu Özet sekmesinde hero kartın HEMEN altında, sayfanın en görünür
-       içerik bloğu — hâlâ eski düz-kutu diliyle kalması hero'nun cüretkar
-       degrade/glow'undan sonra en sert görsel kopukluğu yaratıyordu. ── */
     .da-summary-panel{
       padding:20px 20px 16px;margin-bottom:20px;
       --da-glow-y:-40%;--da-glow-left:-6%;--da-glow-x:auto;--da-glow-size:240px;--da-glow-a:.12;
@@ -1017,42 +848,13 @@
       cursor: crosshair; touch-action: none;
       -webkit-tap-highlight-color: transparent;
     }
-  
 
-    /* r177 (Ozan geri bildirimi, maksimum sadelik): alt sabit CTA çubuğu (Takibe Al/
-       Alarm/Paylaş) kaldırıldı — Portföy ve Alarm zaten yukarıdaki .hib-action-bar'da
-       (hibStarBtn/hibBellBtn) vardı, aynı iki eylem sayfada iki ayrı yerde tekrar
-       ediyordu. Paylaş .hib-action-bar'a üçüncü buton olarak taşındı. Her sayfa
-       görüntülemesinde kalıcı ~60-90px (safe-area dahil) dikey alan geri kazanıldı. */
-
-  
-
-/* a11y: #signalSummaryDetails > summary'nin outline:none'i klavye odak
-   halkasini hic olmadan siliyordu, yerine hicbir sey konmamisti (bug-hunt) */
 #signalSummaryDetails summary:focus-visible {
   outline: 2px solid var(--bp-brand);
   outline-offset: 2px;
   border-radius: var(--bp-r-sm);
 }
 
-/* ── Data-Art içerik-kartı cilası (08.09 gece) — hero'yla aynı görsel dil
-   mockup'taki (hisse-detay-dataart.html) "köşe parıltısı + kenarlık-kontrastı +
-   hafif eğim" reçetesi: box-shadow YOK (derinlik border-contrast'tan gelir),
-   sadece ADDITIVE — mevcut inline background/border/padding'e dokunulmadı,
-   hiçbir HTML/JS/id değişmedi. ── */
-/* 20.09 BULGU — bu grup 08.09'da `#signalSummarySection`'ı da kapsıyordu; 19.09'da
-   aynı öğe için yazılan `.da-summary-panel::before` (marka parıltısı, 240px, sol-üst)
-   ID-özgüllüğü yüzünden CANLIDA HİÇ UYGULANMAMIŞTI — panel sessizce eski içerik-kartı
-   parıltısını (violet .13, 220px, sağ-üst) taşıyordu. Canlı ölçümle yakalandı
-   (getComputedStyle ::before: 220px/-35%/rgba(124,92,255,.13) ≠ kaynaktaki 240px).
-   `#signalSummarySection` gruptan çıkarıldı: panel artık data-art.css `.da-panel`
-   ilkelini kullanıyor, yani sayfadaki diğer 6 panelle AYNI reçete.
-
-   20.09 (ikinci adım) — bu iki kart da `.da-panel`e geçti: `position/overflow`,
-   `::before` parıltı bloğu ve `> *` z-index düzeltmesi elle kopyalanmış hâldeydi;
-   artık yalnızca parıltının DELTA'sı (renk/boyut/konum) burada duruyor. Değerler
-   önceki elle yazılmış hâlle birebir aynı tutuldu (violet .13 / 220px / -35% / -6%),
-   yani görsel çıktı değişmiyor — tek kaynak kazanıldı. */
 .content-card,
 .faq-card {
   --da-glow-rgb: var(--bp-art-violet-rgb);
@@ -1085,14 +887,12 @@
   background: rgba(var(--bp-accent-cyan-rgb), .08);
 }
 
-/* ── Teknik Detaylar konsolu — renk-kodlu satırlar (08.09 gece) ── */
 .tech-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 3px 0;
-  /* 21.09 (K-AT): satira "… nedir?" baglantisi eklendi; wrap olmadan dar
-     ekranda teknik metin ile baglanti birbirini eziyordu (K-AE dersi). */
+
   flex-wrap: wrap;
 }
 .tech-row-dot {
@@ -1104,11 +904,10 @@
 .tech-row-bull .tech-row-dot { background: var(--bp-up); box-shadow: 0 0 6px rgba(var(--bp-al-rgb), .6); }
 .tech-row-bear .tech-row-dot { background: var(--bp-down); box-shadow: 0 0 6px rgba(var(--bp-sat-rgb), .6); }
 .tech-row-neutral .tech-row-dot { background: var(--bp-text-3); }
-/* 21.09 (K-AT): gostergeyi anlatan blog yazisina gercek baglanti — `blog:` alani
-   daha once yalnizca hicbir yerde okunmayan `data-link`e yaziliyordu. */
+
 .tech-row-link {
   margin-left: auto; flex: none; white-space: nowrap;
-  /* dokunma hedefi: satir ici metin 20px kaliyordu -> 24px (WCAG 2.5.8) */
+
   display: inline-flex; align-items: center; min-height: 24px;
   color: var(--bp-art-cyan); text-decoration: none;
   font-size: var(--bp-type-xs); font-weight: 600;
@@ -1116,14 +915,6 @@
 }
 .tech-row-link:hover { color: var(--bp-text); border-bottom-color: var(--bp-text); }
 
-/* ══════════════════════════════════════════════════════════════════════
-   C-22 + C-22b (25.09) — Temel sekmesi v2 (onaylı taslak v3, C-M6).
-   Eski "Üç Skor Analizi" (halkalar + radar + AI yorumu) ve kart ızgarası
-   kalktı. Üstte "Finansalları nasıl?" + Temel skor halkası (.da-ring--temel)
-   + eksen satırları; altta 6 panel. Renk: Temel kimliği camgöbeği, değişim
-   çubuklarında yön rengi yok (kanon §5.3, negatif = soluk). O16e=B: sayı
-   sütunları sabit genişlik, satırlar hizalı.
-   ══════════════════════════════════════════════════════════════════════ */
 .tv-hero {
   display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.5fr); gap: 26px;
   padding: 22px 24px; margin-bottom: 18px; border-radius: var(--bp-r-lg); border: 1px solid var(--bp-line);
@@ -1155,7 +946,7 @@
 .tv-prep, .tv-err { margin: 0 0 14px; font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 .tv-err { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .tv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
-/* C-71 K33b: tek sayıda panel kalınca sonuncu tam satır (boş hücre 0); grafik yarım genişlikte kalır */
+
 .tv-grid > .tv-pan:nth-child(odd of .tv-pan:not([hidden])):nth-last-child(1 of .tv-pan:not([hidden])) { grid-column: 1 / -1; }
 @media (min-width: 981px) { .tv-grid > .tv-pan:nth-child(odd of .tv-pan:not([hidden])):nth-last-child(1 of .tv-pan:not([hidden])) > :not(.tv-ph) { max-width: calc(50% - 9px); } }
 .tv-pan { min-width: 0; padding: 16px 18px 18px; border-radius: var(--bp-r-lg); border: 1px solid var(--bp-line); background: var(--bp-surface); }
@@ -1209,7 +1000,7 @@
 .tv-chip--p { color: var(--bp-stale); border-color: rgba(var(--bp-stale-rgb), .45); }
 .tv-an { margin: 14px 0 0; padding: 9px 11px; border-radius: var(--bp-r-md); background: var(--bp-raised); font-size: var(--bp-type-sm); color: var(--bp-text-2); }
 .tv-an b { font-family: 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); }
-/* kv: etiket + sabit genişlikli sayı sütunları (O16e=B) */
+
 .tv-kv-t { display: grid; margin-top: 12px; font-size: var(--bp-type-body); }
 .tv-kv-h, .tv-kv-r { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px; gap: 8px; align-items: baseline; }
 .tv-kv-t--1 .tv-kv-h, .tv-kv-t--1 .tv-kv-r { grid-template-columns: minmax(0, 1fr) 112px; }
@@ -1235,7 +1026,6 @@
 .tv-divs b { font: 700 1.15rem/1.3 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 #panel-temel > .hx-disc { margin-top: 18px; }
 
-/* C-71 K33b: İlgili okumalar — kart sayısı kadar sütun (en çok 4), 980 altı 4 kart 2+2, 600 altı tek sütun */
 .read-grid { display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 980px) { .read-grid[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .read-grid[data-n] { grid-template-columns: 1fr; } }
@@ -1254,7 +1044,7 @@
   .tv-say { margin: 6px 0 10px; }
   .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 84px 84px; }
   .tv-kv-r { padding: 6px 0; }
-  .tv-foot, .tv-kind, .tv-ax-x { display: none; }   /* taslak v3: telefonda yontem notu ve ikincil ifade yok */
+  .tv-foot, .tv-kind, .tv-ax-x { display: none; }
   .tv-chk { gap: 8px; }
   .tv-chk ul { gap: 4px; }
   .tv-chk li { font-size: var(--bp-type-sm); }
@@ -1264,13 +1054,11 @@
   .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 76px 76px; }
 }
 
-/* C-25a: sekme -> panel gorunurlugu tek kanon. <main data-hx-tab> SSR'da secili sekmeyle
-   gelir (?tab=), applyTab yalniz niteligi degistirir; ilk boyamada yanlis panel gorunmez. */
 [data-hx-tab="ozet"] [data-tab-content]:not([data-tab-content~="ozet"]):not([data-tab-content~="always"]),
 [data-hx-tab="grafik"] [data-tab-content]:not([data-tab-content~="grafik"]):not([data-tab-content~="always"]),
 [data-hx-tab="temel"] [data-tab-content]:not([data-tab-content~="temel"]):not([data-tab-content~="always"]),
 [data-hx-tab="haberler"] [data-tab-content]:not([data-tab-content~="haberler"]):not([data-tab-content~="always"]) { display: none; }
-/* C-70 K16: kapsam dışı pay — tek sütun kimlik + not kartları */
+
 .hx-top.hx-oos{ grid-template-columns:1fr; margin-bottom:16px; }
 .hx-oos-note{ max-width:720px; margin-bottom:14px; padding:16px 18px; }
 .hx-oos .hx-chip{ display:inline-block; }

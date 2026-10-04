@@ -1,16 +1,11 @@
-/* ==== extracted from templates/blog_article.html (T2.5) ==== */
-
   * { margin:0; padding:0; box-sizing:border-box; }
-  /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
+
   body { font-size:var(--bp-type-body); line-height:1.7; min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
 
-  /* C-43: sutun = govde metninin okuma olcusu. Space Grotesk'te 68ch ~712px = satirda ~90 karakter
-     (olculdu 26.09); 17px x 34em ~578px = satirda <=75 karakter. Baslik, modul ve SSS ayni sutunda. */
-
   .article-header { margin-bottom:28px; }
   .art-cat  { font-size:var(--bp-type-sm); color:var(--bp-art-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-  /* C-43 (26.09): baslik Bricolage (Data-Art .da-pagehead-title dili), govdeyle ayni sutunda */
+
   .art-title{ font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:clamp(1.75rem,3.4vw,2.5rem); font-weight:800; letter-spacing:-.02em; color:var(--bp-text); line-height:1.12; margin:10px 0 12px; overflow-wrap:anywhere; }
   .art-desc { font-size:var(--bp-type-lg); color:var(--bp-text-2); line-height:1.6; margin-bottom:14px; }
   .art-meta { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px 16px; font-size:var(--bp-type-sm); color:var(--bp-text-3); padding-top:12px; }
@@ -18,7 +13,6 @@
   .art-share-btn { background:none; border:0; padding:0 8px; min-height:44px; font:inherit; font-size:var(--bp-type-sm); color:var(--bp-text-3); cursor:pointer; }
   .art-share-btn:hover, .art-share-btn:focus-visible { color:var(--bp-text); text-decoration:underline; }
 
-  /* C-43 (26.09): okuma olcusu — sutun genisligi (<=75 karakter), 17px/1,7, H2 28px (satir <=75 karakter) */
   .prose { font-size:var(--bp-type-lg); line-height:1.7; color:var(--bp-text-2); }
   .prose h2 { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-type-title); font-weight:700; letter-spacing:-.015em; line-height:1.2; color:var(--bp-text); margin:40px 0 12px; }
   .prose h3 { font-size:var(--bp-type-body); font-weight:600; color:var(--bp-text); margin:24px 0 8px; }
@@ -52,23 +46,14 @@
 
   .disclaimer { color:var(--bp-text-3); font-size:var(--bp-type-sm); line-height:1.6; margin-top:20px; }
 
-  /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
-  .faq-section-title { font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); margin-top:0; margin-bottom:14px; }  /* K-AM: artik <h2> */
-  /* K-AC (21.09): kendi recetesi (13/16px · 600 · radius-md · zeminsiz ·
-     hover .03) SILINDI — kanonik `.bp-detail-toggle` (data-art.css) devraldi.
-     Burada yalniz SSS'e OZEL iki fark kalir: liste araligi (kanonik 20px bir
-     SSS listesinde cok genis) ve cevap metninin girintisi (kanonik
-     `.bp-detail-toggle-body` yatay dolgusuz; ozet/gundem'de icine tam
-     genislikte izgara koyuluyor, burada duz-yazi var ve soruyla hizalanmali).
-     `.bp-detail-toggle-label` kanonikte `inline-flex` — uzun bir SORU icin
-     `block` daha guvenli (tek satirlik etiket degil, sarmasi gereken cumle). */
+  .faq-section-title { font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); margin-top:0; margin-bottom:14px; }
+
   .faq-item { margin-bottom:8px; }
   .faq-item > .bp-detail-toggle-summary { line-height:1.4; }
   .faq-item .bp-detail-toggle-label { display:block; }
   .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-type-sm); color:var(--bp-text-3); line-height:1.65; }
 
-  /* C-43 (26.09): sonda TEK modul — canli hisse satiri + kural baglantisi + tek satir abonelik */
   .art-live { margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); }
   .art-live-title { font-size:var(--bp-type-sm); font-weight:600; color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
   .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-line); }
@@ -91,10 +76,8 @@
   @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
-  /* Reading progress bar */
   .read-progress {
-    /* K-AZ: `top:0` PWA'da centigin/durum cubugunun ALTINA denk geliyordu —
-       3px'lik cubugun TAMAMI gorunmezdi (olculdu: inset=47px'te top 0..3). */
+
     position: fixed; top: env(safe-area-inset-top, 0px); left: 0;
     width: 0%; height: 3px; z-index:var(--bp-z-toast);
     background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-art-cyan) 50%, var(--bp-art-violet) 100%);

@@ -1,17 +1,9 @@
-/* C-44 (26.09): içerik kabuğu — Hakkında, İletişim, Gizlilik ve Yasal'ın ortak
-   düzeni. Önceden her sayfa aynı reset/gövde/başlık kurallarını kendi CSS'inde
-   ayrı ayrı (ve farklı değerlerle) taşıyordu; burada tek tarif, sayfa CSS'inde
-   yalnız o sayfanın deltası kalır.
-
-   K-AG (WCAG 2.2 SC 2.4.11): bu sayfalarda makro şerit YOK, yapışkan bant
-   yalnız header (canlı ölçüm 0..60). */
 :root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-size: var(--bp-type-body); line-height: 1.7; min-height: 100vh; }
 header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-line); position: sticky; top: 0; z-index: var(--bp-z-dropdown); }
 
-/* C-18b: görünür başlık <main> dışında (hukuki metin kapısı <main>'i izler) */
 .lg-head { padding-top: 0; padding-bottom: 0; }
 
 .prose h2 {

@@ -1,14 +1,10 @@
-/* ==== extracted from templates/ozet.html (T2.5) ==== */
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     -webkit-font-smoothing: antialiased;
     font-size: var(--bp-type-body);
     min-height: 100vh;
   }
-  /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
-     sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank
-     deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */
+
   header {
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
@@ -22,8 +18,6 @@
   }
   .page-sub   { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 1px; }
 
-
-  /* ── Sayaç kartları ── */
   .counter-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -33,11 +27,7 @@
   @media (max-width: 600px) {
     .counter-grid { grid-template-columns: repeat(2, 1fr); }
   }
-  /* 20.09 Data-Art: yuzey + parilti recetesi artik .da-panel'den geliyor
-     (templates/ozet.html'de `class="counter-card da-panel"`). Burada YALNIZ
-     bu sayfanin deltasi kalir: parilti boyutu/konumu/rengi + ic hizalama.
-     Onceki hali elle kopyalanmis bir panel recetesiydi ve parilti rengini
-     --bp-art-violet token'inin LITERALIYLE yaziyordu (ayni rengin iki kaynagi). */
+
   .counter-card {
     --da-glow-rgb: var(--bp-art-violet-rgb);
     --da-glow-a: .12;
@@ -57,9 +47,6 @@
   .num-bekle { color: var(--bp-flat); }
   .num-new   { color: var(--bp-caution); }
 
-  /* ── Sinyaller ── */
-  /* .da-panel deltasi (bkz. .counter-card notu) — govde blogu; parilti daha
-     genis ve yukaridan, boylece uzun listelerin basligini aydinlatir. */
   .section-box {
     --da-glow-a: .07;
     --da-glow-y: -60%;
@@ -74,7 +61,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
-    margin-top: 0;   /* K-AM: artik <h2> — UA ust marji sifirlandi */
+    margin-top: 0;
     margin-bottom: 12px;
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
@@ -84,11 +71,6 @@
     gap: 8px;
   }
 
-  /* CPO-DEV2-102: Yatay (bekle) listesi varsayilan daralti.
-     21.09 (K-W): buradaki `.bp-detail-toggle*` kopyası SİLİNDİ — reçete
-     data-art.css §7'de. Bu kopya "hisse.css ile tutarlı" diye yazılmıştı ama
-     DEĞİLDİ: 11px/600/UPPERCASE/#909097 vs 13px/700/#e5e1e4 (canlı ölçüldü).
-     Sayfaya özgü tek delta margin-bottom'du (16 vs 20) — kanoniğe bırakıldı. */
   .stock-card {
     background: var(--bp-raised);
     border: 1px solid var(--bp-line);
@@ -112,11 +94,9 @@
   .sc-ret  { display: block; width: fit-content; font-size: var(--bp-type-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: var(--bp-r-sm); font-variant-numeric: tabular-nums; }
   .sc-ret-pos { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-up); }
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: var(--bp-down-on-tint); }
-  /* K-CC: yon cifti + NOTR arm — giris fiyatindan sapma 0 ise yon yoktur. */
+
   .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.10); color: var(--bp-text-2); }
 
-  /* Piyasa barometresi */
-  /* .da-panel deltasi (bkz. .counter-card notu) */
   .barometer {
     --da-glow-a: .09;
     --da-glow-y: -70%;
@@ -143,8 +123,6 @@
   }
   .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-flat); }
 
-  /* ── Sektör Nabzı ── */
-  /* C-70 K22: tek renk (Güçlü payı = --bp-up), ad sütunu en uzun ada göre */
   .sr-note { margin:-4px 0 12px; font-size:var(--bp-type-xs); color:var(--bp-text-3); }
   .sector-nabzi { display:grid; grid-template-columns:fit-content(45%) minmax(48px,1fr) auto; column-gap:10px; row-gap:7px; align-items:center; }
   .sector-row { display:contents; }
@@ -156,7 +134,6 @@
   .sr-pct.sr-zero { color:var(--bp-text-3); }
   .sr-cnt { font-size:var(--bp-type-xs); color:var(--bp-text-3); }
 
-  /* C-70 K22: tarih seçici başlık satırında, sağa yaslı */
   .oz-head { position:relative; }
   .oz-date { background-color:var(--bp-raised); border:1px solid var(--bp-field-border); color:var(--bp-text-3); padding:9px 28px 9px 11px; border-radius:var(--bp-r-sm); cursor:pointer; }
   @media (min-width: 601px) {
@@ -167,6 +144,6 @@
     .oz-date { margin:0 0 12px; }
     .sr-name { white-space:normal; line-height:1.25; }
   }
-  /* 320: "22 gün · 10.09.2026" ve "▼ Trend Bozuldu" tek satıra sığsın */
+
   @media (max-width: 360px) { .stock-grid { gap:6px; } .stock-card { padding:10px 7px; } }
 

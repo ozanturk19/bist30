@@ -1,7 +1,3 @@
-/* ══ /takip (C-41) — onayli taslak C-M8 (masaustu 1440 + telefon 390), hesaba bagli.
-   Renkler yalniz token (kanon §5.2-5.3): yesil/kirmizi yalniz fiyat ve K/Z yonunde;
-   durum hapi ve skor halkasi kanonik `.da-signal` / `.da-ring` (data-art.css §7b-7c),
-   burada yalniz boyut deltasi. Makro serit YOK -> yapiskan bant yalniz header. ══ */
 :root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
 
   * { box-sizing: border-box; }
@@ -13,9 +9,6 @@
   .tk button:focus-visible, .tk a:focus-visible, .tk input:focus-visible, .tk [tabindex]:focus-visible,
   .tk-layer button:focus-visible, .tk-layer input:focus-visible, .tk-toasts button:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; }
 
-  /* ── sayfa basi ── */
-  /* Acilir kutu ve menu sayfa basina (tam genislik) gore saga yaslanir: kontroller
-     dar ekranda H1'in altina sarinca da ekranin disina tasmaz. */
   .tk-ph { position: relative; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px 24px; padding: 26px 0 20px; }
   .tk-ph-t { min-width: 0; }
   .tk-h1 { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 52px; font-weight: 800; line-height: 1; letter-spacing: -.04em; color: var(--bp-text); }
@@ -38,7 +31,6 @@
   .tk-ibtn[aria-expanded="true"] { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb), .12); }
   .tk-ibtn:hover { border-color: var(--bp-line-strong); }
 
-  /* ⋯ menusu */
   .tk-menu { position: absolute; right: 0; top: calc(100% - 12px); z-index: var(--bp-z-dropdown); width: 290px; padding: 6px; background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: var(--bp-r-md); box-shadow: 0 24px 60px rgba(var(--bp-bg-rgb), .6); }
   .tk-menu [role="menuitem"] { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 42px; padding: 8px 10px; border: 0; border-radius: var(--bp-r-md); background: transparent; color: var(--bp-text); font-size: 13.5px; font-weight: 600; text-align: left; cursor: pointer; }
   .tk-menu [role="menuitem"] svg { width: 17px; height: 17px; flex: none; color: var(--bp-text-3); }
@@ -52,7 +44,6 @@
   .tk-menu .tk-cfb [role="menuitem"] { flex: 1; justify-content: center; min-height: 40px; border: 1px solid var(--bp-border2); }
   .tk-menu .tk-cfb .tk-okb { background: var(--bp-brand); color: var(--bp-bg); border-color: var(--bp-brand); }
 
-  /* ortak dugmeler */
   .tk-gb { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; font-size: 13px; font-weight: 600; color: var(--bp-text); background: transparent; border: 1px solid var(--bp-border2); border-radius: var(--bp-r-md); padding: 6px 12px; cursor: pointer; white-space: nowrap; }
   .tk-gb svg { width: 14px; height: 14px; }
   .tk-gb:hover { border-color: var(--bp-line-strong); }
@@ -67,7 +58,6 @@
   .tk-xbtn svg { width: 16px; height: 16px; }
   kbd { font: 600 11px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-2); background: var(--bp-surface3); border: 1px solid var(--bp-border2); border-bottom-width: 2px; border-radius: var(--bp-r-sm); padding: 1px 5px; }
 
-  /* ── hisse ekle: acilir kutu (masaustu) + alt panel (telefon) ── */
   .tk-pop { position: absolute; right: 0; top: calc(100% - 12px); z-index: var(--bp-z-dropdown); width: 480px; max-width: calc(100vw - 32px); background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: 18px; box-shadow: 0 24px 60px rgba(var(--bp-bg-rgb), .6); }
   .tk-pop-h, .tk-sh-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--bp-line); }
   .tk-pop-h h2, .tk-sh-h h2 { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
@@ -102,7 +92,6 @@
   .tk-rskel .da-skel { height: 44px; }
   .tk-uerr { margin-top: 12px; padding: 14px 16px; }
 
-  /* ── portfoy ozeti ── */
   .tk-hero { position: relative; overflow: hidden; border: 1px solid var(--bp-line); border-radius: 22px; padding: 24px 26px 20px;
     background: radial-gradient(70% 130% at 100% 0%, rgba(var(--bp-art-violet-rgb), .17), transparent 60%), radial-gradient(55% 110% at 0% 100%, rgba(var(--bp-accent-cyan-rgb), .08), transparent 60%), var(--bp-surface); }
   .tk-hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 40px; }
@@ -123,7 +112,6 @@
   .tk-lhead .tk-alloc { height: 26px; margin-top: 0; }
   .tk-lhead .tk-alloc i { font-size: 12px; border-radius: var(--bp-r-sm); }
 
-  /* ── liste + sag kolon ── */
   .tk-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; margin-top: 22px; }
   .tk-main { position: relative; min-width: 0; }
   .tk-chs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 14px; padding: 10px 14px; border: 1px solid rgba(var(--bp-brand-rgb), .22); border-radius: var(--bp-r-md); background: rgba(var(--bp-brand-rgb), .06); font: 500 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-2); }
@@ -179,7 +167,6 @@
   .tk-store { margin: 12px 2px 0; font: 500 13px/1.5 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); }
   .tk-store b { color: var(--bp-text-2); font-weight: 600; }
 
-  /* ── bildirimler + hesap ── */
   .tk-prefs { border: 1px solid var(--bp-line); border-radius: 18px; background: var(--bp-surface); padding: 18px 18px 16px; }
   .tk-prefs h2 { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
   .tk-em { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0 0; font: 500 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); }
@@ -199,7 +186,6 @@
   .tk-ucf { padding: 12px; border-radius: var(--bp-r-md); background: var(--bp-raised); border: 1px solid var(--bp-border2); font: 500 13px/1.5 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-2); }
   .tk-ucf b { display: block; color: var(--bp-text); font-size: 14px; }
 
-  /* ── bildirim (geri al) ── */
   .tk-toasts { position: fixed; left: 16px; right: 16px; bottom: 24px; z-index: var(--bp-z-local-toast); display: flex; justify-content: center; pointer-events: none; }
   .tk-toasts:empty { display: none; }
   .tk-toast { position: relative; display: flex; align-items: center; gap: 12px; max-width: 100%; padding: 12px 16px; border-radius: var(--bp-r-md); background: var(--bp-raised); border: 1px solid var(--bp-border2); box-shadow: 0 18px 50px rgba(var(--bp-bg-rgb), .7); font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); overflow: hidden; pointer-events: auto; }
@@ -213,7 +199,6 @@
   .tk-toast.paused .tk-bar { animation-play-state: paused; }
   @keyframes tkDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
-  /* ── bos liste ── */
   .tk-onb { border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg); padding: 22px 20px 10px;
     background: radial-gradient(80% 120% at 100% 0%, rgba(var(--bp-art-violet-rgb), .14), transparent 60%), radial-gradient(60% 90% at 0% 100%, rgba(var(--bp-accent-cyan-rgb), .06), transparent 60%), var(--bp-surface); }
   .tk-onb h2 { margin: 0 0 6px; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 26px; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; }
@@ -234,7 +219,6 @@
   .tk-fbtn2 { min-height: 42px; padding: 0 14px; border-radius: var(--bp-r-md); border: 1px solid var(--bp-border2); background: var(--bp-raised); color: var(--bp-text); font-size: 13.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
   .tk-fbtn2:hover { border-color: var(--bp-line-strong); }
 
-  /* ── iskelet / hata / giris ── */
   .tk-skel { display: grid; gap: 18px; }
   .tk-skh { height: 150px; border-radius: 22px; }
   .tk-skl2 { display: grid; gap: 8px; }
@@ -243,14 +227,12 @@
   .tk-login { max-width: 560px; }
   .tk-nojs { color: var(--bp-text-2); }
 
-  /* ── nasil calisir (SSR) + feragat ── */
   .tk-how { margin: 40px 0 0; padding-top: 22px; border-top: 1px solid var(--bp-line); max-width: 880px; }
   .tk-how h2 { margin: 0 0 10px; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
   .tk-how ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; }
   .tk-how li { font-size: 14px; line-height: 1.55; color: var(--bp-text-2); }
   .tk-how li b { display: block; color: var(--bp-text); font-weight: 700; }
 
-  /* ── tablet (820-1099): sag kolon alta, sikisik tablo ── */
   @media (max-width: 1099.98px) {
     .tk-grid { grid-template-columns: minmax(0, 1fr); }
     .tk-rail { max-width: 560px; }
@@ -262,7 +244,6 @@
     .tk-big { font-size: 52px; }
   }
 
-  /* ── telefon (<820): 72px satir, alt panel ── */
   @media (max-width: 819.98px) {
     .tk { --tk-gut: 16px; font-size: 14px; }
     .tk-ph { padding: 12px 0 10px; gap: 10px; }
@@ -334,7 +315,7 @@
     .tk-inp { width: 124px; height: 44px; }
     .tk-rb, .tk-okb, .tk-gb { min-height: 44px; }
     .tk-ib { width: 44px; height: 44px; }
-    /* alt panel */
+
     .tk-scrim { position: fixed; inset: 0; z-index: var(--bp-z-sheet-backdrop); background: rgba(var(--bp-bg-rgb), .62); }
     .tk-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--bp-z-sheet); max-height: 88vh; display: flex; flex-direction: column; background: var(--bp-raised); border-top: 1px solid var(--bp-border2); border-radius: 22px 22px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -20px 50px rgba(var(--bp-bg-rgb), .5); }
     .tk-sheet.enter { animation: tkSheetUp .22s ease-out; }
@@ -355,7 +336,6 @@
   body.tk-lock { overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { .tk-sheet.enter, .tk-bar { animation: none; } .tk-sw i { transition: none; } }
 
-  /* oturumsuz /takip: panel kart olarak (bos hal kartiyla ayni dil) */
   .tk-login .acc { margin-top: 0; padding: 22px 20px 16px; border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg);
     background: radial-gradient(80% 120% at 100% 0%, rgba(var(--bp-art-violet-rgb), .14), transparent 60%), radial-gradient(60% 90% at 0% 100%, rgba(var(--bp-accent-cyan-rgb), .06), transparent 60%), var(--bp-surface); }
   .tk-login .acc-t { font-size: 26px; line-height: 1.1; letter-spacing: -.025em; }
