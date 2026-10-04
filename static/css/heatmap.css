@@ -27,7 +27,7 @@
 .hm .hm-t:hover{z-index:var(--bp-z-raised);box-shadow:inset 0 0 0 2px rgba(var(--bp-text-rgb),.85);filter:brightness(1.08)}
 .hm .hm-t:focus-visible{z-index:var(--bp-z-raised);outline:2px solid var(--bp-art-cyan);outline-offset:-2px}
 .hm-tk{position:absolute;left:7px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--fs,11px);line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
-.hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:max(9px,calc(var(--fs,11px) * .74));line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
+.hm-v{position:absolute;left:7px;top:calc(8px + var(--fs,11px));font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;font-size:var(--fv,11px);line-height:1.1;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
 .hm-lim{position:absolute;right:5px;top:5px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:var(--bp-type-xs);line-height:1;letter-spacing:.08em;padding:3px 5px;border-radius:var(--bp-r-sm);background:rgba(var(--bp-bg-rgb),.45);color:var(--bp-text);white-space:nowrap}
 .hm .hm-off{display:none}
 

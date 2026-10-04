@@ -144,6 +144,7 @@
   function unplace(el) { el.style.left = el.style.top = el.style.width = el.style.height = ''; }
 
   var LABEL_H = 20, GROUP_GAP = 7, TILE_GAP = 2, STACK_MAX = 560, MIN_T = 12;
+  var FS = [11, 13, 15, 18, 24]; /* tokens.css --bp-type-xs/sm/body/lg/title */
   var cq = !!(window.CSS && CSS.supports && CSS.supports('container-type', 'inline-size'));
 
   /* Aşırı oranlı grupta (Savunma: ASELS 1.708 / ALTNY 14 Mrd) squarify son
@@ -166,8 +167,12 @@
       n.w = n.x1 - n.x0; n.h = n.y1 - n.y0;
       place(n.el, n.x0, n.y0, n.w, n.h);
       n.el.classList.toggle('hm-off', n.w < 1 || n.h < 1);
-      var fs = Math.max(9, Math.min(24, Math.sqrt(n.w * n.h) / 6.2));
-      n.el.style.setProperty('--fs', fs.toFixed(1) + 'px');
+      /* C-49: etiket boyutu tip ölçeğinin kademesine oturur (sürekli boy
+         sayfaya ~60 ayrı font boyutu katıyordu); değer satırı bir alt kademe. */
+      var fs = Math.sqrt(n.w * n.h) / 6.2, k = FS.length - 1;
+      while (k > 0 && FS[k] > fs) k--;
+      n.el.style.setProperty('--fs', FS[k] + 'px');
+      n.el.style.setProperty('--fv', FS[Math.max(0, k - 1)] + 'px');
     });
   }
 
