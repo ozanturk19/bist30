@@ -80,20 +80,20 @@ function goToDate(date) {
 
 {% if historical_date is defined and historical_date %}
 <!-- Geçmiş tarih bandı -->
-<div style="background:rgba(var(--bp-gold-rgb),.08);border:1px solid rgba(var(--bp-gold-rgb),.25);border-radius:var(--bp-radius-md);
+<div style="background:rgba(var(--bp-gold-rgb),.08);border:1px solid rgba(var(--bp-gold-rgb),.25);border-radius:var(--bp-r-sm);
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
   <div style="flex:1;min-width:0">
     {% if via_auto_fallback %}
     <span style="color:var(--bp-caution);font-weight:700;font-size:var(--bp-type-sm)">Son İşlem Günü — {{ today_str }}</span>
-    <span style="color:var(--bp-text-3);font-size:var(--bp-text-sm);margin-left:8px">Yeni işlem günü verisi henüz oluşmadı, en son kayıt gösteriliyor.</span>
+    <span style="color:var(--bp-text-3);font-size:var(--bp-type-sm);margin-left:8px">Yeni işlem günü verisi henüz oluşmadı, en son kayıt gösteriliyor.</span>
     {% else %}
     <span style="color:var(--bp-caution);font-weight:700;font-size:var(--bp-type-sm)">Geçmiş Görünüm — {{ today_str }}</span>
-    <span style="color:var(--bp-text-3);font-size:var(--bp-text-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
+    <span style="color:var(--bp-text-3);font-size:var(--bp-type-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
     {% endif %}
   </div>
   {% if not via_auto_fallback %}
   <a href="/ozet" style="background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:var(--bp-r-sm);
-     padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
+     padding:5px 12px;font-size:var(--bp-type-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     <span aria-hidden="true">↩</span> Güncel Özete Dön
   </a>
   {% endif %}
@@ -272,8 +272,8 @@ function goToDate(date) {
        border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-r-md);padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px">Günlük Özeti E-postayla Al</div>
-      <div style="font-size:var(--bp-text-sm);color:var(--bp-text-3)">Sinyal değişimi olan işlem günlerinde, akşam 19:00'da özet gelen kutunuzda — iptal her zaman.</div>
+      <div style="font-size:var(--bp-type-body);font-weight:700;color:var(--bp-text);margin-bottom:3px">Günlük Özeti E-postayla Al</div>
+      <div style="font-size:var(--bp-type-sm);color:var(--bp-text-3)">Sinyal değişimi olan işlem günlerinde, akşam 19:00'da özet gelen kutunuzda — iptal her zaman.</div>
     </div>
     {#- 21.09 (CPO) CANLI BÖLGE: bu sarmalayıcı `role="status" aria-live="polite"`
         taşıyordu — içinde e-posta alanı, Abone Ol butonu, KVKK onay kutusu ve
@@ -287,12 +287,12 @@ function goToDate(date) {
             "e-posta adresiniz" placeholder'ı 8px taşıp KESİLİYORDU (anasayfadaki
             kardeşi 176px alıp sığıyor). Gereken iç genişlik 150px → 170px min. #}
         style="flex:1;background:var(--bp-raised);border:1px solid var(--bp-field-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-r-sm);font-size:var(--bp-type-body);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:170px"
         onfocus="this.style.borderColor='var(--bp-brand)';this.removeAttribute('aria-invalid');var m=document.getElementById('ozSubMsg');if(m)m.textContent='';" onblur="this.style.borderColor='var(--bp-field-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
-        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:8px 18px;border-radius:var(--bp-radius-7);
+        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:8px 18px;border-radius:var(--bp-r-sm);
                font-size:var(--bp-type-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter='none'">
@@ -302,7 +302,7 @@ function goToDate(date) {
         <input type="checkbox" class="da-check" id="ozSubKvkk" required>
         <span><a href="/gizlilik" target="_blank" rel="noopener" class="da-link">Gizlilik Politikası<span class="sr-only"> (yeni sekmede açılır)</span></a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
       </label>
-      <span id="ozSubMsg" role="status" aria-live="polite" style="font-size:var(--bp-text-sm)"></span>
+      <span id="ozSubMsg" role="status" aria-live="polite" style="font-size:var(--bp-type-sm)"></span>
     </div>
     <button class="da-close" onclick="document.getElementById('ozSubBar').style.display='none'"
       aria-label="Kapat">×</button>

@@ -42,7 +42,7 @@ body{
   color:var(--bp-text);margin-bottom:10px;
 }
 .off-card p{
-  font-size:var(--bp-text-sm);color:var(--bp-text-3);
+  font-size:var(--bp-type-sm);color:var(--bp-text-3);
   line-height:1.65;max-width:34ch;margin:0 auto;
 }
 .off-retry{
@@ -55,9 +55,9 @@ body{
   background:var(--bp-brand);
   color:var(--bp-bg);
   border:none;
-  border-radius:var(--bp-radius-md);
+  border-radius:var(--bp-r-sm);
   font-family:inherit;
-  font-size:var(--bp-text-sm);
+  font-size:var(--bp-type-sm);
   font-weight:700;
   cursor:pointer;
   transition:opacity var(--bp-dur-base,.15s) var(--bp-ease-standard,ease);

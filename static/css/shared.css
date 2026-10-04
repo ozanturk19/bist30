@@ -42,7 +42,7 @@ textarea {
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); box-sizing: border-box; height: calc(var(--bp-mbn-h) - 1px); max-width: 600px; margin: 0 auto; }
   .mbn-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; text-decoration: none; color: var(--bp-text-3); font-size: var(--bp-text-sm); font-weight: 600;
+    gap: 4px; text-decoration: none; color: var(--bp-text-3); font-size: var(--bp-type-sm); font-weight: 600;
     letter-spacing: 0.05px; transition: color .2s ease;
     font-family: 'Space Grotesk', system-ui, sans-serif;
     position: relative; background: none; border: none; cursor: pointer;
@@ -332,12 +332,12 @@ body { margin: 0; }
 @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 /* K-AZ: `top:50%` şeridin safe-area dolgusunu da içeren kutusuna göre ortalıyordu
    (PWA'da düğmenin üstü çentiğin altında kalıyordu); dolgunun yarısı geri eklendi. */
-.macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text-3); font-size:var(--bp-text-sm); line-height:1; cursor:pointer; padding:0; }
+.macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text-3); font-size:var(--bp-type-sm); line-height:1; cursor:pointer; padding:0; }
 .macro-pause-btn:hover, .macro-pause-btn:focus-visible { color:var(--bp-text); }
 .macro-pause-btn svg { width:12px; height:12px; }
 .macro-pause-btn[aria-pressed="true"] .mp-pause, .macro-pause-btn:not([aria-pressed="true"]) .mp-play { display:none; }
 .macro-bar[data-paused="true"] .macro-track { animation-play-state:paused !important; }
-.macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-line); font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit; }
+.macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-line); font-size:var(--bp-type-sm); height:32px; text-decoration:none; color:inherit; }
 .macro-item-lbl { font-weight:600; color:var(--bp-text-2); }
 
 /* ── Ana sayfa çeşidi (.macro-bar--home, eski index.css) ──
@@ -351,18 +351,18 @@ body { margin: 0; }
 .macro-bar--home::before,.macro-bar--home::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
 .macro-bar--home::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
 .macro-bar--home::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
-.macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text-3);border-right:1px solid var(--bp-line);background:var(--bp-surface)}
+.macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text-3);border-right:1px solid var(--bp-line);background:var(--bp-surface)}
 /* C-03: nabız ve camgöbeği ışıma "canlı akış" izlenimi veriyordu (veri EOD) → sabit nötr nokta. */
 .macro-bar--home .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex:none}
 .macro-bar--home .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
 .macro-bar--home:hover .macro-track{animation-play-state:paused}
 @keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .macro-bar--home[data-paused="true"] .macro-track{animation-play-state:paused !important}
-.macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text)}
+.macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text)}
 .macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text-2);letter-spacing:.2px}
 /* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
    24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
-.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
+.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
 .macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
 /* ── Sayfa kabı: TEK KAYNAK (C-15) ───────────────────────────────────────────
    Önceden 14 sayfa CSS'inde ayrı `.container` vardı (578/680/820/860/1100/

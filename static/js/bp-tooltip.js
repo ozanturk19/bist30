@@ -19,7 +19,7 @@
          pre-line, mevcut &#10; iceriginin yazarin zaten amacladigi gibi satir
          satir render olmasini sagliyor, tek-satirlik tooltip'leri etkilemiyor. */
       'white-space:pre-line;' +
-      'box-shadow:var(--bp-shadow-md);max-width:260px;opacity:0;transform:translateY(4px) scale(.97);' +
+      'box-shadow:var(--bp-shadow-pop);max-width:260px;opacity:0;transform:translateY(4px) scale(.97);' +
       'transition:opacity .14s ease,transform .14s ease;pointer-events:none}' +
       '.bp-tooltip.bp-tooltip-show{opacity:1;transform:translateY(0) scale(1)}' +
       '.bp-tooltip::after{content:"";position:absolute;width:8px;height:8px;background:inherit;' +

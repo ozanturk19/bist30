@@ -360,36 +360,10 @@ body {
   :root { --bp-type-title: 20px; --bp-type-stat: 26px; }
 }
 
-/* ── DEPRECATED alias (C-14, 27.09) — yeni kodda KULLANILMAZ ──
-   C-49 (04.10): v1'e birebir bağlı takma adlar silindi (kullanım 0).
-   Kalanlar ölçek dışı değer taşır; bileşen göçünde en yakın kademeye
-   oturup bu bloktan çıkar. */
-:root {
-  --bp-radius-sm: 3px;
-  --bp-text-2xs: 10px;
-  --bp-text-sm: 12px;
-  --bp-text-md: 14px;
-  --bp-text-lg: 16px;
-  --bp-text-17: 17px;
-  --bp-text-2xl: 20px;
-  --bp-text-22: 22px;
-  --bp-text-28: 28px;
-  --bp-text-36: 36px;
-  --bp-text-40: 40px;
-  --bp-text-42: 42px;
-  --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
-  --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
-  --bp-radius-xs: 2px;
-  --bp-radius-4: 4px;
-  --bp-radius-md: 8px;
-  --bp-radius-7: 7px;
-  --bp-radius-xl: 12px;
-  --bp-radius-5: 5px;
-  --bp-radius-9: 9px;
-  --bp-radius-11: 11px;
-  --bp-radius-14: 14px;
-  --bp-radius-16: 16px;
-}
+/* C-49 (04.10): takma ad bloğu şablon/CSS/JS için 0; bu üç ad yalnız app.py +
+   blog_content.py satır-içi HTML'i için durur (CPO-1821, DEV) — onlar
+   --bp-type-* adına geçince silinir. */
+:root { --bp-text-sm: 13px; --bp-text-md: 15px; --bp-text-lg: 15px; }
 
 /* bughunt-r28: T7.5.6 nav/footer "kismi" rozeti kurali kaldirildi — hedefledigi
    /kripto, /emtialar, /abd rotalari 19.08 BIST Odakli Sadelesme (CPO-DEV2-036)

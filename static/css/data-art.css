@@ -31,7 +31,7 @@
    ama önceki tavana göre ~%35 daraltıldı. */
 .da-section{padding:clamp(32px,4.5vw,62px) 0}
 .da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,3vw,30px)}
-.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text-3);margin-bottom:8px}
+.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text-3);margin-bottom:8px}
 .da-section-title{font-weight:800;letter-spacing:-.025em;font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.04;max-width:20ch}
 .da-section-desc{color:var(--bp-text-3);max-width:44ch;font-size:var(--bp-type-sm);line-height:1.6}
 
@@ -75,13 +75,13 @@
 .da-recap-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-art-cyan);margin-bottom:14px;position:relative}
 .da-recap-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--bp-art-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);animation:daPulseDot 1.8s ease-in-out infinite}
 .da-recap-headline{font-weight:800;letter-spacing:-.02em;font-size:clamp(1.6rem,3vw,2.3rem);margin:0 0 16px;position:relative}
-.da-recap-body{font-size:var(--bp-text-lg);line-height:1.75;color:var(--bp-text-2);max-width:76ch;position:relative}
+.da-recap-body{font-size:var(--bp-type-body);line-height:1.75;color:var(--bp-text-2);max-width:76ch;position:relative}
 .da-recap-body strong{color:var(--bp-text);font-weight:700}
 .da-recap-body .up{color:var(--bp-up);font-weight:700}
 .da-recap-body .down{color:var(--bp-down);font-weight:700}
 /* K-BP (21.09): 0,00% yon RENGI almaz — yesil bir yukselis vaadidir. */
 .da-recap-body .neu{color:var(--bp-text-2);font-weight:700}
-.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text-3);border:1px solid var(--bp-border2);border-radius:var(--bp-r-pill);padding:5px 11px;position:relative}
+.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text-3);border:1px solid var(--bp-border2);border-radius:var(--bp-r-pill);padding:5px 11px;position:relative}
 
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 
@@ -92,12 +92,12 @@
    .da-chip bir <a> üzerinde kullanılıyor, yani altı çizili kalması gerekirdi;
    ana sayfa JS'i her çipe inline `style="text-decoration:none"` basarak bunu
    farkında olmadan maskeliyordu. Şablondan kullanan ilk sayfada patlardı. */
-.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
+.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);font-weight:700;background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
 .da-chip:hover{border-color:var(--bp-art-cyan);background:rgba(var(--bp-accent-cyan-rgb),.08)}
 .da-chip-badge{font-size:var(--bp-type-xs);padding:3px 8px;border-radius:var(--bp-r-pill);font-weight:700}
 
 /* ── 5. Yükleniyor / hata / boş durumlar (asla-boş-sayfa ilkesi) ────────── */
-.da-skel{position:relative;overflow:hidden;background:var(--bp-raised);border-radius:var(--bp-radius-md)}
+.da-skel{position:relative;overflow:hidden;background:var(--bp-raised);border-radius:var(--bp-r-sm)}
 .da-skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--bp-text-rgb),.06),transparent);animation:daShimmer 1.5s infinite}
 @keyframes daShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 /* 21.09 (K-W): `.da-state-msg` / `.da-state-err` SİLİNDİ — sitenin İKİNCİ
@@ -135,7 +135,7 @@
    `*` kapsamlı global azaltma kuralı zaten var (FAZ8).
    ─────────────────────────────────────────────────────────────────────── */
 /* Metin satırı yerine geçen iskelet (tablo hücresi, etiket). */
-.da-skel--line{display:inline-block;height:14px;width:80px;border-radius:var(--bp-radius-4)}
+.da-skel--line{display:inline-block;height:14px;width:80px;border-radius:var(--bp-r-sm)}
 
 /* Dönen halka. Ölçek: --sm satır-içi metin yanında, taban bölüm başlığı
    yanında, --lg bölümün tamamının yerine geçen blok yüklemede. */
@@ -193,14 +193,14 @@
    duruyordu. Cogunluk (15/17) 32px oldugu icin kanonik deger o. Ayrica
    yasal.css `footer a{margin:0 6px}` veriyordu: link araligi YALNIZ o sayfada
    farkliydi. */
-.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-text-sm);color:var(--bp-text-3)}
+.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-type-sm);color:var(--bp-text-3)}
 .da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
-.da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text)}
-.da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
+.da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-type-body);color:var(--bp-text)}
+.da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-type-sm)}
 /* C-71 K30: dar ekranda footer bağlantıları ızgara — sayfa kendi bağlantısını gizleyince
    son satırda tek başına kalan bağlantı (390'da "İletişim") olmaz; sütunlar hizalı. */
 @media (max-width:600px){.da-footer-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));justify-items:center}}
-.da-footer-note{font-size:var(--bp-type-xs);color:var(--bp-text-3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-line);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
+.da-footer-note{font-size:var(--bp-type-xs);color:var(--bp-text-3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-line);border-radius:var(--bp-r-sm);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
 .da-footer-disclaimer{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
 .da-footer-copy{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-top:8px}
 /* Dokunma hedefi (20.09): footer linkleri 20.4px yuksekti — WCAG 2.5.8'in
@@ -286,7 +286,7 @@ label:has(> .da-check){min-height:24px}
 .da-select{
   appearance:none;-webkit-appearance:none;
   font-family:inherit;
-  font-size:var(--bp-text-lg);          /* 16px — iOS odak-yakınlaştırma eşiği */
+  font-size:var(--bp-type-body);          /* 16px — iOS odak-yakınlaştırma eşiği */
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23909097' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   background-repeat:no-repeat;
   background-position:right 10px center;
@@ -407,7 +407,7 @@ label:has(> .da-check){min-height:24px}
 .da-empty--page{padding:clamp(40px,6vw,60px) 20px}
 
 .da-empty-icon{
-  font-size:var(--bp-text-40);line-height:1;
+  font-size:var(--bp-type-display);line-height:1;
   margin-bottom:14px;
 }
 /* Baslik: sablonlarin cogu `<h2>` yaziyor (tarama / bilanco / temettu /
@@ -417,7 +417,7 @@ label:has(> .da-check){min-height:24px}
 .da-empty-title{
   display:block;
   font-family:'Space Grotesk',system-ui,sans-serif;
-  font-size:var(--bp-text-lg);font-weight:700;letter-spacing:-.01em;
+  font-size:var(--bp-type-body);font-weight:700;letter-spacing:-.01em;
   color:var(--bp-text);
   margin:0 0 6px;
 }
@@ -462,7 +462,7 @@ label:has(> .da-check){min-height:24px}
   min-height:32px;padding:5px 12px;
   background:none;border:1px solid var(--bp-danger-line);color:var(--bp-danger);
   border-radius:var(--bp-r-sm);
-  font-size:var(--bp-text-sm);font-weight:600;font-family:inherit;
+  font-size:var(--bp-type-sm);font-weight:600;font-family:inherit;
   cursor:pointer;flex-shrink:0;
   transition:background .15s;
 }
@@ -502,7 +502,7 @@ label:has(> .da-check){min-height:24px}
 .bp-detail-toggle-summary::marker{content:""}
 .bp-detail-toggle-summary:hover{border-color:var(--bp-border2);background:rgba(255,255,255,.02)}
 .bp-detail-toggle-label{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.bp-detail-toggle-chev{color:var(--bp-text-3);font-size:var(--bp-text-sm);transition:transform .2s ease;flex-shrink:0}
+.bp-detail-toggle-chev{color:var(--bp-text-3);font-size:var(--bp-type-sm);transition:transform .2s ease;flex-shrink:0}
 .bp-detail-toggle[open] .bp-detail-toggle-chev{transform:rotate(180deg)}
 .bp-detail-toggle-body{padding-top:16px}
 
@@ -517,7 +517,7 @@ label:has(> .da-check){min-height:24px}
   justify-content:flex-start;gap:6px;flex-wrap:wrap;
   padding:0;min-height:24px;
   background:none;border:0;border-radius:0;
-  font-size:var(--bp-text-sm);font-weight:600;
+  font-size:var(--bp-type-sm);font-weight:600;
   color:var(--bp-brand);
 }
 .bp-detail-toggle--inline > .bp-detail-toggle-summary:hover{
@@ -562,7 +562,7 @@ label:has(> .da-check){min-height:24px}
 .da-pagehead-lede{margin:0;max-width:72ch;font-size:var(--bp-type-body);line-height:1.5;color:var(--bp-text-2)}
 .da-pagehead-lede .da-num{color:var(--bp-text);font-weight:700}
 .da-pagehead--ticker .da-pagehead-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
-.da-pagehead-name{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;letter-spacing:0;font-size:var(--bp-text-lg);color:var(--bp-text-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.da-pagehead-name{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;letter-spacing:0;font-size:var(--bp-type-body);color:var(--bp-text-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 
 /* 7b. Skor halkası: iz --bp-ring-track, yuvarlak uçlu yay, ortada sayı
    (Bricolage), bant metni ("Yüksek/Orta/Düşük" — O12) halkanın ALTINDA.
@@ -582,7 +582,7 @@ label:has(> .da-check){min-height:24px}
 .da-ring-num{position:absolute;inset:0;display:grid;place-items:center;font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-size:calc(var(--da-ring-s) * .32);line-height:1;color:var(--bp-text)}
 .da-ring-band{display:block;margin-top:6px;text-align:center;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-text-3)}
 .da-ring--sm{--da-ring-s:44px}
-.da-ring--sm .da-ring-num{font-size:var(--bp-text-md)}
+.da-ring--sm .da-ring-num{font-size:var(--bp-type-body)}
 .da-ring--md{--da-ring-s:64px}
 .da-ring--lg{--da-ring-s:88px}
 .da-ring--xl{--da-ring-s:120px}
@@ -593,7 +593,7 @@ label:has(> .da-check){min-height:24px}
 /* 7c. Trend durumu hapı (kanon §5.3): Güçlü Trend yeşil dolu + koyu metin;
    Yatay arduvaz; Trend Bozuldu koyu zemin + sessiz metin (kırmızı DEĞİL).
    Metin her zaman yazılır (renk tek başına anlam taşımaz). Dokunma: ≥24px. */
-.da-signal{display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:3px 11px;border-radius:var(--bp-r-pill);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;letter-spacing:.02em;line-height:1.2;white-space:nowrap;background:var(--bp-state-flat);color:var(--bp-text)}
+.da-signal{display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:3px 11px;border-radius:var(--bp-r-pill);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);font-weight:700;letter-spacing:.02em;line-height:1.2;white-space:nowrap;background:var(--bp-state-flat);color:var(--bp-text)}
 .da-signal--strong{background:var(--bp-up);color:var(--bp-bg)}
 .da-signal--flat{background:var(--bp-state-flat);color:var(--bp-text)}
 .da-signal--broken{background:var(--bp-state-broken);color:var(--bp-state-broken-text);box-shadow:inset 0 0 0 1px var(--bp-line)}
@@ -617,7 +617,7 @@ label:has(> .da-check){min-height:24px}
 .da-stat-delta--up{color:var(--bp-up)}
 .da-stat-delta--down{color:var(--bp-down)}
 .da-stat--sm{gap:4px}
-.da-stat--sm .da-stat-num{font-size:var(--bp-text-lg)}
+.da-stat--sm .da-stat-num{font-size:var(--bp-type-body)}
 @media (max-width:600px){.da-stat-num{font-size:26px}}
 
 /* .da-meter: yatay çubuk (iz + dolgu), 6px (--thin 4px), hap uçlu. Doluluk
@@ -642,7 +642,7 @@ label:has(> .da-check){min-height:24px}
    dolu (sayfada tek birincil eylem), --secondary çerçeveli, --ghost yalnız
    metin, --icon kare. Yön yeşili/kırmızısı butonda KULLANILMAZ.
    <button class="da-btn da-btn--primary" type="button">{{ icon('arti') }}Takip et</button> */
-.da-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid transparent;border-radius:var(--bp-r-md);background:var(--bp-raised);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--bp-dur-base) var(--bp-ease-standard),border-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard)}
+.da-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid transparent;border-radius:var(--bp-r-md);background:var(--bp-raised);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--bp-dur-base) var(--bp-ease-standard),border-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard)}
 .da-btn svg{width:18px;height:18px;flex:none}
 .da-btn--primary{background:var(--bp-brand);color:var(--bp-bg)}
 .da-btn--primary:hover{box-shadow:0 0 0 3px rgba(var(--bp-brand-rgb),.22)}
@@ -650,7 +650,7 @@ label:has(> .da-check){min-height:24px}
 .da-btn--secondary:hover{border-color:var(--bp-ctl-border-hover);background:var(--bp-raised)}
 .da-btn--ghost{background:transparent;color:var(--bp-text-2)}
 .da-btn--ghost:hover{background:var(--bp-raised);color:var(--bp-text)}
-.da-btn--sm{min-height:32px;padding:0 12px;gap:6px;font-size:var(--bp-text-sm);border-radius:var(--bp-radius-md)}
+.da-btn--sm{min-height:32px;padding:0 12px;gap:6px;font-size:var(--bp-type-sm);border-radius:var(--bp-r-sm)}
 .da-btn--sm svg{width:16px;height:16px}
 .da-btn--icon{width:44px;padding:0}
 .da-btn--icon.da-btn--sm{width:32px}
@@ -662,7 +662,7 @@ label:has(> .da-check){min-height:24px}
    `class="da-field da-select"` (ok işareti .da-select'ten). Arama: sarmalayıcı
    .da-field-wrap + içte ikon.
    <label class="da-field-wrap">{{ icon('ara') }}<input class="da-field da-field--search" type="search" placeholder="Hisse ara"></label> */
-.da-field{display:block;width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--bp-field-border);border-radius:var(--bp-r-md);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);line-height:1.4;transition:border-color var(--bp-dur-base) var(--bp-ease-standard)}
+.da-field{display:block;width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--bp-field-border);border-radius:var(--bp-r-md);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);line-height:1.4;transition:border-color var(--bp-dur-base) var(--bp-ease-standard)}
 .da-field::placeholder{color:var(--bp-text-3);opacity:1}
 .da-field:hover{border-color:var(--bp-ctl-border-hover)}
 .da-field:focus{border-color:var(--bp-art-cyan);outline:none}
@@ -672,7 +672,7 @@ textarea.da-field{min-height:96px;resize:vertical}
 .da-field-wrap{position:relative;display:block;min-width:0}
 .da-field-wrap > svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--bp-text-3);pointer-events:none}
 .da-field--search{padding-left:36px}
-@media (pointer:coarse){.da-field{font-size:var(--bp-text-lg)}}
+@media (pointer:coarse){.da-field{font-size:var(--bp-type-body)}}
 
 /* .da-tabs: tek sekme deyimi. Taban = hisse sayfasının onaylı şeridi (C-M10,
    O16i=A; C-19'da hisse.css'teydi, C-17'de buraya taşındı): 44px sekme,
@@ -683,18 +683,18 @@ textarea.da-field{min-height:96px;resize:vertical}
    aria-current="page").
    <div class="da-tabs" role="tablist"><button class="da-tab" role="tab" aria-selected="true">Özet</button>…</div> */
 .da-tabs{display:flex;gap:4px;background:var(--bp-bg);border-bottom:1px solid var(--bp-line)}
-.da-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:0;background:none;cursor:pointer;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;color:var(--bp-text-3);text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.da-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:0;background:none;cursor:pointer;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);font-weight:600;color:var(--bp-text-3);text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .da-tab[aria-selected="true"],.da-tab[aria-current="page"]{color:var(--bp-text)}
-.da-tab[aria-selected="true"]::after,.da-tab[aria-current="page"]::after{content:'';position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--bp-brand);border-radius:var(--bp-radius-xs)}
+.da-tab[aria-selected="true"]::after,.da-tab[aria-current="page"]::after{content:'';position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--bp-brand);border-radius:var(--bp-r-sm)}
 @media (hover:hover) and (pointer:fine){.da-tab:not([aria-selected="true"]):not([aria-current="page"]):hover{color:var(--bp-text-2)}}
-.da-tab:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:-2px;border-radius:var(--bp-radius-md)}
+.da-tab:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:-2px;border-radius:var(--bp-r-sm)}
 @media (max-width:768px){
   .da-tabs{overflow-x:auto;scrollbar-width:none}
   .da-tabs::-webkit-scrollbar{display:none}
   .da-tab{flex:1 0 auto;padding:0 10px}
 }
 .da-tabs--pill{gap:2px;width:max-content;max-width:100%;padding:3px;border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);background:var(--bp-surface);overflow-x:auto;scrollbar-width:none}
-.da-tabs--pill .da-tab{min-height:32px;border-radius:var(--bp-r-pill);font-size:var(--bp-text-sm);color:var(--bp-text-2)}
+.da-tabs--pill .da-tab{min-height:32px;border-radius:var(--bp-r-pill);font-size:var(--bp-type-sm);color:var(--bp-text-2)}
 .da-tabs--pill .da-tab[aria-selected="true"],.da-tabs--pill .da-tab[aria-current="page"]{background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)}
 .da-tabs--pill .da-tab::after{content:none}
 
@@ -729,7 +729,7 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
    hücre: class="da-num".
    <div class="da-table-wrap"><table class="da-table da-table--stack">…<td class="da-num"><span class="da-td-label">Fiyat</span>312,50</td> */
 .da-table-wrap{max-width:100%;overflow-x:auto}
-.da-table{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--bp-text-md);color:var(--bp-text)}
+.da-table{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--bp-type-body);color:var(--bp-text)}
 .da-table th{position:sticky;top:0;z-index:1;padding:10px 12px;border-bottom:1px solid var(--bp-line);background:var(--bp-surface);color:var(--bp-text-3);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-align:left;white-space:nowrap}
 .da-table td{padding:12px;border-bottom:1px solid var(--bp-border-subtle);vertical-align:middle}
 .da-table .da-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -740,7 +740,7 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
   .da-table--stack,.da-table--stack tbody,.da-table--stack tr,.da-table--stack td{display:block;width:100%}
   .da-table--stack tr{padding:8px 0;border-bottom:1px solid var(--bp-line)}
   .da-table--stack td{display:flex;justify-content:space-between;gap:12px;padding:5px 4px;border:0;text-align:right}
-  .da-table--stack .da-td-label{display:inline;color:var(--bp-text-3);font-size:var(--bp-text-sm);text-align:left}
+  .da-table--stack .da-td-label{display:inline;color:var(--bp-text-3);font-size:var(--bp-type-sm);text-align:left}
 }
 
 /* .da-ticker-row / .da-ticker-card: ticker + şirket adı + fiyat + değişim +
@@ -751,11 +751,11 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
 .da-ticker-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:4px 16px;min-height:52px;padding:10px 12px;border-bottom:1px solid var(--bp-border-subtle);color:var(--bp-text);text-decoration:none;transition:background var(--bp-dur-base) var(--bp-ease-standard)}
 a.da-ticker-row:hover,a.da-ticker-card:hover{background:rgba(var(--bp-text-rgb),.03)}
 .da-ticker-id{display:flex;flex-direction:column;gap:2px;min-width:0}
-.da-ticker-sym{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:700;letter-spacing:.02em}
-.da-ticker-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bp-text-sm);color:var(--bp-text-3)}
+.da-ticker-sym{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);font-weight:700;letter-spacing:.02em}
+.da-ticker-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bp-type-sm);color:var(--bp-text-3)}
 .da-ticker-q{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.da-ticker-price{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.da-ticker-chg{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-text-2)}
+.da-ticker-price{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-body);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.da-ticker-chg{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-text-2)}
 .da-ticker-chg--up{color:var(--bp-up)}
 .da-ticker-chg--down{color:var(--bp-down)}
 .da-ticker-row > .da-signal{justify-self:end}
@@ -767,7 +767,7 @@ a.da-ticker-row:hover,a.da-ticker-card:hover{background:rgba(var(--bp-text-rgb),
 .da-ticker-card{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--bp-line);border-radius:16px;background:var(--bp-surface);color:var(--bp-text);text-decoration:none;transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
 a.da-ticker-card:hover{border-color:var(--bp-border2)}
 .da-ticker-card-head,.da-ticker-card-foot{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
-.da-ticker-card .da-ticker-price{font-size:var(--bp-text-2xl)}
+.da-ticker-card .da-ticker-price{font-size:var(--bp-type-lg)}
 .da-ticker-card-foot{align-items:baseline}
 
 /* İkon (_icons.html): 24 viewBox, 1,75 çizgi, currentColor. Boyut kapsayan

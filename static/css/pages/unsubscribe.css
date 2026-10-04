@@ -23,9 +23,9 @@ body{
   padding:32px 30px;
   text-align:center;
 }
-.box-icon{font-size:var(--bp-text-40);display:block;margin-bottom:14px}
-.box h1{font-size:var(--bp-text-lg);font-weight:800;letter-spacing:-.02em;color:var(--bp-text);margin:0 0 10px;line-height:1.25}
-.box p{font-size:var(--bp-text-sm);color:var(--bp-text-3);margin:0 0 20px;line-height:1.65}
+.box-icon{font-size:var(--bp-type-display);display:block;margin-bottom:14px}
+.box h1{font-size:var(--bp-type-body);font-weight:800;letter-spacing:-.02em;color:var(--bp-text);margin:0 0 10px;line-height:1.25}
+.box p{font-size:var(--bp-type-sm);color:var(--bp-text-3);margin:0 0 20px;line-height:1.65}
 .box p strong{color:var(--bp-text)}
 
 /* CTA: sitenin kanonik zemini --bp-brand + --bp-bg metin (14 emsal).
@@ -37,8 +37,8 @@ body{
   display:inline-flex;align-items:center;justify-content:center;
   min-height:44px;
   background:var(--bp-brand);color:var(--bp-bg);
-  padding:11px 24px;border-radius:var(--bp-radius-md);text-decoration:none;
-  font-size:var(--bp-text-sm);font-weight:700;
+  padding:11px 24px;border-radius:var(--bp-r-sm);text-decoration:none;
+  font-size:var(--bp-type-sm);font-weight:700;
   border:none;cursor:pointer;font-family:inherit;
   transition:opacity var(--bp-dur-base,.15s) var(--bp-ease-standard,ease);
 }

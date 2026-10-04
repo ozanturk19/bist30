@@ -23,7 +23,7 @@
   .contact-row { display: flex; align-items: center; gap: 12px; padding: 14px 0 0; }
   .contact-icon { flex-shrink: 0; color: var(--bp-text-2); display: inline-flex; }
   .contact-lbl  { font-size: var(--bp-type-xs); color: var(--bp-text-3); text-transform: uppercase; letter-spacing: 0.4px; }
-  .contact-val  { font-size: var(--bp-text-md); color: var(--bp-brand); }
+  .contact-val  { font-size: var(--bp-type-body); color: var(--bp-brand); }
   .contact-val a { color: var(--bp-brand); text-decoration: none; }
   .contact-val a:hover { text-decoration: underline; }
 
@@ -44,10 +44,10 @@
        select). Canli computed olcumde yakalandi. */
     background-color: var(--bp-border-subtle);
     border: 1px solid var(--bp-field-border);   /* K-Q */
-    border-radius: var(--bp-radius-md);
+    border-radius: var(--bp-r-sm);
     padding: 10px 13px;
     color: var(--bp-text);
-    font-size: var(--bp-text-lg);   /* 16px — iOS'ta odaklanınca otomatik yakınlaştırmayı engeller */
+    font-size: var(--bp-type-body);   /* 16px — iOS'ta odaklanınca otomatik yakınlaştırmayı engeller */
     font-family: inherit;
     transition: border-color var(--bp-dur-base) var(--bp-ease-standard),
                 box-shadow  var(--bp-dur-base) var(--bp-ease-standard);
@@ -112,7 +112,7 @@
     background: linear-gradient(135deg, rgba(var(--bp-danger-rgb),.07) 0%, rgba(var(--bp-danger-rgb),.02) 100%);
     border: 1px solid rgba(var(--bp-danger-rgb),.2);
     border-left: 3px solid var(--bp-danger);
-    border-radius: var(--bp-radius-md);
+    border-radius: var(--bp-r-sm);
     padding: 14px 16px; color: var(--bp-text-2);
     font-size: var(--bp-type-sm); margin-top: 24px;
   }

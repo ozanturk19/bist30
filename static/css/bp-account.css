@@ -5,12 +5,12 @@
       seansta durumu degisen 1-3 hisse; degisen yoksa ya da oturum yoksa gorunmez.
    Renkler yalniz token (kanon §5.2-5.3). Durum hapi kanonik `.da-signal`. ══ */
 
-.acc { display: block; margin-top: 12px; padding: 14px; border: 1px solid rgba(var(--bp-brand-rgb), .32); border-radius: var(--bp-radius-16); background: rgba(var(--bp-brand-rgb), .06); color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
+.acc { display: block; margin-top: 12px; padding: 14px; border: 1px solid rgba(var(--bp-brand-rgb), .32); border-radius: var(--bp-r-lg); background: rgba(var(--bp-brand-rgb), .06); color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
 .acc-f { margin: 0; }
 .acc-t { margin: 0; font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif; font-size: 17px; font-weight: 800; line-height: 1.25; letter-spacing: -.01em; color: var(--bp-text); }
 .acc-s { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--bp-text-2); }
 .acc-s b { color: var(--bp-text); font-weight: 700; overflow-wrap: anywhere; }
-.acc-in { display: block; width: 100%; height: 48px; margin-top: 12px; padding: 0 14px; border: 1px solid var(--bp-field-border); border-radius: var(--bp-radius-xl); background: var(--bp-bg); color: var(--bp-text); font-family: inherit; font-size: 16px; font-weight: 500; }
+.acc-in { display: block; width: 100%; height: 48px; margin-top: 12px; padding: 0 14px; border: 1px solid var(--bp-field-border); border-radius: var(--bp-r-md); background: var(--bp-bg); color: var(--bp-text); font-family: inherit; font-size: 16px; font-weight: 500; }
 .acc-in::placeholder { color: var(--bp-text-3); }
 .acc-in[aria-invalid="true"] { border-color: var(--bp-stale); }
 .acc-code { max-width: 220px; font-size: 22px; font-weight: 700; letter-spacing: .32em; font-variant-numeric: tabular-nums; }
@@ -18,7 +18,7 @@
 .acc-err[hidden] { display: none; }
 .acc-kv { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; margin-top: 12px; font-size: 13px; line-height: 1.45; color: var(--bp-text-2); cursor: pointer; }
 .acc-kv .da-check { width: 22px; height: 22px; margin-top: 0; }
-.acc-b { display: block; width: 100%; min-height: 48px; margin-top: 12px; border: 0; border-radius: var(--bp-radius-xl); background: var(--bp-brand); color: var(--bp-bg); font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.acc-b { display: block; width: 100%; min-height: 48px; margin-top: 12px; border: 0; border-radius: var(--bp-r-md); background: var(--bp-brand); color: var(--bp-bg); font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 .acc-b:disabled { background: var(--bp-surface3); color: var(--bp-text-3); cursor: not-allowed; }
 .acc-b:not(:disabled):hover { filter: brightness(1.07); }
 .acc-f--code .acc-b { max-width: 220px; }
@@ -42,7 +42,7 @@
 .tks-ar, .tks-sep { color: var(--bp-text-3); }
 .tks .da-signal { min-height: 18px; padding: 0 7px; font-size: 10.5px; font-weight: 600; letter-spacing: 0; }
 .tks-go { margin-left: auto; min-height: 28px; display: inline-flex; align-items: center; font-weight: 700; color: var(--bp-brand); text-decoration: none; white-space: nowrap; }
-.tks a:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; border-radius: var(--bp-radius-4); }
+.tks a:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; border-radius: var(--bp-r-sm); }
 @media (max-width: 819.98px) {
   .tks { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 10px 16px; font-size: 12.5px; }
   .tks-tl { grid-column: 1 / -1; }

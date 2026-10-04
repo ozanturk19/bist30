@@ -32,7 +32,7 @@
       'border-left:3px solid ' + col.border,
       'color:var(--bp-text)',
       'padding:10px 16px',
-      'border-radius:var(--bp-radius-md)',
+      'border-radius:var(--bp-r-sm)',
       'font-size:13px',
       'font-weight:600',
       'box-shadow:0 4px 20px rgba(0,0,0,0.45)',

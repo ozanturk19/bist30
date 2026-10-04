@@ -34,14 +34,14 @@
   .hero .da-recap-tag { margin-bottom: 10px; }
   .hero h1 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: var(--bp-text-28); font-weight: 800;
+    font-size: var(--bp-type-stat); font-weight: 800;
     color: var(--bp-text);
     margin: 0 0 8px;
     letter-spacing: -0.5px;
   }
   .hero p {
     color: var(--bp-text-3);
-    font-size: var(--bp-text-md);
+    font-size: var(--bp-type-body);
     max-width: 540px;
     margin: 0 auto;
   }
@@ -59,7 +59,7 @@
   }
   .question:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
   .q-label {
-    font-size: var(--bp-text-md); font-weight: 700;
+    font-size: var(--bp-type-body); font-weight: 700;
     color: var(--bp-text);
     margin-bottom: 12px;
     display: block;
@@ -74,7 +74,7 @@
     position: relative;
     background: var(--bp-raised);
     border: 1.5px solid var(--bp-line-strong);
-    border-radius: var(--bp-radius-xl);
+    border-radius: var(--bp-r-md);
     padding: 13px 16px;
     cursor: pointer;
     font-size: var(--bp-type-sm);
@@ -140,7 +140,7 @@
   .btn-secondary:hover { box-shadow: none; }
   .alert {
     padding: 12px 16px;
-    border-radius:var(--bp-radius-md);
+    border-radius:var(--bp-r-sm);
     margin-bottom: 20px;
     font-size: var(--bp-type-sm);
   }
@@ -169,7 +169,7 @@
     --da-glow-rgb: var(--bp-ok-rgb);
     --da-glow-size: 340px; --da-glow-a: .12;
   }
-  .profile-result-mark  { font-size: var(--bp-text-42); color: var(--bp-ok); margin-bottom: 10px; line-height: 1; }
+  .profile-result-mark  { font-size: var(--bp-type-display); color: var(--bp-ok); margin-bottom: 10px; line-height: 1; }
   .profile-result-title { font-size: var(--bp-type-lg); font-weight: 800; color: var(--bp-ok); margin-bottom: 8px; }
   .profile-result-body  { font-size: var(--bp-type-sm); color: var(--bp-text-2); margin-bottom: 24px; }
 
@@ -178,19 +178,19 @@
      `.da-panel`den gelir; burada yalniz satir duzeni duruyor. */
   .pf-alerts { margin-bottom: 18px; }
   .pf-alerts-title {
-    font-size: var(--bp-text-lg);
+    font-size: var(--bp-type-body);
     font-weight: 700;
     color: var(--bp-text);
     margin: 0 0 6px;
   }
   .pf-alerts-sub {
-    font-size: var(--bp-text-sm);
+    font-size: var(--bp-type-sm);
     color: var(--bp-text-3);
     margin: 0 0 14px;
     line-height: 1.5;
   }
   .pf-alerts-state {
-    font-size: var(--bp-text-sm);
+    font-size: var(--bp-type-sm);
     color: var(--bp-text-2);
     margin-bottom: 10px;
   }
@@ -229,7 +229,7 @@
     border: 1px solid var(--bp-line-strong);
     background: var(--bp-raised);
     color: var(--bp-text-2);
-    font-size: var(--bp-text-sm);
+    font-size: var(--bp-type-sm);
     font-weight: 600;
     cursor: pointer;
     transition: color var(--bp-dur-base) var(--bp-ease-standard),
@@ -254,7 +254,7 @@
   @media (max-width: 600px) {
     main { margin: 20px auto; }
     .form-card { padding: 20px; }
-    .hero h1 { font-size: var(--bp-text-22); }
+    .hero h1 { font-size: var(--bp-type-title); }
     .opts { grid-template-columns: 1fr; }
   }
 

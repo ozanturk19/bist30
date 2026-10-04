@@ -3,7 +3,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body {
-    -webkit-font-smoothing: antialiased; font-size: var(--bp-text-md); min-height: 100vh;
+    -webkit-font-smoothing: antialiased; font-size: var(--bp-type-body); min-height: 100vh;
   }
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-line);
@@ -29,14 +29,14 @@
   }
   .search-bar > * { position: relative; z-index: 1; }
   .search-bar .search-bar-label {
-    font-size: var(--bp-text-sm); color: var(--bp-text-3); text-transform: uppercase;
+    font-size: var(--bp-type-sm); color: var(--bp-text-3); text-transform: uppercase;
     letter-spacing: 0.5px; font-weight: 600; width: 100%; margin-bottom: 4px;
   }
   .ticker-inputs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
   .ticker-input {
     background: var(--bp-bg); border: 1px solid var(--bp-field-border);   /* K-Q */
     color: var(--bp-text); border-radius:var(--bp-r-sm); padding: 11px 12px;
-    font-size: var(--bp-text-lg); font-family: inherit; font-variant-numeric: tabular-nums; text-transform: uppercase;
+    font-size: var(--bp-type-body); font-family: inherit; font-variant-numeric: tabular-nums; text-transform: uppercase;
     width: 100px; outline: none; transition: border-color .15s;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px. 19.09: dikey padding
      8px->11px, 375px'te olculen 37px yukseklik ~44px asgari dokunma hedefine
@@ -54,7 +54,7 @@
   .share-btn {
     position: relative;
     background: var(--bp-raised); color: var(--bp-text-2); border: 1px solid var(--bp-line-strong);
-    border-radius:var(--bp-r-sm); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
+    border-radius:var(--bp-r-sm); padding: 8px 14px; font-size: var(--bp-type-sm); cursor: pointer;
     transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
     align-items: center; justify-content: center; gap: 5px;
     /* K-DP: eleman <a>'dan <button>'a gecti -- <button> font-family'yi
@@ -124,9 +124,9 @@
   .col-ticker { font-size: var(--bp-type-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
   .col-name   { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; margin-right: auto; }
   .col-kap    {
-    display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text-3);
+    display: inline-block; font-size: var(--bp-type-xs); color: var(--bp-text-3);
     background: rgba(var(--bp-text3-rgb),.1); border: 1px solid rgba(var(--bp-text3-rgb),.2);
-    border-radius: var(--bp-radius-4); padding: 1px 5px; text-decoration: none; margin-top: 6px;
+    border-radius: var(--bp-r-sm); padding: 1px 5px; text-decoration: none; margin-top: 6px;
     transition: all .15s;
   }
   .col-kap:hover { color: var(--bp-text); background: rgba(var(--bp-text3-rgb),.2); }
@@ -155,12 +155,12 @@
   /* K-BQ (21.09): Supertrend seviyesinin FIYATA gore rolu. Bu seviye yon-bagimsiz
      bir buyukluktur (K-BO) — rol renkle degil metinle soylenir. */
   .sl-role {
-    display: block; font-size: var(--bp-text-2xs);
+    display: block; font-size: var(--bp-type-xs);
     font-weight: 600; color: var(--bp-text-3); letter-spacing: .3px; margin-top: 2px;
   }
 
   .quality-badge {
-    padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 700;
+    padding: 2px 7px; border-radius: var(--bp-r-sm); font-size: var(--bp-type-xs); font-weight: 700;
     text-transform: uppercase; letter-spacing: .4px;
   }
   .q-ideal  { background: rgba(var(--bp-al-rgb),.18);  color:var(--bp-up); }
@@ -186,8 +186,8 @@
   .ac-dropdown {
     position: absolute; top: calc(100% + 4px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius:var(--bp-radius-md); min-width: 240px; max-height: 280px; overflow-y: auto;
-    z-index:var(--bp-z-modal); box-shadow: var(--bp-shadow-md);
+    border-radius:var(--bp-r-sm); min-width: 240px; max-height: 280px; overflow-y: auto;
+    z-index:var(--bp-z-modal); box-shadow: var(--bp-shadow-pop);
     display: none;
   }
   .ac-dropdown.open { display: block; }
@@ -201,7 +201,7 @@
   .ac-dropdown.ac-up { top: auto; bottom: calc(100% + 4px); }
   .ac-item {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 12px; cursor: pointer; font-size: var(--bp-text-sm);
+    padding: 8px 12px; cursor: pointer; font-size: var(--bp-type-sm);
     border-bottom: 1px solid var(--bp-line);   /* 20.09: eski navy #1e2d45 -> notr token */
     transition: background .12s;
   }
@@ -217,7 +217,7 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .ac-empty {
-    padding: 12px; color: var(--bp-text-3); font-size: var(--bp-text-sm); text-align: center;
+    padding: 12px; color: var(--bp-text-3); font-size: var(--bp-type-sm); text-align: center;
   }
 
   /* ── Score / Verdict styles ── */
@@ -233,7 +233,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 16px; height: 16px; margin-left: 4px;
     border: 1px solid var(--bp-line); border-radius: 50%;
-    font-size: var(--bp-text-2xs); font-style: normal; font-weight: 700;
+    font-size: var(--bp-type-xs); font-style: normal; font-weight: 700;
     color: var(--bp-text-3); cursor: help; flex-shrink: 0;
   }
   .help-icon:hover, .help-icon:focus-visible { color: var(--bp-text); border-color: var(--bp-border2); }
@@ -275,7 +275,7 @@
   }
   .cmp-mrow {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 7px 0; border-bottom: 1px solid var(--bp-border-subtle); font-size: var(--bp-text-sm);
+    padding: 7px 0; border-bottom: 1px solid var(--bp-border-subtle); font-size: var(--bp-type-sm);
   }
   .cmp-mrow:last-child { border-bottom: none; }
   .cmp-mrow-label {

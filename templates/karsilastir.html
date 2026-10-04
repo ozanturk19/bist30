@@ -240,7 +240,7 @@ function renderCell(key, s) {
     case 'rsi':           return renderRsi(v, s.signal);
     /* C-71 K39 (03.10): "Sinyal Süresi" satırı kalktı — yaş duvar saatiyle sayılıyordu
        (Cumartesi, Cuma sinyaline "1 gün"); tarih satırı aynı bilgiyi tarihle verir. */
-    case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${bpSignalDateLabel(v) || v}</span>` : '<span class="muted">—</span>';
+    case 'signal_date':   return v ? `<span style="font-size:var(--bp-type-sm)">${bpSignalDateLabel(v) || v}</span>` : '<span class="muted">—</span>';
     /* K-BQ (21.09): iki kusur birden. (1) Satirin KENDI yardim metni "sinyal yonu ne
        olursa olsun her zaman hesaplanir" derken deger SAT'ta gizleniyordu — sayfa kendi
        aciklamasiyla celisiyordu; ad zaten "Supertrend Seviyesi", yani gizlenmesi gereken
@@ -396,7 +396,7 @@ function buildMobileCards(stocks) {
   const cards = stocks.map((s, i) => {
     if (!s.found) {
       return `<div class="cmp-mcard da-panel cmp-mcard-notfound">
-        <div class="cmp-mtop"><span class="cmp-mticker">${escapeHtml(s.ticker)}</span><span class="muted" style="font-size:var(--bp-text-sm)">Bulunamadı</span></div>
+        <div class="cmp-mtop"><span class="cmp-mticker">${escapeHtml(s.ticker)}</span><span class="muted" style="font-size:var(--bp-type-sm)">Bulunamadı</span></div>
       </div>`;
     }
     const header = `

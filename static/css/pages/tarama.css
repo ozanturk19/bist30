@@ -11,14 +11,14 @@
     --brand:var(--bp-brand); --gold:var(--bp-caution);
   }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
-  body { font-size:var(--bp-text-md); min-height:100vh; }
+  body { font-size:var(--bp-type-body); min-height:100vh; }
 
   /* ── Header ── */
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
-  .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
+  .page-sub   { font-size:var(--bp-type-sm); color:var(--text2); margin-top:1px; }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
 
@@ -50,7 +50,7 @@
 
   /* araç çubuğu: Filtre + hazır liste çipleri */
   .tv-bar { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; border-top: 1px solid var(--bp-line); }
-  .tv-fbtn { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 40px; font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: var(--bp-radius-xl); padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .tv-fbtn { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 40px; font: 600 13.5px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: var(--bp-raised); border: 1px solid var(--bp-border2); border-radius: var(--bp-r-md); padding: 8px 14px; cursor: pointer; white-space: nowrap; }
   .tv-fbtn svg { width: 16px; height: 16px; flex: none; }
   .tv-fn { font: 700 11.5px/1 'Space Grotesk', system-ui, sans-serif; color: var(--bp-bg); background: var(--bp-brand); border-radius: var(--bp-r-pill); padding: 3px 7px; }
   .tv-vsep { flex: none; width: 1px; height: 24px; background: var(--bp-border2); margin: 0 4px; }
@@ -73,12 +73,12 @@
   .tv-clr { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text); background: transparent; border: 1px solid var(--bp-border2); border-radius: var(--bp-r-pill); padding: 6px 12px 6px 9px; cursor: pointer; }
   .tv-clr svg { width: 14px; height: 14px; }
   .tv-seg { display: inline-flex; gap: 2px; background: var(--bp-surface); border: 1px solid var(--bp-line); border-radius: 11px; padding: 3px; }
-  .tv-seg button { min-height: 34px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); background: transparent; border: 0; border-radius: var(--bp-radius-md); padding: 7px 15px; cursor: pointer; }
+  .tv-seg button { min-height: 34px; font: 600 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); background: transparent; border: 0; border-radius: var(--bp-r-sm); padding: 7px 15px; cursor: pointer; }
   .tv-seg button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); box-shadow: inset 0 0 0 1px var(--bp-border2); }
   .tv button:focus-visible, .tv a:focus-visible, .tv [tabindex]:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; }
 
   /* tablo */
-  .tv-tbw { border: 1px solid var(--bp-line); border-radius: var(--bp-radius-16); background: var(--bp-surface); overflow-x: auto; }
+  .tv-tbw { border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg); background: var(--bp-surface); overflow-x: auto; }
   .tv-tb { width: 100%; border-collapse: collapse; font-size: 14px; }
   .tv-tb thead th { font: 600 11px/1.25 'Space Grotesk', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--bp-text-3); text-align: left; padding: 0; border-bottom: 1px solid var(--bp-line); white-space: nowrap; vertical-align: bottom; }
   .tv-tb th.num { text-align: right; }
@@ -88,7 +88,7 @@
   .thb:hover { color: var(--bp-text-2); }
   .tv-tb th[aria-sort]:not([aria-sort="none"]) .thb { color: var(--bp-text); }
   .tv-tb th[aria-sort] .ar { color: var(--bp-brand); opacity: 1; }
-  .tv .thb:focus-visible { outline-offset: -2px; border-radius: var(--bp-radius-md); }
+  .tv .thb:focus-visible { outline-offset: -2px; border-radius: var(--bp-r-sm); }
   .tv-tb td { padding: 9px 14px; border-top: 1px solid var(--bp-line); vertical-align: middle; white-space: nowrap; color: var(--bp-text-2); }
   .tv-tb td.num { text-align: right; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .tv-tb tr.r { position: relative; }
@@ -104,7 +104,7 @@
   .tv-tb .c-tr .sub { display: inline; margin-left: 8px; }
   .tv-tb tr.r.b td { color: var(--bp-text-3); }
   .tv-tb tr.r.b td.num, .tv-tb tr.r.b .c-hs b { color: var(--bp-text-2); }
-  .tv-stale { position: relative; z-index: 1; display: inline-block; margin-left: 6px; padding: 0 6px; font-size: var(--bp-text-2xs); color: var(--bp-stale); border: 1px solid rgba(var(--bp-stale-rgb), .4); border-radius: var(--bp-radius-sm); vertical-align: 1px; }
+  .tv-stale { position: relative; z-index: 1; display: inline-block; margin-left: 6px; padding: 0 6px; font-size: var(--bp-type-xs); color: var(--bp-stale); border: 1px solid rgba(var(--bp-stale-rgb), .4); border-radius: var(--bp-r-sm); vertical-align: 1px; }
   .tv .pill { display: inline-block; font: 600 11.5px/1.55 'Space Grotesk', system-ui, sans-serif; border-radius: var(--bp-r-pill); padding: 1px 9px; white-space: nowrap; }
   .tv .pill.g { background: var(--bp-up); color: var(--bp-bg); }
   .tv .pill.y { background: var(--bp-bkl-bd); color: var(--bp-text); }
@@ -164,7 +164,7 @@
   .tv-opt .oc { font-size: 12px; font-weight: 500; color: var(--bp-text-3); font-variant-numeric: tabular-nums; }
   .tv-opt:not([aria-pressed="true"]):hover { border-color: var(--bp-border2); }
   .tv-opt[aria-pressed="true"] { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb), .13); color: var(--bp-text); }
-  .tv-pp { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 8px 8px 8px 12px; border-radius: var(--bp-radius-xl); background: rgba(var(--bp-brand-rgb), .08); border: 1px solid rgba(var(--bp-brand-rgb), .25); font: 500 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); }
+  .tv-pp { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 8px 8px 8px 12px; border-radius: var(--bp-r-md); background: rgba(var(--bp-brand-rgb), .08); border: 1px solid rgba(var(--bp-brand-rgb), .25); font: 500 13px 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); }
   .tv-pp b { color: var(--bp-text); font-weight: 600; }
   .tv-ppx { margin-left: auto; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; border: 0; background: transparent; color: var(--bp-text-2); cursor: pointer; }
   .tv-ppx svg { width: 14px; height: 14px; }

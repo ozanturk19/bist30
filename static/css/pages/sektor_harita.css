@@ -2,7 +2,7 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
-  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
+  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-type-body); min-height:100vh; }
   /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
      sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank
      deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */

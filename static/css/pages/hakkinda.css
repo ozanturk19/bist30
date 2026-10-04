@@ -8,7 +8,7 @@
   font-size: var(--bp-type-lg); font-weight: 800; line-height: 1;
   color: var(--bp-art-cyan); font-variant-numeric: tabular-nums;
 }
-.hk-q-t { color: var(--bp-text); font-size: var(--bp-text-md); font-weight: 700; line-height: 1.3; }
+.hk-q-t { color: var(--bp-text); font-size: var(--bp-type-body); font-weight: 700; line-height: 1.3; }
 .hk-q-d { color: var(--bp-text-2); font-size: var(--bp-type-sm); line-height: 1.55; }
 
 @media (max-width: 720px) { .hk-qs { grid-template-columns: minmax(0, 1fr); } }

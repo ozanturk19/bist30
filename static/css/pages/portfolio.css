@@ -2,14 +2,14 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
-  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
+  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-type-body); min-height:100vh; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
   .page-sub   { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
   .sum-card { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:16px; text-align:center; }
-  .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
-  .sum-pct  { font-size:var(--bp-text-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
+  .sum-num  { font-size:var(--bp-type-stat); font-weight:800; line-height:1; }
+  .sum-pct  { font-size:var(--bp-type-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
   .sum-lbl  { font-size:var(--bp-type-xs); color:var(--bp-text-3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:var(--bp-up); } .sum-red{ color:var(--bp-down); } .sum-blue{ color:var(--bp-art-cyan); }
   /* K-BP (21.09): K/Z TAM SIFIR — pozisyon guncel fiyattan eklendiginde ilk
@@ -17,13 +17,13 @@
   .sum-neutral{ color:var(--bp-text-2); }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:16px; }
-  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-r-sm); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-r-sm); padding:7px 12px; font-size:var(--bp-type-body); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
   .add-bar input:focus { border-color:var(--bp-art-cyan); }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
   .btn-add { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-r-sm); padding:7px 16px; font-size:var(--bp-type-sm); font-weight:600; cursor:pointer; }
   .btn-add:hover { background:var(--bp-art-cyan); color:var(--bp-bg); }
-  .add-lbl { font-size:var(--bp-text-sm); color:var(--bp-text-3); }
+  .add-lbl { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
 
   .pf-table { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); overflow-x:auto; -webkit-overflow-scrolling:touch; }
   /* CPO-DEV2-100'un ">=900px'te tablo viewport'a sigar" varsayimi 15.09 fresh-ground-audit'te
@@ -48,7 +48,7 @@
                  display:inline-flex; align-items:center; min-height:24px; }
   .ticker-link:hover { color:var(--bp-art-cyan); }
 
-  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-type-xs); font-weight:600; }
+  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-r-md); font-size:var(--bp-type-xs); font-weight:600; }
   .signal-AL    { background:var(--bp-al-bg); color:var(--bp-up); border:1px solid var(--bp-up-line); }
   /* K-BY eki: zemin artik TINT -> K-P kurali geregi metin --bp-down-on-tint
      (tint uzerinde --bp-down 4,63:1'e duser; on-tint 6,15:1). Kenar da cip
@@ -75,7 +75,7 @@
     display:inline-flex; align-items:center; justify-content:center;
     min-width:32px; min-height:32px; padding:0;
     background:none; border:none; color:var(--bp-text-3); cursor:pointer;
-    font-size:var(--bp-text-md);
+    font-size:var(--bp-type-body);
   }
   .btn-del:hover  { color:var(--bp-danger); }
   .btn-edit:hover { color:var(--bp-brand); }
@@ -89,7 +89,7 @@
     position: relative;
     display: inline-flex; align-items: center; gap: 5px;
     background: none; border: 1px solid var(--bp-line-strong); color: var(--bp-text-3);
-    border-radius:var(--bp-r-sm); padding: 5px 12px; font-size: var(--bp-text-sm);
+    border-radius:var(--bp-r-sm); padding: 5px 12px; font-size: var(--bp-type-sm);
     cursor: pointer; transition: all .15s;
   }
   .btn-action::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
@@ -116,9 +116,9 @@
   /* Import modal */
   .import-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--bp-raised); border: 1px solid var(--bp-line); border-radius:var(--bp-radius-md);
+    background: var(--bp-raised); border: 1px solid var(--bp-line); border-radius:var(--bp-r-sm);
     padding: 10px 20px; font-size: var(--bp-type-sm); color: var(--bp-text);
-    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
+    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-pop);
   }
   .import-toast.ok  { border-color: rgba(var(--bp-ok-rgb),.32); color: var(--bp-ok); }
   .import-toast.err { border-color: var(--bp-danger-line); color: var(--bp-danger); }
@@ -140,7 +140,7 @@
   .ls-warning-title { font-weight:700; color:var(--bp-caution); margin-bottom:3px; }
   .ls-warning-close {
     position:relative; background:none; border:none; color:var(--bp-text-3); cursor:pointer;
-    font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
+    font-size:var(--bp-type-body); padding:0 2px; flex-shrink:0; line-height:1;
     transition:color .15s;
   }
   .ls-warning-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
@@ -155,7 +155,7 @@
   }
   .pf-fetch-error-retry {
     background:none; border:1px solid var(--bp-danger-line); color:var(--bp-danger);
-    border-radius:var(--bp-r-sm); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
+    border-radius:var(--bp-r-sm); padding:5px 12px; font-size:var(--bp-type-sm); font-weight:600;
     cursor:pointer; transition:background .15s;
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-danger-rgb),.12); }
@@ -190,17 +190,17 @@
   .pf-mprice-row { margin-bottom:10px; }
   .pf-mdetail-row { padding-top:10px; border-top:1px solid var(--bp-border-subtle); }
   .pf-metric { display:flex; flex-direction:column; gap:2px; }
-  .pf-metric-label { font-size:var(--bp-text-2xs); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.4px; }
+  .pf-metric-label { font-size:var(--bp-type-xs); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.4px; }
   .pf-mprice-row .pf-metric span { font-size:var(--bp-type-sm); font-weight:600; }
-  .pf-mdate { font-size:var(--bp-text-sm); color:var(--bp-text-3); }
+  .pf-mdate { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
   .pf-mspark { margin-top:10px; }
   .pf-mentry { margin-top:8px; }
 
   /* F6: Sparkline + Sinyal Asistanı + XU030 */
   .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }
   .btn-entry {
-    display:inline-block; padding:2px 7px; border-radius:var(--bp-radius-4); margin-left:5px;
-    font-size:var(--bp-text-2xs); font-weight:700; cursor:pointer; vertical-align:middle;
+    display:inline-block; padding:2px 7px; border-radius:var(--bp-r-sm); margin-left:5px;
+    font-size:var(--bp-type-xs); font-weight:700; cursor:pointer; vertical-align:middle;
     background:rgba(var(--bp-ok-rgb),.1); border:1px solid rgba(var(--bp-ok-rgb),.3); color:var(--bp-ok);
     white-space:nowrap; transition:all .15s;
   }
@@ -318,7 +318,7 @@
     }
     .pf-panel-header {
       border-bottom: 1px solid var(--bp-line);
-      border-radius: var(--bp-radius-16);
+      border-radius: var(--bp-r-lg);
       margin-bottom: 10px;
     }
     /* sarmalayici seffaflasinca bos-durum mesaji zeminsiz kalirdi; kendi
@@ -348,7 +348,7 @@
      1.000.000,00 ₺ kesiliyordu -> tek satir + kart genisligine gore yazi boyu. */
   .pf-table:not(.pf-fits) thead th { position: static; }
   .sum-card { container-type: inline-size; }
-  .sum-num { white-space: nowrap; font-size: min(var(--bp-text-28), 11cqi); }
+  .sum-num { white-space: nowrap; font-size: min(var(--bp-type-stat), 11cqi); }
   /* 6 kart masaustunde 7 kolonluk auto-fit'te ~130px'e iniyordu (tutar 14px):
      >=600px iki satir x 3 kart. Hucre yatay dolgusu 14->10: 13 sutunluk tablo
      1280/1440'ta kabina sigar (sil dugmesi kabin icinde). */
