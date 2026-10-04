@@ -185,7 +185,7 @@
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
       html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
-            + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
+            + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text-3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
             + '<span class="bp-sr-price">' + priceStr + '</span>'
             + '<span class="bp-sr-chg ' + cCls + '">' + cSign + '</span>'
             + '</a>';

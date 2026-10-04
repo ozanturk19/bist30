@@ -12,4 +12,4 @@
   }
   .logo-link { align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
   /* C-29: tam ekran isi haritasi -> genis kap (anasayfanin 1360'ina yakin) */
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
+  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-flat); }

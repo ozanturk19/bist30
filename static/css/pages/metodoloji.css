@@ -21,7 +21,7 @@
   }
   header {
     background: var(--bp-surface);
-    border-bottom: 1px solid var(--bp-border);
+    border-bottom: 1px solid var(--bp-line);
     position: sticky;
     top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
@@ -42,26 +42,26 @@
      ritminin metin-agirlikli sayfalardaki karsiligi). */
   .prose h2::after {
     content: ''; display: block; width: 42px; height: 2px; margin-top: 10px;
-    border-radius: var(--bp-radius-pill);
-    background: linear-gradient(90deg, var(--bp-accent-cyan), transparent);
+    border-radius: var(--bp-r-pill);
+    background: linear-gradient(90deg, var(--bp-art-cyan), transparent);
   }
   .prose h3 {
-    font-size: var(--bp-text-15);
+    font-size: var(--bp-type-body);
     font-weight: 600;
-    color: var(--bp-text2);
+    color: var(--bp-text-2);
     margin: 20px 0 8px;
   }
-  .prose p  { color: var(--bp-text2); margin-bottom: 12px; }
-  .prose ul { color: var(--bp-text2); margin: 8px 0 12px 20px; }
+  .prose p  { color: var(--bp-text-2); margin-bottom: 12px; }
+  .prose ul { color: var(--bp-text-2); margin: 8px 0 12px 20px; }
   .prose li { margin-bottom: 6px; }
   .prose strong { color: var(--bp-text); }
   .prose code {
     background: var(--bp-border-subtle);
-    color: var(--bp-accent-cyan);
+    color: var(--bp-art-cyan);
     padding: 2px 6px;
     border-radius: var(--bp-radius-4);
     font-family: var(--bp-font-mono);
-    font-size: var(--bp-text-base);
+    font-size: var(--bp-type-sm);
   }
 
   /* .da-panel'in CIPLAK METIN dugumu tasiyan kullanicilar icin savunma.
@@ -76,20 +76,20 @@
 
   /* .da-panel deltasi — zemin/kenar/radius paylasilan katmandan gelir. */
   .signal-box { padding: 20px; margin: 16px 0; --da-glow-size: 220px; --da-glow-a: .14; }
-  .signal-box.al  { --da-accent: var(--bp-al);  --da-glow-rgb: var(--bp-al-rgb); }
-  .signal-box.sat { --da-accent: var(--bp-sat); --da-glow-rgb: var(--bp-sat-rgb); }
+  .signal-box.al  { --da-accent: var(--bp-up);  --da-glow-rgb: var(--bp-al-rgb); }
+  .signal-box.sat { --da-accent: var(--bp-down); --da-glow-rgb: var(--bp-sat-rgb); }
 
   .disclaimer {
     padding: 18px 20px;
-    color: var(--bp-text2);
-    font-size: var(--bp-text-base);
+    color: var(--bp-text-2);
+    font-size: var(--bp-type-sm);
     margin-top: 32px;
-    --da-accent: var(--bp-sat);
+    --da-accent: var(--bp-down);
     --da-glow-rgb: var(--bp-sat-rgb);
     --da-glow-size: 260px; --da-glow-a: .12;
   }
 
-  .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:var(--bp-text3);}
+  .mc-pos{color:var(--bp-up);}.mc-neg{color:var(--bp-down);}.mc-neu{color:var(--bp-text-3);}
 
   /* Terimler — Karıştırılmaması Gerekenler (CPO-1682 terim netleştirmesi) */
   .term-grid { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }
@@ -104,17 +104,17 @@
     line-height: 1.45; margin: 0;
   }
   .term-row dd {
-    font-size: var(--bp-text-sm); color: var(--bp-text2); line-height: 1.6; margin: 0;
+    font-size: var(--bp-text-sm); color: var(--bp-text-2); line-height: 1.6; margin: 0;
   }
   .term-num {
     display: inline-block; margin-left: 5px; padding: 1px 6px;
     font-variant-numeric: tabular-nums; font-size: var(--bp-text-2xs); font-weight: 500;
-    color: var(--bp-text3); background: rgba(var(--bp-brand-rgb), .10);
+    color: var(--bp-text-3); background: rgba(var(--bp-brand-rgb), .10);
     border-radius: var(--bp-radius-sm); vertical-align: middle; letter-spacing: .2px;
   }
   .term-where {
     display: block; margin-top: 4px;
-    font-size: var(--bp-text-2xs); color: var(--bp-text3); letter-spacing: .15px;
+    font-size: var(--bp-text-2xs); color: var(--bp-text-3); letter-spacing: .15px;
   }
   @media (max-width: 600px) {
     .term-row { grid-template-columns: 1fr; gap: 5px; padding: 11px 13px; }
@@ -132,15 +132,15 @@
 .mt-states dt { font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .mt-states dd { margin: 0; color: var(--bp-text-2); }
 .mt-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.mt-dot.g { background: var(--bp-al); } .mt-dot.y { background: var(--bp-text-2); } .mt-dot.b { background: var(--bp-sat); }
-.mt-td, .mt-faq { border: 1px solid var(--bp-border); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
+.mt-dot.g { background: var(--bp-up); } .mt-dot.y { background: var(--bp-text-2); } .mt-dot.b { background: var(--bp-down); }
+.mt-td, .mt-faq { border: 1px solid var(--bp-line); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
 .mt-td summary, .mt-faq summary { cursor: pointer; font-weight: 600; min-height: 24px; }
 .mt-td p, .mt-faq p { margin: 8px 0 0; color: var(--bp-text-2); }
 .mt-td code { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .mt-states > div { grid-template-columns: 1fr; } }
 /* C-42 dilim 2: TL;DR karti + kriter izgarasi + formul kutusu -> tek 5 kosul listesi */
 .mt-check { list-style: none; counter-reset: mtk; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
-.mt-check li { counter-increment: mtk; display: grid; grid-template-columns: 1.75rem 9.5rem minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 10px 14px; border: 1px solid var(--bp-border); border-radius: 10px; }
+.mt-check li { counter-increment: mtk; display: grid; grid-template-columns: 1.75rem 9.5rem minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 10px 14px; border: 1px solid var(--bp-line); border-radius: 10px; }
 .mt-check li::before { content: counter(mtk); font-weight: 700; color: var(--bp-text-2); font-variant-numeric: tabular-nums; }
 .mt-check a { font-weight: 600; color: var(--bp-text); text-decoration: none; }
 .mt-check a:hover { text-decoration: underline; }

@@ -21,14 +21,14 @@
   /* Borders */
   --bp-border2:   #46464d;
   /* 21.09 (CPO) K-Q — FORM ALANI SINIRI, WCAG 1.4.11 (Non-text Contrast, 3:1).
-     --bp-border (#2a2a2c) bir KART kenarligi icin dogru: kart kendi metniyle
+     --bp-line (#2a2a2c) bir KART kenarligi icin dogru: kart kendi metniyle
      tanindigi icin suslu sayilir ve 1.4.11'den MUAFTIR. Ama BOS bir metin
      alanini bulmanin TEK yolu sinirdir; orada ayni token #0e0e12 zemin uzerinde
      1.34:1 kaliyordu (canli olcum: 10 yuzey / 19 alan, en iyisi 2.06:1).
      #6e6e7a sitedeki UC zeminin hepsinde gecer: #0e0e12'de 4.20:1,
      #141416'da 4.02:1, #1c1b1f'te 3.65:1, alan dolgusu #21262d'de 3.31:1.
      YALNIZ input/textarea/select icin; dekoratif kenarliklara UYGULANMAZ. */
-  --bp-field-border: var(--bp-ctl-border);
+  --bp-field-border: var(--bp-line-strong);
 
   /* 21.09 (CPO) K-Y — ETKILESIMLI KONTROL SINIRI, WCAG 1.4.11 (3:1).
      K-Q yukaridaki yorumda kapsamini "YALNIZ input/textarea/select" diye
@@ -48,8 +48,8 @@
      kuralin :hover yarisi --bp-border2'de (1.97:1) kaldi: fareyle uzerine
      gelince kontrolun kutusu %46 ZAYIFLIYORDU. Hover affordansi GUCLENDIRMELI.
      6.07:1 (sayfa zemini) — rest'in belirgin USTUNDE, odak halkasiyla
-     karistirilmayacak kadar notr. YALNIZ rest'i --bp-ctl-border olan kontrol
-     ailesi icin; kartlarin (--bp-border rest) hover'i zaten YUKARI gidiyor,
+     karistirilmayacak kadar notr. YALNIZ rest'i --bp-line-strong olan kontrol
+     ailesi icin; kartlarin (--bp-line rest) hover'i zaten YUKARI gidiyor,
      onlara dokunulmadi. */
   --bp-ctl-border-hover: #909097;
   --bp-border-subtle: #21262d;
@@ -69,15 +69,15 @@
   /* Brand */
   --bp-brand:     #b8c3ff;   /* periwinkle / electric violet */
   /* K-CZ (22.09): MARKA SOZCUK-ISARETININ ("Borsa|Pusula") vurgulu yarisi.
-     AYRI EKSEN, --bp-al DEGIL: wordmark'in ikinci yarisi 22 yuzeyde
-     var(--bp-al) ile -- yani urunun ANLAM TASIYAN "AL sinyali" rengiyle --
+     AYRI EKSEN, --bp-up DEGIL: wordmark'in ikinci yarisi 22 yuzeyde
+     var(--bp-up) ile -- yani urunun ANLAM TASIYAN "AL sinyali" rengiyle --
      boyaniyordu (K-BO kurali: yon/sinyal rengi yon tasimayan bir buyuklugu
      boyayamaz; K-CY'de ayni ihlal navigasyonda bulunmustu). Ayrica ayni ad
-     UC kanondan boyaniyordu: --bp-al (header SVG + footer, 22 sayfa),
+     UC kanondan boyaniyordu: --bp-up (header SVG + footer, 22 sayfa),
      --bp-brand (404/410/429/500 -- CPO-1558 ONCESI gradyan renginden kalma),
-     --bp-accent-cyan (/hakkinda hero). Deger bugunku BASKIN renkle ayni
+     --bp-art-cyan (/hakkinda hero). Deger bugunku BASKIN renkle ayni
      birakildi: bu commit 22 sayfada gorsel degisiklik YAPMAZ, yalniz 5
-     yuzeyi kanona getirir ve markayi sinyal ekseninden KOPARIR (--bp-al
+     yuzeyi kanona getirir ve markayi sinyal ekseninden KOPARIR (--bp-up
      ileride degisirse marka degismez). Emsal: --bp-volume (hacim ekseni).
      ACIK GORSEL KARAR (Ozan): marka ISARETI CPO-1558'de mor->camgobegi
      gradyanina gecirildi, sozcuk-isareti yesil kaldi -- ikisi ayni logonun
@@ -91,27 +91,27 @@
   /* K-BY eki (22.09): --bp-sat-bg OPAK #3d0f0f idi, --bp-al-bg ise %7 ALFA TINT.
      Ayni rolde (AL/SAT cip zemini) iki AYRI agirlik sinifi demekti: canli
      olcum, sayfa zemininden luminans sapmasi AL +0,0058 / SAT +0,0092 --
-     SAT dolgusu AL'in ~2 kati, BEKLE (--bp-surface2, +0,0068) bile AL'dan
+     SAT dolgusu AL'in ~2 kati, BEKLE (--bp-raised, +0,0068) bile AL'dan
      agirdi; yani "sinyal yok" karti "AL sinyali" kartindan daha one cikiyordu.
      Sitenin KENDI kanonu zaten tint'ti: index.css `.da-index-change.neg`,
      `.da-spot-signal.sig-sat`, `.da-sc-sig.sig-sat` -- UC bilesen de
      rgba(var(--bp-sat-rgb),.09) + .35 kenari ELLE yaziyordu, cunku opak token
      o eslesmeye uymuyordu. Token tint'e cevrildi, 3 elle kopya buraya bagli.
      Yeni denge: AL +0,0058 · SAT +0,0047 · BEKLE +0,0068 (dar bant).
-     --bp-sat-bd (#da3633) OPAK KALDI: onun tuketicileri cip degil HATA
+     --bp-danger-line (#da3633) OPAK KALDI: onun tuketicileri cip degil HATA
      yuzeyleri (.da-empty--error, .pf-fetch-error, .import-toast.err,
      .da-retry) -- ayri eksen, iddiali kenar orada dogru. */
   --bp-sat-bg:    rgba(var(--bp-sat-rgb), 0.09);
-  --bp-sat-bd-tint: rgba(var(--bp-sat-rgb), 0.35);  /* --bp-al-bd (.32) esi */
-  /* K-P (21.09): SOLUK SAT ZEMINI uzerindeki SAT METNI icin. --bp-sat (#f85149)
+  --bp-sat-bd-tint: rgba(var(--bp-sat-rgb), 0.35);  /* --bp-up-line (.32) esi */
+  /* K-P (21.09): SOLUK SAT ZEMINI uzerindeki SAT METNI icin. --bp-down (#f85149)
      duz zeminde 5.49:1 ile rahat gecer, ama rgba(sat,.10+) tint zemini metnin
      ARKASINI da kirmizilastirdigi icin oran 4.27-4.39:1'e duser (WCAG AA 4.5).
      Canli olcum: /ozet .sc-sat 4.27 (53 kart), /bilanco-takvimi .pd-count--sat 4.39.
-     KURAL: tint zemin + SAT metin ayni kuralda ise -> var(--bp-sat-on-tint). */
+     KURAL: tint zemin + SAT metin ayni kuralda ise -> var(--bp-down-on-tint). */
 
   /* Signal: BEKLİYOR (hold) */
   /* K-BY eki: --bp-bkl-bg (#1e293b) SILINDI -- tum repoda SIFIR tuketicisi
-     vardi (notr cip zemini fiilen --bp-surface2). Olu token, canon tuzagi. */
+     vardi (notr cip zemini fiilen --bp-raised). Olu token, canon tuzagi. */
   --bp-bkl-bd:    #30363d;
 
   /* Accent */
@@ -121,12 +121,12 @@
      hex serpiştirmek yerine BURADAN referans verilir. */
   --bp-volume:    #ffc850;   /* HACİM ekseninin kanonik rengi. Hacim Onaylı ⭐ (RVOL >= 1.20).
                                  🔴 K-BO (21.09): hacim YÖN-BAĞIMSIZ bir büyüklüktür (çöküşte de
-                                 yüksek çıkar) — yön rengiyle (--bp-al/--bp-sat) boyanamaz; emsal
+                                 yüksek çıkar) — yön rengiyle (--bp-up/--bp-down) boyanamaz; emsal
                                  tarama.css .trend-label (ADX, 10.09 BTCIM). Aynı büyüklük dört
                                  ayrı renkle boyanıyordu: / → --bp-volume, /sektor-harita ısı
-                                 haritası → --bp-accent-yellow (≥1,3) + --bp-al (≥2,0, ÖLÜ dal:
+                                 haritası → --bp-accent-yellow (≥1,3) + --bp-up (≥2,0, ÖLÜ dal:
                                  sektör ort. rvol canlıda max 1,48), /sektor-harita karşılaştır →
-                                 --bp-gold (≥2,0), /tarama → --bp-al (≥1,5). Hepsi buraya toplandı.
+                                 --bp-caution (≥2,0), /tarama → --bp-up (≥1,5). Hepsi buraya toplandı.
                                  Eşik kanonu da tek: sitenin ilan ettiği RVOL >= 1,20. */
   --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
@@ -142,12 +142,12 @@
   /* K-BY (22.09): ANA SAYFA hero-art'ının KALAN dekoratif renkleri. Aynı SVG'nin 3
      dairesi zaten var(--bp-art-violet) ile boyanıyordu, 13'ü HAM HEX'ti — tek öge
      yarı göç etmişti. hisse.html'in "homepage hero-art yankısı" yorumlu kardeş
-     deseni ise TAMAMEN token'lı (--bp-brand + --bp-accent-cyan). Aşağıdaki ikisi
+     deseni ise TAMAMEN token'lı (--bp-brand + --bp-art-cyan). Aşağıdaki ikisi
      değeri DEĞİŞTİRMEDEN token'landı; cyan ve yeşil ise zaten var olan
      token'lara bağlandı (bkz. index.html) — o ikisi "aynı iş için iki kanon"du:
-       #1fe0ff -> --bp-accent-cyan (#22d3ee; token'ın kendi yorumu zaten
+       #1fe0ff -> --bp-art-cyan (#22d3ee; token'ın kendi yorumu zaten
                   "Data-Art ana sayfa" diyor, ama o sayfa onu kullanmıyordu)
-       #00e6a0 -> --bp-al          (#00e290; %0,2 farkla ayrı yazılmış ikiz) */
+       #00e6a0 -> --bp-up          (#00e290; %0,2 farkla ayrı yazılmış ikiz) */
   --bp-stale:     var(--bp-caution);  /* C-48 (27.09): 5 sarı → 2 (--bp-volume hacim · --bp-caution dikkat); bu ad takma ad.
                                  Aşağıdaki not tarihsel. */
   /* eski değer #f5c949 = --bp-caution */   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
@@ -155,19 +155,19 @@
                                  değildi: hisse.html renderFreshness (×3 dal), _stale_banner.html
                                  (metin + zemin/kenar rgb), static/stale-banner.js (stale +
                                  seans_disi_eksik dalları). Aynı bileşenin `critical` dalı bir
-                                 dosyada var(--bp-sat), diğerinde ham '#f85149' yazıyordu — tek
+                                 dosyada var(--bp-down), diğerinde ham '#f85149' yazıyordu — tek
                                  kavram, iki kanon. DEĞER DEĞİŞTİRİLMEDİ (K-BG emsali: görsel
                                  değişiklik yok, yalnız kaynak tekilleşti).
                                  --bp-warn (#d29922, dikkat/orta-risk: entry-quality, bilanço
                                  rozeti, R:R orta bölge) AYRI eksendir — o bir DEĞERLENDIRME,
                                  bu bir VERİ DURUMU. K-BO (21.09) beş sarının SORUSUNU KAPATTI:
-                                 --bp-gold/--bp-accent-yellow/--bp-warn/--bp-stale ayrı eksenler
+                                 --bp-caution/--bp-accent-yellow/--bp-warn/--bp-stale ayrı eksenler
                                  (premium · sarı aksan/EMA99 · değerlendirme · veri durumu), ama
                                  HACİM ekseni üç yerde onlardan ÖDÜNÇ RENK ALIYORDU — bkz.
                                  --bp-volume notu. */
   --bp-warn:      var(--bp-caution);  /* C-48 takma ad (eski #d29922) */   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
                                  amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
-                                 orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
+                                 orta-bölge. --bp-caution'dan (premium/altın) AYRI semantik eksen, karıştırma. */
   --bp-accent-yellow: var(--bp-caution);  /* C-48 takma ad (eski #e3b341) */   /* CPO 20.09: sarı aksan. Fiilen zaten KANONİKTİ — aynı değer 7 ayrı
                                  yüzeyde birbirinden BAĞIMSIZ yazılıydı, tek kaynağı yoktu:
                                    (1) bp-chart-common.js  EMA99 çizgi rengi
@@ -179,8 +179,8 @@
                                    (7) tarama.css          aynı sarı
                                  (5) ve (6) ÜRÜNÜN GERÇEK RENGİNİ İDDİA EDİYOR: biri kaysa düzyazı
                                  ürünü yanlış anlatır hâle gelirdi. Ad rol bazlı değil DEĞER bazlı
-                                 (--bp-accent-cyan emsali) çünkü üç ayrı semantik eksen aynı sarıyı
-                                 paylaşıyor. --bp-gold (premium/altın) ve --bp-warn (dikkat/orta-risk)
+                                 (--bp-art-cyan emsali) çünkü üç ayrı semantik eksen aynı sarıyı
+                                 paylaşıyor. --bp-caution (premium/altın) ve --bp-warn (dikkat/orta-risk)
                                  AYRI eksenler, karıştırma.
                                  K-BO (21.09) KAPATTI: sektor_harita'nın orta RVOL kademesi bu sarıyı
                                  kullanıyordu — ölçüldü, GERÇEKTEN çakışmaydı, --bp-volume'a taşındı. */
@@ -189,7 +189,7 @@
      Ayni renklerin RGB kanallari, alfa'li kullanim icin. Sablonlardaki
      347 saydam kullanim buraya baglandi: rgba(var(--bp-al-rgb), .18)
 
-     NEDEN boyle ve per-alfa token DEGIL: olcum, --bp-al icin 49 AYRIK alfa
+     NEDEN boyle ve per-alfa token DEGIL: olcum, --bp-up icin 49 AYRIK alfa
      basamagi gosterdi (.03 .04 ... .92). Her alfa'ya token uretmek 150+
      token demekti. Kanal token'i tek kaynagi korur, alfa cagri yerinde kalir.
 
@@ -322,7 +322,7 @@ body {
   --bp-down-line: rgba(var(--bp-sat-rgb), 0.32);
   --bp-down-on-tint: #ff7b72;
   --bp-caution: #f5c949;  /* C-48: tek dikkat sarısı (değerlendirme, veri durumu, EMA99); hacim ayrı: --bp-volume */
-  /* C-48 rol ayrımı: --bp-up/--bp-down (=--bp-al/--bp-sat) YALNIZ yön ve sinyal.
+  /* C-48 rol ayrımı: --bp-up/--bp-down (=--bp-up/--bp-down) YALNIZ yön ve sinyal.
      Form başarısı/aktif durum --bp-ok, hata --bp-danger, BP skor kimliği --bp-score-bp (O12). */
   --bp-ok: var(--bp-logo-accent);
   --bp-score-bp: var(--bp-logo-accent);
@@ -432,7 +432,7 @@ body {
 /* CPO-DEV2-085(3)(4)(5)(6) dedike tur: tekrarlanan tek-ozellikli inline
    style'lar icin paylasilan siniflar.
    20.09.2026 — CPO KARARI (DEV2'nin bekletilen sorusu kapandi): .bp-text-muted
-   literal #8b949e (139,148,158) tasiyordu, --bp-text3 ise #909097 (144,144,151).
+   literal #8b949e (139,148,158) tasiyordu, --bp-text-3 ise #909097 (144,144,151).
    Ikisi "ayni deger degil" dogruydu ama fark GORSEL BIR TERCIH DEGILDI: #8b949e
    eski GitHub-dark paletinin MAVI-TONLU grisi, kanonik palet ise notr. Ayni rolu
    (ikincil/soluk metin) iki farkli griyle boyamak bir bug'dir, tercih meselesi
@@ -441,19 +441,19 @@ body {
    hisse, bp-chart-common tooltip, blog_content.py x32). Tek istisna tarama.css'in
    select-ok'u: deger bir data: URI'nin ICINDE, orada var() CALISMAZ -- kanonik
    degerin LITERALI (%23909097) yazildi. */
-.bp-al-text{color:var(--bp-al)}
+.bp-al-text{color:var(--bp-up)}
 /* K-CZ: marka sozcuk-isareti vurgusu -- .bp-al-text'in ikizi DEGIL, ayri eksen. */
 .bp-logo-accent{color:var(--bp-logo-accent)}
 /* C-06: sozcuk-isareti tek <span> (_brand.html wordmark), §5.7 Bricolage 800 */
 .bp-wordmark{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
 .bp-mark{flex:none;display:block}
-.bp-sat-text{color:var(--bp-sat)}
+.bp-sat-text{color:var(--bp-down)}
 /* K-BW (22.09): yon ucluysa sinif da uclu olmali. AL/SAT icin sinif vardi,
-   BEKLE dali her yerde `style="color:var(--bp-bkl)"` diye satir-ici
+   BEKLE dali her yerde `style="color:var(--bp-flat)"` diye satir-ici
    yaziliyordu -- ayni is icin ikinci yazim. */
-.bp-bkl-text{color:var(--bp-bkl)}
-.bp-text-muted{color:var(--bp-text3)}
-.bp-nav-cat-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none}
+.bp-bkl-text{color:var(--bp-flat)}
+.bp-text-muted{color:var(--bp-text-3)}
+.bp-nav-cat-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text-3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none}
 
 .sr-only {
   position: absolute;

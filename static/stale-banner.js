@@ -42,9 +42,9 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     var critTxt = hasAge
       ? 'Son veri ' + dateTxt + ' kapanışı · yeni kapanış verisi alınamıyor.'
       : 'Yeni kapanış verisi alınamıyor.';
-    if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = 'var(--bp-sat)'; }
+    if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = 'var(--bp-down)'; }
     banner.style.background  = 'rgba(var(--bp-sat-rgb),0.12)';
-    banner.style.borderColor = 'var(--bp-sat)';
+    banner.style.borderColor = 'var(--bp-down)';
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge

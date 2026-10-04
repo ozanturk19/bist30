@@ -9,7 +9,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
-header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border); position: sticky; top: 0; z-index: var(--bp-z-dropdown); }
+header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-line); position: sticky; top: 0; z-index: var(--bp-z-dropdown); }
 
 /* C-18b: görünür başlık <main> dışında (hukuki metin kapısı <main>'i izler) */
 .lg-head { padding-top: 0; padding-bottom: 0; }
@@ -23,13 +23,13 @@ header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border
 }
 .prose h2::after {
   content: ''; display: block; width: 42px; height: 2px; margin-top: 10px;
-  border-radius: var(--bp-radius-pill);
-  background: linear-gradient(90deg, var(--bp-accent-cyan), transparent);
+  border-radius: var(--bp-r-pill);
+  background: linear-gradient(90deg, var(--bp-art-cyan), transparent);
 }
 .prose > h2:first-child, .prose > .updated + h2 { margin-top: 8px; }
 .prose h3 { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); margin: 20px 0 8px; }
-.prose p  { color: var(--bp-text2); margin-bottom: 12px; }
-.prose ul { color: var(--bp-text2); margin: 8px 0 12px 20px; }
+.prose p  { color: var(--bp-text-2); margin-bottom: 12px; }
+.prose ul { color: var(--bp-text-2); margin: 8px 0 12px 20px; }
 .prose li { margin-bottom: 6px; }
 .prose strong { color: var(--bp-text); }
 .prose .da-notice { margin: 0 0 28px; }
@@ -37,5 +37,5 @@ header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border
 .prose .da-notice-title::after { display: none; }
 .prose .da-notice p + p { margin-top: 8px; }
 
-.updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 24px; }
+.updated { font-size: var(--bp-text-sm); color: var(--bp-text-3); margin-bottom: 24px; }
 

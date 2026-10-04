@@ -574,7 +574,7 @@ function buildChart(d) {
     ...BPChart.baseOpts(LC, false),
     width:     chartW,
     height:    _chartH(),
-    timeScale: { borderColor: BPChart.tok('--bp-border', '#2a2a2c'), timeVisible: false, visible: true, rightOffset: 6, tickMarkFormatter: _tickFmtIdx },
+    timeScale: { borderColor: BPChart.tok('--bp-line', '#2a2a2c'), timeVisible: false, visible: true, rightOffset: 6, tickMarkFormatter: _tickFmtIdx },
     /* G26: sirali indeks -> dikey imlec etiketi epoch tarihi basardi; tarih lejantta. */
     crosshair: { mode: LC.CrosshairMode.Magnet, vertLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), width: 1, style: 0, labelVisible: false }, horzLine: { color: BPChart.tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: BPChart.tok('--bp-brand', '#b8c3ff'), width: 1, style: 0 } },
   });
@@ -660,10 +660,10 @@ function buildChart(d) {
   const markers = evs.map(function(e){
     const t = _dayToIdx[e.day]; evAt[t] = e;
     return e.st === 'up'
-      ? { time: t, position: 'belowBar', shape: 'arrowUp',   color: BPChart.tok('--bp-al', '#00e290'), size: 1 }
+      ? { time: t, position: 'belowBar', shape: 'arrowUp',   color: BPChart.tok('--bp-up', '#00e290'), size: 1 }
       : e.st === 'down'
       ? { time: t, position: 'aboveBar', shape: 'arrowDown', color: BPChart.tok('--bp-state-broken-text', '#b9b7c0'), size: 1 }
-      : { time: t, position: 'aboveBar', shape: 'circle',    color: BPChart.tok('--bp-text3', '#909097'), size: 0.6 };
+      : { time: t, position: 'aboveBar', shape: 'circle',    color: BPChart.tok('--bp-text-3', '#909097'), size: 0.6 };
   });
   area.setMarkers(markers);
   if (evs.length) {
@@ -956,7 +956,7 @@ function renderSummary(s, signalData) {
   /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
      K-BS (22.09) — IKI KUSUR BIRDEN:
      (a) K-BO ihlali SINIF ADI uzerinden hayatta kalmisti. Hacim YON-BAGIMSIZ
-         bir buyukluktur; `ind-bull` ise hisse.css'te `--bp-al` (yukselis
+         bir buyukluktur; `ind-bull` ise hisse.css'te `--bp-up` (yukselis
          yesili). Kapi 34 token/ham-hex ariyordu, SINIF ADINI degil — bu yuzden
          gormemisti. Canli 22.09: vol_ratio >= 3 olan 4 hisse (SASA 7,35 ·
          USAK 4,45 · ANHYT 3,41 · TUKAS 3,40); DORDU DE BEKLE ve IKISI O GUN
@@ -2005,8 +2005,8 @@ function _applyTooltipVisibility() {
   if (tb) {
     tb.textContent = show ? '? Kapat' : '? Açıkla';
     tb.setAttribute('aria-pressed', show ? 'true' : 'false');  /* K-AO */
-    tb.style.color = show ? 'var(--bp-brand)' : 'var(--bp-text3)';
-    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-border)';
+    tb.style.color = show ? 'var(--bp-brand)' : 'var(--bp-text-3)';
+    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-line)';
   }
 }
 function toggleTooltips() {

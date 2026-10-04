@@ -3,29 +3,29 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
-  .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
+  .page-sub   { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
-  .sum-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
+  .sum-card { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:16px; text-align:center; }
   .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
   .sum-pct  { font-size:var(--bp-text-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
-  .sum-lbl  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
-  .sum-green{ color:var(--bp-al); } .sum-red{ color:var(--bp-sat); } .sum-blue{ color:var(--bp-accent-cyan); }
+  .sum-lbl  { font-size:var(--bp-type-xs); color:var(--bp-text-3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .sum-green{ color:var(--bp-up); } .sum-red{ color:var(--bp-down); } .sum-blue{ color:var(--bp-art-cyan); }
   /* K-BP (21.09): K/Z TAM SIFIR — pozisyon guncel fiyattan eklendiginde ilk
      gorulen hal — "+0,00 ₺" YESIL yaziliyordu. Kar yokken kar rengi yok. */
-  .sum-neutral{ color:var(--bp-text2); }
+  .sum-neutral{ color:var(--bp-text-2); }
 
-  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; }
-  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
-  .add-bar input:focus { border-color:var(--bp-accent-cyan); }
+  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:16px; }
+  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-r-sm); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input:focus { border-color:var(--bp-art-cyan); }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
-  .btn-add { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
-  .btn-add:hover { background:var(--bp-accent-cyan); color:var(--bp-bg); }
-  .add-lbl { font-size:var(--bp-text-sm); color:var(--bp-text3); }
+  .btn-add { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-r-sm); padding:7px 16px; font-size:var(--bp-type-sm); font-weight:600; cursor:pointer; }
+  .btn-add:hover { background:var(--bp-art-cyan); color:var(--bp-bg); }
+  .add-lbl { font-size:var(--bp-text-sm); color:var(--bp-text-3); }
 
-  .pf-table { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .pf-table { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); overflow-x:auto; -webkit-overflow-scrolling:touch; }
   /* CPO-DEV2-100'un ">=900px'te tablo viewport'a sigar" varsayimi 15.09 fresh-ground-audit'te
      YANLIS cikti: 12 sutunlu tablo .container'in sabit max-width:1100px tavanina (padding sonrasi
      ~1052px kullanilabilir alan) gercek verideki genislikten (olculen ~1077px+) daha dar kaliyor —
@@ -36,29 +36,29 @@
      olcup sadece GERCEKTEN sigdiginda .pf-fits class'i ekliyor — statik breakpoint yerine dinamik olcum. */
   .pf-table.pf-fits { overflow-x: visible; }
   table { width:100%; border-collapse:collapse; }
-  thead th { background:var(--bp-surface2); padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-dropdown); }
+  thead th { background:var(--bp-raised); padding:10px 14px; text-align:left; font-size:var(--bp-type-xs); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-line); white-space:nowrap; position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-dropdown); }
   tbody tr { border-bottom:1px solid var(--bp-border-subtle); }
   tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover { background:var(--bp-surface2); }
-  td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-text-base); }
+  tbody tr:hover { background:var(--bp-raised); }
+  td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-type-sm); }
   /* K-U: dolu portfoy tablosu HIC olculmemisti (localStorage bos basliyor) —
      hisse baglantisi 42.5x16 idi, WCAG 2.5.8 AA altinda. Hucre ici tek baglanti
      "cumle ici satir-ici" muafiyetine girmez. */
   .ticker-link { font-weight:700; color:var(--bp-text); text-decoration:none;
                  display:inline-flex; align-items:center; min-height:24px; }
-  .ticker-link:hover { color:var(--bp-accent-cyan); }
+  .ticker-link:hover { color:var(--bp-art-cyan); }
 
-  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
-  .signal-AL    { background:var(--bp-al-bg); color:var(--bp-al); border:1px solid var(--bp-al-bd); }
-  /* K-BY eki: zemin artik TINT -> K-P kurali geregi metin --bp-sat-on-tint
-     (tint uzerinde --bp-sat 4,63:1'e duser; on-tint 6,15:1). Kenar da cip
-     esine (--bp-sat-bd-tint) alindi; --bp-sat-bd hata yuzeylerinde kaldi. */
-  .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-sat-on-tint); border:1px solid var(--bp-sat-bd-tint); }
-  .signal-BEKLE { background:rgba(var(--bp-text3-rgb),.15); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.3); }
+  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-type-xs); font-weight:600; }
+  .signal-AL    { background:var(--bp-al-bg); color:var(--bp-up); border:1px solid var(--bp-up-line); }
+  /* K-BY eki: zemin artik TINT -> K-P kurali geregi metin --bp-down-on-tint
+     (tint uzerinde --bp-down 4,63:1'e duser; on-tint 6,15:1). Kenar da cip
+     esine (--bp-sat-bd-tint) alindi; --bp-danger-line hata yuzeylerinde kaldi. */
+  .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-down-on-tint); border:1px solid var(--bp-sat-bd-tint); }
+  .signal-BEKLE { background:rgba(var(--bp-text3-rgb),.15); color:var(--bp-flat); border:1px solid rgba(var(--bp-text3-rgb),.3); }
 
-  .pos-pnl { color:var(--bp-al); font-weight:600; }
-  .neg-pnl { color:var(--bp-sat); font-weight:600; }
-  .neu-pnl { color:var(--bp-text3); }
+  .pos-pnl { color:var(--bp-up); font-weight:600; }
+  .neg-pnl { color:var(--bp-down); font-weight:600; }
+  .neu-pnl { color:var(--bp-text-3); }
 
   /* ⛔ K-U (21.09) — YIKICI ISABET HATASI, canli olculdu ve TIKLAMAYLA kanitlandi.
      Iki dugme de 23x21'di ve ikisi de 44x44 `::before` halosu tasiyordu. Halolar
@@ -74,7 +74,7 @@
   .btn-del, .btn-edit {
     display:inline-flex; align-items:center; justify-content:center;
     min-width:32px; min-height:32px; padding:0;
-    background:none; border:none; color:var(--bp-text3); cursor:pointer;
+    background:none; border:none; color:var(--bp-text-3); cursor:pointer;
     font-size:var(--bp-text-md);
   }
   .btn-del:hover  { color:var(--bp-danger); }
@@ -88,8 +88,8 @@
   .btn-action {
     position: relative;
     display: inline-flex; align-items: center; gap: 5px;
-    background: none; border: 1px solid var(--bp-ctl-border); color: var(--bp-text3);
-    border-radius:var(--bp-radius); padding: 5px 12px; font-size: var(--bp-text-sm);
+    background: none; border: 1px solid var(--bp-line-strong); color: var(--bp-text-3);
+    border-radius:var(--bp-r-sm); padding: 5px 12px; font-size: var(--bp-text-sm);
     cursor: pointer; transition: all .15s;
   }
   .btn-action::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
@@ -116,8 +116,8 @@
   /* Import modal */
   .import-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md);
-    padding: 10px 20px; font-size: var(--bp-text-base); color: var(--bp-text);
+    background: var(--bp-raised); border: 1px solid var(--bp-line); border-radius:var(--bp-radius-md);
+    padding: 10px 20px; font-size: var(--bp-type-sm); color: var(--bp-text);
     z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
   }
   .import-toast.ok  { border-color: rgba(var(--bp-ok-rgb),.32); color: var(--bp-ok); }
@@ -132,30 +132,30 @@
   .ls-warning {
     display:flex; align-items:flex-start; gap:12px;
     background:rgba(var(--bp-gold-rgb),.06); border:1px solid rgba(var(--bp-gold-rgb),.2);
-    border-radius:var(--bp-radius-lg); padding:14px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.6;
+    border-radius:var(--bp-r-md); padding:14px 16px; margin-bottom:20px;
+    font-size:var(--bp-type-sm); color:var(--bp-text-3); line-height:1.6;
   }
-  .ls-warning-icon { font-size:var(--bp-text-xl); flex-shrink:0; margin-top:1px; }
+  .ls-warning-icon { font-size:var(--bp-type-lg); flex-shrink:0; margin-top:1px; }
   .ls-warning-body { flex:1; }
-  .ls-warning-title { font-weight:700; color:var(--bp-gold); margin-bottom:3px; }
+  .ls-warning-title { font-weight:700; color:var(--bp-caution); margin-bottom:3px; }
   .ls-warning-close {
-    position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer;
+    position:relative; background:none; border:none; color:var(--bp-text-3); cursor:pointer;
     font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
     transition:color .15s;
   }
   .ls-warning-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
-  .ls-warning-close:hover { color:var(--bp-gold); }
+  .ls-warning-close:hover { color:var(--bp-caution); }
 
   /* T7.4: canlı veri/grafik fetch hatası banner'ı */
   .pf-fetch-error {
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;
     background:rgba(var(--bp-danger-rgb),.08); border:1px solid var(--bp-danger-line);
-    border-radius:var(--bp-radius-lg); padding:12px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:var(--bp-danger);
+    border-radius:var(--bp-r-md); padding:12px 16px; margin-bottom:20px;
+    font-size:var(--bp-type-sm); color:var(--bp-danger);
   }
   .pf-fetch-error-retry {
     background:none; border:1px solid var(--bp-danger-line); color:var(--bp-danger);
-    border-radius:var(--bp-radius); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
+    border-radius:var(--bp-r-sm); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
     cursor:pointer; transition:background .15s;
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-danger-rgb),.12); }
@@ -176,23 +176,23 @@
     #pfMobileCards { display:flex; }
   }
   .pf-mcard {
-    background:var(--bp-surface); border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-radius-lg);
+    background:var(--bp-surface); border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-r-md);
     padding:12px 14px;
   }
   .pf-mtop { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
   /* K-U: mobil kart esdegeri — 48.3x18 idi (bkz. .ticker-link notu). `.pf-mtop`
      zaten flex/align-items:center, min-height buyumesi satiri kaydirmaz. */
-  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); text-decoration:none;
+  .pf-mticker { font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); text-decoration:none;
                 display:inline-flex; align-items:center; min-height:24px; }
-  .pf-mticker:hover { color:var(--bp-accent-cyan); }
+  .pf-mticker:hover { color:var(--bp-art-cyan); }
   .pf-mtop-right { display:flex; align-items:center; gap:8px; }
   .pf-mprice-row, .pf-mdetail-row { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
   .pf-mprice-row { margin-bottom:10px; }
   .pf-mdetail-row { padding-top:10px; border-top:1px solid var(--bp-border-subtle); }
   .pf-metric { display:flex; flex-direction:column; gap:2px; }
-  .pf-metric-label { font-size:var(--bp-text-2xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.4px; }
-  .pf-mprice-row .pf-metric span { font-size:var(--bp-text-base); font-weight:600; }
-  .pf-mdate { font-size:var(--bp-text-sm); color:var(--bp-text3); }
+  .pf-metric-label { font-size:var(--bp-text-2xs); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.4px; }
+  .pf-mprice-row .pf-metric span { font-size:var(--bp-type-sm); font-weight:600; }
+  .pf-mdate { font-size:var(--bp-text-sm); color:var(--bp-text-3); }
   .pf-mspark { margin-top:10px; }
   .pf-mentry { margin-top:8px; }
 
@@ -205,7 +205,7 @@
     white-space:nowrap; transition:all .15s;
   }
   .btn-entry:hover { background:rgba(var(--bp-ok-rgb),.2); border-color:var(--bp-ok); }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
+  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + ekleme çubuğu;
      yoğun pf-table/pf-mcard pozisyon listesine (kişi başına farklı sayıda satır
@@ -239,8 +239,8 @@
 
   /* 1 ── Yuzeyler: duz zemin -> degrade + radius-20 */
   .sum-card, .add-bar {
-    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
-    border-radius: var(--bp-radius-20);
+    background: linear-gradient(135deg, var(--bp-raised) 0%, var(--bp-surface) 72%);
+    border-radius: var(--bp-r-lg);
   }
   .sum-card::before, .add-bar::before {
     top: -70%; width: 120px; height: 120px;
@@ -259,9 +259,9 @@
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 10px;
     padding: 12px 18px;
-    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
-    border: 1px solid var(--bp-border); border-bottom: none;
-    border-radius: var(--bp-radius-20) var(--bp-radius-20) 0 0;
+    background: linear-gradient(135deg, var(--bp-raised) 0%, var(--bp-surface) 72%);
+    border: 1px solid var(--bp-line); border-bottom: none;
+    border-radius: var(--bp-r-lg) var(--bp-r-lg) 0 0;
   }
   .pf-panel-header::before {
     content: ''; position: absolute; top: -140%; right: -4%;
@@ -272,12 +272,12 @@
   .pf-panel-header > * { position: relative; }
   .pf-panel-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-15); font-weight: 700;
+    font-size: var(--bp-type-body); font-weight: 700;
     color: var(--bp-text); letter-spacing: -0.01em;
   }
   .pf-panel-header .pf-actions { margin-bottom: 0; flex: 1; justify-content: flex-end; }
   .pf-table {
-    border-radius: 0 0 var(--bp-radius-20) var(--bp-radius-20);
+    border-radius: 0 0 var(--bp-r-lg) var(--bp-r-lg);
     border-top: none;
   }
 
@@ -292,7 +292,7 @@
   thead th {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     letter-spacing: .08em;
-    background: linear-gradient(180deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
+    background: linear-gradient(180deg, var(--bp-raised) 0%, var(--bp-surface) 100%);
   }
   /* Sayfanin kahramani rakamlar: ozet kutularindaki degerler hizalansin diye
      tabular-nums (kolonlar arasi zipzip oynama olmasin). */
@@ -309,15 +309,15 @@
          kart tasiyor), kartlar sayfa zemininde gercekten yuzuyor.
          tarama.html'de bulunan ayni hatanin bu sayfadaki esi. */
   .pf-mcard {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
+    border-radius: var(--bp-r-lg);
   }
   @media (max-width: 899px) {
     .pf-table {
       background: transparent; border: none; border-radius: 0;
     }
     .pf-panel-header {
-      border-bottom: 1px solid var(--bp-border);
+      border-bottom: 1px solid var(--bp-line);
       border-radius: var(--bp-radius-16);
       margin-bottom: 10px;
     }
@@ -327,8 +327,8 @@
        cunku masaustunde `.pf-table` zaten yuzey veriyor (ic ice panel
        olmasin diye taban `.da-empty` BILEREK yuzeysiz). */
     .da-empty {
-      background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border: 1px solid var(--bp-border); border-radius: var(--bp-radius-20);
+      background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-raised) 100%);
+      border: 1px solid var(--bp-line); border-radius: var(--bp-r-lg);
       padding: 40px 20px;
     }
   }

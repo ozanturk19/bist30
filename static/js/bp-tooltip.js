@@ -12,8 +12,8 @@
     var s = document.createElement('style');
     s.id = 'bp-tooltip-style';
     s.textContent =
-      '.bp-tooltip{position:fixed;z-index:var(--bp-z-tooltip);background:#161618;border:1px solid var(--bp-border);' +
-      'color:#e5e1e4;font-size:12px;line-height:1.45;font-weight:500;padding:8px 11px;border-radius:var(--bp-radius);' +
+      '.bp-tooltip{position:fixed;z-index:var(--bp-z-tooltip);background:#161618;border:1px solid var(--bp-line);' +
+      'color:#e5e1e4;font-size:12px;line-height:1.45;font-weight:500;padding:8px 11px;border-radius:var(--bp-r-sm);' +
       /* r35 bug-hunt: tarama.html'in cok-satirli data-tip'i (&#10; ile ayrilmis)
          white-space varsayilani "normal" oldugu icin tek satira katlaniyordu -
          pre-line, mevcut &#10; iceriginin yazarin zaten amacladigi gibi satir

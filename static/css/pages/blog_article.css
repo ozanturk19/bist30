@@ -3,54 +3,54 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   /* K-DR: yatay-tasma guard'i shared.css'te TEK KANON (html,body{overflow-x:clip}) */
   body { font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
 
   /* C-43: sutun = govde metninin okuma olcusu. Space Grotesk'te 68ch ~712px = satirda ~90 karakter
      (olculdu 26.09); 17px x 34em ~578px = satirda <=75 karakter. Baslik, modul ve SSS ayni sutunda. */
 
   .article-header { margin-bottom:28px; }
-  .art-cat  { font-size:var(--bp-text-sm); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+  .art-cat  { font-size:var(--bp-text-sm); color:var(--bp-art-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
   /* C-43 (26.09): baslik Bricolage (Data-Art .da-pagehead-title dili), govdeyle ayni sutunda */
   .art-title{ font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:clamp(1.75rem,3.4vw,2.5rem); font-weight:800; letter-spacing:-.02em; color:var(--bp-text); line-height:1.12; margin:10px 0 12px; overflow-wrap:anywhere; }
-  .art-desc { font-size:var(--bp-text-17); color:var(--bp-text2); line-height:1.6; margin-bottom:14px; }
-  .art-meta { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px 16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
+  .art-desc { font-size:var(--bp-text-17); color:var(--bp-text-2); line-height:1.6; margin-bottom:14px; }
+  .art-meta { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px 16px; font-size:var(--bp-text-sm); color:var(--bp-text-3); padding-top:12px; }
   .art-share { display:flex; gap:4px; }
-  .art-share-btn { background:none; border:0; padding:0 8px; min-height:44px; font:inherit; font-size:var(--bp-text-sm); color:var(--bp-text3); cursor:pointer; }
+  .art-share-btn { background:none; border:0; padding:0 8px; min-height:44px; font:inherit; font-size:var(--bp-text-sm); color:var(--bp-text-3); cursor:pointer; }
   .art-share-btn:hover, .art-share-btn:focus-visible { color:var(--bp-text); text-decoration:underline; }
 
   /* C-43 (26.09): okuma olcusu — sutun genisligi (<=75 karakter), 17px/1,7, H2 28px (satir <=75 karakter) */
-  .prose { font-size:var(--bp-text-17); line-height:1.7; color:var(--bp-text2); }
+  .prose { font-size:var(--bp-text-17); line-height:1.7; color:var(--bp-text-2); }
   .prose h2 { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-28); font-weight:700; letter-spacing:-.015em; line-height:1.2; color:var(--bp-text); margin:40px 0 12px; }
   .prose h3 { font-size:var(--bp-text-lg); font-weight:600; color:var(--bp-text); margin:24px 0 8px; }
   .prose p  { margin-bottom:16px; }
   .prose ul, .prose ol { margin:8px 0 14px 20px; }
   .prose li { margin-bottom:6px; }
   .prose strong { color:var(--bp-text); }
-  .prose em     { color:var(--bp-gold); font-style:normal; }
-  .prose a      { color:var(--bp-accent-cyan); text-decoration:none; }
+  .prose em     { color:var(--bp-caution); font-style:normal; }
+  .prose a      { color:var(--bp-art-cyan); text-decoration:none; }
   .prose a:hover{ text-decoration:underline; }
   .prose pre {
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-left:3px solid var(--bp-accent-cyan);
-    border-radius:var(--bp-radius); padding:14px 16px; margin:14px 0;
-    font-family:var(--bp-font-mono); font-size:var(--bp-text-base); color:var(--bp-accent-cyan);
+    background:var(--bp-surface); border:1px solid var(--bp-line); border-left:3px solid var(--bp-art-cyan);
+    border-radius:var(--bp-r-sm); padding:14px 16px; margin:14px 0;
+    font-family:var(--bp-font-mono); font-size:var(--bp-type-sm); color:var(--bp-art-cyan);
     overflow-x:auto; white-space:pre-wrap;
   }
-  .prose code { background:var(--bp-border-subtle); color:var(--bp-accent-cyan); padding:2px 6px; border-radius:var(--bp-radius-4); font-family:var(--bp-font-mono); font-size:var(--bp-text-base); }
+  .prose code { background:var(--bp-border-subtle); color:var(--bp-art-cyan); padding:2px 6px; border-radius:var(--bp-radius-4); font-family:var(--bp-font-mono); font-size:var(--bp-type-sm); }
   .prose table { width:100%; border-collapse:collapse; margin:14px 0; }
   .prose table { display:block; overflow-x:auto; }
-  .prose th, .prose td { padding:8px 10px; text-align:left; border-top:1px solid var(--bp-border); font-size:var(--bp-text-base); }
+  .prose th, .prose td { padding:8px 10px; text-align:left; border-top:1px solid var(--bp-line); font-size:var(--bp-type-sm); }
   .prose th { background:var(--bp-border-subtle); font-weight:600; color:var(--bp-text); }
 
   .related { margin-top:40px; padding-top:28px; }
-  .related-title { font-size:var(--bp-text-base); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:14px; }
+  .related-title { font-size:var(--bp-type-sm); color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:14px; }
   .related-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
-  .rel-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:14px; text-decoration:none; display:block; transition:all .15s; }
-  .rel-card:hover { border-color:var(--bp-text3); background:var(--bp-surface2); }
-  .rel-cat   { font-size:var(--bp-text-xs); color:var(--bp-accent-cyan); margin-bottom:6px; }
-  .rel-title { font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); line-height:1.4; }
-  .rel-mins  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; }
+  .rel-card { background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-radius-md); padding:14px; text-decoration:none; display:block; transition:all .15s; }
+  .rel-card:hover { border-color:var(--bp-text-3); background:var(--bp-raised); }
+  .rel-cat   { font-size:var(--bp-type-xs); color:var(--bp-art-cyan); margin-bottom:6px; }
+  .rel-title { font-size:var(--bp-type-sm); font-weight:600; color:var(--bp-text); line-height:1.4; }
+  .rel-mins  { font-size:var(--bp-type-xs); color:var(--bp-text-3); margin-top:6px; }
 
-  .disclaimer { color:var(--bp-text3); font-size:var(--bp-text-sm); line-height:1.6; margin-top:20px; }
+  .disclaimer { color:var(--bp-text-3); font-size:var(--bp-text-sm); line-height:1.6; margin-top:20px; }
 
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
@@ -66,30 +66,30 @@
   .faq-item { margin-bottom:8px; }
   .faq-item > .bp-detail-toggle-summary { line-height:1.4; }
   .faq-item .bp-detail-toggle-label { display:block; }
-  .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.65; }
+  .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-type-sm); color:var(--bp-text-3); line-height:1.65; }
 
   /* C-43 (26.09): sonda TEK modul — canli hisse satiri + kural baglantisi + tek satir abonelik */
-  .art-live { margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); }
-  .art-live-title { font-size:var(--bp-text-sm); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
-  .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-border); }
+  .art-live { margin-top:40px; padding:20px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); }
+  .art-live-title { font-size:var(--bp-text-sm); font-weight:600; color:var(--bp-text-3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px; }
+  .art-live-row { display:flex; align-items:baseline; gap:12px; min-height:44px; padding:6px 0; text-decoration:none; color:var(--bp-text); border-bottom:1px solid var(--bp-line); }
   .art-live-t { font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-22); font-weight:800; }
-  .art-live-v { flex:1; min-width:0; font-variant-numeric:tabular-nums; font-size:var(--bp-text-md); color:var(--bp-text2); }
-  .art-live-v[data-dir="up"] { color:var(--bp-al); } .art-live-v[data-dir="down"] { color:var(--bp-sat); }
-  .art-live-go { color:var(--bp-text3); }
+  .art-live-v { flex:1; min-width:0; font-variant-numeric:tabular-nums; font-size:var(--bp-text-md); color:var(--bp-text-2); }
+  .art-live-v[data-dir="up"] { color:var(--bp-up); } .art-live-v[data-dir="down"] { color:var(--bp-down); }
+  .art-live-go { color:var(--bp-text-3); }
   .art-live-row:hover .art-live-go, .art-live-row:focus-visible .art-live-go { color:var(--bp-text); }
-  .art-live-rule { display:inline-flex; align-items:center; min-height:44px; font-size:var(--bp-text-sm); color:var(--bp-text3); text-decoration:none; }
+  .art-live-rule { display:inline-flex; align-items:center; min-height:44px; font-size:var(--bp-text-sm); color:var(--bp-text-3); text-decoration:none; }
   .art-live-rule b { color:var(--bp-text); font-weight:600; margin:0 4px; }
   .art-live-rule:hover { color:var(--bp-text); }
-  .art-sub { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; padding-top:14px; border-top:1px solid var(--bp-border); }
-  .art-sub-lbl { font-size:var(--bp-text-sm); color:var(--bp-text2); white-space:nowrap; }
+  .art-sub { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; padding-top:14px; border-top:1px solid var(--bp-line); }
+  .art-sub-lbl { font-size:var(--bp-text-sm); color:var(--bp-text-2); white-space:nowrap; }
   .art-sub .da-field { flex:1; min-width:0; width:auto; min-height:44px; }
-  .art-sub-btn { min-height:44px; padding:0 16px; background:var(--bp-brand); color:var(--bp-bg); border:0; border-radius:var(--bp-radius-lg); font:inherit; font-size:var(--bp-text-md); font-weight:600; cursor:pointer; white-space:nowrap; }
+  .art-sub-btn { min-height:44px; padding:0 16px; background:var(--bp-brand); color:var(--bp-bg); border:0; border-radius:var(--bp-r-md); font:inherit; font-size:var(--bp-text-md); font-weight:600; cursor:pointer; white-space:nowrap; }
   .art-sub-btn:hover { filter:brightness(1.1); }
-  .art-sub-kvkk { flex-basis:100%; display:flex; align-items:flex-start; gap:6px; font-size:var(--bp-text-xs); color:var(--bp-text3); line-height:1.4; cursor:pointer; }
+  .art-sub-kvkk { flex-basis:100%; display:flex; align-items:flex-start; gap:6px; font-size:var(--bp-type-xs); color:var(--bp-text-3); line-height:1.4; cursor:pointer; }
   .art-sub-msg { font-size:var(--bp-text-md); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-danger); }
 
   @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
+  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   /* Reading progress bar */
   .read-progress {
@@ -97,7 +97,7 @@
        3px'lik cubugun TAMAMI gorunmezdi (olculdu: inset=47px'te top 0..3). */
     position: fixed; top: env(safe-area-inset-top, 0px); left: 0;
     width: 0%; height: 3px; z-index:var(--bp-z-toast);
-    background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-accent-cyan) 50%, var(--bp-art-violet) 100%);
+    background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-art-cyan) 50%, var(--bp-art-violet) 100%);
     will-change: width; pointer-events: none;
     transition: width 60ms linear;
   }

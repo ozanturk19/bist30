@@ -273,7 +273,7 @@ async function artSubmitSub() {
     return;
   }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    emailEl.style.borderColor = 'var(--bp-sat)';
+    emailEl.style.borderColor = 'var(--bp-down)';
     emailEl.placeholder = 'Geçerli bir e-posta girin';
     setTimeout(() => { emailEl.style.borderColor = ''; emailEl.placeholder = 'e-posta adresiniz'; }, 2500);
     return;

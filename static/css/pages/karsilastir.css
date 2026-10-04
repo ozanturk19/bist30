@@ -6,10 +6,10 @@
     -webkit-font-smoothing: antialiased; font-size: var(--bp-text-md); min-height: 100vh;
   }
   header {
-    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
+    background: var(--bp-surface); border-bottom: 1px solid var(--bp-line);
     position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
-  .page-sub   { font-size: var(--bp-text-base); color: var(--bp-text3); }
+  .page-sub   { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
 
   /* ── Search Bar ── */
@@ -24,37 +24,37 @@
     --da-glow-x: -4%;
     --da-glow-size: 200px;
     display: flex; gap: 8px; margin-bottom: 28px;
-    border-radius:var(--bp-radius-lg); padding: 16px;
+    border-radius:var(--bp-r-md); padding: 16px;
     flex-wrap: wrap; align-items: center;
   }
   .search-bar > * { position: relative; z-index: 1; }
   .search-bar .search-bar-label {
-    font-size: var(--bp-text-sm); color: var(--bp-text3); text-transform: uppercase;
+    font-size: var(--bp-text-sm); color: var(--bp-text-3); text-transform: uppercase;
     letter-spacing: 0.5px; font-weight: 600; width: 100%; margin-bottom: 4px;
   }
   .ticker-inputs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
   .ticker-input {
     background: var(--bp-bg); border: 1px solid var(--bp-field-border);   /* K-Q */
-    color: var(--bp-text); border-radius:var(--bp-radius); padding: 11px 12px;
+    color: var(--bp-text); border-radius:var(--bp-r-sm); padding: 11px 12px;
     font-size: var(--bp-text-lg); font-family: inherit; font-variant-numeric: tabular-nums; text-transform: uppercase;
     width: 100px; outline: none; transition: border-color .15s;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px. 19.09: dikey padding
      8px->11px, 375px'te olculen 37px yukseklik ~44px asgari dokunma hedefine
      yaklastirildi (Apple HIG/Material). */
-  .ticker-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.14); }
-  .ticker-input::placeholder { color: var(--bp-text3); text-transform: none; font-family: inherit; }
+  .ticker-input:focus { border-color: var(--bp-brand); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.14); }
+  .ticker-input::placeholder { color: var(--bp-text-3); text-transform: none; font-family: inherit; }
   .compare-btn {
     position: relative;
-    background: var(--accent); color: var(--bp-bg); border: none; border-radius:var(--bp-radius);
-    padding: 8px 18px; font-size: var(--bp-text-base); font-weight: 600; cursor: pointer;
+    background: var(--bp-brand); color: var(--bp-bg); border: none; border-radius:var(--bp-r-sm);
+    padding: 8px 18px; font-size: var(--bp-type-sm); font-weight: 600; cursor: pointer;
     transition: background .15s; white-space: nowrap;
   }
   .compare-btn::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
-  .compare-btn:hover { background: var(--bp-accent-cyan); }
+  .compare-btn:hover { background: var(--bp-art-cyan); }
   .share-btn {
     position: relative;
-    background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-ctl-border);
-    border-radius:var(--bp-radius); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
+    background: var(--bp-raised); color: var(--bp-text-2); border: 1px solid var(--bp-line-strong);
+    border-radius:var(--bp-r-sm); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
     transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
     align-items: center; justify-content: center; gap: 5px;
     /* K-DP: eleman <a>'dan <button>'a gecti -- <button> font-family'yi
@@ -68,8 +68,8 @@
   /* ── Comparison Table ── */
   .compare-wrap {
     overflow-x: auto;
-    border-radius:var(--bp-radius-lg);
-    border: 1px solid var(--bp-border);
+    border-radius:var(--bp-r-md);
+    border: 1px solid var(--bp-line);
   }
   /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
      thead sticky referansini bozuyordu. >=900px'te ana icerik sutunu .compare-table'in
@@ -82,8 +82,8 @@
     width: 100%; border-collapse: collapse; min-width: 600px;
   }
   .compare-table th {
-    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
-    padding: 0; text-align: center; font-weight: 700; font-size: var(--bp-text-base);
+    background: var(--bp-surface); border-bottom: 1px solid var(--bp-line);
+    padding: 0; text-align: center; font-weight: 700; font-size: var(--bp-type-sm);
   }
   /* CPO-DEV2-099: hisse isimleri (thead) asagi kaydirinca kayboluyordu -
      hangi sutunun hangi hisse oldugu gorunmuyordu (Ozan ornegi). Sadece
@@ -96,35 +96,35 @@
     position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-dropdown);
   }
   .compare-table td {
-    padding: 12px 16px; border-bottom: 1px solid var(--bp-border);
-    text-align: center; font-size: var(--bp-text-base); vertical-align: middle;
+    padding: 12px 16px; border-bottom: 1px solid var(--bp-line);
+    text-align: center; font-size: var(--bp-type-sm); vertical-align: middle;
   }
   .compare-table tr:last-child td { border-bottom: none; }
   .compare-table .row-label {
-    text-align: left; color: var(--bp-text3); font-size: var(--bp-text-xs);
+    text-align: left; color: var(--bp-text-3); font-size: var(--bp-type-xs);
     text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
     padding: 12px 16px; background: rgba(255,255,255,.02);
     white-space: nowrap; min-width: 130px;
   }
   .compare-table .col-hdr {
-    padding: 16px 12px; border-right: 1px solid var(--bp-border);
+    padding: 16px 12px; border-right: 1px solid var(--bp-line);
   }
   .compare-table .col-hdr:last-child { border-right: none; }
   /* 20.09 CPO: bu iki kenar `rgba(30,45,69,.5)` (= #1e2d45, eski navy palet)
-     yaziyordu. AYNI HUCRENIN alt kenari 14 satir yukarida var(--bp-border)
+     yaziyordu. AYNI HUCRENIN alt kenari 14 satir yukarida var(--bp-line)
      (notr gri) ile boyaniyor, disindaki .compare-wrap cercevesi de oyle —
      yani tek bir tablo hucresinin alt kenari gri, sag kenari maviydi. Canli
      olculdu: td border-bottom rgb(42,42,44) vs border-right rgba(30,45,69,.5).
      Ayni rolu iki paletle boyamak bir bug'dir (CPO-1682 olcutu). */
-  .compare-table td { border-right: 1px solid var(--bp-border); }
+  .compare-table td { border-right: 1px solid var(--bp-line); }
   .compare-table td:last-child { border-right: none; }
-  .compare-table th.row-label { border-right: 1px solid var(--bp-border); }
+  .compare-table th.row-label { border-right: 1px solid var(--bp-line); }
   .compare-table tr:last-child th.row-label { border-bottom: none; }
 
-  .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-variant-numeric: tabular-nums; }
-  .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; margin-right: auto; }
+  .col-ticker { font-size: var(--bp-type-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+  .col-name   { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; margin-right: auto; }
   .col-kap    {
-    display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text3);
+    display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text-3);
     background: rgba(var(--bp-text3-rgb),.1); border: 1px solid rgba(var(--bp-text3-rgb),.2);
     border-radius: var(--bp-radius-4); padding: 1px 5px; text-decoration: none; margin-top: 6px;
     transition: all .15s;
@@ -133,53 +133,53 @@
 
   .badge {
     display: inline-flex; align-items: center; gap: 3px; padding: 4px 10px;
-    border-radius: var(--bp-radius-20); font-size: var(--bp-text-xs); font-weight: 600; letter-spacing: .3px;
+    border-radius: var(--bp-r-lg); font-size: var(--bp-type-xs); font-weight: 600; letter-spacing: .3px;
     text-transform: uppercase;
   }
-  .badge.al  { background: rgba(var(--bp-al-rgb),.12); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.3); }
-  .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
-  .badge.bkl { background: rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
+  .badge.al  { background: rgba(var(--bp-al-rgb),.12); color:var(--bp-up); border:1px solid rgba(var(--bp-al-rgb),.3); }
+  .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-down-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
+  .badge.bkl { background: rgba(var(--bp-text3-rgb),.1); color:var(--bp-flat); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
-  .mono { font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); }
-  .up   { color: var(--bp-al); }
-  .dn   { color: var(--bp-sat); }
+  .mono { font-variant-numeric: tabular-nums; font-size: var(--bp-type-sm); }
+  .up   { color: var(--bp-up); }
+  .dn   { color: var(--bp-down); }
   /* K-BP (21.09): YON EKSENININ UCUNCU HALI. Burada .neu YOKTU, bu yuzden
      degismeyen hisse (change_pct = 0) `.up` ile YESIL boyaniyordu — ayni
      hisse /tarama'da `.chg-neu` ile notr griydi. 0 bir yukselis degildir. */
-  .neu  { color: var(--bp-text2); }
+  .neu  { color: var(--bp-text-2); }
   /* K-BX eki (22.09): ORTA band. /hisse'nin `_roeColor`'i orta bandi
-     --bp-gold ile boyuyor; bu sayfada gold sinifi YOKTU, bu yuzden ROE
+     --bp-caution ile boyuyor; bu sayfada gold sinifi YOKTU, bu yuzden ROE
      bandi hem esik hem HUE olarak ayrisiyordu. */
-  .mid  { color: var(--bp-gold); }
-  .muted{ color: var(--bp-text3); }
+  .mid  { color: var(--bp-caution); }
+  .muted{ color: var(--bp-text-3); }
   /* K-BQ (21.09): Supertrend seviyesinin FIYATA gore rolu. Bu seviye yon-bagimsiz
      bir buyukluktur (K-BO) — rol renkle degil metinle soylenir. */
   .sl-role {
     display: block; font-size: var(--bp-text-2xs);
-    font-weight: 600; color: var(--bp-text3); letter-spacing: .3px; margin-top: 2px;
+    font-weight: 600; color: var(--bp-text-3); letter-spacing: .3px; margin-top: 2px;
   }
 
   .quality-badge {
     padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 700;
     text-transform: uppercase; letter-spacing: .4px;
   }
-  .q-ideal  { background: rgba(var(--bp-al-rgb),.18);  color:var(--bp-al); }
-  .q-iyi    { background: rgba(var(--bp-accent-cyan-rgb),.18);  color:var(--bp-accent-cyan); }
+  .q-ideal  { background: rgba(var(--bp-al-rgb),.18);  color:var(--bp-up); }
+  .q-iyi    { background: rgba(var(--bp-accent-cyan-rgb),.18);  color:var(--bp-art-cyan); }
   .q-dikkat { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
   .q-uzak   { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
-  .q-none   { color: var(--bp-text3); }
+  .q-none   { color: var(--bp-text-3); }
 
   /* ── Empty / Loading ──
      21.09 (K-V): bu sayfanin `.empty-state`i ayni adi tasidigi halde
      tarama/bilanco/temettu'dakinden FARKLI bir dil konusuyordu (gövde
-     --bp-text3 vs --bp-text2, h2 600 vs 700, baslik --bp-text2 vs --bp-text).
+     --bp-text-3 vs --bp-text-2, h2 600 vs 700, baslik --bp-text-2 vs --bp-text).
      Kanonik `.da-empty` katina alindi; burada DELTA kalmadi. h2 basliklari
      `.da-empty-title` olcegini `.da-empty h2` uzerinden aliyor. */
 
   /* 21.09 (K-W): `.skeleton` + @keyframes shimmer SİLİNDİ. Bu sayfanınki bir
      METİN SATIRI yer tutucusuydu (14×80 inline-block) — kanonikte
      `.da-skel .da-skel--line` olarak yaşıyor (data-art.css §5). */
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
+  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   /* ── Autocomplete ── */
   .ac-wrap { position: relative; display: inline-block; }
@@ -202,28 +202,28 @@
   .ac-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 12px; cursor: pointer; font-size: var(--bp-text-sm);
-    border-bottom: 1px solid var(--bp-border);   /* 20.09: eski navy #1e2d45 -> notr token */
+    border-bottom: 1px solid var(--bp-line);   /* 20.09: eski navy #1e2d45 -> notr token */
     transition: background .12s;
   }
   .ac-item:last-child { border-bottom: none; }
   .ac-item:hover, .ac-item.active { background: rgba(var(--bp-accent-cyan-rgb),.18); }
   .ac-item-ticker {
-    font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); font-weight: 700;
+    font-variant-numeric: tabular-nums; font-size: var(--bp-type-sm); font-weight: 700;
     color: var(--bp-text); letter-spacing: .3px;
   }
   .ac-item-name {
-    font-size: var(--bp-text-xs); color: var(--bp-text3);
+    font-size: var(--bp-type-xs); color: var(--bp-text-3);
     margin-left: 12px; text-align: right; max-width: 160px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .ac-empty {
-    padding: 12px; color: var(--bp-text3); font-size: var(--bp-text-sm); text-align: center;
+    padding: 12px; color: var(--bp-text-3); font-size: var(--bp-text-sm); text-align: center;
   }
 
   /* ── Score / Verdict styles ── */
   .row-sep td {
     background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
-    color: var(--bp-accent-cyan) !important; font-weight: 700; font-size: var(--bp-text-xs);
+    color: var(--bp-art-cyan) !important; font-weight: 700; font-size: var(--bp-type-xs);
     text-transform: uppercase; letter-spacing: 1px;
     padding: 10px 16px !important; text-align: left !important;
     border-top: 1px solid rgba(var(--bp-accent-cyan-rgb),.25);
@@ -232,9 +232,9 @@
   .help-icon {
     display: inline-flex; align-items: center; justify-content: center;
     width: 16px; height: 16px; margin-left: 4px;
-    border: 1px solid var(--bp-border); border-radius: 50%;
+    border: 1px solid var(--bp-line); border-radius: 50%;
     font-size: var(--bp-text-2xs); font-style: normal; font-weight: 700;
-    color: var(--bp-text3); cursor: help; flex-shrink: 0;
+    color: var(--bp-text-3); cursor: help; flex-shrink: 0;
   }
   .help-icon:hover, .help-icon:focus-visible { color: var(--bp-text); border-color: var(--bp-border2); }
 
@@ -258,7 +258,7 @@
     --da-glow-y: -55%;
     --da-glow-size: 150px;
     border-color: var(--bp-bkl-bd);
-    border-radius: var(--bp-radius-lg); padding: 14px 16px;
+    border-radius: var(--bp-r-md); padding: 14px 16px;
   }
   .cmp-mcard-notfound { opacity: .6; }
   .cmp-mtop {
@@ -266,11 +266,11 @@
     margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--bp-border-subtle);
   }
   .cmp-mticker-link { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-  .cmp-mticker { font-size: var(--bp-text-xl); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--bp-text); }
-  .cmp-mname { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
+  .cmp-mticker { font-size: var(--bp-type-lg); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--bp-text); }
+  .cmp-mname { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 2px; }
   .cmp-msep {
-    font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--bp-accent-cyan); background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
+    font-size: var(--bp-type-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--bp-art-cyan); background: linear-gradient(90deg, rgba(var(--bp-accent-cyan-rgb),.12), rgba(var(--bp-accent-cyan-rgb),.04));
     padding: 8px 10px; margin: 10px -16px 6px; border-top: 1px solid rgba(var(--bp-accent-cyan-rgb),.25);
   }
   .cmp-mrow {
@@ -279,7 +279,7 @@
   }
   .cmp-mrow:last-child { border-bottom: none; }
   .cmp-mrow-label {
-    color: var(--bp-text3); font-size: var(--bp-text-xs); text-transform: uppercase;
+    color: var(--bp-text-3); font-size: var(--bp-type-xs); text-transform: uppercase;
     letter-spacing: .4px; flex-shrink: 0;
   }
   .cmp-mrow-val { text-align: right; }

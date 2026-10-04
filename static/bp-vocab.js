@@ -152,7 +152,7 @@ function sigLabel(sig) {
    HIC gormemisti.
 
    Canli olcum 22.09 (borsapusula.com/tarama, Sinyal=Trend Bozuldu):
-   72 satirin 35'i "Ideal"/"Iyi" rozetini `--bp-al` YESILIYLE
+   72 satirin 35'i "Ideal"/"Iyi" rozetini `--bp-up` YESILIYLE
    (rgb(0,226,144) — urunun AL rengi) basiyordu; mobil kartlarda da 35.
    Ayni hissenin kendi sayfasi ayni anda "Trend asagi yonlu — somut
    giris/hedef seviyesi bu sinyal tipinde gosterilmez" diyordu.

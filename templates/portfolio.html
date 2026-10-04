@@ -96,53 +96,53 @@
     <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Trend Bozuldu</div></div>
   </div>
-  <div id="pfMissingPriceWarn" role="status" aria-live="polite" style="display:none;margin-top:8px;font-size:var(--bp-text-base);color:var(--bp-text3)"></div>
-  <div style="margin-top:8px;font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.5">
+  <div id="pfMissingPriceWarn" role="status" aria-live="polite" style="display:none;margin-top:8px;font-size:var(--bp-type-sm);color:var(--bp-text-3)"></div>
+  <div style="margin-top:8px;font-size:var(--bp-text-sm);color:var(--bp-text-3);line-height:1.5">
     <span aria-hidden="true">⚠️</span> Kâr/Zarar değerleri brüttür; komisyon, BSMV/stopaj gibi işlem kesintileri dahil değildir.
   </div>
 
   <!-- Cloud Sync Modal -->
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--bp-z-modal);align-items:center;justify-content:center">
-    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Bulut eşitleme" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
+    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Bulut eşitleme" style="background:var(--bp-surface);border:1px solid var(--bp-line);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
       <!-- 21.09 K-S: 10.5x21px idi, merkezden ±12px'in 5 probundan yalniz 1'i isabet
            ediyordu (WCAG 2.5.8). Boyut/renk/imlec kanonik `.da-close` katina (32x32)
            birakildi; satir ici stil YALNIZ konumlandirma yapar — aksi halde satir ici
            bildirim sinifi sessizce ezerdi. -->
       <button onclick="closeCloudSync()" aria-label="Kapat" class="da-close" style="position:absolute;top:8px;right:10px">×</button>
       <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Bulut eşitleme</div>
-      <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:16px">Portföyünüzü sunucuya kaydedin. Oluşan token’ı diğer cihazınızda aşağıdaki &laquo;Token yapıştırın&raquo; alanına girerek aynı portföye erişin.</div>
+      <div style="font-size:var(--bp-text-sm);color:var(--bp-text-3);margin-bottom:16px">Portföyünüzü sunucuya kaydedin. Oluşan token’ı diğer cihazınızda aşağıdaki &laquo;Token yapıştırın&raquo; alanına girerek aynı portföye erişin.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="cloudCreateBtn" onclick="createCloudToken()" style="flex:1;background:var(--bp-brand);color:var(--bp-bg);border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+        <button id="cloudCreateBtn" onclick="createCloudToken()" style="flex:1;background:var(--bp-brand);color:var(--bp-bg);border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-type-sm);font-weight:600;cursor:pointer">
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
           <input id="cloudTokenInput" type="text" placeholder="Token yapıştırın" aria-label="Senkronizasyon token'ı" autocomplete="off"
             style="flex:1;background:var(--bp-bg);border:1px solid var(--bp-field-border);color:var(--bp-text);padding:7px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:var(--bp-font-mono);min-width:0">
-          <button id="cloudLoadTokenBtn" onclick="loadCloudToken()" style="background:var(--bp-border-subtle);color:var(--bp-text2);border:1px solid var(--bp-border);padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
+          <button id="cloudLoadTokenBtn" onclick="loadCloudToken()" style="background:var(--bp-border-subtle);color:var(--bp-text-2);border:1px solid var(--bp-line);padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
         </div>
       </div>
       <!-- Aktif token göster -->
       <div id="cloudActiveSection" style="display:none">
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:6px">Aktif Token:</div>
-        <div style="display:flex;gap:8px;align-items:center;background:var(--bp-bg);border:1px solid var(--bp-border);border-radius:var(--bp-radius-7);padding:8px 12px;margin-bottom:12px">
-          <code id="cloudActiveToken" style="font-size:var(--bp-text-sm);color:var(--bp-accent-cyan);flex:1;word-break:break-all"></code>
-          <button onclick="copyCloudToken()" aria-label="Token’ı panoya kopyala" style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-md)" data-tip="Token’ı panoya kopyala"><span aria-hidden="true">📋</span></button>
+        <div style="font-size:var(--bp-type-xs);color:var(--bp-text-3);margin-bottom:6px">Aktif Token:</div>
+        <div style="display:flex;gap:8px;align-items:center;background:var(--bp-bg);border:1px solid var(--bp-line);border-radius:var(--bp-radius-7);padding:8px 12px;margin-bottom:12px">
+          <code id="cloudActiveToken" style="font-size:var(--bp-text-sm);color:var(--bp-art-cyan);flex:1;word-break:break-all"></code>
+          <button onclick="copyCloudToken()" aria-label="Token’ı panoya kopyala" style="background:none;border:none;color:var(--bp-text-3);cursor:pointer;font-size:var(--bp-text-md)" data-tip="Token’ı panoya kopyala"><span aria-hidden="true">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-ok-rgb),.1);border:1px solid rgba(var(--bp-ok-rgb),.2);color:var(--bp-ok);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-ok-rgb),.1);border:1px solid rgba(var(--bp-ok-rgb),.2);color:var(--bp-ok);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-type-sm);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
-          <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(var(--bp-accent-cyan-rgb),.08);border:1px solid rgba(var(--bp-accent-cyan-rgb),.15);color:var(--bp-accent-cyan);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(var(--bp-accent-cyan-rgb),.08);border:1px solid rgba(var(--bp-accent-cyan-rgb),.15);color:var(--bp-art-cyan);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-type-sm);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
-          <button onclick="forgetCloudToken()" style="background:none;border:1px solid var(--bp-border);color:var(--bp-text3);padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" data-tip="Token'ı unut (yerel portföy kalır)">
+          <button onclick="forgetCloudToken()" style="background:none;border:1px solid var(--bp-line);color:var(--bp-text-3);padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" data-tip="Token'ı unut (yerel portföy kalır)">
             <span aria-hidden="true">✕</span> Unut
           </button>
         </div>
       </div>
-      <div id="cloudMsg" role="status" aria-live="polite" style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-top:10px;min-height:18px"></div>
-      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:14px;padding-top:10px;border-top:1px solid var(--bp-border-subtle)">
+      <div id="cloudMsg" role="status" aria-live="polite" style="font-size:var(--bp-text-sm);color:var(--bp-text-3);margin-top:10px;min-height:18px"></div>
+      <div style="font-size:var(--bp-type-xs);color:var(--bp-text-3);margin-top:14px;padding-top:10px;border-top:1px solid var(--bp-border-subtle)">
         <span aria-hidden="true">⚠️</span> Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
       </div>
     </div>
@@ -161,7 +161,7 @@
     <input type="text" id="addPrice" placeholder="Fiyat ₺" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
-    <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-border)">İptal</button>
+    <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-line)">İptal</button>
     <span id="addErr" role="alert" style="color:var(--bp-danger);font-size:var(--bp-text-sm)"></span>
   </div>
 
@@ -397,7 +397,7 @@ async function fetchCharts() {
 }
 
 function svgSparkline(prices) {
-  if (!prices || prices.length < 2) return '<span style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</span>';
+  if (!prices || prices.length < 2) return '<span style="color:var(--bp-text-3);font-size:var(--bp-type-xs)">—</span>';
   const W = 80, H = 26;
   const min = Math.min(...prices), max = Math.max(...prices);
   const rng = max - min || 1;
@@ -415,7 +415,7 @@ function svgSparkline(prices) {
      endpoint'in AYNI dilimi /hisse'de "Son 30 seans" diye etiketleniyordu:
      tek veri, iki birim. Bu etiket egrinin TEK metin esdegeri oldugu icin
      (bkz. K-AI notu) hata dogrudan ekran okuyucuya gidiyordu. */
-  const col = bpDirColor(_chg, 1, 'var(--bp-text3)');   /* C-10: yön rengi, etiketle aynı ondalık */
+  const col = bpDirColor(_chg, 1, 'var(--bp-text-3)');   /* C-10: yön rengi, etiketle aynı ondalık */
   const _lbl = 'Son ' + prices.length + ' seans: ' + bpFormatPct(_chg, 1);   /* K-BP: tek kanon */
   return '<svg role="img" aria-label="' + _lbl + '" width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
     '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -844,14 +844,14 @@ function render() {
     const trHtml = `<tr>
       <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
       <td class="hm bp-text-muted">${fmtDate(p.date)}</td>
-      <td>${Number.isFinite(p.lot) ? fmt(p.lot,0) : '<span style="color:var(--bp-text3)">—</span>'}</td>
-      <td>${Number.isFinite(p.price) ? fmt(p.price) : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td>${Number.isFinite(p.lot) ? fmt(p.lot,0) : '<span style="color:var(--bp-text-3)">—</span>'}</td>
+      <td>${Number.isFinite(p.price) ? fmt(p.price) : '<span style="color:var(--bp-text-3)">—</span>'}</td>
       <td>${cur !== null ? fmt(cur) + ' ₺'
-            : `<span style="color:var(--bp-text3)" tabindex="0" data-tip="${_pfKnownTicker(p.ticker) === false
+            : `<span style="color:var(--bp-text-3)" tabindex="0" data-tip="${_pfKnownTicker(p.ticker) === false
                  ? esc(p.ticker) + ' BIST listemizde bulunamadı — kodu yanlış girmiş olabilirsiniz; güncel fiyat ve kâr/zarar hesaplanamıyor.'
                  : 'Bu hisse için güncel fiyat şu an alınamadı. Bir sonraki yenilemede tekrar denenecek.'}">—</span>`}</td>
-      <td class="hm bp-text-muted">${cost !== null ? fmtM(cost) : '<span style="color:var(--bp-text3)">—</span>'}</td>
-      <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td class="hm bp-text-muted">${cost !== null ? fmtM(cost) : '<span style="color:var(--bp-text-3)">—</span>'}</td>
+      <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text-3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
@@ -870,7 +870,7 @@ function render() {
         </div>
       </div>
       <div class="pf-mprice-row">
-        <div class="pf-metric"><div class="pf-metric-label">Güncel</div><span>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</span></div>
+        <div class="pf-metric"><div class="pf-metric-label">Güncel</div><span>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text-3)">—</span>'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">K/Z</div>${pnlHtml}</div>
         <div class="pf-metric"><div class="pf-metric-label">K/Z %</div>${pnlPctHtml}</div>
       </div>
@@ -1021,7 +1021,7 @@ function _showActiveToken(token) {
 async function createCloudToken() {
   const btn = document.getElementById('cloudCreateBtn');
   if (btn) btn.disabled = true;
-  _setCloudMsg('Oluşturuluyor…', 'var(--bp-text3)');
+  _setCloudMsg('Oluşturuluyor…', 'var(--bp-text-3)');
   try {
     const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
@@ -1044,7 +1044,7 @@ async function loadCloudToken() {
   if (!token) { _setCloudMsg('Token girin.', 'var(--bp-danger)'); return; }
   const btn = document.getElementById('cloudLoadTokenBtn');
   if (btn) btn.disabled = true;
-  _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
+  _setCloudMsg('Yükleniyor…', 'var(--bp-text-3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
@@ -1069,7 +1069,7 @@ async function loadCloudToken() {
     save(); render();
     _setCloudMsg(`Yüklendi! ${_cloudMerge.added} pozisyon eklendi.`
       + (_cloudMerge.duplicate ? ` (${_cloudMerge.duplicate} zaten vardı)` : '')
-      + (skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''), 'var(--bp-al)');
+      + (skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''), 'var(--bp-up)');
     input.value = '';
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-danger)');
@@ -1084,7 +1084,7 @@ async function saveToCloud(silent) {
   if (!silent && !confirm('Bu, sunucudaki mevcut veriyi değiştirecek, devam edilsin mi?')) return;
   const btn = document.getElementById('cloudSaveBtn');
   if (btn) btn.disabled = true;
-  if (!silent) _setCloudMsg('Kaydediliyor…', 'var(--bp-text3)');
+  if (!silent) _setCloudMsg('Kaydediliyor…', 'var(--bp-text-3)');
   try {
     const res = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {
       method: 'POST',
@@ -1117,7 +1117,7 @@ async function loadFromCloud() {
   if (portfolio.length && !confirm(`Bulut kopyası yerel portföyünüzün (${portfolio.length} pozisyon) üzerine yazılacak. Devam edilsin mi?`)) return;
   const btn = document.getElementById('cloudLoadFromCloudBtn');
   if (btn) btn.disabled = true;
-  _setCloudMsg('Yükleniyor…', 'var(--bp-text3)');
+  _setCloudMsg('Yükleniyor…', 'var(--bp-text-3)');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-danger)'); return; }
@@ -1150,7 +1150,7 @@ function forgetCloudToken() {
   _safeRemoveToken();
   document.getElementById('cloudActiveSection').style.display = 'none';
   document.getElementById('cloudTokenInput').value = '';
-  _setCloudMsg('Token unutuldu (portföy bu cihazda korunuyor).', 'var(--bp-text3)');
+  _setCloudMsg('Token unutuldu (portföy bu cihazda korunuyor).', 'var(--bp-text-3)');
 }
 
 /* K-BH: adi "Link" idi ama kopyaladigi sey ham token; sitede token'i URL'den geri
@@ -1187,7 +1187,7 @@ function copyCloudToken() {
 
 function _setCloudMsg(msg, color) {
   const el = document.getElementById('cloudMsg');
-  if (el) { el.textContent = msg; el.style.color = color || 'var(--bp-text3)'; }
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--bp-text-3)'; }
 }
 
 // Close modal on overlay click
@@ -1261,7 +1261,7 @@ window.addPosition = async function() {
       err.style.color = 'var(--bp-warn)';
       err.textContent = 'Hisse listesi yüklenemediği için kod doğrulanamadı — eklendi.';
     } else {
-      err.style.color = 'var(--bp-sat)';
+      err.style.color = 'var(--bp-down)';
     }
   }
   return r;

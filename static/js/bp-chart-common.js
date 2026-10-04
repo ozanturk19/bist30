@@ -35,7 +35,7 @@
       /* K-BG: palet _tok()'tan okunur (hex yalniz yedek). Bu dosyanin KENDI
          kanonu zaten buydu (addEmaPair 20.09'da gecmisti) ama baseOpts ve
          addCandleSeries ham hex'te kalmisti -- ayni dosyada iki kanon. */
-      layout: { background: { color: _tok('--bp-surface', '#141416') }, textColor: _tok('--bp-text2', '#c7c5cd') },
+      layout: { background: { color: _tok('--bp-surface', '#141416') }, textColor: _tok('--bp-text-2', '#c7c5cd') },
       grid: { vertLines: { color: _tok('--bp-border-subtle', '#21262d') }, horzLines: { color: _tok('--bp-border-subtle', '#21262d') } },
       crosshair: {
         mode: LC.CrosshairMode.Normal,
@@ -60,9 +60,9 @@
   /* Kanonik mum serisi. */
   function addCandleSeries(chart) {
     return chart.addCandlestickSeries({
-      upColor: _tok('--bp-al', '#00e290'), downColor: _tok('--bp-sat', '#f85149'),
-      borderUpColor: _tok('--bp-al', '#00e290'), borderDownColor: _tok('--bp-sat', '#f85149'),
-      wickUpColor: _tok('--bp-al', '#00e290'), wickDownColor: _tok('--bp-sat', '#f85149'),
+      upColor: _tok('--bp-up', '#00e290'), downColor: _tok('--bp-down', '#f85149'),
+      borderUpColor: _tok('--bp-up', '#00e290'), borderDownColor: _tok('--bp-down', '#f85149'),
+      wickUpColor: _tok('--bp-up', '#00e290'), wickDownColor: _tok('--bp-down', '#f85149'),
       priceLineVisible: false, lastValueVisible: true,
     });
   }
@@ -179,7 +179,7 @@
     var tip = document.createElement('div');
     tip.style.cssText =
       'position:absolute;display:none;padding:8px 10px;background:var(--bp-surface);' +
-      'border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text);font-size:11px;' +
+      'border:1px solid var(--bp-line);border-radius:6px;color:var(--bp-text);font-size:11px;' +
       'line-height:1.55;font-variant-numeric:tabular-nums;pointer-events:none;' +
       'z-index:var(--bp-z-chart-legend);white-space:nowrap;box-shadow:var(--bp-shadow-sm)';
     elMain.style.position = 'relative';
@@ -193,10 +193,10 @@
       if (!bar) { tip.style.display = 'none'; return; }
       tip.style.display = 'block';
       tip.innerHTML =
-        '<div style="color:var(--bp-text3);margin-bottom:4px;font-weight:600">' + dateFmt(param.time) + '</div>' +
+        '<div style="color:var(--bp-text-3);margin-bottom:4px;font-weight:600">' + dateFmt(param.time) + '</div>' +
         '<div>A: <span style="color:var(--bp-text)">' + fmt(bar.open) + '</span>' +
-        '&nbsp;&nbsp;Y: <span style="color:' + _tok('--bp-al', '#00e290') + '">' + fmt(bar.high) + '</span></div>' +
-        '<div>D: <span style="color:' + _tok('--bp-sat', '#f85149') + '">' + fmt(bar.low) + '</span>' +
+        '&nbsp;&nbsp;Y: <span style="color:' + _tok('--bp-up', '#00e290') + '">' + fmt(bar.high) + '</span></div>' +
+        '<div>D: <span style="color:' + _tok('--bp-down', '#f85149') + '">' + fmt(bar.low) + '</span>' +
         '&nbsp;&nbsp;K: <span style="color:var(--bp-text);font-weight:700">' + fmt(bar.close) + ' ₺</span></div>';
       /* Konteyner sinirlari icinde kelepcele (r137: .chart-section overflow:hidden
          disina tasarsa kirpilir) - once olc, sonra konumlandir. */

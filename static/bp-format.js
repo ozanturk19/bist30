@@ -274,7 +274,7 @@ function bpIsValidPrice(price) {
    OLMALI. -0,004 ekranda "0,00%" yazip KIRMIZI olamaz. Bu yuzden yon, once
    GORUNTU ONDALIGINA yuvarlanmis deger uzerinden belirlenir.
 
-   Kanon: >0 -> --bp-al · <0 -> --bp-sat · =0 -> NOTR (hem renk hem isaret). */
+   Kanon: >0 -> --bp-up · <0 -> --bp-down · =0 -> NOTR (hem renk hem isaret). */
 
 /* -1 / 0 / +1, veya sayi degilse null. `frac` = ekranda gosterilen ondalik. */
 function bpDir(n, frac) {
@@ -290,12 +290,12 @@ function bpDirSign(n, frac) {
   return bpDir(n, frac) === 1 ? '+' : '';
 }
 
-/* Yon rengi (CSS degiskeni metni). Notr varsayilan: --bp-text2. */
+/* Yon rengi (CSS degiskeni metni). Notr varsayilan: --bp-text-2. */
 function bpDirColor(n, frac, neutralVar) {
   var d = bpDir(n, frac);
-  var neu = neutralVar || 'var(--bp-text2)';
-  if (d === null) return 'var(--bp-text3)';
-  return d === 1 ? 'var(--bp-al)' : (d === -1 ? 'var(--bp-sat)' : neu);
+  var neu = neutralVar || 'var(--bp-text-2)';
+  if (d === null) return 'var(--bp-text-3)';
+  return d === 1 ? 'var(--bp-up)' : (d === -1 ? 'var(--bp-down)' : neu);
 }
 
 /* Yon sinifi. names = [pozitif, negatif, notr]; varsayilan ['up','down','neu'].

@@ -17,7 +17,7 @@
 
 
   .hh-alpha-bar {
-    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
+    background: var(--bp-surface); border: 1px solid var(--bp-line); border-radius:var(--bp-r-md);
     padding: 10px 14px; margin: 0 0 12px;
     /* C-71 K30: harf ızgarası — son satırda tek harf yetim kalmaz, sütunlar hizalı */
     display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px;
@@ -26,21 +26,21 @@
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 28px; height: 28px; padding: 0 8px;
-    border-radius:var(--bp-radius); font-size: var(--bp-text-sm); font-weight: 700;
-    background: var(--bp-border-subtle); border: 1px solid var(--bp-border);
-    color: var(--bp-text2); text-decoration: none; transition: all .12s;
+    border-radius:var(--bp-r-sm); font-size: var(--bp-text-sm); font-weight: 700;
+    background: var(--bp-border-subtle); border: 1px solid var(--bp-line);
+    color: var(--bp-text-2); text-decoration: none; transition: all .12s;
   }
   .hh-alpha-link::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
-  .hh-alpha-link:hover { background: rgba(var(--bp-accent-cyan-rgb),0.12); border-color: rgba(var(--bp-accent-cyan-rgb),0.4); color: var(--bp-accent-cyan); }
+  .hh-alpha-link:hover { background: rgba(var(--bp-accent-cyan-rgb),0.12); border-color: rgba(var(--bp-accent-cyan-rgb),0.4); color: var(--bp-art-cyan); }
 
   .hh-tabs { display: flex; gap: 4px; margin: 8px 0 12px; border-bottom: 1px solid var(--bp-border-subtle); }
   .hh-tab {
-    padding: 9px 16px; font-size: var(--bp-text-base); font-weight: 600;
-    color: var(--bp-text3); cursor: pointer; border: none; background: transparent;
+    padding: 9px 16px; font-size: var(--bp-type-sm); font-weight: 600;
+    color: var(--bp-text-3); cursor: pointer; border: none; background: transparent;
     border-bottom: 2px solid transparent; transition: all .15s;
     font-family: inherit;
   }
-  .hh-tab.active { color: var(--bp-text); border-bottom-color: var(--bp-accent-cyan); }
+  .hh-tab.active { color: var(--bp-text); border-bottom-color: var(--bp-art-cyan); }
   .hh-tab:hover { color: var(--bp-text); }
 
   /* K-AG: scroll-margin-top:68px kaldirildi — shared.css html{scroll-padding-top}
@@ -53,9 +53,9 @@
     margin: 0 0 12px; display: flex; align-items: center; gap: 10px;
   }
   .hh-section h2 .hh-count {
-    font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border2);
-    border-radius:var(--bp-radius-pill); padding: 2px 9px;
+    font-size: var(--bp-type-xs); font-weight: 700; color: var(--bp-text-3);
+    background: var(--bp-raised); border: 1px solid var(--bp-border2);
+    border-radius:var(--bp-r-pill); padding: 2px 9px;
   }
   .hh-grid {
     display: grid;
@@ -63,7 +63,7 @@
     gap: 8px;
   }
   .hh-card {
-    display: block; background: var(--bp-surface); border: 1px solid var(--bp-border);
+    display: block; background: var(--bp-surface); border: 1px solid var(--bp-line);
     border-radius:var(--bp-radius-md); padding: 10px 12px; text-decoration: none;
     transition: all .12s;
   }
@@ -72,12 +72,12 @@
     transform: translateY(-1px);
   }
   .hh-tk {
-    font-size: var(--bp-text-15); font-weight: 800; color: var(--bp-text);
+    font-size: var(--bp-type-body); font-weight: 800; color: var(--bp-text);
     font-family: 'Space Grotesk', system-ui, sans-serif;
     letter-spacing: -0.3px;
   }
   .hh-name {
-    font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 2px;
+    font-size: var(--bp-text-sm); color: var(--bp-text-3); margin-top: 2px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   @media (max-width: 720px) {

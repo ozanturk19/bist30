@@ -166,7 +166,7 @@
   {%- set _st_m = _mp + 3 if _mp < 10 else _mp - 9 %}
   {%- set _sr = (ssr_signal.stale_reason or '') ~ '' %}
   <div class="hisse-stale-box" data-stale="1" role="note"
-       style="background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-md);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-stale);line-height:1.5">
+       style="background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-radius-md);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-type-sm);color:var(--bp-stale);line-height:1.5">
     <svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     <strong>{% if _st_ts %}Son veri {{ '%02d.%02d'|format(_st_d, _st_m) }} · güncellenmiyor{% else %}Bu hissenin verisi güncellenmiyor{% endif %}</strong>
     {%- if _sr.startswith('insufficient_history:') %}
@@ -633,7 +633,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   {# SEO: Server-side rendered teknik özet — Google bot için crawlable içerik #}
   <div class="da-panel da-techsum-panel">
     <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
+    <p style="font-size:var(--bp-type-sm);color:var(--bp-text-2);line-height:1.7;margin:0">
       Güçlü Trend, beş koşul aynı anda sağlandığında oluşur: fiyat <strong>Supertrend(10,3)</strong> trend dönüş seviyesinin üstünde, <strong>ADX ≥ 25</strong>, <strong>DI+ &gt; DI−</strong>, <strong>EMA 12 &gt; EMA 99</strong> ve <strong>haftalık trend yukarı</strong> (haftalık EMA 20).
     </p>
   </div>
@@ -791,7 +791,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       Dış bağlantı yok (kanon §2.8); tarihle yazılır (§2.7). -#}
   <div class="da-panel da-panel--accent kap-section" id="kapSection">
     <h2 class="section-title" style="margin:0 0 12px">Şirket bildirimleri</h2>
-    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
+    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text-3);font-size:var(--bp-type-sm);padding:6px 0">
       <div class="da-spin da-spin--sm"></div>
       Bildirimler yükleniyor…
     </div>
@@ -821,9 +821,9 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     <div class="read-grid" data-n="{{ related_blog|length }}" style="--n:{{ related_blog|length }}">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
-        <div style="font-size:var(--bp-text-base);font-weight:600;color:var(--bp-text);line-height:1.4">{{ b.title }}</div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:5px">{{ b.mins }} dk okuma</div>
+        <div style="font-size:var(--bp-type-xs);color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
+        <div style="font-size:var(--bp-type-sm);font-weight:600;color:var(--bp-text);line-height:1.4">{{ b.title }}</div>
+        <div style="font-size:var(--bp-type-xs);color:var(--bp-text-3);margin-top:5px">{{ b.mins }} dk okuma</div>
       </a>
       {% endfor %}
     </div>

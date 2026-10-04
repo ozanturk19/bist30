@@ -5,7 +5,7 @@
   /* ── .da-panel deltaları ─────────────────────────────────────────────── */
   .card { padding: 28px; }
   .cf-intro {
-    --da-accent: var(--bp-accent-cyan);
+    --da-accent: var(--bp-art-cyan);
     --da-glow-rgb: var(--bp-accent-cyan-rgb);
     --da-glow-size: 320px; --da-glow-a: .10;
   }
@@ -18,11 +18,11 @@
   }
   .cf-formcard h2 { margin-bottom: 16px; }
 
-  h2 { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-xl); font-weight: 800; letter-spacing: -.02em; color: var(--bp-text); margin-bottom: 8px; }
-  p  { color: var(--bp-text2); margin-bottom: 14px; }
+  h2 { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-type-lg); font-weight: 800; letter-spacing: -.02em; color: var(--bp-text); margin-bottom: 8px; }
+  p  { color: var(--bp-text-2); margin-bottom: 14px; }
   .contact-row { display: flex; align-items: center; gap: 12px; padding: 14px 0 0; }
-  .contact-icon { flex-shrink: 0; color: var(--bp-text2); display: inline-flex; }
-  .contact-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.4px; }
+  .contact-icon { flex-shrink: 0; color: var(--bp-text-2); display: inline-flex; }
+  .contact-lbl  { font-size: var(--bp-type-xs); color: var(--bp-text-3); text-transform: uppercase; letter-spacing: 0.4px; }
   .contact-val  { font-size: var(--bp-text-md); color: var(--bp-brand); }
   .contact-val a { color: var(--bp-brand); text-decoration: none; }
   .contact-val a:hover { text-decoration: underline; }
@@ -33,8 +33,8 @@
   .cf-label {
     display: block; margin-bottom: 6px;
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-xs); letter-spacing: .12em;
-    text-transform: uppercase; color: var(--bp-text3);
+    font-size: var(--bp-type-xs); letter-spacing: .12em;
+    text-transform: uppercase; color: var(--bp-text-3);
   }
   .cf-input {
     width: 100%;
@@ -53,7 +53,7 @@
                 box-shadow  var(--bp-dur-base) var(--bp-ease-standard);
   }
   .cf-textarea { resize: vertical; line-height: 1.6; }
-  .cf-input:hover { border-color: var(--bp-text3); }   /* K-Q: hover TABANDAN acik olmali; --bp-border2 (#46464d) artik tabandan KOYUYDU */
+  .cf-input:hover { border-color: var(--bp-text-3); }   /* K-Q: hover TABANDAN acik olmali; --bp-border2 (#46464d) artik tabandan KOYUYDU */
   .cf-input:focus {
     border-color: var(--bp-brand);
     box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .16);
@@ -71,7 +71,7 @@
   .cf-consent-row { margin-bottom: 14px; }
   .cf-consent {
     display: flex; align-items: flex-start; gap: 8px;
-    font-size: var(--bp-text-xs); color: var(--bp-text3);
+    font-size: var(--bp-type-xs); color: var(--bp-text-3);
     cursor: pointer; line-height: 1.5;
   }
   /* kutu stilinin TEK KAYNAGI .da-check (data-art.css, 21.09) — burada yalniz
@@ -80,14 +80,14 @@
   /* .cf-input padding kisayolu .da-select'in padding-right'ini eziyor;
      ok isaretinin uzerine metin binmesin diye select'e ozel pay: */
   select.cf-input { padding-right: 30px; }
-  .cf-consent a { color: var(--bp-accent-cyan); }
+  .cf-consent a { color: var(--bp-art-cyan); }
   .cf-submit {
     display: inline-flex; align-items: center; gap: 7px;
     background: var(--bp-brand); color: var(--bp-bg);
-    border: none; border-radius: var(--bp-radius-pill);
+    border: none; border-radius: var(--bp-r-pill);
     padding: 10px 26px;
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-base); font-weight: 700;
+    font-size: var(--bp-type-sm); font-weight: 700;
     letter-spacing: .06em; text-transform: uppercase;
     cursor: pointer;
     transform: rotate(-1deg);
@@ -98,11 +98,11 @@
   .cf-submit:hover { transform: rotate(0deg) translateY(-1px); box-shadow: 0 8px 22px rgba(var(--bp-brand-rgb), .30); }
   .cf-submit:active { transform: scale(.97); }
   .cf-submit:disabled { opacity: .55; cursor: not-allowed; transform: rotate(0deg); box-shadow: none; }
-  .cf-msg { display: none; margin-top: 14px; font-size: var(--bp-text-base); line-height: 1.6; }
+  .cf-msg { display: none; margin-top: 14px; font-size: var(--bp-type-sm); line-height: 1.6; }
   .cf-msg--on  { display: block; }
   .cf-msg--err { color: var(--bp-danger); }
   .cf-msg--ok  { color: var(--bp-ok); }
-  .cf-msg-sub  { font-size: var(--bp-text-base); color: var(--bp-text3); }
+  .cf-msg-sub  { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 
   /* Uyarı şeridi — düz kutu yerine sol aksanlı Data-Art şeridi. `.da-panel`
      KULLANILMADI: içeriği doğrudan panelin içinde duran ÇIPLAK METİN düğümü,
@@ -113,8 +113,8 @@
     border: 1px solid rgba(var(--bp-danger-rgb),.2);
     border-left: 3px solid var(--bp-danger);
     border-radius: var(--bp-radius-md);
-    padding: 14px 16px; color: var(--bp-text2);
-    font-size: var(--bp-text-base); margin-top: 24px;
+    padding: 14px 16px; color: var(--bp-text-2);
+    font-size: var(--bp-type-sm); margin-top: 24px;
   }
   .disclaimer strong { color: var(--bp-text); }
 

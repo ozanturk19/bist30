@@ -31,9 +31,9 @@
    ama önceki tavana göre ~%35 daraltıldı. */
 .da-section{padding:clamp(32px,4.5vw,62px) 0}
 .da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,3vw,30px)}
-.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
+.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text-3);margin-bottom:8px}
 .da-section-title{font-weight:800;letter-spacing:-.025em;font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.04;max-width:20ch}
-.da-section-desc{color:var(--bp-text3);max-width:44ch;font-size:var(--bp-text-base);line-height:1.6}
+.da-section-desc{color:var(--bp-text-3);max-width:44ch;font-size:var(--bp-type-sm);line-height:1.6}
 
 /* ── 3. PANEL — Data-Art'ın merkezî yüzey reçetesi ──────────────────────────
    surface → surface2 degradesi + tek radial parıltı + (opsiyonel) sol aksan
@@ -49,9 +49,9 @@
    zaman parıltının üstünde kalsın). ── */
 .da-panel{
   position:relative;overflow:hidden;
-  background:linear-gradient(135deg,var(--bp-surface) 0%,var(--bp-surface2) 100%);
-  border:1px solid var(--bp-border);
-  border-radius:var(--bp-radius-20);
+  background:linear-gradient(135deg,var(--bp-surface) 0%,var(--bp-raised) 100%);
+  border:1px solid var(--bp-line);
+  border-radius:var(--bp-r-lg);
 }
 .da-panel::before{
   content:'';position:absolute;pointer-events:none;border-radius:50%;
@@ -72,32 +72,32 @@
 .da-panel--accent{border-left:3px solid var(--da-accent,var(--bp-brand))}
 
 /* Panel içi tipografi (ana sayfanın "Bugün ne oldu?" panelinden genelleştirildi) */
-.da-recap-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-accent-cyan);margin-bottom:14px;position:relative}
-.da-recap-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);animation:daPulseDot 1.8s ease-in-out infinite}
+.da-recap-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-art-cyan);margin-bottom:14px;position:relative}
+.da-recap-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--bp-art-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);animation:daPulseDot 1.8s ease-in-out infinite}
 .da-recap-headline{font-weight:800;letter-spacing:-.02em;font-size:clamp(1.6rem,3vw,2.3rem);margin:0 0 16px;position:relative}
-.da-recap-body{font-size:var(--bp-text-lg);line-height:1.75;color:var(--bp-text2);max-width:76ch;position:relative}
+.da-recap-body{font-size:var(--bp-text-lg);line-height:1.75;color:var(--bp-text-2);max-width:76ch;position:relative}
 .da-recap-body strong{color:var(--bp-text);font-weight:700}
-.da-recap-body .up{color:var(--bp-al);font-weight:700}
-.da-recap-body .down{color:var(--bp-sat);font-weight:700}
+.da-recap-body .up{color:var(--bp-up);font-weight:700}
+.da-recap-body .down{color:var(--bp-down);font-weight:700}
 /* K-BP (21.09): 0,00% yon RENGI almaz — yesil bir yukselis vaadidir. */
-.da-recap-body .neu{color:var(--bp-text2);font-weight:700}
-.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text3);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-pill);padding:5px 11px;position:relative}
+.da-recap-body .neu{color:var(--bp-text-2);font-weight:700}
+.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text-3);border:1px solid var(--bp-border2);border-radius:var(--bp-r-pill);padding:5px 11px;position:relative}
 
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 
 /* ── 4. Rozet + çip ─────────────────────────────────────────────────────── */
-.da-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);color:var(--bp-text2);background:var(--bp-surface)}
+.da-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:var(--bp-r-pill);border:1px solid var(--bp-border2);color:var(--bp-text-2);background:var(--bp-surface)}
 .da-chip-row{display:flex;flex-wrap:wrap;gap:9px;flex:none}
 /* 20.09: `text-decoration:color` GEÇERSİZ bir değerdi (kopyalama hatası) —
    .da-chip bir <a> üzerinde kullanılıyor, yani altı çizili kalması gerekirdi;
    ana sayfa JS'i her çipe inline `style="text-decoration:none"` basarak bunu
    farkında olmadan maskeliyordu. Şablondan kullanan ilk sayfada patlardı. */
-.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
-.da-chip:hover{border-color:var(--bp-accent-cyan);background:rgba(var(--bp-accent-cyan-rgb),.08)}
-.da-chip-badge{font-size:var(--bp-text-xs);padding:3px 8px;border-radius:var(--bp-radius-pill);font-weight:700}
+.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);padding:7px 7px 7px 13px;text-decoration:none;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
+.da-chip:hover{border-color:var(--bp-art-cyan);background:rgba(var(--bp-accent-cyan-rgb),.08)}
+.da-chip-badge{font-size:var(--bp-type-xs);padding:3px 8px;border-radius:var(--bp-r-pill);font-weight:700}
 
 /* ── 5. Yükleniyor / hata / boş durumlar (asla-boş-sayfa ilkesi) ────────── */
-.da-skel{position:relative;overflow:hidden;background:var(--bp-surface2);border-radius:var(--bp-radius-md)}
+.da-skel{position:relative;overflow:hidden;background:var(--bp-raised);border-radius:var(--bp-radius-md)}
 .da-skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--bp-text-rgb),.06),transparent);animation:daShimmer 1.5s infinite}
 @keyframes daShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 /* 21.09 (K-W): `.da-state-msg` / `.da-state-err` SİLİNDİ — sitenin İKİNCİ
@@ -142,7 +142,7 @@
 .da-spin{
   display:inline-block;vertical-align:middle;flex-shrink:0;
   width:18px;height:18px;
-  border:2px solid var(--bp-border);
+  border:2px solid var(--bp-line);
   border-top-color:var(--bp-brand);
   border-radius:50%;
   animation:daSpin .8s linear infinite;
@@ -155,7 +155,7 @@
    başlığının altında) ya da --block (bölümün tamamının yerine). */
 .da-loading{
   display:flex;align-items:center;gap:10px;
-  color:var(--bp-text3);font-size:var(--bp-text-base);
+  color:var(--bp-text-3);font-size:var(--bp-type-sm);
 }
 .da-loading--block{
   flex-direction:column;justify-content:center;
@@ -193,16 +193,16 @@
    duruyordu. Cogunluk (15/17) 32px oldugu icin kanonik deger o. Ayrica
    yasal.css `footer a{margin:0 6px}` veriyordu: link araligi YALNIZ o sayfada
    farkliydi. */
-.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-text-sm);color:var(--bp-text3)}
+.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-text-sm);color:var(--bp-text-3)}
 .da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
 .da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text)}
 .da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
 /* C-71 K30: dar ekranda footer bağlantıları ızgara — sayfa kendi bağlantısını gizleyince
    son satırda tek başına kalan bağlantı (390'da "İletişim") olmaz; sütunlar hizalı. */
 @media (max-width:600px){.da-footer-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));justify-items:center}}
-.da-footer-note{font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
-.da-footer-disclaimer{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
-.da-footer-copy{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-top:8px}
+.da-footer-note{font-size:var(--bp-type-xs);color:var(--bp-text-3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-line);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
+.da-footer-disclaimer{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
+.da-footer-copy{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-top:8px}
 /* Dokunma hedefi (20.09): footer linkleri 20.4px yuksekti — WCAG 2.5.8'in
    24x24 tabanini bile gecmiyordu ve mobilde /gizlilik (KVKK) + /yasal +
    /iletisim sayfalarina giden TEK yol bu menu (bp-mobile-nav'da yoklar).
@@ -210,7 +210,7 @@
    16'dan 0'a cekildi cunku o bosluk artik linkin KENDI kutusunun icinde —
    boylece hedefler buyurken satirlar birbirine girmiyor. column-gap 16->4,
    padding 8px iki yandan geldigi icin gorunur aralik ~20px'te kaliyor. */
-.bp-footer-link{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;color:var(--bp-text3);text-decoration:none;transition:color var(--bp-dur-base) var(--bp-ease-standard)}
+.bp-footer-link{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;color:var(--bp-text-3);text-decoration:none;transition:color var(--bp-dur-base) var(--bp-ease-standard)}
 @media (hover: hover) and (pointer: fine){
   .bp-footer-link:hover{color:var(--bp-text)}
 }
@@ -223,9 +223,9 @@
    WCAG 2.1 **1.4.1 Use of Color (A seviyesi)** rengi tek ayırt edici olarak
    ancak link metni çevresindeki metne karşı **≥3:1** kontrast taşıyorsa kabul
    eder. Ölçüm (relatif parlaklık, aynı formül tools/contrast-check.py):
-       --bp-brand (#b8c3ff) vs --bp-text2 (#c7c5cd) = **1.00:1**
-       --bp-accent-cyan (#22d3ee) vs --bp-text2     = **1.06:1**
-       en iyi hâli: cyan vs --bp-text3              = 1.75:1
+       --bp-brand (#b8c3ff) vs --bp-text-2 (#c7c5cd) = **1.00:1**
+       --bp-art-cyan (#22d3ee) vs --bp-text-2     = **1.06:1**
+       en iyi hâli: cyan vs --bp-text-3              = 1.75:1
    Yani periwinkle link ile gövde metni parlaklık olarak BİREBİR aynı — renk
    körlüğünde ya da gri ekranda link, düz metinden ayırt edilemiyordu.
    Ölçüt eşiğin YARISININ altında olduğu için renk ayarıyla kapatılamaz;
@@ -234,7 +234,7 @@
    Ayrıca kanonik renk taksonomisini uygular: prose-içi REFERANS = cyan
    (CTA/buton `--bp-brand` kalır, bkz. 20.09 /gizlilik turu ölçümü). */
 .da-link{
-  color:var(--bp-accent-cyan);
+  color:var(--bp-art-cyan);
   text-decoration:none;
   border-bottom:1px dashed currentColor;
   transition:border-bottom-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard);
@@ -270,7 +270,7 @@
       onlemi, min 16px"), ama kardeş kuralına hiç uygulanmamıştı.
 
    Ok işareti bir data: URI olduğu için içinde var() ÇALIŞMAZ; token adı
-   değil LİTERALİ yazılır (%23909097 = --bp-text3). Aynı istisna
+   değil LİTERALİ yazılır (%23909097 = --bp-text-3). Aynı istisna
    tarama.css'te de belgeli — tek kaynak artık burası. */
 .da-check{
   accent-color:var(--bp-brand);
@@ -359,13 +359,13 @@ label:has(> .da-check){min-height:24px}
   padding:0;
   background-color:transparent;
   border:none;
-  color:var(--bp-text3);
-  font-size:var(--bp-text-xl);
+  color:var(--bp-text-3);
+  font-size:var(--bp-type-lg);
   line-height:1;
   cursor:pointer;
   flex-shrink:0;
 }
-.da-close:hover{color:var(--bp-text2)}
+.da-close:hover{color:var(--bp-text-2)}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BOŞ DURUM / HATA DURUMU — kanonik kat  (K-V, 21.09)
@@ -373,7 +373,7 @@ label:has(> .da-check){min-height:24px}
    ÖNCE: aynı işi yapan ALTI ayrı reçete, beş ayrı isimle —
      .empty-state  (tarama / bilanco_takvimi / temettu_takvimi / karsilastir)
                    üçü text2 + h2 700 + --bp-text, karsilastir ise
-                   text3 + h2 600 + --bp-text2  → aynı sınıf adı, farklı dil
+                   text3 + h2 600 + --bp-text-2  → aynı sınıf adı, farklı dil
      .empty-msg    (portfolio)  yüzeyi YALNIZ mobil media-query'de alıyordu
      .empty-box    (gundem)     tek satır, kendi yüzeyi var
      .cmp-empty-state (sektor_harita) · .no-results (blog) · hisse.html'de
@@ -399,8 +399,8 @@ label:has(> .da-check){min-height:24px}
 .da-empty{
   text-align:center;
   padding:28px 20px;
-  color:var(--bp-text2);
-  font-size:var(--bp-text-base);
+  color:var(--bp-text-2);
+  font-size:var(--bp-type-sm);
   line-height:1.6;
 }
 /* Sayfayı dolduran (tablo/sonuç listesi yerine geçen) boş durum. */
@@ -422,7 +422,7 @@ label:has(> .da-check){min-height:24px}
   margin:0 0 6px;
 }
 .da-empty p,.da-empty-body{
-  font-size:var(--bp-text-base);color:var(--bp-text2);
+  font-size:var(--bp-type-sm);color:var(--bp-text-2);
   line-height:1.6;margin:6px 0 0;
 }
 
@@ -433,15 +433,15 @@ label:has(> .da-check){min-height:24px}
    Ayrım rengin TEK BAŞINA taşıdığı yükü azaltan üç işaretle yapılıyor:
    tint zemin + kenarlık + ⚠ ikon + eylem düğmesi (WCAG 1.4.1: renk tek
    ayırt edici değil).
-   KONTRAST (21.09 hesaplandı, sonra canlı doğrulandı): --bp-sat (#f85149)
+   KONTRAST (21.09 hesaplandı, sonra canlı doğrulandı): --bp-down (#f85149)
    kendi .08 tint'i üzerinde bg'de 5.36:1 / surface'te 5.07:1 → 4.5 eşiğini
-   GEÇİYOR, bu yüzden K-P'nin --bp-sat-on-tint token'ı burada GEREKMİYOR
+   GEÇİYOR, bu yüzden K-P'nin --bp-down-on-tint token'ı burada GEREKMİYOR
    (.12 hover tint'te bile 4.84:1). Tint'i koyulaştıran biri çıkarsa eşik
    yeniden ölçülmeli. */
 .da-empty--error{
   background:rgba(var(--bp-danger-rgb),.08);
   border:1px solid var(--bp-danger-line);
-  border-radius:var(--bp-radius-lg);
+  border-radius:var(--bp-r-md);
   color:var(--bp-danger);
 }
 .da-empty--error h2,
@@ -461,7 +461,7 @@ label:has(> .da-check){min-height:24px}
   display:inline-flex;align-items:center;justify-content:center;
   min-height:32px;padding:5px 12px;
   background:none;border:1px solid var(--bp-danger-line);color:var(--bp-danger);
-  border-radius:var(--bp-radius);
+  border-radius:var(--bp-r-sm);
   font-size:var(--bp-text-sm);font-weight:600;font-family:inherit;
   cursor:pointer;flex-shrink:0;
   transition:background .15s;
@@ -490,9 +490,9 @@ label:has(> .da-check){min-height:24px}
   cursor:pointer;list-style:none;
   padding:14px 18px;
   background:var(--bp-surface);
-  border:1px solid var(--bp-border);
-  border-radius:var(--bp-radius-lg);
-  font-size:var(--bp-text-base);
+  border:1px solid var(--bp-line);
+  border-radius:var(--bp-r-md);
+  font-size:var(--bp-type-sm);
   font-weight:700;
   color:var(--bp-text);
   user-select:none;
@@ -502,7 +502,7 @@ label:has(> .da-check){min-height:24px}
 .bp-detail-toggle-summary::marker{content:""}
 .bp-detail-toggle-summary:hover{border-color:var(--bp-border2);background:rgba(255,255,255,.02)}
 .bp-detail-toggle-label{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.bp-detail-toggle-chev{color:var(--bp-text3);font-size:var(--bp-text-sm);transition:transform .2s ease;flex-shrink:0}
+.bp-detail-toggle-chev{color:var(--bp-text-3);font-size:var(--bp-text-sm);transition:transform .2s ease;flex-shrink:0}
 .bp-detail-toggle[open] .bp-detail-toggle-chev{transform:rotate(180deg)}
 .bp-detail-toggle-body{padding-top:16px}
 
@@ -524,7 +524,7 @@ label:has(> .da-check){min-height:24px}
   background:none;text-decoration:underline;
 }
 .bp-detail-toggle--inline > .bp-detail-toggle-body{padding-top:10px}
-.bp-detail-toggle-hint{color:var(--bp-text3);font-weight:400;font-size:var(--bp-text-xs)}
+.bp-detail-toggle-hint{color:var(--bp-text-3);font-weight:400;font-size:var(--bp-type-xs)}
 
 /* ── K-DO (22.09): VERI TAZELIK DAMGASI ─────────────────────────────────
    `_header.html`in `hdr_sub` / `hdr_sub_id` parametreleri bir TUZAKTI:
@@ -539,11 +539,11 @@ label:has(> .da-check){min-height:24px}
 .da-updated{
   display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   margin:0 0 14px;
-  font-size:var(--bp-text-xs);color:var(--bp-text3);line-height:1.5;
+  font-size:var(--bp-type-xs);color:var(--bp-text-3);line-height:1.5;
 }
 .da-updated::before{
   content:"";width:5px;height:5px;border-radius:50%;
-  background:var(--bp-text3);flex:none;
+  background:var(--bp-text-3);flex:none;
 }
 
 /* ── 7. ÇEKİRDEK BİLEŞENLER I (C-16a, 25.09) ─────────────────────────────────
@@ -559,10 +559,10 @@ label:has(> .da-check){min-height:24px}
    `--ticker`: hisse sayfası kimliği — kod büyük, şirket adı yanında sessiz. */
 .da-pagehead{display:flex;flex-direction:column;gap:6px;padding:clamp(18px,3vw,28px) 0 clamp(12px,2vw,18px);min-width:0}
 .da-pagehead-title{margin:0;font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.025em;line-height:1.05;font-size:clamp(1.75rem,3.4vw,2.75rem);color:var(--bp-text);overflow-wrap:anywhere}
-.da-pagehead-lede{margin:0;max-width:72ch;font-size:var(--bp-text-15);line-height:1.5;color:var(--bp-text2)}
+.da-pagehead-lede{margin:0;max-width:72ch;font-size:var(--bp-type-body);line-height:1.5;color:var(--bp-text-2)}
 .da-pagehead-lede .da-num{color:var(--bp-text);font-weight:700}
 .da-pagehead--ticker .da-pagehead-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
-.da-pagehead-name{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;letter-spacing:0;font-size:var(--bp-text-lg);color:var(--bp-text3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.da-pagehead-name{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:500;letter-spacing:0;font-size:var(--bp-text-lg);color:var(--bp-text-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 
 /* 7b. Skor halkası: iz --bp-ring-track, yuvarlak uçlu yay, ortada sayı
    (Bricolage), bant metni ("Yüksek/Orta/Düşük" — O12) halkanın ALTINDA.
@@ -574,29 +574,29 @@ label:has(> .da-check){min-height:24px}
      <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="da-ring-track" cx="50" cy="50" r="44"/>
        <circle class="da-ring-arc" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="62 100"/></svg>
      <b class="da-ring-num">62</b></div><span class="da-ring-band">Orta</span> */
-.da-ring{--da-ring-c:var(--bp-al);--da-ring-s:64px;position:relative;display:inline-block;width:var(--da-ring-s);height:var(--da-ring-s);flex:none}
+.da-ring{--da-ring-c:var(--bp-up);--da-ring-s:64px;position:relative;display:inline-block;width:var(--da-ring-s);height:var(--da-ring-s);flex:none}
 .da-ring svg{display:block;width:100%;height:100%;overflow:visible}
 .da-ring-track,.da-ring-arc{fill:none;stroke-width:8}
 .da-ring-track{stroke:var(--bp-ring-track)}
 .da-ring-arc{stroke:var(--da-ring-c);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
 .da-ring-num{position:absolute;inset:0;display:grid;place-items:center;font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-size:calc(var(--da-ring-s) * .32);line-height:1;color:var(--bp-text)}
-.da-ring-band{display:block;margin-top:6px;text-align:center;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-text3)}
+.da-ring-band{display:block;margin-top:6px;text-align:center;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-text-3)}
 .da-ring--sm{--da-ring-s:44px}
 .da-ring--sm .da-ring-num{font-size:var(--bp-text-md)}
 .da-ring--md{--da-ring-s:64px}
 .da-ring--lg{--da-ring-s:88px}
 .da-ring--xl{--da-ring-s:120px}
 .da-ring--bp{--da-ring-c:var(--bp-score-bp)}
-.da-ring--temel{--da-ring-c:var(--bp-accent-cyan)}
+.da-ring--temel{--da-ring-c:var(--bp-art-cyan)}
 .da-ring--teknik{--da-ring-c:var(--bp-art-violet)}
 
 /* 7c. Trend durumu hapı (kanon §5.3): Güçlü Trend yeşil dolu + koyu metin;
    Yatay arduvaz; Trend Bozuldu koyu zemin + sessiz metin (kırmızı DEĞİL).
    Metin her zaman yazılır (renk tek başına anlam taşımaz). Dokunma: ≥24px. */
-.da-signal{display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:3px 11px;border-radius:var(--bp-radius-pill);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;letter-spacing:.02em;line-height:1.2;white-space:nowrap;background:var(--bp-state-flat);color:var(--bp-text)}
-.da-signal--strong{background:var(--bp-al);color:var(--bp-bg)}
+.da-signal{display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:3px 11px;border-radius:var(--bp-r-pill);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:700;letter-spacing:.02em;line-height:1.2;white-space:nowrap;background:var(--bp-state-flat);color:var(--bp-text)}
+.da-signal--strong{background:var(--bp-up);color:var(--bp-bg)}
 .da-signal--flat{background:var(--bp-state-flat);color:var(--bp-text)}
-.da-signal--broken{background:var(--bp-state-broken);color:var(--bp-state-broken-text);box-shadow:inset 0 0 0 1px var(--bp-border)}
+.da-signal--broken{background:var(--bp-state-broken);color:var(--bp-state-broken-text);box-shadow:inset 0 0 0 1px var(--bp-line)}
 .da-signal > .jargon-term{display:flex;align-items:center;min-height:24px;color:inherit}
 @media (prefers-reduced-motion:no-preference){.da-ring-arc{transition:stroke-dasharray var(--bp-dur-base) var(--bp-ease-standard)}}
 
@@ -604,7 +604,7 @@ label:has(> .da-check){min-height:24px}
    .da-label: tek mikro etiket (kanon §5.4 xs 11 · büyük harf · ~.12em). Eski
    sum-lbl/stat-lbl/metric-lbl/info-card-label vb. göçte buna bağlanır.
    <span class="da-label">Piyasa değeri</span> */
-.da-label{display:block;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1.3;color:var(--bp-text3)}
+.da-label{display:block;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1.3;color:var(--bp-text-3)}
 
 /* .da-stat: sayı + etiket (+ değişim). Sayı stat 32 / mobil 26, tabular.
    Değişim rengi yalnız fiyat yönü için (kanon §5.3), metin her zaman yazılır.
@@ -612,10 +612,10 @@ label:has(> .da-check){min-height:24px}
      <b class="da-stat-num">%24,1</b><span class="da-stat-delta da-stat-delta--up">+1,2</span></div> */
 .da-stat{display:flex;flex-direction:column;gap:6px;min-width:0}
 .da-stat-num{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-variant-numeric:tabular-nums;font-size:32px;line-height:1;letter-spacing:-.01em;color:var(--bp-text);overflow-wrap:anywhere}
-.da-stat-note{font-size:var(--bp-text-base);line-height:1.45;color:var(--bp-text2)}
-.da-stat-delta{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);font-weight:600;font-variant-numeric:tabular-nums;color:var(--bp-text2)}
-.da-stat-delta--up{color:var(--bp-al)}
-.da-stat-delta--down{color:var(--bp-sat)}
+.da-stat-note{font-size:var(--bp-type-sm);line-height:1.45;color:var(--bp-text-2)}
+.da-stat-delta{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-sm);font-weight:600;font-variant-numeric:tabular-nums;color:var(--bp-text-2)}
+.da-stat-delta--up{color:var(--bp-up)}
+.da-stat-delta--down{color:var(--bp-down)}
 .da-stat--sm{gap:4px}
 .da-stat--sm .da-stat-num{font-size:var(--bp-text-lg)}
 @media (max-width:600px){.da-stat-num{font-size:26px}}
@@ -624,13 +624,13 @@ label:has(> .da-check){min-height:24px}
    --da-meter-v (0-100). Renk: skor kimliği (bp/temel/teknik) ya da fiyat yönü
    (up/down); varsayılan nötr periwinkle. Değer yanında her zaman yazılır.
    <div class="da-meter da-meter--temel" style="--da-meter-v:62" role="img" aria-label="Kârlılık 62/100"><i></i></div> */
-.da-meter{--da-meter-c:var(--bp-brand);--da-meter-v:0;position:relative;display:block;height:6px;border-radius:var(--bp-radius-pill);background:var(--bp-ring-track);overflow:hidden}
+.da-meter{--da-meter-c:var(--bp-brand);--da-meter-v:0;position:relative;display:block;height:6px;border-radius:var(--bp-r-pill);background:var(--bp-ring-track);overflow:hidden}
 .da-meter > i{position:absolute;inset:0 auto 0 0;width:calc(var(--da-meter-v) * 1%);max-width:100%;border-radius:inherit;background:var(--da-meter-c)}
 .da-meter--thin{height:4px}
-.da-meter--bp,.da-meter--up{--da-meter-c:var(--bp-al)}
-.da-meter--temel{--da-meter-c:var(--bp-accent-cyan)}
+.da-meter--bp,.da-meter--up{--da-meter-c:var(--bp-up)}
+.da-meter--temel{--da-meter-c:var(--bp-art-cyan)}
 .da-meter--teknik{--da-meter-c:var(--bp-art-violet)}
-.da-meter--down{--da-meter-c:var(--bp-sat)}
+.da-meter--down{--da-meter-c:var(--bp-down)}
 .da-meter--volume{--da-meter-c:var(--bp-volume)}
 @media (prefers-reduced-motion:no-preference){.da-meter > i{transition:width var(--bp-dur-base) var(--bp-ease-standard)}}
 
@@ -642,14 +642,14 @@ label:has(> .da-check){min-height:24px}
    dolu (sayfada tek birincil eylem), --secondary çerçeveli, --ghost yalnız
    metin, --icon kare. Yön yeşili/kırmızısı butonda KULLANILMAZ.
    <button class="da-btn da-btn--primary" type="button">{{ icon('arti') }}Takip et</button> */
-.da-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid transparent;border-radius:var(--bp-radius-lg);background:var(--bp-surface2);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--bp-dur-base) var(--bp-ease-standard),border-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard)}
+.da-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid transparent;border-radius:var(--bp-r-md);background:var(--bp-raised);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--bp-dur-base) var(--bp-ease-standard),border-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard)}
 .da-btn svg{width:18px;height:18px;flex:none}
 .da-btn--primary{background:var(--bp-brand);color:var(--bp-bg)}
 .da-btn--primary:hover{box-shadow:0 0 0 3px rgba(var(--bp-brand-rgb),.22)}
-.da-btn--secondary{background:transparent;border-color:var(--bp-ctl-border);color:var(--bp-text)}
-.da-btn--secondary:hover{border-color:var(--bp-ctl-border-hover);background:var(--bp-surface2)}
-.da-btn--ghost{background:transparent;color:var(--bp-text2)}
-.da-btn--ghost:hover{background:var(--bp-surface2);color:var(--bp-text)}
+.da-btn--secondary{background:transparent;border-color:var(--bp-line-strong);color:var(--bp-text)}
+.da-btn--secondary:hover{border-color:var(--bp-ctl-border-hover);background:var(--bp-raised)}
+.da-btn--ghost{background:transparent;color:var(--bp-text-2)}
+.da-btn--ghost:hover{background:var(--bp-raised);color:var(--bp-text)}
 .da-btn--sm{min-height:32px;padding:0 12px;gap:6px;font-size:var(--bp-text-sm);border-radius:var(--bp-radius-md)}
 .da-btn--sm svg{width:16px;height:16px}
 .da-btn--icon{width:44px;padding:0}
@@ -662,15 +662,15 @@ label:has(> .da-check){min-height:24px}
    `class="da-field da-select"` (ok işareti .da-select'ten). Arama: sarmalayıcı
    .da-field-wrap + içte ikon.
    <label class="da-field-wrap">{{ icon('ara') }}<input class="da-field da-field--search" type="search" placeholder="Hisse ara"></label> */
-.da-field{display:block;width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--bp-field-border);border-radius:var(--bp-radius-lg);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);line-height:1.4;transition:border-color var(--bp-dur-base) var(--bp-ease-standard)}
-.da-field::placeholder{color:var(--bp-text3);opacity:1}
+.da-field{display:block;width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--bp-field-border);border-radius:var(--bp-r-md);background:var(--bp-surface);color:var(--bp-text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);line-height:1.4;transition:border-color var(--bp-dur-base) var(--bp-ease-standard)}
+.da-field::placeholder{color:var(--bp-text-3);opacity:1}
 .da-field:hover{border-color:var(--bp-ctl-border-hover)}
-.da-field:focus{border-color:var(--bp-accent-cyan);outline:none}
-.da-field:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:1px}
+.da-field:focus{border-color:var(--bp-art-cyan);outline:none}
+.da-field:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:1px}
 select.da-field{padding-right:30px}
 textarea.da-field{min-height:96px;resize:vertical}
 .da-field-wrap{position:relative;display:block;min-width:0}
-.da-field-wrap > svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--bp-text3);pointer-events:none}
+.da-field-wrap > svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--bp-text-3);pointer-events:none}
 .da-field--search{padding-left:36px}
 @media (pointer:coarse){.da-field{font-size:var(--bp-text-lg)}}
 
@@ -682,37 +682,37 @@ textarea.da-field{min-height:96px;resize:vertical}
    role="tablist", öğe role="tab" + aria-selected (bağlantı sekmesinde
    aria-current="page").
    <div class="da-tabs" role="tablist"><button class="da-tab" role="tab" aria-selected="true">Özet</button>…</div> */
-.da-tabs{display:flex;gap:4px;background:var(--bp-bg);border-bottom:1px solid var(--bp-border)}
-.da-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:0;background:none;cursor:pointer;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;color:var(--bp-text3);text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.da-tabs{display:flex;gap:4px;background:var(--bp-bg);border-bottom:1px solid var(--bp-line)}
+.da-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:0;background:none;cursor:pointer;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;color:var(--bp-text-3);text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .da-tab[aria-selected="true"],.da-tab[aria-current="page"]{color:var(--bp-text)}
 .da-tab[aria-selected="true"]::after,.da-tab[aria-current="page"]::after{content:'';position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--bp-brand);border-radius:var(--bp-radius-xs)}
-@media (hover:hover) and (pointer:fine){.da-tab:not([aria-selected="true"]):not([aria-current="page"]):hover{color:var(--bp-text2)}}
-.da-tab:focus-visible{outline:2px solid var(--bp-accent-cyan);outline-offset:-2px;border-radius:var(--bp-radius-md)}
+@media (hover:hover) and (pointer:fine){.da-tab:not([aria-selected="true"]):not([aria-current="page"]):hover{color:var(--bp-text-2)}}
+.da-tab:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:-2px;border-radius:var(--bp-radius-md)}
 @media (max-width:768px){
   .da-tabs{overflow-x:auto;scrollbar-width:none}
   .da-tabs::-webkit-scrollbar{display:none}
   .da-tab{flex:1 0 auto;padding:0 10px}
 }
-.da-tabs--pill{gap:2px;width:max-content;max-width:100%;padding:3px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);background:var(--bp-surface);overflow-x:auto;scrollbar-width:none}
-.da-tabs--pill .da-tab{min-height:32px;border-radius:var(--bp-radius-pill);font-size:var(--bp-text-sm);color:var(--bp-text2)}
+.da-tabs--pill{gap:2px;width:max-content;max-width:100%;padding:3px;border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);background:var(--bp-surface);overflow-x:auto;scrollbar-width:none}
+.da-tabs--pill .da-tab{min-height:32px;border-radius:var(--bp-r-pill);font-size:var(--bp-text-sm);color:var(--bp-text-2)}
 .da-tabs--pill .da-tab[aria-selected="true"],.da-tabs--pill .da-tab[aria-current="page"]{background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)}
 .da-tabs--pill .da-tab::after{content:none}
 
 /* .da-tag: STATİK nötr etiket (sektör, tazelik, YENİ, sayı). Tıklanmaz;
    tıklanan/seçilen şey .da-chip'tir (§4; filtrede aria-pressed).
    <span class="da-tag">Bankacılık</span> <span class="da-tag da-tag--accent">YENİ</span> */
-.da-tag{display:inline-flex;align-items:center;gap:4px;min-height:20px;padding:2px 8px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);background:var(--bp-surface2);color:var(--bp-text2);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);font-weight:600;letter-spacing:.04em;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
+.da-tag{display:inline-flex;align-items:center;gap:4px;min-height:20px;padding:2px 8px;border:1px solid var(--bp-line);border-radius:var(--bp-r-pill);background:var(--bp-raised);color:var(--bp-text-2);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:600;letter-spacing:.04em;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
 .da-tag--accent{border-color:rgba(var(--bp-brand-rgb),.35);background:rgba(var(--bp-brand-rgb),.10);color:var(--bp-brand)}
 .da-tag--stale{border-color:rgba(var(--bp-stale-rgb),.35);background:rgba(var(--bp-stale-rgb),.08);color:var(--bp-stale)}
 button.da-chip{font-family:'Space Grotesk',system-ui,sans-serif;cursor:pointer;min-height:32px}
-.da-chip--filter{padding:6px 13px;font-weight:600;color:var(--bp-text2)}
+.da-chip--filter{padding:6px 13px;font-weight:600;color:var(--bp-text-2)}
 button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)}
 
 /* .da-notice: tek bildirim/banner. --info periwinkle, --caution dikkat,
    --danger yalnız hata/veri kaybı, --stale bayat veri (kehribar). İkon +
    metin; renk tek başına anlam taşımaz. Kapatılabilir: sonda .da-close.
    <div class="da-notice da-notice--info" role="note">{{ icon('bilgi') }}<div><b class="da-notice-title">…</b><p>…</p></div></div> */
-.da-notice{--da-notice-c:var(--bp-text3);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--bp-border);border-left:3px solid var(--da-notice-c);border-radius:var(--bp-radius-lg);background:var(--bp-surface2);color:var(--bp-text2);font-size:var(--bp-text-base);line-height:1.5}
+.da-notice{--da-notice-c:var(--bp-text-3);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--bp-line);border-left:3px solid var(--da-notice-c);border-radius:var(--bp-r-md);background:var(--bp-raised);color:var(--bp-text-2);font-size:var(--bp-type-sm);line-height:1.5}
 .da-notice > svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--da-notice-c)}
 .da-notice > div{flex:1;min-width:0}
 .da-notice p{margin:0}
@@ -730,7 +730,7 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
    <div class="da-table-wrap"><table class="da-table da-table--stack">…<td class="da-num"><span class="da-td-label">Fiyat</span>312,50</td> */
 .da-table-wrap{max-width:100%;overflow-x:auto}
 .da-table{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--bp-text-md);color:var(--bp-text)}
-.da-table th{position:sticky;top:0;z-index:1;padding:10px 12px;border-bottom:1px solid var(--bp-border);background:var(--bp-surface);color:var(--bp-text3);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-align:left;white-space:nowrap}
+.da-table th{position:sticky;top:0;z-index:1;padding:10px 12px;border-bottom:1px solid var(--bp-line);background:var(--bp-surface);color:var(--bp-text-3);font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-align:left;white-space:nowrap}
 .da-table td{padding:12px;border-bottom:1px solid var(--bp-border-subtle);vertical-align:middle}
 .da-table .da-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .da-table tbody tr:hover td{background:rgba(var(--bp-text-rgb),.03)}
@@ -738,9 +738,9 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
 @media (max-width:600px){
   .da-table--stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .da-table--stack,.da-table--stack tbody,.da-table--stack tr,.da-table--stack td{display:block;width:100%}
-  .da-table--stack tr{padding:8px 0;border-bottom:1px solid var(--bp-border)}
+  .da-table--stack tr{padding:8px 0;border-bottom:1px solid var(--bp-line)}
   .da-table--stack td{display:flex;justify-content:space-between;gap:12px;padding:5px 4px;border:0;text-align:right}
-  .da-table--stack .da-td-label{display:inline;color:var(--bp-text3);font-size:var(--bp-text-sm);text-align:left}
+  .da-table--stack .da-td-label{display:inline;color:var(--bp-text-3);font-size:var(--bp-text-sm);text-align:left}
 }
 
 /* .da-ticker-row / .da-ticker-card: ticker + şirket adı + fiyat + değişim +
@@ -752,19 +752,19 @@ button.da-chip[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba
 a.da-ticker-row:hover,a.da-ticker-card:hover{background:rgba(var(--bp-text-rgb),.03)}
 .da-ticker-id{display:flex;flex-direction:column;gap:2px;min-width:0}
 .da-ticker-sym{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:700;letter-spacing:.02em}
-.da-ticker-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bp-text-sm);color:var(--bp-text3)}
+.da-ticker-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bp-text-sm);color:var(--bp-text-3)}
 .da-ticker-q{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .da-ticker-price{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.da-ticker-chg{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-text2)}
-.da-ticker-chg--up{color:var(--bp-al)}
-.da-ticker-chg--down{color:var(--bp-sat)}
+.da-ticker-chg{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-text-2)}
+.da-ticker-chg--up{color:var(--bp-up)}
+.da-ticker-chg--down{color:var(--bp-down)}
 .da-ticker-row > .da-signal{justify-self:end}
 @media (max-width:420px){
   .da-ticker-row{grid-template-columns:minmax(0,1fr) auto}
   .da-ticker-row > .da-ticker-q{grid-row:1 / span 2;grid-column:2}
   .da-ticker-row > .da-signal{grid-row:2;grid-column:1;justify-self:start}
 }
-.da-ticker-card{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--bp-border);border-radius:16px;background:var(--bp-surface);color:var(--bp-text);text-decoration:none;transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
+.da-ticker-card{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--bp-line);border-radius:16px;background:var(--bp-surface);color:var(--bp-text);text-decoration:none;transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
 a.da-ticker-card:hover{border-color:var(--bp-border2)}
 .da-ticker-card-head,.da-ticker-card-foot{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
 .da-ticker-card .da-ticker-price{font-size:var(--bp-text-2xl)}

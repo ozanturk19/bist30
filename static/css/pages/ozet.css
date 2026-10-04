@@ -20,7 +20,7 @@
   .logo-link { align-items: center; gap: 10px;
     text-decoration: none; flex-shrink: 0;
   }
-  .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
+  .page-sub   { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 1px; }
 
 
   /* ── Sayaç kartları ── */
@@ -44,18 +44,18 @@
     --da-glow-y: -55%;
     --da-glow-x: -10%;
     --da-glow-size: 90px;
-    border-radius: var(--bp-radius-lg);
+    border-radius: var(--bp-r-md);
     padding: 16px 14px;
     text-align: center;
     transition: border-color .15s;
   }
   .counter-card:hover { border-color: var(--bp-border2); }
   .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
-  .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .num-al    { color: var(--bp-al); }
-  .num-sat   { color: var(--bp-sat); }
-  .num-bekle { color: var(--bp-bkl); }
-  .num-new   { color: var(--bp-gold); }
+  .counter-lbl  { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .num-al    { color: var(--bp-up); }
+  .num-sat   { color: var(--bp-down); }
+  .num-bekle { color: var(--bp-flat); }
+  .num-new   { color: var(--bp-caution); }
 
   /* ── Sinyaller ── */
   /* .da-panel deltasi (bkz. .counter-card notu) — govde blogu; parilti daha
@@ -64,13 +64,13 @@
     --da-glow-a: .07;
     --da-glow-y: -60%;
     --da-glow-size: 220px;
-    border-radius: var(--bp-radius-lg);
+    border-radius: var(--bp-r-md);
     padding: 16px;
     margin-bottom: 16px;
   }
   .section-title {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
+    font-size: var(--bp-type-xs);
+    color: var(--bp-text-3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
@@ -90,8 +90,8 @@
      DEĞİLDİ: 11px/600/UPPERCASE/#909097 vs 13px/700/#e5e1e4 (canlı ölçüldü).
      Sayfaya özgü tek delta margin-bottom'du (16 vs 20) — kanoniğe bırakıldı. */
   .stock-card {
-    background: var(--bp-surface2);
-    border: 1px solid var(--bp-border);
+    background: var(--bp-raised);
+    border: 1px solid var(--bp-line);
     border-radius:var(--bp-radius-md);
     padding: 12px 13px;
     text-decoration: none;
@@ -103,17 +103,17 @@
     .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
   }
   .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
-  .sc-al   { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); }
-  .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-sat-on-tint); }
-  .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: var(--bp-text3); }
-  .sc-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 4px; }
+  .sc-name    { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-type-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
+  .sc-al   { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-up); }
+  .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-down-on-tint); }
+  .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: var(--bp-text-3); }
+  .sc-meta { font-size: var(--bp-type-xs); color: var(--bp-text-3); margin-top: 4px; }
   .sc-ret  { display: block; width: fit-content; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: var(--bp-radius-4); font-variant-numeric: tabular-nums; }
-  .sc-ret-pos { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); }
-  .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: var(--bp-sat-on-tint); }
+  .sc-ret-pos { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-up); }
+  .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: var(--bp-down-on-tint); }
   /* K-CC: yon cifti + NOTR arm — giris fiyatindan sapma 0 ise yon yoktur. */
-  .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.10); color: var(--bp-text2); }
+  .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.10); color: var(--bp-text-2); }
 
   /* Piyasa barometresi */
   /* .da-panel deltasi (bkz. .counter-card notu) */
@@ -121,44 +121,44 @@
     --da-glow-a: .09;
     --da-glow-y: -70%;
     --da-glow-size: 200px;
-    border-radius: var(--bp-radius-lg);
+    border-radius: var(--bp-r-md);
     padding: 16px;
     margin-bottom: 16px;
   }
   .bar-track {
     position: relative;
     height: 10px;
-    background: var(--bp-surface2);
+    background: var(--bp-raised);
     border-radius: var(--bp-radius-5);
     overflow: hidden;
     margin: 10px 0;
   }
-  .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: var(--bp-al); border-radius: 5px 0 0 5px; transition: width .4s; }
-  .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-sat); border-radius: 0 5px 5px 0; transition: width .4s; }
-  .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
+  .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: var(--bp-up); border-radius: 5px 0 0 5px; transition: width .4s; }
+  .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-down); border-radius: 0 5px 5px 0; transition: width .4s; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text-3); }
 
   @media (max-width: 600px) {
     .counter-num { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: repeat(2, 1fr); }
   }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
+  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-flat); }
 
   /* ── Sektör Nabzı ── */
-  /* C-70 K22: tek renk (Güçlü payı = --bp-al), ad sütunu en uzun ada göre */
-  .sr-note { margin:-4px 0 12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
+  /* C-70 K22: tek renk (Güçlü payı = --bp-up), ad sütunu en uzun ada göre */
+  .sr-note { margin:-4px 0 12px; font-size:var(--bp-type-xs); color:var(--bp-text-3); }
   .sector-nabzi { display:grid; grid-template-columns:fit-content(45%) minmax(48px,1fr) auto; column-gap:10px; row-gap:7px; align-items:center; }
   .sector-row { display:contents; }
-  .sr-name { font-size:var(--bp-text-sm); color:var(--bp-text2); min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:var(--bp-radius-sm); overflow:hidden; }
-  .sr-fill { height:100%; background:var(--bp-al); border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
+  .sr-name { font-size:var(--bp-text-sm); color:var(--bp-text-2); min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-bar { height:6px; background:var(--bp-raised); border-radius:var(--bp-radius-sm); overflow:hidden; }
+  .sr-fill { height:100%; background:var(--bp-up); border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
   .sr-stats { min-width:72px; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
-  .sr-pct { font-size:var(--bp-text-sm); font-weight:700; font-variant-numeric:tabular-nums; color:var(--bp-al); }
-  .sr-pct.sr-zero { color:var(--bp-text3); }
-  .sr-cnt { font-size:var(--bp-text-2xs); color:var(--bp-text3); }
+  .sr-pct { font-size:var(--bp-text-sm); font-weight:700; font-variant-numeric:tabular-nums; color:var(--bp-up); }
+  .sr-pct.sr-zero { color:var(--bp-text-3); }
+  .sr-cnt { font-size:var(--bp-text-2xs); color:var(--bp-text-3); }
 
   /* C-70 K22: tarih seçici başlık satırında, sağa yaslı */
   .oz-head { position:relative; }
-  .oz-date { background-color:var(--bp-surface2); border:1px solid var(--bp-field-border); color:var(--bp-text3); padding:9px 28px 9px 11px; border-radius:var(--bp-radius); cursor:pointer; }
+  .oz-date { background-color:var(--bp-raised); border:1px solid var(--bp-field-border); color:var(--bp-text-3); padding:9px 28px 9px 11px; border-radius:var(--bp-r-sm); cursor:pointer; }
   @media (min-width: 601px) {
     .oz-head .da-pagehead-title { padding-right:200px; min-height:40px; }
     .oz-date { position:absolute; right:0; top:clamp(18px,3vw,28px); }

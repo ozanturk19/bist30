@@ -3,26 +3,26 @@
    (kanon: yasal uyarı rengi amber; kırmızı yalnız hata/veri kaybı). */
 .section-card {
   background: var(--bp-surface);
-  border: 1px solid var(--bp-border);
-  border-radius: var(--bp-radius-lg);
+  border: 1px solid var(--bp-line);
+  border-radius: var(--bp-r-md);
   padding: 24px;
   margin-bottom: 20px;
 }
 .prose .section-card h2 {
-  font-family: inherit; font-size: var(--bp-text-15); font-weight: 700; letter-spacing: 0; line-height: 1.4;
+  font-family: inherit; font-size: var(--bp-type-body); font-weight: 700; letter-spacing: 0; line-height: 1.4;
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 14px; padding-bottom: 10px;
   border-bottom: 1px solid var(--bp-border-subtle);
 }
 .prose .section-card h2::after { display: none; }
 /* SVG sunum-özniteliğinde var() çalışmadığı için ikon rengi burada verilir. */
-.section-card h2 > svg { color: var(--bp-text3); flex-shrink: 0; }
+.section-card h2 > svg { color: var(--bp-text-3); flex-shrink: 0; }
 .prose .section-card p { margin-bottom: 10px; }
 .prose .section-card p:last-child { margin-bottom: 0; }
 .prose .section-card ul { margin: 8px 0 10px 18px; }
 .prose .section-card li { margin-bottom: 5px; }
-.lg-note { font-size: var(--bp-text-base); }
-.prose .lg-note { color: var(--bp-text3); }
+.lg-note { font-size: var(--bp-type-sm); }
+.prose .lg-note { color: var(--bp-text-3); }
 
 .clause { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--bp-border-subtle); }
 .clause:last-child { border-bottom: none; }
@@ -30,9 +30,9 @@
   flex-shrink: 0; width: 24px; height: 24px;
   background: var(--bp-border-subtle); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
+  font-size: var(--bp-type-xs); font-weight: 700; color: var(--bp-text-3);
   margin-top: 1px;
 }
-.clause-text { color: var(--bp-text2); font-size: var(--bp-text-base); line-height: 1.65; }
+.clause-text { color: var(--bp-text-2); font-size: var(--bp-type-sm); line-height: 1.65; }
 
 @media (max-width: 600px) { .section-card { padding: 16px; } }
