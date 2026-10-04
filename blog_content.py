@@ -3214,7 +3214,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Hızlı Karşılaştırma Tablosu</h2>
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:var(--bp-raised)">
-    <th style="padding:8px 12px;text-align:left;font-size:var(--bp-text-sm);color:var(--bp-text-3)">Kriter</th>
+    <th style="padding:8px 12px;text-align:left;font-size:var(--bp-type-sm);color:var(--bp-text-3)">Kriter</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-accent-yellow)">🥇 Altın</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-up)">📈 Borsa</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-brand)">💵 Döviz</th>
@@ -4024,7 +4024,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h3>1. Bilanço (Balance Sheet)</h3>
 <p>Şirketin belirli bir tarihteki varlıkları, yükümlülükleri ve öz sermayesini gösterir. Temel denklem:</p>
-<div style="background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-brand)">
+<div style="background:var(--bp-raised);border:1px solid var(--bp-line);border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-type-body);font-weight:700;color:var(--bp-brand)">
   Varlıklar = Yükümlülükler + Öz Sermaye
 </div>
 <ul>
@@ -4230,7 +4230,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>2026 BIST Hisse Senedi Seans Saatleri</h2>
 <p>Borsa İstanbul Pay Piyasası (hisse senetleri) şu seans düzenini izler:</p>
-<table style="width:100%;border-collapse:collapse;font-size:var(--bp-text-md);margin:12px 0">
+<table style="width:100%;border-collapse:collapse;font-size:var(--bp-type-body);margin:12px 0">
   <thead>
     <tr style="background:var(--bp-border-subtle)">
       <th style="padding:8px 12px;text-align:left;color:var(--bp-text-3);font-weight:600">Seans</th>
