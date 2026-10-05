@@ -5235,6 +5235,12 @@ def background_refresh():
             _run_with_timeout(task_name, fn, args, _CHART_TASK_TIMEOUT)
             time.sleep(5)  # CPO-583: inter-chart throttle — pandas spike aralarında CPU soğutur
 
+        # 4) Bilanço takvimi (earnings) — D-26 (A2) adım 2: eskiden ayrı bir
+        # _startup() thread'i her process açılışında yfinance'a gidiyordu (12s TTL'le
+        # örtüşen, EOD'den bağımsız bir döngüydü); artık refresh_data() ile aynı
+        # günlük turda, watchdog'lu çalışıyor (web yalnız disk okur, değişmedi).
+        _run_with_timeout("earnings_refresh", _do_earnings_refresh, (), _CHART_TASK_TIMEOUT)
+
         time.sleep(_EOD_POLL_INTERVAL)
 
 
@@ -14052,32 +14058,16 @@ def _startup():
             _macro_cache["ts"]   = time.time()
         logger.info("_warm_macro: %d sembol hazır", len(items))
     threading.Thread(target=_warm_macro, daemon=True).start()
-    # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
-    def _warm_earnings():
-        # CPO-558B: web worker'da yfinance yasak — refresh service günceller, disk-reload yeter
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_earnings: REFRESH_WORKER=web — yfinance atlandı")
-            return
-        time.sleep(30)   # ana sinyal datasının gelmesini bekle
-        _do_earnings_refresh()
-    threading.Thread(target=_warm_earnings, daemon=True).start()
+    # D-26 (A2) adım 2: bilanço takvimi yfinance çekimi artık her process açılışında
+    # DEĞİL, background_refresh() EOD akışında (refresh_data() sonrası) günde bir kez
+    # yapılıyor (CPO-551 Aşama 4 deseniyle aynı: web disk-okur, lider EOD'de hesaplar).
+    # Burada yalnız diskteki son EOD çıktısını belleğe yükle — restart sonrası boş
+    # kalmasın, gereksiz yfinance çağrısı yapmasın.
+    _load_earnings_cache_from_disk()
     # F5 — AI Sentiment bg worker DURDURULDU (CPO-1781): sıfır tüketici + aktif
     # Gemini kota tüketimi. _compute_sentiment() silinmedi, geri açmak için bu
     # satırı geri aç yeterli.
     # threading.Thread(target=_sentiment_bg_worker, daemon=True, name="sentiment-bg").start()
-    # Bilanco takvimi ilk yuklemesini arkaplanda hazirla (yfinance cagrilari yuzunden yavastir)
-    def _warm_earnings_2():
-        # CPO-558B: web worker'da yfinance yasak
-        if os.environ.get("REFRESH_WORKER") == "web":
-            logger.info("_warm_earnings_2: REFRESH_WORKER=web — yfinance atlandı")
-            return
-        time.sleep(60)    # Ana veri yüklendikten 60s sonra başla
-        try:
-            get_earnings_data()
-            logger.info("_warm_earnings: bilanço takvimi ön yüklendi")
-        except Exception as e:
-            logger.warning("_warm_earnings: %s", e)
-    threading.Thread(target=_warm_earnings_2, daemon=True).start()
 
     # D-24: yfinance temettü ısınma döngüsü (_warm_dividend) kalktı; temettü D-40a0 kaydından.
 
