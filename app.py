@@ -12063,7 +12063,8 @@ def api_ozet_snapshots():
 @app.route("/metodoloji")
 def metodoloji():
     # D-59: Keşfet listelerinin kural cümleleri (sayfadakiyle aynı metin, tek kaynak kesfet.KURAL)
-    return render_template("metodoloji.html", kesfet_kurallari=kesfet.rules())
+    return render_template("metodoloji.html", kesfet_kurallari=kesfet.rules(),
+                            temel_v2_on=temel_skor_v2.enabled())
 
 
 @app.route("/offline")
