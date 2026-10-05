@@ -14080,31 +14080,8 @@ def _startup():
             logger.info("_slow_chart_refresh: REFRESH_WORKER=web — atlandı")
             return
         time.sleep(300)  # Startup'ta 5dk bekle (refresh_data bitmesini bekle)
-        # D-26 (A2) adım 3: eskiden koşulsuz 6 saatte bir (hafta sonu/seans
-        # ortası dahil, günde 234 ticker × ~12-13dk yfinance çekişi) çalışıyordu.
-        # EOD-only felsefesiyle (D-04b) uyumlu hale getirildi: günde yalnız bir
-        # kez, ana EOD turu (background_refresh) bugünün anlık cache'ini
-        # yazdıktan SONRA (_today_snapshot_path varlığı — Yahoo contention'ı ana
-        # turla yarışmasın) ve işlem günüyse çalışır; günlük flag ile tekilleşir.
-        # BİLEREK background_refresh()'in 1800s loop-watchdog'una/60s
-        # _CHART_TASK_TIMEOUT zincirine EKLENMEDİ (prep/D-26-A2-scope.md ölçümü:
-        # gerçek süre ~12-13dk, 60s ile sarılırsa 234 ticker'ın ~%95'i o gün hiç
-        # güncellenmezdi) — kendi bağımsız thread'inde, watchdog'un saymadığı
-        # bir yolda kalmaya devam ediyor; yalnız TETİKLEME zamanlaması değişti.
         while True:
             try:
-                _today_tr_sc = datetime.now(_TZ_TR).date()
-                _slow_chart_flag_path = os.path.join(
-                    _SNAPSHOTS_DIR, f"{_today_tr_sc.strftime('%Y-%m-%d')}_slow_chart.flag"
-                )
-                _today_snapshot_path_sc = os.path.join(
-                    _SNAPSHOTS_DIR, f"{_today_tr_sc.strftime('%Y-%m-%d')}.json"
-                )
-                if not (is_trading_day(_today_tr_sc)
-                        and os.path.exists(_today_snapshot_path_sc)
-                        and not os.path.exists(_slow_chart_flag_path)):
-                    time.sleep(600)
-                    continue
                 with _lock:
                     tickers = [s.get("ticker") for s in _cache.get("data", []) if s.get("ticker")]
                 if not tickers:
@@ -14202,14 +14179,9 @@ def _startup():
                         "_slow_chart_refresh retry tamamlandı: %d/%d fetch_failed ticker kurtarıldı",
                         retried_ok, len(fetch_failed)
                     )
-                try:
-                    with open(_slow_chart_flag_path, "w", encoding="utf-8") as _f:
-                        _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
-                except OSError as _e:
-                    logger.warning("slow_chart flag yazılamadı: %s", _e)
             except Exception as e:
                 logger.error("_slow_chart_refresh outer: %s", e)
-            time.sleep(600)  # günlük flag zaten tekilleştiriyor — kapıyı 10dk'da bir yokla
+            time.sleep(6 * 3600)  # 6 saatte bir tam cycle
 
     threading.Thread(target=_slow_chart_refresh_daemon, daemon=True).start()
 
