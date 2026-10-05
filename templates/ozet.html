@@ -354,7 +354,7 @@ async function ozSubmitSub() {
     const res  = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email}),
+      body: JSON.stringify({email, kvkk: true}),
       signal: AbortSignal.timeout(10000)
     });
     function _escSub(v) {
