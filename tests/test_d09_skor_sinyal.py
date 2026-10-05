@@ -152,9 +152,11 @@ def test_health_score_insurer_leverage_na_even_with_data(stock_pool):
     r = fhs.compute_health_score(pool[0], "Sigorta", pool)
     assert "kaldirac" not in r["categories"] and r["categories_na"] == ["kaldirac"]
     assert set(r["categories"]) == {"karlilik", "nakit_akisi", "degerleme_buyume"}
-    # D-58: brüt marj/FAVÖK marjı/FD-FAVÖK sigortada da kavram olarak yok —
-    # 11 değil 8 uygulanabilir metrik (kaldıraç + bu 3 metrik sayılmaz).
-    assert r["data_completeness"] == 0.88        # 7 / 8 uygulanabilir metrik (D-58)
+    # D-58 kalanı (05.10): brüt marj/FAVÖK marjı/FD-FAVÖK sigortada da kavram
+    # olarak yok, ayrıca yfinance sigortada çeyreklik nakit akışını doğrudan
+    # yöntemle sunduğu için ocf_positive_quarters/ocf_stability_cv de yapısal
+    # N/A (canlı 4/4 sigortada doğrulandı) — 11 değil 6 uygulanabilir metrik.
+    assert r["data_completeness"] == 0.83        # 5 / 6 uygulanabilir metrik (D-58)
 
 
 def test_health_score_structural_na_by_sector_or_ticker():
@@ -172,9 +174,12 @@ def test_health_score_structural_na_metrics_bank_insurer():
     expected = {"gross_margin", "ebitda_margin", "ev_to_ebitda"}
     assert fhs.structural_na_metrics("GARAN", "Bankacılık") == expected
     assert fhs.structural_na_metrics("YENIBANKA", "Bankacılık") == expected             # sektörden
-    assert fhs.structural_na_metrics("ANHYT", "Sigorta") == expected
     assert fhs.structural_na_metrics("THYAO", "Ulaştırma") == frozenset()
     assert "revenue_growth" not in expected
+    # D-58 kalanı (05.10): sigortada AYRICA ocf_positive_quarters/ocf_stability_cv
+    # yapısal N/A (yfinance direkt yöntem, "Operating Cash Flow" satırı hiç yok).
+    insurer_expected = expected | {"ocf_positive_quarters", "ocf_stability_cv"}
+    assert fhs.structural_na_metrics("ANHYT", "Sigorta") == insurer_expected
 
 
 def test_health_score_bank_reaches_featured_threshold_with_partial_data(stock_pool):

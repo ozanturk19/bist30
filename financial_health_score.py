@@ -138,6 +138,17 @@ SECTOR_INSURER, SECTOR_BANK = "Sigorta", "Bankacılık"
 # yapısal N/A değil.
 BANK_INSURER_METRIC_NA = {"gross_margin", "ebitda_margin", "ev_to_ebitda"}
 
+# D-58 kalanı (05.10): yfinance sigorta şirketlerinde çeyreklik nakit akışı
+# tablosunu dolaylı değil DOĞRUDAN yöntemle sunuyor ("Operating Cash Flow"
+# satırı hiç yok — canlı doğrulandı, ANHYT quarterly_cashflow index'inde
+# "Cash Flowsfromusedin Operating Activities Direct" var, "Operating Cash
+# Flow" yok); ocf_positive_quarters/ocf_stability_cv 4/4 sigortada (ANHYT,
+# AKGRT, TURSG, ANSGR) sürekli None. fcf_to_sales (Free Cash Flow satırından,
+# dolaylı yöntemde de var) geliyor — Nakit Akışı kategorisi hâlâ uygulanabilir,
+# yalnız bu iki tekil metrik yapısal N/A (bankadaki gross_margin/ebitda_margin
+# ile aynı mantık, D-15).
+INSURER_METRIC_NA = {"ocf_positive_quarters", "ocf_stability_cv"}
+
 # Tamlık bu değerin altındaysa `limited_data` bayrağı; sıralama havuzları
 # (home_fields.featured_pool) aynı eşikle dışlar.
 LIMITED_DATA_BELOW = 0.6
@@ -159,11 +170,12 @@ def structural_na(ticker, sector):
 
 def structural_na_metrics(ticker, sector):
     """D-58: kategori uygulanabilir sayılsa da YAPISAL OLARAK yok sayılan tekil
-    metrikler (bkz. BANK_INSURER_METRIC_NA docstring'i) — veri gelse bile
-    puanlanmaz, tamlık paydasına girmez."""
-    if (ticker in BANK_TICKERS or sector == SECTOR_BANK
-            or ticker in INSURER_TICKERS or sector == SECTOR_INSURER):
+    metrikler (bkz. BANK_INSURER_METRIC_NA/INSURER_METRIC_NA docstring'i) —
+    veri gelse bile puanlanmaz, tamlık paydasına girmez."""
+    if ticker in BANK_TICKERS or sector == SECTOR_BANK:
         return BANK_INSURER_METRIC_NA
+    if ticker in INSURER_TICKERS or sector == SECTOR_INSURER:
+        return BANK_INSURER_METRIC_NA | INSURER_METRIC_NA
     return frozenset()
 
 
@@ -259,7 +271,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             category_scores[cat_name] = sum(metric_scores) / len(metric_scores)
 
     # Payda: bu hisse için UYGULANABİLİR metrikler (D-15/D-58) — bankada 14
-    # değil 5, sigortada 11 değil 8; yapısal N/A veri eksikliği sayılmaz.
+    # değil 5, sigortada 11 değil 6; yapısal N/A veri eksikliği sayılmaz.
     applicable = sum(
         1 for n, c in CATEGORIES.items() if n not in categories_na
         for m, _ in c["metrics"] if m not in metric_na
