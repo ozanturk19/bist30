@@ -132,6 +132,25 @@ def test_parse_detail_fields_text_and_turkish_only():
     assert "Our Company" not in astor["text"] and "33.781.500 ABD Doları" in astor["text"]
     kar = _detail(1667900)                                      # alansiz form: satirlar
     assert not kar["fields"] and "Nakit Kar Payı Ödeme Şekli" in kar["lines"]
+    assert d["ekler"] == []                                     # fixture onceden flatten edilmis (href yok)
+
+
+def test_parse_attachments_extracts_from_raw_html_and_dedupes():
+    # CPO-1824: ek (PDF) baglantilari _flat() tarafindan silinir -- bu yuzden parse_attachments
+    # ham page_html uzerinde calisir. Her ek sayfada genellikle 2 kez gorunur (ust panel + liste).
+    html = (
+        '<a class="x" target="_blank" href="https://www.kap.org.tr/tr/api/file/download/abc123">'
+        'Ek_1_AKCNS Pay Alım Formu.pdf</a>'
+        '<a class="y" target="_blank" href="https://www.kap.org.tr/tr/api/file/download/abc123">'
+        'Ek_1_AKCNS Pay Alım Formu.pdf</a>'
+        '<a class="z" target="_blank" href="https://www.kap.org.tr/tr/api/file/download/def456">'
+        'AKCNS - PAT Bilgilendirme Formu.pdf</a>'
+    )
+    assert kf.parse_attachments(html) == [
+        {"ad": "Ek_1_AKCNS Pay Alım Formu.pdf", "url": "https://www.kap.org.tr/tr/api/file/download/abc123"},
+        {"ad": "AKCNS - PAT Bilgilendirme Formu.pdf", "url": "https://www.kap.org.tr/tr/api/file/download/def456"},
+    ]
+    assert kf.parse_detail(html)["ekler"] == kf.parse_attachments(html)
 
 
 def test_parse_detail_inlines_data_tables_and_merges_bullets():

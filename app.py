@@ -9538,6 +9538,7 @@ def _bildirim_payload(idx):
             "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
                      "lines": doc.get("lines") or [], "resp": doc.get("resp")},
             "has_text": bool(doc),
+            "ekler": doc.get("ekler") or [],
             "similar": [kap_feed.public_item(x, STOCK_NAMES) for x in same]}
 
 

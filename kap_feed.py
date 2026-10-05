@@ -640,11 +640,33 @@ def _merge_bullets(lines):
     return out
 
 
+_EKLER_RE = re.compile(
+    r'<a\b[^>]*\bhref="(https://www\.kap\.org\.tr/tr/api/file/download/[^"]+)"[^>]*>([^<]*)</a>',
+    re.I)
+
+
+def parse_attachments(page_html):
+    """KAP bildirim sayfasindaki PDF ek baglantilari -> [{'ad': dosya adi, 'url': indirme adresi}].
+    _flat() hreflari siler; bu yuzden ham (henuz flatten edilmemis) page_html uzerinde calisir.
+    Ayni ek sayfada genellikle 2 kez gorunur (ust panel + liste) -- url'e gore tekillestirilir,
+    ilk gorulen sira korunur."""
+    out, seen = [], set()
+    for m in _EKLER_RE.finditer(page_html):
+        url, name = m.group(1), _html.unescape(m.group(2)).strip()
+        if not name or url in seen:
+            continue
+        seen.add(url)
+        out.append({"ad": name, "url": url})
+    return out
+
+
 def parse_detail(page_html):
-    """KAP bildirim sayfasi -> {'fields': [[etiket, deger]], 'text': str, 'resp': str|None, 'lines': []}.
+    """KAP bildirim sayfasi -> {'fields': [[etiket, deger]], 'text': str, 'resp': str|None, 'lines': [],
+    'ekler': [{'ad', 'url'}]}.
 
     Iki bicim: (1) 'oda_*' alanli form (etiket/deger TR+EN), (2) alansiz form (temettu vb.):
     satirlar sirayla. Ingilizce kisim atilir (Turkce metin esastir)."""
+    ekler = parse_attachments(page_html)
     s = _flat(_inline_data_tables(page_html))
     toks = [t.strip() for t in s.split("|")]
     toks = [t for t in toks if t]
@@ -691,7 +713,7 @@ def parse_detail(page_html):
         lines = _merge_bullets(_turkish_part(body))
     text = " ".join(x for x in text_segs if x)
     text = re.sub(r"\s+([.,;:])", r"\1", text)
-    return {"fields": fields, "text": text, "resp": resp, "lines": lines}
+    return {"fields": fields, "text": text, "resp": resp, "lines": lines, "ekler": ekler}
 
 
 # ----------------------------------------------------------------------------- tutar ve onem orani
