@@ -198,6 +198,24 @@ def test_gyo_zararda_fk_yok_pd_dd_var():
     assert now["son12ay_kar"] < 0 and now["fk"] is None and now["pd_dd"] == 0.49
 
 
+def test_valuation_band_carpan_genislemesi_d40b():
+    """D-40b kalani: F/K, PD/DD disinda ozsermaye karliligi + net borc/FAVOK + cari oran da
+    5 yillik banda girer (DEV-CPO canli KAP ham rapor olcumuyle ayni degerler, 05.10 07:0x)."""
+    thyao = {b["yil"]: b for b in kt.valuation_band(_rec("THYAO"), "sanayi")}
+    assert thyao[2025]["ozsermaye_karliligi"] == 14.86
+    assert thyao[2025]["net_borc_favok"] == 2.68
+    assert thyao[2025]["cari_oran"] == 0.99
+    assert len(thyao) == 5 and all(b["net_borc_favok"] is not None for b in thyao.values())
+
+    garan = {b["yil"]: b for b in kt.valuation_band(_rec("GARAN"), "banka")}
+    assert garan[2025]["ozsermaye_karliligi"] == 28.38
+    assert garan[2025]["net_borc_favok"] is None and garan[2025]["cari_oran"] is None
+
+    ansgr = {b["yil"]: b for b in kt.valuation_band(_rec("ANSGR"), "sigorta")}
+    assert ansgr[2025]["ozsermaye_karliligi"] == 45.31
+    assert ansgr[2025]["net_borc_favok"] is None and ansgr[2025]["cari_oran"] == 1.36
+
+
 def test_extend_kayit_yoksa_hazirlaniyor_varsa_kaynaksiz_v2():
     yahoo = {"pe_ratio": 11.7, "roe": 17.6, "shares": 1926795598.0, "market_cap": {"value": 7.9e11, "currency": "TRY"}}
     med = {"fk": {"deger": 13.8, "n": 12, "kapsam": "sektor"}, "pd_dd": None, "ozsermaye_karliligi": None}

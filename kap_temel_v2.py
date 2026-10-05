@@ -338,22 +338,41 @@ def valuation_now(rec, template, price, yahoo_shares=None):
     return out
 
 
+def _multiplier_year(rep, template):
+    """D-40b: F/K, PD/DD disindaki carpanlarin yillik degeri -- tek raporun cur sutunundan
+    (balance()'daki sablon ayrimiyla ayni: bankada net borc/FAVOK ve cari oran yok)."""
+    roe = roe_avg(rep, template)
+    net_borc_favok = cari_oran = None
+    if template in ("sanayi", "gyo"):
+        b, cash = kf._borrowings(rep), _v(rep, "cash")
+        fi = _v(rep, "current_financial_investments") or 0
+        nd = None if b is None or cash is None else b - cash - fi
+        eb = kf._ebitda(rep)
+        net_borc_favok = round(nd / eb, 2) if nd is not None and eb and eb > 0 else None
+        cari_oran = _r(_ratio(_v(rep, "current_assets"), _v(rep, "current_liabilities")))
+    elif template == "sigorta":
+        cari_oran = _r(_ratio(_v(rep, "current_assets"), _v(rep, "current_liabilities")))
+    return {"ozsermaye_karliligi": roe, "net_borc_favok": net_borc_favok, "cari_oran": cari_oran}
+
+
 def valuation_band(rec, template):
-    """D-40a0 bandi; sigortada ozkaynak toplam ozkaynaktan (PD/DD bos kalmasin)."""
+    """D-40a0 bandi (F/K, PD/DD) + D-40b carpan genislemesi (ozsermaye karliligi, net borc/FAVOK,
+    cari oran); sigortada ozkaynak toplam ozkaynaktan (PD/DD bos kalmasin)."""
     band = list(((rec.get("derived") or {}).get("degerleme_bandi")) or [])
-    if template != "sigorta":
-        return [{k: b.get(k) for k in ("yil", "tarih", "kapanis", "fk", "pd_dd")} for b in band]
     by_fy = {r["fy"]: r for r in _annual(rec)}
     out = []
     for b in band:
         rep = by_fy.get(b.get("yil"))
         pd = b.get("pd_dd")
-        if pd is None and rep is not None:
-            eq = _tl(rep, _equity(rep, template))
-            if eq and eq > 0 and b.get("piyasa_degeri"):
-                pd = round(b["piyasa_degeri"] / eq, 2)
+        extra = {"ozsermaye_karliligi": None, "net_borc_favok": None, "cari_oran": None}
+        if rep is not None:
+            if template == "sigorta" and pd is None:
+                eq = _tl(rep, _equity(rep, template))
+                if eq and eq > 0 and b.get("piyasa_degeri"):
+                    pd = round(b["piyasa_degeri"] / eq, 2)
+            extra = _multiplier_year(rep, template)
         out.append({"yil": b.get("yil"), "tarih": b.get("tarih"), "kapanis": b.get("kapanis"),
-                    "fk": b.get("fk"), "pd_dd": pd})
+                    "fk": b.get("fk"), "pd_dd": pd, **extra})
     return out
 
 
