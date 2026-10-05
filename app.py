@@ -3038,6 +3038,30 @@ def _build_follow_confirm_email(email, ticker, confirm_url, unsubscribe_url, nam
     return _email_base(content, unsubscribe_url, preheader=f"{ticker} takibini onayla")
 
 
+def _build_subscribe_confirm_email(email, confirm_url, unsubscribe_url=None, name=None):
+    """D-38: yeni bülten aboneliğinde e-posta sahipliğini kanıtlayan çift onay maili
+    (/api/recognize/confirm mevcut token ucu — başkası adına abonelik açılamaz)."""
+    greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
+          BorsaPusula sinyal bildirimlerine abone olmak için e-posta adresini onayla.<br>
+          Bağlantı <strong style="color:#e5e1e4">24 saat</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
+        </p>
+        <a href="{confirm_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          E-postamı onayla →
+        </a>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu kaydı sen yapmadıysan bu e-postayı yok sayabilirsin — abonelik onaylanmadan hiçbir mail gönderilmez.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader="E-postanı onayla ve sinyal bildirimlerini aç")
+
+
 def _build_signal_email(changes, unsubscribe_url, follow=None):
     """Sinyal değişim maili — premium-aware, modern card layout.
     D-P1-2509: `follow` (takip listesi) varsa takipteki hisseler başa alınır ve "TAKİPTE" rozeti alır."""
@@ -3581,7 +3605,9 @@ def _send_digest_emails(timeframe="daily", force=False):
 
     with _sub_lock:
         subs = _load_subscribers()
-    active = {e: d for e, d in subs.items() if d.get("active", True)}
+    # D-38: onaysız kayıt (confirmed_at boş) digest'e girmez — mevcut aktif aboneler
+    # tools/migrate_confirm_grandfather.py ile tek seferlik confirmed_at almıştır.
+    active = {e: d for e, d in subs.items() if d.get("active", True) and d.get("confirmed_at")}
     logger.info("Digest: %d aktif abone, %d toplam abone", len(active), len(subs))
     if not active:
         return {"status": "no_active_subs", "sent": 0}
@@ -13105,7 +13131,13 @@ def api_subscribe():
             react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
 
+        # D-38: yeni kayıtta KVKK zorunlu (mevcut aktif abonelerde Engel 1/2 çözümüyle
+        # kapsam dışı — grandfather migration'ı confirmed_at'i ayrıca dolduruyor).
+        if data.get("kvkk") is not True:
+            return safe_json({"ok": False, "error": "KVKK onayı gerekli"}), 400
+
         token = secrets.token_hex(24)
+        confirm_token = secrets.token_hex(24)
         subs[email] = {
             "token":         token,
             "subscribed_at": datetime.now(_TZ_TR).isoformat(),
@@ -13125,31 +13157,36 @@ def api_subscribe():
             "portfolio":       {},
             "notify":          {"trend": True, "bulten": True},
             "confirmed_at":    None,
-            "kvkk_consent_ts": _accounts.now_iso() if data.get("kvkk") is True else None,
+            "kvkk_consent_ts": _accounts.now_iso(),
+            # D-38: /api/recognize/confirm mevcut token ucu — yeni uç açılmadı.
+            "login_token":     confirm_token,
+            "login_expires":   time.time() + 86400,
+            "login_used":      False,
         }
         _save_subscribers(subs)
 
-    unsub = f"https://borsapusula.com/unsubscribe/{token}"
+    unsub       = f"https://borsapusula.com/unsubscribe/{token}"
+    confirm_url = f"https://borsapusula.com/api/recognize/confirm?t={confirm_token}"
     email_sent = send_email(
-        email, "✅ BorsaPusula — Abonelik Onayı",
-        _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", "")),
+        email, "📩 BorsaPusula — E-postanı Onayla",
+        _build_subscribe_confirm_email(email, confirm_url, unsubscribe_url=unsub, name=name),
         unsub
     )
     if not email_sent:
         logger.error("Abonelik onay maili gonderilemedi: %s", _mask_email(email))
 
-    logger.info("Yeni e-posta abonesi: %s", _mask_email(email))
+    logger.info("Yeni e-posta abonesi (onay bekliyor): %s", _mask_email(email))
     resp = safe_json({
         "ok":      True,
-        "message": ("Abonelik başarılı! Onay e-postası gönderildi." if email_sent else "Abonelik başarılı! Onay e-postası şu an gönderilemedi, kaydınız aktif.")
-                   + (f" {follow_t} bildirimleri açıldı." if follow_t else ""),
+        "message": ("Onay e-postası gönderildi, lütfen gelen kutunu kontrol et." if email_sent else "Kaydın alındı ama onay e-postası şu an gönderilemedi, lütfen sonra tekrar dene.")
+                   + (f" Onayladığında {follow_t} bildirimleri açılacak." if follow_t else ""),
         "token":   token,
         "name":    name,
         "email":   email,
         "email_sent": email_sent,
     })
-    # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
-    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
+    # D-38: sahiplik e-posta onayıyla kanıtlanana kadar bp_sub çerezi verilmez
+    # (/api/recognize/confirm onayda oturum açar).
     return resp
 
 

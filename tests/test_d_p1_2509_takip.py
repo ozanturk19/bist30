@@ -63,15 +63,15 @@ def _sub(c, **kw):
 
 @PY310
 def test_new_subscriber_gets_follow(client):
-    r = _sub(client, email="a@example.com", ticker="AHGAZ")
-    assert r["ok"] and "AHGAZ bildirimleri açıldı" in r["message"]
+    r = _sub(client, email="a@example.com", ticker="AHGAZ", kvkk=True)
+    assert r["ok"] and "AHGAZ bildirimleri açılacak" in r["message"]
     rec = client.mod._load_subscribers()["a@example.com"]
     assert rec["watchlist"] == ["AHGAZ"] and rec["tickers"] == []   # D-50: izleme listesi
 
 
 @PY310
 def test_registered_with_cookie_adds_directly_then_already(client):
-    r = _sub(client, email="a@example.com")
+    r = _sub(client, email="a@example.com", kvkk=True)
     client.set_cookie("bp_sub", r["token"])   # werkzeug>=2.3 imzası (domain'siz)
     r2 = _sub(client, email="a@example.com", ticker="AHGAZ")
     assert r2["status"] == "added"
@@ -81,7 +81,7 @@ def test_registered_with_cookie_adds_directly_then_already(client):
 
 @PY310
 def test_registered_without_cookie_sends_confirm_then_confirms(client):
-    _sub(client, email="a@example.com")
+    _sub(client, email="a@example.com", kvkk=True)
     client.delete_cookie("bp_sub")
     n = len(client.sent)
     r = _sub(client, email="a@example.com", ticker="THYAO")
@@ -96,7 +96,7 @@ def test_registered_without_cookie_sends_confirm_then_confirms(client):
 
 @PY310
 def test_inactive_reactivated_with_follow(client):
-    r = _sub(client, email="a@example.com")
+    r = _sub(client, email="a@example.com", kvkk=True)
     subs = client.mod._load_subscribers()
     subs["a@example.com"]["active"] = False
     client.mod._save_subscribers(subs)
@@ -109,7 +109,7 @@ def test_inactive_reactivated_with_follow(client):
 @PY310
 def test_invalid_ticker_400_and_plain_subscribe_unchanged(client):
     assert client.post("/api/subscribe", json={"email": "a@example.com", "ticker": "XU030"}).status_code == 400
-    _sub(client, email="a@example.com")
+    _sub(client, email="a@example.com", kvkk=True)
     r = _sub(client, email="a@example.com")           # ticker'sız: eski davranış
     assert r["ok"] is False and "zaten kayıtlı" in r["error"]
 
