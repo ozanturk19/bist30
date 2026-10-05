@@ -5137,7 +5137,12 @@ def background_refresh():
                 _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_morning_verify.flag"
             )
             if _morning_verify_window(datetime.now(_TZ_TR)) and not os.path.exists(_morning_verify_path):
-                if _run_morning_verify_pass(_today_tr):
+                try:
+                    _morning_verify_ok = _run_morning_verify_pass(_today_tr)
+                except Exception as _e:
+                    logger.error("MORNING_VERIFY: beklenmeyen hata, pencere içinde yeniden denenecek: %s", _e, exc_info=True)
+                    _morning_verify_ok = False
+                if _morning_verify_ok:
                     try:
                         with open(_morning_verify_path, "w", encoding="utf-8") as _f:
                             _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
