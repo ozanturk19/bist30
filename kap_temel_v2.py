@@ -226,6 +226,32 @@ def yearly_series(rec, template):
     return {"seri": seri, "dusen_yillar": dusen}
 
 
+_GROWTH_3Y_KEYS = {
+    "sanayi": ("revenue", "net_income_parent"), "gyo": ("revenue", "net_income_parent"),
+    "banka": ("net_income_parent",), "sigorta": ("net_income_parent",),
+}
+
+
+def growth_3y(rec, template):
+    """D-40b: 3 yillik buyume (gelir, net kar) -- son yillik raporla tam 3 yil onceki
+    raporun ayni muhasebe esasinda olmasi gerekir (TMS 29 kirilmasi var ise None; yakin
+    yilla yama ya da extrapolasyon yok, acikla nan veri ilkesi)."""
+    ann = _annual(rec)
+    if not ann:
+        return None
+    last = ann[-1]
+    basis = last.get("basis")
+    same = {r["fy"]: r for r in ann if r.get("basis") == basis}
+    old_fy = last["fy"] - 3
+    if old_fy not in same:
+        return None
+    old_rep = same[old_fy]
+    out = {"yil_araligi": [old_fy, last["fy"]]}
+    for k in _GROWTH_3Y_KEYS[template]:
+        out[k] = kf.pct_change(_v(last, k), _v(old_rep, k))
+    return out
+
+
 def quarterly_series(rec, template):
     """[{donem, ceyrek, degisim{kalem: %}}] -- ara donem raporunun 3 aylik sutunlari (Q1: kumulatif)."""
     out = []
@@ -524,6 +550,7 @@ def build_v2(rec, price=None, today=None, yahoo_shares=None, medians=None):
         "ara_donem": interim_ratios(rec, tpl),
         "yillik_seri": ys["seri"],
         "dusen_yillar": ys["dusen_yillar"],
+        "buyume_3y": growth_3y(rec, tpl),
         "ceyrek_seri": quarterly_series(rec, tpl),
         "tutarlar": latest_amounts(rec, tpl),
         "son12ay": ttm_net_income(rec),
@@ -546,6 +573,7 @@ def extend(data, rec, price=None, today=None, medians=None):
     if not data:
         return data
     out = dict(data)
+    out["schema_version"] = 2   # D-40b: eski alanlar korunur, yalniz ek bilgi (additif)
     out["sektor_ortanca"] = medians
     if not rec or not out.get("kap"):
         out["kap_durum"] = "hazirlaniyor"

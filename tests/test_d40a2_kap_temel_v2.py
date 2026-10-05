@@ -73,6 +73,32 @@ def test_degisim_grafigi_yalniz_ayni_esas_tms29_2023_sonrasi():
     assert [r["yil"] for r in g["seri"]] == [2021, 2022, 2023, 2024, 2025] and g["dusen_yillar"] == []
 
 
+def test_buyume_3y_tms29_kirilmasinda_none_digerinde_pct_change():
+    # TUPRS/BIMAS/EKGYO: son yillik rapordan 3 yil once (2022) TMS29 esasi farkli -> None
+    # (yakin yilla yama ya da extrapolasyon yok)
+    assert kt.growth_3y(_rec("TUPRS"), "sanayi") is None
+    assert kt.growth_3y(_rec("BIMAS"), "sanayi") is None
+    assert kt.growth_3y(_rec("EKGYO"), "gyo") is None
+    # THYAO/GARAN/ANSGR: 2021-2025 tek esas -> 2022->2025 (3 yil) hesaplanir
+    thy = kt.growth_3y(_rec("THYAO"), "sanayi")
+    assert thy["yil_araligi"] == [2022, 2025]
+    assert (thy["revenue"], thy["net_income_parent"]) == (207.06, 149.23)
+    gar = kt.growth_3y(_rec("GARAN"), "banka")
+    assert gar["yil_araligi"] == [2022, 2025] and gar["net_income_parent"] == 88.41
+    ans = kt.growth_3y(_rec("ANSGR"), "sigorta")
+    assert ans["yil_araligi"] == [2022, 2025] and ans["net_income_parent"] == 914.79
+
+
+def test_build_v2_buyume_3y_ve_schema_version_alanlari():
+    v2 = kt.build_v2(_rec("THYAO"), price=300.0, today=TODAY)
+    assert v2["buyume_3y"]["yil_araligi"] == [2022, 2025]
+    ext = kt.extend({"kap": {"x": 1}}, _rec("THYAO"), price=300.0, today=TODAY)
+    assert ext["schema_version"] == 2 and ext["kap"]["buyume_3y"] == v2["buyume_3y"]
+    # Kayit yoksa (hazirlaniyor) da schema_version eklenir, eski alanlar bozulmaz
+    bos = kt.extend({"shares": 100}, None, price=300.0, today=TODAY)
+    assert bos["schema_version"] == 2 and bos["kap_durum"] == "hazirlaniyor" and bos["shares"] == 100
+
+
 def test_ceyreklik_seri_3_aylik_sutundan_q4_yok():
     q = kt.quarterly_series(_rec("TUPRS"), "sanayi")
     assert [x["ceyrek"] for x in q] == ["25 Ç1", "25 Ç2", "25 Ç3", "26 Ç1", "26 Ç2"]
