@@ -68,6 +68,29 @@
   </ol>
 </section>
 
+{#- C-42 (05.10): Temel skor v2 bölümü (D-40c). Yalnız `temel_v2_on` bağlamı doğruyken basılır
+    (route: temel_skor_v2.enabled(), CPO-mailbox isteği); bayrak kapalıyken sayfa bugünküyle aynı. -#}
+{%- if temel_v2_on %}
+<section class="mt-sec" id="temel-skor" aria-labelledby="mtTemelH">
+  <h2 id="mtTemelH">Temel skor hangi 5 başlığa bakar?</h2>
+  <p>Temel skor 0 ile 100 arasındadır ve şirketin açıkladığı son finansal raporlardan hesaplanır. Her ölçü, şirketin aynı sektördeki ve aynı muhasebe esasındaki en az 5 şirket arasındaki sırasına göre puanlanır.</p>
+  <ol class="mt-check">
+    <li><strong>Kalite · %30</strong><span>Özsermaye kârlılığı, net kâr marjı (bankada gider/gelir oranı) ve sağlamlık kontrol listesi.</span></li>
+    <li><strong>Değerleme · %20</strong><span>F/K ve PD/DD'nin sektör orta değerine oranı; daha düşük oran daha yüksek puan.</span></li>
+    <li><strong>Büyüme · %20</strong><span>Hasılat ve net kârın yıllık ve son ara dönemdeki değişimi, şirketin kendi raporundaki karşılaştırmayla.</span></li>
+    <li><strong>Bilanço sağlığı · %20</strong><span>Net borç / FAVÖK ve cari oran (GYO'da net borç / özsermaye, bankada kredi/mevduat ve özsermaye/varlık).</span></li>
+    <li><strong>Temettü · %10</strong><span>Son yıllarda temettü dağıtımının sürekliliği ve temettü verimi.</span></li>
+  </ol>
+  <p><strong>Fiyat ucuz mu, pahalı mı?</strong> F/K ve PD/DD, sektördeki şirketlerin orta değeriyle karşılaştırılır: orta değerin %80'inin altı &laquo;ucuz tarafta&raquo;, %125'inin üstü &laquo;pahalı tarafta&raquo;, arası &laquo;makul&raquo;; ikisi ters yönü gösterirse &laquo;karışık&raquo;. Sektörde 5'ten az şirket varsa karşılaştırma piyasa geneline göre yapılır ve öyle yazılır.</p>
+  <details class="mt-td">
+    <summary>Teknik detay</summary>
+    <p><strong>Sağlamlık kontrol listesi:</strong> sanayi şirketleri ve GYO'larda Piotroski F-Skor'un 9 maddesi (kârlılık, nakit akışı, borç, likidite, verimlilik), bankalarda 5 maddelik kontrol. Maddelerin çoğu hesaplanamıyorsa liste puanlanmaz.</p>
+    <p><strong>Eksik başlık:</strong> Hesaplanamayan başlığın ağırlığı diğerlerine dağılır. En az 3 başlık ve beklenen ölçülerin en az %60'ı yoksa skor verilmez, hisse &laquo;Sınırlı veri&raquo; olarak gösterilir ve listelere girmez. Sigorta şirketlerinde bilanço sağlığı hesaplanmaz.</p>
+    <p><strong>Veri notu A/B/C:</strong> Şirketin raporlarında sorun yoksa A, bir sorun varsa B (örneğin gecikmiş rapor ya da eksik ara dönem), birden fazlaysa C. Notun nedeni hisse sayfasının Temel sekmesinde yazar.</p>
+  </details>
+</section>
+{%- endif %}
+
 <article class="prose">
 
 <h2 id="supertrend">1. Supertrend Göstergesi</h2>
