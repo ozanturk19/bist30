@@ -207,3 +207,15 @@ def test_css_contracts():
     assert re.search(r"(^|\n)\.hv-tim\{", css) and ".hv-tm{position:relative" in css
     # kategori/tür gökkuşağı yok
     assert "--hv-pink" not in css and "--hv-teal" not in css and ".hv .t-finansal" not in css
+
+
+def test_rating_row_is_neutral(data):
+    """Kredi notu satırı: kuruluş + not + izleme etiketi; kırmızı/yeşil yalnız fiyat yönü (kanon §5.3)."""
+    items, snap = data
+    with open(os.path.join(FX, "kredi_docs.json"), encoding="utf-8") as f:
+        docs = {int(k): v for k, v in json.load(f).items()}
+    ctx = _gundem_ctx(items, snap)
+    ctx["gundem_sirket"] = hv.company_cards(items, "2026-09-28", {}, n=6, hot_tickers=[], doc_fn=docs.get)
+    rt = re.findall(r'<p class="hv-rt">(.*?)</p>', _render("haberler.html", ctx), re.S)
+    assert rt and "Fitch: <b>B−</b>" in rt[0] and "Negatif izleme" in rt[0]
+    assert 'class="down"' not in rt[0] and 'class="up"' not in rt[0]

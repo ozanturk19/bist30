@@ -216,7 +216,7 @@
       {%- for x in _rows %}
       {%- set c = x.c -%}
       {% call brow(x.r, x.m, x.when, x.dt) %}
-        {%- if c and c.rating %}<p class="hv-rt">{{ c.rating.agency }}: <b>{{ c.rating.at }}</b>{% if c.rating.prev %} · önceki {{ c.rating.prev }}{% endif %}{% if c.rating.tag %} · <span class="{{ 'down' if c.rating.tag_dir == 'down' else ('up' if c.rating.tag_dir == 'up' else '') }}">{{ c.rating.tag }}</span>{% endif %}</p>
+        {%- if c and c.rating %}<p class="hv-rt">{{ c.rating.agency }}: <b>{{ c.rating.at }}</b>{% if c.rating.prev %} · önceki {{ c.rating.prev }}{% endif %}{% if c.rating.tag %} · {{ c.rating.tag }}{% endif %}</p>
         {%- elif c %}{{ onem_bar(c.onem) }}{% endif %}
       {%- endcall %}
       {%- endfor %}
