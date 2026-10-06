@@ -61,18 +61,30 @@
 
 {%- macro ring(v) -%}{%- set c = 37.7 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="rg0" cx="8" cy="8" r="6" fill="none" stroke-width="2.2"/><circle class="rg1" cx="8" cy="8" r="6" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}" transform="rotate(-90 8 8)"/></svg>{%- endmacro -%}
 
-{#- hisse çipi: kod + 30 günlük çizgi + günlük değişim -#}
+{#- hisse çipi: kod + günlük değişim (C-75: çizgi kalktı; çip yalnız "hangi hisse, bugün ne yaptı") -#}
 {%- macro tk(m) -%}
-{%- if m -%}<a class="hv-tk" href="/hisse/{{ m.t }}"><b>{{ m.t }}</b>{{ spk(m.sp, 'sm') }}{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</a>{%- endif -%}
+{%- if m -%}<a class="hv-tk" href="/hisse/{{ m.t }}"><b>{{ m.t }}</b>{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</a>{%- endif -%}
 {%- endmacro -%}
 
-{#- satırdaki hisse mini kartı -#}
-{%- macro mc(m) -%}
-{%- if m -%}<a class="hv-mc" href="/hisse/{{ m.t }}" aria-label="{{ m.t }} hisse sayfası{% if m.ch is not none %}, günlük değişim {{ pct_text(m.ch) }}{% endif %}{% if m.stn %}, {{ m.stn }}{% endif %}">
-  <span class="l1"><b>{{ m.t }}</b>{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</span>
-  {{ spk(m.sp, 'mc') }}
-  {%- if m.st %}<span class="l2"><span class="hv-st {{ m.st }}">{{ m.stn }}</span>{% if m.bp is not none %}<span class="hv-bp" title="BorsaPusula Skoru {{ m.bp }} / 100">{{ ring(m.bp) }}{{ m.bp }}</span>{% endif %}</span>{% endif %}
-</a>{%- else -%}<span class="hv-mc hv-mc--0" aria-hidden="true"></span>{%- endif -%}
+{#- C-75 bildirim satırı (Gündem önizlemesi ve Şirket bildirimleri sekmesi aynı anatomi):
+    hisse | başlık (+ şirket, önem, grup) | tür | tarih. Masaüstünde 4 sütunlu ızgara; telefonda hisse
+    satırı, başlık, sonra tek meta satırı (tür · şirket · saat). Başlık bağlantısı bütün satırı kaplar.
+    r: haber_v2.row_view alanları (ticker, company, title, href, k, kl); m: hisse mini kartı ya da None;
+    when/dt: görünen zaman ve ISO zaman. caller(): başlığın altına ek satırlar (önem, kredi notu, grup). -#}
+{%- macro brow(r, m, when, dt) -%}
+<article class="hv-br t-{{ r.k }}">
+  <div class="hv-tkc">
+    <a class="hv-tkl" href="/hisse/{{ r.ticker }}" aria-label="{{ r.ticker }} hisse sayfası{% if m and m.ch is not none %}, günlük değişim {{ pct_text(m.ch) }}{% endif %}"><b>{{ r.ticker }}</b>{% if m and m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</a>
+    {%- if m and m.st %}<span class="hv-tks"><span class="hv-st {{ m.st }}">{{ m.stn }}</span>{% if m.bp is not none %}<span class="hv-bp" title="BorsaPusula Skoru {{ m.bp }} / 100">{{ ring(m.bp) }}{{ m.bp }}</span>{% endif %}</span>{% endif %}
+  </div>
+  <div class="hv-bb">
+    <a class="hv-bt" href="{{ r.href }}">{{ r.title }}</a>
+    <p class="hv-bm"><span class="hv-bm-ty">{{ ico(TY_ICO.get(r.k, 'megaphone')) }}{{ r.kl }} · </span><span class="hv-co">{{ r.company }}</span><span class="hv-bm-tm"> · <time datetime="{{ dt }}">{{ when }}</time></span></p>
+    {%- if caller %}{{ caller() }}{% endif %}
+  </div>
+  <span class="hv-ty">{{ ico(TY_ICO.get(r.k, 'megaphone')) }}{{ r.kl }}</span>
+  <time class="hv-tim" datetime="{{ dt }}">{{ when }}</time>
+</article>
 {%- endmacro -%}
 
 {#- önem oranı çubuğu (satır) -#}

@@ -7,11 +7,29 @@
 {%- set _mini = mini if mini is defined and mini else {} -%}
 {%- set _day = (_lead.day_label if _lead else (gundem.date_label if gundem else '')) -%}
 {%- set _q = (_day ~ _DE.get(_day.split(' ')[-1], "'de") ~ ' piyasada ne oldu?') if _day else 'Piyasada ne oldu?' -%}
-{#- v1 kural tabanlı baskı maddeleri (D-57 yoksa): günün hikâyesi ve şirket kartlarıyla çakışanlar düşer -#}
+{#- v1 kural tabanlı baskı maddeleri (D-57 yoksa): piyasa özeti ve şirket bildirimleriyle çakışanlar düşer -#}
 {%- set _v1 = [] -%}
 {%- if not _gh and gundem -%}{%- for g in gundem.groups or [] -%}{%- for it in g['items'] or [] -%}
   {%- if not (_lead and it.id in ('bist', 'sektor')) and not (_cards and it.id == 'bildirim') -%}{%- set _ = _v1.append(it) -%}{%- endif -%}
 {%- endfor -%}{%- endfor -%}{%- endif -%}
+{#- C-75 Bölge 3 satırları: Gündem şirket kartları (haber_v2.company_cards; tür, önem, kredi notu hazır) yeniden
+    eskiye; 5'ten azsa son akışın (feed_days, kap_feed.public_item) başka hisselerinden 6'ya tamamlanır.
+    Akış satırında tür anahtarı yok: KAP konusu bilinen türe eşlenir, değilse bildirimin kendi sınıf adı
+    (ör. "Pay alım teklifi") ve genel simge. Arka uç `gundem_son` (row_view) verirse bu yol gereksizleşir. -#}
+{%- set _SUBJ = {'Finansal Rapor': 'finansal', 'Kar Payı Dağıtım İşlemlerine İlişkin Bildirim': 'temettu', 'Kredi Derecelendirmesi': 'kredi', 'Ortaklık Aleyhine Dava Açılması veya Davaya İlişkin Gelişmeler': 'dava', 'Genel Kurul İşlemlerine İlişkin Bildirim': 'yonetim', 'Sermaye Artırımı - Azaltımı İşlemlerine İlişkin Bildirim': 'sermaye', 'Payların Geri Alınmasına İlişkin Bildirim': 'sermaye', 'Pay Alım Teklifi Yoluyla Pay Toplanmasına İlişkin Bildirim': 'sermaye', 'Yeni İş İlişkisi': 'is', 'İhale Süreci / Sonucu': 'is'} -%}
+{%- set _TYL = {'finansal': 'Finansal rapor', 'temettu': 'Temettü', 'sermaye': 'Sermaye ve pay', 'yonetim': 'Yönetim ve genel kurul', 'is': 'Sözleşme ve ihale', 'kredi': 'Kredi notu', 'dava': 'Dava', 'ozel': 'Özel durum'} -%}
+{%- set _rows = [] -%}{%- set _seen = [] -%}
+{%- for c in _cards -%}{%- set _ = _rows.append({'r': c, 'm': _mini.get(c.ticker), 'when': c.time_label, 'dt': c.date, 'c': c}) -%}{%- set _ = _seen.append(c.ticker) -%}{%- endfor -%}
+{%- if _rows|length < 5 and feed_days is defined and feed_days -%}
+  {%- for d in feed_days -%}{%- for f in d.rows -%}
+    {%- if _rows|length < 6 and f.ticker not in _seen -%}
+      {%- set _k = _SUBJ.get(f.subject) -%}
+      {%- set _ = _rows.append({'r': {'ticker': f.ticker, 'company': f.company, 'title': f.title, 'href': f.href, 'k': _k or 'ozel', 'kl': _TYL[_k] if _k else (f['class'] or _TYL['ozel'])}, 'm': _mini.get(f.ticker) or f.mc, 'when': (f.day[8:10]|int) ~ ' ' ~ _AY[(f.day[5:7]|int) - 1] ~ ' · ' ~ f.time, 'dt': f.date, 'c': none}) -%}
+      {%- set _ = _seen.append(f.ticker) -%}
+    {%- endif -%}
+  {%- endfor -%}{%- endfor -%}
+{%- endif -%}
+{%- set _rows = _rows|sort(attribute='dt', reverse=true) -%}
 {% block head %}<title>Haberler — {{ _q }} | BorsaPusula</title>
 <meta name="description" content="{% if _lead %}{{ _lead.title }}. {{ _lead.text }}{% else %}Gündem, şirket bildirimleri, takvim ve Akşam Bülteni: Borsa İstanbul'da piyasa ve şirket haberleri{% if close_label %}, {{ close_label }} kapanışı verisiyle{% endif %}.{% endif %}">
 <link rel="canonical" href="https://borsapusula.com/haberler">
@@ -32,15 +50,14 @@
   {"@type":"ListItem","position":2,"name":"Haberler"}
 ]}
 </script>
-{#- Her kart için NewsArticle (taslak: "Her kart için NewsArticle, bildirim listesi için ItemList"). -#}
+{#- Her madde için NewsArticle, sayfadaki sırayla: piyasa özeti, Gündem maddeleri, şirket bildirimleri. -#}
 {%- set _org = {"@type": "Organization", "name": "BorsaPusula", "url": "https://borsapusula.com"} -%}
 {%- set _ld = [] -%}
 {%- macro _na(head, desc, date, url, based=none) -%}{%- set a = {"@type": "NewsArticle", "headline": head|truncate(110, true, '…'), "inLanguage": "tr", "url": url, "mainEntityOfPage": url, "author": _org, "publisher": _org} -%}{%- if desc %}{% set _ = a.update({"description": desc}) %}{% endif -%}{%- if date %}{% set _ = a.update({"datePublished": date}) %}{% endif -%}{%- if based %}{% set _ = a.update({"isBasedOn": based}) %}{% endif -%}{%- set _ = _ld.append({"@type": "ListItem", "position": _ld|length + 1, "item": a}) -%}{%- endmacro -%}
 {%- if _lead %}{{ _na(_lead.title, _lead.text, _lead.day, "https://borsapusula.com/haberler#hv-lead") }}{% endif -%}
-{%- for c in _cards[:2] %}{{ _na(c.company ~ ": " ~ c.title, none, c.date ~ "+03:00", "https://borsapusula.com" ~ c.href) }}{% endfor -%}
 {%- if _gh %}{% for m in _gh.maddeler %}{% set _b = [] %}{% for k in m.kaynaklar %}{% set _ = _b.append(k.url) %}{% endfor %}{{ _na(m.baslik, m.ozet, _gh.baski, "https://borsapusula.com/haberler#hv-g" ~ loop.index, _b) }}{% endfor -%}
 {%- else %}{% for it in _v1 %}{{ _na(it.h, it.p, (gundem.printed_at ~ "+03:00") if gundem.printed_at else none, "https://borsapusula.com/haberler#hv-" ~ it.id) }}{% endfor %}{% endif -%}
-{%- for c in _cards[2:] %}{{ _na(c.company ~ ": " ~ c.title, none, c.date ~ "+03:00", "https://borsapusula.com" ~ c.href) }}{% endfor %}
+{%- for c in _cards %}{{ _na(c.company ~ ": " ~ c.title, none, c.date ~ "+03:00", "https://borsapusula.com" ~ c.href) }}{% endfor %}
 <script type="application/ld+json">
 {{ {"@context": "https://schema.org", "@type": "CollectionPage", "name": _q, "inLanguage": "tr", "description": "Gündem: " ~ ((_day ~ " kapanışında piyasa ve öne çıkan şirket bildirimleri.") if _day else "piyasa ve öne çıkan şirket bildirimleri."), "mainEntity": {"@type": "ItemList", "numberOfItems": _ld|length, "itemListElement": _ld}}|tojson }}
 </script>
@@ -55,21 +72,19 @@
 <a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
 {%- from '_fmt_macros.html' import pct_text, dir_class, pagehead -%}
-{%- from '_haber_ui.html' import ico, tabs, spk, spk_big, tk, onem_bar, CAT, V1_CAT -%}
-{#- C-72 Haberler v2 — Gündem sekmesi (taslak haberler-v2.html, O28=A). Bağlam D-56 /haberler:
-    gundem_lead (günün hikâyesi: BIST100 donmuş ısı haritası, Bülten'le aynı sektör özeti, 30 günlük
-    endeks), gundem_sirket (kural tabanlı şirket kartları, bildirimin kendi rakamları), gundem_haber
-    (D-57 basın derlemesi; varsa maddeler onunla, yoksa kural tabanlı v1 baskısı `gundem`), mini
-    (hisse kartları, 30 günlük çizgi), heatmap/heatmap_tiles. Eksik her parça yalnız kendini gizler. -#}
+{%- from '_haber_ui.html' import ico, tabs, spk, spk_big, tk, brow, onem_bar, CAT, V1_CAT -%}
+{#- C-75 Haberler — Gündem sekmesi üç ayrı bölge (tasarım denetimi plans/2026-09-23-denetim/haberler-tasarim-denetimi.md):
+    1 Piyasa özeti (gundem_lead: BIST100 donmuş ısı haritası, Bülten'le aynı sektör özeti, 30 günlük endeks),
+    2 Gündem (gundem_haber: D-57 basın derlemesi; yoksa kural tabanlı v1 baskısı `gundem`),
+    3 Şirket bildirimleri (gundem_sirket önizlemesi → /haberler/bildirimler).
+    Her bölge kendi başlığı, tek vurgu rengi ve tek kutusuyla. Eksik her parça yalnız kendi bölgesini gizler. -#}
 
-{%- macro meta(cat, sub, time, hot) -%}
-{%- set C = CAT.get(cat) or ('piyasa', cat, 'chart') -%}
-<div class="hv-meta"><span class="hv-cat">{{ ico(C[2]) }}{{ C[1] }}</span>{% if sub %}<span class="hv-sub">{{ sub }}</span>{% endif %}{% if time %}<span class="hv-time">{{ time }}</span>{% endif %}{% if hot %}<span class="hv-hot">{{ ico('spark4') }}Öne çıkan</span>{% endif %}</div>
-{%- endmacro -%}
+{#- yüzde işaretinin önünde satır kırılmasın: "(−" / "%9,87)" bölünmesi (U+2060 kelime birleştirici) -#}
+{%- macro nb(s) -%}{{ s|replace('−%', '−⁠%')|replace('+%', '+⁠%')|replace('(%', '(⁠%') }}{%- endmacro -%}
 
 {%- macro vis(v) -%}
 {%- if v.k == 'ratio' and v.pct is not none -%}
-<div class="hv-vr"><div class="hv-vr-t"><b class="hv-grad">{{ v.big }}</b><span>{{ v.lab }}</span></div><span class="hv-bar"><i style="width:{{ '%.1f'|format([[2, v.pct / 50 * 100]|max, 100]|min) }}%"></i></span><div class="hv-scl" aria-hidden="true"><span>%0</span><span>%25</span><span>%50</span></div>{% if v.calc %}<div class="hv-calc">{{ v.calc }}</div>{% endif %}</div>
+<div class="hv-vr"><div class="hv-vr-t"><b>{{ v.big }}</b><span>{{ v.lab }}</span></div><span class="hv-bar"><i style="width:{{ '%.1f'|format([[2, v.pct / 50 * 100]|max, 100]|min) }}%"></i></span><div class="hv-scl" aria-hidden="true"><span>%0</span><span>%25</span><span>%50</span></div>{% if v.calc %}<div class="hv-calc">{{ v.calc }}</div>{% endif %}</div>
 {%- elif v.k == 'spark' and _mini.get(v.t) and _mini.get(v.t).sp -%}
 {%- set m = _mini.get(v.t) -%}
 <div class="hv-vs"><div class="hv-vs-t"><b>{{ m.price|tr_price }} ₺</b>{% if m.ch is not none %}<span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span>{% endif %}</div>{{ spk_big(m.sp, 'card') }}<div class="hv-ax"><span>{{ m.t }} · 30 işlem günü</span><span>{{ m.sp.lo|tr_price }} – {{ m.sp.hi|tr_price }} ₺</span></div></div>
@@ -82,42 +97,27 @@
 <div class="hv-vb">{% for r in v.rows %}<div class="hv-vb-r"><span>{{ r.l }}</span><i class="hv-db" aria-hidden="true"><s class="{{ dir_class(r.ch) }}" style="{{ 'right' if r.ch < 0 else 'left' }}:50%;width:{{ '%.1f'|format(([2, (r.ch|abs) / (mx or 1) * 50]|max)) }}%"></s></i><b class="{{ dir_class(r.ch) }}">{{ pct_text(r.ch) }}</b></div>{% endfor %}<small>BIST100 hisselerinin sektör içi ortalama değişimi</small></div>
 {%- elif v.k == 'flow' and v.rows -%}
 <div class="hv-vw">{% for r in v.rows %}<div class="hv-vw-r"><span class="hv-vw-ab"><span class="hv-st {{ r['as'] }}">{{ r.a }}</span>{{ ico('arrow') }}<span class="hv-st {{ r.bs }}">{{ r.b }}</span></span><b>{{ r.n }}</b></div>{% endfor %}<small>Trend durumu değişen hisseler: önceki → yeni</small></div>
-{%- elif v.k == 'rating' and v.r -%}
-{%- set r = v.r -%}
-<div class="hv-vg" role="img" aria-label="{{ r.lab }}: {{ r.at }}{% if r.prev %}, önceki {{ r.prev }}{% endif %}{% if r.tag %}, {{ r.tag|lower }}{% endif %}"><div class="hv-vg-l" aria-hidden="true">{% for x in r.scale %}<span{% if loop.index0 == r.at_i %} class="on"{% elif loop.index0 == r.prev_i %} class="was"{% endif %}>{{ x }}</span>{% endfor %}</div><div class="hv-vg-c" aria-hidden="true"><span>{{ r.lab }}{% if r.prev %} · önceki {{ r.prev }}{% endif %}</span>{% if r.tag %}<span class="{{ 'neg' if r.tag_dir == 'down' else ('pos' if r.tag_dir == 'up' else '') }}">{{ r.tag }}</span>{% endif %}</div></div>
-{%- elif v.k == 'cmp' and v.rows -%}
-<div class="hv-vc">{% for r in v.rows %}<div class="hv-vc-r"><span>{{ r.l }}</span><i class="hv-vc-b" aria-hidden="true"><s{% if loop.first %} class="hl"{% endif %} style="width:{{ r.w }}%"></s></i><b>{{ r.t }}</b></div>{% endfor %}{% if v.cap %}<div class="hv-calc">{{ v.cap }}</div>{% endif %}</div>
 {%- elif v.k == 'dates' and v.rows -%}
 <div class="hv-vd">{% for r in v.rows %}<div><b>{{ r.d }}</b><span>{{ r.m }}</span><em>{{ r.l }}</em><small>{{ r.s }}</small></div>{% endfor %}</div>
 {%- endif -%}
 {%- endmacro -%}
 
-{%- macro chips(list) -%}
-{%- set ns = namespace(n=0) -%}{%- for c in list or [] if c.k in ('tk', 'hm', 'doc') -%}{%- set ns.n = ns.n + 1 -%}{%- endfor -%}
-{%- if ns.n -%}<div class="hv-chips">
-{%- for c in list -%}
-{%- if c.k == 'tk' -%}{%- if _mini.get(c.t) -%}{{ tk(_mini.get(c.t)) }}{%- else -%}<a class="hv-tk" href="{{ c.href }}"><b>{{ c.t }}</b></a>{%- endif -%}
-{%- elif c.k == 'hm' -%}<a class="hv-lk" href="/harita">{{ ico('grid') }}Isı haritası</a>
-{%- elif c.k == 'doc' -%}<a class="hv-lk" href="{{ c.href }}">{{ ico('report') }}{{ c.l }}</a>
-{%- endif -%}
-{%- endfor -%}</div>{%- endif -%}
-{%- endmacro -%}
-
-{%- macro company_card(c, big) -%}
-<article class="hv-nc hv-c-sirket{% if big %} hv-nc--m{% endif %}">
-  {#- görsel: kredi notu basamakları > iki çubuk (oran %50 ölçeğini aşınca) > oran çubuğu > 30 günlük çizgi -#}
-  {%- if c.rating %}{% set _v = {'k': 'rating', 'r': c.rating} %}
-  {%- elif c.onem and c.onem.pct >= 1 and c.onem.vis == 'bars' and c.onem.bars %}{% set _v = {'k': 'cmp', 'rows': c.onem.bars, 'cap': c.onem.lab ~ ' ' ~ c.onem.big} %}
-  {%- elif c.onem and c.onem.pct >= 1 %}{% set _v = {'k': 'ratio', 'pct': c.onem.pct, 'big': c.onem.big, 'lab': c.onem.lab, 'calc': c.onem.calc} %}
-  {%- else %}{% set _v = {'k': 'spark', 't': c.ticker} %}{% endif %}
-  {%- set _vh = vis(_v)|trim %}
-  {%- if _vh %}<div class="hv-nc-v">{{ _vh|safe }}</div>{% endif %}
-  <div class="hv-nc-b">
-    {{ meta('sirket', c.kl, c.time_label, c.hot) }}
-    <h3><a href="{{ c.href }}">{{ c.company }}: {{ c.title }}</a></h3>
-    {%- if c.onem and c.onem.amount and c.onem.pct >= 0.1 %}<p>{{ c.onem.basis }} {{ c.onem.amount }}; şirketin {{ c.onem.year }} hasılatına oranı {{ c.onem.big }}.</p>{% endif %}
-    {{ chips([{'k': 'tk', 't': c.ticker, 'href': '/hisse/' ~ c.ticker}]) }}
+{#- Gündem maddesi: kategori → başlık → özet → ilgili hisseler → altta sabit meta satırı -#}
+{%- macro news(id, cat, title, text, tickers, hot, src, ai, when, dt, v=none) -%}
+{%- set C = CAT.get(cat) or ('piyasa', cat, 'chart') -%}
+<article class="hv-ni" id="{{ id }}">
+  <p class="hv-ni-k"><span class="hv-cat">{{ ico(C[2]) }}{{ C[1] }}</span>{% if hot %}<span class="hv-hot">Öne çıkan</span>{% endif %}</p>
+  <h3>{{ title }}</h3>
+  {%- if text %}<p class="hv-ni-p">{{ nb(text) }}</p>{% endif %}
+  {%- if v %}{% set _vh = vis(v)|trim %}{% if _vh %}<div class="hv-ni-v">{{ _vh|safe }}</div>{% endif %}{% endif %}
+  {%- set _tk = [] -%}{%- for t in tickers or [] if _mini.get(t) -%}{%- set _ = _tk.append(t) -%}{%- endfor -%}
+  {%- if _tk %}<div class="hv-chips">{% for t in _tk %}{{ tk(_mini.get(t)) }}{% endfor %}</div>{% endif %}
+  {%- if src or ai or when %}
+  <div class="hv-ni-m">
+    {%- if src %}<span class="hv-src">Kaynaklar: {% for s in src %}<a href="{{ s.url }}" target="_blank" rel="noopener noreferrer nofollow">{{ s.ad }}<span class="sr-only"> (yeni sekmede açılır)</span></a>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+    <span class="hv-ni-e">{% if when %}<time datetime="{{ dt }}">{{ when }}</time>{% endif %}{% if ai %}<span class="hv-ai">{{ ico('spark4') }}Yapay zekâ ile derlendi</span>{% endif %}</span>
   </div>
+  {%- endif %}
 </article>
 {%- endmacro -%}
 
@@ -125,91 +125,106 @@
   {% call pagehead('Haberler') %}Gündem, şirket bildirimleri, takvim ve Akşam Bülteni{% if close_label %}; hepsi {{ close_label }} kapanışı verisiyle{% endif %}.{% endcall %}
   {{ tabs('gundem') }}
 
-  <section class="hv-ed" aria-labelledby="hvQ">
-    <div>
-      {%- if _gh and _gh.baski_label %}<p class="hv-eyb">{{ _gh.baski_label }}</p>
-      {%- elif gundem %}<p class="hv-eyb">{{ gundem.day_label }} · {{ gundem.edition_label }} · {{ gundem.time }}</p>{% endif %}
-      <h2 id="hvQ">{{ _q }}</h2>
-    </div>
-  </section>
-
-
-  {%- if _lead or _cards or _gh or _v1 %}
-  <div class="hv-grid">
-    {%- if _lead %}{% set x = _lead %}
-    <article class="hv-nc hv-lead hv-c-piyasa" id="hv-lead">
-      <div class="hv-ld-b">
-        {{ meta('piyasa', 'BIST100', x.day_label ~ ' kapanışı', x.hot) }}
-        <h3><a href="/harita">{{ x.title }}</a></h3>
-        <p>{{ x.text }}</p>
-        <div class="hv-ld-k">
-          <div class="hv-ld-n"><b>{{ x.close|tr_price }}</b><span class="{{ dir_class(x.ch) }}">{{ pct_text(x.ch) }}</span><small>BIST100 · puan</small></div>
-          {%- if x.sp %}
-          <div class="hv-ld-sp">{{ spk_big(x.sp, 'lead') }}<div class="hv-ax"><span>{{ '{:,.0f}'.format(x.sp.first)|replace(',', '.') }}</span><span>30 işlem günü</span><span>{{ '{:,.0f}'.format(x.sp.last)|replace(',', '.') }}</span></div></div>
-          {%- endif %}
-        </div>
-        <div class="hv-brd" role="img" aria-label="BIST100: {{ x.up }} hisse yükseldi, {{ x.down }} hisse düştü, {{ x.flat }} hisse değişmedi"><i class="u" style="flex:{{ x.up }}"></i>{% if x.flat %}<i class="z" style="flex:{{ x.flat }}"></i>{% endif %}<i class="d" style="flex:{{ x.down }}"></i></div>
-        <div class="hv-brd-l"><span><b class="up">{{ x.up }}</b> yükselen</span><span><b class="down">{{ x.down }}</b> düşen</span>{% if x.flat %}<span><b>{{ x.flat }}</b> değişmeyen</span>{% endif %}</div>
-        <div class="hv-chips">{% for m in x.movers %}{{ tk(_mini.get(m.t)) }}{% endfor %}<a class="hv-lk" href="/harita">{{ ico('grid') }}Isı haritası</a>{% if bulten and bulten.tarih %}<a class="hv-lk" href="/bulten/{{ bulten.tarih }}">{{ ico('news') }}Akşam Bülteni</a>{% endif %}</div>
+  {#- ── 1 · Piyasa özeti ─────────────────────────────────────────────────────────────── -#}
+  {%- if _lead %}{% set x = _lead %}
+  <section class="hv-z hv-z--piyasa" id="piyasa" aria-labelledby="hvQ">
+    <div class="hv-zh">
+      <div class="hv-zh-t">
+        <p class="hv-eyb">Piyasa özeti · {{ x.day_label }} kapanışı</p>
+        <h2 id="hvQ">{{ _q }}</h2>
       </div>
+      <nav class="hv-zl" aria-label="Piyasa bağlantıları"><a href="/harita">Isı haritası{{ ico('arrow') }}</a>{% if bulten and bulten.tarih %}<a href="/bulten/{{ bulten.tarih }}">Akşam Bülteni{{ ico('arrow') }}</a>{% endif %}</nav>
+    </div>
+    <div class="hv-box hv-sum">
+      <article class="hv-story" id="hv-lead">
+        <h3><a href="/harita">{{ x.title }}</a></h3>
+        <p>{{ nb(x.text) }}</p>
+        <dl class="hv-kv">
+          <div class="hv-kv-r">
+            <dt>BIST100</dt>
+            <dd><span class="hv-kv-n"><b>{{ x.close|tr_price }}</b> <span class="{{ dir_class(x.ch) }}">{{ pct_text(x.ch) }}</span></span>
+              {%- if x.sp %}<span class="hv-kv-sp" role="img" aria-label="BIST100 son 30 işlem günü: {{ '{:,.0f}'.format(x.sp.first)|replace(',', '.') }} → {{ '{:,.0f}'.format(x.sp.last)|replace(',', '.') }} puan">{{ spk_big(x.sp, 'kv') }}<small aria-hidden="true">30 işlem günü</small></span>{% endif %}</dd>
+          </div>
+          <div class="hv-kv-r">
+            <dt>Hisseler</dt>
+            <dd class="hv-kv-br"><span class="hv-kv-t"><b class="up">{{ x.up }}</b> yükselen, <b class="down">{{ x.down }}</b> düşen{% if x.flat %}, <b>{{ x.flat }}</b> değişmeyen{% endif %}</span>
+              <span class="hv-brd" role="img" aria-label="BIST100: {{ x.up }} hisse yükseldi, {{ x.down }} hisse düştü, {{ x.flat }} hisse değişmedi"><i class="u" style="flex:{{ x.up }}"></i>{% if x.flat %}<i class="z" style="flex:{{ x.flat }}"></i>{% endif %}<i class="d" style="flex:{{ x.down }}"></i></span></dd>
+          </div>
+          {%- set _mv = [] -%}{%- for m in x.movers if _mini.get(m.t) -%}{%- set _ = _mv.append(m) -%}{%- endfor -%}
+          {%- if _mv %}
+          <div class="hv-kv-r">
+            <dt>Hareketliler</dt>
+            <dd class="hv-kv-mv">{% for m in _mv %}{% set mm = _mini.get(m.t) %}<a class="hv-mv" href="/hisse/{{ m.t }}"><small>{% if loop.first %}{{ 'En çok yükselen' if m.ch > 0 else 'En az düşen' }}{% else %}{{ 'En çok düşen' if m.ch < 0 else 'En az yükselen' }}{% endif %}</small><span><b>{{ m.t }}</b> <span class="{{ dir_class(m.ch) }}">{{ pct_text(m.ch) }}</span></span></a>{% endfor %}</dd>
+          </div>
+          {%- endif %}
+        </dl>
+      </article>
       {%- if heatmap and heatmap_tiles %}
-      {%- set _rows = {} -%}{%- for r in heatmap.rows or [] -%}{%- set _ = _rows.update({r.t: r}) -%}{%- endfor %}
-      <div class="hv-ld-v">
+      {%- set _hr = {} -%}{%- for r in heatmap.rows or [] -%}{%- set _ = _hr.update({r.t: r}) -%}{%- endfor %}
+      <figure class="hv-map">
         <a class="hv-tm" href="/harita" aria-label="BIST100 ısı haritası, {{ x.day_label }}: {{ x.up }} hisse yükseldi, {{ x.down }} hisse düştü">
           {%- for tl in heatmap_tiles if tl.w and tl.h %}
-          {%- set r = _rows.get(tl.t) or {} -%}{%- set v = r.ch.d1 if r.ch else none -%}
+          {%- set r = _hr.get(tl.t) or {} -%}{%- set v = r.ch.d1 if r.ch else none -%}
           {%- set cls = dir_class(v, 2, 'up,dn,neu') if v is not none else 'na' -%}
           {%- set k = (0.16 + 0.84 * (([(v|abs) / 3.0, 1.0]|min) ** 0.72)) if cls in ('up', 'dn') else 0 -%}
           <i class="{{ cls }}{% if tl.w >= 9 and tl.h >= 11 %} lb{% endif %}" style="left:{{ '%.3f'|format(tl.x) }}%;top:{{ '%.3f'|format(tl.y) }}%;width:{{ '%.3f'|format(tl.w) }}%;height:{{ '%.3f'|format(tl.h) }}%;--k:{{ '%.2f'|format(k) }}">{% if tl.w >= 9 and tl.h >= 11 %}<span>{{ tl.t }}{% if v is not none and tl.h >= 15 %}<em>{{ pct_text(v) }}</em>{% endif %}</span>{% endif %}</i>
           {%- endfor %}
           {%- for g in heatmap_groups or [] %}<b style="left:{{ '%.3f'|format(g.x) }}%;top:{{ '%.3f'|format(g.y) }}%;width:{{ '%.3f'|format(g.w) }}%;height:{{ '%.3f'|format(g.h) }}%"></b>{% endfor %}
         </a>
-        <div class="hv-tm-l"><span><i class="gr" aria-hidden="true"></i>−%3 · 0 · +%3</span><span>Kutu büyüklüğü: piyasa değeri</span></div>
-      </div>
+        <figcaption class="hv-tm-l"><span><i class="gr" aria-hidden="true"></i>−%3 · 0 · +%3</span><span>Kutu büyüklüğü: piyasa değeri</span></figcaption>
+      </figure>
       {%- endif %}
-    </article>
-    {%- endif %}
-
-    {%- for c in _cards[:2] %}{{ company_card(c, true) }}{% endfor %}
-
-    {%- if _gh %}
-    {%- for m in _gh.maddeler %}
-    {%- set C = CAT.get(m.kategori) or ('piyasa', m.kategori, 'chart') %}
-    <article class="hv-nc hv-xc hv-c-{{ C[0] }}" id="hv-g{{ loop.index }}">
-      <div class="hv-nc-b">
-        {{ meta(m.kategori, none, none, m.onemli) }}
-        <h3>{{ m.baslik }}</h3>
-        {% if m.ozet %}<p>{{ m.ozet }}</p>{% endif %}
-        {%- set _tc = [] -%}{%- for t in m.hisseler -%}{%- set _ = _tc.append({'k': 'tk', 't': t, 'href': '/hisse/' ~ t}) -%}{%- endfor -%}
-        {{ chips(_tc) }}
-        <div class="hv-src">
-          {%- if m.kaynaklar %}<span class="hv-src-l">Kaynaklar: {% for s in m.kaynaklar %}<a href="{{ s.url }}" target="_blank" rel="noopener noreferrer nofollow">{{ s.ad }}<span class="sr-only"> (yeni sekmede açılır)</span></a>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
-          {%- if m.ai %}<span class="hv-ai">Yapay zekâ ile derlendi</span>{% endif %}
-        </div>
-      </div>
-    </article>
-    {%- endfor %}
-    {%- else %}
-    {%- for it in _v1 %}
-    {%- set cat = it.cat or V1_CAT.get(it.id) or 'piyasa' %}{%- set C = CAT.get(cat) or ('piyasa', 'Piyasa', 'chart') %}
-    {%- set _vh = vis(it.v)|trim if it.v else '' %}
-    <article class="hv-nc hv-c-{{ C[0] }}{% if not _vh %} hv-xc{% endif %}" id="hv-{{ it.id }}">
-      {%- if _vh %}<div class="hv-nc-v">{{ _vh|safe }}</div>{% endif %}
-      <div class="hv-nc-b">
-        {{ meta(cat, none, (gundem.date_label ~ ' · ' ~ gundem.time) if gundem.date_label else none, false) }}
-        <h3>{{ it.h }}</h3>
-        <p>{{ it.p }}</p>
-        {{ chips(it.chips) }}
-      </div>
-    </article>
-    {%- endfor %}
-    {%- endif %}
-
-    {%- for c in _cards[2:] %}{{ company_card(c, false) }}{% endfor %}
-  </div>
-  {%- else %}
-  <p class="hv-empty"><a class="hv-lk" href="/haberler/bildirimler">{{ ico('megaphone') }}Şirket bildirimleri</a></p>
+    </div>
+  </section>
   {%- endif %}
+
+  {#- ── 2 · Gündem ───────────────────────────────────────────────────────────────────── -#}
+  {%- if _gh or _v1 %}
+  <section class="hv-z hv-z--gundem" id="gundem" aria-labelledby="hvGH">
+    <div class="hv-zh">
+      <div class="hv-zh-t">
+        <p class="hv-eyb">Gündem · {% if _gh and _gh.baski_label %}{{ _gh.baski_label }}{% elif gundem %}{{ gundem.day_label }} · {{ gundem.edition_label }} · {{ gundem.time }}{% endif %}</p>
+        <h2 id="hvGH">Gündemde neler var?</h2>
+      </div>
+      <p class="hv-zh-s">{% if _gh %}Türkiye ve dünyadan {{ _gh.maddeler|length }} başlık; basından derlendi, kaynakları altında.{% else %}Piyasa, döviz ve takvimden {{ _v1|length }} başlık, sitenin kendi verisiyle.{% endif %}</p>
+    </div>
+    <div class="hv-box hv-news{% if (_gh.maddeler if _gh else _v1)|length is odd %} odd{% endif %}">
+      {%- if _gh %}
+      {%- set _t = _gh.baski[11:16] if _gh.baski else '' %}
+      {%- for m in _gh.maddeler %}{{ news('hv-g' ~ loop.index, m.kategori, m.baslik, m.ozet, m.hisseler, m.onemli, m.kaynaklar, m.ai, _t, _gh.baski) }}{% endfor %}
+      {%- else %}
+      {%- for it in _v1 %}
+      {%- set _tk = [] -%}{%- for c in it.chips or [] if c.k == 'tk' -%}{%- set _ = _tk.append(c.t) -%}{%- endfor -%}
+      {{ news('hv-' ~ it.id, it.cat or V1_CAT.get(it.id) or 'piyasa', it.h, it.p, _tk, false, none, false, gundem.time, gundem.printed_at, it.v) }}
+      {%- endfor %}
+      {%- endif %}
+    </div>
+  </section>
+  {%- endif %}
+
+  {#- ── 3 · Şirket bildirimleri ──────────────────────────────────────────────────────── -#}
+  <section class="hv-z hv-z--bildirim" id="sirket-bildirimleri" aria-labelledby="hvSB">
+    <div class="hv-zh">
+      <div class="hv-zh-t">
+        <p class="hv-eyb">Şirket bildirimleri</p>
+        <h2 id="hvSB">Hangi şirket ne açıkladı?</h2>
+      </div>
+      <nav class="hv-zl" aria-label="Şirket bildirimleri"><a href="/haberler/bildirimler">Tüm bildirimler{{ ico('arrow') }}</a></nav>
+    </div>
+    {%- if _rows %}
+    <div class="hv-box hv-rows hv-rows--pre">
+      {%- for x in _rows %}
+      {%- set c = x.c -%}
+      {% call brow(x.r, x.m, x.when, x.dt) %}
+        {%- if c and c.rating %}<p class="hv-rt">{{ c.rating.agency }}: <b>{{ c.rating.at }}</b>{% if c.rating.prev %} · önceki {{ c.rating.prev }}{% endif %}{% if c.rating.tag %} · <span class="{{ 'down' if c.rating.tag_dir == 'down' else ('up' if c.rating.tag_dir == 'up' else '') }}">{{ c.rating.tag }}</span>{% endif %}</p>
+        {%- elif c %}{{ onem_bar(c.onem) }}{% endif %}
+      {%- endcall %}
+      {%- endfor %}
+    </div>
+    {%- else %}
+    <p class="hv-empty">Bildirimlerin tamamı <a href="/haberler/bildirimler">Şirket bildirimleri</a> sekmesinde.</p>
+    {%- endif %}
+  </section>
 
   <p class="hb-disc">Bu sayfadaki bilgiler yatırım tavsiyesi değildir. Şirket haberlerindeki rakamlar şirketlerin kendi bildirimlerinden alınır.</p>
 </main>
