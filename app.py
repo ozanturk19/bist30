@@ -641,7 +641,7 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
 _SIGNAL_LABELS = SIGNAL_LABELS
 
 # CPO-1732: grafik yolunun AL/SAT/NÖTR renkleri site paletinden (tokens.css
-# --bp-al/--bp-sat/--bp-bkl) türesin — #3fb950 sitenin yeşili değildi.
+# --bp-up/--bp-down/--bp-flat) türesin — #3fb950 sitenin yeşili değildi.
 CHART_DIR_COLOR = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
 
 @app.template_filter('signal_label')
@@ -2818,17 +2818,17 @@ def _build_code_email(code, unsubscribe_url=None):
 # gercek literallerle ilgilenir):
 #   0e0e12 -> --bp-bg        (tam eslesme)
 #   161618 -> --bp-surface   141416 (K-DC ile duzeltildi, asagida)
-#   2a2a2c -> --bp-border    (tam eslesme)
+#   2a2a2c -> --bp-line    (tam eslesme)
 #   e5e1e4 -> --bp-text      (tam eslesme)
-#   c7c5cd -> --bp-text2     (tam eslesme)
-#   909097 -> --bp-text3 / --bp-bkl / --bp-ctl-border-hover (ucu de ayni
+#   c7c5cd -> --bp-text-2     (tam eslesme)
+#   909097 -> --bp-text-3 / --bp-flat / --bp-ctl-border-hover (ucu de ayni
 #              deger; e-postada BEKLE sinyali + ikincil metin icin kullaniliyor)
-#   00e290 -> --bp-al / --bp-logo-accent (ayni deger; e-postada hem AL
+#   00e290 -> --bp-up / --bp-logo-accent (ayni deger; e-postada hem AL
 #              sinyali hem CTA buton zemini icin kullaniliyor)
-#   f85149 -> --bp-sat       (tam eslesme)
+#   f85149 -> --bp-down       (tam eslesme)
 #   ffc850 -> --bp-volume    (tam eslesme; Hacim Onayli rozeti)
 #   b8c3ff -> --bp-brand     (tam eslesme; kisisellestirme CTA'si)
-#   1c1c1f -> --bp-surface2  1c1b1f (K-DC ile duzeltildi, asagida)
+#   1c1c1f -> --bp-raised  1c1b1f (K-DC ile duzeltildi, asagida)
 #
 # K-DC (22.09, CPO-1783 karari) -- 7 kanon-disi literal kanona baglandi:
 # CPO-1782'de "kanona karsilik yok" isaretlenen 5 literal + "neredeyse esit
@@ -2836,19 +2836,19 @@ def _build_code_email(code, unsubscribe_url=None):
 # DEGISTI, tools/app_hex_exempt.json'daki 7 satir bu commit'le silindi):
 #   eski eef3f8 -> e5e1e4 (--bp-text) -- logo wordmark acik yarisi, artik
 #              sitenin metin rengiyle birebir.
-#   eski 00e2a1 -> 00e290 (--bp-al / --bp-logo-accent) -- CPO: ucuncu ikiz
+#   eski 00e2a1 -> 00e290 (--bp-up / --bp-logo-accent) -- CPO: ucuncu ikiz
 #              yazim, %0,2 fark kopya hatasiydi (bkz. tokens.css 00e6a0
 #              notu, ayni sinif).
 #   eski 161618 -> 141416 (--bp-surface) -- kart zemini.
-#   eski 1c1c1f -> 1c1b1f (--bp-surface2) -- watchlist alarm tablo basligi.
-#   eski 8f98a8 -> 909097 (--bp-text3) -- ust baslik altyazisi "PIYASANIN
+#   eski 1c1c1f -> 1c1b1f (--bp-raised) -- watchlist alarm tablo basligi.
+#   eski 8f98a8 -> 909097 (--bp-text-3) -- ust baslik altyazisi "PIYASANIN
 #              YONU": yon TASIMAYAN bir etiket, bu yuzden ayni degerdeki
-#              sinyal token'i --bp-bkl degil metin token'i --bp-text3
+#              sinyal token'i --bp-flat degil metin token'i --bp-text-3
 #              secildi (K-BO ekseni: sinyal rengi yon tasimayan bir
 #              buyuklugu boyayamaz -- burada tersi: yon tasimayan metin de
 #              sinyal token'indan ayri kalmali).
 #   eski 5a5a62 -> 46464d (--bp-border2) -- footer metni. En yakin kanon
-#              Oklid mesafesiyle --bp-border2 (fark 35) ve --bp-ctl-border
+#              Oklid mesafesiyle --bp-border2 (fark 35) ve --bp-line-strong
 #              (fark 37) arasinda yakin; site genelinde hicbir yerde bir
 #              border token'i `color:` (metin) icin kullanilmiyor -- ilk
 #              emsal. CPO'ya bildirildi, itiraz gelirse degisebilir.
@@ -11591,8 +11591,8 @@ def _og_image_url():
 # 22.09 CANLI OLCUM (1200x630 PNG, piksel sayimi): 12 ayri renk, 11'i
 # tokens.css'te YOK. Kart GitHub koyu temasinin paletiyle boyaniyordu:
 #   #0d1117 zemin (kanon --bp-bg #0e0e12)      #161b22 kart (--bp-surface #141416)
-#   #f0f6fc baslik (--bp-text #e5e1e4)         #8b949e ikincil (--bp-text3 #909097)
-#   #30363d kenarlik (--bp-border #2a2a2c)     #c9d1d9 slogan (--bp-text2 #c7c5cd)
+#   #f0f6fc baslik (--bp-text #e5e1e4)         #8b949e ikincil (--bp-text-3 #909097)
+#   #30363d kenarlik (--bp-line #2a2a2c)     #c9d1d9 slogan (--bp-text-2 #c7c5cd)
 #   #58a6ff marka vurgusu/sayi/serit/cubuk     #3fb950 AL     #484f58 yasal uyari
 #   #1c2b3a + #1f6feb ikon kutusu
 # TEK esleseni `#f85149` (SAT) idi -> AYNI GORSELDE yon cifti ASIMETRIKTI:
@@ -11614,15 +11614,15 @@ def _og_image_url():
 _OG_PALETTE = {          # degerler tokens.css ile BIREBIR (kapi 72 dogrular)
     "bg":       "#0e0e12",   # --bp-bg
     "surface":  "#141416",   # --bp-surface
-    "surface2": "#1c1b1f",   # --bp-surface2
-    "border":   "#2a2a2c",   # --bp-border
+    "surface2": "#1c1b1f",   # --bp-raised
+    "border":   "#2a2a2c",   # --bp-line
     "text":     "#e5e1e4",   # --bp-text
-    "text2":    "#c7c5cd",   # --bp-text2
-    "text3":    "#909097",   # --bp-text3
+    "text2":    "#c7c5cd",   # --bp-text-2
+    "text3":    "#909097",   # --bp-text-3
     "brand":    "#b8c3ff",   # --bp-brand   (yon TASIMAYAN vurgu -- K-BO)
     "logo":     "#00e290",   # --bp-logo-accent (marka sozcuk-isareti, K-CZ)
-    "al":       "#00e290",   # --bp-al
-    "sat":      "#f85149",   # --bp-sat
+    "al":       "#00e290",   # --bp-up
+    "sat":      "#f85149",   # --bp-down
 }
 
 # K-DB icerik bulgusu: kart basligi "BIST100 Sinyal Paneli" diyordu, UCUNCU
