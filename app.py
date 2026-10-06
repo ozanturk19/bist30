@@ -14290,12 +14290,36 @@ def _fundamentals_warmup_daemon():
     Öncesinde REFRESH_WORKER=1 sadece 3 hisseyi (THYAO/AKBNK/GARAN) tek seferlik ısıtıyordu
     ve hiçbir yere yazmıyordu — web worker'lar (REFRESH_WORKER=web) /api/hisse/<X>/fundamentals'ta
     hep {} dönüyordu. MTF warmup daemon paterniyle aynı: tüm BIST listesini döner, periyodik diske yazar.
+
+    D-26 (A2) adım 4: eskiden koşulsuz 30dk'da bir (hafta sonu/seans ortası dahil) tüm
+    listeyi tarayıp stale/şema-eksik/earnings-due tickerları Yahoo'dan çekiyordu — ürün
+    tanımı "fundamentals (haftalık ya da şema eksikse)" zaten günlük/haftalık cadence
+    istiyor, 30dk'lık tarama gereksiz Yahoo trafiği. Slow-chart'ın adım 3'te kullandığı
+    AYNI desen: günde yalnız bir kez, ana EOD turu bugünün anlık cache'ini yazdıktan SONRA
+    (Yahoo contention ana turla yarışmasın) ve işlem günüyse çalışır; günlük flag ile
+    tekilleşir. Fundamentals TTL'i zaten 4h+ (aşağıdaki kontrol listesi) — günlük tek
+    taramanın stale/earnings-due tickerları yakalaması için yeterli. BİLEREK
+    background_refresh()'in watchdog/timeout zincirine EKLENMEDİ (per-ticker Yahoo fetch
+    maliyeti slow-chart'la aynı sınıfta — bkz. prep/D-26-A2-scope.md); kendi bağımsız
+    thread'inde kalmaya devam ediyor, yalnız TETİKLEME zamanlaması değişti.
     """
     time.sleep(120)  # MTF daemon'dan sonra başla — startup I/O ile çakışma önlenir
     # D-40a: lider açılışta diski YÜKLEMİYORDU (yalnız web/non-leader yüklüyor) → her restart
     # 233 hissenin tamamını Yahoo'dan yeniden çektiriyordu (canlı 26.09: restart +710 sn'de 180 kayıt).
     _load_fundamentals_cache_from_disk()
     while True:
+        _today_tr_fund = datetime.now(_TZ_TR).date()
+        _fund_flag_path = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr_fund.strftime('%Y-%m-%d')}_fundamentals.flag"
+        )
+        _today_snapshot_path_fund = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr_fund.strftime('%Y-%m-%d')}.json"
+        )
+        if not (is_trading_day(_today_tr_fund)
+                and os.path.exists(_today_snapshot_path_fund)
+                and not os.path.exists(_fund_flag_path)):
+            time.sleep(600)
+            continue
         now = time.time()
         _written_this_round = 0
         for _t in BIST30:
@@ -14320,7 +14344,12 @@ def _fundamentals_warmup_daemon():
                 except Exception:
                     pass
         _save_fundamentals_cache_to_disk()
-        time.sleep(1800)
+        try:
+            with open(_fund_flag_path, "w", encoding="utf-8") as _f:
+                _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+        except OSError as _e:
+            logger.warning("fundamentals flag yazılamadı: %s", _e)
+        time.sleep(600)  # günlük flag zaten tekilleştiriyor — kapıyı 10dk'da bir yokla
 
 if os.environ.get("REFRESH_WORKER") == "1":
     _bg_start(threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup"))
