@@ -14242,6 +14242,18 @@ if _IS_SHADOW:
 _MTF_DISK_FLUSH_EVERY_N = 5  # CPO-1187 D-6 Sıra-1 revizyonu: tur-sonu tek yazma yerine
 
 def _mtf_warmup_daemon():
+    """D-26 (A2) adım 5: eskiden koşulsuz 30dk'da bir (hafta sonu/seans ortası
+    dahil) BIST30'u tarayıp TTL'i geçen ticker'ları Yahoo'dan çekiyordu.
+    Fundamentals'ın adım 4'te kullandığı AYNI desen: günde yalnız bir kez, ana
+    EOD turu bugünün anlık cache'ini yazdıktan SONRA (Yahoo contention ana
+    turla yarışmasın) ve işlem günüyse çalışır; günlük flag ile tekilleşir.
+    Per-ticker TTL kontrolü (25dk) KORUNDU — günde tek turda artık neredeyse
+    tüm ticker'lar bu eşiği aşmış olacağından tam tazeleme davranışı aynı
+    kalıyor. BİLEREK background_refresh()'in watchdog/timeout zincirine
+    EKLENMEDİ (per-ticker Yahoo fetch maliyeti slow-chart/fundamentals ile
+    aynı sınıfta — bkz. prep/D-26-A2-scope.md); kendi bağımsız thread'inde
+    kalmaya devam ediyor, yalnız TETİKLEME zamanlaması değişti.
+    """
     time.sleep(90)  # ilk cycle'dan sonra başla — startup I/O ile çakışma önlenir
     # CPO-1755 FIX: leader restart'ta _mtf_cache BOŞ başlıyordu; daemon 5 ticker'da
     # bir _save_mtf_cache_to_disk() (dict(_mtf_cache) TAM üzerine yazar) çağırdığı
@@ -14252,6 +14264,18 @@ def _mtf_warmup_daemon():
     # belleğe yükleyip devam etmek, overwrite'ı merge'e çeviriyor.
     _load_mtf_cache_from_disk()
     while True:
+        _today_tr_mtf = datetime.now(_TZ_TR).date()
+        _mtf_flag_path = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr_mtf.strftime('%Y-%m-%d')}_mtf.flag"
+        )
+        _today_snapshot_path_mtf = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr_mtf.strftime('%Y-%m-%d')}.json"
+        )
+        if not (is_trading_day(_today_tr_mtf)
+                and os.path.exists(_today_snapshot_path_mtf)
+                and not os.path.exists(_mtf_flag_path)):
+            time.sleep(600)
+            continue
         now = time.time()
         _written_this_round = 0
         for _i, _t in enumerate(BIST30):
@@ -14277,11 +14301,16 @@ def _mtf_warmup_daemon():
                 except Exception:
                     pass
         _save_mtf_cache_to_disk()
-        time.sleep(1800)
+        try:
+            with open(_mtf_flag_path, "w", encoding="utf-8") as _f:
+                _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+        except OSError as _e:
+            logger.warning("mtf flag yazılamadı: %s", _e)
+        time.sleep(600)  # günlük flag zaten tekilleştiriyor — kapıyı 10dk'da bir yokla
 
 if os.environ.get("REFRESH_WORKER") == "1":
     _bg_start(threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup"))
-    logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, 30dk interval)")
+    logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, D-26 adım 5: EOD-gated günde 1 tur)")
 
 _FUND_DISK_FLUSH_EVERY_N = 10  # MTF'nin 5'lik aralığından seyrek — fundamentals TTL daha uzun (4s)
 
