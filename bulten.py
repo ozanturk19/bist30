@@ -82,11 +82,6 @@ def ayrilma(n):
     return "'den"
 
 
-def bulunma(n):
-    """Sayıya bulunma eki: 2026'da, 2025'te, 2023'te."""
-    return ayrilma(n)[:-1]
-
-
 def sayi(v, nd=2):
     """12592.76 -> '12.592,76' (tr-TR)."""
     s = "{:,.{nd}f}".format(abs(float(v)), nd=nd).replace(",", "X").replace(".", ",").replace("X", ".")
@@ -96,11 +91,6 @@ def sayi(v, nd=2):
 def yuzde_mutlak(v, nd=2):
     """2.38 / -2.38 -> '%2,38' (işaretsiz; yön kelimeyle söylenir)."""
     return "%" + sayi(abs(v), nd)
-
-
-def tarih_uzun(iso, yil=True):
-    y, m, d = (int(x) for x in iso[:10].split("-"))
-    return "%d %s%s" % (d, AYLAR[m - 1], (" %d" % y) if yil else "")
 
 
 def _since(iso, day_iso):
