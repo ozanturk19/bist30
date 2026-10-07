@@ -250,6 +250,51 @@ def test_sektor_ortancasi_kap_degerleri_en_az_5_akran():
     assert kt.sector_medians(four, sec, "Banka")["fk"] is None            # 3 akran < 5
 
 
+def test_sektor_ici_sira_cpo1826_yon_ve_esik():
+    """CPO-1826: fk/pd_dd dusuk iyi (ucuz), ozsermaye karliligi yuksek iyi; <5 akran -> None;
+    hissenin kendi degeri yoksa/gecersizse de None. Ayni havuz/esik sector_medians ile birebir."""
+    def row(fk, pd, roe):
+        return {"fk": fk, "pd_dd": pd, "ozsermaye_karliligi": roe}
+    kap = {"A": row(10, 1.0, 20), "B": row(12, 2.0, 10), "C": row(14, -1, -5), "D": row(16, 3.0, 30),
+           "E": row(18, 4.0, 15), "F": row(None, 5.0, None), "X": row(40, 9.0, 50)}
+    sec = {"A": "Banka", "B": "Banka", "C": "Banka", "D": "Banka", "E": "Banka", "F": "Banka", "X": "Enerji"}.get
+    # fk artan sira (ucuz once, 5 gecerli: A10<B12<C14<D16<E18, F None payda disi). A en ucuz -> 1/5.
+    # pd_dd artan (5 gecerli: A1<B2<D3<E4<F5, C=-1 negatif payda disi). ozsermaye_karliligi azalan
+    # (5 gecerli: D30>A20>E15>B10>C-5, F None payda disi) -> A 3.sirada (D,A,E,B,C) = 2.
+    assert kt.sector_rank(kap, sec, "Banka", "A") == {"fk": {"sira": 1, "toplam": 5, "kume": "kap_sektor"},
+                                                        "pd_dd": {"sira": 1, "toplam": 5, "kume": "kap_sektor"},
+                                                        "ozsermaye_karliligi": {"sira": 2, "toplam": 5, "kume": "kap_sektor"}}
+    # D en yuksek ROE (30) -> 1/5; E en yuksek fk (18) -> 5/5.
+    assert kt.sector_rank(kap, sec, "Banka", "D")["ozsermaye_karliligi"] == {"sira": 1, "toplam": 5, "kume": "kap_sektor"}
+    assert kt.sector_rank(kap, sec, "Banka", "E")["fk"] == {"sira": 5, "toplam": 5, "kume": "kap_sektor"}
+    # C: pd_dd negatif -> gecersiz, sira yok; fk/ozsermaye_karliligi gecerli.
+    r_c = kt.sector_rank(kap, sec, "Banka", "C")
+    assert r_c["pd_dd"] is None and r_c["fk"] is not None and r_c["ozsermaye_karliligi"] is not None
+    # F: fk/ozsermaye_karliligi None -> sirasiz; pd_dd (5.0) gecerli.
+    r_f = kt.sector_rank(kap, sec, "Banka", "F")
+    assert r_f["fk"] is None and r_f["ozsermaye_karliligi"] is None and r_f["pd_dd"] is not None
+    # X: Enerji sektorunde tek basina, <5 akran -> hepsi None.
+    assert kt.sector_rank(kap, sec, "Enerji", "X") == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}
+    # Sektor belirsiz/Diger -> hukum yok.
+    assert kt.sector_rank(kap, sec, "Diğer", "A") == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}
+    assert kt.sector_rank(kap, sec, None, "A") == {"fk": None, "pd_dd": None, "ozsermaye_karliligi": None}
+    # 3 akran < 5 -> None (sector_medians ile ayni esik).
+    four = {k: v for k, v in kap.items() if k in "ABCX"}
+    assert kt.sector_rank(four, sec, "Banka", "A")["fk"] is None
+
+
+def test_extend_sektor_sira_additif_gecis():
+    """CPO-1826: sektor_sira medians'tan bagimsiz, additif gecis -- verilmezse None, verilirse aynen."""
+    yahoo = {"pe_ratio": 11.7, "roe": 17.6, "shares": 1926795598.0, "market_cap": {"value": 7.9e11, "currency": "TRY"}}
+    rec = _rec("TUPRS")
+    base = kf.apply_to_fundamentals(dict(yahoo), rec, 410.75, TODAY)
+    none = kt.extend(dict(base), rec, 410.75, TODAY)
+    assert none["sektor_sira"] is None and none["sektor_ortanca"] is None
+    ranks = {"fk": {"sira": 2, "toplam": 9, "kume": "kap_sektor"}, "pd_dd": None, "ozsermaye_karliligi": None}
+    out = kt.extend(dict(base), rec, 410.75, TODAY, None, ranks)
+    assert out["sektor_sira"] == ranks
+
+
 def test_kap_metrics_valuation_now_ile_ayni_ve_kayitsizda_none():
     rec = _rec("TUPRS")
     m = kt.kap_metrics(rec, 410.75)

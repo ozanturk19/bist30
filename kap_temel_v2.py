@@ -550,6 +550,22 @@ def kap_metrics(rec, price, yahoo_shares=None):
     return {k: now.get(k) for k in ("fk", "pd_dd", "ozsermaye_karliligi")}
 
 
+def _sector_pool(kap_by_ticker, pools, field, pos):
+    """Esik (MIN_PEERS_KAP) karsilayan ilk havuzun {ticker: deger} sozlugu (yoksa None, None).
+    sector_medians ve sector_rank'in akran secimi burada birlesir -- iki fonksiyon ayni havuzu
+    (once sektor, yetmezse kap_bucket_for yedegi) ve ayni gecerlilik kuralini kullanir."""
+    for of, grp, havuz in pools:
+        vals = {}
+        for tk, m in (kap_by_ticker or {}).items():
+            v = (m or {}).get(field)
+            ok = _positive(v) if pos else (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v)
+            if ok and of(tk) == grp:
+                vals[tk] = v
+        if len(vals) >= MIN_PEERS_KAP:
+            return vals, havuz
+    return None, None
+
+
 def sector_medians(kap_by_ticker, sector_of, sector, fallback_of=None, fallback=None):
     """F/K, PD/DD (yalniz pozitif) ve ozsermaye karliligi ortancasi, ayni sektor grubundaki
     sirketlerin KAP degerlerinden (kap_metrics). Grupta gecerli akran < MIN_PEERS_KAP ya da sektor
@@ -566,18 +582,40 @@ def sector_medians(kap_by_ticker, sector_of, sector, fallback_of=None, fallback=
     if fallback_of is not None and fallback not in (None, "", "Diğer"):
         pools.append((fallback_of, fallback, "kap"))
     for k, pos in fields:
-        for of, grp, havuz in pools:
-            vals = []
-            for tk, m in (kap_by_ticker or {}).items():
-                v = (m or {}).get(k)
-                ok = _positive(v) if pos else (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v)
-                if ok and of(tk) == grp:
-                    vals.append(v)
-            if len(vals) >= MIN_PEERS_KAP:
-                out[k] = {"deger": round(statistics.median(vals), 2), "n": len(vals), "kapsam": "sektor"}
-                if havuz:
-                    out[k]["havuz"] = havuz
-                break
+        vals, havuz = _sector_pool(kap_by_ticker, pools, k, pos)
+        if vals is not None:
+            out[k] = {"deger": round(statistics.median(vals.values()), 2), "n": len(vals), "kapsam": "sektor"}
+            if havuz:
+                out[k]["havuz"] = havuz
+    return out
+
+
+# CPO-1826 (07.10): fk/pd_dd dusuk iyi (ucuz), ozsermaye karliligi yuksek iyi -- yon burada
+# sabitlenir, testle kilitlenir.
+_RANK_AZALAN = {"fk": False, "pd_dd": False, "ozsermaye_karliligi": True}
+
+
+def sector_rank(kap_by_ticker, sector_of, sector, ticker, fallback_of=None, fallback=None):
+    """CPO-1826: her oran icin sektor ici sira -- C-22c'nin ucuz/makul/pahali icin kullandigi AYNI
+    KAP sektor es kumesi/havuz sirasi (_sector_pool: once D-23 sektoru, yetmezse kap_bucket_for
+    yedegi), esik ve gecerlilik kurali sector_medians ile birebir. <5 akran ya da hissenin kendi
+    degeri yoksa None. Esitlikte ticker anahtarina gore kararli sira (rastgele degil). Yargi
+    etiketi uretilmez, yalniz {sira, toplam, kume: 'kap_sektor'}."""
+    fields = (("fk", True), ("pd_dd", True), ("ozsermaye_karliligi", False))
+    out = {k: None for k, _ in fields}
+    if sector in (None, "", "Diğer"):
+        return out
+    pools = [(sector_of, sector, None)]
+    if fallback_of is not None and fallback not in (None, "", "Diğer"):
+        pools.append((fallback_of, fallback, "kap"))
+    for k, pos in fields:
+        vals, _havuz = _sector_pool(kap_by_ticker, pools, k, pos)
+        if vals is None or ticker not in vals:
+            continue
+        azalan = _RANK_AZALAN[k]
+        order = sorted(vals.items(), key=lambda kv: (-kv[1] if azalan else kv[1], kv[0]))
+        sira = next(i for i, (tk, _) in enumerate(order, start=1) if tk == ticker)
+        out[k] = {"sira": sira, "toplam": len(vals), "kume": "kap_sektor"}
     return out
 
 
@@ -619,14 +657,17 @@ def build_v2(rec, price=None, today=None, yahoo_shares=None, medians=None):
     }
 
 
-def extend(data, rec, price=None, today=None, medians=None):
+def extend(data, rec, price=None, today=None, medians=None, ranks=None):
     """/api/hisse/<T>/fundamentals icin: kap_financials.apply_to_fundamentals ciktisina
-    Temel v2 alanlari. Kayit yoksa kap_durum='hazirlaniyor' (arayuz eski alanlarla + sessiz not)."""
+    Temel v2 alanlari. Kayit yoksa kap_durum='hazirlaniyor' (arayuz eski alanlarla + sessiz not).
+    ranks: CPO-1826 sektor ici sira (additif, medians'tan bagimsiz kaynak -- her zaman canli
+    KAP havuzundan; D-40c'nin EOD v2 ortanca yedegi rank icin yok)."""
     if not data:
         return data
     out = dict(data)
     out["schema_version"] = 2   # D-40b: eski alanlar korunur, yalniz ek bilgi (additif)
     out["sektor_ortanca"] = medians
+    out["sektor_sira"] = ranks
     if not rec or not out.get("kap"):
         out["kap_durum"] = "hazirlaniyor"
         return out

@@ -8855,8 +8855,12 @@ def _fundamentals_temel_v2(ticker, data):
         v2_meds = temel_skor_v2.api_medians(v2)
         meds = v2_meds or kap_temel_v2.sector_medians(_kap_sector_metrics(), _get_sector, _get_sector(ticker),
                                                       _get_kap_bucket, _get_kap_bucket(ticker))   # D-23b yedek
+        # CPO-1826: sektor ici sira -- medians'in EOD v2 yedegi burada yok, hep canli KAP havuzundan
+        # (C-22c ucuz/makul/pahali ile AYNI kume: once D-23 sektoru, yetmezse kap_bucket_for).
+        ranks = kap_temel_v2.sector_rank(_kap_sector_metrics(), _get_sector, _get_sector(ticker), ticker,
+                                         _get_kap_bucket, _get_kap_bucket(ticker))
         return kap_temel_v2.extend(data, kap_financials.load_record(ticker), price,
-                                   datetime.now(_TZ_TR).date(), meds)
+                                   datetime.now(_TZ_TR).date(), meds, ranks)
     except Exception as e:
         logger.warning("_fundamentals_temel_v2(%s): %s", ticker, e)
         return data
