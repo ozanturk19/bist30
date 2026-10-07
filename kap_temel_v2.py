@@ -125,6 +125,37 @@ def roe_avg(rep, template):
     return _pct(ni, (e1 + e0) / 2.0)
 
 
+def _invested_capital(rep, col="cur"):
+    """Yatirilan sermaye = toplam ozkaynak + borclanma - nakit (ayni raporun bir sutunu)."""
+    e = _v(rep, "equity_total", col)
+    b = kf._borrowings(rep, col)
+    cash = _v(rep, "cash", col)
+    if e is None or b is None or cash is None:
+        return None
+    return e + b - cash
+
+
+def roic_avg(rep, template):
+    """ROIC (yillik, CPO-1826): NOPAT / ortalama yatirilan sermaye (ayni raporun iki sutunu).
+    Efektif vergi orani aciklanan veriden (kendi varsayimimiz yok): vergi oncesi kar =
+    net_income_total - tax_expense; oran = -tax_expense / vergi_oncesi_kar. Vergi oncesi kar
+    <=0 ya da ilgili alan bossa None (tahmin uretilmez). Banka/sigortada ROIC hesaplanmaz."""
+    if template in ("banka", "sigorta"):
+        return None
+    op = _v(rep, "operating_profit")
+    ni_total, tax = _v(rep, "net_income_total"), _v(rep, "tax_expense")
+    if op is None or ni_total is None or tax is None:
+        return None
+    pretax = ni_total - tax
+    if pretax <= 0:
+        return None
+    nopat = op * (1 - (-tax / pretax))
+    ic1, ic0 = _invested_capital(rep, "cur"), _invested_capital(rep, "prev")
+    if ic1 is None or ic0 is None or (ic1 + ic0) <= 0:
+        return None
+    return _pct(nopat, (ic1 + ic0) / 2.0)
+
+
 def bank_ratios(rep):
     """Banka sablonu (ayni rapor): ozsermaye karliligi, gider/gelir, kredi/mevduat, net faiz
     geliri / ortalama varlik, ucret-komisyon payi, beklenen zarar karsiligi / ortalama kredi."""
@@ -340,8 +371,10 @@ def valuation_now(rec, template, price, yahoo_shares=None):
 
 def _multiplier_year(rep, template):
     """D-40b: F/K, PD/DD disindaki carpanlarin yillik degeri -- tek raporun cur sutunundan
-    (balance()'daki sablon ayrimiyla ayni: bankada net borc/FAVOK ve cari oran yok)."""
+    (balance()'daki sablon ayrimiyla ayni: bankada net borc/FAVOK ve cari oran yok; ROIC
+    banka/sigortada CPO-1826 geregi hesaplanmaz, roic_avg kendi icinde None doner)."""
     roe = roe_avg(rep, template)
+    roic = roic_avg(rep, template)
     net_borc_favok = cari_oran = None
     if template in ("sanayi", "gyo"):
         b, cash = kf._borrowings(rep), _v(rep, "cash")
@@ -352,7 +385,7 @@ def _multiplier_year(rep, template):
         cari_oran = _r(_ratio(_v(rep, "current_assets"), _v(rep, "current_liabilities")))
     elif template == "sigorta":
         cari_oran = _r(_ratio(_v(rep, "current_assets"), _v(rep, "current_liabilities")))
-    return {"ozsermaye_karliligi": roe, "net_borc_favok": net_borc_favok, "cari_oran": cari_oran}
+    return {"ozsermaye_karliligi": roe, "net_borc_favok": net_borc_favok, "cari_oran": cari_oran, "roic": roic}
 
 
 def valuation_band(rec, template):
@@ -364,7 +397,7 @@ def valuation_band(rec, template):
     for b in band:
         rep = by_fy.get(b.get("yil"))
         pd = b.get("pd_dd")
-        extra = {"ozsermaye_karliligi": None, "net_borc_favok": None, "cari_oran": None}
+        extra = {"ozsermaye_karliligi": None, "net_borc_favok": None, "cari_oran": None, "roic": None}
         if rep is not None:
             if template == "sigorta" and pd is None:
                 eq = _tl(rep, _equity(rep, template))

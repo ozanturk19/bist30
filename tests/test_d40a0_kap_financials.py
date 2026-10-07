@@ -13,6 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 import kap_financials as kf  # noqa: E402
+import kap_temel_v2 as kt  # noqa: E402
 
 FIX = os.path.join(ROOT, "tests", "fixtures", "kap_fin")
 TODAY = date(2026, 9, 24)
@@ -73,6 +74,21 @@ def test_tuprs_tax_expense_roic_efektif_vergi_orani_icin_cpo1826():
     profit_before_tax25 = t25["items"]["net_income_total"]["cur"] - tax25["cur"]
     assert profit_before_tax25 == 43768722.0
     assert tax24["kaynak"] == {"rapor": 1393446, "donem": "2024/12", "birim": "1.000 TL"}
+
+
+def test_tuprs_roic_efektif_vergi_orani_ile_cpo1826_b_adimi():
+    # D-40b adim (b/c): kap_temel_v2.roic_avg -- NOPAT (operating_profit * (1-efektif vergi orani))
+    # / ortalama yatirilan sermaye (equity_total + borclanma - nakit, ayni raporun iki sutunu).
+    # Elle KAP ham raporuyla (fr_1393446/fr_1554106) teyitli, kendi varsayimimizla sabit oran yok.
+    t24, t25 = _rep(1393446, "TUPRS", 2024), _rep(1554106, "TUPRS", 2025)
+    assert kt.roic_avg(t24, "sanayi") == 9.84
+    assert kt.roic_avg(t25, "sanayi") == 9.23
+    # Banka/sigortada ROIC hesaplanmaz (CPO-1826 karari) -- sablon kontrolu disardaki
+    # finansal alanlara bakmadan erken None doner.
+    assert kt.roic_avg(t25, "banka") is None
+    assert kt.roic_avg(t25, "sigorta") is None
+    g = _rep(1552588, "GARAN", 2025, sector="BANKALAR")
+    assert kt.roic_avg(g, "banka") is None
 
 
 def test_garan_banka_toplam_sutunu_ve_bayrak():
