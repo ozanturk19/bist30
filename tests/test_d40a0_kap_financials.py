@@ -59,6 +59,22 @@ def test_tuprs_bimas_froto_yillik_degisim_rapor_karsilastirmasiyla_birebir():
     assert {t24["basis"], t25["basis"], b["basis"], f["basis"]} == {"tms29"}
 
 
+def test_tuprs_tax_expense_roic_efektif_vergi_orani_icin_cpo1826():
+    # CPO-1826: ROIC efektif vergi orani = tax_expense / (net_income_total - tax_expense).
+    # Kendi varsayimimizla sabit oran yok; sirketin aynı raporundaki vergi (gideri) satiri.
+    t24, t25 = _rep(1393446, "TUPRS", 2024), _rep(1554106, "TUPRS", 2025)
+    tax24, tax25 = t24["items"]["tax_expense"], t25["items"]["tax_expense"]
+    assert (tax24["cur"], tax24["prev"]) == (-12711864.0, -5700367.0)
+    assert (tax25["cur"], tax25["prev"]) == (-13896050.0, -16638814.0)
+    # vergi oncesi kar = net_income_total - tax_expense (KAP'in kendi raporuyla birebir, SÜRDÜRÜLEN
+    # FAALİYETLER VERGİ ÖNCESİ KARI satiri): 19.033.640 - (-12.711.864) = 31.745.504.
+    profit_before_tax24 = t24["items"]["net_income_total"]["cur"] - tax24["cur"]
+    assert profit_before_tax24 == 31745504.0
+    profit_before_tax25 = t25["items"]["net_income_total"]["cur"] - tax25["cur"]
+    assert profit_before_tax25 == 43768722.0
+    assert tax24["kaynak"] == {"rapor": 1393446, "donem": "2024/12", "birim": "1.000 TL"}
+
+
 def test_garan_banka_toplam_sutunu_ve_bayrak():
     g = _rep(1552588, "GARAN", 2025, sector="BANKALAR")
     assert g["format"] == "banka" and g["basis"] == "banka"

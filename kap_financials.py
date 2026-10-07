@@ -192,6 +192,8 @@ IND_ITEMS = [
     ("net_monetary_position", "IS", "ifrs-full_GainsLossesOnNetMonetaryPosition"),
     ("net_income_total", "IS", "ifrs-full_ProfitLoss"),
     ("net_income_parent", "IS", "ifrs-full_ProfitLossAttributableToOwnersOfParent"),
+    # ROIC efektif vergi orani icin (CPO-1826): vergi oncesi kar = net_income_total - tax_expense.
+    ("tax_expense", "IS", "ifrs-full_IncomeTaxExpenseContinuingOperations"),
     ("cfo", "CF", "ifrs-full_CashFlowsFromUsedInOperatingActivities"),
     ("d_and_a", "CF", "ifrs-full_AdjustmentsForDepreciationAndAmortisationExpense"),
     ("capex", "CF", "kap-fr_PurchaseOfPropertyPlantEquipmentAndIntangibleAssetsClassifiedAsInvestingActivities"),
