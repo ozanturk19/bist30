@@ -12063,12 +12063,50 @@ def api_ozet_snapshots():
         return safe_json({"dates": []})
 
 
+def _metodoloji_ornek():
+    """CPO-1829: /metodoloji 'canlı THYAO örneği' — /hisse hero kartıyla AYNI
+    kaynak (_financial_health_cache, CPO-1610 deseni), yeniden hesaplama yok;
+    kayıt yoksa, bp_trend yoksa (BP_DIRECTIONAL kapalıyken entry'de hiç
+    olmaz) ya da skor None ise None döner (blok gizlenir). Şablon kendi
+    round(temel)/round(pay)'ini 0,60/0,40 ile çarpıp skorla gösterir — burada
+    da aynı yuvarlamayla tutarlılık doğrulanır, sapma varsa sayfa kendi
+    içinde çelişmesin diye None dönülür."""
+    with _lock:
+        cached = _financial_health_cache.get("THYAO")
+    entry = cached.get("data") if cached else None
+    if not entry:
+        return None
+    bp_trend = entry.get("bp_trend")
+    temel = entry.get("temel_analiz_skoru")
+    skor = entry.get("borsapusula_skoru")
+    if not bp_trend or temel is None or skor is None:
+        return None
+    pay = bp_trend.get("pay")
+    durum = bp_trend.get("durum")
+    if pay is None or durum is None:
+        return None
+    if round(0.6 * round(temel) + 0.4 * round(pay)) != skor:
+        return None
+    ts = cached.get("ts")
+    if not ts:
+        return None
+    return {
+        "ticker": "THYAO",
+        "temel": temel,
+        "pay": pay,
+        "durum_ad": _SIGNAL_LABELS.get(durum, durum),
+        "skor": skor,
+        "tarih": datetime.fromtimestamp(ts, _TZ_TR).strftime("%d.%m.%Y"),
+    }
+
+
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
 @app.route("/metodoloji")
 def metodoloji():
     # D-59: Keşfet listelerinin kural cümleleri (sayfadakiyle aynı metin, tek kaynak kesfet.KURAL)
     return render_template("metodoloji.html", kesfet_kurallari=kesfet.rules(),
-                            temel_v2_on=temel_skor_v2.enabled())
+                            temel_v2_on=temel_skor_v2.enabled(),
+                            ornek=_metodoloji_ornek())
 
 
 @app.route("/offline")
