@@ -50,6 +50,13 @@
     <div><dt><i class="mt-dot y" aria-hidden="true"></i>Yatay</dt><dd>Trend payı 50; skor finansallara göre oluşur.</dd></div>
     <div><dt><i class="mt-dot b" aria-hidden="true"></i>Trend Bozuldu</dt><dd>Trend payı 0 ile 50 arası; skoru yükseltmez.</dd></div>
   </dl>
+  {#- C-42 (09.10): canlı örnek. `ornek` route bağlamı (CPO-1829, DEV) gelene kadar basılmaz:
+      {ticker, temel, pay, durum_ad, skor, tarih} — son gün sonu skor kaydından. -#}
+  {%- if ornek %}
+  <p class="mt-ex"><span class="mt-ex-k">Örnek · {{ ornek.tarih }} kapanışı</span>
+    <a href="/hisse/{{ ornek.ticker }}">{{ ornek.ticker }}</a>: Temel skor {{ ornek.temel|round|int }}, trend payı {{ ornek.pay|round|int }} ({{ ornek.durum_ad }}) →
+    <span class="num">0,60 × {{ ornek.temel|round|int }} + 0,40 × {{ ornek.pay|round|int }} = <strong>{{ ornek.skor }}</strong></span></p>
+  {%- endif %}
   <details class="mt-td">
     <summary>Teknik detay</summary>
     <p><code>Skor = 0,60 × Temel skor + 0,40 × trend payı</code>. Güçlü Trend ve Trend Bozuldu'da trend payının 50'den uzaklığı, trendin ne kadar güçlü teyit edildiğine göre <a class="jargon-term" data-term="adx" href="#adx">ADX</a>, hacim, durumun en az 3 işlem günüdür sürmesi ve RSI'dan hesaplanır; Yatay'da trend payı 50'dir.</p>
