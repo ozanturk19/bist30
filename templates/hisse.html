@@ -387,7 +387,7 @@
 {%- macro tv2_weights(v) -%}
 {%- set _w = v.agirliklar or {} -%}
 Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değerleme %{{ _w.degerleme or 20 }}, büyüme %{{ _w.buyume or 20 }}, bilanço sağlığı %{{ _w.bilanco or 20 }}, temettü %{{ _w.temettu or 10 }}.
-{%- if hs.categories_na and 'bilanco' in hs.categories_na %} {{ 'Bankalarda' if sector == 'Bankacılık' else ('Sigorta şirketlerinde' if sector == 'Sigorta' else 'Bu şirket türünde') }} bilanço sağlığı başlığı kullanılmaz; puan diğer dört başlıktan.{% endif -%}
+{%- if hs.categories_na and 'bilanco' in hs.categories_na %} {{ 'Bankalarda' if sector == 'Bankacılık' else ('Sigorta şirketlerinde' if sector == 'Sigorta' else 'Bu şirket türünde') }} bilanço sağlığı başlığı kullanılmaz; puan diğer dört başlıktan.{% elif hs.categories and 'degerleme' not in hs.categories %} Değerleme başlığına puan verilmedi; puan diğer dört başlıktan.{% endif -%}
 {%- endmacro -%}
 {%- macro tv2_limited(v) -%}
 {#- C-74 K3: yüzde eşiği ve iç süreç dili yok; somut tek cümle. -#}
@@ -732,6 +732,9 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       {%- set _cm = ((_tv2.eksenler or {}).get(_k) or {}).get('cumle') if _tv2 else none %}
       {%- set _cp = _cm.replace('; ', ' · ').split(' · ') if _cm else [] %}
       <li class="tv-ax" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><svg class="tv-ax-tr" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="tv-ax-bg" width="100" height="8" rx="4"/><rect class="tv-ax-fg" width="{{ '%.1f'|format(_v) }}" height="8" rx="4"/></svg><b class="tv-ax-v">{{ '%.0f'|format(_v) }}</b><span class="tv-ax-l" id="tvAx-{{ _k }}">{% if _cp %}<span>{{ _cp[0] }}</span>{% if _cp|length > 1 %}<span class="tv-ax-x"> · {{ _cp[1:]|join(' · ') }}</span>{% endif %}{% else %}{{ 'Güçlü alan' if _v >= 70 else ('Zayıf alan' if _v < 50 else 'Dengeli') }}{% endif %}</span></li>
+      {%- elif _tv2 and ((_tv2.eksenler or {}).get(_k) or {}).get('cumle') %}
+      {#- C-22c (09.10): v2 ekseni puansiz (or. sektorde <5 sirket) -> satir gizlenmez, D-40c cumlesi tam gorunur. -#}
+      <li class="tv-ax tv-ax--na" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><span class="tv-ax-na">Puan verilmedi</span><b class="tv-ax-v"></b><span class="tv-ax-l" id="tvAx-{{ _k }}">{{ _tv2.eksenler[_k].cumle }}</span></li>
       {%- elif _k in _tv_na %}
       <li class="tv-ax tv-ax--na" data-k="{{ _k }}"><span class="tv-ax-n">{{ _lb }}</span><span class="tv-ax-na">{{ 'Bankalarda' if (sector == 'Bankacılık' or 'nakit_akisi' in _tv_na) else ('Sigorta şirketlerinde' if sector == 'Sigorta' else 'Bu şirket türünde') }} kullanılmaz</span><b class="tv-ax-v"></b><span class="tv-ax-l" id="tvAx-{{ _k }}"></span></li>
       {%- endif %}
