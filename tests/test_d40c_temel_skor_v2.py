@@ -176,8 +176,9 @@ def test_tuprs_sanayi_eksenleri_cumleler_ve_piotroski():
     assert k["buyume"]["cumle"].endswith("(enflasyon düzeltmeli).")
     assert k["temettu"]["cumle"].startswith("Son 12 ay temettü verimi %") and "önceki 12 ayda da ödeme var" in k["temettu"]["cumle"]
     # F/K 410,75 fiyatla 11,73; kovanin ortancasi 11,73 (5 degerin ortasi) -> oran 1,0
-    assert d["degerleme"]["fk"] == 11.73 and d["ortanca"]["fk"] == {"deger": 11.73, "n": 5}
+    assert d["degerleme"]["fk"] == 11.73 and d["ortanca"]["fk"] == {"deger": 11.73, "n": 5, "kapsam": "sektor"}
     assert d["degerleme"]["oran"]["fk"] == 1.0 and d["degerleme"]["hukum"] == "pahali"   # PD/DD 1,74 / 1,1
+    assert d["degerleme"]["kapsam"] == "sektor"
     assert "F/K 11,73 · sektör ortancası 11,73" in k["degerleme"]["cumle"]
     assert d["cevap"] and not any(w in d["cevap"] for w in BANNED)
 
@@ -191,7 +192,7 @@ def test_garan_banka_sablonu_5_madde_kap_ortancasi():
     d = ts.score_universe(inputs, buckets)["GARAN"]["detay"]
     k = d["eksenler"]
     assert set(k["kalite"]["girdiler"]) == {"roe", "gider_gelir", "saglamlik"}
-    assert d["ortanca"]["ozsermaye_karliligi"] == {"deger": 20.0, "n": 5}
+    assert d["ortanca"]["ozsermaye_karliligi"] == {"deger": 20.0, "n": 5, "kapsam": "sektor"}
     # 5 madde: ozsermaye karliligi 24,72 > banka ortancasi 20,0 gecer -> 3/5 (D-40a2 testiyle ayni sonuc)
     assert d["saglamlik"] == {"yontem": "banka5", "puan": 3, "toplam": 5}
     assert k["kalite"]["cumle"] == ("Özsermaye kârlılığı son 12 ayda %24,7 · banka ortancası %20,0; "
@@ -199,6 +200,24 @@ def test_garan_banka_sablonu_5_madde_kap_ortancasi():
     assert k["bilanco"]["cumle"].startswith("Kredi / mevduat %86,2 · özkaynak / varlık %")
     assert "faaliyet gelirleri" in k["buyume"]["cumle"] and k["buyume"]["cumle"].endswith("(nominal TL).")
     assert d["degerleme"]["hukum"] in ("ucuz", "makul", "pahali", "karisik")
+
+
+def test_degerleme_kucuk_sektorde_piyasa_geneli_yedegi_cpo1828():
+    """CPO-1828 (09.10): sektorde <5 akran -> hukumsuz birakilmaz, BIST geneli (piyasa)
+    ortancasina duser; kapsam alani 'piyasa' olarak isaretlenir (tarama_fields ile ayni desen)."""
+    t = _inp("TUPRS")
+    small_peers = _peers(t, n=2, fk=[9.0, 10.0], pd_dd=[1.2, 1.3])
+    inputs, buckets = _universe(("TUPRS", t), "Savunma", small_peers)
+    extra = _peers(t, n=5, fk=[6.0, 7.0, 8.0, 12.0, 14.0], pd_dd=[0.8, 0.9, 1.0, 1.5, 1.6])
+    for i, p in enumerate(extra):
+        inputs["M%d" % i] = p
+        buckets["M%d" % i] = "Diğer Sektör"
+    d = ts.score_universe(inputs, buckets)["TUPRS"]["detay"]
+    assert d["ortanca"]["fk"]["kapsam"] == "piyasa" and d["ortanca"]["pd_dd"]["kapsam"] == "piyasa"
+    assert d["degerleme"]["kapsam"] == "piyasa"
+    assert d["degerleme"]["hukum"] in ("ucuz", "makul", "pahali", "karisik")
+    assert d["eksenler"]["degerleme"]["puan"] is not None
+    assert "piyasa ortancası" in d["eksenler"]["degerleme"]["cumle"]
 
 
 def test_sigorta_sablonu_durust_not_bilanco_yok_4_sirketle_sinirli():

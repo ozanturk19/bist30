@@ -12,9 +12,11 @@ Yontem (kanon docs/URUN-VE-TASARIM.md §3 ve §5.6; bilinen yontemler, yeni kavr
   (ozsermaye karliligi, tutar degisimleri) yalniz ayni esas sinifinda (enflasyon duzeltmeli /
   duzeltmesiz / banka / sigorta) siralanir. Her grup en az 5 sirket; yoksa gosterge puanlanmaz.
 - Degerleme: F/K (son 12 ay kari, O22) ve PD/DD, ayni D-23 kovasindaki sirketlerin KAP
-  degerlerinin ortancasina oranla (yalniz pozitif degerler, en az 5 sirket; yoksa hukum yok).
-  Puan = 50 - 50 x log2(oran): ortancada 50, 0,80 katta 66, 1,25 katta 34 (kanon esikleri),
-  yarisinda 100, iki katinda 0. Hukum kanon kurali (ucuz / makul / pahali / karisik).
+  degerlerinin ortancasina oranla (yalniz pozitif degerler, en az 5 sirket). Kovada yetmezse
+  BIST geneli (piyasa) ortancasina duser (tarama_fields.valuation_medians ile ayni desen,
+  CPO-1828 09.10); piyasa genelinde de yetmiyorsa hukum yok. Puan = 50 - 50 x log2(oran):
+  ortancada 50, 0,80 katta 66, 1,25 katta 34 (kanon esikleri), yarisinda 100, iki katinda 0.
+  Hukum kanon kurali (ucuz / makul / pahali / karisik).
   GYO'da yalniz PD/DD (kar buyuk olcude yatirim amacli gayrimenkul degerleme kazanci).
 - Saglamlik: sanayi ve GYO'da Piotroski F-Skor 9 madde, bankada 5 madde (kap_temel_v2) ->
   gecen / hesaplanan x 100. Sigortada yok (prim ve hasar kalemleri okunmuyor).
@@ -44,7 +46,7 @@ AXIS_LABELS = {"kalite": "Kalite", "degerleme": "Değerleme", "buyume": "Büyüm
 WEIGHTS = {"kalite": 30, "degerleme": 20, "buyume": 20, "bilanco": 20, "temettu": 10}
 
 MIN_POOL = 5              # her karsilastirma en az 5 sirketle (kendisi dahil); yoksa gosterge puanlanmaz
-MIN_MEDIAN_N = 5          # degerleme ortancasi: kovada en az 5 pozitif deger (kanon §3)
+MIN_MEDIAN_N = 5          # degerleme ortancasi: kovada (yoksa BIST genelinde) en az 5 pozitif deger (kanon §3)
 MIN_AXES = 3
 MIN_COMPLETENESS = 0.6    # D-15: altinda limited_data (skor yok, siralama disi)
 LIST_COMPLETENESS = 0.8   # C-56: listelere giris
@@ -348,26 +350,38 @@ def company_inputs(rec, price=None, today=None, yahoo_shares=None):
 
 def sector_medians(inputs, bucket_of):
     """D-23 kovasi basina KAP ortancalari: F/K ve PD/DD (yalniz pozitif), ozsermaye karliligi
-    (son 12 ay). En az MIN_MEDIAN_N deger yoksa None (hukum yok). {kova: {metrik: {deger, n}}}."""
-    vals = {}
+    (son 12 ay). Kovada gecerli akran < MIN_MEDIAN_N ise BIST geneli (piyasa) ortancasina
+    duser -- tarama_fields.valuation_medians'in sektor/market deseniyle ayni (CPO-1828 09.10:
+    kucuk sektorlerde (Savunma, Iletisim, Saglik...) hukumsuz birakma yerine BIST geneli).
+    Piyasa genelinde de MIN_MEDIAN_N yoksa None (hukum yok). Donus {kova: {metrik:
+    {deger, n, kapsam: 'sektor'|'piyasa'} | None}}."""
+    fields = (("fk", "fk", True), ("pd_dd", "pd_dd", True), ("roe", "ozsermaye_karliligi", False))
+    by_bucket, market, buckets = {}, {key: [] for _, key, _ in fields}, set()
     for tk, inp in inputs.items():
         if not inp:
             continue
         b = bucket_of.get(tk)
-        if not b:
-            continue
-        for m, pos in (("fk", True), ("pd_dd", True), ("roe", False)):
+        if b:
+            buckets.add(b)
+        for m, key, pos in fields:
             v = inp.get(m)
             if v is None or (pos and v <= 0):
                 continue
-            vals.setdefault(b, {}).setdefault(m, []).append(v)
+            market[key].append(v)
+            if b:
+                by_bucket.setdefault(b, {}).setdefault(key, []).append(v)
+
+    def _entry(xs, kapsam):
+        return ({"deger": round(statistics.median(xs), 2), "n": len(xs), "kapsam": kapsam}
+                if len(xs) >= MIN_MEDIAN_N else None)
+
+    piyasa = {key: _entry(market[key], "piyasa") for _, key, _ in fields}
     out = {}
-    for b, byb in vals.items():
+    for b in buckets:
+        byb = by_bucket.get(b, {})
         out[b] = {}
-        for m, key in (("fk", "fk"), ("pd_dd", "pd_dd"), ("roe", "ozsermaye_karliligi")):
-            xs = byb.get(m) or []
-            out[b][key] = ({"deger": round(statistics.median(xs), 2), "n": len(xs)}
-                           if len(xs) >= MIN_MEDIAN_N else None)
+        for _, key, _ in fields:
+            out[b][key] = _entry(byb.get(key) or [], "sektor") or piyasa.get(key)
     return out
 
 
@@ -451,7 +465,8 @@ def _sentences(inp, ax, med, check):
             continue
         v, mm = inp.get(m), (med or {}).get(m)
         if v is not None and mm:
-            vparts.append("%s %s · sektör ortancası %s" % (lab, _num(v), _num(mm["deger"])))
+            kaynak = "piyasa ortancası" if mm.get("kapsam") == "piyasa" else "sektör ortancası"
+            vparts.append("%s %s · %s %s" % (lab, _num(v), kaynak, _num(mm["deger"])))
         elif v is not None:
             vparts.append("%s %s" % (lab, _num(v)))
     if inp.get("pay_uyumsuz"):
@@ -606,14 +621,16 @@ def score_company(tk, inputs, bucket_of, medians, groups):
         if any(m in xs for xs in INPUTS[tpl].values()):
             pts[m] = ranked(m)
     # degerleme
-    ratios = {}
+    ratios, deg_kapsam = {}, []
     for m in INPUTS[tpl]["degerleme"]:
         v, mm = inp.get(m), med.get(m)
         if v is not None and v > 0 and mm:
             ratios[m] = round(v / mm["deger"], 2)
             pts[m] = valuation_points(v / mm["deger"])
+            deg_kapsam.append(mm.get("kapsam"))
         else:
             pts[m] = None
+    kapsam_deg = "piyasa" if "piyasa" in deg_kapsam else ("sektor" if deg_kapsam else None)
     # temettu: sureklilik her zaman bilinir; verim odeme yapanlar arasinda sira, odeme yoksa 0
     pts["sureklilik"] = inp.get("sureklilik")
     vr = inp.get("verim")
@@ -665,7 +682,8 @@ def score_company(tk, inputs, bucket_of, medians, groups):
                                            "puan": pts.get(m), "grup": used.get(m)}
                                        for m in INPUTS[tpl][ax]}}
                      for ax in AXES},
-        "degerleme": {"hukum": hukum, "fk": inp.get("fk"), "pd_dd": inp.get("pd_dd"), "oran": ratios},
+        "degerleme": {"hukum": hukum, "fk": inp.get("fk"), "pd_dd": inp.get("pd_dd"), "oran": ratios,
+                     "kapsam": kapsam_deg},
         "ortanca": med,
         "saglamlik": check,
         "cevap": answer(axes),
@@ -717,11 +735,12 @@ def score_universe(inputs, bucket_of):
 
 def api_medians(detay):
     """/fundamentals 'sektor_ortanca' bicimi (kap_temel_v2.sector_medians ile ayni anahtarlar):
-    v2 acikken gun sonu turunun KAP ortancalari; kapsam her zaman 'sektor'."""
+    v2 acikken gun sonu turunun KAP ortancalari; kapsam 'sektor' ya da (CPO-1828 09.10) kovada
+    <5 akran oldugunda 'piyasa' (BIST geneli yedegi)."""
     if not detay or not isinstance(detay.get("ortanca"), dict):
         return None
     o = detay["ortanca"]
-    return {k: ({"deger": o[k]["deger"], "n": o[k]["n"], "kapsam": "sektor"} if o.get(k) else None)
+    return {k: ({"deger": o[k]["deger"], "n": o[k]["n"], "kapsam": o[k].get("kapsam", "sektor")} if o.get(k) else None)
             for k in ("fk", "pd_dd", "ozsermaye_karliligi")}
 
 
