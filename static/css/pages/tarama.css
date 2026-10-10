@@ -191,6 +191,12 @@
   @media (min-width: 820px) and (max-width: 1099.98px) {
     .tv-tb .c-te .sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   }
+  @media (min-width: 820px) and (max-width: 959.98px) {
+    .tv-tb td { padding-left: 7px; padding-right: 7px; }
+    .thb { padding-left: 7px; padding-right: 7px; }
+    .tv-tb .c-hs { min-width: 130px; }
+    .tv-tb .c-hs .nm { max-width: 130px; }
+  }
   @media (prefers-reduced-motion: reduce) { .tv-strip i, .ghb .chev { transition: none; } }
   @media (max-width: 480px) { .tv-bar { flex-wrap: wrap; } .tv-chip { white-space: normal; } }
 
