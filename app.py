@@ -6808,21 +6808,6 @@ _SIG_EXPLAIN_DISK_PATH = "/root/bist30/_signal_explain_cache.json"
 _sig_disk_mtime = None  # H3 pattern: file mtime guard
 
 
-def _save_explain_cache_to_disk():
-    """Leader-only — _signal_explain_cache'i atomic disk'e yazar."""
-    try:
-        # In-memory cache snapshot (concurrent mutation güvenli)
-        with _lock:
-            snap = dict(_signal_explain_cache)
-        # Atomic write: tempfile + os.replace
-        tmp = _SIG_EXPLAIN_DISK_PATH + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(snap, f, ensure_ascii=False)
-        os.replace(tmp, _SIG_EXPLAIN_DISK_PATH)
-    except Exception as e:
-        logger.debug("explain cache disk yazma hatası: %s", e)
-
-
 def _load_explain_cache_from_disk():
     """Non-leader workers — disk cache'i memory'e merge eder (H3 pattern, mtime guard)."""
     global _sig_disk_mtime
