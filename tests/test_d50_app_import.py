@@ -16,7 +16,7 @@ def test_routes_and_service_registered():
     for r in app.app.url_map.iter_rules():
         for m in r.methods - {"HEAD", "OPTIONS"}:
             have.add("%s %s" % (m, r.rule))
-    need = {"POST /api/auth/code", "POST /api/auth/verify", "POST /api/auth/logout", "POST /api/recognize",
+    need = {"POST /api/auth/code", "POST /api/auth/verify", "POST /api/auth/logout",
             "GET /api/me", "DELETE /api/me", "GET /api/me/watchlist", "POST /api/me/watchlist",
             "PUT /api/me/watchlist", "DELETE /api/me/watchlist/<ticker>", "GET /api/me/portfolio",
             "PUT /api/me/portfolio/<ticker>", "DELETE /api/me/portfolio/<ticker>", "POST /api/me/import",

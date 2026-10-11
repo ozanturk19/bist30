@@ -23,7 +23,7 @@ import accounts  # noqa: E402
 WANT_FUNCS = {
     "_clean", "safe_json", "_private_json", "_acct_store", "_acct_valid_ticker", "_acct_email",
     "_acct_set_cookies", "_acct_clear_cookies", "_acct_json", "_acct_result", "_acct_api", "_acct_body",
-    "_build_code_email", "_acct_code_request", "api_auth_code", "api_recognize", "api_auth_verify",
+    "_build_code_email", "_acct_code_request", "api_auth_code", "api_auth_verify",
     "api_auth_logout", "api_me", "api_me_delete", "_acct_market_snapshot", "api_me_watchlist",
     "api_me_watchlist_add", "api_me_watchlist_replace", "api_me_watchlist_remove", "api_me_portfolio",
     "api_me_position_set", "api_me_position_remove", "api_me_import", "api_me_prefs", "takip_page",
@@ -225,8 +225,3 @@ def test_legacy_endpoints_accept_session_and_bp_sub(env):
     c2.set_cookie("bp_sub", tok, domain="localhost")
     assert c2.get("/api/user-alerts", base_url=B).status_code == 200       # eski bp_sub hâlâ çalışır
     assert c2.get("/api/me", base_url=B).get_json()["logged_in"] is False  # yeni API bp_sub'ı kabul etmez
-
-
-def test_recognize_is_code_flow(env):
-    r = _post(env, "/api/recognize", {"email": "r@ornek.com", "kvkk": True})
-    assert r.status_code == 200 and re.search(r">(\d{6})<", env.sent[-1][2])

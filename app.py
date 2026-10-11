@@ -13009,16 +13009,6 @@ def api_auth_code():
     return _acct_code_request()
 
 
-@app.route("/api/recognize", methods=["POST"])
-@limiter.limit("10 per hour")
-@_acct_api(login=False)
-def api_recognize():
-    """Eski "üye girişi" ucu (CPO-DEV2-034 magic-link) D-50'de hesap kodu akışına bağlandı:
-    ikinci giriş sistemi yok, URL'de sır taşıyan bağlantı da artık gönderilmez. Sitede
-    tüketicisi yok; gövde /api/auth/code ile aynı ({email, kvkk:true})."""
-    return _acct_code_request()
-
-
 @app.route("/api/auth/verify", methods=["POST"])
 @limiter.limit("60 per hour")
 @_acct_api(login=False)
