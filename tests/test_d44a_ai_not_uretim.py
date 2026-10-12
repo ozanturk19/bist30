@@ -188,6 +188,8 @@ def test_pilot_style_judgments_and_average_dropped():
     ("Hasılat ({F1}) ve net kâr ({F2}) arttı.", "yon"),
     ("Özsermaye kârlılığı {F12}, sektör ortancası {F13} altında.", "karsilastirma"),
     ("F/K {F8}, sektör ortancasına {F9} yakın.", None),
+    ("Net kârı arttı ({F2}); şirketin net kârında artış var ({F2}).", None),
+    ("Mevcut durumda trend {F17}.", None),
     ("Cari oran ({F6}) kısa vadeli borçları karşılamıyor.", "karsilama"),
     ("Net nakit ({F5}) bilançoyu sağlam kılıyor.", "yargi"),
     ("Borçluluk yüksek ({F6}).", "yargi"),

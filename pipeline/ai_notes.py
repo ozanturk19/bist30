@@ -610,7 +610,7 @@ sağlanmıyor sağlandı madde maddesi maddeden geçti geçen sırada sırası s
 altında gerisinde yakın eşit benzer paralel aşıyor arttı artış artışı artarak artırdı yükseldi yükseliş yükselişi
 büyüdü büyüme büyümesi geriledi gerileme gerilemesi azaldı azalış düştü düşüş düşüşü daraldı daralma iyileşti
 kötüleşti toparlandı yön döndü dönüş ise yönünde bildirim bildirimi yayımladı yayımlanan duyurdu açıklama başlıklı
-konulu hakkında ilişkin ilgili""".split()
+konulu hakkında ilişkin ilgili mevcut buna bunun""".split()
 
 
 def _stem(w):
@@ -635,6 +635,8 @@ def _grounded(lw, vocab, vocab_stems):
         return True
     for fw in vocab:
         if len(fw) >= 4 and (lw.startswith(fw) or (len(lw) >= 4 and fw.startswith(lw))):
+            return True
+        if len(fw) == 3 and lw.startswith(fw) and len(lw) - 3 <= 4:   # kâr → kârı, kârında (yalnız ek)
             return True
     return False
 
