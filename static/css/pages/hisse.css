@@ -1048,10 +1048,12 @@
   .tv-chk { gap: 8px; }
   .tv-chk ul { gap: 4px; }
   .tv-chk li { font-size: var(--bp-type-sm); }
+  .tv-chk li b { max-width: 10em; }
 }
 @media (max-width: 360px) {
   .tv-ax { grid-template-columns: 92px minmax(0, 1fr) 28px; }
   .tv-kv-h, .tv-kv-r { grid-template-columns: minmax(0, 1fr) 76px 76px; }
+  .tv-kv-r b { font-size: var(--bp-type-sm); }
 }
 
 [data-hx-tab="ozet"] [data-tab-content]:not([data-tab-content~="ozet"]):not([data-tab-content~="always"]),

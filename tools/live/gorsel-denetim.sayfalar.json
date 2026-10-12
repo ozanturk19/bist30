@@ -34,6 +34,7 @@
       { "ad": "haberler", "yol": "/hisse/THYAO?tab=haberler" }
     ] },
     { "ad": "hisse-GARAN", "yol": "/hisse/GARAN?tab=temel", "durumlar": [{ "ad": "temel-banka" }] },
+    { "ad": "hisse-TUPRS", "yol": "/hisse/TUPRS?tab=temel", "durumlar": [{ "ad": "temel" }] },
     { "ad": "hisse-ANHYT", "yol": "/hisse/ANHYT", "durumlar": [{ "ad": "sigorta" }] },
     { "ad": "hisse-kapsam-disi", "yol": "/hisse/MARKA", "durumlar": [{ "ad": "varsayilan" }] },
     { "ad": "bildirim", "yol": "{api:/api/haberler|items.0.href}", "durumlar": [
