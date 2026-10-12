@@ -506,6 +506,18 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     <div class="hx-mean-h">
       <h2 class="hx-mean-t" id="meaningTitle">Ne anlama geliyor?</h2>
     </div>
+    {#- C-76 (D-44b, O5b=A): AI Analist Notu. Bağlam `ai_not` (app.py stock_page): {not, kapanis,
+        kapanis_label}; yoksa (bayrak kapalı, pilot bütçesi bitti, not eski/yok) blok hiç çizilmez —
+        gri ifade yok. Sabit anatomi: (1) etiket satırı, her zaman ilk satır: simge + "Yapay zekâ ile
+        derlendi" solda, kapanış tarihi sağda (dar ekranda alt satıra iner); (2) not metni. Sayılar ve
+        tarihler koddan yerleşir, her cümle veriye eşlenmiş (D-44b doğrulayıcısı); kaynak etiketi yok
+        (kanon §2.8). `not` Jinja'da anahtar sözcük → köşeli parantezle okunur. -#}
+    {%- if ai_not and ai_not['not'] %}
+    <div class="hx-ai" id="hxAiNot" role="note" aria-label="Yapay zekâ ile derlenen şirket notu">
+      <p class="hx-ai-m"><span class="hx-ai-l"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l2.4 7.1 7.1 2.4-7.1 2.4-2.4 7.1-2.4-7.1L2.5 12l7.1-2.4z" fill="currentColor"/></svg>Yapay zekâ ile derlendi</span><span class="hx-ai-d"><time datetime="{{ ai_not.kapanis }}">{{ ai_not.kapanis_label }}</time> kapanışı</span></p>
+      <p class="hx-ai-p">{{ ai_not['not'] }}</p>
+    </div>
+    {%- endif %}
     <p class="hx-mean-p"><b>Trend.</b>
     {%- if _ms == 'AL' %} Güçlü Trend: beş koşulun beşi de aynı anda sağlanıyor (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı). Kapanış trend dönüş seviyesinin altına inerse bu durum sona erer.
     {%- elif _ms == 'SAT' %} Trend Bozuldu: koşullar tersine dönmüş durumda (fiyat trend dönüş seviyesinin altında, ADX ≥ 25 ve DI− &gt; DI+, EMA 12 &lt; EMA 99, haftalık trend aşağı). Kapanış trend dönüş seviyesinin üstüne çıkmadan trend desteklemiyor.

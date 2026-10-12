@@ -658,6 +658,22 @@
   .hx-mean-t{ margin:0; font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); }
   .hx-mean-p{ margin:6px 0 0; font-size:var(--bp-type-body); line-height:1.6; color:var(--bp-text-2); }
   .hx-mean-p b{ color:var(--bp-text); }
+  /* C-76 (D-44b): AI Analist Notu — kartın başında, kural tabanlı cümlelerin üstünde. Sabit anatomi:
+     etiket satırı (simge + "Yapay zekâ ile derlendi" solda, kapanış tarihi sağda; dar ekranda alt satır)
+     sonra not. Kimlik: logo gradyanının mor→camgöbeği ince sol çizgisi; yeşil/kırmızı yok (kanon §5.3). */
+  .hx-ai{ position:relative; margin:4px 0 12px; padding:12px 14px 13px 17px; border-radius:var(--bp-r-md);
+    background:linear-gradient(120deg, rgba(var(--bp-art-violet-rgb),.10), rgba(var(--bp-accent-cyan-rgb),.04) 55%, transparent 85%), var(--bp-raised);
+    border:1px solid rgba(var(--bp-art-violet-rgb),.26); }
+  .hx-ai::before{ content:""; position:absolute; left:0; top:11px; bottom:11px; width:2px; border-radius:var(--bp-r-pill);
+    background:linear-gradient(180deg, var(--bp-art-violet), var(--bp-art-cyan)); }
+  .hx-ai-m{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:2px 12px; margin:0 0 6px;
+    font-size:var(--bp-type-sm); line-height:1.45; color:var(--bp-text-3); }
+  .hx-ai-l{ display:inline-flex; align-items:center; gap:6px; font-weight:600; color:var(--bp-text-2); white-space:nowrap; }
+  .hx-ai-l svg{ width:12px; height:12px; flex:none; color:var(--bp-brand); }
+  .hx-ai-d{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .hx-ai-p{ margin:0; font-size:var(--bp-type-body); line-height:1.65; color:var(--bp-text); font-variant-numeric:tabular-nums;
+    overflow-wrap:break-word; }
+  @media (max-width:480px){ .hx-ai{ padding:11px 12px 12px 14px; } .hx-ai::before{ top:10px; bottom:10px; } }
 
   .hx-more > .bp-detail-toggle-body > *{ margin-bottom:14px; }
 
