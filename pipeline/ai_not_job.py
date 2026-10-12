@@ -382,16 +382,22 @@ def _run_locked(now, day, call, fetch, base, root, tickers, kuru, log, budget_st
             out["atlanan"] += 1
             continue
         imza = an.facts_signature(facts)
-        if not kuru and prev.get("imza") == imza:
+        if not kuru:
             doc = _read_json(note_path(t, base))
-            if isinstance(doc, dict) and doc.get("not"):
-                # olgular aynı: not bu kapanış için de geçerli → çağrı yok, kapanış tarihi ilerler
+            if isinstance(doc, dict) and doc.get("not") and doc.get("imza") == imza:
+                # yayımlanmış not aynı olgularla yazılmış: bu kapanış için de geçerli → çağrı yok, tarih ilerler
                 doc.update(kapanis=day, kapanis_label=_day_label(day))
                 _atomic_write(note_path(t, base), doc)
-            hs[t] = dict(prev, gun=day, sonuc="degismedi")
-            _atomic_write(_state_path(base), dict(state, hisseler=hs))
-            out["degismedi"] += 1
-            continue
+                hs[t] = {"gun": day, "imza": imza, "sonuc": "degismedi"}
+                _atomic_write(_state_path(base), dict(state, hisseler=hs))
+                out["degismedi"] += 1
+                continue
+            if prev.get("imza") == imza and prev.get("sonuc") in ("ret", "degismedi_ret"):
+                # aynı olgular daha önce denetimden geçmedi: aynı girdiyle her gün yeniden harcama yapılmaz
+                hs[t] = dict(prev, gun=day, sonuc="degismedi_ret")
+                _atomic_write(_state_path(base), dict(state, hisseler=hs))
+                out["degismedi"] += 1
+                continue
         if not kuru:
             # çağrıdan ÖNCE iz: süreç ölse de bu hisse bu kapanış için yeniden çağrılmaz
             hs[t] = {"gun": day, "imza": imza, "sonuc": "basliyor"}

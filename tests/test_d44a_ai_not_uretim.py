@@ -552,3 +552,33 @@ def test_systemd_units_point_to_job_and_flag():
     assert "-m pipeline.ai_not_job" in svc and "EnvironmentFile=/root/bist30/.env" in svc
     assert "Type=oneshot" in svc and "TimeoutStartSec=" in svc
     assert "OnCalendar=" in tmr and "Mon..Fri" in tmr
+
+
+def _next_day(env, day2="2026-10-13"):
+    open(os.path.join(env["root"], "data", "bulten", day2 + ".json"), "w").write("{}")
+    data = _j("api_data.json")
+    for r in data["stocks"]:
+        r["bar_date"] = "13.10.2026"
+    return data
+
+
+def test_crashed_attempt_is_retried_next_day_with_same_facts(env):
+    # süreç çağrıdan sonra öldü: iz "basliyor" kaldı, not yazılmadı → ertesi gün aynı olgularla yeniden yazılır
+    imza = an.facts_signature(facts_for("TUPRS"))
+    job._atomic_write(os.path.join(env["base"], "durum.json"),
+                      {"hisseler": {"TUPRS": {"gun": DAY, "imza": imza, "sonuc": "basliyor"}}})
+    calls = []
+    res = run(env, make_call({"TUPRS": ["yanit_TUPRS_iyi.json"]}, calls), make_fetch(data=_next_day(env)),
+              tickers=["TUPRS"], now=datetime(2026, 10, 13, 20, 5, tzinfo=TZ))
+    assert res["yayin"] == 1 and len(calls) == 1
+
+
+def test_rejected_same_facts_not_retried_next_day(env):
+    calls = []
+    run(env, make_call({"TUPRS": ["yanit_TUPRS_kotu.json", "yanit_TUPRS_kotu.json"]}, calls), tickers=["TUPRS"])
+    assert len(calls) == 2
+    res = run(env, make_call({}, calls), make_fetch(data=_next_day(env)), tickers=["TUPRS"],
+              now=datetime(2026, 10, 13, 20, 5, tzinfo=TZ))
+    assert res["degismedi"] == 1 and len(calls) == 2
+    st = json.load(open(os.path.join(env["base"], "durum.json"), encoding="utf-8"))
+    assert st["hisseler"]["TUPRS"]["sonuc"] == "degismedi_ret"
