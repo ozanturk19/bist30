@@ -192,7 +192,9 @@ def bist30(root=None):
 
 
 def _day_label(iso):
-    return an._tr_date(iso) or iso
+    """Kapanış etiketi hisse sayfası başlığıyla aynı biçimde: '12 Ekim' (şablon: '12 Ekim kapanışı')."""
+    full = an._tr_date(iso)
+    return full.rsplit(" ", 1)[0] if full else iso
 
 
 # ----------------------------------------------------------------------------- çağrı ve getirme

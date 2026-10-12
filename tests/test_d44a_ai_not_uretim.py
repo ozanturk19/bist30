@@ -348,7 +348,7 @@ def test_full_run_publishes_atomically_and_is_once_per_day(env):
     res = run(env, make_call(script, calls))
     assert res["durum"] == "tamam" and res["yayin"] == 3 and res["cagri"] == 3
     doc = json.load(open(job.note_path("TUPRS", env["base"]), encoding="utf-8"))
-    assert doc["ticker"] == "TUPRS" and doc["kapanis"] == DAY and doc["kapanis_label"] == "12 Ekim 2026"
+    assert doc["ticker"] == "TUPRS" and doc["kapanis"] == DAY and doc["kapanis_label"] == "12 Ekim"
     assert doc["etiket"] == "Yapay zekâ ile derlendi" and doc["model"] == "gemini-2.5-flash-lite"
     assert doc["not"].startswith("Tüpraş'ın hasılatı 2025'te geriledi (−%21,7)")
     assert [f["id"] for f in doc["olgular"]] == ["F1", "F2", "F3", "F4", "F5", "F6", "F8", "F9", "F16", "F17", "F19"]
@@ -359,7 +359,7 @@ def test_full_run_publishes_atomically_and_is_once_per_day(env):
     res2 = run(env, make_call({}, calls))
     assert res2 == {"durum": "yapildi", "gun": DAY} and len(calls) == 3
     pub = job.public_note("TUPRS", base=env["base"], today=date(2026, 10, 12))
-    assert pub == {"ticker": "TUPRS", "not": doc["not"], "kapanis": DAY, "kapanis_label": "12 Ekim 2026",
+    assert pub == {"ticker": "TUPRS", "not": doc["not"], "kapanis": DAY, "kapanis_label": "12 Ekim",
                    "etiket": "Yapay zekâ ile derlendi"}
 
 
@@ -380,7 +380,7 @@ def test_next_day_unchanged_facts_no_call_and_date_advances(env):
     assert res["degismedi"] == 2 and res["yayin"] == 1 and res["cagri"] == 1
     assert [c[0] for c in calls[3:]] == ["TUPRS"]
     g = json.load(open(job.note_path("GARAN", env["base"]), encoding="utf-8"))
-    assert g["kapanis"] == day2 and g["kapanis_label"] == "13 Ekim 2026"     # not geçerli, tarih ilerledi
+    assert g["kapanis"] == day2 and g["kapanis_label"] == "13 Ekim"     # not geçerli, tarih ilerledi
     assert "11,3" in json.load(open(job.note_path("TUPRS", env["base"]), encoding="utf-8"))["not"]
 
 
@@ -397,7 +397,7 @@ def test_rejected_first_draft_retries_with_feedback(env):
 
 def test_twice_rejected_note_not_stored_previous_kept(env):
     calls = []
-    prev = {"ticker": "TUPRS", "not": "Önceki not.", "kapanis": "2026-10-09", "kapanis_label": "9 Ekim 2026"}
+    prev = {"ticker": "TUPRS", "not": "Önceki not.", "kapanis": "2026-10-09", "kapanis_label": "9 Ekim"}
     job._atomic_write(job.note_path("TUPRS", env["base"]), prev)
     res = run(env, make_call({"TUPRS": ["yanit_TUPRS_kotu.json", "yanit_TUPRS_kotu.json"]}, calls),
               tickers=["TUPRS"])
@@ -525,7 +525,7 @@ def test_lock_prevents_parallel_runs(env):
 def test_public_note_guards(env, monkeypatch):
     job._atomic_write(job.note_path("TUPRS", env["base"]),
                       {"ticker": "TUPRS", "not": "Trend durumu Yatay.", "kapanis": "2026-10-01"})
-    assert job.public_note("TUPRS", base=env["base"], today=date(2026, 10, 11))["kapanis_label"] == "1 Ekim 2026"
+    assert job.public_note("TUPRS", base=env["base"], today=date(2026, 10, 11))["kapanis_label"] == "1 Ekim"
     assert job.public_note("TUPRS", base=env["base"], today=date(2026, 10, 12)) is None   # 11 gün eski
     assert job.public_note("../etc", base=env["base"]) is None
     assert job.public_note("GARAN", base=env["base"]) is None
