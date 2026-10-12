@@ -53,6 +53,7 @@ import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açık
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
 import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bayrağıyla
 import kesfet           # D-59: Keşfet orta-uzun vade listeleri (C-56): 4 kural tabanlı liste, KAP verisiyle
+import kap_tablolar     # D-60 (C-59): finansal tablo sayfaları (bilanço · gelir tablosu · nakit akışı), KAP raporlarından
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from pipeline import ai_not_job  # D-44b: AI Analist Notu okuma yolu (üretim ayrı iş; AI_NOT_ENABLED=1 olmadan None)
@@ -7845,7 +7846,8 @@ def stock_page(ticker):
                            seo_rsi=rsi_val,
                            initial_tab=_hisse_initial_tab(request.args.get("tab")),
                            closes_30=_closes_30(ticker, ssr_signal),
-                           ai_not=_ai_not_ctx(ticker))
+                           ai_not=_ai_not_ctx(ticker),
+                           finansal_tablolar=_finansal_tablo_baglantilari(ticker))
 
 
 _fundamentals_cache = {}
@@ -9059,6 +9061,40 @@ def bildirim_page(ticker, idx):
     smap = _haber_stock_map()
     return render_template("bildirim.html", b=p, mc=_haber_mini(it["ticker"], smap),
                            canonical="https://borsapusula.com" + it["href"], close_label=_haber_close_label())
+
+
+# ── D-60 (C-59): finansal tablo sayfaları ─────────────────────────────────────
+# /hisse/<T>/bilanco · /gelir-tablosu · /nakit-akis: SSR, dizinlenir. Sütunlar KAP raporlarından
+# (D-40a0 kaydının raporları, ham sayfa önbelleği); her sütun tek rapor, yüzde aynı raporun
+# karşılaştırma sütunundan (kanon §3). Şablon yoksa 404 (arka uç önce deploy edilebilir).
+def _finansal_tablo_baglantilari(ticker):
+    if not _tpl_ready("finansal_tablo.html"):
+        return []
+    try:
+        return kap_tablolar.baglantilar(ticker, kap_financials.load_record(ticker))
+    except Exception as e:
+        logger.warning("finansal tablo bağlantısı (%s): %s", ticker, e)
+        return []
+
+
+@app.route("/hisse/<ticker>/<any(bilanco, 'gelir-tablosu', 'nakit-akis'):tablo>")
+def finansal_tablo_page(ticker, tablo):
+    if not _tpl_ready("finansal_tablo.html"):
+        abort(404)
+    up = ticker.upper()
+    if ticker != up:
+        return redirect(f"/hisse/{up}/{tablo}", code=301)
+    if up in INDEX_TICKERS or up not in BIST100:
+        abort(404)
+    try:
+        ctx = kap_tablolar.sayfa(up, tablo, kap_financials.load_record(up), name=STOCK_NAMES.get(up, up))
+    except Exception as e:
+        logger.warning("finansal tablo (%s/%s): %s", up, tablo, e)
+        ctx = None
+    if not ctx:
+        abort(404)
+    return render_template("finansal_tablo.html", ft=ctx, ticker=up, name=ctx["ad"],
+                           canonical=ctx["kanonik"])
 
 
 def _kap_feed_universe():
@@ -10508,6 +10544,14 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
+    # D-60 (C-59): finansal tablo sayfaları (şablon yayındaysa; lastmod = son raporun yayın günü)
+    if _tpl_ready("finansal_tablo.html"):
+        try:
+            for _g in kap_tablolar.sitemap_girdileri([t for t in BIST30 if t not in INDEX_TICKERS]):
+                pages.append({"loc": _g["loc"], "priority": "0.6", "changefreq": "monthly",
+                              "lastmod": _g["lastmod"] or today})
+        except Exception as e:
+            logger.warning("sitemap: finansal tablo sayfaları eklenemedi: %s", e)
     # K-CK #2: sitemap HAM `ARTICLES`i okuyordu, makale SAYFASI ise
     # `_normalize_article()`ten gecen listeyi -- yani ayni olgunun (bir
     # makalenin tarihi) IKI KANONU vardi. 8 makalede "date" alani hic yok;
@@ -10727,6 +10771,11 @@ def llms_txt():
 ## İletişim
 - [İletişim](https://borsapusula.com/iletisim)
 """
+    if _tpl_ready("finansal_tablo.html"):   # D-60 (C-59): finansal tablo sayfaları
+        body = body.replace("\n\n## Metodoloji", "\n- Finansal tablolar: https://borsapusula.com/hisse/{TICKER}/bilanco, "
+                            "/hisse/{TICKER}/gelir-tablosu, /hisse/{TICKER}/nakit-akis — şirketin açıkladığı "
+                            "raporlardaki kalemler, rapordaki sırasıyla; yıllık ve çeyreklik dönemler, her dönemin "
+                            "değişimi kendi raporundaki karşılaştırma sütunundan\n\n## Metodoloji", 1)
     if _harita_page_ready():   # D-54: kalıcı gün sayfaları (şablon yayındaysa)
         body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
                             "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
