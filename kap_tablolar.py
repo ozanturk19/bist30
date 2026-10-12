@@ -91,11 +91,15 @@ SABLONLAR = {
                "olcek": "yon"},
     },
     "sigorta": {
-        "BS": {"derinlik": 4, "olgu": (("ifrs-full_Assets", "Toplam varlıklar"),
+        "BS": {"derinlik": 3, "olgu": (("ifrs-full_Assets", "Toplam varlıklar"),
                                         ("ifrs-full_Equity", "Özkaynaklar")),
                "olcek": "ilk"},
-        "IS": {"derinlik": 2, "olgu": (("ifrs-full_ProfitLoss", "Dönem net kârı"),),
-               "olcek": "enbuyuk"},
+        "IS": {"derinlik": 2, "olgu": (("kap-fr_NonlifeTechnicalIncome", "Hayat dışı teknik gelir"),
+                                        ("kap-fr_LifeTechnicalIncome", "Hayat teknik gelir"),
+                                        ("kap-fr_PensionBusinessTechnicalIncome", "Emeklilik teknik gelir"),
+                                        ("kap-fr_TechnicalPartBalance", "Genel teknik bölüm dengesi"),
+                                        ("ifrs-full_ProfitLoss", "Dönem net kârı")),
+               "olcek": "enbuyuk", "cumle": (3, 4)},
         "CF": {"derinlik": 2, "olgu": (("ifrs-full_CashFlowsFromUsedInOperatingActivities", "Esas faaliyetler",
                                          "esas faaliyetlerden"),
                                         ("ifrs-full_CashFlowsFromUsedInInvestingActivities", "Yatırım faaliyetleri",
@@ -314,16 +318,26 @@ def _pct_text(p):
     return ("+" if r > 0 else "−") + "%" + _fmt(abs(r), nd)
 
 
+_NB = "\u00a0"  # sayi ile olcek/simge ayni satirda kalir ("1,02 T ₺" satir sonunda bolunmez)
+
+
 def para_kisa(tl):
-    """Olgu metni: '1,99 T ₺' / '911 Mrd ₺' / '86,0 Mrd ₺' / '742 Mn ₺'."""
+    """Olgu metni: '1,99 T ₺' / '911 Mrd ₺' / '86,0 Mrd ₺' / '742 Mn ₺' (bosluklar bolunmez)."""
     a = abs(tl)
     if a >= 1e12:
-        return _fmt(tl / 1e12, 2) + " T ₺"
+        return _fmt(tl / 1e12, 2) + _NB + "T" + _NB + "₺"
     if a >= 1e9:
-        return _fmt(tl / 1e9, 1 if a < 1e11 else 0) + " Mrd ₺"
+        return _fmt(tl / 1e9, 1 if a < 1e11 else 0) + _NB + "Mrd" + _NB + "₺"
     if a >= 1e6:
-        return _fmt(tl / 1e6, 0) + " Mn ₺"
-    return _fmt(tl, 0) + " ₺"
+        return _fmt(tl / 1e6, 0) + _NB + "Mn" + _NB + "₺"
+    return _fmt(tl, 0) + _NB + "₺"
+
+
+def _hucre(x):
+    """Tablo hucresi (olcekli tutar): tam sayi; 1'in altindaki sifir olmayan tutar tek ondalikla."""
+    if x != 0 and abs(x) < 1 and round(abs(x), 1) >= 0.1:
+        return _fmt(x, 1)
+    return _fmt(x, 0)
 
 
 def degisim(cur, prev):
@@ -529,14 +543,15 @@ def gorunum(rec, parsed, slug, tur):
                 continue
             x = v[0] / bolen
             dolu = dolu or v[0] != 0
-            hucre.append({"metin": _fmt(x, 0), "degisim": _pct_text(v[1]), "deger": round(x, 3)})
+            hucre.append({"metin": _hucre(x), "degisim": _pct_text(v[1]), "deger": round(x, 3)})
         if not dolu:
             continue
         satirlar.append({"anahtar": key, "etiket": lab, "seviye": lvl, "baslik": False,
                          "toplam": flag == "t" or key in VURGU,
-                         "detay": lvl > sab["derinlik"] and key not in her_zaman and key not in olgu_k,
+                         "detay": (lvl > sab["derinlik"] and flag != "t" and key not in her_zaman
+                                   and key not in olgu_k),
                          "hucreler": hucre})
-    satirlar = _ara_toplam_ayikla(_bos_baslik_ayikla(satirlar))
+    satirlar = _baslik_detayi(_ara_toplam_ayikla(_bos_baslik_ayikla(satirlar)))
     if not satirlar:
         return None
     taban = min(s["seviye"] for s in satirlar)
@@ -554,7 +569,9 @@ def gorunum(rec, parsed, slug, tur):
     return {
         "tur": tur, "sutunlar": sutunlar, "satirlar": satirlar,
         "birim": birim,
-        "birim_notu": birim + (" · " + _esas_notu(tek_esas, yab) if tek_esas else ""),
+        "birim_notu": birim + (" · " + _esas_notu(tek_esas, yab) if tek_esas else
+                               (" · enflasyon düzeltmeli sütunlar kendi rapor tarihinin parasıyla"
+                                if any(g["esas"] == "enflasyon" for g in esaslar) else "")),
         "esas_gruplari": esaslar if len(esaslar) > 1 else [],
         "degisim_notu": _degisim_notu(st, tur),
         "detay_sayisi": sum(1 for s in satirlar if s["detay"] and not s["baslik"]),
@@ -579,6 +596,22 @@ def _bos_baslik_ayikla(satirlar):
     return out
 
 
+def _baslik_detayi(satirlar):
+    """Sade gorunumde altinda gorunen kalem kalmayan baslik da ayrintidir (bos baslik gosterilmez)."""
+    for i, s in enumerate(satirlar):
+        if not s["baslik"]:
+            continue
+        gorunen = False
+        for n in satirlar[i + 1:]:
+            if n["seviye"] <= s["seviye"]:
+                break
+            if not n["baslik"] and not n["detay"]:
+                gorunen = True
+                break
+        s["detay"] = s["detay"] or not gorunen
+    return satirlar
+
+
 def _ara_toplam_ayikla(satirlar):
     """'ARA TOPLAM' satiri hemen arkasindaki toplamla her sutunda aynıysa tekrar sayilir, atilir."""
     out = []
@@ -597,8 +630,8 @@ def _degisim_notu(st, tur):
     if tur == "yillik":
         return "Rakamların altındaki yüzde, aynı raporun önceki yıl sütununa göre değişimdir."
     if st == "IS":
-        return "Rakamların altındaki yüzde, aynı raporda geçen yılın aynı çeyreğine göre değişimdir."
-    return "Rakamların altındaki yüzde, aynı raporda geçen yılın aynı dönemine göre değişimdir."
+        return "Rakamların altındaki yüzde, aynı raporda önceki yılın aynı çeyreğine göre değişimdir."
+    return "Rakamların altındaki yüzde, aynı raporda önceki yılın aynı dönemine göre değişimdir."
 
 
 # ----------------------------------------------------------------------------- olgular
@@ -639,6 +672,10 @@ def olgular(rec, parsed, slug):
                          "cumle_ad": o[2] if len(o) > 2 else None,
                          "tl": tl, "metin": para_kisa(abs(tl) if zarar else tl),
                          "degisim": _pct_text(degisim(c, p)), "eksi": tl < 0})
+    if sab["olcek"] == "enbuyuk":
+        # seritte yalniz anlamli buyuklukler (tablo tam kalir): sifir ve en buyugun binde 5'inden kucuk kalem yok
+        enb = max([abs(k["tl"]) for k in kalemler] or [0])
+        kalemler = [k for k in kalemler if k["tl"] != 0 and abs(k["tl"]) >= 0.005 * enb]
     if not kalemler:
         return None
     if sab["olcek"] == "ilk":

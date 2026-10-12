@@ -133,7 +133,7 @@ def test_birim_ve_esas_basligi():
     assert thy["birim_notu"] == "Milyon TL · işlevsel para birimi ABD doları, TL'ye çevrilmiş"
     assert thy["esas_gruplari"] == []
     tup = _view("TUPRS", "bilanco", "yillik")
-    assert tup["birim_notu"] == "Milyon TL"
+    assert tup["birim_notu"] == "Milyon TL · enflasyon düzeltmeli sütunlar kendi rapor tarihinin parasıyla"
     assert [(g["etiket"], g["kapsam"]) for g in tup["esas_gruplari"]] == [("Enflasyon düzeltmeli", 3), ("Nominal", 2)]
     assert [c["esas"] for c in tup["sutunlar"]] == ["enflasyon"] * 3 + ["nominal"] * 2
     tq = _view("TUPRS", "gelir-tablosu", "ceyreklik")
@@ -208,23 +208,37 @@ def test_sigortada_yinelenen_kalem_ayri_satir():
 
 # ----------------------------------------------------------------------------- olgular ve sayfa baglami
 
+def _sp(x):
+    return x.replace("\u00a0", " ")
+
+
 def test_olgu_cumleleri_betimleyici():
-    assert _sayfa("THYAO", "gelir-tablosu")["olgu"]["cumle"] == (
+    assert _sp(_sayfa("THYAO", "gelir-tablosu")["olgu"]["cumle"]) == (
         "2025 yılında hasılat 955 Mrd ₺ (önceki yıla göre +%28,2), esas faaliyet kârı 90,1 Mrd ₺, "
         "dönem kârı 118 Mrd ₺ oldu.")
-    assert _sayfa("THYAO", "bilanco")["olgu"]["cumle"] == (
+    assert _sp(_sayfa("THYAO", "bilanco")["olgu"]["cumle"]) == (
         "30 Haziran 2026 itibarıyla toplam varlıklar 2,36 T ₺ (önceki yıl sonuna göre +%18,2), "
         "toplam yükümlülükler 1,34 T ₺, toplam özkaynaklar 1,02 T ₺.")
-    assert _sayfa("THYAO", "nakit-akis")["olgu"]["cumle"] == (
+    assert _sp(_sayfa("THYAO", "nakit-akis")["olgu"]["cumle"]) == (
         "2025 yılında işletme faaliyetlerinden 186 Mrd ₺ nakit girişi, yatırım faaliyetlerinden 145 Mrd ₺ "
         "nakit çıkışı, finansman faaliyetlerinden 49,2 Mrd ₺ nakit çıkışı oldu.")
-    assert _sayfa("GARAN", "bilanco")["olgu"]["cumle"] == (
+    assert _sp(_sayfa("GARAN", "bilanco")["olgu"]["cumle"]) == (
         "30 Haziran 2026 itibarıyla toplam varlıklar 5,22 T ₺ (önceki yıl sonuna göre +%14,7), "
         "krediler 3,00 T ₺, mevduat 3,47 T ₺.")
     ol = _sayfa("THYAO", "gelir-tablosu")["olgu"]
     assert [(k["etiket"], k["pay"]) for k in ol["kalemler"]] == [
         ("Hasılat", 100.0), ("Brüt kâr", 16.3), ("Esas faaliyet kârı", 9.4), ("Dönem kârı", 12.4)]
     assert ol["rapor"] == 1565996
+
+
+def test_sigorta_gelir_olgulari_ve_kucuk_kalem_seritte_yok():
+    ol = _sayfa("ANHYT", "gelir-tablosu")["olgu"]
+    assert [k["etiket"] for k in ol["kalemler"]] == [
+        "Hayat teknik gelir", "Emeklilik teknik gelir", "Genel teknik bölüm dengesi", "Dönem net kârı"]
+    assert _sp(ol["cumle"]) == ("2025 yılında genel teknik bölüm dengesi 3,6 Mrd ₺ (önceki yıla göre +%67,2), "
+                                "dönem net kârı 6,0 Mrd ₺ oldu.")
+    v = _view("ANHYT", "gelir-tablosu", "yillik")                 # tablo tam: hayat disi teknik gelir duruyor
+    assert _row(v, "kap-fr_NonlifeTechnicalIncome")["hucreler"][0]["metin"] == "2"
 
 
 def test_zarar_kalemi_zarar_diye_yazilir():
@@ -234,8 +248,8 @@ def test_zarar_kalemi_zarar_diye_yazilir():
             r[4] = -5000.0
     ol = kt.olgular(rec, parsed, "gelir-tablosu")
     k = next(x for x in ol["kalemler"] if x["anahtar"] == "ifrs-full_ProfitLoss")
-    assert (k["etiket"], k["metin"], k["eksi"]) == ("Dönem zararı", "5,0 Mrd ₺", True)
-    assert ol["cumle"].endswith("dönem zararı 5,0 Mrd ₺ oldu.")
+    assert (k["etiket"], _sp(k["metin"]), k["eksi"]) == ("Dönem zararı", "5,0 Mrd ₺", True)
+    assert _sp(ol["cumle"]).endswith("dönem zararı 5,0 Mrd ₺ oldu.")
 
 
 def test_sayfa_baglami_soru_sekmeler_kanonik():
@@ -281,8 +295,9 @@ def test_bicim_kanonu():
     assert kt._pct_text(12.345) == "+%12,3" and kt._pct_text(-3.06) == "−%3,1" and kt._pct_text(0.01) == "%0,0"
     assert kt._pct_text(216.4) == "+%216" and kt._pct_text(25355.0) == "+%25.355" and kt._pct_text(None) is None
     assert kt._fmt(-799912.0) == "−799.912" and kt._fmt(-0.2) == "0"
-    assert kt.para_kisa(2.36e12) == "2,36 T ₺" and kt.para_kisa(955.472e9) == "955 Mrd ₺"
-    assert kt.para_kisa(90.129e9) == "90,1 Mrd ₺" and kt.para_kisa(-144e6) == "−144 Mn ₺"
+    assert kt.para_kisa(2.36e12) == "2,36\u00a0T\u00a0₺" and _sp(kt.para_kisa(955.472e9)) == "955 Mrd ₺"
+    assert _sp(kt.para_kisa(90.129e9)) == "90,1 Mrd ₺" and _sp(kt.para_kisa(-144e6)) == "−144 Mn ₺"
+    assert kt._hucre(0.36) == "0,4" and kt._hucre(-0.04) == "0" and kt._hucre(1234.6) == "1.235" and kt._hucre(0.0) == "0"
 
 
 def test_degisim_ayni_isaretli_buyukluk_isaret_degisince_yok():
