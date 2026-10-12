@@ -6593,168 +6593,6 @@ def _news_ua_class(req) -> str:
         return "other_bot"
     return "human_or_unclassified"
 
-# ── F5 — AI Haber Sentiment Cache ────────────────────────────────────────────
-_sentiment_cache      = {}   # {ticker: {"score": int, "label": str, "news_count": int, "ts": float}}
-_SENTIMENT_TTL_DEFAULT = 3600 * 4   # 4h (varsayılan)
-_SENTIMENT_TTL_ACTIVE  = 3600 * 2   # 2h (AL/SAT sinyalli hisseler)
-_SENTIMENT_TTL_SLOW    = 3600 * 8   # 8h (durgun hisseler)
-_SENTIMENT_FAIL_TTL    = 300        # 5dk — başarısız çağrı (retry soon)
-_SENTIMENT_MIN_NEWS    = 2          # Bu kadar haberden azsa sentiment atla
-_SENTIMENT_DISK_PATH   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_sentiment_cache.json")
-_sentiment_cycle_idx   = [0]        # Döngüsel ticker index (5'li batch)
-
-_SENTIMENT_PROMPT = (
-    "Aşağıda bir Türk borsası hissesi ({ticker}) ile ilgili {count} haber başlığı var.\n"
-    "Bu haberlerin genel haber sentiment'ini -100 (çok negatif) ile +100 (çok pozitif) arasında "
-    "TEK BİR TAM SAYI olarak ver. Sadece sayıyı yaz, başka hiçbir şey yazma.\n\n"
-    "Haberler:\n{news}"
-)
-
-
-def _sentiment_ttl_for(ticker: str) -> int:
-    """Adaptive TTL: AL/SAT → 2h, hacimli → 4h, durgun → 8h."""
-    with _lock:
-        for s in _cache.get("data", []):
-            if s.get("ticker") == ticker:
-                if s.get("signal") in ("AL", "SAT"):
-                    return _SENTIMENT_TTL_ACTIVE
-                vr = s.get("vol_ratio") or 1.0
-                if vr < 0.5:
-                    return _SENTIMENT_TTL_SLOW
-                return _SENTIMENT_TTL_DEFAULT
-    return _SENTIMENT_TTL_DEFAULT
-
-
-def _save_sentiment_cache_to_disk():
-    """Sentiment cache'i diske yazar (cross-worker sync). _lock DIŞINDA çağrılmalı."""
-    try:
-        with _lock:
-            snapshot = dict(_sentiment_cache)
-        if not snapshot:
-            return
-        _atomic_write_json(_SENTIMENT_DISK_PATH, snapshot)
-    except Exception as e:
-        logger.warning("_save_sentiment_cache_to_disk hatası: %s", e)
-
-
-def _load_sentiment_cache_from_disk():
-    """Diskten sentiment cache merge — ticker başına en taze TS kazanır."""
-    try:
-        if not os.path.exists(_SENTIMENT_DISK_PATH):
-            return
-        with open(_SENTIMENT_DISK_PATH, "r", encoding="utf-8") as f:
-            disk = json.load(f)
-        if not isinstance(disk, dict):
-            return
-        with _lock:
-            for tk, dentry in disk.items():
-                if not isinstance(dentry, dict):
-                    continue
-                mem = _sentiment_cache.get(tk)
-                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
-                    _sentiment_cache[tk] = dentry
-    except Exception as e:
-        logger.warning("_load_sentiment_cache_from_disk hatası: %s", e)
-
-
-def _compute_sentiment(ticker: str) -> bool:
-    """Gemini ile ticker'ın son haberlerinden sentiment skoru hesaplar.
-
-    Returns True if sentiment was computed (or skipped gracefully), False on error.
-    Only runs as Gemini leader. Uses _news_cache for news items.
-    """
-    if not GEMINI_API_KEY:
-        return False
-    if not _is_gemini_leader():
-        return False
-
-    now = time.time()
-    # Cache taze mi kontrol
-    with _lock:
-        cached = _sentiment_cache.get(ticker)
-    if cached:
-        ttl = _SENTIMENT_FAIL_TTL if cached.get("failed") else _sentiment_ttl_for(ticker)
-        if (now - cached.get("ts", 0)) < ttl:
-            return True  # still fresh
-
-    # News cache'den haberleri al
-    with _lock:
-        news_entry = _news_cache.get(ticker)
-    if not news_entry:
-        return False  # news yok, atla
-    news_text = (news_entry.get("text") or "").strip()
-    if not news_text or news_entry.get("failed"):
-        return False  # news başarısız, atla
-
-    # Haberleri satır satır say
-    news_lines = [ln.strip() for ln in news_text.splitlines() if ln.strip()]
-    news_count = len(news_lines)
-    if news_count < _SENTIMENT_MIN_NEWS:
-        return False  # yetersiz haber
-
-    # En fazla 8 haber satırı kullan (token tasarrufu)
-    news_sample = "\n".join(news_lines[:8])
-    prompt = _SENTIMENT_PROMPT.format(ticker=ticker, count=min(news_count, 8), news=news_sample)
-
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=10, max_tokens=10, temperature=0.1)
-
-    if text:
-        text = text.strip()
-        try:
-            score = int(float(text))
-            score = max(-100, min(100, score))
-            if score >= 30:
-                label = "positive"
-            elif score <= -30:
-                label = "negative"
-            else:
-                label = "neutral"
-            with _lock:
-                _sentiment_cache[ticker] = {
-                    "score":      score,
-                    "label":      label,
-                    "news_count": news_count,
-                    "ts":         now,
-                    "failed":     False,
-                }
-            logger.debug("sentiment [%s]: score=%d label=%s [model=%s]", ticker, score, label, model_used)
-            return True
-        except (ValueError, TypeError):
-            logger.debug("sentiment [%s]: parse hatası text=%r", ticker, text)
-
-    # Başarısız — negatif cache
-    with _lock:
-        _sentiment_cache[ticker] = {"score": None, "label": None, "news_count": 0, "ts": now, "failed": True}
-    return False
-
-
-def _sentiment_bg_worker():
-    """F5 bg thread: 5 ticker/batch, 3dk aralık. Gemini leader-only."""
-    time.sleep(300)  # startup grace: news cache dolsun
-    tickers_all = list(BIST30)
-    total = len(tickers_all)
-    while True:
-        if not _is_gemini_leader():
-            time.sleep(60)
-            continue
-        # 5 ticker batch al (döngüsel)
-        idx = _sentiment_cycle_idx[0]
-        batch = tickers_all[idx: idx + 5]
-        _sentiment_cycle_idx[0] = (idx + 5) % total
-
-        computed = 0
-        for ticker in batch:
-            try:
-                ok = _compute_sentiment(ticker)
-                if ok:
-                    computed += 1
-            except Exception as e:
-                logger.debug("_sentiment_bg_worker [%s]: %s", ticker, e)
-
-        _save_sentiment_cache_to_disk()
-        time.sleep(180)  # 3dk aralık
-
-
 _signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool, "ttl": float}}
 _SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
 _SIG_EXPLAIN_TTL_JITTER = 3600 * 2  # CPO-1008: ±2h jitter — toplu yazılan cache'lerin aynı anda thundering-herd bitişini önler
@@ -11115,7 +10953,6 @@ def api_cache_inventory():
     _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir",
            content_ts_field="ts")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
-    _check("sentiment", _SENTIMENT_DISK_PATH, "CPO-1781: bg worker kasıtlı durduruldu, STALE beklenir (donmuş cache)")
     _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
     _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
     _check("mtf", _MTF_CACHE_DISK_PATH)
@@ -13858,11 +13695,6 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
-    # F5 — AI Sentiment cache'i diskten yükle
-    try:
-        _load_sentiment_cache_from_disk()
-    except Exception as e:
-        logger.warning("Sentiment disk yükleme hatası: %s", e)
     refresh_chart()
     # XU100 sirali sekilde yukle (CPO-DEV2-065: 10 oksuz varlik-chart rotasi
     # -kripto/emtia/ABD, 19.08 CPO-DEV2-036 sayfa kaldirmasinin unutulmus parcasi-
@@ -13928,10 +13760,8 @@ def _startup():
     # Burada yalnız diskteki son EOD çıktısını belleğe yükle — restart sonrası boş
     # kalmasın, gereksiz yfinance çağrısı yapmasın.
     _load_earnings_cache_from_disk()
-    # F5 — AI Sentiment bg worker DURDURULDU (CPO-1781): sıfır tüketici + aktif
-    # Gemini kota tüketimi. _compute_sentiment() silinmedi, geri açmak için bu
-    # satırı geri aç yeterli.
-    # threading.Thread(target=_sentiment_bg_worker, daemon=True, name="sentiment-bg").start()
+    # F5 — AI Sentiment bg worker + cache tamamen silindi (D-22c, CPO-1781 sıfır
+    # tüketici kararının devamı); Gemini kota tüketimi kalmadı.
 
     # D-24: yfinance temettü ısınma döngüsü (_warm_dividend) kalktı; temettü D-40a0 kaydından.
 
@@ -14089,7 +13919,7 @@ if _IS_SHADOW:
             return
         _shadow_warmed.append(1)
         for _fn in (_load_cache_from_disk, _load_macro_from_disk, _load_macro_ai_from_disk,
-                    _load_sentiment_cache_from_disk, _load_news_cache_from_disk,
+                    _load_news_cache_from_disk,
                     _load_explain_cache_from_disk, _load_fundamentals_cache_from_disk,
                     _load_sector_stats_from_disk, _load_xu100_chart_from_disk,
                     _load_health_scores_from_disk, _load_mtf_cache_from_disk):
