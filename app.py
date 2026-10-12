@@ -233,10 +233,6 @@ def require_admin():
 # ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
 CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
 
-# CPO-1695: /profil denetim token'ı — gerçek aboneye bağlı DEĞİL, subscribers.json'a
-# hiç yazılmaz/okunmaz. Boşsa özellik tamamen kapalı (fail-closed).
-PROFIL_QA_TOKEN = os.environ.get("PROFIL_QA_TOKEN", "").strip()
-
 _NON_HUMAN_UA_RE = re.compile(
     r"BorsaPusulaQA|HeadlessChrome|Claude/|curl|python-requests|"
     r"UptimeRobot|Go-http|\bbot\b|\bspider\b|\bcrawl\b",
@@ -2986,12 +2982,12 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     <!-- Profil tamamla davet -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(184,195,255,0.06);border:1px solid rgba(184,195,255,0.20);border-radius:10px;margin-bottom:18px">
       <tr><td style="padding:18px 22px">
-        <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Sinyalleri sana özelleştir</div>
+        <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Takip listeni oluştur</div>
         <div style="font-size:12.5px;color:#c7c5cd;line-height:1.55;margin-bottom:12px">
-          10 saniye sürer — mail sıklığını seç (günlük özet, kapanış sonrası, sadece Hacim Onaylı veya haftada bir).
+          10 saniye sürer — favori hisselerini takip listene ekle, bültenlerde önce onları gör.
         </div>
-        <a href="https://borsapusula.com/profil?t={profile_token}" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
-          Profili Tamamla →
+        <a href="https://borsapusula.com/takip" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
+          Takip Listeme Git →
         </a>
       </td></tr>
     </table>
@@ -3306,40 +3302,6 @@ def _notify_email_signal_changes(changes):
         _save_pending_changes_weekly(weekly_pending)
         logger.info("Weekly pending buffer: %d → %d (+%d) (file=pending_changes_weekly.json)",
                     weekly_prev_len, len(weekly_pending), len(changes))
-
-    # 2) Anında gönderim — mail_pref=instant olan kullanıcılara
-    def _send_instant():
-        with _sub_lock:
-            subs = _load_subscribers()
-        active = {e: d for e, d in subs.items() if d.get("active", True)}
-        if not active:
-            return
-        sent = 0
-        for email, data in active.items():
-            mail_pref = data.get("mail_pref") or "daily"
-            # Sadece instant ya da premium-isteyen abonelere anlık
-            if mail_pref not in ("instant", "premium"):
-                continue
-            token    = data.get("token", "")
-            name     = data.get("name", "")
-            follow   = _sub_follow_set(data)
-            # D-50: hesap tercihi (trend = yalnız izlenenler, bulten = hepsi, liste başta);
-            # premium: takipteki hisse premium olmasa da gelir. Eski kayıtta eski filtre birebir.
-            relevant = _accounts.relevant_changes(data, changes, premium_only=(mail_pref == "premium"))
-            if not relevant:
-                continue
-            unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
-            subject_prefix = "⭐ Hacim Onaylı" if mail_pref == "premium" else "🔔 BorsaPusula —"
-            subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
-            if len(relevant) > 3:
-                subject += f" +{len(relevant) - 3}"
-            if send_email(email, subject, _build_signal_email(relevant, unsub_url, follow=follow), unsubscribe_url=unsub_url):
-                sent += 1
-            time.sleep(0.3)
-        if sent:
-            logger.info("Anında sinyal e-postası gönderildi: %d abone", sent)
-
-    threading.Thread(target=_send_instant, daemon=True).start()
 
 
 # SPEC-009 Aksiyon 3 / CPO-1195 §2: takvim mantığı (hafta içi + TR resmi tatil +
@@ -7929,6 +7891,7 @@ REDIRECTS = {
     "/sp500": "/",
     "/portfolio": "/takip",
     "/virtual-portfolio": "/takip",
+    "/profil": "/takip",
     "/api/bilanco-takvimi": "/api/takvim",
     "/btc": "/", "/eth": "/", "/sol": "/", "/bnb": "/",
     "/altin": "/", "/gumus": "/", "/petrol": "/", "/dogalgaz": "/",
@@ -7952,6 +7915,7 @@ REDIRECTS = {
 @app.route("/sp500")
 @app.route("/portfolio")
 @app.route("/virtual-portfolio")
+@app.route("/profil")
 @app.route("/api/bilanco-takvimi")
 @app.route("/btc")
 @app.route("/eth")
@@ -13244,132 +13208,6 @@ def api_follow_confirm():
     return redirect("/?takip=expired")
 
 
-@app.route("/profil")
-def profil_page():
-    """Profil tamamla sayfası — token ile kullanıcıyı tanı.
-    CPO-1561 P0: hoş geldin mailindeki link ?t=<token> taşıyor — GA4/Sentry'ye
-    sızmasın diye (URL analytics'e page_location/request.url olarak gidiyordu)
-    /api/recognize/confirm ile aynı desen: token'ı httponly cookie'ye taşı,
-    URL'den ?t= parametresini temizleyip tekrar /profil'e yönlendir. Cookie
-    zaten varsa (ikinci ziyaret) hiç ?t= gelmez, bu blok atlanır."""
-    url_token = (request.args.get("t") or "").strip()
-    if url_token and url_token != request.cookies.get("bp_sub", ""):
-        resp = redirect("/profil")
-        resp.set_cookie("bp_sub", url_token, max_age=31536000, samesite="Lax", secure=True, httponly=True)
-        return resp
-    token = request.cookies.get("bp_sub", "")
-    if PROFIL_QA_TOKEN and token and secrets.compare_digest(token, PROFIL_QA_TOKEN):
-        # CPO-1695: kalıcı denetim hesabı — gerçek abone kaydı yok, subscribers.json'a
-        # dokunmaz, mail gönderim döngülerine hiç girmez.
-        qa_profile = {
-            "level": "orta", "freq": "swing", "size": "10-50k",
-            "segments": ["bist30", "teknoloji"], "mail_pref": "daily",
-        }
-        return _nocache_html(render_template("profil.html",
-                               email="qa-test@borsapusula.local",
-                               name="Test Kullanıcı",
-                               profile=qa_profile,
-                               token=token,
-                               done=True))
-    if not token:
-        # CPO-1190 K9: çıplak 400 yerine markalı açıklama sayfası — kullanıcı
-        # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük
-        # temizlik (Master Program, DEV2-139): içerik aynı, yalnız HTTP
-        # status 200->404 (zaten noindex,nofollow, SEO zararı yok).
-        return _nocache_html(render_template("profil.html",
-                               error="Bu sayfaya kişisel e-posta bağlantınız üzerinden ulaşmanız gerekiyor.",
-                               email=None, name="", profile=None, token=""), 404)
-    with _sub_lock:
-        subs = _load_subscribers()
-        target_email = None
-        for em, info in subs.items():
-            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
-                target_email = em
-                break
-    if not target_email:
-        return _nocache_html(render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token=""), 404)
-
-    info = subs[target_email]
-    profile = {
-        "level":     info.get("level"),
-        "freq":      info.get("freq"),
-        "size":      info.get("size"),
-        "segments":  info.get("segments", []),
-        "mail_pref": info.get("mail_pref", "daily"),
-    }
-    return _nocache_html(render_template("profil.html",
-                           email=target_email,
-                           name=info.get("name", ""),
-                           profile=profile,
-                           token=token,
-                           done=info.get("profile_done", False)))
-
-
-@app.route("/api/profile", methods=["POST"])
-@limiter.limit("10 per hour")
-def api_profile():
-    """Profil verilerini kaydet."""
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        data = {}
-    def _safe_str(x, default=""):
-        return x.strip() if isinstance(x, str) and x else default
-
-    token = _safe_str(data.get("token"))
-    if not token:
-        return safe_json({"ok": False, "error": "Token eksik"}), 400
-
-    _ALLOWED_LEVEL = ("yeni", "orta", "deneyimli", "profesyonel")
-    _ALLOWED_FREQ = ("gunluk", "swing", "pozisyon", "pasif")
-    _ALLOWED_SIZE = ("0-10k", "10-50k", "50-250k", "250k+")
-    _ALLOWED_SEGMENTS = ("bist30", "bist100", "yildiz", "bankacilik", "teknoloji", "enerji", "sanayi", "gyo")
-
-    level     = _safe_str(data.get("level"))[:20]
-    if level and level not in _ALLOWED_LEVEL:
-        return safe_json({"ok": False, "error": "Geçersiz level değeri"}), 400
-    freq      = _safe_str(data.get("freq"))[:20]
-    if freq and freq not in _ALLOWED_FREQ:
-        return safe_json({"ok": False, "error": "Geçersiz freq değeri"}), 400
-    size      = _safe_str(data.get("size"))[:30]
-    if size and size not in _ALLOWED_SIZE:
-        return safe_json({"ok": False, "error": "Geçersiz size değeri"}), 400
-    segments  = data.get("segments") or []
-    if not isinstance(segments, list): segments = []
-    segments = [str(s).strip()[:30] for s in segments if str(s).strip() in _ALLOWED_SEGMENTS][:10]
-    mail_pref = _safe_str(data.get("mail_pref"), "daily")[:20]
-    if mail_pref not in ("daily", "instant", "premium", "weekly"):
-        return safe_json({"ok": False, "error": "Geçersiz mail_pref değeri"}), 400
-
-    if PROFIL_QA_TOKEN and secrets.compare_digest(token, PROFIL_QA_TOKEN):
-        # CPO-1695: denetim hesabı — gerçek subscribers.json'a hiç yazılmaz.
-        return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
-
-    with _sub_lock:
-        subs = _load_subscribers()
-        target = None
-        for em, info in subs.items():
-            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
-                target = em; break
-        if not target:
-            return safe_json({"ok": False, "error": "Geçersiz token"}), 404
-
-        subs[target]["level"]        = level
-        subs[target]["freq"]         = freq
-        subs[target]["size"]         = size
-        subs[target]["segments"]     = segments
-        subs[target]["mail_pref"]    = mail_pref
-        subs[target]["profile_done"] = True
-        subs[target]["profile_updated_at"] = datetime.now(_TZ_TR).isoformat()
-        _save_subscribers(subs)
-
-    logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", _mask_email(target), level, freq, mail_pref)
-    # r35 bug-hunt: "Sinyaller artık size özel" yanlıştı — level/freq/segments/size
-    # sadece bu formu tekrar render ederken geri gösteriliyor, mail dağıtımını
-    # mail_pref dışında hiçbir alan filtrelemiyor. Mesaj gerçekte ne değiştiğini
-    # yansıtacak şekilde düzeltildi.
-    return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
-
-
 @app.route("/api/me", methods=["GET"])
 @limiter.limit("120 per minute")
 def api_me():
@@ -13703,7 +13541,7 @@ def _check_user_alerts(stocks):
 </tr>{rows}
 </table>
 <p style="margin-top:20px;font-size:13px;color:#909097;line-height:1.6">
-  Bu alarmı devre dışı bırakmak için <a href="https://borsapusula.com/profil?t={rec.get('token', '')}" style="color:#00e290">profil sayfandan</a> ilgili takibi silebilirsin.
+  Bu alarmı devre dışı bırakmak için <a href="https://borsapusula.com/takip" style="color:#00e290">takip sayfandan</a> ilgili takibi silebilirsin.
 </p>"""
             preheader = f"Takip listendeki {len(triggered)} hissede alarm koşulu tetiklendi."
             unsub_url = f"https://borsapusula.com/unsubscribe/{rec.get('token', '')}"
