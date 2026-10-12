@@ -655,6 +655,36 @@ def _rounded_pair(fmap, ids, ga, gb):
     return (a, b) if a and b and a.get("_n") is not None and b.get("_n") is not None else (None, None)
 
 
+_KEY_GENERIC = set("""yıllık değişim değişimi son sonu önceki yılın aynı çeyreğine göre birinci geçen madde
+olarak ile oranı""".split())
+
+
+def _fact_keys(f):
+    """Olgu etiketinin ayırt edici sözcükleri (kök) + F/K, PD/DD, FAVÖK gibi kısaltmalar."""
+    low = _lower_tr(f["t"])
+    keys = set(k for k in ("f/k", "pd/dd", "favök") if k in low)
+    for w in _WORD.findall(low):
+        if len(w) >= 3 and w not in _KEY_GENERIC and w not in _STOP and not w.isdigit():
+            keys.add(_stem(w))
+    return keys
+
+
+def _split_outside_parens(s):
+    """';' ve ', ' ile böl; parantez içindeki virgül ('(%22,9, %19,9)') bölmez."""
+    out, depth, cur, i = [], 0, [], 0
+    while i < len(s):
+        c = s[i]
+        depth += (c == "(") - (c == ")")
+        if depth <= 0 and (c == ";" or (c == "," and s[i + 1:i + 2] == " ")):
+            out.append("".join(cur))
+            cur = []
+        else:
+            cur.append(c)
+        i += 1
+    out.append("".join(cur))
+    return [x for x in out if x.strip()]
+
+
 def check_sentence(sent, fmap, vocab, vocab_stems, name_words=()):
     """Tek cümle → ret kodları listesi (boş = geçer). fmap: {id: olgu}. Ağ yok."""
     ret = []
@@ -715,6 +745,14 @@ def check_sentence(sent, fmap, vocab, vocab_stems, name_words=()):
             if (k == ">" and not x > y) or (k == "<" and not x < y) or \
                     (k == "=" and not (y != 0 and abs(x / y - 1) <= 0.10)):
                 ret.append("karsilastirma:%s/%s" % (pair[0]["id"], pair[1]["id"]))
+    # eşleşme: her {Fn} kendi yan cümlesinde olgunun konusuyla birlikte anılır ("değerleme {F17}" ama F17 trend
+    # durumuysa → yanlış olguya bağlanmış cümle). Parantez içindeki virgül yan cümle bölmez.
+    for cl in _split_outside_parens(sent):
+        low = _lower_tr(_PH.sub(" ", cl))
+        for i in dict.fromkeys(_PH.findall(cl)):
+            keys = _fact_keys(fmap[i])
+            if keys and not any(k in low for k in keys):
+                ret.append("eslesme:" + i)
     # yön (arttı/geriledi) ve işaret (negatif) — değişim olgusunun işaretiyle çelişmemeli
     deg_all = [i for i in dict.fromkeys(ids) if fmap[i].get("_k") == "degisim"]
     for cl in re.split(r";|,\s", sent):
@@ -830,7 +868,8 @@ _RET_TXT = (("olgu_yok", "cümlede olgu kimliği yok"), ("tanimsiz_olgu", "liste
             ("yon", "artış/düşüş olgunun işaretiyle çelişiyor"), ("isaret", "negatif/pozitif olguyla çelişiyor"),
             ("yargi", "olguda olmayan yorum sıfatı"), ("dayanak", "olgu listesinde olmayan bilgi"),
             ("ad", "olgu listesinde olmayan özel ad"), ("bicim", "% ya da ₺ olgu kimliğine yapışık"),
-            ("karsilama", "cari oran ifadesi olguyla çelişiyor"), ("sayi", "olguda olmayan sayı"))
+            ("karsilama", "cari oran ifadesi olguyla çelişiyor"), ("sayi", "olguda olmayan sayı"),
+            ("eslesme", "olgu kimliği konusuyla birlikte anılmamış"))
 
 
 def feedback_for(result):
