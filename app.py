@@ -8276,7 +8276,14 @@ def stock_page(ticker):
         # CPO-1496: TR locale formatlayıcısından geçmeden ham Python float basılıyordu
         # ("131.6 TL", "%0.15") — sayfanın geri kalanı (fiyat kartı) virgüllü format
         # kullanıyor, aynı ekranda çelişki oluşuyordu.
-        _chg_txt = f", günlük değişim %{tr_price_filter(chg)}" if isinstance(chg, (int, float)) else ""
+        # D-P1-1210-1: işaret '%' İÇİNDEN DEĞİL ÖNÜNDEN basılır (templates/_fmt_macros.html
+        # pct_text ile aynı kanon) — eskiden negatifte "%-0,61" basılıyordu (K25 ihlali).
+        if isinstance(chg, (int, float)):
+            _chg_r = round(chg, 2)
+            _chg_sign = "+" if _chg_r > 0 else ("-" if _chg_r < 0 else "")
+            _chg_txt = f", günlük değişim {_chg_sign}%{tr_price_filter(abs(_chg_r))}"
+        else:
+            _chg_txt = ""
         seo_faq.append({
             "q": f"{ticker} hisse fiyatı ne kadar?",
             "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} ₺{_chg_txt}.",
