@@ -182,7 +182,7 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text-3
   .tk-flt button{position:relative;min-height:36px;padding:5px 12px}
   .tk-flt button::after{content:'';position:absolute;inset:-4px -2px}
   .tk-range,.tk-snv,.tk-strip-f{display:none}
-  .tk-sc{gap:10px;scroll-snap-type:x proximity}
+  .tk-sc{gap:10px;scroll-snap-type:x proximity;padding-right:28px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
   .tk-wk{flex:0 0 auto;scroll-snap-align:none}
   .tk-wk-d{grid-template-columns:repeat(5,46px)}
   .tk-dy{scroll-snap-align:start;height:50px;gap:2px;padding-top:4px;border-radius:9px}

@@ -222,9 +222,9 @@
   .cmp-mrow:last-child { border-bottom: none; }
   .cmp-mrow-label {
     color: var(--bp-text-3); font-size: var(--bp-type-xs); text-transform: uppercase;
-    letter-spacing: .4px; flex-shrink: 0;
+    letter-spacing: .4px; flex: 1 1 auto; min-width: 0;
   }
-  .cmp-mrow-val { text-align: right; }
+  .cmp-mrow-val { text-align: right; flex: 0 1 auto; min-width: 0; max-width: 62%; overflow-wrap: anywhere; }
 
   @media (max-width: 600px) {
     .search-bar { padding: 12px; }
