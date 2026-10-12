@@ -1,0 +1,10 @@
+[Unit]
+Description=BorsaPusula AI Analist Notu zamanlayıcı (hafta içi 20:00–22:30 TR, yarım saatte bir; iş kendisi gün sonu hazır mı ve bugün yapıldı mı diye bakar)
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 20,21,22:00,30:00 Europe/Istanbul
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

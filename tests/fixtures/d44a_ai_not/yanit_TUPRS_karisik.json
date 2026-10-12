@@ -1,0 +1,14 @@
+{
+  "note": "Tüpraş'ın hasılatı 2025'te geriledi ({F1}), net kâr arttı ({F2}). Şirket, yeni rafineri yatırımıyla ihracatını artırdı ({F3}). Net kâr %25,4 arttı ({F2}). Bilançoda net nakit var ({F5}). Bu seviyeler uzun vadeli yatırımcı için alım fırsatı sunuyor ({F16}). Özsermaye kârlılığı {F12}, sektör ortancası {F13}. Trend durumu {F17}.",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F3",
+    "F5",
+    "F12",
+    "F13",
+    "F16",
+    "F17"
+  ],
+  "lang": "tr"
+}

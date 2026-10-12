@@ -1,0 +1,15 @@
+{
+  "note": "Garanti BBVA'nın net faiz geliri 2025'te arttı ({F1}), net kâr yükseldi ({F2}). Özsermaye kârlılığı {F12}, sektör ortancası {F13}; sektörde {F15}. F/K {F8}, sektör ortancası {F9}; değerleme {F16}. Trend durumu {F17}.",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F8",
+    "F9",
+    "F12",
+    "F13",
+    "F15",
+    "F16",
+    "F17"
+  ],
+  "lang": "tr"
+}

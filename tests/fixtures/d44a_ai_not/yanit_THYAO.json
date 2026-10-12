@@ -1,0 +1,15 @@
+{
+  "note": "Türk Hava Yolları'nın hasılatı 2025'te arttı ({F1}), net kâr yükseldi ({F2}). 2026 2. çeyrekte net kâr geriledi ({F4}). Net borç/FAVÖK {F5}, cari oran {F6}. F/K {F8}, sektör ortancası {F9}; değerleme {F16}. Trend durumu {F17}.",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F4",
+    "F5",
+    "F6",
+    "F8",
+    "F9",
+    "F16",
+    "F17"
+  ],
+  "lang": "tr"
+}

@@ -1,0 +1,12 @@
+{
+  "note": "Hasılat arttı ({F1}). Net kâr 2024'te yükseldi ({F2}). F/K ({F8}) sektör ortancasının ({F9}) üstünde. Bugün trend durumu {F17}. Hedef fiyata göre potansiyel yüksek ({F16}).",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F8",
+    "F9",
+    "F16",
+    "F17"
+  ],
+  "lang": "tr"
+}

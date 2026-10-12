@@ -1,0 +1,104 @@
+{
+ "disclosures": [
+  {
+   "date": "08.10.2026 18:10:40",
+   "summary": "VDMK İhracına İlişkin Yönetim Kurulu Kararı",
+   "subject": "İhraç Tavanına İlişkin Bildirim",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1677721,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "08.10.2026 18:10:19",
+   "summary": "MTN ihracı itfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1677719,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "07.10.2026 18:10:51",
+   "summary": "MTN ihracı itfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1675188,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "06.10.2026 12:24:44",
+   "summary": "MTN ihracı itfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1672971,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "30.09.2026 18:54:11",
+   "summary": "Yatırım Kuruluşu Varantları İtfa Fiyatları",
+   "subject": "Yatırım Kuruluşu Varant - Sertifika - Senetlerine İlişkin Bildirim",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1670523,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "30.09.2026 18:23:30",
+   "summary": "JCR Kredi Derecelendirme Notu Hakkında",
+   "subject": "Kredi Derecelendirmesi",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1670455,
+   "rutin": false,
+   "label": "Kredi notu"
+  },
+  {
+   "date": "30.09.2026 18:18:55",
+   "summary": "KREDİ DERECELENDİRME BİLDİRİMİ",
+   "subject": "Kredi Derecelendirmesi",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1670442,
+   "rutin": false,
+   "label": "Kredi notu"
+  },
+  {
+   "date": "28.09.2026 18:21:48",
+   "summary": "MTN ihracı itfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1669135,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "25.09.2026 18:10:46",
+   "summary": "MTN ihracı itfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1668282,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "22.09.2026 18:39:12",
+   "summary": "MTN ihracı itfa",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1666808,
+   "rutin": true,
+   "label": "Özel durum"
+  }
+ ]
+}

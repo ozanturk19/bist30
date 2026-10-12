@@ -1,0 +1,142 @@
+{
+ "stocks": [
+  {
+   "ticker": "TUPRS",
+   "name": "Tüpraş Türkiye Petrol Rafinerileri",
+   "price": 384.75,
+   "signal": "BEKLE",
+   "signal_date": "22.09.2026",
+   "bar_date": "12.10.2026",
+   "close_status": "resmi",
+   "conditions": [
+    {
+     "id": "supertrend",
+     "label": "Supertrend yönü",
+     "ok": true,
+     "value": "Yukarı",
+     "threshold": null
+    },
+    {
+     "id": "adx",
+     "label": "ADX ≥ 25",
+     "ok": true,
+     "value": 27.8,
+     "threshold": 25
+    },
+    {
+     "id": "di",
+     "label": "DI+ > DI-",
+     "ok": false,
+     "value": "13.3/24.3",
+     "threshold": null
+    },
+    {
+     "id": "ema1299",
+     "label": "EMA12 > EMA99",
+     "ok": true,
+     "value": 53.4,
+     "threshold": 0
+    },
+    {
+     "id": "weekly_ema20",
+     "label": "Haftalık EMA20 yönü",
+     "ok": true,
+     "value": 1,
+     "threshold": null
+    }
+   ]
+  },
+  {
+   "ticker": "GARAN",
+   "name": "Garanti BBVA",
+   "price": 129.8,
+   "signal": "BEKLE",
+   "signal_date": "24.04.2026",
+   "bar_date": "12.10.2026",
+   "close_status": "resmi",
+   "conditions": [
+    {
+     "id": "supertrend",
+     "label": "Supertrend yönü",
+     "ok": false,
+     "value": "Aşağı",
+     "threshold": null
+    },
+    {
+     "id": "adx",
+     "label": "ADX ≥ 25",
+     "ok": false,
+     "value": 23.6,
+     "threshold": 25
+    },
+    {
+     "id": "di",
+     "label": "DI+ > DI-",
+     "ok": false,
+     "value": "16.6/26.9",
+     "threshold": null
+    },
+    {
+     "id": "ema1299",
+     "label": "EMA12 > EMA99",
+     "ok": false,
+     "value": -1.88,
+     "threshold": 0
+    },
+    {
+     "id": "weekly_ema20",
+     "label": "Haftalık EMA20 yönü",
+     "ok": false,
+     "value": -1,
+     "threshold": null
+    }
+   ]
+  },
+  {
+   "ticker": "THYAO",
+   "name": "Türk Hava Yolları",
+   "price": 285.75,
+   "signal": "SAT",
+   "signal_date": "28.09.2026",
+   "bar_date": "12.10.2026",
+   "close_status": "resmi",
+   "conditions": [
+    {
+     "id": "supertrend",
+     "label": "Supertrend yönü",
+     "ok": false,
+     "value": "Aşağı",
+     "threshold": null
+    },
+    {
+     "id": "adx",
+     "label": "ADX ≥ 25",
+     "ok": true,
+     "value": 30.8,
+     "threshold": 25
+    },
+    {
+     "id": "di",
+     "label": "DI+ > DI-",
+     "ok": false,
+     "value": "14.2/29.7",
+     "threshold": null
+    },
+    {
+     "id": "ema1299",
+     "label": "EMA12 > EMA99",
+     "ok": false,
+     "value": -13.57,
+     "threshold": 0
+    },
+    {
+     "id": "weekly_ema20",
+     "label": "Haftalık EMA20 yönü",
+     "ok": false,
+     "value": -1,
+     "threshold": null
+    }
+   ]
+  }
+ ]
+}

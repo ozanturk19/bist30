@@ -1,0 +1,104 @@
+{
+ "disclosures": [
+  {
+   "date": "02.10.2026 18:24:08",
+   "summary": "Yurtiçinde Borçlanma Aracı İhraç Edilmesi için SPK Başvurusu",
+   "subject": "İhraç Tavanına İlişkin Bildirim",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1671554,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "02.10.2026 09:24:17",
+   "summary": "Kurumsal Yönetim Derecelendirme Notu",
+   "subject": "Kurumsal Yönetim İlkelerine Uyum Derecelendirmesi",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1671102,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "23.09.2026 18:15:41",
+   "summary": "Yurtiçinde borçlanma aracı ihraç edilmesi hakkında karar alınması",
+   "subject": "İhraç Tavanına İlişkin Bildirim",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1667333,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "09.09.2026 18:23:08",
+   "summary": "Yönetici Sorumluluk Sigortası",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1661253,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "01.09.2026 18:44:56",
+   "summary": "Bağlı Ortaklığımız Entek Elektrik Üretim A.Ş.'nin Sermaye Artırımına Katılım",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1656945,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "12.08.2026 18:15:35",
+   "summary": "TRSTPRS82613 ISIN Kodlu Tahvilin 8. Kupon Ödemesi ve İtfası",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1648751,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "12.08.2026 09:35:25",
+   "summary": "TRSTPRS82613 ISIN Kodlu Tahvilin 8. Kupon Faiz Oranının Belirlenmesi",
+   "subject": "Pay Dışında Sermaye Piyasası Aracı İşlemlerine İlişkin Bildirim (Faiz İçeren)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1648306,
+   "rutin": true,
+   "label": "Özel durum"
+  },
+  {
+   "date": "04.08.2026 19:22:20",
+   "summary": "2026 2.Çeyrek Finansal Tabloların Açıklanması",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1643171,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "04.08.2026 18:25:00",
+   "summary": "2026 Yılı Geleceğe Yönelik Beklentilerin Güncellenmesi",
+   "subject": "Geleceğe Dönük Değerlendirmeler",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1643118,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "04.08.2026 18:24:45",
+   "summary": "Ara Dönem Faaliyet Raporu",
+   "subject": "Faaliyet Raporu (Konsolide)",
+   "class": "FR",
+   "type": "FR",
+   "index": 1643117,
+   "rutin": true,
+   "label": "Rapor"
+  }
+ ]
+}

@@ -1,0 +1,104 @@
+{
+ "disclosures": [
+  {
+   "date": "08.10.2026 16:06:22",
+   "summary": "Eylül 2026 Trafik Sonuçları",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1676983,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "23.09.2026 18:19:37",
+   "summary": "Ortaklığımızın Stratejik Planı Çerçevesindeki Uçak Siparişleri",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1667339,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "08.09.2026 22:06:03",
+   "summary": "Ağustos 2026 Trafik Sonuçları",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1660523,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "07.08.2026 13:57:02",
+   "summary": "Temmuz 2026 Trafik Sonuçları",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1645098,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "05.08.2026 08:01:20",
+   "summary": "2026 2. Çeyrek Finansal Sonuçlar",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1643242,
+   "rutin": false,
+   "label": "Özel durum"
+  },
+  {
+   "date": "05.08.2026 08:00:51",
+   "summary": "Sermaye Piyasası Kurulu Seri: II, No:14.1 Sayılı Tebliğinin 2.Bölüm Madde 9 Gereğince Hazırlanan Sorumluluk Beyanı",
+   "subject": "Sorumluluk Beyanı (Konsolide)",
+   "class": "FR",
+   "type": "FR",
+   "index": 1643240,
+   "rutin": true,
+   "label": "Rapor"
+  },
+  {
+   "date": "05.08.2026 08:00:36",
+   "summary": "01.01.2026-30.06.2026 Dönemi Yönetim Kurulu Faaliyet Raporu",
+   "subject": "Faaliyet Raporu (Konsolide)",
+   "class": "FR",
+   "type": "FR",
+   "index": 1643239,
+   "rutin": true,
+   "label": "Rapor"
+  },
+  {
+   "date": "05.08.2026 08:00:21",
+   "summary": "Finansal Rapor",
+   "subject": "Finansal Rapor",
+   "class": "FR",
+   "type": "FR",
+   "index": 1643238,
+   "rutin": false,
+   "label": "Finansal rapor"
+  },
+  {
+   "date": "09.07.2026 14:19:46",
+   "summary": "Fitch Kredi Derecelendirme Notu",
+   "subject": "Kredi Derecelendirmesi",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1630629,
+   "rutin": false,
+   "label": "Kredi notu"
+  },
+  {
+   "date": "08.07.2026 19:07:25",
+   "summary": "Haziran 2026 Trafik Sonuçları",
+   "subject": "Özel Durum Açıklaması (Genel)",
+   "class": "ODA",
+   "type": "ODA",
+   "index": 1629952,
+   "rutin": false,
+   "label": "Özel durum"
+  }
+ ]
+}

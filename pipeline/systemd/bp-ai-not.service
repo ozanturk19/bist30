@@ -1,0 +1,17 @@
+[Unit]
+Description=BorsaPusula AI Analist Notu — BIST30 şirket notu, gün sonu işi (D-44b ilk adım)
+After=network.target bist30.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/bist30
+# AI_NOT_ENABLED=1 bu dosyada yoksa iş çağrı atmadan çıkar ("kapali"); GEMINI_API_KEY ikinci dosyada.
+EnvironmentFile=/root/bist30/.env
+EnvironmentFile=-/etc/bist30/secrets.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/root/bist30/venv/bin/python3 -m pipeline.ai_not_job
+# 30 hisse × (2,2 sn girdi + ≤2 × 7 sn çağrı) ≈ 8 dk üst sınır
+TimeoutStartSec=900
+StandardOutput=append:/var/log/bp-ai-not.log
+StandardError=append:/var/log/bp-ai-not.log

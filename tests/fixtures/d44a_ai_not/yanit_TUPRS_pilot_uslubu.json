@@ -1,0 +1,14 @@
+{
+  "note": "Şirket, hasılatında gerileme ({F1}) ve net kârında artış ({F2}) kaydetti. Cari oranı makul seviyede ({F6}), net nakit pozisyonu güçlü ({F5}). Şirket, sektör ortalamasına göre pahalı değerlenmektedir ({F16}). Özsermaye kârlılığı ({F12}) sektör ortancasının ({F13}) üzerinde. Trend durumu yataydır ({F17}).",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F5",
+    "F6",
+    "F12",
+    "F13",
+    "F16",
+    "F17"
+  ],
+  "lang": "tr"
+}

@@ -1,8 +1,12 @@
-"""D-44a — AI Analist Notu pilotu (iki model yan yana).
+"""D-44a — AI Analist Notu pilotu (iki model yan yana) + D-44b ilk adım (üretim şirket notu).
+
+Üretim (BIST30, gün sonu): olgu kurucu build_company_facts (yalnız KAP bloğu, trend ve koşullar, sektör
+ortancası/sırası, son bildirimler), istem SYSTEM_PROMPT, cümle denetimi validate_sentences; iş ve okuma
+yolu pipeline/ai_not_job.py. Pilot raporları (aşağıdaki run_* işlevleri) aynı olgu kurucuyu kullanır.
 
 Kalite tarifi: ~/ops/plans/2026-09-23-denetim/ai-not-tarifi.md (CPO, 23.09).
 Bu modül app.py'yi İMPORT ETMEZ (pipeline/intraday.py deseni) — girdi yalnız
-sitenin kendi yayınladığı public API'si (/api/hisse/<T>/lite, /fundamentals).
+sitenin kendi yayınladığı public API'si (/api/data, /api/hisse/<T>/fundamentals, /kap).
 Sayıları model YAZMAZ: kod olgu listesi üretir, model olgu kimliğiyle yazar,
 kod {Fn} yerleştirir, doğrulayıcı geçmeyeni reddeder (önceki not korunur —
 pilotta "önceki not" yok, reddedilen örnek ayrıca raporda işaretlenir).
@@ -35,13 +39,22 @@ yalnız olgu kimliği ({F1} gibi, SÜSLÜ PARANTEZLİ) kullan — tarih ve "üç
 ZORUNLU ÖRNEK (olgu: F1=Hasılat 2025 yıllık değişim=−%21,7): DOĞRU → "Hasılat geriledi ({F1})." \
 YANLIŞ → "Hasılat %21,7 geriledi." (rakam metne çıplak yazılmış, {F1} kullanılmamış — bu metin REDDEDİLİR).
 Her sayısal olguyu mutlaka {Fn} kimliğiyle ver; olgu listesindeki hiçbir sayıyı kendi kelimelerinle yazma.
+Her cümlede en az bir {Fn} olsun: olgu kimliği taşımayan cümle yayımlanmaz.
+Şirketin ne iş yaptığını, ürününü, pazarını, yatırımını, yöneticisini yazma; olgu listesinde olmayan hiçbir \
+şirket bilgisi yazma.
+Neden-sonuç kurma ("nedeniyle", "sayesinde", "sağladı", "destekledi", "işaret ediyor" yok). Yorum sıfatı ve derece \
+zarfı kullanma ("makul", "yeterli", "güçlü", "zayıf", "yüksek", "önemli ölçüde", "oldukça"); böyle bir sözcük \
+yalnız ilgili olgunun değerinde geçiyorsa yazılır (ör. değerleme olgusunun değeri "pahalı tarafta" ise).
+Sektör karşılaştırmasında "ortanca" de, "ortalama" deme; karşılaştırmayı iki olguyla birlikte ver \
+("F/K {F7}, sektör ortancası {F8}"). Yıl ve dönemi yalnız olgu etiketindeki gibi yaz ("2025", "2026 2. çeyrek").
 Yasak: AL / SAT / BEKLE kelimeleri ve "al", "sat", "almalı", "satmalı", "fırsat", "tavsiye", "önerilir"; \
 teknik hedef dili (hedef fiyat, TP, kâr al, potansiyel, yükseliş beklentisi, "hedefe ulaştı"); \
 göreli zaman ("bugün", "dün", "yarın", "günün"); kaynak adı ("KAP'a göre", "Reuters"); \
 şirkete yargı ("zayıf şirket", "sağlam değil", "riskli hisse").
-İzinli: güçlü/zayıf KALEM betimi ("nakit akışı güçlü, kârlılık zayıf"), ucuz/makul/pahalı DEĞERLEME betimi \
-(sektöre göre, olguyla), trend durumu adı (Güçlü Trend / Yatay / Trend Bozuldu).
-Sıra: (1) son finansal tablonun ana hareketi, (2) bilanço/nakit, (3) değerleme bağlamı, (4) trend durumu tek cümle.
+İzinli: ucuz/makul/pahalı DEĞERLEME betimi yalnız değerleme olgusunun değeriyle; trend durumu adı \
+(Güçlü Trend / Yatay / Trend Bozuldu).
+Sıra: (1) son finansal tablonun ana hareketi, (2) bilanço/nakit, (3) değerleme bağlamı, (4) trend durumu tek cümle. \
+KAP bildirimi olgusu varsa en çok bir kısa cümle (isteğe bağlı).
 3-5 cümle, toplam en fazla 420 karakter. Çıktı YALNIZ JSON: {"note": "...", "facts_used": ["F1","F4"], "lang": "tr"}
 """
 
@@ -110,80 +123,33 @@ def _get_json(path, base_url, timeout=15):
         return json.loads(r.read().decode("utf-8"))
 
 
+def fetch_company_inputs(ticker, base_url, data_rows=None, get_json=None):
+    """Şirket notunun girdisi — yalnız sitenin kendi uçları: /api/data satırı (trend durumu ve 5 koşul),
+    /fundamentals (KAP bloğu, sektör ortancası ve sırası), /kap (son bildirimler). data_rows verilirse
+    /api/data yeniden çekilmez (üretim işi tek kez çeker). Dönüş: (stock, fund, kap_rows)."""
+    get = get_json or (lambda path: _get_json(path, base_url))
+    if data_rows is None:
+        data_rows = {r.get("ticker"): r for r in ((get("/api/data") or {}).get("stocks") or [])}
+    stock = data_rows.get(ticker) or {}
+    fund = (get(f"/api/hisse/{ticker}/fundamentals") or {}).get("fundamentals") or {}
+    kap_rows = (get(f"/api/hisse/{ticker}/kap") or {}).get("disclosures") or []
+    return stock, fund, kap_rows
+
+
 def build_facts(ticker, base_url):
-    """Olgu listesi: [{"id","t","v"}]. Girdi yalnız sitenin kendi /api/hisse/<T>/* JSON'u."""
-    lite = (_get_json(f"/api/hisse/{ticker}/lite", base_url) or {}).get("stock") or {}
-    fund = (_get_json(f"/api/hisse/{ticker}/fundamentals", base_url) or {}).get("fundamentals") or {}
-    if not lite or not fund:
-        return None, lite, fund
-    kap = fund.get("kap") or {}
-    facts = []
-    n = [0]
-
-    def add(t, v):
-        if v is None:
-            return None
-        n[0] += 1
-        fid = f"F{n[0]}"
-        facts.append({"id": fid, "t": t, "v": v})
-        return fid
-
-    yd = kap.get("yillik_degisim") or {}
-    years = sorted(yd.keys())
-    if years:
-        last_y = years[-1]
-        is_bank = (kap.get("flags") or {}).get("banka")
-        rev_key = "net_interest_income" if is_bank else "revenue"
-        rev_label = "Net faiz geliri" if is_bank else "Hasılat"
-        pct = (yd.get(last_y) or {}).get(rev_key)
-        if pct is not None:
-            add(f"{rev_label} {last_y} yıllık değişim", _tr_pct(pct))
-        ni_pct = (yd.get(last_y) or {}).get("net_income_parent")
-        if ni_pct is not None:
-            add(f"Net kâr {last_y} yıllık değişim", _tr_pct(ni_pct))
-    nb = kap.get("net_borc") or {}
-    if nb.get("net_borc_favok") is not None:
-        add("Net borç/FAVÖK", _tr_num(nb["net_borc_favok"], 2))
-    elif nb.get("net_borc_tl") is not None and nb["net_borc_tl"] < 0:
-        add("Net nakit (TL)", _tr_num(-nb["net_borc_tl"] / 1e9, 1) + " milyar")
-    cr = fund.get("current_ratio")
-    if cr is not None:
-        add("Cari oran", _tr_num(cr, 2))
-    ds = kap.get("degerleme_simdi") or {}
-    sek = fund.get("sektor_ortanca") or {}
-    fk_simdi, fk_sek = ds.get("fk"), (sek.get("fk") or {}).get("deger")
-    if fk_simdi is not None:
-        add("F/K (son 12 ay)", _tr_num(fk_simdi, 1))
-    if fk_sek is not None:
-        add("Sektör ortanca F/K", _tr_num(fk_sek, 1))
-    roe = fund.get("roe")
-    roe_sek = (sek.get("ozsermaye_karliligi") or {}).get("deger")
-    if roe is not None:
-        add("Özsermaye kârlılığı (son 12 ay)", _tr_pct(roe, 1))
-    if roe_sek is not None:
-        add("Sektör ortanca özsermaye kârlılığı", _tr_pct(roe_sek, 1))
-    hukum = None
-    if fk_simdi and fk_sek:
-        if fk_simdi < fk_sek * 0.9:
-            hukum = "ucuz"
-        elif fk_simdi > fk_sek * 1.1:
-            hukum = "pahalı"
-        else:
-            hukum = "makul"
-        add("Değerleme (F/K, sektöre göre)", hukum)
-    trend = SIGNAL_LABELS.get(lite.get("signal"), lite.get("signal"))
-    if trend:
-        add("Trend durumu", trend)
-    at = fund.get("analyst_target")
-    price = lite.get("price")
-    if at and price:
-        add("Analist hedef ortalaması fiyatın üstünde oranı", _tr_pct((at / price - 1) * 100, 1))
-        add("Analist sayısı", str(fund.get("analyst_count") or ""))
-    return facts, lite, fund
+    """Olgu listesi: [{"id","t","v"}] (D-44b: yalnız KAP bloğu + trend + sektör sırası + bildirim;
+    Yahoo alanları ve analist hedefi artık yok). Pilot raporu bu fonksiyonu kullanır."""
+    stock, fund, kap_rows = fetch_company_inputs(ticker, base_url)
+    if not stock or not fund:
+        return None, stock, fund
+    return build_company_facts(ticker, stock, fund, kap_rows), stock, fund
 
 
 def facts_block(facts):
-    return "\n".join(f'{{"id":"{f["id"]}","t":"{f["t"]}","v":"{f["v"]}"}}' for f in facts)
+    """Modele giden olgu satırları: yalnız id/t/v (iç alanlar `_k/_g/_n` gitmez); json.dumps → KAP
+    başlığındaki tırnak da satırı bozmaz."""
+    return "\n".join(json.dumps({"id": f["id"], "t": f["t"], "v": f["v"]}, ensure_ascii=False,
+                                separators=(",", ":")) for f in facts)
 
 
 def build_bildirim_facts(idx, base_url):
@@ -317,6 +283,566 @@ def validate_note(raw_text, facts, max_len=420):
     if len(rendered) > max_len:
         return False, None, f"uzunluk {len(rendered)} > {max_len}"
     return True, rendered, None
+
+
+# ============================================================================================
+# D-44b ilk adım (üretim, şirket notu) — KAP olguları + cümle cümle denetim.
+# Model: flash-lite (O5c teknik karar, CPO 12.10: pilotta 10/10 geçti, en ucuz). Olgu listesi yalnız
+# sitenin kendi verisinden: KAP bloğu (açıklanan rakamlar), trend durumu ve 5 koşul, sektör ortancası
+# ve sırası, son rutin dışı bildirimler. Yahoo alanları ve analist hedefi girmez.
+# Denetim cümle düzeyinde: eşlenemeyen (olgu kimliği yok / olgu dışı söz / yanlış sayı-tarih / yön ya da
+# karşılaştırma çelişkisi / yasak dil / yargı / neden-sonuç / tahmin) cümle atılır; kalan ≥3 cümle
+# değilse not yayımlanmaz. validate_note() (pilot: bildirim ve bülten) değişmedi.
+# ============================================================================================
+URETIM_MODEL = "gemini-2.5-flash-lite"
+NOTE_MAX_LEN = 420
+NOTE_MIN_SENT = 3
+NOTE_MAX_SENT = 5
+MAX_NOVEL = 1            # cümlede olgu, şirket adı ve nötr sözlük dışında en çok 1 sözcük
+KAP_DAYS = 30
+KAP_MAX = 2
+
+_TR_MONTHS = ("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül",
+              "Ekim", "Kasım", "Aralık")
+_POSS = {0: "'ı", 1: "'i", 2: "'si", 3: "'ü", 4: "'ü", 5: "'i", 6: "'sı", 7: "'si", 8: "'i", 9: "'u"}
+_BASIS_TXT = {"tms29": "enflasyon düzeltmeli", "banka": "nominal", "nominal": "nominal"}
+_VERDICT_TXT = {"ucuz": "ucuz tarafta", "makul": "makul", "pahali": "pahalı tarafta", "karisik": "karışık"}
+PAIRS = (("fk", "fk_ort"), ("pddd", "pddd_ort"), ("ozk", "ozk_ort"))
+
+
+def _lower_tr(s):
+    return (s or "").replace("I", "ı").replace("İ", "i").lower()
+
+
+def _tr_chg(v, decimals=1):
+    """Değişim: işaretli (+%28,2 / −%21,7), kanon §2.10."""
+    if v is None:
+        return None
+    r = round(float(v), decimals)
+    if r == 0:
+        return "%" + _tr_num(0.0, decimals)
+    return ("+" if r > 0 else "−") + "%" + _tr_num(abs(r), decimals)
+
+
+def _tr_date(s):
+    """'22.09.2026' | '2026-09-22' | '02.10.2026 18:24:08' → '22 Eylül 2026'."""
+    s = (s or "").strip()
+    m = re.match(r"^(\d{2})\.(\d{2})\.(\d{4})", s) or None
+    if m:
+        d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    else:
+        m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+        if not m:
+            return None
+        y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not 1 <= mo <= 12:
+        return None
+    return "%d %s %d" % (d, _TR_MONTHS[mo - 1], y)
+
+
+def _iso_of(s):
+    m = re.match(r"^(\d{2})\.(\d{2})\.(\d{4})", (s or "").strip())
+    if m:
+        return "%s-%s-%s" % (m.group(3), m.group(2), m.group(1))
+    m = re.match(r"^(\d{4}-\d{2}-\d{2})", (s or "").strip())
+    return m.group(1) if m else None
+
+
+def _quarter_label(donem):
+    """'2026/06' → '2026 2. çeyrek' (12. ay yıllık rapordur → None)."""
+    m = re.match(r"^(\d{4})/(\d{2})$", donem or "")
+    if not m or m.group(2) not in ("03", "06", "09"):
+        return None
+    return "%s %d. çeyrek" % (m.group(1), int(m.group(2)) // 3)
+
+
+_POSS_TENS = {1: "'u", 2: "'si", 3: "'u", 4: "'ı", 5: "'si", 6: "'ı", 7: "'i", 8: "'i", 9: "'ı"}
+
+
+def _poss(n):
+    """Sayının iyelik eki (4'ü, 7'si, 10'u) — 'beş koşuldan 4'ü', '9 maddenin 7'si'."""
+    n = abs(int(n))
+    if n % 10:
+        return _POSS[n % 10]
+    return _POSS_TENS.get((n // 10) % 10, "'ü") if n else _POSS[0]
+
+
+_COND_COUNT_TXT = "{n} koşuldan {k}{s}"
+
+
+def build_company_facts(ticker, stock, fund, kap_rows=None, today=None):
+    """Saf olgu kurucu (ağ yok). stock: /api/data satırı; fund: /fundamentals 'fundamentals'; kap_rows:
+    /kap 'disclosures'. Olgu: {"id","t","v"} + iç alanlar _k (tür), _g (grup), _n (sayısal değer,
+    gösterilen yuvarlamayla). Sayılar sitenin gösterdiği biçimde (kanon §2.10)."""
+    import temel_skor_v2   # kanon §5.6 değerleme hükmü (hisse sayfası "Fiyatı makul mu?" ile aynı kural)
+    stock, fund = stock or {}, fund or {}
+    facts = []
+
+    def add(t, v, kind, grup=None, n=None):
+        if v in (None, ""):
+            return None
+        fid = "F%d" % (len(facts) + 1)
+        facts.append({"id": fid, "t": t, "v": v, "_k": kind, "_g": grup, "_n": n})
+        return fid
+
+    kap = (fund.get("kap") or {}) if fund.get("kap_durum") == "var" else {}
+    flags = kap.get("flags") or {}
+    bank = bool(flags.get("banka")) or kap.get("sablon") == "banka"
+    basis = kap.get("basis")
+    cur = fund.get("financial_currency") or fund.get("statement_currency")
+    if basis == "yabanci_para":
+        basis_txt = "%s cinsinden rapor" % cur if cur and cur != "TRY" else None
+    else:
+        basis_txt = _BASIS_TXT.get(basis)
+    suffix = " (%s)" % basis_txt if basis_txt else ""
+    money_ok = basis in ("tms29", "nominal", "banka")
+
+    # (1) son finansal tablonun ana hareketi — şirketin kendi raporundaki karşılaştırma
+    rev_key, rev_lbl = ("net_interest_income", "Net faiz geliri") if bank else ("revenue", "Hasılat")
+    yd = kap.get("yillik_degisim") or {}
+    years = sorted(y for y in yd if isinstance(yd.get(y), dict) and yd.get(y))
+    if years:
+        y, row = years[-1], yd[years[-1]]
+        if row.get(rev_key) is not None:
+            add("%s, %s yıllık değişim%s" % (rev_lbl, y, suffix), _tr_chg(row[rev_key]), "degisim", "gelir",
+                round(row[rev_key], 1))
+        if row.get("net_income_parent") is not None:
+            add("Net kâr, %s yıllık değişim%s" % (y, suffix), _tr_chg(row["net_income_parent"]), "degisim", "kar",
+                round(row["net_income_parent"], 1))
+    son = (kap.get("son_rapor") or {}).get("donem")
+    q = _quarter_label(son) if son and son != kap.get("son_yillik") else None
+    cd = ((kap.get("ceyreklik_degisim") or {}).get(son) or {}) if q else {}
+    if cd.get(rev_key) is not None:
+        add("%s değişimi, %s (önceki yılın aynı çeyreğine göre)" % (rev_lbl, q), _tr_chg(cd[rev_key]), "degisim",
+            "gelir_q", round(cd[rev_key], 1))
+    if cd.get("net_income_parent") is not None:
+        add("Net kâr değişimi, %s (önceki yılın aynı çeyreğine göre)" % q, _tr_chg(cd["net_income_parent"]),
+            "degisim", "kar_q", round(cd["net_income_parent"], 1))
+
+    # (2) bilanço / nakit
+    bil = kap.get("bilanco") or {}
+    bcur, by = bil.get("cur") or {}, bil.get("yil")
+    if by:
+        if bank:
+            km = bcur.get("kredi_mevduat")
+            if km is not None:
+                add("Kredi/mevduat oranı, %s sonu" % by, _tr_pct(km, 1), "oran", "km", round(km, 1))
+            gg = ((kap.get("oranlar") or {}).get(str(by)) or {}).get("gider_gelir")
+            if gg is not None:
+                add("Gider/gelir oranı, %s" % by, _tr_pct(gg, 1), "oran", "gg", round(gg, 1))
+        else:
+            nb, fv, nbf = bcur.get("net_borc"), bcur.get("favok"), bcur.get("net_borc_favok")
+            if nb is not None and nb < 0:
+                if money_ok:
+                    add("Net nakit, %s sonu" % by, _tr_num(-nb / 1e9, 1) + " Mrd ₺", "tutar", "net_nakit",
+                        round(-nb / 1e9, 1))
+                else:
+                    add("Net borç durumu, %s sonu" % by, "net nakit", "durum", "net_nakit")
+            elif nb is not None and nbf is not None and (fv or 0) > 0:
+                add("Net borç/FAVÖK, %s" % by, _tr_num(nbf, 2), "oran", "nb_favok", round(nbf, 2))
+            cr = bcur.get("cari_oran")
+            if cr is not None:
+                add("Cari oran (dönen varlıklar / kısa vadeli borçlar), %s sonu" % by, _tr_num(cr, 2), "oran",
+                    "cari", round(cr, 2))
+    sg = kap.get("saglamlik") or {}
+    if sg.get("puan") is not None and sg.get("toplam"):
+        add("Sağlamlık kontrolü, %s (geçen madde)" % sg.get("yil"),
+            "%d maddenin %d%s" % (sg["toplam"], sg["puan"], _poss(sg["puan"])), "sayim", "saglamlik", sg["puan"])
+
+    # (3) değerleme — hisse sayfası Q2 ile aynı sayılar ve aynı kural (kanon §5.6)
+    ds = kap.get("degerleme_simdi") or {}
+    med = fund.get("sektor_ortanca") or {}
+    sira = fund.get("sektor_sira") or {}
+    pay_ok = not ds.get("pay_uyumsuz")
+
+    def med_lbl(m):
+        return "Sektör ortancası" if (m or {}).get("kapsam") == "sektor" else "BIST ortancası"
+
+    ratios, used = [], []
+    for key, grup, lbl, dec in (("fk", "fk", "F/K (son 12 ay kârıyla)", 1),
+                                ("pd_dd", "pddd", "PD/DD (son açıklanan özkaynakla)", 2)):
+        v = ds.get(key) if pay_ok else None
+        if v is None or v <= 0:
+            continue
+        add(lbl, _tr_num(v, dec), "oran", grup, round(v, dec))
+        m = med.get(key) or {}
+        if (m.get("deger") or 0) > 0:
+            add("%s %s" % (med_lbl(m), "F/K" if key == "fk" else "PD/DD"), _tr_num(m["deger"], dec), "oran",
+                grup + "_ort", round(m["deger"], dec))
+            ratios.append(v / m["deger"])
+            used.append("F/K" if key == "fk" else "PD/DD")
+    roe = ds.get("ozsermaye_karliligi")
+    if roe is not None:
+        add("Özsermaye kârlılığı (son 12 ay)", _tr_pct(roe, 1), "oran", "ozk", round(roe, 1))
+        m = med.get("ozsermaye_karliligi") or {}
+        if m.get("deger") is not None:
+            add("%s özsermaye kârlılığı" % med_lbl(m), _tr_pct(m["deger"], 1), "oran", "ozk_ort",
+                round(m["deger"], 1))
+    for key, lbl in (("fk", "F/K'da sektör sırası (en düşük F/K birinci)"),
+                     ("ozsermaye_karliligi", "Özsermaye kârlılığında sektör sırası (en yüksek birinci)")):
+        s = sira.get(key) if (pay_ok or key != "fk") else None
+        if s and s.get("sira") and s.get("toplam"):
+            add(lbl, "%d şirket arasında %d. sırada" % (s["toplam"], s["sira"]), "sira", key + "_sira", s["sira"])
+    verdict = temel_skor_v2.valuation_verdict(ratios) if ratios else None
+    if verdict:
+        add("Değerleme (%s, ortancaya göre)" % " ve ".join(used), _VERDICT_TXT[verdict], "hukum", "degerleme")
+
+    # (4) trend durumu ve koşullar (motorun kendi kaydı, D-47)
+    trend = SIGNAL_LABELS.get(stock.get("signal"))
+    if trend:
+        add("Trend durumu", trend, "durum", "trend")
+        add("Trend durumunun başladığı tarih", _tr_date(stock.get("signal_date")), "tarih", "trend_tarih")
+        conds = stock.get("conditions") or []
+        if conds:
+            k = sum(1 for c in conds if c.get("ok"))
+            add("Sağlanan trend koşulu", _COND_COUNT_TXT.format(n=len(conds), k=k, s=_poss(k)), "sayim", "kosul", k)
+
+    # (5) son rutin dışı şirket bildirimleri (isteğe bağlı; finansal rapor duyurusu (1)'de zaten var)
+    ref = today or _iso_of(stock.get("bar_date"))
+    picked = []
+    for r in kap_rows or []:
+        iso = _iso_of(r.get("date"))
+        title = re.sub(r"\s+", " ", (r.get("summary") or "")).strip()
+        if not iso or not title or r.get("rutin") or (r.get("class") or r.get("type")) != "ODA":
+            continue
+        if ref and iso < _days_before(ref, KAP_DAYS):
+            continue
+        if re.search(r"(?i)finansal (tablo|rapor)", title) or any(re.search(p, title) for p in _BANNED_ALL):
+            continue
+        letters = [c for c in title if c.isalpha()]
+        if letters and sum(c.isupper() for c in letters) > 0.7 * len(letters):
+            continue   # TAMAMI BÜYÜK HARF başlık nota olduğu gibi girmez (Türkçe küçültme riski almıyoruz)
+        if any(_lower_tr(title) == _lower_tr(t) for _, t in picked):
+            continue   # aynı başlık iki kez (büyük/küçük harf farkıyla da) girmez
+        picked.append((iso, title[:120]))
+    for iso, title in sorted(picked, reverse=True)[:KAP_MAX]:
+        add("Şirket bildirimi, %s" % _tr_date(iso), title, "bildirim", "kap")
+    return facts
+
+
+def _days_before(iso, days):
+    from datetime import date, timedelta
+    try:
+        y, m, d = (int(x) for x in iso.split("-"))
+        return (date(y, m, d) - timedelta(days=days)).isoformat()
+    except (ValueError, AttributeError):
+        return "0000-00-00"
+
+
+def facts_signature(facts, model=URETIM_MODEL, prompt=None):
+    """Girdi imzası: olgular (id/t/v) + model + istem. Aynı imza → yeni çağrı yok (veri değişmedi)."""
+    import hashlib
+    body = json.dumps([{"id": f["id"], "t": f["t"], "v": f["v"]} for f in facts], ensure_ascii=False,
+                      sort_keys=True, separators=(",", ":"))
+    h = hashlib.sha256()
+    for part in (body, model, prompt if prompt is not None else SYSTEM_PROMPT):
+        h.update(part.encode("utf-8"))
+        h.update(b"\x00")
+    return h.hexdigest()
+
+
+def company_user_content(ticker, name, facts, feedback=None):
+    s = "Şirket: %s (%s)\nOlgular:\n%s" % (name or ticker, ticker, facts_block(facts))
+    if feedback:
+        s += "\n\n" + feedback
+    return s
+
+
+# ---- cümle denetimi ---------------------------------------------------------------------------
+# Tarifi §4'ün dört kalıbı aynen (_BANNED_PATTERNS) + üretim genişletmesi: çekimli göreli zaman,
+# işlem/hedef dili, şirkete yargı ve üstünlük iddiası, gri dil, kaynak adı.
+_BANNED_EXTRA = [
+    r"(?i)\b(?:öneri\w*|önerir\w*|önerilir\w*|tavsiye\w*|fırsat\w*|hedef\w*|potansiyel\w*|beklenti\w*)",
+    r"(?i)\b(?:almalı\w*|satmalı\w*|alım fırsat\w*|kâr al\w*|kar al\w*|zarar kes\w*|stop\w*|TP\d|R/R|risk/ödül)",
+    r"(?i)\bgiriş (?:fiyat|bölge|seviye|nokta)\w*|\bdirenç\w*|\bdestek seviye\w*|\bprim yap\w*",
+    r"(?i)\b(?:bugün\w*|yarın\w*|dün(?:kü|den|de|e|ü|ün)?|günün|şimdi\w*|haftaya|yakında|son günlerde)\b",
+    r"(?i)\b(?:bu|geçen|gelecek|önümüzdeki|geçtiğimiz)\s+(?:gün|hafta|ay|yıl|sene|çeyrek|dönem)\w*",
+    r"(?i)\b(?:zayıf|güçlü|sağlam|riskli|kötü|iyi|cazip|değerli|değersiz)\s+(?:bir\s+)?(?:şirket|hisse|firma|banka|holding)\w*",
+    r"(?i)\b(?:şirket|hisse|firma)\w*\s+(?:zayıf|güçlü|sağlam|riskli|cazip|kötü)\b",
+    r"(?i)\ben büyük\w*|\ben iyi\w*|\blider\w*|\böncü\w*|pazar pay\w*|\bdev\b",
+    r"(?i)\b(?:kısmi\w*|ücretsiz\w*)|verisi\s*%",
+    r"(?i)(?:yahoo|finnet|matriks|kap'a göre|kap’a göre|kaynağa göre)",
+]
+_BANNED_ALL = list(_BANNED_PATTERNS) + _BANNED_EXTRA
+_CAUSAL_RE = re.compile(
+    r"(?i)\b(?:nedeniyle|yüzünden|sayesinde|etkisiyle|dolayı\w*|kaynakl\w*|bağlı olarak|sonucunda|"
+    r"yol aç\w*|katkı\w*|destekle\w*|sağladı\w*|sağlamış\w*|sağlayarak|yansı\w*|işaret\w*|anlamına|"
+    r"böylece|dolayısıyla|bu nedenle|bu da\b|bunun sonucu\w*)")
+_FUTURE_RE = re.compile(
+    r"(?i)\b(?!(?:içecek|yiyecek|giyecek)\b)\w+(?:acak|ecek|acağ|eceğ)\w*|\b(?:beklen\w*|öngör\w*|tahmin\w*|"
+    r"muhtemel\w*|olası\w*|olabilir\w*|edebilir\w*|sürebilir\w*|gelecek\w*)")
+_AVG_RE = re.compile(r"(?i)\bortalama\w*")
+# yargı/derece sözcükleri: yalnız cümlenin dayandığı olgunun metninde geçiyorsa (ör. "pahalı tarafta")
+_JUDGE_RE = re.compile(
+    r"(?i)\b(makul\w*|ucuz\w*|pahal\w*|karışık\w*|güçlü\w*|zayıf\w*|sağlam\w*|sağlıklı\w*|yeterli\w*|"
+    r"yetersiz\w*|iyi|kötü\w*|olumlu\w*|olumsuz\w*|önemli\w*|ciddi\w*|belirgin\w*|dikkat çek\w*|sınırlı\w*|"
+    r"oldukça|çok|yönetilebilir\w*|uyumlu\w*|riskl\w*|risk|cazip\w*|başarı\w*|istikrar\w*|rekor\w*|sert\w*|"
+    r"keskin\w*|hızl[ıa]\w*|yavaş\w*|kayda değer|zirve\w*|güvenl\w*|endişe\w*|kaygı\w*|yüksek\w*|düşük\w*|"
+    r"fazla\w*|az|negatif\w*|pozitif\w*)\b")
+_UP_CMP = re.compile(r"(?i)\b(?:üstünde\w*|üzerinde\w*|yüksek\w*|fazla\w*|aşıyor|aştı)\b")
+_DN_CMP = re.compile(r"(?i)\b(?:altında\w*|gerisinde\w*|düşük\w*|az)\b")
+_EQ_CMP = re.compile(r"(?i)\b(?:yakın\w*|eşit\w*|benzer\w*|paralel\w*)\b|\baynı (?:seviye|düzey)\w*")
+_UP_DIR = re.compile(r"(?i)\b(?:art(?:tı|ış\w*|arak|mış\w*|an|ıyor)|artır\w*|yüksel\w*|büyü(?:dü|me\w*|yerek|"
+                     r"müş\w*|yen|yor)|iyileş\w*|toparlan\w*|güçlen\w*)\b")
+_DN_DIR = re.compile(r"(?i)\b(?:azal\w*|geril\w*|düş(?:tü|üş\w*|erek|müş\w*|en|üyor)|daral\w*|kötüleş\w*|"
+                     r"zayıfla\w*|küçül\w*|kayb\w*)\b")
+_NEG_SIGN = re.compile(r"(?i)\b(?:negatif\w*|eksi\w*|zarar\w*)\b")
+_POS_SIGN = re.compile(r"(?i)\b(?:pozitif\w*|kâra geç\w*|kara geç\w*)\b")
+_CLAUSE_SPLIT = re.compile(r";|,\s|\s(?:ve|ancak|ama|fakat|ise|buna karşılık|öte yandan)\s")
+_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ{(\"'“]|\d)")   # "2. çeyrek" küçük harfle sürer
+_PH = re.compile(r"\{(F\d+)\}")
+_WORD = re.compile(r"[A-Za-zÇĞİÖŞÜÂÎÛçğıöşüâîû]+")
+_NUM_TOK = re.compile(r"\d+(?:[.,]\d+)*")
+_MONTHS_RE = "|".join(_TR_MONTHS)
+_BARE_OK = re.compile(
+    r"\b\d{1,2}\s+(?:%s)(?:\s+(?:19|20)\d{2})?|\b[1-4]\.\s*çeyre\w*|\bson\s+12\s+ay\w*|\b(?:19|20)\d{2}\b"
+    % _MONTHS_RE)
+_STOP = set("""ve ile da de ki bu şu o bir en mi mı mu mü ise için gibi daha olarak kadar göre ya veya hem ne
+ama fakat ancak ayrıca yanı sıra""".split())
+_NEUTRAL_WORDS = """şirket şirketin şirketi şirketinin hisse hissenin hissesi bilanço bilançoda bilançosu finansal tablo
+tablolar tablosunda rapor raporda raporu raporunda dönem dönemde döneminde yıl yılı yılında yıllık çeyrek çeyrekte
+çeyreğinde ilk yarı yarısında son aynı oranla oran oranı oranında değer değeri değerinde düzey düzeyinde seviye
+seviyesinde durum durumu durumda durumunda var yok oldu olan olup olmuş olduğu olarak birlikte öte yandan buna
+karşılık kendi açıkladığı açıklanan açıkladı karşılaştırma kaydetti kaydedildi gösterdi gösteriyor izliyor izledi
+seyrediyor sürüyor bulunuyor devam ediyor yer alıyor başladı başlayan beri itibarıyla tarihinden tarihinde tarihli
+tarihte kapanış kapanışı toplam değişim değişimi değişti koşul koşulu koşuldan koşulun koşulları sağlanıyor
+sağlanmıyor sağlandı madde maddesi maddeden geçti geçen sırada sırası sıralamada arasında içinde üstünde üzerinde
+altında gerisinde yakın eşit benzer paralel aşıyor arttı artış artışı artarak artırdı yükseldi yükseliş yükselişi
+büyüdü büyüme büyümesi geriledi gerileme gerilemesi azaldı azalış düştü düşüş düşüşü daraldı daralma iyileşti
+kötüleşti toparlandı yön döndü dönüş ise yönünde bildirim bildirimi yayımladı yayımlanan duyurdu açıklama başlıklı
+konulu hakkında ilişkin ilgili""".split()
+
+
+def _stem(w):
+    return w[:5] if len(w) > 5 else w
+
+
+_NEUTRAL = set(_stem(_lower_tr(w)) for w in _NEUTRAL_WORDS)
+
+
+def _vocab(texts):
+    words = set()
+    for t in texts:
+        for w in _WORD.findall(t or ""):
+            lw = _lower_tr(w)
+            if len(lw) >= 3:
+                words.add(lw)
+    return words
+
+
+def _grounded(lw, vocab, vocab_stems):
+    if _stem(lw) in vocab_stems:
+        return True
+    for fw in vocab:
+        if len(fw) >= 4 and (lw.startswith(fw) or (len(lw) >= 4 and fw.startswith(lw))):
+            return True
+    return False
+
+
+def _split_sentences(note):
+    return [s.strip() for s in _SENT_SPLIT.split((note or "").strip()) if s.strip()]
+
+
+def _render(text, fmap):
+    return _PH.sub(lambda m: fmap[m.group(1)]["v"] if m.group(1) in fmap else m.group(0), text)
+
+
+def _rounded_pair(fmap, ids, ga, gb):
+    a = next((fmap[i] for i in ids if fmap[i].get("_g") == ga), None)
+    b = next((fmap[i] for i in ids if fmap[i].get("_g") == gb), None)
+    return (a, b) if a and b and a.get("_n") is not None and b.get("_n") is not None else (None, None)
+
+
+def check_sentence(sent, fmap, vocab, vocab_stems, name_words=()):
+    """Tek cümle → ret kodları listesi (boş = geçer). fmap: {id: olgu}. Ağ yok."""
+    ret = []
+    ids = _PH.findall(sent)
+    if not ids:
+        return ["olgu_yok"]
+    unknown = [i for i in ids if i not in fmap]
+    if unknown:
+        return ["tanimsiz_olgu:" + ",".join(unknown)]
+    refs = [fmap[i] for i in dict.fromkeys(ids)]
+    ref_text = _lower_tr(" ".join("%s %s" % (f["t"], f["v"]) for f in refs))
+    ref_words = _vocab([ref_text])
+    pre = _PH.sub(" ", sent)
+    # biçim: % ya da ₺ ya da işaret olgu kimliğine yapışık ("%{F1}" → "%−%21,7"), iki kimlik bitişik
+    if re.search(r"[%₺+−-]\s*\{F\d+\}|\d\{F\d+\}|\{F\d+\}\s*[%₺]|\{F\d+\}\d|\{F\d+\}\{F\d+\}", sent):
+        ret.append("bicim")
+    # çıplak rakam: yalnız tarih/yıl/çeyrek kalıbı ve yalnız dayandığı olgunun metninde geçiyorsa
+    rest = pre
+    for m in _BARE_OK.finditer(pre):
+        core = _lower_tr(re.sub(r"\s+", " ", m.group(0)))
+        core = re.sub(r"\.\s*çeyre\w*", ". çeyrek", core)
+        core = re.sub(r"\bay\w*$", "ay", core)
+        if core in ref_text:
+            rest = rest.replace(m.group(0), " ", 1)
+    if re.search(r"\d", rest):
+        ret.append("ciplak_rakam")
+    for pat in _BANNED_ALL:
+        if re.search(pat, pre):
+            ret.append("yasak_dil")
+            break
+    if _CAUSAL_RE.search(pre):
+        ret.append("neden_sonuc")
+    if _FUTURE_RE.search(pre):
+        ret.append("tahmin")
+    if _AVG_RE.search(pre):
+        ret.append("ortalama")
+    # karşılaştırma (F/K ↔ ortanca vb.): sözcüğün yönü gösterilen sayılarla tutarlı olmalı; çifti olmayan
+    # karşılaştırma sözcüğü ("borçluluk yüksek") yargıdır — dayandığı olgunun metninde yoksa atılır
+    sent_pairs = [(a, b) for a, b in (_rounded_pair(fmap, ids, ga, gb) for ga, gb in PAIRS) if a is not None]
+    checked = set()
+    for cl in (c for c in _CLAUSE_SPLIT.split(sent) if c and c.strip()):
+        body = _PH.sub(" ", cl)
+        found = [(k, _lower_tr(m.group(0))) for rx, k in ((_UP_CMP, ">"), (_DN_CMP, "<"), (_EQ_CMP, "="))
+                 for m in rx.finditer(body)]
+        if not found:
+            continue
+        cl_ids = _PH.findall(cl)
+        pair = next(((a, b) for a, b in sent_pairs if a["id"] in cl_ids or b["id"] in cl_ids), None)
+        if pair is None and len(sent_pairs) == 1:
+            pair = sent_pairs[0]
+        for k, w in found:
+            checked.add(w)
+            if pair is None:
+                if not (w in ref_text or _stem(w) in ref_text):
+                    ret.append("yargi:" + w)
+                continue
+            x, y = pair[0]["_n"], pair[1]["_n"]
+            if (k == ">" and not x > y) or (k == "<" and not x < y) or \
+                    (k == "=" and not (y != 0 and abs(x / y - 1) <= 0.10)):
+                ret.append("karsilastirma:%s/%s" % (pair[0]["id"], pair[1]["id"]))
+    # yön (arttı/geriledi) ve işaret (negatif) — değişim olgusunun işaretiyle çelişmemeli
+    deg_all = [i for i in dict.fromkeys(ids) if fmap[i].get("_k") == "degisim"]
+    for cl in re.split(r";|,\s", sent):
+        body = _PH.sub(" ", cl)
+        up, dn = bool(_UP_DIR.search(body)), bool(_DN_DIR.search(body))
+        parts = [cl] if up != dn else re.split(r"\s(?:ve|ancak|ama|fakat|ise|buna karşılık)\s", cl)
+        for p in parts:
+            pb = _PH.sub(" ", p)
+            pu, pd = bool(_UP_DIR.search(pb)), bool(_DN_DIR.search(pb))
+            if pu == pd:
+                continue
+            cl_deg = [i for i in _PH.findall(p) if fmap.get(i, {}).get("_k") == "degisim"]
+            for i in cl_deg or (deg_all if len(deg_all) == 1 else []):
+                n = fmap[i].get("_n")
+                if n is not None and ((pu and not n > 0) or (pd and not n < 0)):
+                    ret.append("yon:" + i)
+        neg, pos = bool(_NEG_SIGN.search(body)), bool(_POS_SIGN.search(body))
+        if neg or pos:
+            nums = [fmap[i] for i in _PH.findall(cl) if fmap.get(i, {}).get("_n") is not None] or \
+                   [f for f in refs if f.get("_n") is not None][:1]
+            if not nums:
+                ret.append("isaret")
+            for f in nums:
+                if (neg and not f["_n"] < 0) or (pos and not f["_n"] > 0):
+                    ret.append("isaret:" + f["id"])
+    # cari oran "karşılıyor" ancak oran ≥1 ise
+    if re.search(r"(?i)karşıla", pre):
+        cari = next((f for f in refs if f.get("_g") == "cari"), None)
+        negated = bool(re.search(r"(?i)karşıla(?:mıyor|mamakta|yamıyor|madı)", pre))
+        if cari is None or (negated and not cari["_n"] < 1) or (not negated and not cari["_n"] >= 1):
+            ret.append("karsilama")
+    # yargı/derece sözcüğü: dayandığı olgunun metninde yoksa (karşılaştırma çiftiyle denetlenenler hariç)
+    for m in _JUDGE_RE.finditer(pre):
+        w = _lower_tr(m.group(0))
+        if w in checked or _NEG_SIGN.fullmatch(w) or _POS_SIGN.fullmatch(w):
+            continue
+        if not (_stem(w) in ref_text or any(rw.startswith(_stem(w)) for rw in ref_words)):
+            ret.append("yargi:" + w)
+    # dayanak: sözcükler olguda, şirket adında ya da nötr sözlükte; büyük harfli (özel ad) sözcükte tolerans yok
+    novel, proper = [], []
+    for raw in _WORD.findall(re.sub(r"[’'][A-Za-zÇĞİÖŞÜçğıöşü]+", "", pre)):
+        lw = _lower_tr(raw)
+        if len(lw) < 3 or lw in _STOP or _stem(lw) in _NEUTRAL:
+            continue
+        if _JUDGE_RE.fullmatch(lw) or _UP_DIR.fullmatch(lw) or _DN_DIR.fullmatch(lw):
+            continue
+        if lw in name_words or _grounded(lw, vocab, vocab_stems):
+            continue
+        (proper if raw[:1].isupper() else novel).append(lw)
+    if proper:
+        ret.append("ad:" + ",".join(proper[:3]))
+    if len(novel) > MAX_NOVEL:
+        ret.append("dayanak:" + ",".join(novel[:4]))
+    # yerleştirme sonrası: yasak dil (olgu değerleri dahil) ve her sayı dayandığı olgularda
+    rendered = _render(sent, fmap)
+    if not any(r == "yasak_dil" for r in ret) and any(re.search(p, _PH.sub(" ", rendered)) for p in _BANNED_ALL):
+        ret.append("yasak_dil_olgu")
+    ok_nums = set(_NUM_TOK.findall(" ".join("%s %s" % (f["t"], f["v"]) for f in refs)))
+    if any(n not in ok_nums for n in _NUM_TOK.findall(rendered)) and "ciplak_rakam" not in ret:
+        ret.append("sayi")
+    return list(dict.fromkeys(ret))
+
+
+def validate_sentences(raw_text, facts, name="", ticker="", max_len=NOTE_MAX_LEN, min_sent=NOTE_MIN_SENT,
+                       max_sent=NOTE_MAX_SENT, extra_words=()):
+    """Üretim doğrulayıcısı (tarifi §4 + cümle düzeyi). Dönüş sözlüğü:
+    {ok, not (yerleştirilmiş metin | None), cumleler: [{ham, metin, olgular, ret}], sebep, facts_used}.
+    Geçemeyen cümle atılır; kalan cümle sayısı min_sent altındaysa not yayımlanmaz (ok=False)."""
+    out = {"ok": False, "not": None, "cumleler": [], "sebep": None, "facts_used": []}
+    try:
+        parsed = json.loads(raw_text)
+        note = parsed.get("note", "")
+        facts_used = parsed.get("facts_used", [])
+    except (json.JSONDecodeError, AttributeError, TypeError):
+        out["sebep"] = "json"
+        return out
+    if not isinstance(note, str) or not note.strip():
+        out["sebep"] = "bos_not"
+        return out
+    fmap = {f["id"]: f for f in facts}
+    if not isinstance(facts_used, list) or not set(map(str, facts_used)) <= set(fmap):
+        out["sebep"] = "facts_used"   # tarifi §4: facts_used ⊆ verilen olgular
+        return out
+    name_words = set(_lower_tr(w) for w in _WORD.findall("%s %s" % (name or "", ticker or "")) if len(w) >= 3)
+    vocab = _vocab(["%s %s" % (f["t"], f["v"]) for f in facts] + [name or "", ticker or ""] + list(extra_words))
+    vocab_stems = set(_stem(w) for w in vocab)
+    kept = []
+    for s in _split_sentences(note):
+        ret = check_sentence(s, fmap, vocab, vocab_stems, name_words)
+        rec = {"ham": s, "metin": _render(s, fmap), "olgular": list(dict.fromkeys(_PH.findall(s))), "ret": ret}
+        out["cumleler"].append(rec)
+        if not ret:
+            kept.append(rec)
+    for rec in kept[max_sent:]:
+        rec["ret"] = ["fazla_cumle"]
+    kept = kept[:max_sent]
+    while kept and len(" ".join(r["metin"] for r in kept)) > max_len:
+        kept[-1]["ret"] = ["uzunluk"]
+        kept.pop()
+    if len(kept) < min_sent:
+        out["sebep"] = "cumle_az:%d" % len(kept)
+        return out
+    text = " ".join(r["metin"] for r in kept)
+    out.update(ok=True, **{"not": text})
+    out["facts_used"] = sorted(set(i for r in kept for i in r["olgular"]), key=lambda x: int(x[1:]))
+    return out
+
+
+_RET_TXT = (("olgu_yok", "cümlede olgu kimliği yok"), ("tanimsiz_olgu", "listede olmayan olgu kimliği"),
+            ("ciplak_rakam", "sayı ya da tarih {Fn} yerine çıplak yazılmış"), ("yasak_dil", "yasak sözcük"),
+            ("neden_sonuc", "olguda olmayan neden-sonuç"), ("tahmin", "tahmin/gelecek ifadesi"),
+            ("ortalama", "'ortalama' yerine 'ortanca' yazılmalı"), ("karsilastirma", "karşılaştırma sayılarla çelişiyor"),
+            ("yon", "artış/düşüş olgunun işaretiyle çelişiyor"), ("isaret", "negatif/pozitif olguyla çelişiyor"),
+            ("yargi", "olguda olmayan yorum sıfatı"), ("dayanak", "olgu listesinde olmayan bilgi"),
+            ("ad", "olgu listesinde olmayan özel ad"), ("bicim", "% ya da ₺ olgu kimliğine yapışık"),
+            ("karsilama", "cari oran ifadesi olguyla çelişiyor"), ("sayi", "olguda olmayan sayı"))
+
+
+def feedback_for(result):
+    """Yeniden deneme için kısa ret özeti (model istemine eklenir)."""
+    why = []
+    for c in result.get("cumleler") or []:
+        for r in c.get("ret") or []:
+            head = r.split(":")[0]
+            txt = next((t for k, t in _RET_TXT if head == k), None)
+            if txt and txt not in why:
+                why.append(txt)
+    return ("Önceki taslakta bazı cümleler kurallara uymadığı için atıldı (%s). Yalnız olgulara dayanan, her "
+            "cümlesinde {Fn} bulunan 3-5 cümle yaz; sayı ve tarihi kendin yazma, yorum sıfatı ve neden-sonuç "
+            "kullanma." % ("; ".join(why[:6]) or "cümle sayısı yetersiz"))
 
 
 def run_pilot(tickers, base_url, api_key, budget_usd, out_path):

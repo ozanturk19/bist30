@@ -1,0 +1,122 @@
+{
+ "fundamentals": {
+  "kap_durum": "var",
+  "financial_currency": "USD",
+  "statement_currency": "USD",
+  "sektor_ortanca": {
+   "fk": {
+    "deger": 12.3,
+    "n": 7,
+    "kapsam": "sektor"
+   },
+   "pd_dd": {
+    "deger": 1.5,
+    "n": 8,
+    "kapsam": "sektor"
+   },
+   "ozsermaye_karliligi": {
+    "deger": 10.72,
+    "n": 8,
+    "kapsam": "sektor"
+   }
+  },
+  "sektor_sira": {
+   "fk": {
+    "sira": 1,
+    "toplam": 7,
+    "kume": "kap_sektor"
+   },
+   "pd_dd": {
+    "sira": 1,
+    "toplam": 8,
+    "kume": "kap_sektor"
+   },
+   "ozsermaye_karliligi": {
+    "sira": 4,
+    "toplam": 8,
+    "kume": "kap_sektor"
+   }
+  },
+  "kap": {
+   "flags": {
+    "banka": false,
+    "sigorta": false,
+    "yabanci_para": "USD"
+   },
+   "sablon": "sanayi",
+   "basis": "yabanci_para",
+   "yillik_degisim": {
+    "2025": {
+     "revenue": 28.18,
+     "gross_profit": 8.85,
+     "operating_profit": 12.11,
+     "ebitda": 21.03,
+     "net_income_parent": 4.26,
+     "equity_parent": 34.03
+    }
+   },
+   "son_rapor": {
+    "donem": "2026/06",
+    "yayin": "2026-08-05T08:00"
+   },
+   "son_yillik": "2025/12",
+   "ceyreklik_degisim": {
+    "2026/06": {
+     "revenue": 41.41,
+     "operating_profit": -109.66,
+     "net_income_parent": -66.65
+    }
+   },
+   "bilanco": {
+    "yil": 2025,
+    "onceki_yil": 2024,
+    "cur": {
+     "net_borc": 495486000000.0,
+     "favok": 184811000000.0,
+     "net_borc_favok": 2.68,
+     "cari_oran": 0.99,
+     "nakit": 86035000000.0
+    },
+    "prev": {
+     "net_borc": 275917000000.0,
+     "favok": 152699000000.0,
+     "net_borc_favok": 1.81,
+     "cari_oran": 1.01,
+     "nakit": 95992000000.0
+    }
+   },
+   "oranlar": {
+    "2025": {
+     "ozsermaye_karliligi": 14.86,
+     "brut": 16.28,
+     "esas": 9.43,
+     "favok": 19.34,
+     "net": 12.37
+    }
+   },
+   "saglamlik": {
+    "yontem": "piotroski",
+    "yil": 2025,
+    "puan": 4,
+    "toplam": 9
+   },
+   "degerleme_simdi": {
+    "pay_adedi": 1380000000.0,
+    "piyasa_degeri": 394335000000,
+    "fk": 3.52,
+    "pd_dd": 0.39,
+    "ozsermaye_karliligi": 11.0,
+    "son12ay_kar": 112059000000.0,
+    "son12ay_yontem": "son12ay",
+    "son12ay_etiket": "2026 ilk yarı",
+    "ozkaynak": 1018517000000.0,
+    "ozkaynak_donem": "2026/06",
+    "pay_uyumsuz": false
+   }
+  },
+  "roe": 13.1,
+  "current_ratio": 0.91,
+  "analyst_target": 463.54025,
+  "analyst_count": 13
+ }
+}

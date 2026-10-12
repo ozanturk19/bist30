@@ -1,0 +1,17 @@
+{
+  "note": "Tüpraş'ın hasılatı 2025'te geriledi ({F1}), net kâr arttı ({F2}). 2026 2. çeyrekte hasılat ({F3}) ve net kâr ({F4}) yükseldi. Bilançoda net nakit var ({F5}) ve cari oran {F6}. F/K {F8}, sektör ortancası {F9}; değerleme {F16}. Trend durumu {F17}; {F19} sağlanıyor.",
+  "facts_used": [
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F8",
+    "F9",
+    "F16",
+    "F17",
+    "F19"
+  ],
+  "lang": "tr"
+}
