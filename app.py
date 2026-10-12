@@ -6184,15 +6184,6 @@ def api_macro():
     return safe_json(_resp_macro)
 
 
-# ── Günlük Makro AI Özeti (D-22b: üretim kodu silindi, disk cache gemini-cache-sync
-# tarafından hâlâ okunuyor/yazılıyor — kalıntı veri kalıcı STALE, /api/health bunu
-# bekliyor: "Gemini kota bağımlı — STALE beklenir") ─────────────────────────────
-_macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
-
-# SPEC-009 Faz 2 B2: macro-ai shared disk cache — leader Gemini çağrısını yapıp
-# diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
-_MACRO_AI_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_ai.json")
-
 def _atomic_write_json(path, data, **json_kwargs):
     """JSON'u atomic yazar — tempfile + fsync + os.replace (POSIX rename).
     Ozan/Madde 1: leader yazarken non-leader yarım dosya okumamalı (bozuk JSON
@@ -6213,33 +6204,6 @@ def _atomic_write_json(path, data, **json_kwargs):
         if os.path.exists(tmp):
             os.unlink(tmp)
         raise
-
-
-def _save_macro_ai_to_disk():
-    """Leader: macro-ai cache'i diske yazar (non-leader worker'lar okusun).
-    Boş cache'i diske YAZMAZ — restart sonrası startup-load yarışı diskteki
-    veriyi silmesin (empty-overwrite guard)."""
-    try:
-        if not _macro_ai_cache:
-            return
-        # DEV-1570/CPO-992-DEV-983 pattern: bu fonksiyon eskiden inline
-        # _atomic_write_json (fsync+replace) kullanıyordu — gemini-cache-sync
-        # 90s loop'unda leader worker'da çalışıp hub'ı bloke ediyordu (bkz
-        # CPO-1218/1226 CLOSE_WAIT sızıntısı, worker-connections tavanına dayandı).
-        _tp_write_json(_MACRO_AI_DISK_PATH, _macro_ai_cache, atomic=True, ensure_ascii=False)
-    except Exception as e:
-        logger.warning("_save_macro_ai_to_disk hatası: %s", e)
-
-def _load_macro_ai_from_disk():
-    """Non-leader: diskten macro-ai cache yükler (leader yazmış olabilir)."""
-    try:
-        if not os.path.exists(_MACRO_AI_DISK_PATH):
-            return
-        data = _tp_read_json(_MACRO_AI_DISK_PATH)
-        if isinstance(data, dict) and data.get("text"):
-            _macro_ai_cache.update(data)
-    except Exception as e:
-        logger.warning("_load_macro_ai_from_disk hatası: %s", e)
 
 
 def _safe_float(val):
@@ -7202,7 +7166,6 @@ def _gemini_cache_sync_loop():
     # non-leader okuyordu — worker recycle sonrası boş açılan yeni leader
     # diski hiç görmeden Gemini'ye 8 hissenin tamamını yeniden soruyordu.
     _load_news_cache_from_disk()
-    _load_macro_ai_from_disk()
     # CPO-1207 §1 (aynı sınıf, bu thread'de bulundu): eskiden is_leader thread
     # başlangıcında BİR KEZ okunup döngü boyunca sabit kalıyordu — kilit
     # sonradan boşalıp bu worker leader olsa (veya leaderliğini kaybetse) bile
@@ -7218,10 +7181,8 @@ def _gemini_cache_sync_loop():
                 _last_logged_mode = mode
             if is_leader:
                 _save_news_cache_to_disk()
-                _save_macro_ai_to_disk()
             else:
                 _load_news_cache_from_disk()
-                _load_macro_ai_from_disk()
         except Exception as e:
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
@@ -10675,19 +10636,6 @@ def _compute_health():
             # CPO-1165 D-NEWS-2 — önceden yalnız journald grep'iyle ölçülebiliyordu
             **{f"{k}_today": v for k, v in _news_daily_stats_sync().items() if k != "date"},
         },
-        # CPO-1676: macro_ai_cache 10 gün stale kalabildi ve hiçbir yüzey bunu
-        # ALARM olarak göstermiyordu — /api/internal/cache-inventory dosya
-        # mtime'ına bakıyordu (leader'ın 90s'lik gemini-cache-sync loop'u içerik
-        # aynı kalsa bile dosyayı sürekli yeniden yazıyor, mtime hep "taze"
-        # görünüyordu). Burada CONTENT yaşı (_macro_ai_cache["ts"]) kullanılıyor —
-        # news.degraded ile aynı desen, aynı paylaşımlı Gemini kota devresine bağlı.
-        "macro_ai": {
-            "age_h":       (round((now - _macro_ai_cache.get("ts", 0)) / 3600.0, 1)
-                             if _macro_ai_cache.get("ts") else None),
-            "generated_date": _macro_ai_cache.get("date"),
-            "stale_48h":   bool(_macro_ai_cache.get("ts")) and (now - _macro_ai_cache.get("ts", 0)) >= 172800,
-            "degraded":    _gemini_news_degraded(),  # aynı paylaşımlı kota devresi
-        },
         "data_freshness":           build_data_freshness(stocks_list),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
@@ -10920,29 +10868,11 @@ def api_cache_inventory():
     now = time.time()
     entries = []
 
-    def _check(name, path, note="", content_ts_field=None):
+    def _check(name, path, note=""):
         if not path or not os.path.exists(path):
             entries.append({"name": name, "disk_path_exists": False,
                             "last_write_age_s": None, "status": "NEVER_WRITTEN", "note": note})
             return
-        # CPO-1676: macro_ai_summary gibi tek-obje cache'ler leader'ın 90s'lik
-        # gemini-cache-sync loop'unda İÇERİK aynı kalsa bile diske yeniden
-        # yazılıyor (_save_macro_ai_to_disk her turda unconditional çağrılıyor) —
-        # mtime bu yüzden hep "az önce yazıldı" gösterir, 10 günlük stale içeriği
-        # bile FRESH olarak raporlar. content_ts_field verilirse mtime yerine
-        # JSON içindeki gerçek üretim zamanı kullanılır.
-        if content_ts_field:
-            try:
-                content_ts = _tp_read_json(path).get(content_ts_field)
-            except Exception:
-                content_ts = None
-            if content_ts:
-                age = now - content_ts
-                entries.append({"name": name, "disk_path_exists": True,
-                                "last_write_age_s": round(age, 1),
-                                "status": "FRESH" if age < 3600 else "STALE",
-                                "note": (note + " [içerik yaşı, mtime DEĞİL]").strip()})
-                return
         age = now - os.path.getmtime(path)
         entries.append({"name": name, "disk_path_exists": True,
                         "last_write_age_s": round(age, 1),
@@ -10950,8 +10880,6 @@ def api_cache_inventory():
 
     _check("stocks_main", _DISK_CACHE_PATH)
     _check("macro", _MACRO_DISK_PATH)
-    _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir",
-           content_ts_field="ts")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
     _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
     _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
@@ -13918,7 +13846,7 @@ if _IS_SHADOW:
         if _shadow_warmed:
             return
         _shadow_warmed.append(1)
-        for _fn in (_load_cache_from_disk, _load_macro_from_disk, _load_macro_ai_from_disk,
+        for _fn in (_load_cache_from_disk, _load_macro_from_disk,
                     _load_news_cache_from_disk,
                     _load_explain_cache_from_disk, _load_fundamentals_cache_from_disk,
                     _load_sector_stats_from_disk, _load_xu100_chart_from_disk,

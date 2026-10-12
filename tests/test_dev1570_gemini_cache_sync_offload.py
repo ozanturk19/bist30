@@ -27,12 +27,11 @@ import pytest
 _APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
 # (fn_name, path_const) — hepsi gemini-cache-sync 90s loop'unun parçası
+# (macro_ai girdisi D-22c adım 2'de silindi — 13.10, bkz. MASTER-PLAN)
 SAVE_FUNCS = [
-    ("_save_macro_ai_to_disk", "_MACRO_AI_DISK_PATH"),
     ("_save_news_cache_to_disk", "_NEWS_CACHE_DISK_PATH"),
 ]
 LOAD_FUNCS = [
-    ("_load_macro_ai_from_disk", "_MACRO_AI_DISK_PATH"),
     ("_load_news_cache_from_disk", "_NEWS_CACHE_DISK_PATH"),
 ]
 
