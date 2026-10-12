@@ -959,6 +959,21 @@
 .tv-ax-na { font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 .tv-ax--na .tv-ax-v { color: var(--bp-text-3); }
 
+/* C-59: Temel sekmesinden finansal tablo sayfalarina baglanti satiri */
+.tv-ft { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 18px; }
+.tv-ft-l { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-type-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--bp-text-3); }
+.tv-ft-ls { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tv-ft-a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 1px solid var(--bp-line); border-radius: var(--bp-r-pill); background: var(--bp-surface); color: var(--bp-text-2); text-decoration: none; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-type-sm); font-weight: 600; text-align: center; -webkit-tap-highlight-color: transparent; }
+.tv-ft-o { color: var(--bp-art-cyan); }
+@media (hover: hover) and (pointer: fine) { .tv-ft-a:hover { border-color: rgba(var(--bp-accent-cyan-rgb), .55); color: var(--bp-text); } }
+.tv-ft-a:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 2px; }
+@media (max-width: 600px) {
+  .tv-ft { display: grid; gap: 8px; }
+  .tv-ft-ls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tv-ft-a { padding: 4px 8px; line-height: 1.2; }
+  .tv-ft-o { display: none; }
+}
+
 .tv-prep, .tv-err { margin: 0 0 14px; font-size: var(--bp-type-sm); color: var(--bp-text-3); }
 .tv-err { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .tv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }

@@ -1,0 +1,221 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-59 (12.10): finansal tablo sayfalari -- /hisse/<T>/bilanco · /gelir-tablosu · /nakit-akis (SSR, dizinlenir).
+    Rota (D-60 `finansal_tablo_page`) baglami `ft` = kap_tablolar.sayfa():
+      ticker, ad, slug, baslik, sablon (sanayi|banka|sigorta), soru (H1),
+      olgu = {donem, rapor, cumle, olcek ('ilk'|'enbuyuk'|'yon'), kalemler[{anahtar, etiket, metin, degisim, pay, eksi}]},
+      yillik / ceyreklik = {sutunlar[{rapor, donem, esas, etiket{ust, alt, tam}}], satirlar[{anahtar, etiket, girinti,
+                            baslik, toplam, detay, hucreler[{metin, degisim} | None]}], birim, birim_notu,
+                            esas_gruplari[{etiket, kapsam}], degisim_notu, detay_sayisi} | None,
+      varsayilan, sekmeler[{slug, ad, href, aktif}], son_yayin (ISO gun), kanonik.
+    Aciklanan veri ilkesi (kanon §3): her sutun tek rapor; sutunun raporu yalniz ic nitelik (data-rapor,
+    data-donem), gorunen metinde kaynak adi yok. Birim ve para birimi tablo basliginda (sol ust hucre).
+    Veri yoksa gizlenir: bos gorunum, bos olgu, bos hucre metni basilmaz. Telefonda tablo kendi kabinda
+    yatay kayar (sayfa govdesi kaymaz), ilk sutun yapiskan. JS yalniz donem sekmesi ve "Tum kalemler";
+    JS yoksa iki donem tablosu da tum kalemleriyle basili kalir (noscript). -#}
+{%- set f = ft -%}
+{%- set _base = 'https://borsapusula.com' -%}
+{%- set _url = canonical or f.kanonik -%}
+{%- set _AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
+{%- macro _gun(iso) -%}{%- set p = (iso or '')[:10].split('-') -%}{% if p|length == 3 and p[1]|int >= 1 and p[1]|int <= 12 %}{{ p[2]|int }} {{ _AY[p[1]|int - 1] }} {{ p[0] }}{% else %}{{ iso }}{% endif %}{%- endmacro -%}
+{%- set _ol = f.olgu -%}
+{%- set _ttl = f.soru ~ ' (' ~ f.ticker ~ ')' -%}
+{%- set _desc = ((_ol.cumle ~ ' ') if _ol else '') ~ f.ad ~ ' ' ~ f.baslik|lower ~ ' kalemleri; yıllık ve çeyreklik dönemler.' -%}
+{%- set _ana = f.yillik or f.ceyreklik -%}
+{%- set _yillar = [] -%}
+{%- for c in (f.yillik.sutunlar if f.yillik else []) %}{% set _ = _yillar.append(c.donem[:4]) %}{% endfor -%}
+{%- set _deg = [] -%}
+{%- for s in _ana.satirlar if not s.baslik and not s.detay %}{% if _deg|length < 24 %}{% set _ = _deg.append(s.etiket) %}{% endif %}{% endfor -%}
+{%- set _Q = {
+  ('sanayi', 'bilanco'): 'Varlıklar nasıl finanse ediliyor?',
+  ('banka', 'bilanco'): 'Krediler ve mevduat ne büyüklükte?',
+  ('sigorta', 'bilanco'): 'Varlıklar ve özkaynaklar ne büyüklükte?',
+  ('sanayi', 'gelir-tablosu'): 'Hasılatın ne kadarı kâra dönüşüyor?',
+  ('banka', 'gelir-tablosu'): 'Gelir kalemleri ne büyüklükte?',
+  ('sigorta', 'gelir-tablosu'): 'Teknik gelirler ve kâr ne büyüklükte?',
+} -%}
+{%- set _olgu_q = _Q.get((f.sablon, f.slug), 'Nakit nereden geldi, nereye gitti?') -%}
+{% block head %}<title>{{ _ttl }} | BorsaPusula</title>
+<meta name="description" content="{{ _desc|truncate(158, True, '…') }}">
+<link rel="canonical" href="{{ _url }}">
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ _ttl }}">
+<meta property="og:description" content="{{ _desc|truncate(158, True, '…') }}">
+<meta property="og:url"         content="{{ _url }}">
+<meta property="og:site_name"   content="borsapusula.com">
+<meta property="og:locale"      content="tr_TR">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{{ _ttl }}">
+<meta name="twitter:description" content="{{ _desc|truncate(158, True, '…') }}">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': [
+  {'@type': 'WebPage', '@id': _url ~ '#sayfa', 'url': _url, 'name': _ttl, 'description': _desc, 'inLanguage': 'tr',
+   'isPartOf': {'@type': 'WebSite', '@id': _base ~ '/#website', 'name': 'BorsaPusula', 'url': _base ~ '/'},
+   'about': {'@type': 'Corporation', 'name': f.ad, 'tickerSymbol': 'BIST:' ~ f.ticker},
+   'mainEntity': {'@id': _url ~ '#tablo'}, 'breadcrumb': {'@id': _url ~ '#yol'}},
+  {'@type': 'Dataset', '@id': _url ~ '#tablo', 'url': _url, 'name': f.baslik ~ ': ' ~ f.ad ~ ' (' ~ f.ticker ~ ')',
+   'description': _desc, 'inLanguage': 'tr', 'variableMeasured': _deg,
+   'temporalCoverage': (_yillar[-1] ~ '/' ~ _yillar[0]) if _yillar|length > 1 else (_yillar[0] if _yillar else none),
+   'dateModified': f.son_yayin, 'creator': {'@type': 'Organization', 'name': 'BorsaPusula', 'url': _base ~ '/'}},
+  {'@type': 'FAQPage', '@id': _url ~ '#sss', 'mainEntity': [{'@type': 'Question', 'name': f.soru,
+   'acceptedAnswer': {'@type': 'Answer', 'text': _ol.cumle if _ol else _desc}}]},
+  {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
+    {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': _base ~ '/'},
+    {'@type': 'ListItem', 'position': 2, 'name': f.ticker, 'item': _base ~ '/hisse/' ~ f.ticker},
+    {'@type': 'ListItem', 'position': 3, 'name': f.baslik, 'item': _url}]}
+]}|tojson }}</script>
+<link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+<link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
+<script src="{{ static_v('bp-vocab.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_v('css/pages/finansal_tablo.css') }}">
+<style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
+<noscript><style>.ft .ft-pan[hidden]{display:block!important}.ft-sade .ft-d{display:table-row!important}.ft-ctl{display:none!important}.ft-pan-h{display:block!important}</style></noscript>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+
+{% include '_macro_bar.html' %}
+
+{% include '_header.html' %}
+
+{#- Tek tablo gorunumu. Sol ust hucre birim + para birimi; sutun basligi iki satir (telefonda) ve
+    raporu ic nitelik olarak tasir. Bos hucre bos kalir (tire yok). -#}
+{%- macro tablo(v, kimlik, ad) -%}
+<p class="ft-birim">{{ v.birim_notu }}</p>
+<div class="ft-scroll" role="region" aria-labelledby="{{ kimlik }}C" tabindex="0">
+<table class="ft-t" data-sutun="{{ v.sutunlar|length }}">
+  <caption id="{{ kimlik }}C" class="sr-only">{{ f.ticker }} {{ f.baslik|lower }}, {{ ad }} dönemler; {{ v.birim_notu }}</caption>
+  <colgroup><col class="ft-col0">{% for c in v.sutunlar %}<col data-rapor="{{ c.rapor }}">{% endfor %}</colgroup>
+  <thead>
+    {%- if v.esas_gruplari %}
+    <tr class="ft-esas"><td class="ft-c0"></td>{% for g in v.esas_gruplari %}<th scope="colgroup" colspan="{{ g.kapsam }}" data-esas="{{ g.esas }}"><span>{{ g.etiket }}</span></th>{% endfor %}</tr>
+    {%- endif %}
+    <tr class="ft-don"><th scope="col" class="ft-c0"><span class="ft-u">{{ v.birim }}</span></th>
+      {%- for c in v.sutunlar %}<th scope="col" data-rapor="{{ c.rapor }}" data-donem="{{ c.donem }}" data-esas="{{ c.esas }}"><span class="ft-p1" aria-hidden="true">{{ c.etiket.ust }}</span>{% if c.etiket.alt %}<span class="ft-p2" aria-hidden="true">{{ c.etiket.alt }}</span>{% endif %}<span class="sr-only">{{ c.etiket.tam }}</span></th>{% endfor %}</tr>
+  </thead>
+  <tbody>
+    {%- for s in v.satirlar %}
+    {%- if s.baslik %}
+    <tr class="ft-h{{ ' ft-d' if s.detay }}"><th scope="rowgroup" class="ft-c0 ft-g{{ s.girinti }}">{{ s.etiket }}</th><td colspan="{{ v.sutunlar|length }}"></td></tr>
+    {%- else %}
+    <tr class="{{ 'ft-tt' if s.toplam }}{{ ' ft-d' if s.detay }}"><th scope="row" class="ft-c0 ft-g{{ s.girinti }}">{{ s.etiket }}</th>
+      {%- for h in s.hucreler %}{% if h %}<td><span class="ft-v">{{ h.metin }}</span>{% if h.degisim %}<span class="ft-y">{{ h.degisim }}</span>{% endif %}</td>{% else %}<td></td>{% endif %}{% endfor %}</tr>
+    {%- endif %}
+    {%- endfor %}
+  </tbody>
+</table>
+</div>
+<p class="ft-not">{{ v.degisim_notu }}</p>
+{%- endmacro -%}
+
+<main id="main-content" class="container ft ft--{{ f.sablon }}" tabindex="-1">
+  <ol class="ft-bc" aria-label="Konum">
+    <li><a href="/hisse/{{ f.ticker }}">{{ f.ticker }}</a></li>
+    <li><a href="/hisse/{{ f.ticker }}?tab=temel">Temel</a></li>
+    <li aria-current="page">{{ f.baslik }}</li>
+  </ol>
+  <div class="da-pagehead">
+    <h1 class="da-pagehead-title">{{ f.soru }}</h1>
+    {%- if _ol %}
+    <p class="da-pagehead-lede">{{ _ol.cumle }}</p>
+    {%- endif %}
+  </div>
+
+  <nav class="ft-tabs" aria-label="Finansal tablolar">
+    {%- for t in f.sekmeler %}
+    <a class="ft-tab" href="{{ t.href }}"{% if t.aktif %} aria-current="page"{% endif %}>{{ t.ad }}</a>
+    {%- endfor %}
+  </nav>
+
+  {%- if _ol and _ol.kalemler %}
+  <section class="ft-olgu ft-olgu--{{ _ol.olcek }}" aria-labelledby="ftOlguH">
+    <div class="ft-olgu-bas">
+      <h2 class="ft-h2" id="ftOlguH">{{ _olgu_q }}</h2>
+      <span class="ft-olgu-d">{{ _ol.donem }}</span>
+    </div>
+    <ul class="ft-bars" data-rapor="{{ _ol.rapor }}">
+      {%- for k in _ol.kalemler %}
+      <li class="ft-bar{{ ' ft-bar--eksi' if k.eksi }}">
+        <span class="ft-bar-l">{{ k.etiket }}</span>
+        <span class="ft-bar-v">{{ k.metin }}</span>
+        {%- if k.degisim %}<span class="ft-bar-y">{{ k.degisim }}</span>{% endif %}
+        <span class="ft-bar-tr" aria-hidden="true"><i style="width:{{ '%.1f'|format(k.pay / 2 if _ol.olcek == 'yon' else k.pay) }}%"></i></span>
+      </li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+
+  <section class="ft-sec ft-sade" id="ftSec" aria-labelledby="ftTabloH">
+    <div class="ft-sec-bas">
+      <h2 class="ft-h2" id="ftTabloH">{{ f.baslik }} kalemleri dönemlere göre nasıl değişti?</h2>
+      <div class="ft-ctl">
+        {%- if f.yillik and f.ceyreklik %}
+        <div class="ft-don-sec" role="tablist" aria-label="Dönem">
+          <button type="button" role="tab" class="ft-seg" id="ftTabY" aria-controls="ftPanY" aria-selected="{{ 'true' if f.varsayilan == 'yillik' else 'false' }}" tabindex="{{ '0' if f.varsayilan == 'yillik' else '-1' }}">Yıllık</button>
+          <button type="button" role="tab" class="ft-seg" id="ftTabC" aria-controls="ftPanC" aria-selected="{{ 'true' if f.varsayilan == 'ceyreklik' else 'false' }}" tabindex="{{ '0' if f.varsayilan == 'ceyreklik' else '-1' }}">Çeyreklik</button>
+        </div>
+        {%- endif %}
+        {%- if (f.yillik and f.yillik.detay_sayisi) or (f.ceyreklik and f.ceyreklik.detay_sayisi) %}
+        <button type="button" class="ft-tum" id="ftTum" aria-pressed="false" aria-controls="ftSec">Tüm kalemler</button>
+        {%- endif %}
+      </div>
+    </div>
+    {%- for tur, v, ad in [('yillik', f.yillik, 'yıllık'), ('ceyreklik', f.ceyreklik, 'çeyreklik')] %}
+    {%- if v %}
+    {%- set _k = 'ftPanY' if tur == 'yillik' else 'ftPanC' %}
+    <div class="ft-pan" id="{{ _k }}"{% if f.yillik and f.ceyreklik %} role="tabpanel" aria-labelledby="{{ 'ftTabY' if tur == 'yillik' else 'ftTabC' }}"{% endif %}{% if f.yillik and f.ceyreklik and tur != f.varsayilan %} hidden{% endif %}>
+      <h3 class="ft-pan-h">{{ ad|capitalize }} dönemler</h3>
+      {{ tablo(v, _k, ad) }}
+    </div>
+    {%- endif %}
+    {%- endfor %}
+    {%- if f.son_yayin %}
+    <p class="ft-son">Son rapor {{ _gun(f.son_yayin) }} tarihinde açıklandı.</p>
+    {%- endif %}
+  </section>
+
+  <p class="ft-disc">Bu sayfa bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+</main>
+
+<script>
+/* C-59: donem sekmesi (ok tuslari, Home/End) + "Tum kalemler". Gorunurluk yalniz `hidden` ve
+   sinifla; tablo icerigi SSR. JS yoksa noscript kurali iki tabloyu da tum kalemleriyle gosterir. */
+(function () {
+  var sec = document.getElementById('ftSec');
+  if (!sec) return;
+  var tabs = [].slice.call(sec.querySelectorAll('[role="tab"]'));
+  function sec_(t, odak) {
+    tabs.forEach(function (b) {
+      var on = b === t;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      var p = document.getElementById(b.getAttribute('aria-controls'));
+      if (p) p.hidden = !on;
+    });
+    if (odak) t.focus();
+  }
+  tabs.forEach(function (b, i) {
+    b.addEventListener('click', function () { sec_(b, false); });
+    b.addEventListener('keydown', function (e) {
+      var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : null;
+      if (j === null) return;
+      e.preventDefault();
+      sec_(tabs[(j + tabs.length) % tabs.length], true);
+    });
+  });
+  var tum = document.getElementById('ftTum');
+  if (tum) tum.addEventListener('click', function () {
+    var acik = tum.getAttribute('aria-pressed') !== 'true';
+    tum.setAttribute('aria-pressed', acik ? 'true' : 'false');
+    sec.classList.toggle('ft-sade', !acik);
+  });
+})();
+</script>
+
+{% with ftr_self='/hisse/' ~ f.ticker ~ '/' ~ f.slug %}{% include '_footer.html' %}{% endwith %}
+
+<script src="{{ static_v('bp-format.js') }}"></script>
+<script src="{{ static_v('bp-search.js') }}" defer></script>
+
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

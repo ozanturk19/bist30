@@ -754,6 +754,13 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     </ul>
     {% endif %}
   </section>
+  {#- C-59: finansal tablo sayfalari (D-60 `finansal_tablolar`; tablo yoksa ya da arka uc eskiyse blok yok). -#}
+  {%- if finansal_tablolar is defined and finansal_tablolar %}
+  <nav class="tv-ft" aria-label="Finansal tablolar">
+    <span class="tv-ft-l">Finansal tablolar</span>
+    <span class="tv-ft-ls">{% for _b in finansal_tablolar %}<a class="tv-ft-a" href="{{ _b.href }}">{{ _b.ad }}<span class="tv-ft-o" aria-hidden="true">→</span></a>{% endfor %}</span>
+  </nav>
+  {%- endif %}
   <p class="tv-prep" id="tvPrep" hidden>Bu hisse için temel göstergelerin özeti gösteriliyor.</p>
   <div class="tv-grid" id="tvGrid" aria-busy="true" hidden>
     <section class="tv-pan" id="tvBuyume" aria-labelledby="tvBuyumeH">
