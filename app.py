@@ -55,6 +55,7 @@ import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bay
 import kesfet           # D-59: Keşfet orta-uzun vade listeleri (C-56): 4 kural tabanlı liste, KAP verisiyle
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
+from pipeline import ai_not_job  # D-44b: AI Analist Notu okuma yolu (üretim ayrı iş; AI_NOT_ENABLED=1 olmadan None)
 from email_mask import mask_email as _mask_email, EmailMaskFilter as _EmailMaskFilter  # D-48: KVKK
 import takvim as _takvim  # D-24: /api/takvim (bilanço · temettü · makro tek liste)
 import accounts as _accounts  # D-50: hesap çekirdeği (şifresiz e-posta kodu, oturum, liste, portföy)
@@ -7843,7 +7844,8 @@ def stock_page(ticker):
                            seo_adx=adx_val,
                            seo_rsi=rsi_val,
                            initial_tab=_hisse_initial_tab(request.args.get("tab")),
-                           closes_30=_closes_30(ticker, ssr_signal))
+                           closes_30=_closes_30(ticker, ssr_signal),
+                           ai_not=_ai_not_ctx(ticker))
 
 
 _fundamentals_cache = {}
@@ -9255,6 +9257,27 @@ def _inject_gundem_haber():
             logger.warning("_inject_gundem_haber: %s", e)
             return {"gundem_haber": None}
     return {}
+
+
+# ── D-44b ilk adım: AI Analist Notu (şirket notu, BIST30). Üretim app dışında: pipeline/ai_not_job.py
+# (gün sonu sonrası systemd zamanlayıcı, gemini_budget tavanları + ayrı ≤1 $ pilot sayacı). Burada yalnız
+# okuma: AI_NOT_ENABLED=1 değilse, pilot bütçesi bittiyse ya da not yoksa/eskiyse None → kart çizilmez.
+def _ai_not_ctx(ticker):
+    try:
+        return ai_not_job.public_note(ticker)
+    except Exception as e:
+        logger.warning("_ai_not_ctx(%s): %s", ticker, e)
+        return None
+
+
+@app.route("/api/hisse/<ticker>/ai-not")
+@limiter.limit("60 per minute")
+def api_hisse_ai_not(ticker):
+    """D-44b sözleşmesi: {"ai_not": {ticker, not, kapanis, kapanis_label, etiket} | null}."""
+    ticker = ticker.upper()
+    if ticker in INDEX_TICKERS or ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    return safe_json({"ai_not": _ai_not_ctx(ticker)})
 
 
 _mtf_cache     = {}        # {ticker: {"data": {...}, "ts": float}}
