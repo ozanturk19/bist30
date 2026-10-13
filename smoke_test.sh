@@ -52,7 +52,10 @@ for page in "/" "/hisse/THYAO" "/sektor-harita" "/portfolio" "/sinyal-performans
   if [ "$page" = "/portfolio" ] && [ "$status" = "301" ]; then  # /takip'e kasıtlı redirect (D-25b, 1a3dc7ff)
     continue
   fi
-  if [ "$status" != "200" ] && [ "$status" != "400" ] && [ "$status" != "404" ]; then  # /profil without/invalid token returns 404 (9dcb721)
+  if [ "$page" = "/profil" ] && [ "$status" = "301" ]; then  # /takip'e kasıtlı redirect (D-25b, d55b0553 — profil_page kaldırıldı)
+    continue
+  fi
+  if [ "$status" != "200" ] && [ "$status" != "400" ] && [ "$status" != "404" ]; then
     echo "❌ FAIL: ${page} returned ${status}"
     exit 1
   fi
