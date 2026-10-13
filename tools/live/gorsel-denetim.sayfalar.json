@@ -37,6 +37,16 @@
     { "ad": "hisse-TUPRS", "yol": "/hisse/TUPRS?tab=temel", "durumlar": [{ "ad": "temel" }] },
     { "ad": "hisse-ANHYT", "yol": "/hisse/ANHYT", "durumlar": [{ "ad": "sigorta" }] },
     { "ad": "hisse-kapsam-disi", "yol": "/hisse/MARKA", "durumlar": [{ "ad": "varsayilan" }] },
+    { "ad": "finansal-tablo", "yol": "/hisse/THYAO/bilanco", "durumlar": [
+      { "ad": "THYAO-bilanco" },
+      { "ad": "THYAO-bilanco-ceyrek", "adimlar": [{ "tikla": "#ftTabC", "bekle": 300 }] },
+      { "ad": "THYAO-bilanco-tum", "adimlar": [{ "tikla": "#ftTum", "bekle": 300 }] },
+      { "ad": "THYAO-gelir", "yol": "/hisse/THYAO/gelir-tablosu" },
+      { "ad": "THYAO-nakit", "yol": "/hisse/THYAO/nakit-akis" },
+      { "ad": "TUPRS-bilanco-tms29", "yol": "/hisse/TUPRS/bilanco" },
+      { "ad": "GARAN-bilanco-banka", "yol": "/hisse/GARAN/bilanco" },
+      { "ad": "ANHYT-gelir-sigorta", "yol": "/hisse/ANHYT/gelir-tablosu" }
+    ] },
     { "ad": "bildirim", "yol": "{api:/api/haberler|items.0.href}", "durumlar": [
       { "ad": "son" },
       { "ad": "tutarli", "yol": "{api:/api/haberler|items[?onem].href}" }
