@@ -76,7 +76,7 @@ def test_corrupt_usage_file_starts_blank(path):
 
 def test_app_wiring_grounding_off_reserve_before_request_health_fields():
     src = open(_APP_PY, encoding="utf-8").read()
-    call = src[src.index("def _gemini_call("):src.index("def _compute_signal_commentary(")]
+    call = src[src.index("def _gemini_call("):src.index("def _tr1(")]
     assert call.index("gemini_budget.reserve()") < call.index("requests.post(")
     assert "use_search and gemini_budget.GROUNDING" in call
     assert "gemini_budget.record(" in call

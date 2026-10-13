@@ -26,7 +26,7 @@ def _block(start, end):
 # ----------------------------------------------------------------------------- kaynak denetimi (yerel)
 
 def test_gemini_call_json_mode_and_timeout_cap_are_opt_in():
-    call = _block("def _gemini_call(", "def _compute_signal_commentary(")
+    call = _block("def _gemini_call(", "def _tr1(")
     assert "json_mode=False, timeout_cap=None" in call
     assert "_GEMINI_TIMEOUT_CAP if timeout_cap is None else timeout_cap" in call
     i = call.index('"responseMimeType"')

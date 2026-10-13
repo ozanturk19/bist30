@@ -248,13 +248,6 @@ def should_track(req) -> bool:
         return False
     return not _NON_HUMAN_UA_RE.search(ua)
 
-def is_synthetic_client(req) -> bool:
-    """CPO-1320: izleme/QA/bot trafiği — news endpoint'lerinde Gemini çağrısı
-    tetiklemesin. should_track() ile AYNI UA deseni (_NON_HUMAN_UA_RE) paylaşılır,
-    kopya regex yok (tek kaynak, 17-kopya dersi)."""
-    ua = (req.headers.get("User-Agent") or "").casefold()
-    return bool(_NON_HUMAN_UA_RE.search(ua))
-
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── CPO-992/DEV-983: disk I/O gevent hub threadpool offload ──────────────────
@@ -2132,9 +2125,9 @@ def analyze(ticker_base):
             # sayi) — ham adx_val'den türetilirse tam eşikte (ör. 24.9x) yayınlanan
             # "25,0" ile farklı bant seçilir; _tarama_core/karsilastir zaten böyle yapıyordu.
             "adx_label":     derive_adx_label(round(adx_val, 1)),  # CPO-1196 D0 #4: tek kaynaklı Zayıf/Orta/Güçlü/Çok Güçlü
-            # CPO-1741: indicators.ema1299.value zaten "{:.0f}/{:.0f}" — o STRING'i
-            # geri parse eden _compute_signal_commentary (app.py ~7040) düşük fiyatlı
-            # hisselerde (ör. MARTI EMA12 2,3/EMA99 1,9 → "2/2") iki değeri eşitliyordu.
+            # CPO-1741: indicators.ema1299.value zaten "{:.0f}/{:.0f}" — bu STRING'i
+            # geri parse eden tüketiciler düşük fiyatlı hisselerde (ör. MARTI EMA12
+            # 2,3/EMA99 1,9 → "2/2") iki değeri eşitliyordu.
             # Ham hassasiyeti top-level alanla taşı (adx ile aynı desen).
             "e12":           round(e12, 2),
             "e99":           round(e99, 2),
@@ -6834,81 +6827,6 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3, 
                 break   # Fallback fayda vermez, dur
 
     return None, None
-
-
-def _compute_signal_commentary(ticker, signal_data):
-    """İndikatörleri çıkarır + algoritmik commentary üretir (Gemini YOK, her zaman hızlı/senkron).
-
-    Hem request path'i (anında dönen fallback) hem bg enrichment worker'ı
-    tarafından kullanılır — tek kaynak, indikatör extraction mantığı tekrarlanmaz.
-    """
-    sig     = signal_data.get("signal", "BEKLE")
-    name    = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl = _SIGNAL_LABELS.get(sig, sig)
-
-    # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
-    inds = signal_data.get("indicators") or {}
-
-    # ADX: US hisseleri → düz "adx" alanı; BIST → indicators.adx.label ("ADX 25")
-    adx_raw = signal_data.get("adx")
-    if adx_raw is None:
-        adx_label = (inds.get("adx") or {}).get("label", "ADX 0")
-        try:
-            adx = float(adx_label.replace("ADX", "").strip())
-        except (ValueError, AttributeError):
-            adx = 0.0
-    else:
-        adx = float(adx_raw or 0)
-
-    # DI+/DI-: US hisseleri → düz "di_plus"/"di_minus"; BIST → indicators.adx.value ("DI+27/DI-15")
-    di_plus  = signal_data.get("di_plus")
-    di_minus = signal_data.get("di_minus")
-    if di_plus is None or di_minus is None:
-        di_val = (inds.get("adx") or {}).get("value", "")
-        try:
-            parts    = di_val.replace("DI+", "").split("/DI-")
-            di_plus  = float(parts[0]) if len(parts) >= 1 else 0.0
-            di_minus = float(parts[1]) if len(parts) >= 2 else 0.0
-        except (ValueError, IndexError, AttributeError):
-            di_plus, di_minus = 0.0, 0.0
-    else:
-        di_plus, di_minus = float(di_plus or 0), float(di_minus or 0)
-
-    # EMA12/EMA99: US hisseleri → düz "e12"/"e99"; BIST → indicators.ema1299.value ("121/104")
-    e12 = signal_data.get("e12")
-    e99 = signal_data.get("e99")
-    if e12 is None or e99 is None:
-        ema_val = (inds.get("ema1299") or {}).get("value", "")
-        try:
-            parts = ema_val.split("/")
-            e12 = float(parts[0]) if len(parts) >= 1 else 0.0
-            e99 = float(parts[1]) if len(parts) >= 2 else 0.0
-        except (ValueError, IndexError, AttributeError):
-            e12, e99 = 0.0, 0.0
-    else:
-        e12, e99 = float(e12 or 0), float(e99 or 0)
-
-    # Supertrend: US hisseleri → düz "st_bull"; BIST → indicators.supertrend.bull
-    st_bull_raw = signal_data.get("st_bull")
-    if st_bull_raw is None:
-        st_bull = bool((inds.get("supertrend") or {}).get("bull", False))
-    else:
-        st_bull = bool(st_bull_raw)
-    price    = signal_data.get("price", 0) or 0
-    sl       = signal_data.get("sl_level")
-    bars     = signal_data.get("signal_bars", 1) or 1
-    sig_date = signal_data.get("signal_date")
-
-    # ── Algoritmik temel metin (her zaman doğru, AI'dan bağımsız) ────────────
-    commentary = _generate_commentary(ticker, sig, bars, sig_date, adx, di_plus, di_minus, e12, e99, st_bull)
-
-    return {
-        "sig": sig, "sig_lbl": sig_lbl, "name": name, "commentary": commentary,
-        "adx": adx, "di_plus": di_plus, "di_minus": di_minus,
-        "e12": e12, "e99": e99, "st_bull": st_bull,
-        "price": price, "sl": sl, "bars": bars,
-    }
-
 
 
 def _tr1(value):
