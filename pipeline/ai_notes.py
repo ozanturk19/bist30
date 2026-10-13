@@ -53,6 +53,11 @@ göreli zaman ("bugün", "dün", "yarın", "günün"); kaynak adı ("KAP'a göre
 şirkete yargı ("zayıf şirket", "sağlam değil", "riskli hisse").
 İzinli: ucuz/makul/pahalı DEĞERLEME betimi yalnız değerleme olgusunun değeriyle; trend durumu adı \
 (Güçlü Trend / Yatay / Trend Bozuldu).
+Her değişim olgusunu ({Fn} değeri +% ya da −% ile başlayan) kullandığın cümlede dönemini de yaz ("2025" ya da \
+"2026 2. çeyrek" gibi, olgunun kendi etiketindeki gibi) — dönemsiz değişim cümlesi yayımlanmaz.
+Bir parantezde en çok bir {Fn} olsun; aynı değeri cümlede iki kez yazma (ne aynı {Fn}'i tekrar, ne de kelimeyle \
+yazıp parantezle tekrarlama — "Değerleme makul (makul)" YANLIŞ, "Trend durumu {F17}" DOĞRU, parantezsiz).
+Bir cümle "ise", "ancak", "ama", "fakat", "da/de" ile BAŞLAMAZ (önceki cümleye bağımlı, tek başına anlamsız kalır).
 Sıra: (1) son finansal tablonun ana hareketi, (2) bilanço/nakit, (3) değerleme bağlamı, (4) trend durumu tek cümle. \
 KAP bildirimi olgusu varsa en çok bir kısa cümle (isteğe bağlı).
 3-5 cümle, toplam en fazla 420 karakter. Çıktı YALNIZ JSON: {"note": "...", "facts_used": ["F1","F4"], "lang": "tr"}
@@ -590,6 +595,8 @@ _NEG_SIGN = re.compile(r"(?i)\b(?:negatif\w*|eksi\w*|zarar\w*)\b")
 _POS_SIGN = re.compile(r"(?i)\b(?:pozitif\w*|kâra geç\w*|kara geç\w*)\b")
 _CLAUSE_SPLIT = re.compile(r";|,\s|\s(?:ve|ancak|ama|fakat|ise|buna karşılık|öte yandan)\s")
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ{(\"'“]|\d)")   # "2. çeyrek" küçük harfle sürer
+_PERIOD_RE = re.compile(r"(?:19|20)\d{2}(?:\s+\d\.\s*çeyrek)?")
+_DANGLING_START_RE = re.compile(r"(?i)^(ise|ancak|ama|fakat|da|de|dahi|üstelik|öte yandan|buna karşılık)\b")
 _PH = re.compile(r"\{(F\d+)\}")
 _WORD = re.compile(r"[A-Za-zÇĞİÖŞÜÂÎÛçğıöşüâîû]+")
 _NUM_TOK = re.compile(r"\d+(?:[.,]\d+)*")
@@ -659,6 +666,13 @@ _KEY_GENERIC = set("""yıllık değişim değişimi son sonu önceki yılın ayn
 olarak ile oranı""".split())
 
 
+def _period_phrase(label):
+    """Olgu etiketindeki dönem ifadesi ('2025' ya da '2026 2. çeyrek') — değişim cümlesinin aynı dönemi
+    taşıması zorunlu (tarifi §madde-3, dönemsiz değişim cümlesi atılır)."""
+    m = _PERIOD_RE.search(label or "")
+    return m.group(0) if m else None
+
+
 def _fact_keys(f):
     """Olgu etiketinin ayırt edici sözcükleri (kök) + F/K, PD/DD, FAVÖK gibi kısaltmalar."""
     low = _lower_tr(f["t"])
@@ -701,6 +715,16 @@ def check_sentence(sent, fmap, vocab, vocab_stems, name_words=()):
     # biçim: % ya da ₺ ya da işaret olgu kimliğine yapışık ("%{F1}" → "%−%21,7"), iki kimlik bitişik
     if re.search(r"[%₺+−-]\s*\{F\d+\}|\d\{F\d+\}|\{F\d+\}\s*[%₺]|\{F\d+\}\d|\{F\d+\}\{F\d+\}", sent):
         ret.append("bicim")
+    # yankı parantezi + değer yığını: metin olgusu (durum/hukum) parantezde hiç basılmaz (zaten cümlede
+    # çıplak ya da {Fn} ile var — parantezdeki tekrarı okunabilirliği bozar); bir parantezde en çok bir {Fn}
+    for grp in re.findall(r"\(([^()]*)\)", sent):
+        grp_ids = _PH.findall(grp)
+        if len(grp_ids) > 1:
+            ret.append("deger_yigini")
+        for gid in grp_ids:
+            if fmap.get(gid, {}).get("_k") in ("hukum", "durum"):
+                ret.append("yanki_parantez")
+                break
     # çıplak rakam: yalnız tarih/yıl/çeyrek kalıbı ve yalnız dayandığı olgunun metninde geçiyorsa
     rest = pre
     for m in _BARE_OK.finditer(pre):
@@ -711,6 +735,17 @@ def check_sentence(sent, fmap, vocab, vocab_stems, name_words=()):
             rest = rest.replace(m.group(0), " ", 1)
     if re.search(r"\d", rest):
         ret.append("ciplak_rakam")
+    # dönemsiz cümle: değişim olgusu kullanan cümle kendi dönemini (olgu etiketindeki yıl/çeyrek) de taşır
+    if "ciplak_rakam" not in ret:
+        low_pre = _lower_tr(pre)
+        for i in dict.fromkeys(ids):
+            f = fmap.get(i, {})
+            if f.get("_k") != "degisim":
+                continue
+            phrase = _period_phrase(f.get("t"))
+            if phrase and _lower_tr(phrase) not in low_pre:
+                ret.append("donem_yok")
+                break
     for pat in _BANNED_ALL:
         if re.search(pat, pre):
             ret.append("yasak_dil")
@@ -840,12 +875,19 @@ def validate_sentences(raw_text, facts, name="", ticker="", max_len=NOTE_MAX_LEN
     vocab = _vocab(["%s %s" % (f["t"], f["v"]) for f in facts] + [name or "", ticker or ""] + list(extra_words))
     vocab_stems = set(_stem(w) for w in vocab)
     kept = []
-    for s in _split_sentences(note):
+    prev_idx = -1
+    for idx, s in enumerate(_split_sentences(note)):
         ret = check_sentence(s, fmap, vocab, vocab_stems, name_words)
         rec = {"ham": s, "metin": _render(s, fmap), "olgular": list(dict.fromkeys(_PH.findall(s))), "ret": ret}
         out["cumleler"].append(rec)
         if not ret:
-            kept.append(rec)
+            # kopuk bağlaç: öncesindeki cümle(ler) atıldıysa ve bu cümle "ise/ancak/..." ile başlıyorsa
+            # (önceki cümleye bağımlı, tek başına anlamsız kalır) o da yayımlanmaz (tarifi §madde-5)
+            if idx - prev_idx > 1 and _DANGLING_START_RE.match(rec["metin"].strip()):
+                rec["ret"] = ["kopuk_baglac"]
+            else:
+                kept.append(rec)
+                prev_idx = idx
     for rec in kept[max_sent:]:
         rec["ret"] = ["fazla_cumle"]
     kept = kept[:max_sent]
@@ -869,7 +911,11 @@ _RET_TXT = (("olgu_yok", "cümlede olgu kimliği yok"), ("tanimsiz_olgu", "liste
             ("yargi", "olguda olmayan yorum sıfatı"), ("dayanak", "olgu listesinde olmayan bilgi"),
             ("ad", "olgu listesinde olmayan özel ad"), ("bicim", "% ya da ₺ olgu kimliğine yapışık"),
             ("karsilama", "cari oran ifadesi olguyla çelişiyor"), ("sayi", "olguda olmayan sayı"),
-            ("eslesme", "olgu kimliği konusuyla birlikte anılmamış"))
+            ("eslesme", "olgu kimliği konusuyla birlikte anılmamış"),
+            ("deger_yigini", "bir parantezde birden çok değer"),
+            ("yanki_parantez", "aynı değer parantezle tekrar edilmiş"),
+            ("donem_yok", "değişim cümlesi dönemini (yıl/çeyrek) taşımıyor"),
+            ("kopuk_baglac", "önceki cümle atıldığı için bağlaçla başlıyor"))
 
 
 def feedback_for(result):

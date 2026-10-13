@@ -162,7 +162,7 @@ def test_bad_response_rejected_whole_note():
     res = an.validate_sentences(_raw("yanit_TUPRS_kotu.json"), facts_for("TUPRS"), name=NAMES["TUPRS"], ticker="TUPRS")
     assert not res["ok"] and res["not"] is None and res["sebep"] == "cumle_az:0"
     r = rets(res)
-    assert r[0] == ["yon:F1"]                      # "Hasılat arttı" ama olgu −%21,7
+    assert r[0] == ["donem_yok", "yon:F1"]         # "Hasılat arttı" ama olgu −%21,7, dönem de yok
     assert r[1] == ["ciplak_rakam"]                # 2024 olguda yok (olgu 2025)
     assert r[2] == ["karsilastirma:F8/F9"]         # 11,0 "üstünde" 11,7 değil
     assert "yasak_dil" in r[3] and "yasak_dil" in r[4]
@@ -173,7 +173,7 @@ def test_pilot_style_judgments_and_average_dropped():
                                 ticker="TUPRS")
     r = rets(res)
     assert r[1] == ["yargi:makul", "yargi:güçlü"]  # olguda olmayan yorum sıfatı
-    assert r[2] == ["ortalama"]                    # veri ortanca; "ortalama" yanlış terim
+    assert r[2] == ["yanki_parantez", "ortalama"]  # F16 (hukum) parantezde + veri ortanca "ortalama" yanlış
     assert res["ok"] and res["not"].count(".") == 3
 
 
@@ -188,11 +188,11 @@ def test_pilot_style_judgments_and_average_dropped():
     ("Hasılat ({F1}) ve net kâr ({F2}) arttı.", "yon"),
     ("Özsermaye kârlılığı {F12}, sektör ortancası {F13} altında.", "karsilastirma"),
     ("F/K {F8}, sektör ortancasına {F9} yakın.", None),
-    ("Net kârı arttı ({F2}); şirketin net kârında artış var ({F2}).", None),
+    ("Net kârı arttı ({F2}); şirketin net kârında artış var ({F2}).", "donem_yok"),
     ("Mevcut durumda trend {F17}.", None),
     ("Değerleme {F17}.", "eslesme"),                        # F17 trend durumu: yanlış olguya bağlanmış
     ("Net kâr arttı ({F3}).", "eslesme"),                    # F3 çeyrek hasılatı
-    ("Özsermaye kârlılığı sektör ortancasının üzerinde ({F12}, {F13}).", None),
+    ("Özsermaye kârlılığı sektör ortancasının üzerinde ({F12}, {F13}).", "deger_yigini"),
     ("Cari oran ({F6}) kısa vadeli borçları karşılamıyor.", "karsilama"),
     ("Net nakit ({F5}) bilançoyu sağlam kılıyor.", "yargi"),
     ("Borçluluk yüksek ({F6}).", "yargi"),
@@ -233,7 +233,8 @@ def test_trims_to_five_sentences_and_length():
     res = check("TUPRS", s)
     assert res["ok"] and res["not"].count("Trend durumu") == 5
     assert [c["ret"] for c in res["cumleler"]][5:] == [["fazla_cumle"], ["fazla_cumle"]]
-    long_s = " ".join(["Hasılat {F1}, net kâr {F2} ve çeyrek hasılat {F3}; şirket bildirimi {F20}."] * 5)
+    long_s = " ".join(["2025'te hasılat {F1}, net kâr {F2} ve 2026 2. çeyrekte çeyrek hasılat {F3}; "
+                       "şirket bildirimi {F20}."] * 5)
     res2 = check("TUPRS", long_s)
     assert res2["ok"] and len(res2["not"]) <= an.NOTE_MAX_LEN
     assert [c["ret"] for c in res2["cumleler"]] == [[], [], [], ["uzunluk"], ["uzunluk"]]
