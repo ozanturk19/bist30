@@ -40,9 +40,9 @@ def ortam(monkeypatch, tmp_path):
     monkeypatch.setattr(kt, "_atomic_write_json", lambda p, o: None)    # testte diske yazilmaz
     seen = {}
 
-    def fake_render(name, **ctx):
-        seen["name"], seen["ctx"] = name, ctx
-        return "ok:" + name
+    def fake_render(_tpl_name, **ctx):
+        seen["name"], seen["ctx"] = _tpl_name, ctx
+        return "ok:" + _tpl_name
     monkeypatch.setattr(app, "render_template", fake_render)
     monkeypatch.setattr(app, "_tpl_ready", lambda name: True)
     return seen
