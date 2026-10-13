@@ -104,6 +104,27 @@ def test_facts_share_mismatch_drops_valuation():
     assert "Özsermaye kârlılığı (son 12 ay)" in t     # pay adedinden bağımsız
 
 
+def test_facts_sign_reversal_uses_text_not_percent():
+    """CPO 13.10 madde 4: kardan zarara (ya da tersi) geçişte yüzde yanıltıcı olur
+    (|değişim| hep >%100) — olgu kurucu metin olgusu üretir, yüzde basmaz."""
+    fund = _j("TUPRS.fundamentals.json")["fundamentals"]
+    fund["kap"]["yillik_degisim"]["2025"]["net_income_parent"] = {"pct": -191.9, "don": "zarara_dondu"}
+    fund["kap"]["ceyreklik_degisim"]["2026/06"]["net_income_parent"] = {"pct": 290.0, "don": "kara_gecti"}
+    f = {x["id"]: x for x in facts_for("TUPRS", fund)}
+    assert f["F2"]["_k"] == "durum" and f["F2"]["v"] == "zarara döndü"
+    assert f["F2"]["t"] == "Net kâr, 2025 karşılaştırması (enflasyon düzeltmeli)"
+    assert "%" not in f["F2"]["v"] and "191" not in f["F2"]["v"]
+    assert f["F4"]["_k"] == "durum" and f["F4"]["v"] == "kâra geçti" and "%" not in f["F4"]["v"]
+    facts = list(f.values())
+    # bare kullanım (parantez dışı) geçer, parantez içine konulursa yankı kuralı reddeder
+    ok = check("TUPRS", "Net kâr {F2}. Trend durumu {F17}. Hasılat 2025'te geriledi ({F1}). Cari oran {F6}.",
+               facts=facts)
+    assert ok["cumleler"][0]["ret"] == [] and ok["cumleler"][0]["metin"] == "Net kâr zarara döndü."
+    bad = check("TUPRS", "Net kâr zarara döndü ({F2}). Trend durumu {F17}. Hasılat 2025'te geriledi ({F1}). "
+                         "Cari oran {F6}.", facts=facts)
+    assert "yanki_parantez" in bad["cumleler"][0]["ret"]
+
+
 def test_facts_without_kap_record():
     fund = {"kap_durum": "hazirlaniyor", "kap": None}
     f = an.build_company_facts("TUPRS", ROWS["TUPRS"], fund, [], today=DAY)

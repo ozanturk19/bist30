@@ -441,6 +441,18 @@ def pct_change(cur, prev):
     return round((cur - prev) / abs(prev) * 100.0, 2)
 
 
+def sign_reversal(cur, prev):
+    """Kar/zarar isaret degisimi (CPO 13.10 madde 4): yuzde degisim yaniltici olur
+    (kardan zarara donuste |%| hep >100), olgu kurucu bunun yerine metin olgusu kullanmali."""
+    if cur is None or prev is None:
+        return None
+    if prev > 0 and cur < 0:
+        return "zarara_dondu"
+    if prev < 0 and cur > 0:
+        return "kara_gecti"
+    return None
+
+
 def _ebitda(rep, col="cur"):
     op, da = _v(rep, "operating_profit", col), _v(rep, "d_and_a", col)
     return None if op is None or da is None else op + da
@@ -636,8 +648,11 @@ def apply_to_fundamentals(data, rec, price=None, today=None):
         "flags": rec.get("flags"),
         "son_rapor": d.get("son_rapor"),
         "son_yillik": fy,
-        "yillik_degisim": {y: {k: v["pct"] for k, v in c.items()} for y, c in d["yillik_degisim"].items()},
-        "ceyreklik_degisim": {q: ({k: v["pct"] for k, v in c.items()} if c else None)
+        "yillik_degisim": {y: {k: {"pct": v["pct"], "don": sign_reversal(v["cur"], v["prev"])}
+                               for k, v in c.items() if v["pct"] is not None}
+                           for y, c in d["yillik_degisim"].items()},
+        "ceyreklik_degisim": {q: ({k: {"pct": v["pct"], "don": sign_reversal(v["cur"], v["prev"])}
+                                   for k, v in c.items() if v["pct"] is not None} if c else None)
                               for q, c in d["ceyreklik_degisim"].items()},
         "net_borc": ({"net_borc_tl": nd["net_borc"] * nd["mult"] if nd.get("mult") else None,
                       "favok_tl": nd["favok"] * nd["mult"] if nd.get("mult") and nd["favok"] is not None else None,

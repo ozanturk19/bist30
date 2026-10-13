@@ -1,125 +1,158 @@
 {
- "fundamentals": {
-  "kap_durum": "var",
-  "financial_currency": "TRY",
-  "statement_currency": "TRY",
-  "sektor_ortanca": {
-   "fk": {
-    "deger": 4.6,
-    "n": 8,
-    "kapsam": "sektor"
-   },
-   "pd_dd": {
-    "deger": 0.99,
-    "n": 8,
-    "kapsam": "sektor"
-   },
-   "ozsermaye_karliligi": {
-    "deger": 19.94,
-    "n": 8,
-    "kapsam": "sektor"
-   }
-  },
-  "sektor_sira": {
-   "fk": {
-    "sira": 4,
-    "toplam": 8,
-    "kume": "kap_sektor"
-   },
-   "pd_dd": {
-    "sira": 7,
-    "toplam": 8,
-    "kume": "kap_sektor"
-   },
-   "ozsermaye_karliligi": {
-    "sira": 1,
-    "toplam": 8,
-    "kume": "kap_sektor"
-   }
-  },
-  "kap": {
-   "flags": {
-    "banka": true,
-    "sigorta": false,
-    "yabanci_para": null
-   },
-   "sablon": "banka",
-   "basis": "banka",
-   "yillik_degisim": {
-    "2025": {
-     "net_interest_income": 62.45,
-     "net_fees": 49.81,
-     "operating_income": 42.89,
-     "net_income_parent": 20.36,
-     "loans": 52.88,
-     "deposits": 46.22,
-     "total_assets": 51.46,
-     "equity_parent": 34.65
-    }
-   },
-   "son_rapor": {
-    "donem": "2026/06",
-    "yayin": "2026-07-30T08:00"
-   },
-   "son_yillik": "2025/12",
-   "ceyreklik_degisim": {
-    "2026/06": {
-     "net_interest_income": 62.45,
-     "operating_income": 32.11,
-     "net_income_parent": 8.77
-    }
-   },
-   "bilanco": {
-    "yil": 2025,
-    "onceki_yil": 2024,
-    "cur": {
-     "krediler": 2715711500000.0,
-     "mevduat": 3150033577000.0,
-     "kredi_mevduat": 86.21,
-     "ozkaynak": 444072860000.0
+  "fundamentals": {
+    "kap_durum": "var",
+    "financial_currency": "TRY",
+    "statement_currency": "TRY",
+    "sektor_ortanca": {
+      "fk": {
+        "deger": 4.6,
+        "n": 8,
+        "kapsam": "sektor"
+      },
+      "pd_dd": {
+        "deger": 0.99,
+        "n": 8,
+        "kapsam": "sektor"
+      },
+      "ozsermaye_karliligi": {
+        "deger": 19.94,
+        "n": 8,
+        "kapsam": "sektor"
+      }
     },
-    "prev": {
-     "krediler": 1776363816000.0,
-     "mevduat": 2154347642000.0,
-     "kredi_mevduat": 82.45,
-     "ozkaynak": 329788449000.0
-    }
-   },
-   "oranlar": {
-    "2025": {
-     "ozsermaye_karliligi": 28.38,
-     "gider_gelir": 43.51,
-     "kredi_mevduat": 86.21,
-     "net_faiz_marji": 5.42,
-     "ucret_payi": 35.45,
-     "risk_maliyeti": 3.57,
-     "ozkaynak_degisim": 34.65,
-     "varlik_degisim": 51.46
-    }
-   },
-   "saglamlik": {
-    "yontem": "banka5",
-    "yil": 2025,
-    "puan": 3,
-    "toplam": 5
-   },
-   "degerleme_simdi": {
-    "pay_adedi": 4200000000.0,
-    "piyasa_degeri": 545160000000,
-    "fk": 4.53,
-    "pd_dd": 1.12,
-    "ozsermaye_karliligi": 24.72,
-    "son12ay_kar": 120318312000.0,
-    "son12ay_yontem": "son12ay",
-    "son12ay_etiket": "2026 ilk yarı",
-    "ozkaynak": 486659000000.0,
-    "ozkaynak_donem": "2026/06",
-    "pay_uyumsuz": false
-   }
-  },
-  "roe": 28.1,
-  "current_ratio": null,
-  "analyst_target": 179.86732,
-  "analyst_count": 15
- }
+    "sektor_sira": {
+      "fk": {
+        "sira": 4,
+        "toplam": 8,
+        "kume": "kap_sektor"
+      },
+      "pd_dd": {
+        "sira": 7,
+        "toplam": 8,
+        "kume": "kap_sektor"
+      },
+      "ozsermaye_karliligi": {
+        "sira": 1,
+        "toplam": 8,
+        "kume": "kap_sektor"
+      }
+    },
+    "kap": {
+      "flags": {
+        "banka": true,
+        "sigorta": false,
+        "yabanci_para": null
+      },
+      "sablon": "banka",
+      "basis": "banka",
+      "yillik_degisim": {
+        "2025": {
+          "net_interest_income": {
+            "pct": 62.45,
+            "don": null
+          },
+          "net_fees": {
+            "pct": 49.81,
+            "don": null
+          },
+          "operating_income": {
+            "pct": 42.89,
+            "don": null
+          },
+          "net_income_parent": {
+            "pct": 20.36,
+            "don": null
+          },
+          "loans": {
+            "pct": 52.88,
+            "don": null
+          },
+          "deposits": {
+            "pct": 46.22,
+            "don": null
+          },
+          "total_assets": {
+            "pct": 51.46,
+            "don": null
+          },
+          "equity_parent": {
+            "pct": 34.65,
+            "don": null
+          }
+        }
+      },
+      "son_rapor": {
+        "donem": "2026/06",
+        "yayin": "2026-07-30T08:00"
+      },
+      "son_yillik": "2025/12",
+      "ceyreklik_degisim": {
+        "2026/06": {
+          "net_interest_income": {
+            "pct": 62.45,
+            "don": null
+          },
+          "operating_income": {
+            "pct": 32.11,
+            "don": null
+          },
+          "net_income_parent": {
+            "pct": 8.77,
+            "don": null
+          }
+        }
+      },
+      "bilanco": {
+        "yil": 2025,
+        "onceki_yil": 2024,
+        "cur": {
+          "krediler": 2715711500000.0,
+          "mevduat": 3150033577000.0,
+          "kredi_mevduat": 86.21,
+          "ozkaynak": 444072860000.0
+        },
+        "prev": {
+          "krediler": 1776363816000.0,
+          "mevduat": 2154347642000.0,
+          "kredi_mevduat": 82.45,
+          "ozkaynak": 329788449000.0
+        }
+      },
+      "oranlar": {
+        "2025": {
+          "ozsermaye_karliligi": 28.38,
+          "gider_gelir": 43.51,
+          "kredi_mevduat": 86.21,
+          "net_faiz_marji": 5.42,
+          "ucret_payi": 35.45,
+          "risk_maliyeti": 3.57,
+          "ozkaynak_degisim": 34.65,
+          "varlik_degisim": 51.46
+        }
+      },
+      "saglamlik": {
+        "yontem": "banka5",
+        "yil": 2025,
+        "puan": 3,
+        "toplam": 5
+      },
+      "degerleme_simdi": {
+        "pay_adedi": 4200000000.0,
+        "piyasa_degeri": 545160000000,
+        "fk": 4.53,
+        "pd_dd": 1.12,
+        "ozsermaye_karliligi": 24.72,
+        "son12ay_kar": 120318312000.0,
+        "son12ay_yontem": "son12ay",
+        "son12ay_etiket": "2026 ilk yarı",
+        "ozkaynak": 486659000000.0,
+        "ozkaynak_donem": "2026/06",
+        "pay_uyumsuz": false
+      }
+    },
+    "roe": 28.1,
+    "current_ratio": null,
+    "analyst_target": 179.86732,
+    "analyst_count": 15
+  }
 }

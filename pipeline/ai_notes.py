@@ -329,6 +329,9 @@ def _tr_chg(v, decimals=1):
     return ("+" if r > 0 else "−") + "%" + _tr_num(abs(r), decimals)
 
 
+_DON_METIN = {"kara_gecti": "kâra geçti", "zarara_dondu": "zarara döndü"}
+
+
 def _tr_date(s):
     """'22.09.2026' | '2026-09-22' | '02.10.2026 18:24:08' → '22 Eylül 2026'."""
     s = (s or "").strip()
@@ -409,20 +412,32 @@ def build_company_facts(ticker, stock, fund, kap_rows=None, today=None):
     if years:
         y, row = years[-1], yd[years[-1]]
         if row.get(rev_key) is not None:
-            add("%s, %s yıllık değişim%s" % (rev_lbl, y, suffix), _tr_chg(row[rev_key]), "degisim", "gelir",
-                round(row[rev_key], 1))
-        if row.get("net_income_parent") is not None:
-            add("Net kâr, %s yıllık değişim%s" % (y, suffix), _tr_chg(row["net_income_parent"]), "degisim", "kar",
-                round(row["net_income_parent"], 1))
+            add("%s, %s yıllık değişim%s" % (rev_lbl, y, suffix), _tr_chg(row[rev_key]["pct"]), "degisim", "gelir",
+                round(row[rev_key]["pct"], 1))
+        ni = row.get("net_income_parent")
+        if ni is not None:
+            metin = _DON_METIN.get(ni.get("don"))
+            if metin:
+                # işaret dönüşü (CPO 13.10 madde 4): kardan zarara/zarardan kara geçişte yüzde
+                # yanıltıcı olur (|değişim| hep >%100) — metin olgusu kullanılır, yüzde verilmez.
+                add("Net kâr, %s karşılaştırması%s" % (y, suffix), metin, "durum", "kar")
+            else:
+                add("Net kâr, %s yıllık değişim%s" % (y, suffix), _tr_chg(ni["pct"]), "degisim", "kar",
+                    round(ni["pct"], 1))
     son = (kap.get("son_rapor") or {}).get("donem")
     q = _quarter_label(son) if son and son != kap.get("son_yillik") else None
     cd = ((kap.get("ceyreklik_degisim") or {}).get(son) or {}) if q else {}
     if cd.get(rev_key) is not None:
-        add("%s değişimi, %s (önceki yılın aynı çeyreğine göre)" % (rev_lbl, q), _tr_chg(cd[rev_key]), "degisim",
-            "gelir_q", round(cd[rev_key], 1))
-    if cd.get("net_income_parent") is not None:
-        add("Net kâr değişimi, %s (önceki yılın aynı çeyreğine göre)" % q, _tr_chg(cd["net_income_parent"]),
-            "degisim", "kar_q", round(cd["net_income_parent"], 1))
+        add("%s değişimi, %s (önceki yılın aynı çeyreğine göre)" % (rev_lbl, q), _tr_chg(cd[rev_key]["pct"]),
+            "degisim", "gelir_q", round(cd[rev_key]["pct"], 1))
+    ni_q = cd.get("net_income_parent")
+    if ni_q is not None:
+        metin_q = _DON_METIN.get(ni_q.get("don"))
+        if metin_q:
+            add("Net kâr karşılaştırması, %s (önceki yılın aynı çeyreğine göre)" % q, metin_q, "durum", "kar_q")
+        else:
+            add("Net kâr değişimi, %s (önceki yılın aynı çeyreğine göre)" % q, _tr_chg(ni_q["pct"]),
+                "degisim", "kar_q", round(ni_q["pct"], 1))
 
     # (2) bilanço / nakit
     bil = kap.get("bilanco") or {}

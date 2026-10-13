@@ -1,122 +1,149 @@
 {
- "fundamentals": {
-  "kap_durum": "var",
-  "financial_currency": "TRY",
-  "statement_currency": "TRY",
-  "sektor_ortanca": {
-   "fk": {
-    "deger": 11.7,
-    "n": 10,
-    "kapsam": "sektor"
-   },
-   "pd_dd": {
-    "deger": 0.91,
-    "n": 15,
-    "kapsam": "sektor"
-   },
-   "ozsermaye_karliligi": {
-    "deger": 5.93,
-    "n": 16,
-    "kapsam": "sektor"
-   }
-  },
-  "sektor_sira": {
-   "fk": {
-    "sira": 4,
-    "toplam": 10,
-    "kume": "kap_sektor"
-   },
-   "pd_dd": {
-    "sira": 13,
-    "toplam": 15,
-    "kume": "kap_sektor"
-   },
-   "ozsermaye_karliligi": {
-    "sira": 4,
-    "toplam": 16,
-    "kume": "kap_sektor"
-   }
-  },
-  "kap": {
-   "flags": {
-    "banka": false,
-    "sigorta": false,
-    "yabanci_para": null
-   },
-   "sablon": "sanayi",
-   "basis": "tms29",
-   "yillik_degisim": {
-    "2025": {
-     "revenue": -21.72,
-     "gross_profit": -8.78,
-     "operating_profit": -10.9,
-     "ebitda": -5.15,
-     "net_income_parent": 23.15,
-     "equity_parent": -1.43
-    }
-   },
-   "son_rapor": {
-    "donem": "2026/06",
-    "yayin": "2026-08-04T18:24"
-   },
-   "son_yillik": "2025/12",
-   "ceyreklik_degisim": {
-    "2026/06": {
-     "revenue": 59.69,
-     "operating_profit": 268.43,
-     "net_income_parent": 290.91
-    }
-   },
-   "bilanco": {
-    "yil": 2025,
-    "onceki_yil": 2024,
-    "cur": {
-     "net_borc": -56987761000.0,
-     "favok": 56272759000.0,
-     "net_borc_favok": -1.01,
-     "cari_oran": 1.4,
-     "nakit": 107237211000.0
+  "fundamentals": {
+    "kap_durum": "var",
+    "financial_currency": "TRY",
+    "statement_currency": "TRY",
+    "sektor_ortanca": {
+      "fk": {
+        "deger": 11.7,
+        "n": 10,
+        "kapsam": "sektor"
+      },
+      "pd_dd": {
+        "deger": 0.91,
+        "n": 15,
+        "kapsam": "sektor"
+      },
+      "ozsermaye_karliligi": {
+        "deger": 5.93,
+        "n": 16,
+        "kapsam": "sektor"
+      }
     },
-    "prev": {
-     "net_borc": -71396121000.0,
-     "favok": 59328208000.0,
-     "net_borc_favok": -1.2,
-     "cari_oran": 1.25,
-     "nakit": 96250694000.0
-    }
-   },
-   "oranlar": {
-    "2025": {
-     "ozsermaye_karliligi": 8.05,
-     "brut": 9.78,
-     "esas": 5.02,
-     "favok": 6.78,
-     "net": 3.56
-    }
-   },
-   "saglamlik": {
-    "yontem": "piotroski",
-    "yil": 2025,
-    "puan": 7,
-    "toplam": 9
-   },
-   "degerleme_simdi": {
-    "pay_adedi": 1926796000.0,
-    "piyasa_degeri": 741334761000,
-    "fk": 10.98,
-    "pd_dd": 1.63,
-    "ozsermaye_karliligi": 14.8,
-    "son12ay_kar": 67498630000.0,
-    "son12ay_yontem": "son12ay",
-    "son12ay_etiket": "2026 ilk yarı",
-    "ozkaynak": 456139125000.0,
-    "ozkaynak_donem": "2026/06",
-    "pay_uyumsuz": false
-   }
-  },
-  "roe": 17.6,
-  "current_ratio": 1.35,
-  "analyst_target": 370.1857,
-  "analyst_count": 14
- }
+    "sektor_sira": {
+      "fk": {
+        "sira": 4,
+        "toplam": 10,
+        "kume": "kap_sektor"
+      },
+      "pd_dd": {
+        "sira": 13,
+        "toplam": 15,
+        "kume": "kap_sektor"
+      },
+      "ozsermaye_karliligi": {
+        "sira": 4,
+        "toplam": 16,
+        "kume": "kap_sektor"
+      }
+    },
+    "kap": {
+      "flags": {
+        "banka": false,
+        "sigorta": false,
+        "yabanci_para": null
+      },
+      "sablon": "sanayi",
+      "basis": "tms29",
+      "yillik_degisim": {
+        "2025": {
+          "revenue": {
+            "pct": -21.72,
+            "don": null
+          },
+          "gross_profit": {
+            "pct": -8.78,
+            "don": null
+          },
+          "operating_profit": {
+            "pct": -10.9,
+            "don": null
+          },
+          "ebitda": {
+            "pct": -5.15,
+            "don": null
+          },
+          "net_income_parent": {
+            "pct": 23.15,
+            "don": null
+          },
+          "equity_parent": {
+            "pct": -1.43,
+            "don": null
+          }
+        }
+      },
+      "son_rapor": {
+        "donem": "2026/06",
+        "yayin": "2026-08-04T18:24"
+      },
+      "son_yillik": "2025/12",
+      "ceyreklik_degisim": {
+        "2026/06": {
+          "revenue": {
+            "pct": 59.69,
+            "don": null
+          },
+          "operating_profit": {
+            "pct": 268.43,
+            "don": null
+          },
+          "net_income_parent": {
+            "pct": 290.91,
+            "don": null
+          }
+        }
+      },
+      "bilanco": {
+        "yil": 2025,
+        "onceki_yil": 2024,
+        "cur": {
+          "net_borc": -56987761000.0,
+          "favok": 56272759000.0,
+          "net_borc_favok": -1.01,
+          "cari_oran": 1.4,
+          "nakit": 107237211000.0
+        },
+        "prev": {
+          "net_borc": -71396121000.0,
+          "favok": 59328208000.0,
+          "net_borc_favok": -1.2,
+          "cari_oran": 1.25,
+          "nakit": 96250694000.0
+        }
+      },
+      "oranlar": {
+        "2025": {
+          "ozsermaye_karliligi": 8.05,
+          "brut": 9.78,
+          "esas": 5.02,
+          "favok": 6.78,
+          "net": 3.56
+        }
+      },
+      "saglamlik": {
+        "yontem": "piotroski",
+        "yil": 2025,
+        "puan": 7,
+        "toplam": 9
+      },
+      "degerleme_simdi": {
+        "pay_adedi": 1926796000.0,
+        "piyasa_degeri": 741334761000,
+        "fk": 10.98,
+        "pd_dd": 1.63,
+        "ozsermaye_karliligi": 14.8,
+        "son12ay_kar": 67498630000.0,
+        "son12ay_yontem": "son12ay",
+        "son12ay_etiket": "2026 ilk yarı",
+        "ozkaynak": 456139125000.0,
+        "ozkaynak_donem": "2026/06",
+        "pay_uyumsuz": false
+      }
+    },
+    "roe": 17.6,
+    "current_ratio": 1.35,
+    "analyst_target": 370.1857,
+    "analyst_count": 14
+  }
 }
