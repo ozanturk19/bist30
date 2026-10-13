@@ -231,7 +231,10 @@ def test_pilot_style_judgments_and_average_dropped():
     ("Değerleme sektör ortalamasına göre {F16}.", "ortalama"),
 ])
 def test_sentence_rules(sentence, code):
-    res = check("TUPRS", sentence + " Trend durumu {F17}. Hasılat 2025'te geriledi ({F1}). Cari oran {F6}.")
+    # dolgu cümleleri (min_sent=3 için) hiçbir parametrized sentence'ın kullandığı olguyla çakışmaz (F7/F14/F19) —
+    # çakışsaydı madde-7 (olgu_tekrar) dolgu cümlesini reddederdi.
+    res = check("TUPRS", sentence + " Sağlamlık kontrolü {F7}. Sektördeki F/K sırası {F14}. "
+                                     "Sağlanan trend koşulu {F19}.")
     first = res["cumleler"][0]["ret"]
     if code is None:
         assert first == [], first
@@ -250,15 +253,33 @@ def test_bare_years_dates_quarters_allowed_only_from_referenced_fact():
 
 
 def test_trims_to_five_sentences_and_length():
-    s = " ".join(["Trend durumu {F17}."] * 7)
+    # madde-7 (olgu_tekrar) her cümlede farklı olgu ister: 7 ayrı olgu kullanılır, sayı sınırı (5) test edilir.
+    s = " ".join(["Net nakit {F5}.", "Cari oran {F6}.", "Sağlamlık kontrolü {F7}.",
+                  "Sektördeki F/K sırası {F14}.", "Değerleme {F16}.", "Trend durumu {F17}.",
+                  "Sağlanan trend koşulu {F19}."])
     res = check("TUPRS", s)
-    assert res["ok"] and res["not"].count("Trend durumu") == 5
+    assert res["ok"] and [c["ret"] for c in res["cumleler"]][:5] == [[]] * 5
     assert [c["ret"] for c in res["cumleler"]][5:] == [["fazla_cumle"], ["fazla_cumle"]]
-    long_s = " ".join(["2025'te hasılat {F1}, net kâr {F2} ve 2026 2. çeyrekte çeyrek hasılat {F3}; "
-                       "şirket bildirimi {F20}."] * 5)
+    # 5 ayrı olgu bloğu (20 olgunun tamamı, hiç tekrar yok), uzunluk sınırı (420) 3 cümle sonra devreye girer.
+    long_s = " ".join([
+        "2025'te hasılat {F1}, net kâr {F2} ve 2026 2. çeyrekte çeyrek hasılat {F3}; şirket bildirimi {F20}.",
+        "2026 2. çeyrekte net kâr {F4} ve net nakit {F5}; cari oran {F6}, sağlamlık kontrolü {F7}.",
+        "F/K {F8}, sektör ortancası {F9}; PD/DD {F10}, sektör ortancası {F11}.",
+        "Özsermaye kârlılığı {F12}, sektör ortancası {F13}; F/K sırası {F14}, özsermaye kârlılığı sırası {F15}.",
+        "Değerleme {F16}; trend durumu {F17}, başladığı tarih {F18}; sağlanan trend koşulu {F19}.",
+    ])
     res2 = check("TUPRS", long_s)
     assert res2["ok"] and len(res2["not"]) <= an.NOTE_MAX_LEN
     assert [c["ret"] for c in res2["cumleler"]] == [[], [], [], ["uzunluk"], ["uzunluk"]]
+
+
+def test_same_fact_rejected_in_second_sentence():
+    # madde-7: {F17} ilk cümlede kullanıldıktan sonra başka bir cümlede tekrar anılırsa o cümle atılır
+    # (min_sent=3 karşılansın diye 4. ayrı-olgulu cümle eklendi).
+    res = check("TUPRS", "Trend durumu {F17}. Sağlanan trend koşulu {F19}. Trend durumu {F17}. "
+                         "Sağlamlık kontrolü {F7}.")
+    assert [c["ret"] for c in res["cumleler"]] == [[], [], ["olgu_tekrar"], []]
+    assert res["ok"] and res["facts_used"] == ["F7", "F17", "F19"]
 
 
 def test_note_level_rejections():

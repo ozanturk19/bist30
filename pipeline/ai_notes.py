@@ -57,6 +57,7 @@ Her değişim olgusunu ({Fn} değeri +% ya da −% ile başlayan) kullandığın
 "2026 2. çeyrek" gibi, olgunun kendi etiketindeki gibi) — dönemsiz değişim cümlesi yayımlanmaz.
 Bir parantezde en çok bir {Fn} olsun; aynı değeri cümlede iki kez yazma (ne aynı {Fn}'i tekrar, ne de kelimeyle \
 yazıp parantezle tekrarlama — "Değerleme makul (makul)" YANLIŞ, "Trend durumu {F17}" DOĞRU, parantezsiz).
+Her {Fn} notun tamamında yalnız BİR cümlede kullanılır; aynı olguyu başka bir cümlede tekrar anma.
 Bir cümle "ise", "ancak", "ama", "fakat", "da/de" ile BAŞLAMAZ (önceki cümleye bağımlı, tek başına anlamsız kalır).
 Sıra: (1) son finansal tablonun ana hareketi, (2) bilanço/nakit, (3) değerleme bağlamı, (4) trend durumu tek cümle. \
 KAP bildirimi olgusu varsa en çok bir kısa cümle (isteğe bağlı).
@@ -891,6 +892,7 @@ def validate_sentences(raw_text, facts, name="", ticker="", max_len=NOTE_MAX_LEN
     vocab_stems = set(_stem(w) for w in vocab)
     kept = []
     prev_idx = -1
+    used_facts = set()
     for idx, s in enumerate(_split_sentences(note)):
         ret = check_sentence(s, fmap, vocab, vocab_stems, name_words)
         rec = {"ham": s, "metin": _render(s, fmap), "olgular": list(dict.fromkeys(_PH.findall(s))), "ret": ret}
@@ -900,9 +902,14 @@ def validate_sentences(raw_text, facts, name="", ticker="", max_len=NOTE_MAX_LEN
             # (önceki cümleye bağımlı, tek başına anlamsız kalır) o da yayımlanmaz (tarifi §madde-5)
             if idx - prev_idx > 1 and _DANGLING_START_RE.match(rec["metin"].strip()):
                 rec["ret"] = ["kopuk_baglac"]
+            # olgu tekrarı: {Fn} notun tamamında yalnız bir cümlede kullanılır (tarifi §madde-7);
+            # bir önceki cümlede geçmiş olgu başka bir cümlede yeniden anılırsa o cümle yayımlanmaz
+            elif used_facts.intersection(rec["olgular"]):
+                rec["ret"] = ["olgu_tekrar"]
             else:
                 kept.append(rec)
                 prev_idx = idx
+                used_facts.update(rec["olgular"])
     for rec in kept[max_sent:]:
         rec["ret"] = ["fazla_cumle"]
     kept = kept[:max_sent]
@@ -930,7 +937,8 @@ _RET_TXT = (("olgu_yok", "cümlede olgu kimliği yok"), ("tanimsiz_olgu", "liste
             ("deger_yigini", "bir parantezde birden çok değer"),
             ("yanki_parantez", "aynı değer parantezle tekrar edilmiş"),
             ("donem_yok", "değişim cümlesi dönemini (yıl/çeyrek) taşımıyor"),
-            ("kopuk_baglac", "önceki cümle atıldığı için bağlaçla başlıyor"))
+            ("kopuk_baglac", "önceki cümle atıldığı için bağlaçla başlıyor"),
+            ("olgu_tekrar", "olgu notta başka bir cümlede zaten kullanılmış"))
 
 
 def feedback_for(result):
