@@ -87,23 +87,8 @@ def test_chart_integrity_alarm_thread_starts_unconditionally():
     )
 
 
-# ── gemini-cache-sync — farklı alt-sınıf: thread koşulsuz başlıyor ama ──
-# ── is_leader döngü ÖNCESİNDE sabitleniyordu ─────────────────────────────
-
-def test_gemini_cache_sync_reevaluates_leader_inside_loop_not_before():
-    src = _read_app()
-    body = _extract_function_body(src, "_gemini_cache_sync_loop")
-    assert body, "_gemini_cache_sync_loop() bulunamadı"
-    while_idx = body.index("while True:")
-    before_loop = body[:while_idx]
-    inside_loop = body[while_idx:]
-    assert "is_leader = _is_gemini_leader()" not in before_loop, (
-        "is_leader hâlâ döngüden ÖNCE bir kez okunuyor — kilit sonradan "
-        "boşalsa/el değiştirse bile bu thread'in modu hiç güncellenmez"
-    )
-    assert "is_leader = _is_gemini_leader()" in inside_loop, (
-        "is_leader döngü içinde her turda yeniden değerlendirilmiyor"
-    )
+# ── gemini-cache-sync — D-22c adım 3 (13.10) ile kaldırıldı (haber/sinyal-
+# ── açıklama uçleri silindi, kilit+loop'un var olma nedeni kalmadı) ──────
 
 
 # ── /api/health — leaders alanı (CPO-1207 §2) ────────────────────────────
@@ -114,9 +99,6 @@ def test_health_payload_exposes_leaders_block():
     assert body, "_compute_health() bulunamadı"
     idx = body.index('"leaders":')
     window = body[idx: idx + 250]
-    assert '"gemini":' in window and "_is_gemini_leader()" in window, (
-        "health.leaders.gemini alanı yok/yanlış"
-    )
     assert '"notify":' in window and "_is_notify_leader()" in window, (
         "health.leaders.notify alanı yok/yanlış"
     )

@@ -36,15 +36,10 @@ def test_build_signal_summary_entry_quality_gated_on_al():
 
 
 def test_api_news_fallback_entry_quality_gated_on_al():
-    """`/api/news` algoritmik yedek metni. D-39 (O10, 24.09): giriş kalitesi /
-    "giriş bölgesi" / "SL:" / "Hedef:" bu metinden tamamen kalktı (tek kopya,
-    betimleyici "Trend dönüş seviyesi (Supertrend)") — CPO-1784'ün AL kapısı
-    yerini kaldırmaya bıraktı."""
+    """D-22c adım 3 (13.10): `/api/market-news` (eski adıyla `/api/news`) ve
+    `api_market_news()` canlıda sıfır tüketiciyle silindi — bu test artık
+    konusuz. `entry_q`/"ideal giriş" deseni app.py genelinde kalmadığını
+    doğrulamaya devam eder (CPO-1784'ün AL kapısı yerini kaldırmaya bıraktı)."""
     src = _read()
     assert not re.findall(r'entry_q = s\.get\("entry_quality"', src), "entry_q geri gelmiş"
-    start = src.index("def api_market_news(")
-    body = "\n".join(ln for ln in src[start:src.index("\n@app.route", start)].splitlines()
-                     if not ln.strip().startswith("#"))   # yorumlar render edilmez
-    for bad in (" giriş bölgesi", "SL: ", "| Hedef: ", 's.get("tp1")'):
-        assert bad not in body, f"market-news yedek metninde {bad!r} geri gelmiş"
-    assert "Trend dönüş seviyesi (Supertrend): " in body
+    assert "def api_market_news(" not in src, "api_market_news() beklenmedik şekilde geri gelmiş"

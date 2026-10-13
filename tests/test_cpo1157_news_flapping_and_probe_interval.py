@@ -43,44 +43,9 @@ def test_quota_cooldown_extended_past_ten_minutes():
     )
 
 
-def test_news_endpoint_short_circuits_head_and_monitor_ua():
-    src = _read_app()
-    body = _extract_function_body(src, "api_stock_news")
-    assert body, "api_stock_news() bulunamadı"
-    assert 'request.method == "HEAD"' in body, (
-        "HEAD isteği için erken dönüş yok — Werkzeug varsayılanı queue.add() dahil "
-        "tüm yan etkileri çalıştırır"
-    )
-    assert "uptimerobot" in body.lower(), (
-        "UptimeRobot User-Agent kısa devresi yok — monitör kendi kota devresini besliyor"
-    )
-    # Kısa devre, cache mantığından ÖNCE olmalı
-    head_idx = body.index('request.method == "HEAD"')
-    miss_idx = body.index("# 4. CACHE MISS")
-    assert head_idx < miss_idx, "HEAD/monitor kısa devresi cache-miss dalından SONRA geliyor"
-
-
-def test_news_endpoint_deterministic_when_quota_degraded_even_after_cache_expiry():
-    src = _read_app()
-    body = _extract_function_body(src, "api_stock_news")
-    assert body, "api_stock_news() bulunamadı"
-    assert "if _gemini_news_degraded():" in body, (
-        "kota-tükendi kısa devresi yok — negatif cache TTL'i dolunca hâlâ "
-        "loading:true'ya (flapping) dönebilir"
-    )
-    degraded_idx = body.index("if _gemini_news_degraded():")
-    miss_idx = body.index("# 4. CACHE MISS")
-    assert degraded_idx < miss_idx, (
-        "kota-tükendi kontrolü cache-miss dalından ÖNCE olmalı — "
-        "aksi halde doomed bir yanıt üretiliyor"
-    )
-
-
-def test_quota_degraded_short_circuit_returns_unavailable_not_loading():
-    src = _read_app()
-    body = _extract_function_body(src, "api_stock_news")
-    assert body, "api_stock_news() bulunamadı"
-    degraded_idx = body.index("if _gemini_news_degraded():")
-    # Bir sonraki return bloğu unavailable:True + loading:False dönmeli, loading:True DEĞİL
-    snippet = body[degraded_idx:degraded_idx + 400]
-    assert '"loading": False, "unavailable": True' in snippet
+# D-22c adım 3 (13.10): api_stock_news() canlıda sıfır tüketiciyle silindi
+# (/api/hisse/<T>/news) — HEAD/monitor kısa devresi, kota-tükendi-kısa-devresi
+# ve unavailable/loading ayrımını doğrulayan 3 test konusuz kaldı, kaldırıldı.
+# §3.1 (cooldown ölçeği) üstteki testte, _gemini_news_degraded()/kota devresi
+# kendisi _gemini_call'ın paylaşımlı altyapısında (kalıcı, D-57/ai_notes.py
+# tüketiyor) doğrulanmaya devam ediyor.

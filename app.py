@@ -2357,50 +2357,6 @@ def _is_digest_leader():
             return False
     return _is_digest_leader_blocking()
 
-# SPEC-009 Gemini Faz 1: _prefetch_thread her 4 worker'da çalışıyordu → Gemini
-# çağrıları 4× → maliyet patlaması (~60 TL/gün). Ayrı leader-lock — yalnız 1
-# worker bg prefetch yapar (multi-worker cost multiplier fix).
-_GEMINI_LOCK_PATH = os.environ.get("GEMINI_LOCK_PATH", "/tmp/bp_gemini_leader.lock")  # staging-prod izolasyon
-_gemini_lock_fh = None
-
-def _is_gemini_leader_blocking():
-    """Bu worker Gemini bg prefetch yetkisine sahip mi? fcntl.flock —
-    4 worker'dan yalnızca biri leader → prefetch 4× yerine 1×.
-
-    CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
-    bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
-    global _gemini_lock_fh
-    if _IS_SHADOW:
-        return False
-    try:
-        if _gemini_lock_fh is None:
-            with _leader_lock_init_guard:
-                if _gemini_lock_fh is None:
-                    _gemini_lock_fh = open(_GEMINI_LOCK_PATH, "w")
-        _fcntl.flock(_gemini_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
-        return True
-    except (BlockingIOError, OSError):
-        return False
-
-
-def _is_gemini_leader():
-    """Bu worker Gemini bg prefetch yetkisine sahip mi? — public wrapper.
-
-    CPO-1032 deseninin 3 leader fonksiyonundan eksik kalan 3.'sü (CPO-1228,
-    03.08 03:10 TR APPROVE) — `_is_digest_leader`/`_is_macro_leader` zaten bu
-    deseni kullanıyordu, bu tek eksikti. `_is_gemini_leader_blocking()`'i
-    gevent hub threadpool'a offload edip 10s tavan koyar. Timeout'ta False
-    (non-leader) — güvenli varsayılan."""
-    if os.environ.get("BP_ROLE") == "macro":
-        return False
-    if _WS_AVAILABLE:
-        try:
-            return _gevent.get_hub().threadpool.spawn(_is_gemini_leader_blocking).get(timeout=10)
-        except _gevent.Timeout:
-            logger.error("_is_gemini_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
-            return False
-    return _is_gemini_leader_blocking()
-
 # CPO-520 KÖK NEDEN P0 (07.06.2026): _macro_bg_loop her worker'da çalışıyordu →
 # 4 worker × 10 ticker × 3dk = 40 paralel yfinance.Ticker.fast_info call →
 # gevent monkey_patch + threading hybrid corruption → /hisse deadlock 20s.
@@ -6441,72 +6397,6 @@ _CHART_CACHE_VERSION = "1.0"     # SPEC-008 L4a — schema bumpu temiz invalidat
 # ── Gemini API — AI haber özeti & sinyal açıklaması ─────────────────────────
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# Cache yapıları
-# failed=True → negatif cache (başarısız istek, kısa TTL)
-_news_cache           = {}   # {ticker: {"text": str|None, "ts": float, "failed": bool}}
-_NEWS_CACHE_TTL       = 3600 * 6   # 6 saat — başarılı yanıt
-_NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif cache)
-
-# SPEC-009 Faz 2 B2: news cache shared disk — herhangi worker Gemini'den haber
-# çekince diske yazar; başka worker aynı ticker'ı çekmeden önce diskten okur →
-# 4× Gemini çağrısı yerine ~1× (cross-worker dedup). Leader-gate gerekmez:
-# dedup get_ai_news içindeki disk-check ile olur (her worker kendi isteğini servis eder).
-_NEWS_CACHE_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_cache.json")
-
-def _save_news_cache_to_disk():
-    """News cache'i diske yazar (cross-worker dedup). _lock DIŞINDA çağrılmalı.
-
-    CPO-1205 §2(c)/§4-2: recycle sonrası boş açılan leader birkaç ticker
-    fetch'ledikten sonra ilk save'inde diski ezerdi — snapshot dolu ama
-    disk'teki diğer leader'lardan kalma daha zengin kopyadan küçük olabilirdi.
-    Bu yüzden yazmadan önce disk'teki mevcut kaydı okuyup ticker başına en
-    taze (ts) kazanır şekilde birleştiriyoruz; küçük bir snapshot artık
-    büyük bir disk kopyasını asla silemez.
-    """
-    try:
-        with _lock:
-            snapshot = dict(_news_cache)
-        if not snapshot:
-            return   # empty-overwrite guard — diskteki veriyi silme
-        merged = dict(snapshot)
-        try:
-            if os.path.exists(_NEWS_CACHE_DISK_PATH):
-                disk = _tp_read_json(_NEWS_CACHE_DISK_PATH)
-                if isinstance(disk, dict):
-                    for tk, dentry in disk.items():
-                        if not isinstance(dentry, dict):
-                            continue
-                        mem_entry = merged.get(tk)
-                        if not mem_entry or dentry.get("ts", 0) > mem_entry.get("ts", 0):
-                            merged[tk] = dentry
-        except Exception:
-            pass   # disk okunamazsa in-memory snapshot ile devam (eski davranış)
-        # DEV-1570/CPO-992-DEV-983 pattern: inline _atomic_write_json (fsync+
-        # replace) gemini-cache-sync 90s loop'unda leader worker'ı bloke
-        # ediyordu — bkz CPO-1218/1226 CLOSE_WAIT sızıntısı.
-        _tp_write_json(_NEWS_CACHE_DISK_PATH, merged, atomic=True, ensure_ascii=False)
-        logger.info("_save_news_cache_to_disk: %d anahtar yazıldı (in-memory=%d)", len(merged), len(snapshot))
-    except Exception as e:
-        logger.warning("_save_news_cache_to_disk hatası: %s", e)
-
-def _load_news_cache_from_disk():
-    """Diskten news cache merge — ticker başına en taze (ts) kazanır. _lock DIŞINDA."""
-    try:
-        if not os.path.exists(_NEWS_CACHE_DISK_PATH):
-            return
-        disk = _tp_read_json(_NEWS_CACHE_DISK_PATH)
-        if not isinstance(disk, dict):
-            return
-        with _lock:
-            for tk, dentry in disk.items():
-                if not isinstance(dentry, dict):
-                    continue
-                mem = _news_cache.get(tk)
-                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
-                    _news_cache[tk] = dentry
-    except Exception as e:
-        logger.warning("_load_news_cache_from_disk hatası: %s", e)
-
 # ── D-46b — Şirket açıklaması: KAP "Şirketin Faaliyet Konusu" (AI üretimi kalktı) ──
 # Faaliyet konusu yoksa None → "Hakkında" bölümü ve SSS sorusu hiç çizilmez (yanlış metin yerine boşluk).
 def get_company_summary(ticker):
@@ -6517,92 +6407,6 @@ def get_company_summary(ticker):
         return None
     return f"{k.get('kisa_ad') or STOCK_NAMES.get(ticker, ticker)} — Faaliyet konusu: {faaliyet}"
 
-
-def _news_ttl_for(ticker: str) -> int:
-    """Dinamik TTL: aktif sinyalli/hacimli hisseler kısa TTL, durgun hisseler uzun TTL.
-
-    - AL/SAT sinyalli: 6h (aktif iş, sık güncelle)
-    - vol_ratio >= 1.0: 6h (hacimli)
-    - vol_ratio 0.5-1.0: 12h (orta)
-    - vol_ratio < 0.5: 24h (durgun, gemini çağrısını azalt)
-    """
-    with _lock:
-        for s in _cache.get("data", []):
-            if s.get("ticker") == ticker:
-                if s.get("signal") in ("AL", "SAT"):
-                    return _NEWS_CACHE_TTL
-                vr = s.get("vol_ratio") or 1.0
-                if vr < 0.5:
-                    return 3600 * 24
-                if vr < 1.0:
-                    return 3600 * 12
-                return _NEWS_CACHE_TTL
-    return _NEWS_CACHE_TTL
-
-
-# CPO-1208 §1(d): "kotayı kim yiyor" zincirinin son doğrulanmamış halkası —
-# recycle-sonrası her poll gerçekten Gemini çağrısına mı dönüşüyor. 24s toplanıp
-# NEWS_MEASURE log satırlarından [ua_class]×[cache hit/miss]×[gemini_call] tablosu
-# çıkarılacak; grep hedefi: `grep "NEWS_MEASURE" <log> | awk ...`.
-def _news_ua_class(req) -> str:
-    ua = req.headers.get("User-Agent") or ""
-    low = ua.lower()
-    if "uptimerobot" in low:
-        return "uptimerobot"
-    if "headlesschrome" in low:
-        return "headless_chrome"
-    if "borsapusulaqa" in low:
-        return "qa_bot"
-    if not ua or _NON_HUMAN_UA_RE.search(ua):   # curl/python-requests/Go-http/bot/spider/crawl (satır ~144)
-        return "other_bot"
-    return "human_or_unclassified"
-
-_signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool, "ttl": float}}
-_SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
-_SIG_EXPLAIN_TTL_JITTER = 3600 * 2  # CPO-1008: ±2h jitter — toplu yazılan cache'lerin aynı anda thundering-herd bitişini önler
-_SIG_FAIL_TTL         = 300        # 5 dakika
-
-# SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
-# Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
-# burst = gevent hub 40-50s donar → K6 v2 quorum tetik. Çözüm:
-#   1. Leader-only Gemini call (_is_gemini_leader mevcut)
-#   2. Disk cache shared (workers arası senkron)
-#   3. Non-leader: cache miss → commentary fallback (Gemini call YOK)
-_SIG_EXPLAIN_DISK_PATH = "/root/bist30/_signal_explain_cache.json"
-_sig_disk_mtime = None  # H3 pattern: file mtime guard
-
-
-def _load_explain_cache_from_disk():
-    """Non-leader workers — disk cache'i memory'e merge eder (H3 pattern, mtime guard)."""
-    global _sig_disk_mtime
-    try:
-        if not os.path.exists(_SIG_EXPLAIN_DISK_PATH):
-            return
-        current_mtime = os.path.getmtime(_SIG_EXPLAIN_DISK_PATH)
-        # Mtime guard: file değişmemişse skip (gevent hub bloke etme)
-        if _sig_disk_mtime == current_mtime:
-            return
-        with open(_SIG_EXPLAIN_DISK_PATH, "r", encoding="utf-8") as f:
-            disk_data = json.load(f)
-        if not isinstance(disk_data, dict):
-            return
-        # Merge: disk daha taze TS varsa al
-        with _lock:
-            for tk, dv in disk_data.items():
-                mv = _signal_explain_cache.get(tk)
-                if not mv or (dv.get("ts", 0) > mv.get("ts", 0)):
-                    _signal_explain_cache[tk] = dv
-        _sig_disk_mtime = current_mtime
-    except Exception as e:
-        logger.debug("explain cache disk okuma hatası: %s", e)
-
-# Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
-# (use_search=False olan denemeler grounding olmadan gider → daha stabil)
-# D-P0-2409 (maliyet): grounding kapalı, önce ucuz model (flash-lite $0,10/$0,40 · flash $0,30/$2,50).
-_GEMINI_EXPLAIN_ATTEMPTS = [
-    ("gemini-2.5-flash-lite", False),  # 1. tercih: Flash 2.5 Lite
-    ("gemini-2.5-flash",      False),  # fallback: Flash 2.5
-]
 
 # ─── Gemini timeout-guard + circuit breaker (SPEC-009 Faz D, 18 May 2026) ───
 # 17:15 watchdog auto-restart kök neden: Gemini 503/ReadTimeout 30s+ → 2 fallback
@@ -7103,91 +6907,6 @@ def _compute_signal_commentary(ticker, signal_data):
         "price": price, "sl": sl, "bars": bars,
     }
 
-
-def get_ai_signal_explanation(ticker, signal_data):
-    """Sinyal açıklaması — request path'i Gemini çağırmaz (D-22b: bg zenginleştirme
-    kaldırıldı, algoritmik commentary tek kaynak).
-
-    - Cache hit → önceki (Gemini zenginleştirilmiş ya da algoritmik) metni dön
-      (geçmişte yazılmış cache kayıtları TTL'leri dolana kadar geçerli kalır)
-    - Cache miss → algoritmik commentary hesaplanır, ANINDA dön
-
-    Returns: (text, source) — "gemini" yalnız eski cache kayıtlarından gelir,
-    yeni üretim her zaman "algorithmic".
-    """
-    now = time.time()
-    sig = signal_data.get("signal", "BEKLE")
-
-    # Önce cache'i kontrol et
-    with _lock:
-        cached = _signal_explain_cache.get(ticker)
-        if cached:
-            ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
-            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
-
-    # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
-    _load_explain_cache_from_disk()
-    with _lock:
-        cached = _signal_explain_cache.get(ticker)
-        if cached:
-            ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
-            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
-
-    # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
-    # AI tab ASLA boş/takılı kalmaz.
-    fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"]
-    return fallback_text, "algorithmic"
-
-
-def _market_box_candidates(stocks):
-    """Ana sayfa Gündem kutusu adayları: top5 AL + top2 SAT (endeks hariç).
-
-    api_market_news (serve-time) ticker listesini burada HER ÇAĞRIDA TAZE
-    türetir — aday listesi hiçbir yerde cache'lenmez, her okuyucu kendi
-    anındaki _cache["data"] üzerinden hesaplar.
-    """
-    al_stocks  = [s for s in stocks
-                  if s.get("signal") == "AL"
-                  and s.get("ticker") not in ("XU030", "XU100")][:5]
-    sat_stocks = [s for s in stocks
-                  if s.get("signal") == "SAT"
-                  and s.get("ticker") not in ("XU030", "XU100")][:2]
-    return al_stocks + sat_stocks
-
-
-# SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
-# #38: disk I/O request/hot-path'te YAPILMAZ (gevent hub kilitler). Bunun yerine
-# 90s'lik bg timer thread — background_refresh non-leader pattern'i birebir.
-# Leader: in-memory cache'i diske yazar. Non-leader: diskten okur. Inline I/O YOK.
-def _gemini_cache_sync_loop():
-    # CPO-1205 §4-2: leader de boot'ta diski bir kez okusun. Eskiden yalnız
-    # non-leader okuyordu — worker recycle sonrası boş açılan yeni leader
-    # diski hiç görmeden Gemini'ye 8 hissenin tamamını yeniden soruyordu.
-    _load_news_cache_from_disk()
-    # CPO-1207 §1 (aynı sınıf, bu thread'de bulundu): eskiden is_leader thread
-    # başlangıcında BİR KEZ okunup döngü boyunca sabit kalıyordu — kilit
-    # sonradan boşalıp bu worker leader olsa (veya leaderliğini kaybetse) bile
-    # mod hiç güncellenmiyordu. Artık her turda yeniden değerlendiriliyor;
-    # mod değiştiğinde loglanıyor (her 90s aynı satırı basmasın diye).
-    _last_logged_mode = None
-    while True:
-        try:
-            is_leader = _is_gemini_leader()
-            mode = "LEADER (disk yazar)" if is_leader else "non-leader (disk okur)"
-            if mode != _last_logged_mode:
-                logger.info("gemini-cache-sync: %s", mode)
-                _last_logged_mode = mode
-            if is_leader:
-                _save_news_cache_to_disk()
-            else:
-                _load_news_cache_from_disk()
-        except Exception as e:
-            logger.error("gemini-cache-sync hatası: %s", e)
-        time.sleep(90)
-
-_bg_start(threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync"))
 
 
 def _tr1(value):
@@ -8895,141 +8614,6 @@ def _run_eod_scoring_pass(results: list):
 _news_queue_stats = {"last_added_ts": 0, "last_processed_ts": 0, "total_added": 0, "total_processed": 0}
 
 
-def _news_coverage_state(ticker: str, now_ts: float) -> str:
-    """CPO-1368: bot/HEAD kısa devresi için Gemini çağrısı yapmadan ucuz cache
-    okuması — 'kapsam dışı' (hiç kuyruğa girmemiş) ile 'kuyruğa girdi ama
-    haberi yok/başarısız' ayrımını görünür kılar. Yan etkisi yok, kota tüketmez.
-    'cached' | 'fetch_failed' | 'not_fetched'."""
-    with _lock:
-        kap_hit = _kap_cache.get(ticker)
-        gen_cached = _news_cache.get(ticker)
-    kap_discs = kap_hit["data"] if (kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL) else None
-    kap_news_cached = None
-    if kap_discs:
-        cache_key = f"{ticker}_kap_{kap_discs[0]['date'][:10]}"
-        with _lock:
-            kap_news_cached = _news_cache.get(cache_key)
-    if (gen_cached and not gen_cached.get("failed") and gen_cached.get("text")) or \
-       (kap_news_cached and not kap_news_cached.get("failed")):
-        return "cached"
-    if (gen_cached and gen_cached.get("failed")) or (kap_news_cached and kap_news_cached.get("failed")):
-        return "fetch_failed"
-    return "not_fetched"
-
-
-@app.route("/api/hisse/<ticker>/news")
-@limiter.limit("20 per minute")
-def api_stock_news(ticker):
-    """News endpoint — ARCHITECTURAL FIX: cache-or-queue pattern.
-
-    Cache hit → return. Cache miss → bg fetch trigger (single-flight per ticker),
-    return {"news": null}. Frontend zaten 8s sonra retry yapar (loadNews retry pattern).
-
-    Request handler İÇİNDE yfinance/Gemini ÇAĞRILMAZ → worker hang riski sıfır.
-    """
-    ticker = ticker.upper()
-    if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-
-    # CPO-1157 §3.4: HEAD (Werkzeug varsayılan olarak GET view'ı çalıştırıp gövdeyi
-    # atar — queue.add() dahil TÜM yan etkiler yine de çalışırdı) ve monitor UA'lar
-    # (nginx access.log kanıtı: UptimeRobot bu endpoint'i ~5dk'da bir HEAD ile
-    # yokluyordu, kota devresinin her açılışını besleyen gerçek kullanıcı değil
-    # kendi monitörümüzdü) hiç cache/queue mantığına girmemeli — bu kısa devre
-    # aynen kalır, Gemini/queue'ya 0 çağrı garantisi bundan geliyor.
-    #
-    # CPO-1208 §1(c)/CPO-1209 §2(b): eskiden kısa devre HER ZAMAN sabit
-    # {"news": None, "loading": False} dönüyordu — özellik 6 saat kota-tükenmiş
-    # kalsa bile UptimeRobot hep HTTP 200 görüyordu ("monitör hem sebep hem kör").
-    # Şimdi CB durumunu (_gemini_news_degraded — paylaşımlı dosyadan ucuz okuma,
-    # Gemini çağrısı YOK) gövdeye yansıtıyoruz; UptimeRobot'un keyword-check'i
-    # (panel tarafı Ozan'da) artık gerçek arızayı görebilir.
-    #
-    # CPO-1320: aynı kısa devre BorsaPusulaQA ailesine (rapid/smoke/full) de
-    # genişletildi — is_synthetic_client() aynı _NON_HUMAN_UA_RE'yi paylaşır.
-    # İzleme trafiği artık cache/queue mantığına HİÇ girmiyor, Gemini çağrısı
-    # tetikleyemez. Gerçek-yol testi qa-full timer'ındaki ayrı bütçeli tek
-    # ticker'a bırakıldı (probe tarafı, borsapusula-qa reposu).
-    if request.method == "HEAD" or is_synthetic_client(request):
-        degraded = _gemini_news_degraded()
-        return safe_json({
-            "news": None, "loading": False,
-            "unavailable": degraded,
-            "news_degraded": degraded,
-            "coverage": _news_coverage_state(ticker, time.time()),  # CPO-1368
-        })
-
-    kap_url = kap_url_for(ticker)
-    now_ts  = time.time()
-
-    # 1. KAP cache check (no scrape in handler)
-    with _lock:
-        kap_hit = _kap_cache.get(ticker)
-    kap_discs = kap_hit["data"] if (kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL) else None
-
-    # 2. KAP-based news cache check
-    if kap_discs:
-        cache_key = f"{ticker}_kap_{kap_discs[0]['date'][:10] if kap_discs else 'none'}"
-        with _lock:
-            cached = _news_cache.get(cache_key)
-        if cached and not cached.get("failed"):
-            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-            if (now_ts - cached["ts"]) < ttl:
-                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no served=yes source=kap_ai",
-                            ticker, _news_ua_class(request))
-                return safe_json({
-                    "news": cached["text"], "source": "kap_ai",
-                    "kap_url": kap_url, "kap_count": len(kap_discs)
-                })
-
-    # 3. Search-grounded cache check (get_ai_news uses _news_cache[ticker])
-    with _lock:
-        gen_cached = _news_cache.get(ticker)
-    if gen_cached:
-        failed = gen_cached.get("failed")
-        ttl = _NEWS_FAIL_TTL if failed else _news_ttl_for(ticker)
-        if (now_ts - gen_cached["ts"]) < ttl:
-            if failed:
-                # CPO-1153/1154 P0-B(c): negatif cache içindeyken tekrar kuyruğa ekleyip
-                # sonsuz "loading:true" dönmek YASAK — 6 saatlik kota kesintisi boyunca
-                # kullanıcı sonsuz spinner görüyordu, hiç hata görmüyordu. Dürüst dön.
-                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=negcache gemini_call=no served=no",
-                            ticker, _news_ua_class(request))
-                return safe_json({
-                    "news": None, "loading": False, "unavailable": True,
-                    "reason": "Haber özeti şu an kullanılamıyor",
-                    "news_degraded": _gemini_news_degraded(),
-                    "retry_after_s": _gemini_cb_retry_after_s(),  # CPO-1165 D-NEWS-1
-                    "kap_url": kap_url,
-                })
-            if gen_cached.get("text"):
-                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no served=yes source=gemini",
-                            ticker, _news_ua_class(request))
-                return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
-
-    # CPO-1157 §3.3: negatif cache (5dk TTL, _NEWS_FAIL_TTL) süresi dolduğunda
-    # kota devresi HÂLÂ açıksa (10dk-1sa ölçekli, günlük kotanın ufkuna göre çok
-    # kısa) endpoint eskiden "cache miss" sayıp loading:true'ya dönüyordu — kota
-    # devresi kapanana kadar bu döngü her birkaç dakikada bir tekrarlıyor, kullanıcı
-    # spinner/dürüst-mesaj arasında salınım görüyordu (canlı kanıt: try1 loading,
-    # try2 unavailable, try3 loading). Kota bilinen şekilde tükenmişken bekleyen bir
-    # sonuç YOK — yeni bir bg-fetch kuyruklamak yalnız kuyruğu ISRAF eder, sonucu
-    # değiştirmez. Cache TTL'inden bağımsız olarak deterministik dön.
-    if _gemini_news_degraded():  # CPO-1210 §3: reddedilen talep artık ölçülüyor
-        logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=n/a gemini_call=no short_circuit=yes",
-                    ticker, _news_ua_class(request))
-        return safe_json({
-            "news": None, "loading": False, "unavailable": True,
-            "reason": "Haber özeti şu an kullanılamıyor",
-            "news_degraded": True,
-            "retry_after_s": _gemini_cb_retry_after_s(),  # CPO-1165 D-NEWS-1
-            "kap_url": kap_url,
-        })
-
-    # 4. CACHE MISS — D-22b: Gemini üretimi kaldırıldı, doldurulacak worker yok.
-    return safe_json({"news": None, "loading": True, "kap_url": kap_url})
-
-
 def get_signal_story(ticker: str, signal_date: str) -> dict:
     """Sinyal tarihi etrafındaki (-20/+5 gün) KAP bildirimleri.
     AL/SAT sinyalinin hangi haber ortamında oluştuğunu gösterir.
@@ -9671,29 +9255,6 @@ def _inject_gundem_haber():
             logger.warning("_inject_gundem_haber: %s", e)
             return {"gundem_haber": None}
     return {}
-
-
-@app.route("/api/hisse/<ticker>/signal-explanation")
-@limiter.limit("20 per minute")
-def api_signal_explanation(ticker):
-    """Sinyal açıklaması — AI varsa AI, yoksa algoritmik metin döner. Her zaman dolu.
-    BIST hisseleri için _cache["data"] kullanılır.
-    """
-    ticker = ticker.upper()
-    if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-
-    with _lock:
-        stocks = list(_cache.get("data") or _cache.get("stocks") or [])
-    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
-    if not stock:
-        # CPO-DEV2-083: gecerli ticker ama _cache henuz doldurulmamis (soguk baslangic/
-        # refresh arasi) -> gecersiz ticker'in 404'unden ayirt edilebilir olsun diye 503.
-        # hisse.html loadSignalExplanation() bu durumu reason=="no_data" ile ayri okur.
-        return safe_json({"explanation": None, "reason": "no_data"}), 503
-
-    text, source = get_ai_signal_explanation(ticker, stock)
-    return safe_json({"explanation": text, "signal": stock.get("signal"), "source": source})
 
 
 _mtf_cache     = {}        # {ticker: {"data": {...}, "ts": float}}
@@ -10606,7 +10167,6 @@ def _compute_health():
         # onun kendi leader/thread durumu, global değil (news_queue_note ile
         # aynı uyarı geçerli).
         "leaders": {
-            "gemini": _is_gemini_leader(),
             "notify": _is_notify_leader(),
         },
         # CPO-1260-B P1: alarm kanallarının KENDİSİ de sağlık yüzeyine girsin —
@@ -10880,8 +10440,6 @@ def api_cache_inventory():
 
     _check("stocks_main", _DISK_CACHE_PATH)
     _check("macro", _MACRO_DISK_PATH)
-    _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
-    _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
     _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
     _check("mtf", _MTF_CACHE_DISK_PATH)
     _check("chart_xu100", os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json"),
@@ -12568,158 +12126,6 @@ def api_temettu_takvimi():
     return safe_json({"stocks": rows, "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M")})
 
 
-@app.route("/api/market-news")
-@limiter.limit("30 per minute")
-def api_market_news():
-    """Ana sayfa Gündem kutusu için öne çıkan hisse haberleri.
-
-    Sadece mevcut cache'leri okur — Gemini'ye yeni çağrı yapmaz.
-    AL sinyalli top hisseler için news veya sinyal açıklamasını döner.
-    Haber yoksa algoritmik fallback metin kullanılır.
-    """
-    with _lock:
-        stocks = list(_cache["data"])
-
-    # CPO-1353 §4 — kanonik aday kaynağı (_market_box_candidates); ticker
-    # listesi HER ÇAĞRIDA burada, güncel _cache["data"] üzerinden türetilir
-    # (prefetch'ten DONMUŞ bir liste okunmaz) — ticker her zaman güncel kalır.
-    candidates = _market_box_candidates(stocks)
-
-    results = []
-    for s in candidates:
-        t      = s["ticker"]
-        name   = STOCK_NAMES.get(t, t)
-        sig    = s.get("signal", "BEKLE")
-        price  = s.get("price", 0) or 0
-        chg    = s.get("change_pct", 0) or 0
-        bars   = s.get("signal_bars", 1) or 1
-        # D-06: göreli zaman ("bugün") yok — son bar sinyali kesin tarihle.
-        _sd    = parse_signal_date(s.get("signal_date"))
-        dur    = (f"son {bars} gündür" if bars > 1 else
-                  f"{_tr_day_month(_sd)} kapanışından beri" if _sd else "son seanstan beri")
-
-        # ── Metin kaynağı önceliği: kap_cache > haber_cache > sinyal_açıklama > algoritma ──
-        with _lock:
-            news_c = _news_cache.get(t)
-            expl_c = _signal_explain_cache.get(t)
-
-        text   = None
-        source = "algorithmic"
-
-        # 1. KAP cache'den doğrudan bildirim konularını snippet olarak kullan (hallucination yok)
-        kap_cached = _kap_cache.get(t, {})
-        kap_discs  = kap_cached.get("data", []) if kap_cached else []
-        if kap_discs:
-            lines = [f"{d['date'][:10]}: {d['subject']}"
-                     for d in kap_discs[:3] if d.get("subject")]
-            if lines:
-                text   = " | ".join(lines)
-                source = "kap"
-
-        # 2. AI haber cache (Google Search grounding)
-        if not text and news_c and not news_c.get("failed") and news_c.get("text"):
-            text   = news_c["text"]
-            source = "news"
-
-        # 3. Sinyal açıklama cache
-        if not text and expl_c and expl_c.get("text") and not expl_c.get("failed"):
-            text   = expl_c["text"]
-            source = "explanation"
-
-        if not text:
-            # D-22b: Gemini üretimi kaldırıldı — haber cache yoksa doğrudan
-            # algoritmik fallback'e düşülür, doldurulacak bg kuyruk yok.
-
-            # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
-            if sig == "AL":
-                text = (f"{name} hissesinde {dur} Güçlü Trend sinyali aktif. "
-                        "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
-                source = "loading"
-            elif sig == "SAT":
-                text = (f"{name} hissesinde {dur} Trend Bozuldu sinyali aktif. "
-                        "Teknik göstergeler düşüş yönünü işaret ediyor.")
-                source = "loading"
-            else:
-                continue   # BEKLE hisselerini listeye alma
-
-        # Snippet: gereksiz giriş/kapanış cümlelerini temizle, ilk ~220 karakter
-        _skip_prefixes = (
-            "aşağıda", "işte", "here are", "here is", "below are",
-            "son 7 gün", "son yedi gün", "belirtmek gerekir",
-            "bugünün tarihi", "bu tarihe", "01 mayıs", "belirtilen tarih",
-            "kayda değer", "son 7 günde kayda", "son yedi günde kayda",
-            "not:", "note:", "önemli not",
-        )
-        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        # Başındaki giriş cümlelerini atla (maksimum 2 satır)
-        for _ in range(2):
-            if lines and any(lines[0].lower().startswith(p) for p in _skip_prefixes):
-                lines = lines[1:]
-            else:
-                break
-        # Madde işareti olan satırlarla başlıyorsa, sadece ilk 3 maddeyi al
-        bullet_lines = [ln for ln in lines if ln.startswith(("•", "-", "*", "–", "1.", "2.", "3."))]
-        if bullet_lines:
-            lines = bullet_lines[:3]
-        # Markdown temizle: bullet prefix, bold markers, italic markers
-        def _clean_md(ln):
-            ln = re.sub(r'^\s*[\*\-•–]\s+', '', ln)  # bullet prefix
-            ln = re.sub(r'\*\*([^*]+)\*\*', r'\1', ln)  # **bold**
-            ln = re.sub(r'\*([^*]+)\*', r'\1', ln)   # *italic*
-            ln = re.sub(r'^\d+\.\s+', '', ln)         # 1. numbered
-            return ln.strip()
-        lines = [_clean_md(ln) for ln in lines if ln.strip()]
-        clean = " ".join(ln for ln in lines if ln).strip()
-        snippet = clean if len(clean) <= 220 else clean[:220].rsplit(" ", 1)[0] + "…"
-
-        # "Kayda değer gelişme yok" → boş kart yerine algoritmik sinyal bilgisi göster
-        _EMPTY_PATTERNS = (
-            "kayda değer bir gelişme",
-            "kayda değer gelişme bulunmuyor",
-            "kayda değer bir haber",
-            "herhangi bir haber bulunamadı",
-            "son 7 günde kayda değer",
-        )
-        # "Kayda değer gelişme yok" yanıtı ya da _skip_prefixes tüm satırları sildiyse
-        # → algoritmik yedek. D-39 (kanon §2.2): giriş bölgesi / SL / Hedef dili yok,
-        # tek betimleyici satır trend dönüş seviyesi (Supertrend).
-        if (source == "news" and len(snippet) < 160 and
-                any(pat in snippet.lower() for pat in _EMPTY_PATTERNS)) or not snippet.strip():
-            sl_val  = s.get("sl_level")
-            snippet = (
-                f"{dur[:1].upper() + dur[1:]} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif."
-                f"{' Trend dönüş seviyesi (Supertrend): ' + tr_price_filter(sl_val) + ' ₺.' if sl_val else ''}"
-            )
-            source = "algorithmic"
-
-        results.append({
-            "ticker":      t,
-            "name":        name,
-            "signal":      sig,
-            "price":       round(price, 2),
-            "change_pct":  round(chg, 2),
-            "snippet":     snippet,
-            "source":      source,
-            "signal_date": s.get("signal_date", ""),
-            "signal_bars": bars,
-            "sector":      _get_sector(t),
-            "sl_level":    s.get("sl_level"),
-            "kap_url":     kap_url_for(t),
-        })
-
-        if len(results) >= 5:
-            break
-
-    has_loading = any(r.get("source") == "loading" for r in results)
-    now = datetime.now(_TZ_TR)
-    return safe_json({
-        "items":       results,
-        "updated_at":  now.strftime("%d.%m.%Y %H:%M"),
-        "count":       len(results),
-        "has_loading": has_loading,   # True → frontend 30s sonra yenile
-    })
-
-
 def _acct_code_request():
     """D-50: kod isteği (ortak gövde). Kod her adrese aynı biçimde gider: kayıtlıysa giriş,
     değilse hesap açılışı -> yanıt adresin kayıtlı olup olmadığını söylemez."""
@@ -13847,8 +13253,7 @@ if _IS_SHADOW:
             return
         _shadow_warmed.append(1)
         for _fn in (_load_cache_from_disk, _load_macro_from_disk,
-                    _load_news_cache_from_disk,
-                    _load_explain_cache_from_disk, _load_fundamentals_cache_from_disk,
+                    _load_fundamentals_cache_from_disk,
                     _load_sector_stats_from_disk, _load_xu100_chart_from_disk,
                     _load_health_scores_from_disk, _load_mtf_cache_from_disk):
             try:

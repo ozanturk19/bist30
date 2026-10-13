@@ -80,8 +80,9 @@ def test_app_wiring_grounding_off_reserve_before_request_health_fields():
     assert call.index("gemini_budget.reserve()") < call.index("requests.post(")
     assert "use_search and gemini_budget.GROUNDING" in call
     assert "gemini_budget.record(" in call
-    explain = src[src.index("_GEMINI_EXPLAIN_ATTEMPTS = ["):src.index("_GEMINI_EXPLAIN_ATTEMPTS = [") + 200]
-    assert "True" not in explain, "denemelerde grounding açık kalmamalı"
-    assert explain.index("flash-lite") < explain.index('"gemini-2.5-flash"')
+    # D-22c adım 3 (13.10): _GEMINI_EXPLAIN_ATTEMPTS (haber/sinyal-açıklama
+    # model fallback listesi) o uçlarla birlikte silindi — kalan tek çağrı
+    # yolu D-57 (gundem_haber.MODEL, False), üstteki use_search/grounding
+    # kontrolüyle zaten kapsanıyor.
     for k in ("gemini_calls_today", "gemini_usd_month"):
         assert f'resp["{k}"]' in src

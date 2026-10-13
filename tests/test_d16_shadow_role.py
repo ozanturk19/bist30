@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 _CODE = r"""
 import os, app
 fns = [app._is_notify_leader_blocking, app._is_bg_leader_blocking, app._is_digest_leader_blocking,
-       app._is_gemini_leader_blocking, app._is_macro_leader_blocking]
+       app._is_macro_leader_blocking]
 print('LEADERS', [f() for f in fns])
 fds = [os.readlink('/proc/self/fd/' + x) for x in os.listdir('/proc/self/fd') if os.path.exists('/proc/self/fd/' + x)]
 print('FDS', [p for p in fds if '/bp_' in p and p.endswith('.lock') or p.endswith('news_inflight.json')])
@@ -27,7 +27,7 @@ def test_shadow_kilit_tutmaz():
                        capture_output=True, text=True, timeout=180)
     assert r.returncode == 0, r.stderr[-800:]
     out = dict(ln.split(" ", 1) for ln in r.stdout.splitlines() if ln.startswith(("LEADERS", "FDS")))
-    assert out["LEADERS"] == "[False, False, False, False, False]"
+    assert out["LEADERS"] == "[False, False, False, False]"
     assert out["FDS"] == "[]"
 
 

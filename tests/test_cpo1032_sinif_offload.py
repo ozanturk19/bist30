@@ -29,9 +29,8 @@ LEADER_FUNCS = [
     ("_is_bg_leader", "_is_bg_leader_blocking", "False"),
     ("_is_digest_leader", "_is_digest_leader_blocking", "False"),
     ("_is_macro_leader", "_is_macro_leader_blocking", "False"),
-    # CPO-1228 (03.08 03:10 TR): 4.'sü — desenin eksik kalan 3. leader fonksiyonuydu
-    # (DEV-1568 bulgusu, py-spy + cw leak korelasyonuyla doğrulandı, APPROVE edildi).
-    ("_is_gemini_leader", "_is_gemini_leader_blocking", "False"),
+    # D-22c adım 3 (13.10): _is_gemini_leader* kaldırıldı (haber/sinyal-açıklama
+    # uçları silindi, kilit artık gereksiz) — bu listeden de çıkarıldı.
 ]
 
 ALL_FUNCS = LEADER_FUNCS + [("_get_kap_uuid", "_get_kap_uuid_blocking", "None")]
@@ -133,7 +132,6 @@ def _load_fn_isolated(func_name, extra_ns=None):
     ("_is_bg_leader_blocking", "_bg_lock_fh", "_BG_LOCK_PATH"),
     ("_is_digest_leader_blocking", "_digest_lock_fh", "_DIGEST_LOCK_PATH"),
     ("_is_macro_leader_blocking", "_macro_leader_fh", "_MACRO_LOCK_PATH"),
-    ("_is_gemini_leader_blocking", "_gemini_lock_fh", "_GEMINI_LOCK_PATH"),
 ])
 def test_leader_blocking_helper_preserves_original_flock_behavior(tmp_path, blocking_fn, fh_var, path_var):
     """Fix öncesi/sonrası davranış birebir aynı olmalı: ilk çağıran True (leader)

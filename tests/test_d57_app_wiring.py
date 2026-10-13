@@ -35,7 +35,7 @@ def test_gemini_call_json_mode_and_timeout_cap_are_opt_in():
 
 
 def test_d57_block_uses_capped_path_without_grounding():
-    blk = _block("# ── D-57 Gündem haber derlemesi", '@app.route("/api/hisse/<ticker>/signal-explanation")')
+    blk = _block("# ── D-57 Gündem haber derlemesi", "_mtf_cache     = {}")
     assert "_gemini_call(prompt, [(gundem_haber.MODEL, False)]" in blk    # use_search=False
     assert "requests." not in blk and "generativelanguage" not in blk     # tek çağrı yolu _gemini_call
     assert "budget_status=gemini_budget.status()" in blk

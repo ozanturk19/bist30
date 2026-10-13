@@ -37,20 +37,10 @@ def test_retry_after_helper_exists_and_clamped_nonnegative():
     assert "max(0" in body, "retry_after_s negatif olabilir (CB kapalıyken) — max(0, ...) ile clamp edilmeli"
 
 
-def test_news_endpoint_degraded_branches_include_retry_after_s():
-    src = _read_app()
-    body = _extract_function_body(src, "api_stock_news")
-    assert body, "api_stock_news() bulunamadı"
-    unavailable_blocks = [m.start() for m in re.finditer(r'"unavailable":\s*True', body)]
-    assert len(unavailable_blocks) == 2, (
-        f"beklenen 2 degrade dönüş bloğu bulunamadı (bulundu: {len(unavailable_blocks)}) — "
-        "negatif-cache ve kota-devresi-açık dalları"
-    )
-    for idx in unavailable_blocks:
-        window = body[idx: idx + 400]
-        assert "retry_after_s" in window, (
-            "degrade dönüşünde retry_after_s yok — kullanıcı ne kadar bekleyeceğini bilmiyor (D-NEWS-1)"
-        )
+# D-22c adım 3 (13.10): api_stock_news() canlıda sıfır tüketiciyle silindi
+# (/api/hisse/<T>/news) — degrade dönüş bloklarını doğrulayan test konusuz
+# kaldı, kaldırıldı. retry_after_s'in kendisi (_gemini_cb_retry_after_s) ve
+# /api/health'teki genel kullanımı diğer testlerde doğrulanmaya devam ediyor.
 
 
 def test_daily_stats_incremented_on_cb_open():
