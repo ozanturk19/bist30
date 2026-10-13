@@ -33,7 +33,7 @@ def test_app_only_reads_notes_never_generates():
 
 def test_stock_page_passes_ssr_context():
     page = _block("def stock_page(ticker):", "_fundamentals_cache = {}")
-    assert "ai_not=_ai_not_ctx(ticker))" in page
+    assert "ai_not=_ai_not_ctx(ticker)," in page
     assert "from pipeline import ai_not_job" in APP_SRC
 
 
