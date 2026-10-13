@@ -22,7 +22,7 @@ def _block(start, end):
 # ----------------------------------------------------------------------------- kaynak denetimi (yerel)
 
 def test_app_only_reads_notes_never_generates():
-    blk = _block("# ── D-44b ilk adım: AI Analist Notu", '@app.route("/api/hisse/<ticker>/signal-explanation")')
+    blk = _block("# ── D-44b ilk adım: AI Analist Notu", "_mtf_cache     = {}")
     assert "ai_not_job.public_note(ticker)" in blk
     assert '@app.route("/api/hisse/<ticker>/ai-not")' in blk
     assert 'safe_json({"ai_not": _ai_not_ctx(ticker)})' in blk
