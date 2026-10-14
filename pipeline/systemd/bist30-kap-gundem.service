@@ -1,0 +1,22 @@
+[Unit]
+Description=BorsaPusula KAP bildirim + Gündem AI 7/24 Worker (D-17 kesme hazırlığı, CPO-1830)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/bist30
+EnvironmentFile=/root/bist30/.env
+EnvironmentFile=/etc/bist30/secrets.env
+Environment=REFRESH_WORKER=web
+Environment=BP_ROLE=macro
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/root/bist30/venv/bin/python3 /root/bist30/kap_gundem_worker.py
+Restart=always
+RestartSec=30
+LimitNOFILE=65535
+StandardOutput=append:/var/log/bist30-kap-gundem.log
+StandardError=append:/var/log/bist30-kap-gundem.log
+
+[Install]
+WantedBy=multi-user.target
