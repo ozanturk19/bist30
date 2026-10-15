@@ -119,9 +119,9 @@
   }
 
   var TOPICS = [
-    { h:'/tarama?signal=AL&sort=signal_strength', i:'⚡', t:'Güçlü Trend Hisseler' },
+    { h:'/tarama?durum=guclu-trend', i:'⚡', t:'Güçlü Trend Hisseler' },   // C-86: Tarama'nın kanonik adres biçimi
     { h:'/tarama',            i:'🔍', t:'Teknik Analiz Tarama' },
-    { h:'/tarama?tab=temel',  i:'🧮', t:'Temel Analiz Tarama' },
+    { h:'/tarama?gorunum=temel', i:'🧮', t:'Temel Analiz Tarama' },
     { h:'/takvim',            i:'📅', t:'Takvim' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },
     { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' }

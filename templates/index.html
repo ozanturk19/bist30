@@ -251,7 +251,11 @@
 {%- endif %}
 
 {#- C-30: Son seansta değişenler — SSR (D-53 `ssr_gundem`, /api/gundem ile aynı kaynak; BEKLE'ye dönüş listelenmez).
-    long-only: Trend Bozuldu'ya geçenler sessiz koyu çip, kırmızı yok. -#}
+    long-only: Trend Bozuldu'ya geçenler sessiz koyu çip, kırmızı yok.
+    C-86 (D-67 ön yüz): "+N" çipi /bulten (302) yerine doğrudan 200 dönen Tarama görünümüne gider:
+    Güçlü Trend'e geçenler → Güçlü Trend, durum yaşı artan (son seansta geçenler başta);
+    Trend Bozuldu'ya geçenler → "Son seansta Trend Bozuldu" hazır listesi. Bülten bu saatte henüz
+    donmamış olabileceği için tarihli /bulten/<gün> kullanılmadı. -#}
 {%- set _gd = ssr_gundem or {} -%}
 {%- set _ns = _gd.new_signals or [] %}
 <section class="da-section hp-blk" id="degisenler" aria-labelledby="hpChT">
@@ -264,7 +268,7 @@
   {%- for sig, lbl, cls in [('AL', "Güçlü Trend'e geçen", 'strong'), ('SAT', "Trend Bozuldu'ya geçen", 'broken')] %}
   {%- set _l = _ns|selectattr('signal', 'equalto', sig)|list %}
   {%- if _l %}
-  <div class="hp-chg-g"><p class="hp-chg-l">{{ lbl }} <b class="da-num">{{ _l|length }}</b></p><ul class="hp-chips">{% for x in _l[:8] %}<li><a class="hp-chip hp-chip--{{ cls }}" href="/hisse/{{ x.ticker|urlencode }}">{{ x.ticker }}</a></li>{% endfor %}{% if _l|length > 8 %}<li><a class="hp-chip hp-chip--more" href="/bulten">+{{ _l|length - 8 }}</a></li>{% endif %}</ul></div>
+  <div class="hp-chg-g"><p class="hp-chg-l">{{ lbl }} <b class="da-num">{{ _l|length }}</b></p><ul class="hp-chips">{% for x in _l[:8] %}<li><a class="hp-chip hp-chip--{{ cls }}" href="/hisse/{{ x.ticker|urlencode }}">{{ x.ticker }}</a></li>{% endfor %}{% if _l|length > 8 %}<li><a class="hp-chip hp-chip--more" href="{{ '/tarama?durum=guclu-trend&sirala=durum-yasi-artan' if sig == 'AL' else '/tarama?liste=trend-bozuldu-son-seans' }}">+{{ _l|length - 8 }}</a></li>{% endif %}</ul></div>
   {%- endif %}
   {%- endfor %}
   {%- else %}

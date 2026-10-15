@@ -153,12 +153,12 @@
   {% endif %}
 
   {#- C-43 (26.09): sonda TEK modül. Eski CTA kutusu ("Sinyal Paneline Git" +
-      "Tarama Yap"), ilgili hisse kartları ve büyük abonelik kutusu birleşti. -#}
+      "Tarama Yap"), ilgili hisse kartları ve büyük abonelik kutusu birleşti.
+      C-86 (D-67 ön yüz): bağlantı kanonik /hisse/<T>; ?tab=grafik/?tab=temel kopyaları kalktı. -#}
   {% set rt = article.related_tickers or [] %}{% set live_t = 'THYAO' if ('THYAO' in rt or not rt) else rt[0] %}
-  {% set live_tab = '?tab=grafik' if article.cat == 'Teknik Analiz' else ('?tab=temel' if article.cat == 'Temel Analiz' else '') %}
   <section class="art-live" aria-labelledby="artLiveTitle">
     <h2 class="art-live-title" id="artLiveTitle">Bu göstergeyi canlı gör</h2>
-    <a class="art-live-row" href="/hisse/{{ live_t }}{{ live_tab }}" data-ticker="{{ live_t }}">
+    <a class="art-live-row" href="/hisse/{{ live_t }}" data-ticker="{{ live_t }}">
       <span class="art-live-t">{{ live_t }}</span>
       <span class="art-live-v" id="artLiveVal"></span>
       <span class="art-live-go" aria-hidden="true">→</span>

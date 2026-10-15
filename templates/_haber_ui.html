@@ -43,9 +43,10 @@
   'Türkiye': ('turkiye', 'Türkiye', 'pin')} -%}
 {%- set V1_CAT = {'bist': 'piyasa', 'sektor': 'piyasa', 'durum': 'piyasa', 'bildirim': 'sirket', 'kur': 'doviz', 'emtia': 'doviz', 'abd': 'dunya', 'mb': 'takvim'} -%}
 
+{#- C-86 (D-67 ön yüz): Bülten sekmesi /bulten (302, son güne) yerine doğrudan 200 dönen arşive gider. -#}
 {%- macro tabs(active) -%}
 <nav class="hv-tabs" aria-label="Haberler bölümleri">
-  {%- for k, u, l, s, i in [('gundem', '/haberler', 'Gündem', 'Gündem', 'news'), ('bildirimler', '/haberler/bildirimler', 'Şirket bildirimleri', 'Bildirimler', 'megaphone'), ('takvim', '/takvim', 'Takvim', 'Takvim', 'cal'), ('bulten', '/bulten', 'Akşam Bülteni', 'Bülten', 'grid')] %}
+  {%- for k, u, l, s, i in [('gundem', '/haberler', 'Gündem', 'Gündem', 'news'), ('bildirimler', '/haberler/bildirimler', 'Şirket bildirimleri', 'Bildirimler', 'megaphone'), ('takvim', '/takvim', 'Takvim', 'Takvim', 'cal'), ('bulten', '/bulten/arsiv', 'Akşam Bülteni', 'Bülten', 'grid')] %}
   <a href="{{ u }}"{% if active == k %} aria-current="page"{% endif %}>{{ ico(i) }}<span class="l">{{ l }}</span><span class="s" aria-hidden="true">{{ s }}</span></a>
   {%- endfor %}
 </nav>

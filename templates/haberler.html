@@ -127,17 +127,20 @@
 
   {#- ── 1 · Piyasa özeti ─────────────────────────────────────────────────────────────── -#}
   {%- if _lead %}{% set x = _lead %}
+  {#- C-86 (D-67 ön yüz): /harita 302 yerine günün donmuş haritası (x.day = _heatmap_latest() dosyasının
+      günü, /harita/<gün> 200); gün yoksa canlı tam ekran harita. -#}
+  {%- set _hmu = ('/harita/' ~ x.day[:10]) if x.day else '/sektor-harita' %}
   <section class="hv-z hv-z--piyasa" id="piyasa" aria-labelledby="hvQ">
     <div class="hv-zh">
       <div class="hv-zh-t">
         <p class="hv-eyb">Piyasa özeti · {{ x.day_label }} kapanışı</p>
         <h2 id="hvQ">{{ _q }}</h2>
       </div>
-      <nav class="hv-zl" aria-label="Piyasa bağlantıları"><a href="/harita">Isı haritası{{ ico('arrow') }}</a>{% if bulten and bulten.tarih %}<a href="/bulten/{{ bulten.tarih }}">Akşam Bülteni{{ ico('arrow') }}</a>{% endif %}</nav>
+      <nav class="hv-zl" aria-label="Piyasa bağlantıları"><a href="{{ _hmu }}">Isı haritası{{ ico('arrow') }}</a>{% if bulten and bulten.tarih %}<a href="/bulten/{{ bulten.tarih }}">Akşam Bülteni{{ ico('arrow') }}</a>{% endif %}</nav>
     </div>
     <div class="hv-box hv-sum">
       <article class="hv-story" id="hv-lead">
-        <h3><a href="/harita">{{ x.title }}</a></h3>
+        <h3><a href="{{ _hmu }}">{{ x.title }}</a></h3>
         <p>{{ nb(x.text) }}</p>
         <dl class="hv-kv">
           <div class="hv-kv-r">
@@ -162,7 +165,7 @@
       {%- if heatmap and heatmap_tiles %}
       {%- set _hr = {} -%}{%- for r in heatmap.rows or [] -%}{%- set _ = _hr.update({r.t: r}) -%}{%- endfor %}
       <figure class="hv-map">
-        <a class="hv-tm" href="/harita" aria-label="BIST100 ısı haritası, {{ x.day_label }}: {{ x.up }} hisse yükseldi, {{ x.down }} hisse düştü">
+        <a class="hv-tm" href="{{ _hmu }}" aria-label="BIST100 ısı haritası, {{ x.day_label }}: {{ x.up }} hisse yükseldi, {{ x.down }} hisse düştü">
           {%- for tl in heatmap_tiles if tl.w and tl.h %}
           {%- set r = _hr.get(tl.t) or {} -%}{%- set v = r.ch.d1 if r.ch else none -%}
           {%- set cls = dir_class(v, 2, 'up,dn,neu') if v is not none else 'na' -%}
