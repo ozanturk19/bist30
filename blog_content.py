@@ -341,7 +341,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Trend Bozuldu sinyali yukarıdakilerin tersidir: Supertrend düşüş modu + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99 + haftalık EMA20 yönü aşağı. BorsaPusula long-only bir üründür — bu sinyal açığa satış için tasarlanmamıştır; mevcut bir yükseliş pozisyonunun trend gücünü kaybettiğini, pozisyon kapatmayı değerlendirmek için bir uyarı olarak yorumlanmalıdır.</p>
 
 <h2>Sinyal Kaç Gündür Devam Ediyor?</h2>
-<p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir. Giriş fiyatı, sinyalin oluştuğu günün kapanış fiyatı olarak gösterilir.</p>
+<p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir.</p>
 
 <h2>Yatay Sinyali</h2>
 <p>Beş koşulun tamamı aynı yönü göstermiyorsa sinyal Yatay'dır. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, Yatay'dan Güçlü Trend'e geçişi sabırla bekleyerek yakalanır.</p>
@@ -687,12 +687,12 @@ Histogram = MACD − Sinyal</pre>
 <p>Her Fibonacci sayısını bir öncekine bölünce elde edilen değer (örn. 21÷13 ≈ 1,618) altın orana yaklaşır. Bu oran, borsalarda en kritik geri çekilme seviyeleri için kullanılır. Birçok büyük yükseliş trendi %61,8 geri çekilmesinden sonra devam etmiştir.</p>
 
 <h2>BorsaPusula ile Kullanımı</h2>
-<p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38,2 veya %61,8 Fibonacci desteğindeyse sinyal daha güçlü bir "giriş noktası" işaret eder. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
+<p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38,2 veya %61,8 Fibonacci desteğindeyse bu seviye iki ayrı yöntemle destek olarak öne çıkar. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
 """,
     "faqs": [
       {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (0%) sonuna (100%) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23,6, %38,2, %50, %61,8 ve %78,6 seviyelerini hesaplar."},
       {"q": "Neden %61,8 altın oran olarak adlandırılır?", "a": "Her Fibonacci sayısının kendinden öncekine oranı yaklaşık 1,618'e yaklaşır (altın oran). Bu oran doğada ve mimaride de karşımıza çıkar. Analistler fiyatların bu seviyede tepki verdiğini gözlemlemişlerdir."},
-      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38,2 veya %61,8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu giriş noktasının güvenilirliğini artırır."}
+      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38,2 veya %61,8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu, seviyenin destek olarak önemini artırır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
@@ -1130,7 +1130,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "faqs": [
       {"q": "Çok sayıda Güçlü Trend sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyutu birleştirerek en yüksek puanlı hisseyi seçin."},
       {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. Aynı sinyal gücünde iki hisse arasında seçimde ADX değeri yüksek olan daha güvenilir trend gösterir ve tercih edilmelidir."},
-      {"q": "Giriş kalitesi İdeal/İyi/Dikkatli/Uzak neye göre belirlenir?", "a": "BorsaPusula giriş kalitesi güncel fiyatın Supertrend'e olan mesafesine göre belirlenir. İdeal fiyat Supertrend'e çok yakın (az risk), İyi makul mesafede, Dikkatli nispeten uzak, Uzak çok uzak ve yüksek risk anlamına gelir."}
+      {"q": "Trend dönüş seviyesi nedir?", "a": "Trend dönüş seviyesi Supertrend çizgisidir. Fiyat bu çizginin üzerinde kaldıkça trend korunur; altında kapanış trendin bozulduğunu gösterir. Fiyatın bu çizgiye uzaklığı, kısa vadeli oynaklık hakkında fikir verir."}
     ],
     "related_tickers": ['ASELS', 'THYAO', 'AKBNK']
   },
@@ -1332,25 +1332,22 @@ Genel swing trading pratiğinde sık kullanılan bir yaklaşım EMA 20/50/100 hi
 
 (Not: BorsaPusula'nın kendi sinyal motoru farklı periyotlar — EMA12/EMA99 — kullanır, aşağıdaki bölüme bakın.)
 
-## Pratik Swing Trading Stratejisi: Pullback Al
+## Swing Trading'de Geri Çekilme (Pullback) Yaklaşımı
 
 **Adım 1:** Ana trend yukarı olduğunu doğrula (EMA hizalama + Supertrend yeşil)
 
 **Adım 2:** Fiyatın bir geri çekilme (pullback) yaşadığını bekle — genellikle EMA 20 veya 50 seviyesine
 
-**Adım 3:** RSI 35-45 bölgesine gelince alım yap
+**Adım 3:** RSI'ın 35-45 bölgesine inip inmediğine bakılır
 
-**Adım 4:** Stop-loss: Giriş fiyatının %3-5 altına koy
-
-**Adım 5:** Hedef: Önceki zirve veya R/R = 1:2 seviyesi
+**Adım 4:** Trend dönüş seviyesi not edilir (Supertrend çizgisi veya son dip); bu seviyenin altındaki kapanış trendin bozulduğunu gösterir
 
 ## Swing Trading Risk Yönetimi
 
 Swing traderde sermayeyi korumak kritiktir:
 
 - **Her işlemde maksimum %1-2 risk** (stop-loss ile hesaplanır)
-- **Pozisyon büyüklüğü** = (Sermaye × Risk%) ÷ (Giriş - Stop)
-- **En az 1:2 risk/ödül oranı** — 1 birim riskle 2 birim kazanç hedefle
+- **Pozisyon büyüklüğü** = (Sermaye × Risk%) ÷ (Alış fiyatı − trend dönüş seviyesi)
 - **Aynı anda çok fazla pozisyon açma** — maksimum 3-5 pozisyon
 
 ## BIST'te Swing Trading: Dikkat Edilecekler
@@ -1378,9 +1375,9 @@ BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmı
 - **Güçlü Trend sinyali** = Supertrend, ADX, DI yönü ve EMA birlikte yükselişi gösterdiğinde → Swing giriş fırsatı
 - **ADX değeri** → Trendin ne kadar güçlü olduğunu gösterir
 - **Sinyal yaşı** → Kaç gün önce girdi, henüz erken mi geç mi?
-- **Giriş/SL seviyeleri** → Stop-loss otomatik hesaplanmış
+- **Trend dönüş seviyesi** → Supertrend çizgisi, tarihiyle
 
-[Şu anki swing fırsatlarını gör →](/)""",
+[Hisselerin trend durumunu gör →](/tarama)""",
     "faqs": [
       {"q": "Swing trading günlük tradingden ne farkı var?", "a": "Day trading aynı gün içinde pozisyon kapatır, gecelik risk almaz. Swing trading ise 3-20 gün arasında pozisyon tutar, gecelik fiyat hareketlerinden de yararlanır. Daha az ekran başında olunmasını gerektirdiği için çalışan bireysel yatırımcılara daha uygundur."},
       {"q": "BIST'te swing trading için minimum sermaye ne olmalı?", "a": "Minimum 10.000 TL önerilir. Bunun altında tek bir hissede anlamlı pozisyon almak ve risk yönetimi yapmak zorlaşır. Swing trading için her işlemde sermayenin maksimum %1-2'si riske atılmalıdır."},
@@ -1427,14 +1424,14 @@ Her mum çubuğu için "True Range" şu üç değerin en büyüğüdür:
 ATR tabanlı stop-loss, sabit yüzde stop'tan çok daha akıllıcadır:
 
 ```
-Stop-Loss = Giriş Fiyatı - (ATR × Çarpan)
+Stop-Loss = Alış Fiyatı - (ATR × Çarpan)
 
 Swing Trade için: ATR × 1,5
 Günlük Trade için: ATR × 1,0
 Pozisyon Trade için: ATR × 2,0-3,0
 ```
 
-**Örnek:** AKBNK ATR = 2,5 TL, giriş 85 TL
+**Örnek:** AKBNK ATR = 2,5 TL, alış 85 TL
 
 - Stop = 85 - (2,5 × 1,5) = 85 - 3,75 = **81,25 TL**
 
@@ -1487,16 +1484,16 @@ BIST büyük hisseleri günlük %2-3 ATR ile hareket ediyorsa, bu normal ve bekl
 BorsaPusula sinyalleri ATR'yi arka planda kullanır:
 
 - **Sinyal kalitesi** — Supertrend, ATR ile dinamik destek/direnç çizer
-- **Stop-loss seviyeleri** — Görüntülenen SL seviyeleri ATR bazlıdır
-- **Risk değerlendirmesi** — Giriş kalitesi kısmen volatiliteye göre belirlenir
+- **Trend dönüş seviyesi** — Supertrend çizgisi ATR bazlıdır
+- **Oynaklık** — ATR yüksekken trend dönüş seviyesi fiyattan daha uzakta durur
 
-Yüksek ATR dönemlerinde sinyaller daha geniş stop ile gelir, bu normaldir ve piyasanın oynaklığını yansıtır.
+Yüksek ATR dönemlerinde Supertrend çizgisinin fiyattan uzak durması normaldir ve piyasanın oynaklığını yansıtır.
 
-[BIST hisselerinin sinyal ve SL seviyelerini gör →](/)""",
+[BIST hisselerinin trend durumunu gör →](/tarama)""",
     "faqs": [
       {"q": "ATR indikatörü için ideal periyot nedir?", "a": "Standart ATR periyodu 14'tür. Kısa vadeli trading için 7-10, uzun vadeli pozisyonlar için 20-21 kullanılabilir. BorsaPusula'nın Supertrend sinyallerinde ATR(10) kullanılmaktadır."},
       {"q": "ATR değeri ne kadar olmalı ki işlem yapılabilir?", "a": "Belirli bir 'ideal ATR' yoktur. Önemli olan ATR'nin trend sırasında yükselmesi, daralma dönemlerinde düşmesidir. Yükselen ATR ile birlikte gelen fiyat kırılması güçlü bir sinyal olarak yorumlanır."},
-      {"q": "Supertrend ile ATR arasındaki ilişki nedir?", "a": "Supertrend indikatörü tamamen ATR üzerine inşa edilmiştir. Supertrend = Orta Fiyat ± (ATR × Çarpan) formülünü kullanır. ATR yükseldikçe Supertrend bantları genişler ve stop seviyesi uzaklaşır; bu volatiliteye adaptasyondur."},
+      {"q": "Supertrend ile ATR arasındaki ilişki nedir?", "a": "Supertrend indikatörü tamamen ATR üzerine inşa edilmiştir. Supertrend = Orta Fiyat ± (ATR × Çarpan) formülünü kullanır. ATR yükseldikçe Supertrend bantları genişler ve trend dönüş seviyesi fiyattan uzaklaşır; bu volatiliteye adaptasyondur."},
       {"q": "ATR stop-loss neden sabit yüzde stop'tan iyidir?", "a": "Sabit yüzde stop (%5 gibi) piyasanın volatilitesini görmezden gelir. Çok oynak hissede %5 çok dar, durağan hissede çok geniş olabilir. ATR tabanlı stop ise hissenin kendi volatilitesine göre dinamik olarak ayarlanır, gereksiz stop-out'ları azaltır."},
       {"q": "ATR sadece hisse senedi için mi kullanılır?", "a": "Hayır. ATR her finansal varlıkta kullanılabilir: forex (USD/TRY gibi), kripto para (BTC), emtia (altın, petrol), endeksler (BIST30, S&P500). Hesaplama prensibi aynıdır."}
     ],
@@ -1576,7 +1573,7 @@ BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullan
       {"q": "MACD sıfır çizgisinin önemi nedir?", "a": "MACD hattı sıfırın üzerindeyse EMA12 > EMA26 demektir, yani kısa vadeli ortalama uzun vadeliyi geçmiştir ve yükseliş momentumu var. Sıfırın altındaysa tersi geçerlidir."},
       {"q": "MACD uyumsuzluğu neden önemlidir?", "a": "Uyumsuzluk, fiyat ile momentum arasındaki çelişkiyi gösterir. Fiyat yeni zirve yaparken MACD yapmıyorsa, yükseliş momentumu zayıflıyor demektir ve yakında düzeltme gelebilir. Bu sinyaller çok güvenilir olmakla birlikte kesin değildir."},
       {"q": "MACD ile ne sıklıkla işlem yapılabilir?", "a": "Günlük grafikte MACD ayda 2-5 sinyal üretebilir. Çok kısa vadeli grafikte (15dk) sinyaller çok fazla ve gürültülü olur. Haftalık grafikte sinyaller seyrek ama güvenilir olur."},
-      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve stop seviyesini belirler; MACD giriş zamanlaması için kullanılır. Supertrend Güçlü Trend veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
+      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve trend dönüş seviyesini gösterir; MACD momentumdaki değişimi erken gösterir. Supertrend Güçlü Trend veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SISE', 'KRDMD']
   },
@@ -1641,20 +1638,16 @@ Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
 ### Adım 1: Grafik Çerçevesini Belirle
 - **Uzun vadeli destek/direnç:** Haftalık veya aylık grafik
 - **Kısa vadeli destek/direnç:** Günlük grafik
-- **Giriş noktası:** 4 saatlik veya günlük grafik
+- **Yakın seviyeler:** 4 saatlik veya günlük grafik
 
 ### Adım 2: Seviyeleri İşaretle
 1. Açık zirveler ve dipleri işaretle
 2. Bu seviyelerde birden fazla temas var mı kontrol et
 3. Hacmin nasıl davrandığına bak
 
-### Adım 3: Stop-Loss Yerleştir
-- Uzun (Long) pozisyon için: Destek seviyesinin biraz altına stop koy (ATR × 0,5 mesafe)
-- Kısa (Short) pozisyon için: Direnç seviyesinin biraz üstüne stop koy
-
-### Adım 4: Hedef Fiyat Belirle
-- Bir sonraki anlamlı destek/direnç seviyesini hedef al
-- Risk/ödül oranının en az 1:2 olmasını hedefle
+### Adım 3: Kırılımı Nasıl Okursun?
+- Yükselen trendde en yakın desteğin altında kapanış, trendin zayıfladığını gösterir
+- Düşen trendde en yakın direncin üstünde kapanış, düşüşün zayıfladığını gösterir
 
 ## Supertrend ile Birleştirme
 
@@ -1683,7 +1676,7 @@ Fibonacci geri çekilme seviyelerinde en çok izlenen oranlar **%38,2**, **%50**
 
 ## Kırılım Sonrası Retest (Geri Test)
 
-Bir destek veya direnç kırıldıktan sonra fiyat çoğu zaman kırılan seviyeye geri döner ve buradan tepki verir; buna **retest (geri test)** denir. Retest'in başarılı olması — kırılan direncin artık destek, kırılan desteğin artık direnç olarak tutması — kırılımı teyit eder ve daha güvenli bir giriş noktası sunar.
+Bir destek veya direnç kırıldıktan sonra fiyat çoğu zaman kırılan seviyeye geri döner ve buradan tepki verir; buna **retest (geri test)** denir. Retest'in başarılı olması — kırılan direncin artık destek, kırılan desteğin artık direnç olarak tutması — kırılımı teyit eder ve seviyenin rolünün değiştiğini gösterir.
 
 Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zamanda kırılma riskini de artırır — 3-4. dokunuşta gerçekleşen kırılımlar genellikle daha sert ve hızlı olur.
 
@@ -1761,7 +1754,7 @@ BorsaPusula, her hisse için 20 günlük ortalama hacmi referans alır. Günlük
 ### Supertrend + Hacim Teyidi
 BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
 
-- Güçlü Trend sinyali + yüksek hacim = **hacim onaylı güçlü sinyal**, giriş kalitesi yüksek
+- Güçlü Trend sinyali + yüksek hacim = **hacim onaylı güçlü sinyal**
 - Güçlü Trend sinyali + düşük hacim = **hacim onaysız zayıf sinyal**, kırılım sahte olabilir
 
 Hisse sayfasında "Hacim Profili" bölümü bu bilgiyi (⭐ Hacim Onaylı / ✓ TEYİTLİ rozetleriyle) otomatik gösterir.
@@ -1839,7 +1832,7 @@ ADX, trendin *yönünü değil, gücünü* ölçer:
 
 ### 2. Supertrend İndikatörü
 
-Supertrend hem yönü hem de dinamik stop seviyesini gösterir:
+Supertrend hem yönü hem de dinamik trend dönüş seviyesini gösterir:
 
 - **Yeşil çizgi** (fiyatın altında) = yükseliş momentumu aktif
 - **Kırmızı çizgi** (fiyatın üstünde) = düşüş momentumu aktif
@@ -1894,14 +1887,12 @@ Momentum stratejisi güçlü olmakla birlikte riskler içerir:
 
 **Makro riskler:** TCMB kararı, jeopolitik gelişmeler ve FED açıklamaları tek bir seansta tüm momentumu bozabilir.
 
-## Örnek: BIST'te Momentum Tradeı
+## Örnek: BIST'te Momentum Takibi
 
 Klasik BIST momentum yaklaşımı:
-1. BorsaPusula sinyaller sayfasında "⚡ Bugün" filtresi → yeni sinyaller
-2. ADX ≥ 25 + hacim teyidi olanları seç
-3. Supertrend çizgisi giriş fiyatı olarak kullan
-4. SL = Supertrend çizgisi altına 1-2 ATR mesafe
-5. TP = giriş fiyatının 2-3x SL mesafesi (R/R ≥ 1:2)
+1. Tarama sayfasında son kapanışta Güçlü Trend'e geçen hisseler listelenir
+2. ADX ≥ 25 ve hacim teyidi olanlar ayrılır
+3. Supertrend çizgisi trend dönüş seviyesi olarak izlenir: fiyat bu çizginin altında kapanırsa trend bozulmuş sayılır
 
 Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir.""",
     "faqs": [
@@ -2497,11 +2488,11 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </tbody>
 </table>
 
-<h2>Giriş ve Çıkış Kuralları</h2>
+<h2>Trend Durumu Nasıl Değişir?</h2>
 <ul>
-<li><strong>Giriş:</strong> Beş koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
-<li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
-<li><strong>Çıkış:</strong> Supertrend Trend Bozuldu sinyaline geçtiğinde veya ADX 20'nin altına indiğinde.</li>
+<li><strong>Güçlü Trend:</strong> Beş koşul aynı anda sağlandığında, ilk kapanıştan itibaren trend Güçlü Trend sayılır.</li>
+<li><strong>Trend dönüş seviyesi:</strong> Supertrend çizgisi — fiyatın bunun altında kapanması trendin bozulduğunu gösterir.</li>
+<li><strong>Trend Bozuldu:</strong> Supertrend Trend Bozuldu durumuna geçtiğinde veya ADX 20'nin altına indiğinde.</li>
 </ul>
 
 <h2>Trend Takibin Zayıf Yönleri</h2>
@@ -2650,7 +2641,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
   <li><strong>İlk günden potansiyel kazanç:</strong> Talep fazla olan halka arzlarda ilk işlem gününde önemli fiyat artışı yaşanabilir</li>
   <li><strong>Erken aşamada giriş:</strong> Şirkete piyasa değerlendirmesinden önce girilir</li>
-  <li><strong>Düşük giriş fiyatı:</strong> Benzer şirketlere göre iskontolu fiyat sunulabilir</li>
+  <li><strong>Düşük halka arz fiyatı:</strong> Benzer şirketlere göre iskontolu fiyat sunulabilir</li>
 </ul>
 
 <h2>Halka Arzın Riskleri</h2>
@@ -3021,7 +3012,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
   <li>Portföyün %60'ı endeks ETF veya fon → istikrarlı baz</li>
   <li>Portföyün %30'u seçici hisse senetleri → alfa yaratma denemesi</li>
-  <li>Portföyün %10'u yüksek risk/ödül fırsatları (swing trade vb.)</li>
+  <li>Portföyün %10'u yüksek riskli seçimler</li>
 </ul>
 """,
     "faqs": [
@@ -3295,7 +3286,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>BorsaPusula ile BIST Sinyallerini Takip Et</h2>
-<p>Portföyünüzün borsa bölümü için BorsaPusula'nın algoritmik sinyal sistemi kullanılabilir. Güçlü Trend sinyali veren BIST hisseleri gün sonu verisiyle günlük olarak taranır, giriş kalitesi ve SL/TP seviyeleri gösterilir.</p>
+<p>Portföyünüzün borsa bölümü için BorsaPusula'da şirketlerin finansalları, değerlemesi ve trend durumu birlikte incelenebilir. BIST hisseleri gün sonu verisiyle her akşam güncellenir.</p>
 """,
     "faqs": [
       {"q": "Türkiye'de en güvenli yatırım aracı hangisi?",
@@ -3387,7 +3378,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>BorsaPusula'nın önerilen yaklaşımı:</p>
 <ol>
   <li>Yüksek temettü verimi olan BIST hisselerini temel analiz kısmından listele</li>
-  <li>Sinyal "Güçlü Trend" durumuna geçtiğinde giriş noktasını değerlendir</li>
+  <li>Trend durumunu da kontrol et (Güçlü Trend / Trend Bozuldu)</li>
   <li>Güçlü trend + yüksek temettü = dual kaynak: fiyat artışı + temettü geliri</li>
 </ol>
 
@@ -3706,7 +3697,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Teknik Analizin Güçlü Yönleri</h2>
 <ul>
   <li><strong>Zamanlama:</strong> "Ne zaman girilmeli?" sorusuna doğrudan cevap verir</li>
-  <li><strong>Disiplin:</strong> Somut giriş/çıkış seviyeleri (SL, TP) belirler</li>
+  <li><strong>Disiplin:</strong> Kurala bağlı ölçütler duygusal kararları azaltır</li>
   <li><strong>Hız:</strong> Piyasa değişimlerine hızlı tepki verir</li>
   <li><strong>Evrensellik:</strong> Her piyasada (hisse, forex, kripto) uygulanabilir</li>
   <li><strong>Otomatikleştirilebilir:</strong> Algoritmik sistemlere dönüştürülebilir</li>
@@ -4547,7 +4538,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Koşullu Emir (OCO — One Cancels the Other)</h2>
-<p>İki emrin aynı anda girildiği; birinin gerçekleşmesi halinde diğerinin otomatik iptal edildiği emir tipidir. Tipik kullanım: "Ya 140₺ hedefe ulaşırsa sat, ya da 120₺ stop seviyesine düşerse sat — ikisinden hangisi önce gerçekleşirse diğeri iptal olsun."</p>
+<p>İki emrin aynı anda girildiği; birinin gerçekleşmesi halinde diğerinin otomatik iptal edildiği emir tipidir. Tipik kullanım: "Fiyat 140₺'ye çıkarsa ya da 120₺'ye inerse emir gerçekleşsin — hangisi önce olursa diğeri iptal olsun."</p>
 
 <h2>Hangi Durumda Hangi Emri Kullanmalı?</h2>
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
@@ -4583,15 +4574,15 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>BorsaPusula Sinyallerinde Stop Loss</h2>
 <p>BorsaPusula her hisse için ATR tabanlı bir stop loss seviyesi hesaplar. Bu seviyeyi stop emir olarak girebilirsiniz. Örneğin AKBNK için stop loss 120₺ görünüyorsa, elinizde AKBNK hissesi varken 120₺'lik stop-loss emri girebilirsiniz. Fiyat bu seviyeye düşerse sistem otomatik olarak satış yapar ve büyük zararı önler.</p>
-<p>Hisse detay sayfasında SL (Stop Loss) ve TP (Hedef Fiyat) değerlerini görebilir, bunları doğrudan limit veya stop emir olarak aracı kurumunuza girebilirsiniz.</p>
+<p>BorsaPusula emir vermez ve fiyat seviyesi önermez; emir türü ve fiyatı yatırımcı kendi planına göre belirler.</p>
 """,
     "faqs": [
       {"q": "Limit emir ile piyasa emri arasındaki fark nedir?",
        "a": "Piyasa emri, o anda en iyi mevcut fiyattan anında işlem gerçekleştirmek için kullanılır. Limit emir ise belirlediğiniz fiyattan veya daha iyi bir fiyattan işlem yapılmasını sağlar; ancak piyasa o fiyata ulaşmazsa emir gerçekleşmez."},
       {"q": "Stop loss emrini nasıl girerim?",
        "a": "Aracı kurum uygulamanızda 'koşullu emir' veya 'stop emir' seçeneğini kullanın. Tetik fiyatı olarak stop loss seviyesini girin. Fiyat bu seviyeye geldiğinde emir devreye girer ve piyasa emrine dönüşerek pozisyonunuz kapatılır."},
-      {"q": "BorsaPusula'daki stop loss seviyesini nasıl kullanabilirim?",
-       "a": "Hisse detay sayfasında görünen SL (Stop Loss) değerini, aracı kurum uygulamanızda stop emir olarak girebilirsiniz. Bu seviye ATR tabanlı hesaplanmış olup sinyal geçerliyken koruma sağlar. SL seviyesi kırılırsa sinyal da güncellenir."},
+      {"q": "BorsaPusula fiyat seviyesi önerir mi?",
+       "a": "Hayır. BorsaPusula emir vermez ve stop ya da hedef seviyesi önermez; hisse sayfasında trend durumu ve Supertrend çizgisi (trend dönüş seviyesi) tarihiyle bilgi olarak gösterilir. Emir türü ve fiyatı yatırımcı belirler."},
       {"q": "Emir iptali nasıl yapılır?",
        "a": "Gün bitmeden gerçekleşmemiş emirler 'günlük emir' olarak ayarlanmışsa günün sonunda otomatik iptal olur. İptal etmek için aracı kurum uygulamanızdaki 'bekleyen emirler' bölümünden manuel iptal de yapabilirsiniz."}
     ],
@@ -4934,7 +4925,7 @@ Toplam ≈ 13.003,90₺
 </ul>
 
 <h2>BorsaPusula'yı Küçük Sermayeyle Kullanmak</h2>
-<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da Güçlü Trend sinyali + İdeal giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
+<p>Küçük sermayeyle başlarken şirketin kendisine odaklanmak işi kolaylaştırır. <a href="/tarama">Hisse Tarayıcı</a>'da şirketleri finansallarına, değerlemelerine ve trend durumlarına göre tek ekranda karşılaştırabilirsiniz.</p>
 """,
     "faqs": [
       {"q": "Borsaya başlamak için minimum ne kadar para gerekir?",
@@ -6277,7 +6268,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>EMA'ların birbirine göre konumu, trendin gücünü gösterir:</p>
 <ul>
   <li><strong>EMA 20 > EMA 50 > EMA 200 ve Fiyat > EMA 20:</strong> → Tam hizalı yükseliş trendi. En güçlü alım ortamı.</li>
-  <li><strong>EMA 20 > EMA 50 > EMA 200 ama Fiyat &lt; EMA 20:</strong> → Trend güçlü ama kısa vadeli geri çekilme. Potansiyel giriş noktası.</li>
+  <li><strong>EMA 20 > EMA 50 > EMA 200 ama Fiyat &lt; EMA 20:</strong> → Trend güçlü ama kısa vadeli geri çekilme var.</li>
   <li><strong>EMA'lar karışık:</strong> → Trend belirsiz, range piyasa. İşlem yapmak yerine beklemek mantıklı.</li>
   <li><strong>EMA 20 &lt; EMA 50 &lt; EMA 200:</strong> → Tam hizalı düşüş trendi. Alımdan kaçınılmalı.</li>
 </ul>
@@ -6289,11 +6280,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Ölüm Kesişimi, EMA 50 EMA 200'ü yukarıdan aşağı kırdığında oluşur. Uzun vadeli ayı piyasasının başlangıcına işaret eder. 2018 kripto ayısı, 2020 COVID düşüşü ve birçok BIST düzeltmesinde Death Cross öncesinde veya erken döneminde oluştu.</p>
 
 <h2>EMA'yı Destek ve Direnç Olarak Kullanmak</h2>
-<p>Yükselen trendlerde fiyat çoğunlukla EMA 20 veya EMA 50 seviyelerine çekilir ve bu seviyelerden sekmeye devam eder. Bu dinamik destek anlayışı, giriş noktası belirlemek için kullanılabilir:</p>
+<p>Yükselen trendlerde fiyat çoğunlukla EMA 20 veya EMA 50 seviyelerine çekilir ve bu seviyelerden sekmeye devam eder. Bu dinamik destek anlayışı, trendin sağlığını izlemek için kullanılabilir:</p>
 <ul>
-  <li>Fiyat EMA 20'ye geldi ve sekiyorsa + trend yukarı → potansiyel alım noktası</li>
+  <li>Fiyat EMA 20'ye geldi ve sekiyorsa + trend yukarı → trend korunuyor</li>
   <li>Fiyat EMA 50'yi kırdıysa → EMA 20/50 arasında konsolidasyon veya trend zayıflıyor</li>
-  <li>Fiyat EMA 200'ün altına düştüyse → stop-loss seviyesi veya tamamen çıkış</li>
+  <li>Fiyat EMA 200'ün altına düştüyse → uzun vadeli trend bozuluyor</li>
 </ul>
 
 <h2>BorsaPusula'da EMA Kullanımı</h2>
@@ -6315,7 +6306,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 85 ──
   {
     "slug": "fibonacci-geri-cekilme-seviyeleri",
-    "title": "Fibonacci Geri Çekilme Seviyeleri: Giriş Noktası Nasıl Belirlenir?",
+    "title": "Fibonacci Geri Çekilme Seviyeleri Nedir, Nasıl Okunur?",
     "desc": "Fibonacci oranları teknik analizde nasıl kullanılır? %23,6, %38,2, %50, %61,8 geri çekilme seviyeleri ve BIST hisselerinde pratik Fibonacci uygulaması.",
     "date": "2026-05-03",
     "mins": 7,
@@ -6358,7 +6349,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>BIST'te Fibonacci Kullanımı</h2>
 <p>Türkiye piyasasında özellikle BIST30 hisselerinde Fibonacci seviyeleri dikkat çekici biçimde çalışabilir. Yüksek işlem hacimli hisselerde kurumsal alıcılar da bu seviyelere dikkat ettiğinden destek/direnç kalitesi artar.</p>
 <p>Örnek yaklaşım: Güçlü bir Supertrend yükseliş sürecindeki AKBNK veya GARAN gibi hissede %38,2 veya %50 geri çekilme yaşandığında, bu seviyeden hacim azalması + RSI yükselişi + Supertrend yatay/yeşil kombinasyonu görülürse swing trade girişi değerlendirilebilir.</p>
-<p>Stop-loss: %61,8 seviyesinin altı genellikle makul stop bölgesidir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
+<p>%61,8 seviyesinin altı genellikle trend dönüş bölgesi olarak izlenir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
 """,
     "faqs": [
       {"q": "Fibonacci seviyeleri hangi grafikte çalışır?",
@@ -6619,7 +6610,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     <td style="padding:8px; border:1px solid var(--bp-bkl-bd);">Limit satış emri</td>
   </tr>
 </table>
-<p>BorsaPusula'nın Güçlü Trend ve Trend Bozuldu sinyalleri, emir türü kararını basitleştirir: Sinyal geldiğinde giriş fiyatı önerisini limit emrinde kullanabilir veya hızlı hareket için piyasa emrini tercih edebilirsiniz.</p>
+<p>BorsaPusula'nın Güçlü Trend ve Trend Bozuldu sinyalleri, emir türü seçmez ve fiyat önermez: trend durumu karar öncesi bilgi içindir; limit ya da piyasa emri seçimi yatırımcıya aittir.</p>
 """,
     "faqs": [
       {"q": "Piyasa emri mi limit emri mi daha iyi?",
@@ -6841,7 +6832,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
-<p>Destek ve direnç seviyeleri, teknik analizin en temel ve en pratik kavramlarından ikisidir. Her deneyim seviyesindeki yatırımcı bu seviyeleri kullanır; çünkü fiyatın nerede durup nerede döndüğünü anlayabilmek, hem giriş noktası hem de stop-loss belirleme açısından kritik önem taşır.</p>
+<p>Destek ve direnç seviyeleri, teknik analizin en temel ve en pratik kavramlarından ikisidir. Her deneyim seviyesindeki yatırımcı bu seviyeleri kullanır; çünkü fiyatın nerede durup nerede döndüğünü anlayabilmek, trendin gücünü ve olası dönüş bölgelerini anlamak açısından kritik önem taşır.</p>
 
 <h2>Destek Seviyesi Nedir?</h2>
 <p>Destek seviyesi, fiyatın düşerken durduğu ve yeniden yükselmeye başladığı bölgedir. Bu bölgede alıcılar satıcılardan güçlüdür; talep arzı absorbe eder.</p>
