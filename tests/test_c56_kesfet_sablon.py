@@ -1,7 +1,7 @@
 """C-56 (01.10) — Keşfet orta-uzun vade listeleri şablonu (D-59 bağlamının tüketicisi).
 
 Kilitler:
-  1. /kesfet/<liste>: H1 + soru biçimli H2, kural tek cümle + metodoloji bağlantısı, dört liste
+  1. /kesfet/<liste>: listenin sorusu H1 (C-82: liste başına ayrı), kural tek cümle + metodoloji bağlantısı, dört liste
      bağlantısı (paylaşılabilir adres, seçili olan aria-current), satır başına hisse bağlantısı.
   2. Satır: şirket · neden · değerleme rozeti (hisse "Fiyatı makul mu?" sözcükleri) · trend rozeti ·
      BP halkası (sayı ve yay aynı değer); hüküm yoksa yalnız "—" (açıklama metni yok).
@@ -54,8 +54,11 @@ def test_baslik_soru_kural_ve_liste_secici():
     v = FX["temettu"]
     html = _render(kesfet=v)
     main = _main(html)
-    assert re.search(r'<h1[^>]*>Orta-uzun vade listeleri</h1>', main)
-    assert '<h2 class="kf-q da-display" id="kfH">Hangi şirketler istikrarlı temettü ödüyor?</h2>' in main
+    # C-82 (15.10, SEO #9): H1 listenin kendi sorusu; "Orta-uzun vade listeleri" üst satır (başlık değil)
+    assert main.count('<h1') == 1 and 'kf-q' not in main
+    assert '<h1 class="da-pagehead-title" id="kfH">Hangi şirketler istikrarlı temettü ödüyor?</h1>' in main
+    assert '<div class="da-eyebrow">Orta-uzun vade listeleri</div>' in main
+    assert '1 Ekim 2026 kapanışında listede <span class="da-num">18</span> şirket var.' in main
     assert v["kural"] in main and 'href="/metodoloji#kesfet-listeleri"' in main
     assert "1 Ekim 2026 kapanışı" in main
     tabs = re.findall(r'<a class="kf-tab" href="(/kesfet/[a-z-]+)"( aria-current="page")?>', main)
@@ -101,7 +104,9 @@ def test_meta_canonical_json_ld():
     v = FX["temettu"]
     html = _render(kesfet=v)
     assert '<link rel="canonical" href="https://borsapusula.com/kesfet/istikrarli-temettu">' in html
-    assert "<title>İstikrarlı temettü · Orta-uzun vade listeleri | BorsaPusula</title>" in html
+    # C-82: benzersiz, veri aylı başlık (ay listenin tarihinden: 2026-10-01 -> Ekim 2026)
+    assert "<title>Temettü veren BIST şirketleri: istikrarlı temettü listesi (Ekim 2026) | BorsaPusula</title>" in html
+    assert '<meta name="description" content="1 Ekim 2026 kapanışında 18 şirket. ' in html
     g = {n["@type"]: n for n in _ld(html)["@graph"]}
     assert set(g) == {"CollectionPage", "ItemList", "BreadcrumbList"}
     il = g["ItemList"]
@@ -113,6 +118,23 @@ def test_meta_canonical_json_ld():
     # kök (/kesfet) varsayılan listeyi gösterir; kanonik adres listenin kendisi
     root = _render(kesfet=FX["ucuz"], kesfet_kok=True, path="/kesfet")
     assert '<link rel="canonical" href="https://borsapusula.com/kesfet/sektorune-gore-ucuz">' in root
+
+
+def test_dort_liste_benzersiz_baslik_ve_h1():
+    """C-82: dört listenin title'ı ve H1'i birbirinden farklı; tarih yoksa başlıkta ay yok."""
+    base = FX["temettu"]
+    sorular = {"kaliteli_makul": "Hangi şirketler kaliteli ve makul fiyatlı?",
+               "istikrarli_temettu": "Hangi şirketler istikrarlı temettü ödüyor?",
+               "borcsuz_buyuyen": "Hangi şirketler borçsuz büyüyor?",
+               "sektorune_gore_ucuz": "Hangi şirketler sektörüne göre ucuz?"}
+    titles, h1s = set(), set()
+    for k, q in sorular.items():
+        html = _render(kesfet=dict(base, anahtar=k, soru=q))
+        titles.add(re.search(r"<title>(.*?)</title>", html).group(1))
+        h1s.add(re.search(r"<h1[^>]*>(.*?)</h1>", html).group(1))
+    assert len(titles) == 4 and len(h1s) == 4 and all("(Ekim 2026)" in t for t in titles)
+    undated = _render(kesfet=dict(base, tarih=None))
+    assert "<title>Temettü veren BIST şirketleri: istikrarlı temettü listesi | BorsaPusula</title>" in undated
 
 
 def test_bos_ve_baglamsiz_500_vermez():
