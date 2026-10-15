@@ -1,4 +1,4 @@
-"""D-18b — hisse rotası SSR bağlamı: initial_tab + closes_30; /lite'a sayısal di_plus/di_minus/adx.
+"""D-18b — hisse rotası SSR bağlamı: initial_tab + closes_30.
 
 VPS (py3.10+). Şablon bağlamı `template_rendered` sinyaliyle okunur.
 """
@@ -72,17 +72,3 @@ def test_hisse_sayfasi_baglami(monkeypatch):
     assert _ctx(app, "/hisse/THYAO?tab=zzz")["initial_tab"] == "ozet"
 
 
-@PY310
-def test_lite_sayisal_di_alanlari():
-    import app
-    row = app._enrich_stock({"ticker": "THYAO", "price": 1.0, "change_pct": 0.0})
-    row.update({"di_plus": 27.5, "di_minus": 12.1, "adx": 31.2})
-    with app._lock:
-        _old = list(app._cache["data"])
-        app._cache["data"] = [row]
-    try:
-        st = app.app.test_client().get("/api/hisse/THYAO/lite").get_json()["stock"]
-    finally:
-        with app._lock:
-            app._cache["data"] = _old
-    assert st["di_plus"] == 27.5 and st["di_minus"] == 12.1 and st["adx"] == 31.2

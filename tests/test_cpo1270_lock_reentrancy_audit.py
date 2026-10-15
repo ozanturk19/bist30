@@ -163,7 +163,9 @@ def test_at_least_75_functions_directly_hold_lock_sanity_check():
         name for name, nodes in funcs.items()
         if any(_find_lock_withs(n) for n in nodes)
     }
-    assert len(direct_lock_funcs) >= 70, (
+    # D-11 (15.10): api_hisse_lite (ölü route, 0 dış trafik) silindi — kendi
+    # `with _lock:` bloğuyla birlikte gitti, eşik 70→69 (gerçek sayıyı izler).
+    assert len(direct_lock_funcs) >= 69, (
         f"Beklenenden çok daha az fonksiyon _lock alıyor görünüyor "
         f"({len(direct_lock_funcs)}) — audit'in kendisi bozulmuş olabilir"
     )

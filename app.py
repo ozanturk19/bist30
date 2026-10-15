@@ -5553,56 +5553,6 @@ def api_data_lite():
     return _resp
 
 
-@app.route("/api/hisse/<ticker>/lite")
-@limiter.limit("30 per minute")  # ailedeki kardeş route'larla tutarlı (fundamentals/news/chart)
-def api_hisse_lite(ticker):
-    """CPO-1512 madde 1: hisse.html tam /api/data'yı (~280KB, 215 hisse) indirip
-    client-side kendi ticker'ını filtreliyordu. Bu endpoint sadece o sayfanın
-    gerçekten kullandığı alanları tek ticker için döner (bkz. renderSummary)."""
-    ticker = ticker.upper()
-    # CPO-1783: /hisse/XU030 ile aynı kabul kapısı kusuru — XU030 BIST100
-    # içinde olduğu için bu endpoint de hisse şablonunu besliyordu.
-    if ticker in INDEX_TICKERS or ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-    with _lock:
-        stocks = list(_cache["data"])
-        _ac_snap = dict(_anomaly_cache)
-    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
-    if not stock:
-        return safe_json({"stock": None, "loading": True})
-    anomaly = _ac_snap.get(ticker, {"flag": False, "reason": ""})
-    out = {
-        "ticker":           stock.get("ticker"),
-        "name":             stock.get("name") or stock.get("ticker"),
-        "price":            stock.get("price"),
-        "change_pct":       stock.get("change_pct"),
-        "signal":           stock.get("signal"),
-        "signal_price":     stock.get("signal_price"),
-        "signal_date":      stock.get("signal_date"),
-        "signal_bars":      stock.get("signal_bars"),
-        "sl_level":         stock.get("sl_level"),
-        "is_premium":       stock.get("is_premium"),
-        "anomaly":          {"flag": anomaly.get("flag", False), "reason": anomaly.get("reason", "")},
-        # D-18: tazelik alanları /api/data ve SSR ssr_signal ile aynı kaynaktan (stock sözlüğü);
-        # hisse sayfası /api/data'dan çıkınca "Güncellenmiyor" rozeti ve kapanış günü bu 4 alanla kurulur.
-        "last_fresh_ts":    stock.get("last_fresh_ts"),
-        "data_quality":     stock.get("data_quality"),
-        "stale_reason":     stock.get("stale_reason"),
-        "close_status":     stock.get("close_status"),
-        # D-18b: sayısal DI/ADX (hisse sayfası Q3 DI satırı /chart özetini beklemesin)
-        "di_plus":          stock.get("di_plus"),
-        "di_minus":         stock.get("di_minus"),
-        "adx":              stock.get("adx"),
-    }
-    _resp = safe_json({"stock": out})
-    _etag = hashlib.md5(_resp.get_data()).hexdigest()
-    _resp.headers["Cache-Control"] = "no-cache"
-    _resp.headers["ETag"] = _etag
-    if request.headers.get("If-None-Match") == _etag:
-        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
-    return _resp
-
-
 # ── D-54: paylaşılabilir ısı haritası — /harita/<gün> kalıcı sayfa + PNG görseller ──────────────
 def _harita_page_ready():
     """harita_gun.html (ön yüz dalı) yayında mı? Arka uç önce deploy edilirse /harita ve
