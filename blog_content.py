@@ -871,7 +871,7 @@ Histogram = MACD − Sinyal</pre>
 </ul>
 """,
     "faqs": [
-      {"q": "Borsa işlemlerinde en sık kullanılan terimler nelerdir?", "a": "En temel kavramlar: alım/satım emri, stop loss (zarar durdur), take profit (kâr al), piyasa emri, limit emir, spread, lot, portföy, pozisyon, volatilite ve hacim. Bu terimlerin anlamını bilmeden işlem yapmamak önemlidir."},
+      {"q": "Borsa işlemlerinde en sık kullanılan terimler nelerdir?", "a": "En temel kavramlar: alım/satım emri, stop loss (zarar durdur), piyasa emri, limit emir, spread, lot, portföy, pozisyon, volatilite ve hacim. Bu terimlerin anlamını bilmeden işlem yapmamak önemlidir."},
       {"q": "Bull ve Bear piyasası ne demektir?", "a": "Bull (boğa) piyasası fiyatların genel olarak yükseldiği iyimser dönemdir. Bear (ayı) piyasası ise fiyatların %20 veya daha fazla düştüğü karamser dönemdir. Bu iki kavram piyasa senaryolarını anlatmak için sıkça kullanılır."},
       {"q": "BorsaPusula teknik terimlerini nerede açıklıyor?", "a": "ADX, RSI, Supertrend, EMA gibi tüm teknik göstergeler için Metodoloji sayfasında detaylı açıklamalar bulunur. Her sinyal bileşeninin nasıl hesaplandığı ve yorumlandığı anlatılır."}
     ],
@@ -1907,7 +1907,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
     "faqs": [
       {"q": "Momentum hissesi ne kadar süre elde tutulmalı?", "a": "Supertrend sinyali devam ettiği sürece pozisyon korunabilir. Klasik yaklaşımda sinyal kapanana (Supertrend tersine dönene) veya stop-loss tetiklenene kadar beklenebilir. Bu bazen 2 hafta, bazen 3 ay sürebilir."},
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
-      {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
+      {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ çok güçlü bir trendi gösterir; bu seviyelerden sonra trend gücü çoğunlukla yavaşlar. ADX tek başına yön söylemez — fiyat ve Supertrend ile birlikte okunmalıdır."},
       {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
       {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Teknik Güç Skoru'na göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1,20) en güçlü hacim teyitli adayları işaretler."}
     ],
@@ -1941,7 +1941,7 @@ Açılış ve kapanış neredeyse aynı fiyatta. Gövde çok küçük, fitiller 
 
 **Anlam:** Alıcı-satıcı dengesi, kararsızlık. Güçlü trend sonrasında doji görülürse dönüş yakın olabilir.
 
-**BIST'te:** Uzun süreli yükselişin ardından doji → kısmi kar alma fırsatı.
+**BIST'te:** Uzun süreli yükselişin ardından doji → trendin yorulduğuna dair erken bir işaret olabilir.
 
 ### 2. Çekiç (Hammer)
 
@@ -2501,7 +2501,6 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
 <li><strong>Giriş:</strong> Beş koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
 <li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
-<li><strong>Kâr alma:</strong> TP1 = 1,5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
 <li><strong>Çıkış:</strong> Supertrend Trend Bozuldu sinyaline geçtiğinde veya ADX 20'nin altına indiğinde.</li>
 </ul>
 
@@ -2523,8 +2522,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
        "a": "Volatilitenin ani arttığı dönemlerde, özellikle yatay piyasada, Supertrend sık sık yön değiştirir. Bu nedenle ADX filtresi kritik önem taşır — trend gücü zayıfken Supertrend sinyalleri güvenilir değildir."},
       {"q": "Stop loss nereye koyulmalı?",
        "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (Güçlü Trend için) veya üstüne (Trend Bozuldu için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
-      {"q": "Kâr alma hedefleri nasıl belirlenir?",
-       "a": "BorsaPusula TP1 için ~1,5×ATR, TP2 için ~3×ATR kullanır. Aktif yönetimde ise Supertrend çizgisinin kırılması güçlü bir çıkış sinyali olarak değerlendirilebilir."}
+      {"q": "Trend ne zaman bozulmuş sayılır?",
+       "a": "Kapanış fiyatının Supertrend çizgisinin altına inmesi trendin bozulduğunu gösterir; BorsaPusula bu durumu \"Trend Bozuldu\" olarak işaretler."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
   },
@@ -4157,7 +4156,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>Maruziyetiniz değişti: Hisse piyasasına gereğinden fazla bağlandınız</li>
   <li>Risk profiliniz başlangıçta belirlediğinizin üstüne çıktı</li>
 </ul>
-<p>Rebalancing ile hisselerden kâr alıp altın ve nakit ağırlığını artırarak orijinal %60/%30/%10 dağılımına geri dönersiniz.</p>
+<p>Rebalancing ile hisse ağırlığını azaltıp altın ve nakit ağırlığını artırarak orijinal %60/%30/%10 dağılımına geri dönersiniz.</p>
 
 <h2>Rebalancing Ne Zaman Yapılmalı?</h2>
 <p>İki temel yaklaşım vardır:</p>
@@ -5217,6 +5216,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 70 ──
   {
     "slug": "zarar-kesme-pozisyon-kapatma-rehberi",
+    "canonical_slug": "risk-yonetimi-portfoy",  # C-P1-1510: işlem yönetimi dili (kalıcı yasak) — 301 → risk-yonetimi-portfoy
     "title": "Zararda Hisseyi Ne Zaman Satmalısınız? Pozisyon Kapatma Rehberi",
     "desc": "Zarardaki bir hisseyi tutmak mı, satmak mı? Stop loss seviyesine uymak neden kritiktir? Yatırım kararlarında zarar kesmenin psikolojisi ve kuralları.",
     "date": "2026-05-01",
@@ -5460,6 +5460,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 73 ──
   {
     "slug": "kar-alma-ne-zaman-satmali-tp-stratejisi",
+    "canonical_slug": "risk-yonetimi-portfoy",  # C-P1-1510: işlem yönetimi dili (kalıcı yasak) — 301 → risk-yonetimi-portfoy
     "title": "Kâr Alma Stratejisi: Hissede Ne Zaman Satış Yapmalısınız?",
     "desc": "Hedef fiyata (TP) ulaşınca mı satmalısınız? Hisseyi nasıl kademeli satabilirsiniz? Kâr almanın doğru zamanı ve strateji rehberi.",
     "date": "2026-05-01",
@@ -6122,6 +6123,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 82 ──
   {
     "slug": "scalp-trading-nedir-kisa-vadeli-bist-stratejileri",
+    "canonical_slug": "teknik-analiz-mi-temel-analiz-mi",  # C-P1-1510: işlem yönetimi dili (kalıcı yasak) — 301 → teknik-analiz-mi-temel-analiz-mi
     "title": "Scalp Trading Nedir? Kısa Vadeli BIST Yatırım Stratejileri",
     "desc": "Scalping ve kısa vadeli trade stratejileri: ne zaman işe yarar, riskleri nelerdir? BIST'e özgü koşullar ve günlük trader için pratik rehber.",
     "date": "2026-05-02",
@@ -6364,7 +6366,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "En önemli Fibonacci seviyesi hangisi?",
        "a": "%61,8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder. Bu nedenle %61,8, stop-loss konumlandırması için de en yaygın kullanılan referans seviyesidir."},
       {"q": "Fibonacci uzantısı (extension) nedir?",
-       "a": "Fibonacci geri çekilme seviyeleri destek/direnç için kullanılırken Fibonacci uzantıları fiyat hedefi belirlemek için kullanılır. %127,2, %161,8 gibi uzantı seviyeleri trend devam ettiğinde hedef fiyatları gösterir. Geri çekilmenin sonunda bir trend devam formasyonu oluşursa uzantı seviyeleri kâr alma noktası olarak planlanabilir."},
+       "a": "Geri çekilme seviyeleri (%38,2, %50, %61,8) önceki hareketin içinde kalır ve olası destek/direnç bölgelerini gösterir. Uzantı seviyeleri (%127,2, %161,8) ise önceki hareketin dışına taşar. İkisi de olasılık gösterir, kesinlik değil; tek başına karar aracı olarak kullanılmaz."},
       {"q": "Fibonacci seviyeleri her zaman tutar mı?",
        "a": "Hayır. Fibonacci seviyeleri olasılıksal göstergelerdir, garanti değildir. Güçlü fundamental haberler, makroekonomik şoklar veya yüksek hacimli satış baskısı Fibonacci desteğini kolayca kırabilir. Bu nedenle Fibonacci seviyelerini stop-loss ile birlikte kullanmak ve tek başına karar verici olarak görmemek önemlidir."}
     ],
@@ -6445,6 +6447,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 87 ──
   {
     "slug": "stop-loss-emirleri-nereye-konulur",
+    "canonical_slug": "risk-yonetimi-portfoy",  # C-P1-1510: işlem yönetimi dili (kalıcı yasak) — 301 → risk-yonetimi-portfoy
     "title": "Stop-Loss Emirleri: Türleri, Nereye Konulur ve Neden Uygulanır?",
     "desc": "Stop-loss (zarar durdur) emri nedir? ATR bazlı stop hesabı, trailing stop, stop-loss koymama hatası ve BIST'te pratik stop-loss stratejileri.",
     "date": "2026-05-03",
@@ -6575,7 +6578,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <ul>
   <li>Spesifik bir fiyattan girmek istediğinizde (Fibonacci geri çekilme veya destek seviyesine limit koyma)</li>
   <li>Düşük hacimli hisselerde spread riski taşımamak için</li>
-  <li>Otomatik kâr alma için (take-profit emri)</li>
+  <li>Belirlediğiniz fiyattan satış yapmak için</li>
 </ul>
 <p><strong>Riski:</strong> Fiyat limit seviyenize ulaşmazsa emir gerçekleşmez. Hızlı hareket eden piyasalarda treni kaçırabilirsiniz.</p>
 
@@ -6612,7 +6615,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     <td style="padding:8px; border:1px solid var(--bp-bkl-bd);">Stop-buy emri</td>
   </tr>
   <tr>
-    <td style="padding:8px; border:1px solid var(--bp-bkl-bd);">Hedef fiyattan kâr almak istiyorum</td>
+    <td style="padding:8px; border:1px solid var(--bp-bkl-bd);">Belirlediğim fiyattan satmak istiyorum</td>
     <td style="padding:8px; border:1px solid var(--bp-bkl-bd);">Limit satış emri</td>
   </tr>
 </table>
@@ -7069,7 +7072,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Rebalancing Neden Yapılmalı?</h2>
 <ul>
   <li><strong>Risk kontrolü:</strong> Belirli bir varlık sınıfının oransal büyümesini sınırlamak, hedeflenen risk profilini korur.</li>
-  <li><strong>Disiplinli al-sat:</strong> Rebalancing, doğal olarak "pahalı olan sat, ucuz olanı al" davranışını zorunlu kılar. Bu sistematik kâr alma ve dip alma mantığına yol açar.</li>
+  <li><strong>Disiplinli al-sat:</strong> Rebalancing, doğal olarak "pahalı olan sat, ucuz olanı al" davranışını zorunlu kılar. Böylece yükselen varlıktaki ağırlık azaltılıp gerileyen varlığa kaydırılması sistematik hale gelir.</li>
   <li><strong>Duygusal kararları engeller:</strong> Mekanik bir kural olduğundan FOMO veya panik satışını minimize eder.</li>
   <li><strong>Uzun vadeli performans:</strong> Tarihsel araştırmalar, düzenli rebalancing yapan portföylerin uzun vadede daha iyi risk-ayarlı getiri sağladığını göstermektedir.</li>
 </ul>
