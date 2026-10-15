@@ -55,6 +55,7 @@ import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bay
 import kesfet           # D-59: Keşfet orta-uzun vade listeleri (C-56): 4 kural tabanlı liste, KAP verisiyle
 import kap_tablolar     # D-60 (C-59): finansal tablo sayfaları (bilanço · gelir tablosu · nakit akışı), KAP raporlarından
 import sitemap_build    # D-63: site haritası dizini + 5 alt harita (saf yardımcılar)
+import seo_yonlendirme  # D-66/D-67: /ozet → /bulten, endeks adresleri, /hisseler endeks bölümleri
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from pipeline import ai_not_job  # D-44b: AI Analist Notu okuma yolu (üretim ayrı iş; AI_NOT_ENABLED=1 olmadan None)
@@ -11188,6 +11189,11 @@ def ozet_gecmis(tarih, via_auto_fallback=False):
     """
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", tarih):
         abort(404)
+    # D-66: o günün Akşam Bülteni varsa tek 301 (aynı günün soru H1'li, Article JSON-LD'li sayfası);
+    # bülteni olmayan eski günler aşağıda noindex, follow ile sunulur (site haritasında yok, D-63).
+    _hedef = seo_yonlendirme.ozet_hedefi(tarih, bulten.days(_BULTEN_DIR) if _bulten_page_ready() else [])
+    if _hedef:
+        return redirect(_hedef, code=301)
     fname = os.path.join(_SNAPSHOTS_DIR, f"{tarih}.json")
     if not os.path.exists(fname):
         abort(404)
@@ -11218,12 +11224,14 @@ def ozet_gecmis(tarih, via_auto_fallback=False):
     new_signals = [s for s in stocks
                    if is_signal_from_today(s.get("signal_date"), today=_arsiv_gun)
                    and s.get("signal") != "BEKLE"]
-    return render_template("ozet.html",
+    resp = app.make_response(render_template("ozet.html",
         stocks=stocks, loading=False,
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
         new_signals=new_signals, today_str=snap.get("date_tr", tarih),
         stock_names=STOCK_NAMES,
-        historical_date=tarih, via_auto_fallback=via_auto_fallback)
+        historical_date=tarih, via_auto_fallback=via_auto_fallback))
+    resp.headers["X-Robots-Tag"] = "noindex, follow"   # D-66: eski trend listesi arşivi
+    return resp
 
 
 @app.route("/api/ozet/snapshots")
