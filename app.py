@@ -12905,6 +12905,12 @@ _BLOG_SLUG_REDIRECTS = {
     "bist-temettue-yatirimligi-rehberi": "bist-temettu-yatirimciligi-rehberi",
     # CPO-1793: kanon §2.2 -- islem yonetimi dili yok; makale yeniden yazildi.
     "stop-loss-nedir":               "trend-donus-seviyesi-supertrend-nedir",
+    # CPO-1831 (C-P1-1510): 4 islem yonetimi yazisi canonical_slug ile emekli
+    # (cpo-wip a9fbf230) -- 404 penceresi acmamak icin 301'ler once DEV ile gelir.
+    "kar-alma-ne-zaman-satmali-tp-stratejisi": "risk-yonetimi-portfoy",
+    "stop-loss-emirleri-nereye-konulur":       "risk-yonetimi-portfoy",
+    "zarar-kesme-pozisyon-kapatma-rehberi":    "risk-yonetimi-portfoy",
+    "scalp-trading-nedir-kisa-vadeli-bist-stratejileri": "teknik-analiz-mi-temel-analiz-mi",
 }
 
 def _normalize_article(a):
