@@ -120,6 +120,7 @@ _ALLOWED = {
     "--short",          # git rev-parse argümanı
     "LONG", "SHORT",    # _enrich_stock: eski disk cache değerini Yukarı/Aşağı'ya çevirir
     "stop-loss-nedir",  # Borsa Okulu blog yazısı adresi (blog kalır)
+    "stop-loss-emirleri-nereye-konulur",  # CPO-1831: emekli yazı adresi, 301 anahtarı
 }
 
 
