@@ -85,7 +85,7 @@ def test_temel_sekmesi_baglantilari(ortam, monkeypatch):
 def test_sitemap_ve_llms(ortam, monkeypatch):
     c = app.app.test_client()
     monkeypatch.setattr(app, "_sitemap_cache", {})
-    sm = c.get("/sitemap.xml").get_data(as_text=True)
+    sm = c.get("/sitemap-finansal.xml").get_data(as_text=True)   # D-63: alt harita
     son = max(_rec("THYAO")["reports"], key=lambda r: (r["fy"], r["period"]))["publish"][:10]
     assert "<loc>https://borsapusula.com/hisse/THYAO/bilanco</loc><lastmod>%s</lastmod>" % son in sm
     assert "/hisse/THYAO/nakit-akis</loc>" in sm and "/hisse/GARAN/bilanco</loc>" in sm

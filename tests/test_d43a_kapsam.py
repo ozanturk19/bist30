@@ -91,7 +91,7 @@ def test_routes_out_of_scope_page_portfolio_alerts_sitemap_api_data():
     assert c.get("/hisse/XU030").status_code == 404
     assert "TRMET" in app.BIST100 and "KONTR" not in app.BIST100
     assert "KONTR" in app._PF_VALID_TICKERS            # portföy kaydında silinmez
-    sm = c.get("/sitemap.xml").get_data(as_text=True)
+    sm = c.get("/sitemap-hisseler.xml").get_data(as_text=True)   # D-63: alt harita
     assert "/hisse/KONTR<" not in sm and "/hisse/TRMET<" in sm
     with app._lock:
         _old = list(app._cache["data"])

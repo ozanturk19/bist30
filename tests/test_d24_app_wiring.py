@@ -85,7 +85,7 @@ def test_eski_disk_bicimi_duzlesir():
 
 
 def test_sitemap_takvim():
-    body = app.app.test_client().get("/sitemap.xml").get_data(as_text=True)
+    body = app.app.test_client().get("/sitemap-sayfalar.xml").get_data(as_text=True)   # D-63
     assert "/takvim</loc>" in body and "/bilanco-takvimi</loc>" not in body
 
 

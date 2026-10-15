@@ -95,7 +95,7 @@ def test_d57_context_processor_value_reaches_haberler(client, monkeypatch):
 
 
 def test_sitemap_and_llms_list_bildirimler(client):
-    sm = client.get("/sitemap.xml").get_data(as_text=True)
+    sm = client.get("/sitemap-sayfalar.xml").get_data(as_text=True)   # D-63: alt harita
     assert "/haberler/bildirimler</loc>" in sm
     ll = client.get("/llms.txt").get_data(as_text=True)
     assert "https://borsapusula.com/haberler/bildirimler" in ll

@@ -54,6 +54,7 @@ import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 1
 import temel_skor_v2    # D-40c: Temel skor v2 (5 eksen, KAP) — TEMEL_V2=1 bayrağıyla
 import kesfet           # D-59: Keşfet orta-uzun vade listeleri (C-56): 4 kural tabanlı liste, KAP verisiyle
 import kap_tablolar     # D-60 (C-59): finansal tablo sayfaları (bilanço · gelir tablosu · nakit akışı), KAP raporlarından
+import sitemap_build    # D-63: site haritası dizini + 5 alt harita (saf yardımcılar)
 import gemini_budget    # D-P0-2409: Gemini günlük çağrı + aylık USD tavanı
 import gundem_haber     # D-57: Gündem haber derlemesi (AI yazar, kod denetler; kaynak satırı O27k)
 from pipeline import ai_not_job  # D-44b: AI Analist Notu okuma yolu (üretim ayrı iş; AI_NOT_ENABLED=1 olmadan None)
@@ -9891,7 +9892,7 @@ def api_tarama_temel():
 
 
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
-_sitemap_cache: dict = {}  # {"xml": str, "date": str}
+_sitemap_cache: dict = {}  # D-63: {"anahtar": (kapanış günü, saat), "alt": {alt harita: [girdi]}}
 
 def _compute_health():
     """Health verisini hesaplar — _lock alır. SPEC-016 K4: yalnız bg thread çağırır,
@@ -10402,110 +10403,75 @@ def _tpl_lastmod(tpl_name, fallback):
 
 @app.route("/sitemap.xml")
 def sitemap():
-    today = datetime.now(_TZ_TR).date().isoformat()
-    if _sitemap_cache.get("date") == today and _sitemap_cache.get("xml"):
-        return Response(_sitemap_cache["xml"], mimetype="application/xml",
-                         headers={"Cache-Control": "public, max-age=3600"})
+    """D-63: site haritası DİZİNİ — 5 alt harita (sitemap_build.py modül notu). Eskiden tek 755 KB
+    dosya, 4.767 adres (%76 bildirim) ve 246 adreste lastmod = takvim günüydü."""
+    return Response(sitemap_build.sitemapindex(_sitemap_alt_girdileri()), mimetype="application/xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
+
+
+def _sitemap_alt_girdileri():
+    """{alt harita: [{loc, lastmod}]}. Yalnız dizinlenebilir, 200 dönen kanonik adresler: bildirim
+    sayfaları, eski özet arşivi (D-66) ve noindex takip sayfası yok. lastmod kuralları sitemap_build.py'de.
+    Önbellek anahtarı (son kapanış günü, saat): kapanış günü değişince ya da en geç saatte bir
+    yeniden kurulur (yeni rapor / bülten / ısı haritası günü)."""
+    kapanis = sitemap_build.kapanis_gunu(heatmap.days(_HEATMAP_DIR), _expected_data_date())
+    anahtar = (kapanis, int(time.time() // 3600))
+    if _sitemap_cache.get("anahtar") == anahtar and _sitemap_cache.get("alt"):
+        return _sitemap_cache["alt"]
+    _blog_articles, _ = _get_blog_cache()   # K-CK #2: makale sayfasıyla aynı normalize liste
+    blog = [{"loc": f"/blog/{quote(a['slug'])}", "lastmod": sitemap_build.blog_lastmod(a)}
+            for a in _blog_articles]
+    # K-CK: mimari EOD-only; merkez sayfalar günde bir kez, kapanış turunda tazelenir.
     pages = [
-        # K-CK: mimari EOD-only (K-CE kanonu). "hourly" bu kanalda da bir
-        # gun-ici iddiasidir -- sayfa gunde BIR kez, EOD turunda tazelenir.
-        {"loc": "/",            "priority": "1.0", "changefreq": "daily"},
-        {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly", "lastmod": _tpl_lastmod("metodoloji.html", today)},
-        {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly", "lastmod": _tpl_lastmod("hakkinda.html", today)},
-        {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly", "lastmod": _tpl_lastmod("gizlilik.html", today)},
-        {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly", "lastmod": _tpl_lastmod("yasal.html", today)},
-        {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly", "lastmod": _tpl_lastmod("iletisim.html", today)},
+        {"loc": "/",              "lastmod": kapanis},
+        {"loc": "/tarama",        "lastmod": kapanis},
+        {"loc": "/hisseler",      "lastmod": kapanis},
+        {"loc": "/sektor-harita", "lastmod": kapanis},
+        {"loc": "/takvim",        "lastmod": kapanis},
+        {"loc": "/blog",          "lastmod": sitemap_build.en_son(blog)},
+        {"loc": "/karsilastir",   "lastmod": _tpl_lastmod("karsilastir.html", None)},
+        {"loc": "/metodoloji",    "lastmod": _tpl_lastmod("metodoloji.html", None)},
+        {"loc": "/hakkinda",      "lastmod": _tpl_lastmod("hakkinda.html", None)},
+        {"loc": "/iletisim",      "lastmod": _tpl_lastmod("iletisim.html", None)},
+        {"loc": "/gizlilik",      "lastmod": _tpl_lastmod("gizlilik.html", None)},
+        {"loc": "/yasal",         "lastmod": _tpl_lastmod("yasal.html", None)},
     ]
-    for t in BIST30:
-        if t != "XU030":
-            pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
-    # D-60 (C-59): finansal tablo sayfaları (şablon yayındaysa; lastmod = son raporun yayın günü)
-    if _tpl_ready("finansal_tablo.html"):
+    # D-59/C-56: Keşfet listeleri (şablon yayındaysa); /kesfet kökünün kanonik adresi varsayılan
+    # listenin adresidir: haritada yok.
+    if _tpl_ready("kesfet.html"):
+        pages += [{"loc": f"/kesfet/{kesfet.SLUG[_k]}", "lastmod": kapanis} for _k in kesfet.LISTS]
+    if _tpl_ready("haberler.html"):
+        pages.append({"loc": "/haberler", "lastmod": kapanis})
+        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
+            pages.append({"loc": "/haberler/bildirimler", "lastmod": kapanis})
+    _bulten_gunleri = bulten.days(_BULTEN_DIR) if _bulten_page_ready() else []
+    if _bulten_gunleri and _bulten_page_ready("bulten_arsiv.html"):   # D-56
+        pages.append({"loc": "/bulten/arsiv", "lastmod": _bulten_gunleri[-1]})
+    _evren = [t for t in BIST30 if t not in INDEX_TICKERS]
+    hisseler = [{"loc": f"/hisse/{t}", "lastmod": kapanis} for t in _evren]
+    finansal = []
+    if _tpl_ready("finansal_tablo.html"):   # D-60 (C-59): lastmod = son raporun yayın günü
         try:
-            for _g in kap_tablolar.sitemap_girdileri([t for t in BIST30 if t not in INDEX_TICKERS]):
-                pages.append({"loc": _g["loc"], "priority": "0.6", "changefreq": "monthly",
-                              "lastmod": _g["lastmod"] or today})
+            finansal = kap_tablolar.sitemap_girdileri(_evren)
         except Exception as e:
             logger.warning("sitemap: finansal tablo sayfaları eklenemedi: %s", e)
-    # K-CK #2: sitemap HAM `ARTICLES`i okuyordu, makale SAYFASI ise
-    # `_normalize_article()`ten gecen listeyi -- yani ayni olgunun (bir
-    # makalenin tarihi) IKI KANONU vardi. 8 makalede "date" alani hic yok;
-    # normalizer onlara "2026-05-01" veriyor (sayfanin JSON-LD
-    # datePublished'i bu), sitemap ise `today` fallback'ine dusuyordu:
-    # o 8 URL HER GUN "bugun degisti" diyordu, kendi sayfasiyla celisiyordu.
-    # Tek kanon: normalize edilmis liste.
-    _blog_articles, _ = _get_blog_cache()
-    _blog_lastmod = max((a.get("date") or today) for a in _blog_articles) if _blog_articles else today
-    pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly",
-                  "lastmod": _blog_lastmod})
-    # D-25b: /portfolio artık /takip'e 301 (C-41) — sitemap girdisi taşındı.
-    pages.append({"loc": "/takip",          "priority": "0.6", "changefreq": "monthly",
-                  "lastmod": _tpl_lastmod("takip.html", today)})
-    pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
-    pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
-    # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
-    try:
-        snapshot_dates = sorted([
-            f.replace(".json", "")
-            for f in os.listdir(_SNAPSHOTS_DIR)
-            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
-        ], reverse=True)[:90]
-        for d in snapshot_dates:
-            pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
-    except Exception as e:
-        logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
-    # D-54: /harita/<gün> kalıcı ısı haritası sayfaları (şablon yayındaysa)
+    # Günlük kalıcı sayfalar (CPO-1802 bülten, D-54 ısı haritası): son 90 takvim günü, lastmod = kendi günü
+    _bugun = datetime.now(_TZ_TR).date()
+    gunluk = [{"loc": f"/bulten/{d}", "lastmod": d}
+              for d in sitemap_build.son_gunler(_bulten_gunleri, _bugun)]
     if _harita_page_ready():
-        for d in reversed(heatmap.days(_HEATMAP_DIR)[-90:]):
-            pages.append({"loc": f"/harita/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
-    # CPO-1802: /bulten/<gün> kalıcı Akşam Bülteni sayfaları (şablon yayındaysa)
-    if _bulten_page_ready() and _bulten_page_ready("bulten_arsiv.html") and bulten.days(_BULTEN_DIR):
-        pages.append({"loc": "/bulten/arsiv", "priority": "0.6", "changefreq": "daily"})   # D-56
-    if _bulten_page_ready():
-        for d in reversed(bulten.days(_BULTEN_DIR)[-90:]):
-            _snap = _bulten_read(os.path.join(_BULTEN_DIR, d + ".json"))
-            _lastmod = (_snap or {}).get("updated_at", d)[:10]
-            pages.append({"loc": f"/bulten/{d}", "priority": "0.5", "changefreq": "never", "lastmod": _lastmod})
-    pages.append({"loc": "/takvim",             "priority": "0.8", "changefreq": "daily"})
-    # D-59/C-56: Keşfet listeleri (şablon yayındaysa); her liste kendi paylaşılabilir adresinde.
-    # /kesfet kökü varsayılan listeyi gösterir ve kanonik adresi o listenin adresidir: sitemap'te yok.
-    if _tpl_ready("kesfet.html"):
-        for _k in kesfet.LISTS:
-            pages.append({"loc": f"/kesfet/{kesfet.SLUG[_k]}", "priority": "0.8", "changefreq": "daily"})
-    # D-45: /haberler + son 180 günün rutin-dışı bildirim sayfaları (yalnız C-57 şablonları varsa)
-    if _tpl_ready("haberler.html"):
-        pages.append({"loc": "/haberler",           "priority": "0.8", "changefreq": "daily"})
-        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
-            pages.append({"loc": "/haberler/bildirimler", "priority": "0.7", "changefreq": "daily"})
-        if _tpl_ready("bildirim.html") and _KAP_STORE.available():
-            _cut = (datetime.now(_TZ_TR).date() - timedelta(days=180)).isoformat()
-            for _it in _KAP_STORE.all_items():
-                if _it["ts"][:10] < _cut:
-                    break
-                if not _it.get("rutin"):
-                    pages.append({"loc": "/hisse/%s/bildirim/%d" % (_it["ticker"], _it["id"]),
-                                  "priority": "0.4", "changefreq": "never", "lastmod": _it["ts"][:10]})
-    pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
-                  "lastmod": _tpl_lastmod("karsilastir.html", today)})
-    for a in _blog_articles:
-        if a.get("canonical_slug"):
-            continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
-        pages.append({"loc": f"/blog/{quote(a['slug'])}", "priority": "0.7", "changefreq": "monthly",
-                      "lastmod": a.get("date", today)})
-    xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
-             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    base  = "https://borsapusula.com"   # Domain eklenince burası güncellenir
-    for p in pages:
-        xml.append(f"  <url><loc>{base}{p['loc']}</loc>"
-                   f"<lastmod>{p.get('lastmod', today)}</lastmod>"
-                   f"<changefreq>{p['changefreq']}</changefreq>"
-                   f"<priority>{p['priority']}</priority></url>")
-    xml.append("</urlset>")
-    xml_str = "\n".join(xml)
-    _sitemap_cache.update({"xml": xml_str, "date": today})
-    return Response(xml_str, mimetype="application/xml",
-                     headers={"Cache-Control": "public, max-age=3600"})
+        gunluk += [{"loc": f"/harita/{d}", "lastmod": d}
+                   for d in sitemap_build.son_gunler(heatmap.days(_HEATMAP_DIR), _bugun)]
+    alt = {"sayfalar": pages, "hisseler": hisseler, "finansal": finansal, "gunluk": gunluk, "blog": blog}
+    _sitemap_cache.update({"anahtar": anahtar, "alt": alt})
+    return alt
+
+
+@app.route("/sitemap-<any(sayfalar, hisseler, finansal, gunluk, blog):ad>.xml")
+def sitemap_alt(ad):
+    """D-63: alt haritalar (dizin: /sitemap.xml)."""
+    return Response(sitemap_build.urlset(_sitemap_alt_girdileri()[ad]), mimetype="application/xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
 
 
 @app.route("/robots.txt")
