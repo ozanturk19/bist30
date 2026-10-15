@@ -39,29 +39,12 @@
   "sameAs": ["https://twitter.com/borsapusula", "https://x.com/borsapusula"]
 }
 </script>
+{#- C-83 (15.10, SEO #11): varlık netliği — ana sayfada yalnız Organization + WebSite.
+    FinancialService ("BIST Sinyal Servisi") ve WebApplication ("BIST100 Sinyal Paneli", fiyatı 0
+    Offer) kalktı: Organization, llms.txt ve /hakkinda ile çelişiyorlardı. WebSite açıklaması
+    llms.txt'in ilk cümlesiyle aynı. /hakkinda AboutPage → #organization. -#}
 <script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "WebSite", "@id": "https://borsapusula.com/#website", "url": "https://borsapusula.com", "name": "BorsaPusula", "description": "BIST teknik analiz sinyalleri ve piyasa gözlem platformu", "inLanguage": "tr-TR", "publisher": { "@id": "https://borsapusula.com/#organization" } }
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org", "@type": "FinancialService", "@id": "https://borsapusula.com/#service",
-  "name": "BorsaPusula — BIST Sinyal Servisi", "url": "https://borsapusula.com",
-  "description": "BIST şirketleri için gün sonu verisiyle temel analiz, değerleme ve trend durumu (Güçlü Trend / Trend Bozuldu / Yatay).",
-  "provider": { "@id": "https://borsapusula.com/#organization" }, "areaServed": "TR", "serviceType": "Teknik Analiz Sinyal Servisi",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY", "availability": "https://schema.org/InStock", "description": "Üyeliksiz erişim" },
-  "termsOfService": "https://borsapusula.com/yasal", "audience": { "@type": "Audience", "audienceType": "Bireysel Yatırımcı" }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org", "@type": "WebApplication", "@id": "https://borsapusula.com/#webapp",
-  "name": "BIST100 Sinyal Paneli", "url": "https://borsapusula.com",
-  "description": "BIST100 + ek hisseler için gün sonu trend ve şirket analizi. Supertrend, ADX ve EMA12/99 göstergelerine dayalı Güçlü Trend / Trend Bozuldu / Yatay sinyalleri.",
-  "applicationCategory": "FinanceApplication", "applicationSubCategory": "Stock Market Analysis", "operatingSystem": "Web Browser",
-  "browserRequirements": "Requires JavaScript. Requires HTML5.", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
-  "inLanguage": "tr", "isAccessibleForFree": true, "publisher": { "@id": "https://borsapusula.com/#organization" },
-  "featureList": ["Şirket finansalları ve değerleme", "Gün sonu trend durumu", "BIST100 ısı haritası", "Hisse tarama", "Bilanço takvimi", "Hisse karşılaştırma"]
-}
+{ "@context": "https://schema.org", "@type": "WebSite", "@id": "https://borsapusula.com/#website", "url": "https://borsapusula.com", "name": "BorsaPusula", "description": "Her akşam kapanıştan sonra BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?", "inLanguage": "tr-TR", "publisher": { "@id": "https://borsapusula.com/#organization" } }
 </script>
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
