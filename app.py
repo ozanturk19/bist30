@@ -6911,6 +6911,14 @@ def _compute_chart_data(ticker_base, period="2y"):
         df    = _fill_intraday_gaps(df, ticker)
         df    = df.sort_index()
 
+        # D-P0-1510 (15.10): seans içinde yfinance "bugün"ün oturmamış/yarım
+        # barını (tek anlık fiyat, O=H=L=C eşit) döndürebilir — EOD tetiğinden
+        # (18:10 TR) önce bu bar diske YAZILMAZ; analyze()'in resmi seans
+        # gününden (_expected_bar_date) sonraki hiçbir bar grafiğe girmez, yoksa
+        # sayfa tarihi/son kapanış bugünün yarım barından okunur (gerçek olmayan
+        # "bugün kapanışı" yazdırır).
+        df = df[df.index.date <= _expected_bar_date()]
+
         close  = df["Close"]
         high   = df["High"]
         low    = df["Low"]
