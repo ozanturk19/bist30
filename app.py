@@ -8761,7 +8761,8 @@ def _bildirim_payload(idx):
             "date_long": kap_feed.date_long(it["ts"]), "day_label": kap_feed.day_label(it["ts"]),
             "text": {"fields": doc.get("fields") or [], "text": doc.get("text") or "",
                      "lines": doc.get("lines") or [], "resp": doc.get("resp")},
-            "has_text": bool(doc),
+            # D-64: metin = gövde, satırlar ya da alanlar (yalnız `resp` taşıyan kayıt metinsiz sayılır)
+            "has_text": bool(doc.get("text") or doc.get("lines") or doc.get("fields")),
             "ekler": doc.get("ekler") or [],
             "similar": [kap_feed.public_item(x, STOCK_NAMES) for x in same]}
 
@@ -8936,8 +8937,12 @@ def bildirim_page(ticker, idx):
     if ticker != ticker.upper():
         return redirect(it["href"], code=301)
     smap = _haber_stock_map()
+    # D-64: metni işlenmemiş bildirim sayfası noindex, follow (şablon); gri cümle yerine başlık,
+    # tür, tarih ve bildirimin KAP sayfası. KAP bağlantısı yalnız sayfa bağlamında (API'de dış
+    # bağlantı yok, D-45).
     return render_template("bildirim.html", b=p, mc=_haber_mini(it["ticker"], smap),
-                           canonical="https://borsapusula.com" + it["href"], close_label=_haber_close_label())
+                           canonical="https://borsapusula.com" + it["href"], close_label=_haber_close_label(),
+                           kap_url=kap_feed.KAP_PAGE_URL % it["id"])
 
 
 # ── D-60 (C-59): finansal tablo sayfaları ─────────────────────────────────────

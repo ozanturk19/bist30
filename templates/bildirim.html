@@ -1,6 +1,7 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{%- set it = b.item -%}{%- set _desc = (it.summary or it.title)|truncate(158, True, '…') -%}<title>{{ b.headline }} ({{ b.date_long }}) | BorsaPusula</title>
 <meta name="description" content="{{ _desc }}">
 <link rel="canonical" href="{{ canonical }}">
+{% if not b.has_text %}<meta name="robots" content="noindex, follow">{% endif %}
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ b.headline }} | BorsaPusula">
 <meta property="og:description" content="{{ _desc }}">
@@ -43,7 +44,7 @@
 {%- from '_fmt_macros.html' import pct_text, dir_class -%}
 {#- C-57: kalici bildirim sayfasi (taslak telefon 2). Baglam D-45 bildirim_page: `b` (item + headline +
     kural tabanli tek cumle ozet + bildirimin kendi metni + benzerleri), `mc` (hisse mini karti).
-    AI yok; dis baglanti ve kaynak etiketi yok; tarih mutlak. -#}
+    AI yok; kaynak etiketi yok; dis baglanti yalniz metni sitede olmayan bildirimde (D-64: KAP sayfasi); tarih mutlak. -#}
 {%- set it = b.item -%}
 {%- set AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
 {%- macro trdate(iso) -%}{%- set p = iso[:10].split('-') -%}{{ p[2]|int }} {{ AY[p[1]|int - 1] }} {{ p[0] }}{%- endmacro -%}
@@ -122,19 +123,28 @@
     <span class="go">{{ mc.t }} hisse sayfası →</span>
   </a>
 
+  {% if b.has_text %}
   <details class="hb-full"{% if not facts and not (it.onem and it.onem.pct >= 0.1) %} open{% endif %}>
     <summary>Bildirimin tam metni</summary>
     <div class="in">
-      {% if b.has_text %}
         {% if b.text.text %}<p>{{ b.text.text }}</p>{% endif %}
         {% if b.text.lines %}{% for ln in b.text.lines %}<p>{{ ln }}</p>{% endfor %}{% endif %}
         {% if b.text.fields and not b.text.text and not b.text.lines %}{% for f in b.text.fields %}<p><b>{{ f[0] }}:</b> {{ f[1] }}</p>{% endfor %}{% endif %}
         {% if b.text.resp %}<p class="resp">{{ b.text.resp }}</p>{% endif %}
-      {% else %}
-        <p>Bildirimin metni henüz işlenmedi; başlığı ve sınıfı yukarıda.</p>
-      {% endif %}
     </div>
   </details>
+  {% else %}
+  {#- D-64: metni sitede olmayan bildirim -> baslik, tur, tarih ve bildirimin KAP sayfasi (sayfa noindex, follow). -#}
+  <section class="hb-sec" aria-labelledby="hbKnH">
+    <h2 id="hbKnH">Bildirim bilgileri</h2>
+    <dl class="hb-facts">
+      <dt>Başlık</dt><dd>{{ it.title }}</dd>
+      <dt>Tür</dt><dd>{{ it.subject or it['class'] }}</dd>
+      <dt>Tarih</dt><dd><time datetime="{{ it.date }}">{{ b.date_long }} · {{ it.time }}</time></dd>
+    </dl>
+    <a class="hb-all" href="{{ kap_url }}">Bildirimin tam metni KAP'ta ↗</a>
+  </section>
+  {% endif %}
 
   {% if b.similar %}
   <section class="hb-sec" aria-labelledby="hbSimH">
