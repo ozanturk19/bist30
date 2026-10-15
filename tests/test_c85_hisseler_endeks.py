@@ -34,7 +34,8 @@ def _render(endeks=True):
     ctx = dict(by_sector={"Diğer": pairs}, sectors_sorted=["Diğer"], by_letter=by_letter,
                letters_sorted=sorted(by_letter), total_count=len(pairs), og_image_url="/og.png", should_track=False)
     if endeks:
-        ctx["hisseler_endeks"] = {"bist30": B30, "bist100": B100, "donem": "Ekim–Aralık 2026"}
+        # 15.10 P0: D-67 bağlamı (kod, ad) ikilisi verir (seo_yonlendirme.hisseler_endeks); düz liste 500 vermişti
+        ctx["hisseler_endeks"] = {"bist30": [(t, "Şirket " + t) for t in B30], "bist100": [(t, "Şirket " + t) for t in B100], "donem": "Ekim–Aralık 2026"}
     return ENV.get_template("hisseler.html").render(**ctx)
 
 

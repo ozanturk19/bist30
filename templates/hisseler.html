@@ -56,7 +56,8 @@
 {%- for L in letters_sorted %}{% for t, n in by_letter[L] %}{% set _ = _nm.update({t: n}) %}{% endfor %}{% endfor -%}
 {%- macro _chips(codes) -%}
 <ul class="hh-chips">
-  {%- for t in codes %}<li><a class="hh-chip" href="/hisse/{{ t|urlencode }}"{% if _nm.get(t) and _nm.get(t) != t %} title="{{ _nm.get(t) }}"{% endif %}>{{ t }}</a></li>{% endfor -%}
+  {#- D-67 bağlamı (kod, ad) ikilisi verir; düz kod da kabul edilir -#}
+  {%- for it in codes %}{% set t = it if it is string else it[0] %}{% set n = _nm.get(t) if it is string else it[1] %}<li><a class="hh-chip" href="/hisse/{{ t|urlencode }}"{% if n and n != t %} title="{{ n }}"{% endif %}>{{ t }}</a></li>{% endfor -%}
 </ul>
 {%- endmacro %}
 <div class="hh-endeks">
