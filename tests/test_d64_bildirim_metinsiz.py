@@ -63,8 +63,9 @@ def test_metinsiz_noindex_kunye_ve_kap_baglantisi():
         assert "<dt>Başlık</dt><dd>Lusail Plaza Towers (Plot 3&amp;4) projesi hakkında</dd>" in main
         assert "<dt>Tür</dt><dd>Özel Durum Açıklaması (Genel)</dd>" in main
         assert '<time datetime="2026-10-01T19:54:53">1 Ekim 2026 · 19:54</time>' in main
-        assert '<a class="hb-all" href="https://www.kap.org.tr/tr/Bildirim/1671025">' in main
-        assert "Bildirimin tam metni KAP'ta ↗" in main
+        assert "kap.org.tr" not in main        # CPO 15.10: metinsizde dış bağlantı yok (kanon)
+        assert '<a class="hb-all" href="/haberler/bildirimler?hisse=ANELE">' in main
+        assert "Tüm ANELE bildirimleri →" in main
         assert "<details" not in main          # boş tam metin kutusu yok
         assert 'target="_blank"' not in main   # aynı sekme (K-AW yeni sekme kanonu dışı)
 
@@ -109,5 +110,6 @@ def test_app_bildirim_sayfasi(tmp_path, monkeypatch):
     r = c.get("/hisse/%s/bildirim/%d" % (t, metinsiz_id))
     html = r.get_data(as_text=True)
     assert r.status_code == 200 and NOINDEX in html and "henüz işlenmedi" not in html
-    assert "https://www.kap.org.tr/tr/Bildirim/%d" % metinsiz_id in html
+    assert "kap.org.tr" not in html        # CPO 15.10: metinsizde dış bağlantı yok (kanon)
+    assert "/haberler/bildirimler?hisse=%s" % t in html
     assert "kap.org.tr" not in c.get("/api/bildirim/%d" % metinsiz_id).get_data(as_text=True)

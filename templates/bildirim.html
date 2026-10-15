@@ -142,7 +142,7 @@
       <dt>Tür</dt><dd>{{ it.subject or it['class'] }}</dd>
       <dt>Tarih</dt><dd><time datetime="{{ it.date }}">{{ b.date_long }} · {{ it.time }}</time></dd>
     </dl>
-    <a class="hb-all" href="{{ kap_url }}">Bildirimin tam metni KAP'ta ↗</a>
+    <a class="hb-all" href="/haberler/bildirimler?hisse={{ it.ticker }}">Tüm {{ it.ticker }} bildirimleri →</a>
   </section>
   {% endif %}
 
