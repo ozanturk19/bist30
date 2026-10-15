@@ -10482,84 +10482,65 @@ def sitemap_alt(ad):
 @app.route("/robots.txt")
 def robots():
     body = """# borsapusula.com — robots.txt
-# Allow major search engines + reputation crawlers explicitly
+# NOT (K-CJ): REP (RFC 9309) bir tarayiciya YALNIZ en ozel eslesen grubu
+# uygulatir -- adli gruplar `User-agent: *` blogundan HICBIR kural miras ALMAZ.
+# Bu yuzden `Disallow: /admin/` ve parametre kurallari her grupta AYRICA yazilidir.
+# D-65: parametreli adresler taranmaz -- sirket/tarih/rutin suzgecli bildirim
+# listeleri (hepsi noindex), eski /haberler?hisse= yonlendirmeleri ve /tarama,
+# /sektor-harita durum adresleri (kanonik: parametresiz sayfa).
 
+# Arama motorlari ve AI arama/cevap ajanlari -- acik, Crawl-delay yok
 User-agent: Googlebot
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /karsilastir?tickers=
-
 User-agent: Bingbot
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /karsilastir?tickers=
-
 User-agent: Yandex
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /karsilastir?tickers=
-
 User-agent: DuckDuckBot
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /karsilastir?tickers=
-
 User-agent: Slurp
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /karsilastir?tickers=
-
-# Reputation/security scanners — explicit allow
-User-agent: facebookexternalhit
-Allow: /
-Disallow: /admin/
-
-User-agent: Twitterbot
-Allow: /
-Disallow: /admin/
-
-User-agent: LinkedInBot
-Allow: /
-Disallow: /admin/
-
-User-agent: WhatsApp
-Allow: /
-Disallow: /admin/
-
 User-agent: Applebot
-Allow: /
-Disallow: /admin/
-
-# AI crawlers — allow (we want indexing)
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: Perplexity-User
 User-agent: GPTBot
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-
 User-agent: ClaudeBot
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-
 User-agent: PerplexityBot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /karsilastir?tickers=
+Disallow: /haberler/bildirimler?*hisse=
+Disallow: /haberler?*hisse=
+Disallow: /*?*tarih=
+Disallow: /*?*rutin=
+Disallow: /tarama?
+Disallow: /sektor-harita?
 
-# Default rule
-# NOT (K-CJ): REP (RFC 9309) bir tarayiciya YALNIZ en ozel eslesen grubu
-# uygulatir -- yukaridaki adli gruplar bu bloktan HICBIR kural miras ALMAZ.
-# Bu yuzden `Disallow: /admin/` her adli grupta AYRICA yazilidir.
+# Sosyal onizleme kartlari
+User-agent: facebookexternalhit
+User-agent: Twitterbot
+User-agent: LinkedInBot
+User-agent: WhatsApp
+Allow: /
+Disallow: /admin/
+Disallow: /haberler/bildirimler?*hisse=
+Disallow: /haberler?*hisse=
+Disallow: /*?*tarih=
+Disallow: /*?*rutin=
+Disallow: /tarama?
+Disallow: /sektor-harita?
+
+# Diger tum tarayicilar
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /karsilastir?tickers=
+Disallow: /haberler/bildirimler?*hisse=
+Disallow: /haberler?*hisse=
+Disallow: /*?*tarih=
+Disallow: /*?*rutin=
+Disallow: /tarama?
+Disallow: /sektor-harita?
 Crawl-delay: 5
 
 # Aggressive scrapers — explicit deny
