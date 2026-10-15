@@ -87,7 +87,10 @@
      SSR: gerçek BIST100 son 30 seans eğrisi (ssr_bist_level.spark, /api/data
      xu100_spark ile aynı kaynak), gün sonu kapanış kutusu, tüm kapsamın durum
      şeridi (ssr_signal_counts). Seans içi satırı JS'tir: makro şerit verisi +
-     /api/data data_freshness.market_open; seans dışında gizli. -#}
+     /api/data data_freshness.market_open; seans dışında gizli.
+     C-81 (15.10, SEO #5): satırın etiketi de ham HTML'de BOŞ gelir; metni
+     (bp-vocab.js BP_SEANS_LABEL) yalnız seans açıkken daPaintSeans() yazar.
+     Önceden gizli etiket "<gün> kapanışı" ile yan yana tarayıcıya gidiyordu. -#}
 {%- set _bl = ssr_bist_level or {} -%}
 {%- set _sc = ssr_signal_counts or {} -%}
 {%- set _asof = heatmap.asof_label if (heatmap and heatmap.asof_label) else '' -%}
@@ -122,7 +125,7 @@
       <div class="hp-idx-c da-num {{ bpf.dir_class(_chg) }}" id="hpIdxC">{{ bpf.pct_text(_chg) }}</div>
     </div>
     <div class="hp-seans" id="hpSeans">
-      <div class="hp-seans-l" data-intraday><i aria-hidden="true"></i>Seans içi · 15 dk gecikmeli</div>
+      <div class="hp-seans-l" data-intraday><i aria-hidden="true"></i><span id="hpSeansL"></span></div>
       <div class="hp-seans-v" id="hpSeansV"><span>BIST100 —</span> <span>BIST30 —</span></div>
     </div>
   </div>
@@ -357,12 +360,15 @@
   // ── State ──
   var st = { macro: null };
 
-  // ═══ 1) Makro şerit (canlı, 180 sn) + hero "Seans içi · 15 dk gecikmeli" satırı ═══
+  // ═══ 1) Makro şerit (canlı, 180 sn) + hero gün içi satırı ═══
   // C-27 (O16b=B not 3): kahraman kutusunun ana değeri gün sonu kapanışıdır
-  // (/api/data, CPO-1558 tek kaynak). Seans içinde altında makro şerit
-  // verisiyle BIST100/BIST30 satırı çıkar; seans dışında gizli. İki sayı artık
-  // etiketleriyle ayrışıyor ("<gün> kapanışı" / "Seans içi"), bu yüzden
+  // (/api/data, CPO-1558 tek kaynak). Seans açıkken altında makro şerit
+  // verisiyle BIST100/BIST30 satırı çıkar; seans dışında gizli. İki sayı
+  // etiketleriyle ayrışıyor ("<gün> kapanışı" / gün içi etiketi), bu yüzden
   // CPO-1558'in XU100'ü şeritten dışlaması kalktı (taslaktaki şerit de gösteriyor).
+  // C-81: gün içi etiketinin metni ham HTML'de yok; bp-vocab.js (defer) içindeki
+  // BP_SEANS_LABEL'dan yalnız satır açılırken yazılır. Satırı açan makro verisi
+  // bp-search.js'ten (defer, bp-vocab.js'ten sonra) geldiği için sözlük hazırdır.
   var _seans = { open: null, items: null };
   function daPaintSeans(){
     var box = document.getElementById('hpSeans'), val = document.getElementById('hpSeansV');
@@ -374,6 +380,8 @@
     if (_seans.open !== true || !a || !b || typeof a.price !== 'number' || typeof b.price !== 'number') { box.classList.remove('is-on'); return; }
     function one(lbl, m){ return '<span>' + lbl + ' <b class="da-num">' + fmtPrice(m.price) + '</b> <span class="da-num ' + bpDirClass(m.change, 2) + '">' + fmtPct(m.change) + '</span></span>'; }
     val.innerHTML = one('BIST100', a) + ' ' + one('BIST30', b);
+    var lbl = document.getElementById('hpSeansL');
+    if (lbl && typeof BP_SEANS_LABEL === 'string') lbl.textContent = BP_SEANS_LABEL;
     box.classList.add('is-on');
   }
   function daOnMacro(items){ _seans.items = items; daPaintSeans(); }

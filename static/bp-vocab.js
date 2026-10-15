@@ -130,6 +130,12 @@ function bpFormatAssetPrice(key, price) {
    expose ediyoruz ki cagiran sablonlarin mevcut sigLabel(...) call site'lari
    HIC degismesin — sadece yerel tanimlar kaldirildi. */
 var BP_SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay' };
+
+/* C-81 (15.10, SEO #5): ana sayfa kahramanındaki gün içi satırının etiketi
+   (kanon §1, O16b=B). Ham HTML'de durmaz: gün sonu verisi tazeyken arama
+   motoru "<gün> kapanışı" ile bu etiketi yan yana okuyordu. index.html
+   daPaintSeans() yalnız seans açıkken yazar. */
+var BP_SEANS_LABEL = 'Seans içi · 15 dk gecikmeli';
 function sigLabel(sig) {
   // CPO-1647: sig null/undefined olabilir (ticker sinyal motorunda henüz yok,
   // ör. <120 gün geçmişi olan yeni BIST30 üyesi) — "null" yazısı basmak yerine
