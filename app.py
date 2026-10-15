@@ -10570,70 +10570,71 @@ Sitemap: https://borsapusula.com/sitemap.xml
 
 @app.route("/llms.txt")
 def llms_txt():
-    """CPO-1587 Faz 1C (GEO): robots.txt/sitemap.xml deseniyle aynı —
-    statik dosya DEĞİL, inline route. AI cevap motorlarının (ChatGPT/
-    Perplexity/Claude) sitenin yapısını anlaması için kısa, elle
-    yazılmış özet."""
+    """CPO-1587 Faz 1C (GEO) + C-84 (15.10): AI cevap motorları (ChatGPT/Perplexity/Claude) için
+    elle yazılmış site özeti; robots.txt/sitemap.xml deseniyle inline route. Metindeki her adres
+    doğrudan 200 döner (302 dönen /harita ve /bulten yerine son günün kalıcı sayfası); hisse
+    sayfası için yalnız sunucuda gelen içerik anlatılır. [[...]] yer tutucuları istek anında
+    dolar; dolmayan satır (ör. şablon yayında değil, hiç bülten yok) metinden düşer."""
     body = """# BorsaPusula
 
-> Her akşam kapanıştan sonra BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?
-> Finansallar şirketin KAP'ta açıkladığı rakamlardan, trend Supertrend(10,3) + ADX + EMA12/EMA99 kurallarından gelir; kural-temelli, yapay zekâ rakam üretmez.
-> Yatırım tavsiyesi değildir.
+> BorsaPusula, Borsa İstanbul şirketlerini her işlem günü kapanıştan sonra üç soruyla özetler: finansalları nasıl, fiyatı makul mü, trend destekliyor mu?
+> Finansallar şirketlerin KAP'ta açıkladığı rakamlardan; trend durumu Supertrend(10,3), ADX ve EMA 12/99 kurallarından gelir. Kural tabanlıdır, yapay zekâ rakam üretmez. Yatırım tavsiyesi değildir.
 
-## Ana Sayfalar
-- [Piyasa](https://borsapusula.com/): "Üç soruda BIST" — son kapanışta BIST100, öne çıkan şirketler, durum değiştirenler, sektör ısı haritası
-- [Keşfet (Hisse Tarayıcı)](https://borsapusula.com/tarama): BorsaPusula Skoru, finansal skor, trend, sektör, fiyat ve değerleme filtreleriyle tarama
-- [Sektörler](https://borsapusula.com/sektor-harita): hisselerin kapanış günü değişimi, piyasa değerine göre kutular ve KAP sektör grupları
-- [Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
-- [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
+## Veri, kapsam ve güncelleme
+- Güncelleme: her işlem günü kapanıştan sonra bir kez, yaklaşık 18:45'te (Türkiye saati, UTC+3). Her sayfa rakamın ait olduğu kapanış gününü tarihiyle yazar.
+- Kapsam: [[KAPSAM]]. Tam liste: https://borsapusula.com/hisseler · BIST 30 üyeleri: https://borsapusula.com/hisseler#bist30 · BIST 100 üyeleri: https://borsapusula.com/hisseler#bist100
+- Fiyat: resmi kapanış fiyatı. Finansallar: şirketin KAP'ta açıkladığı son finansal rapor; şirket yeni rapor açıklayınca güncellenir. Büyüme, şirketin aynı rapordaki önceki dönem karşılaştırmasıdır; BorsaPusula kendi enflasyon düzeltmesini yapmaz.
+- Tüm sayfalar Türkçe. Site haritası: https://borsapusula.com/sitemap.xml
+
+## Skorlar nasıl hesaplanır?
+- BorsaPusula Skoru (0-100) = 0,60 × Temel skor + 0,40 × trend payı. Trend payı Güçlü Trend'de en az 50, Yatay'da 50, Trend Bozuldu'da en çok 50; bozulan trend skoru yükseltmez.
+- Temel skor (0-100), beş başlığın ağırlıklı ortalaması: [[TEMEL]]. Hesaplanamayan başlığın ağırlığı diğerlerine dağılır.
+- Trend durumu Güçlü Trend, Yatay ya da Trend Bozuldu'dur. Güçlü Trend beş koşulun birlikte sağlanmasıdır: fiyat Supertrend(10,3) trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ > DI−, EMA 12 > EMA 99 ve haftalık trend yukarı. Trend Bozuldu aynı koşulların aşağı yönde sağlanmasıdır; diğer her durum Yatay'dır. Hiçbiri bir işlem çağrısı değildir.
+- Ayrıntı: [Metodoloji](https://borsapusula.com/metodoloji)
+
+## Şirket sayfaları
+- Hisse sayfası: /hisse/{TICKER} (örnek: https://borsapusula.com/hisse/THYAO). Sunucuda hazır gelen içerik: kapanış fiyatı ve kapanış günü, "3 Soruda" kartı (Finansalları nasıl? Fiyatı makul mü? Trend destekliyor mu?), BorsaPusula Skoru, Temel skorun beş başlığı, trend koşulları ve sık sorulan sorular.
+- Finansal tablolar: /hisse/{TICKER}/bilanco, /hisse/{TICKER}/gelir-tablosu, /hisse/{TICKER}/nakit-akis — şirketin açıkladığı raporlardaki kalemler, rapordaki sırasıyla; yıllık ve çeyreklik dönemler, her dönemin değişimi kendi raporundaki karşılaştırma sütunundan. Örnekler:
+  - https://borsapusula.com/hisse/THYAO/bilanco
+  - https://borsapusula.com/hisse/ASELS/gelir-tablosu
+  - https://borsapusula.com/hisse/BIMAS/nakit-akis
+- Şirket bildirimleri: her bildirimin kalıcı sayfası /hisse/{TICKER}/bildirim/{NO}
+
+## Piyasa, listeler ve haberler
+- [Piyasa](https://borsapusula.com/): son kapanışta BIST 100, öne çıkan şirketler, durum değiştirenler, ısı haritası
+- Keşfet, orta-uzun vade listeleri: KAP'ta açıklanan finansallara göre dört kural tabanlı liste — [[KESFET]]
+- [Hisse Tarayıcı](https://borsapusula.com/tarama): BorsaPusula Skoru, Temel skor, trend, sektör, fiyat ve değerleme filtreleri
+- [Sektörler](https://borsapusula.com/sektor-harita): kapanış günü değişimi, piyasa değerine göre kutular ve KAP sektör grupları
+- [Isı Haritası](https://borsapusula.com/harita/[[SON_HARITA]]): BIST 100 hisselerinin kapanış günü değişimi; her kapanış günü kalıcı sayfa /harita/YYYY-AA-GG
 - [Takvim](https://borsapusula.com/takvim): şirketlerin temettü ve finansal rapor tarihleri, Türkiye ve ABD veri günleri
-- [Borsa Okulu (Blog)](https://borsapusula.com/blog): teknik ve temel analiz kavramları, eğitim içerikleri
+- [Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
+- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, günde iki baskı) ve kapsamdaki şirketlerin bildirimleri
+  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): türe göre (?tur=finansal-rapor, temettu, sermaye, genel-kurul, ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar
+  - [Akşam Bülteni](https://borsapusula.com/bulten/[[SON_BULTEN]]): gün sonu BIST 100 kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı sayfa /bulten/YYYY-AA-GG; tüm bültenler: https://borsapusula.com/bulten/arsiv
+- [Borsa Okulu](https://borsapusula.com/blog): temel ve teknik analiz kavramları, eğitim yazıları
 
-## Hisse Sayfaları
-- Format: https://borsapusula.com/hisse/{TICKER} — örn. /hisse/THYAO
-- Her sayfada: kapanış fiyatı ve kapanış günü, "3 soruda" kartı (finansallar, değerleme, trend), BorsaPusula Skoru, KAP'a dayalı finansal göstergeler, grafik, KAP bildirimleri, SSS
+## Nasıl alıntılanır?
+- Şirket adı ve kodu, rakam, rakamın ait olduğu tarih (kapanış günü ya da rapor dönemi) ve sayfanın adresi birlikte verilir. Biçim: "Türk Hava Yolları (THYAO), BorsaPusula Skoru <değer>, <gün> kapanışı — https://borsapusula.com/hisse/THYAO"; finansal rakamda dönem: "Türk Hava Yolları (THYAO), <dönem> net kârı <tutar> — https://borsapusula.com/hisse/THYAO/gelir-tablosu".
 
-## Metodoloji
-- [Metodoloji](https://borsapusula.com/metodoloji): skorlar ve trend durumu nasıl hesaplanır
-- [Hakkında](https://borsapusula.com/hakkinda)
-
-## Önemli Notlar
-- Veri: her işlem günü kapanışından sonra güncellenen resmi kapanış fiyatları ve şirketlerin KAP'ta açıkladığı finansal raporlar
-- Trend durumu terimleri: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
-- Tüm sayfalar Türkçe (tr)
-
-## İletişim
-- [İletişim](https://borsapusula.com/iletisim)
+## Hakkında
+- [Hakkında](https://borsapusula.com/hakkinda) · [İletişim](https://borsapusula.com/iletisim)
+- "Güçlü Trend", "Yatay" ve "Trend Bozuldu" fiyat trendinin betimidir; sayfalar bilgi amaçlıdır, yatırım tavsiyesi değildir.
 """
-    if _tpl_ready("finansal_tablo.html"):   # D-60 (C-59): finansal tablo sayfaları
-        body = body.replace("\n\n## Metodoloji", "\n- Finansal tablolar: https://borsapusula.com/hisse/{TICKER}/bilanco, "
-                            "/hisse/{TICKER}/gelir-tablosu, /hisse/{TICKER}/nakit-akis — şirketin açıkladığı "
-                            "raporlardaki kalemler, rapordaki sırasıyla; yıllık ve çeyreklik dönemler, her dönemin "
-                            "değişimi kendi raporundaki karşılaştırma sütunundan\n\n## Metodoloji", 1)
-    if _harita_page_ready():   # D-54: kalıcı gün sayfaları (şablon yayındaysa)
-        body = body.replace("- [Takvim](", "- [Isı Haritası](https://borsapusula.com/harita): BIST100 "
-                            "hisselerinin kapanış günü değişimi, piyasa değerine göre kutular; her "
-                            "kapanış günü kalıcı sayfa: /harita/YYYY-AA-GG\n- [Takvim](", 1)
-    if _tpl_ready("kesfet.html"):   # D-59/C-56: orta-uzun vade listeleri (kurallar sayfada tek cümle)
-        body = body.replace("- [Keşfet (Hisse Tarayıcı)]", "- [Keşfet: orta-uzun vade listeleri]"
-                            "(https://borsapusula.com/kesfet): KAP'ta açıklanan finansallara göre dört kural "
-                            "tabanlı liste — " + ", ".join(
-                                "[%s](https://borsapusula.com/kesfet/%s)" % (kesfet.BASLIK[k], kesfet.SLUG[k])
-                                for k in kesfet.LISTS) + "\n- [Hisse Tarayıcı]", 1)
-    if _tpl_ready("haberler.html"):  # D-45/C-57: sayfa canlıysa listelenir
-        body = body.replace("- [Borsa Okulu (Blog)]", "- [Haberler](https://borsapusula.com/haberler): Gündem (Türkiye ve Dünya, "
-                            "günde iki baskı) ve kapsamdaki şirketlerin bildirim akışı; her bildirimin kalıcı sayfası "
-                            "/hisse/{TICKER}/bildirim/{NO}\n- [Borsa Okulu (Blog)]", 1)
-        if _tpl_ready("haberler_bildirimler.html"):   # D-56: Şirket bildirimleri sekmesi
-            body = body.replace("- [Borsa Okulu (Blog)]", "  - [Şirket bildirimleri](https://borsapusula.com/haberler/bildirimler): "
-                                "şirket bildirimleri türe göre (?tur=finansal-rapor, temettu, sermaye, genel-kurul, "
-                                "ihale, kredi-notu, dava, ozel-durum), 30'ar bildirimlik sayfalar\n- [Borsa Okulu (Blog)]", 1)
-        if _bulten_page_ready():   # CPO-1802: Akşam Bülteni alt satırı
-            body = body.replace("- [Borsa Okulu (Blog)]", "  - [Akşam Bülteni](https://borsapusula.com/bulten): gün sonu BIST100 "
-                                "kapanışı, hareketliler, durum değişimleri, ısı haritası özeti; her gün kalıcı "
-                                "sayfa: /bulten/YYYY-AA-GG" + (
-                                    "; tüm bültenler: https://borsapusula.com/bulten/arsiv"
-                                    if _bulten_page_ready("bulten_arsiv.html") else "") + "\n- [Borsa Okulu (Blog)]", 1)
+    _bg = bulten.days(_BULTEN_DIR) if _bulten_page_ready() else []
+    _hg = heatmap.days(_HEATMAP_DIR) if _harita_page_ready() else []
+    if not _bulten_page_ready("bulten_arsiv.html"):
+        body = body.replace("; tüm bültenler: https://borsapusula.com/bulten/arsiv", "")
+    _uyeler = "; BIST 100 endeksinin tüm üyeleri dahil" if BIST100_MEMBERS and BIST100_MEMBERS <= set(BIST100) else ""
+    yer = {
+        "[[KAPSAM]]": "%d şirket%s" % (BIST_STOCK_COUNT, _uyeler),
+        "[[TEMEL]]": ", ".join("%s %%%d" % (temel_skor_v2.AXIS_LABELS[k].lower(), w)
+                               for k, w in temel_skor_v2.WEIGHTS.items()) if temel_skor_v2.enabled() else None,
+        "[[KESFET]]": ", ".join("[%s](https://borsapusula.com/kesfet/%s)" % (kesfet.BASLIK[k], kesfet.SLUG[k])
+                                for k in kesfet.LISTS) if _tpl_ready("kesfet.html") else None,
+        "[[SON_HARITA]]": _hg[-1] if _hg else None,
+        "[[SON_BULTEN]]": _bg[-1] if _bg else None,
+    }
+    body = seo_yonlendirme.yer_tutucu_doldur(body, yer)
     return Response(body, mimetype="text/plain")
 
 

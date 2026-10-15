@@ -91,4 +91,5 @@ def test_sitemap_ve_llms(ortam, monkeypatch):
     assert "/hisse/THYAO/nakit-akis</loc>" in sm and "/hisse/GARAN/bilanco</loc>" in sm
     assert "/hisse/XU030/bilanco" not in sm
     txt = c.get("/llms.txt").get_data(as_text=True)
-    assert "/hisse/{TICKER}/gelir-tablosu" in txt and txt.index("Finansal tablolar") < txt.index("## Metodoloji")
+    assert "/hisse/{TICKER}/gelir-tablosu" in txt and "https://borsapusula.com/hisse/THYAO/bilanco" in txt
+    assert txt.index("Finansal tablolar") < txt.index("## Piyasa")   # C-84: şirket sayfaları bölümünde

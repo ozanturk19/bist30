@@ -4,6 +4,7 @@ D-66  /ozet/<gün>: o günün Akşam Bülteni varsa tek 301 → /bulten/<gün> (
       JSON-LD'li aynı gün sayfası); bülteni olmayan eski günler noindex, follow (app.py).
 D-67  /hisse/XU030 ve /hisse/XU100 endeks kodu, hisse değil → /hisseler'deki endeks bölümüne tek 301;
       /hisseler bağlamına `hisseler_endeks` (KAP endeks üyeliği + dönem etiketi, C-85 bölümleri için).
+C-84  /llms.txt yer tutucuları ([[AD]]) istek anında dolar; dolmayan satır düşer.
 """
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -50,3 +51,12 @@ def hisseler_endeks(universe, evren, adlar):
         out[ad] = [(t, adlar.get(t, t)) for t in uyeler if t in evren]
         out["eksik"] += [t for t in uyeler if t not in evren and t not in out["eksik"]]
     return out
+
+
+def yer_tutucu_doldur(metin, yer):
+    """C-84: `[[AD]]` yer tutucularını `yer` sözlüğünden doldurur; değeri boş olan yer tutucuyu
+    taşıyan SATIR metinden düşer (ör. şablon yayında değil, hiç bülten yok → 404/302'ye bağlantı yok)."""
+    for k, v in yer.items():
+        if v:
+            metin = metin.replace(k, v)
+    return "\n".join(ln for ln in metin.split("\n") if "[[" not in ln)
