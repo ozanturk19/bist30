@@ -128,7 +128,8 @@ def test_full_page_share_link_is_view_url_when_not_default(mode, per, href):
     out = _partial(heatmap_og_image="/harita/%s.png" % DAY, hm_full=True, hm_mode=mode, hm_per=per, hm_path="/sektor-harita")
     assert 'href="%s" data-share-copy>' % href in out
     assert _attr(out, "data-url") == PERMA and _attr(out, "data-view") == "https://borsapusula.com/sektor-harita"
-    assert '<a class="hm-arc" href="/harita">Geçmiş günler</a>' in out
+    # C-86 (D-67): /harita 302 yerine doğrudan 200 dönen bülten arşivi
+    assert '<a class="hm-arc" href="/bulten/arsiv">Geçmiş günler</a>' in out and 'href="/harita"' not in out
     assert out.count("data-hm-share") == 1
 
 

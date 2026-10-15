@@ -115,7 +115,8 @@ def test_market_summary_numbers_and_heatmap(data):
     assert 'class="hv-kv"' in sec and "<dt>BIST100</dt>" in sec and "<dt>Hisseler</dt>" in sec
     assert "Piyasa özeti · 1 Ekim kapanışı" in sec          # "Günün özeti" değil: göreli zaman yok
     assert 'class="hv-tm"' in sec and "Kutu büyüklüğü: piyasa değeri" in sec
-    assert 'href="/bulten/2026-10-01"' in sec and 'href="/harita"' in sec
+    # C-86 (D-67): /harita 302 yerine günün donmuş haritası (lead.day)
+    assert 'href="/bulten/2026-10-01"' in sec and 'href="/harita/2026-10-01"' in sec and 'href="/harita"' not in sec
     # yüzde işareti önünde satır kırılmaz (U+2060)
     assert "\u2060%" in sec
 

@@ -109,7 +109,9 @@ def test_dil_taramasi(fx):
 def test_eski_rota_baglami_bolum_gizler_hata_yok(fx):
     """C-73 D-56'dan önce deploy edilirse: harita/arşiv yok, eski json — 500 yok, boş bölüm yok."""
     html = _page(fx, v2=False)
-    assert 'aria-labelledby="hmH"' not in html and "/bulten/arsiv" not in html
+    # C-86: alt bilgi ve Haberler sekme çubuğu artık /bulten/arsiv'e bağlanır (302 veren /bulten yerine);
+    # kilit, arşiv rotası yokken bülten gövdesindeki "Tüm bültenler" bağlantısının gizlenmesi
+    assert 'aria-labelledby="hmH"' not in html and 'href="/bulten/arsiv">Tüm bültenler' not in html
     assert "28 Eylül 2026'da borsa nasıl kapandı?" in html
     assert 'aria-labelledby="skH"' in html and 'aria-labelledby="ddH"' in html
     assert html.count('class="blv-ad"') == 3
