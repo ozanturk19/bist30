@@ -769,7 +769,7 @@
   .hx-news{ padding:16px 18px; margin-bottom:16px; }
   .hx-news-h{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; }
   .hx-news-t{ margin:0; font-size:var(--bp-type-body); font-weight:700; }
-  .hx-link{ background:none; border:0; padding:0 2px; min-height:32px; cursor:pointer; font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-type-sm); font-weight:600; color:var(--bp-art-cyan); }
+  .hx-link{ background:none; border:0; padding:0 2px; min-height:40px; cursor:pointer; font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-type-sm); font-weight:600; color:var(--bp-art-cyan); }
   .hx-link:focus-visible{ outline:2px solid var(--bp-art-cyan); outline-offset:2px; border-radius:var(--bp-r-sm); }
   .hx-news-l{ list-style:none; margin:0; padding:0; }
   .hx-news-l li{ display:grid; grid-template-columns:72px minmax(0,1fr); gap:12px; padding:10px 0; border-top:1px solid var(--bp-line); }
@@ -779,6 +779,50 @@
   .hx-news-l span{ font-size:var(--bp-type-sm); color:var(--bp-text-3); }
   .hx-news-l li.hx-news-e{ display:block; color:var(--bp-text-3); font-size:var(--bp-type-sm); }
   .hx-disc{ margin:18px 0 4px; font-size:var(--bp-type-sm); color:var(--bp-text-3); }
+  /* C-79 (SEO #2): H1 "{Ad} ({T}) hissesi nasıl?" -- büyük kod H1'in dışında önde (.hx-idr, aria-hidden), ad + soru
+     gövde boyunda; H1'deki "(T)" .sr-only. */
+  .hx-h1{ flex:0 1 auto; min-width:0; margin:0; font-size:var(--bp-type-body); font-weight:400; line-height:1.35; color:var(--bp-text-2); }
+  .hx-idr{ display:inline-flex; flex:none; align-items:baseline; gap:10px; }
+  /* C-80 (Ozan 15.10): "{Ad} kısaca" kartı -- etiket/değer satırları (hx-mean / hx-news kart anatomisi); dar ekranda
+     etiket değerin üstünde. */
+  .hx-ks{ padding:16px 18px; margin-bottom:16px; }
+  .hx-ks-h{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 12px; margin-bottom:8px; }
+  .hx-ks-t{ margin:0; font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); }
+  .hx-ks-a{ margin:0; font-size:var(--bp-type-sm); color:var(--bp-text-3); font-variant-numeric:tabular-nums; }
+  .hx-ks-l{ display:grid; margin:0; }
+  .hx-ks-l > div{ display:grid; grid-template-columns:minmax(0,270px) minmax(0,1fr); gap:2px 16px; padding:9px 0; border-top:1px solid var(--bp-line); }
+  .hx-ks-l > div:first-child{ border-top:0; padding-top:2px; }
+  .hx-ks-l dt{ font-size:var(--bp-type-sm); font-weight:600; line-height:1.5; color:var(--bp-text-3); }
+  .hx-ks-l dd{ margin:0; font-size:var(--bp-type-sm); line-height:1.55; color:var(--bp-text); font-variant-numeric:tabular-nums; overflow-wrap:break-word; }
+  .hx-ks-g{ display:inline-block; max-width:100%; }
+  .hx-ks-n{ white-space:nowrap; }
+  .hx-facts dd, .hx-chg .hx-pct{ white-space:nowrap; }   /* C-80: işaretli yüzde bölünmez */
+  /* C-80: son dört çeyrek mini tablosu -- satır başına tek birim (finansal tablo sayfalarındaki gibi), hücrede
+     sayı + aynı raporun değişimi; dar ekranda kendi kabında kayar, ilk sütun yapışkan. Değişim nötr renk. */
+  .hx-mini{ padding:16px 18px; margin-bottom:16px; background:var(--bp-surface); }
+  .hx-mini-t{ margin:0 0 10px; font-size:var(--bp-type-body); font-weight:700; color:var(--bp-text); }
+  .hx-mini-sc{ overflow-x:auto; overscroll-behavior-x:contain; }
+  .hx-mini-sc:focus-visible{ outline:2px solid var(--bp-art-cyan); outline-offset:2px; border-radius:var(--bp-r-sm); }
+  .hx-mini-tb{ width:100%; border-collapse:collapse; font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-type-sm); font-variant-numeric:tabular-nums; }
+  .hx-mini-tb th, .hx-mini-tb td{ padding:8px 10px; text-align:right; vertical-align:top; border-top:1px solid var(--bp-line); white-space:nowrap; }
+  .hx-mini-tb thead th, .hx-mini-tb thead td{ border-top:0; padding-top:0; font-size:var(--bp-type-xs); font-weight:600; letter-spacing:.04em; line-height:1.3; color:var(--bp-text-3); vertical-align:bottom; }
+  .hx-mini-tb .hx-mini-c0{ position:sticky; left:0; z-index:var(--bp-z-raised); text-align:left; padding-left:0; background:var(--bp-surface); font-weight:600; color:var(--bp-text-2); }
+  .hx-mini-u{ display:block; font-size:var(--bp-type-xs); font-weight:500; color:var(--bp-text-3); }
+  .hx-mini-v{ display:block; font-weight:700; color:var(--bp-text); }
+  .hx-mini-d{ display:block; font-size:var(--bp-type-xs); color:var(--bp-text-3); }
+  .hx-mini-n{ margin:10px 0 12px; font-size:var(--bp-type-xs); line-height:1.5; color:var(--bp-text-3); }
+  .hx-mini .tv-ft{ margin:0; }
+  /* C-80: "Son haberler" satırı tamamı bağlantı (kalıcı bildirim sayfası), dokunma alanı satır boyu. */
+  .hx-news-l li.hx-news-r{ display:block; padding:0; }
+  .hx-news-a{ display:grid; grid-template-columns:72px minmax(0,1fr); gap:12px; padding:10px 0; min-height:44px; color:inherit; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .hx-news-l li.hx-news-r:first-child .hx-news-a{ padding-top:0; }
+  .hx-news-x{ min-width:0; }
+  .hx-news-a:focus-visible{ outline:2px solid var(--bp-art-cyan); outline-offset:2px; border-radius:var(--bp-r-sm); }
+  @media (hover: hover) and (pointer: fine) { .hx-news-a:hover b{ color:var(--bp-brand); } .kap-a:hover{ color:var(--bp-text); } }
+  .kap-a{ color:var(--bp-text-2); text-decoration:none; }
+  .kap-a:focus-visible{ outline:2px solid var(--bp-art-cyan); outline-offset:2px; border-radius:var(--bp-r-sm); }
+  .hx-yontem{ font-size:var(--bp-type-sm); line-height:1.6; color:var(--bp-text-3); }
+  .hx-yontem a, .faq-a .faq-l{ color:var(--bp-art-cyan); }
   .hx-glos{ margin:0 0 12px; font-size:var(--bp-type-sm); color:var(--bp-text-3); line-height:1.6; }
   @media (max-width:980px){
     .hx-top{ grid-template-columns:1fr; gap:16px; }
@@ -792,6 +836,8 @@
     .hx-id{ grid-area:id; flex-wrap:nowrap; }
     .hx-tk{ font-size:var(--bp-type-title); }
     .hx-nm{ font-size:var(--bp-type-sm); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; }
+    .hx-h1{ flex:1 1 auto; font-size:var(--bp-type-sm); }
+    .hx-ks-l > div{ grid-template-columns:minmax(0,1fr); }
     .hx-chip{ display:none; }
     .hx-price{ grid-area:price; font-size:40px; margin:10px 0 4px; align-self:end; }
     .hx-chg{ grid-area:chg; font-size:var(--bp-type-body); }

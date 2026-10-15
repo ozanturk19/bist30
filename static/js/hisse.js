@@ -1,3 +1,8 @@
+/* C-80 (SEO #4): JS'e bağlı sekme iskeletleri (Grafik içi, Temel panel ızgarası) ham HTML'de
+   <template data-hx-lazy> içinde gelir; dosyanın ilk işi onları yerine koymak. Aşağıdaki kodun tamamı
+   öğeleri her zamanki kimlikleriyle bulur (betik gövde sonunda, ayrıştırma bitmiş). */
+document.querySelectorAll('template[data-hx-lazy]').forEach(function (t) { t.replaceWith(t.content.cloneNode(true)); });
+
 /* ── Sinyal görünen etiketleri ───────────────────── */
 window.toggleIndDetails = function() {
   const det = document.getElementById('indTechDetails');
@@ -1159,10 +1164,11 @@ function hxChartDraw() {
   if (j) { try { hxChartSetData(JSON.parse(j.textContent)); } catch (e) { console.warn('closes_30', e); } }
 })();
 
-/* Q3'un DI satiri: SSR'da sayi yok (yalniz etiket metninde), /chart ozetinden. */
+/* Q3'un DI satiri: C-80'den beri SSR'da ssr_signal.di_plus/di_minus (resmi gun sonu) varsa yazili gelir
+   (data-ssr) -- /chart ozeti gun icinde yarim cubuk tasiyabilir, ustune yazilmaz. Yoksa /chart ozetinden. */
 function hxFillDI(sum) {
   const li = document.getElementById('q3Di'), v = document.getElementById('q3DiV'), sr = document.getElementById('q3DiSr');
-  if (!li || !sum || sum.di_plus == null || sum.di_minus == null) return;
+  if (!li || li.dataset.ssr || !sum || sum.di_plus == null || sum.di_minus == null) return;
   const ok = +sum.di_plus > +sum.di_minus;
   li.className = ok ? 'ok' : 'no';
   li.querySelector('i').textContent = ok ? '✓' : '–';
@@ -1174,7 +1180,8 @@ function hxFillDI(sum) {
    `kap` varsa ozsermaye karliligi O22=B son 12 ay, temettu son 12 ay KAP odemeleri / fiyat,
    Q2 hukmu tvValuation (sektor ortancasina oran 0,80 / 1,25; ortanca yoksa hukum yok). */
 function hxFillFund(f, divRow) {
-  const set = (id, txt, dim) => { const el = document.getElementById(id); if (el) { el.textContent = txt; el.classList.toggle('hx-dim', !!dim); } };
+  /* C-80: sunucu (D-68 ozet) dolu yazdigi kutuya ve Q2'ye data-ssr koyar; ayni kural ve bicim, JS dokunmaz. */
+  const set = (id, txt, dim) => { const el = document.getElementById(id); if (el && !el.dataset.ssr) { el.textContent = txt; el.classList.toggle('hx-dim', !!dim); } };
   const k = f && f.kap_durum === 'var' ? f.kap : null;
   const now = k && k.degerleme_simdi;
   if (f) {
@@ -1185,8 +1192,9 @@ function hxFillFund(f, divRow) {
     const yr = k && k.oranlar && k.yillar && k.yillar.length ? k.oranlar[String(k.yillar[k.yillar.length - 1])] : null;
     const bank = k && k.sablon === 'banka', ins = k && k.sablon === 'sigorta';
     const mRow = document.getElementById('hxfMarginRow'), mLbl = document.getElementById('hxfMarginLbl');
-    if (mRow) mRow.hidden = !!ins;
-    if (mLbl) mLbl.textContent = bank ? 'Gider / gelir' : 'Net kâr marjı';
+    const mSsr = (mRow && mRow.dataset.ssr) || (document.getElementById('hxfMargin') || {dataset: {}}).dataset.ssr;
+    if (mRow && !mSsr) mRow.hidden = !!ins;
+    if (mLbl && !mSsr) mLbl.textContent = bank ? 'Gider / gelir' : 'Net kâr marjı';
     const mv = k ? (yr ? yr[bank ? 'gider_gelir' : 'net'] : null) : f.profit_margin;
     set('hxfMargin', mv != null ? bpPctLevel(mv, 1) : '—');
   }
@@ -1201,6 +1209,8 @@ function hxFillFund(f, divRow) {
     set('hxfDiv', recent && HX_PRICE ? bpPctLevel(divRow.last_div_amount / HX_PRICE * 100, 2) : 'Ödeme yok', !recent);
   }
   if (!f) return;
+  const q2 = document.getElementById('q2');
+  if (q2 && q2.dataset.ssr) return;
   const kv = document.getElementById('q2Kv'), ans = document.getElementById('q2Ans'), dot = document.getElementById('q2Dot');
   const V = tvValuation(f);
   const rows = V ? V.rows.filter(r => r.v != null) : [];
@@ -1236,6 +1246,7 @@ function hxFillNews(data) {
   const ul = document.getElementById('hxNewsL');
   if (!ul) return;
   const items = (data && data.disclosures) || [];
+  ul.removeAttribute('aria-busy');
   if (!items.length) { const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none'; return; }
   const fmtD = s => { const p = String(s || '').split(' ')[0].split('.'); return p.length === 3 ? (+p[0]) + ' ' + _HX_AY[+p[1] - 1] : ''; };
   ul.innerHTML = items.slice(0, 3).map(d =>
@@ -1248,9 +1259,13 @@ function loadOzetExtras() {
     const f = fj && fj.fundamentals && Object.keys(fj.fundamentals).length ? fj.fundamentals : null;
     const row = dj === undefined ? undefined : (((dj && dj.stocks) || []).find(x => x.ticker === TICKER) || null);
     hxFillFund(f, row);
-    if (!f) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Temel skor hesaplanmadı'; }
+    const q2 = document.getElementById('q2');
+    if (!f && !(q2 && q2.dataset.ssr)) { const a = document.getElementById('q2Ans'); if (a) a.textContent = 'Temel skor hesaplanmadı'; }
   });
-  /* C-25c: "Son haberler" ilk ekranin altinda -- /kap blok yaklasinca istenir */
+  /* C-25c: "Son haberler" ilk ekranin altinda -- /kap blok yaklasinca istenir. C-80: satirlar SSR'da
+     geldiyse (data-ssr) istek yok; Haberler sekmesi /kap'i kendisi ister. */
+  const news = document.getElementById('hxNews');
+  if (news && news.dataset.ssr) return;
   const ul = document.getElementById('hxNewsL');
   const load = () => _bpKapJSON().then(hxFillNews).catch(() => {
     const sec = document.getElementById('hxNews'); if (sec) sec.style.display = 'none';
@@ -1383,6 +1398,8 @@ async function loadKapDisclosures() {
     listEl.style.display = '';
 
   } catch(e) {
+    /* C-80: sunucunun yazdigi son 10 bildirim (data-ssr) yerinde kalir; hata kutusu yalniz liste bossa. */
+    if (listEl.dataset.ssr) { loadEl.style.display = 'none'; return; }
     loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Bildirimler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadKapDisclosures()">Tekrar dene</button></div>';
   }
 }

@@ -1,25 +1,23 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{#- C-79 (SEO #2): başlık, açıklama ve JSON-LD temel analiz önde ve günden güne değişmez. Title sabit kalıp
+    (trend durumu ya da gösterge yok); açıklama D-68 `ozet.meta` (tek tarihli veri cümlesi); keywords yok;
+    JSON-LD finansal tablo sayfasının deseni: WebPage + about Corporation "BIST:<T>" + FAQPage + BreadcrumbList.
+    `ozet` yoksa (arka uç henüz eski) sabit yedek cümle; FinancialProduct yok. -#}
+{%- set oz = ozet if (ozet is defined and ozet) else {} -%}
+{%- set _ad = name if (name and name != ticker) else none -%}
+{%- set _adk = (_ad ~ ' (' ~ ticker ~ ')') if _ad else ticker -%}
 {% if kapsam_disi %}
   {#- C-70 K16: kapsam dışı pay — dürüst başlık/açıklama, dizine girmez (sitemap'te de yok). -#}
   {% set _st = ticker ~ ' — ' ~ name ~ ' · analiz kapsamı dışında | BorsaPusula' %}
+  {% set _sn = _st %}
   {% set _sd = kapsam_disi.metin %}
-{% elif ssr_signal and ssr_signal.signal == 'AL' %}
-  {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
-{% elif ssr_signal and ssr_signal.signal == 'SAT' %}
-  {% set _st = ticker ~ ' Trend Bozuldu — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
-{% elif ssr_signal %}
-  {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Gün sonu trend ve şirket analizi.' %}
 {% else %}
-  {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') trend durumu ve şirket analizi. Supertrend, ADX ve EMA göstergeleriyle gün sonu analizi.' %}
+  {% set _sn = _adk ~ ' hisse: finansallar, değerleme, trend' %}
+  {% set _st = _sn ~ ' | BorsaPusula' %}
+  {% set _sd = oz.meta or (_adk ~ ' hisse sayfası: finansallar, değerleme ve trend.') %}
 {% endif %}
 {% if kapsam_disi %}<meta name="robots" content="noindex, follow">{% endif %}
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
-<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} trend dönüş seviyesi, {{ ticker }} RSI ADX">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 {# Open Graph #}
@@ -36,67 +34,23 @@
 <meta name="twitter:title"       content="{{ _st }}">
 <meta name="twitter:description" content="{{ _sd }}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FinancialProduct",
-  "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
-  "description": "{{ ticker }} hissesi için Supertrend, ADX ve EMA göstergeleriyle trend durumu ve şirket analizi. Gün sonu güncelleme.",
-  "url": "https://borsapusula.com/hisse/{{ ticker }}",{# K-DM: "Diğer" siniflandirilamayanlarin catch-all kovasi; makine-okunur
-       bir kategori/anahtar-kelime olarak "Diğer hisseleri" bilgi tasimaz. #}{% if sector and sector != 'Diğer' %}
-  "category": "{{ sector }}",{% endif %}
-  "provider": {
-    "@type": "Organization",
-    "name": "BorsaPusula",
-    "url": "https://borsapusula.com"
-  },{% if seo_signal or seo_score or seo_adx or (hs_available and hs.borsapusula_skoru is not none) %}
-  {# bughunt-13.09 (finansal-analist workflow, GEO §2): BorsaPusula Skoru
-     sitenin en özgün metriği olmasına rağmen sadece görünür HTML'deydi,
-     yapılandırılmış veride yoktu — AI motorları JSON-LD'yi HTML'den daha
-     güvenilir sayar. #}
-  "additionalProperty": [
-    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_adx is not none %},
-    {# CPO-1649: |int KESER (13.5→13), FAQ metni app.py:8080'de {:.0f} kullanıyor
-       (13.5→14, round-half) — aynı sayfada iki farklı yuvarlama kuralı "3 farklı
-       sayı" çelişkisine katkıda bulunuyordu. |round FAQ ile aynı davranışa (en
-       yakın tam sayı) yaklaştırır. #}
-    {"@type": "PropertyValue", "name": "ADX", "value": "{{ '%.1f'|format(seo_adx) }}"}{% endif %}{% if seo_rsi is not none %},
-    {"@type": "PropertyValue", "name": "RSI", "value": "{{ '%.1f'|format(seo_rsi) }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
-    {"@type": "PropertyValue", "name": "BorsaPusula Skoru", "value": "{{ hs.borsapusula_skoru }}"}{% endif %}
-  ],{% endif %}
-  "inLanguage": "tr"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://borsapusula.com/"},
-    {"@type": "ListItem", "position": 2, "name": "{{ ticker }} — {{ name }}", "item": "https://borsapusula.com/hisse/{{ ticker }}"}
-  ]
-}
-</script>
-{% if seo_faq %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {% for item in seo_faq %}
-    {
-      "@type": "Question",
-      "name": {{ item.q|tojson }},
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": {{ item.a|tojson }}
-      }
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ]
-}
-</script>
-{% endif %}
+{%- set _base = 'https://borsapusula.com' -%}
+{%- set _url = _base ~ '/hisse/' ~ ticker -%}
+{%- set _corp = {'@type': 'Corporation', 'name': name or ticker, 'tickerSymbol': 'BIST:' ~ ticker} -%}
+{%- if oz.faaliyet %}{% set _ = _corp.update({'description': oz.faaliyet}) %}{% endif -%}
+{%- set _page = {'@type': 'WebPage', '@id': _url ~ '#sayfa', 'url': _url, 'name': _sn, 'description': _sd, 'inLanguage': 'tr',
+   'isPartOf': {'@type': 'WebSite', '@id': _base ~ '/#website', 'name': 'BorsaPusula', 'url': _base ~ '/'},
+   'about': _corp, 'breadcrumb': {'@id': _url ~ '#yol'}} -%}
+{%- if oz.kapanis %}{% set _ = _page.update({'dateModified': oz.kapanis.tarih}) %}{% endif -%}
+{%- set _graph = [_page, {'@type': 'BreadcrumbList', '@id': _url ~ '#yol', 'itemListElement': [
+    {'@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa', 'item': _base ~ '/'},
+    {'@type': 'ListItem', 'position': 2, 'name': _adk, 'item': _url}]}] -%}
+{%- if seo_faq -%}
+{%- set _qs = [] -%}
+{%- for item in seo_faq %}{% set _ = _qs.append({'@type': 'Question', 'name': item.q, 'acceptedAnswer': {'@type': 'Answer', 'text': item.a}}) %}{% endfor -%}
+{%- set _ = _graph.append({'@type': 'FAQPage', '@id': _url ~ '#sss', 'mainEntity': _qs}) -%}
+{%- endif %}
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@graph': _graph}|tojson }}</script>
 {# lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir #}
 <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_v('css/data-art.css') }}">
@@ -126,6 +80,19 @@
 {#- C-25a: ilk sekme sunucuda secili gelir (D-18b `initial_tab`, dogrulanmis ?tab=). Gorunurluk
     tek kanon: <main data-hx-tab> + hisse.css kurali; applyTab yalniz bu niteligi degistirir. -#}
 {%- set _it = initial_tab if (initial_tab is defined and initial_tab) else 'ozet' -%}
+{#- D-68 `ozet` (C-80): cevap-önde paragraf, başlık olguları, "Fiyatı makul mü?", son 3 bildirim, 4 çeyrek
+    mini tablo ham HTML'de. Yoksa (arka uç eski) bloklar bugünkü gibi JS ile dolar. -#}
+{%- set oz = ozet if (ozet is defined and ozet) else {} -%}
+{#- C-80: işaretli yüzde satır sonunda bölünmez ("(−" | "%24,6)" olmasın): işaret ile % arasına U+2060, önceki sözcük ile
+    % arasına bölünmez boşluk. "Kısaca" kartında her "değer (±%)" ve "F/K a (…)" grubu tek parça; satır yalnız " · "
+    ayırıcılarında, grup karttan genişse yalnız "(" öncesindeki boşlukta kırılır. -#}
+{%- macro _nb(t) -%}{{ (t or '')|replace(' %', ' %')|replace('−%', '−⁠%')|replace('+%', '+⁠%')|replace('-%', '-⁠%') }}{%- endmacro -%}
+{%- macro _ksg(deger) -%}
+{%- for g in deger.split(' · ') -%}
+{%- set p = g.split(' (', 1) -%}
+<span class="hx-ks-g">{% if p|length == 2 %}<span class="hx-ks-n">{{ _nb(p[0]) }}</span> <span class="hx-ks-n">({{ _nb(p[1]) }}</span>{% else %}<span class="hx-ks-n">{{ _nb(g) }}</span>{% endif %}</span>{% if not loop.last %} · {% endif %}
+{%- endfor -%}
+{%- endmacro -%}
 <main id="main-content" class="container container--wide" tabindex="-1" data-hx-tab="{{ _it }}">
 
   {% include '_stale_banner.html' %}
@@ -211,21 +178,29 @@
   <section class="hx-top" aria-label="{{ ticker }} fiyat özeti">
     <div class="hx-head">
       <div class="hx-id">
-        <h1 class="hx-tk">{{ ticker }}</h1>
-        <span class="hx-nm" title="{{ name }}">{{ name }}</span>
-        {% if sector %}<span class="hx-chip">{{ sector }}</span>{% endif %}
-        {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><svg class="da-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Anomal</span>{% endif %}
+        {#- C-79: H1 metni tam "{Ad} ({T}) hissesi nasıl?". Büyük kod bugünkü gibi önde görünür ama H1'in dışında
+            (aria-hidden; okuyucu kodu H1'deki görünmez "(T)"den bir kez duyar); ad + soru H1'de doğal satır kırar. -#}
+        <span class="hx-idr">
+          <span class="hx-tk" aria-hidden="true">{{ ticker }}</span>
+          {% if sector %}<span class="hx-chip">{{ sector }}</span>{% endif %}
+          {% if ssr_signal and ssr_signal.anomaly and ssr_signal.anomaly.flag %}<span id="hpAnomalyBadge" class="anomaly-badge" tabindex="0" data-tip="{{ ssr_signal.anomaly.reason or 'Fiyat/hacim normal dağılımın dışında' }}" aria-label="Anomali{{ (': ' ~ ssr_signal.anomaly.reason) if ssr_signal.anomaly.reason else '' }}"><svg class="da-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Anomal</span>{% endif %}
+        </span>
+        <h1 class="hx-h1">{% if name and name != ticker %}{{ name }} <span class="sr-only">({{ ticker }})</span> {% else %}<span class="sr-only">{{ ticker }}</span> {% endif %}hissesi nasıl?</h1>
       </div>
       <div class="hx-price da-display" id="hpPrice">{{ _px|tr_price if _px is not none else '—' }}<small>₺</small></div>
       <div class="hx-chg">
         <span id="hpChg" class="hx-pct {{ bpf.dir_class(_ch, 2, 'up,down,neu') }}">{{ bpf.pct_text(_ch, 2) }}</span>
         {%- if _asof_d %} <span class="hx-dt">{{ _asof_d }} {{ _AYLAR[_asof_m - 1] }} kapanışı</span>{% endif %}
       </div>
+      {#- C-80: 4 temel gösterge ham HTML'de (D-68 ozet.olgular = hisse.js hxFillFund ile aynı kural ve biçim);
+          dolu kutu data-ssr taşır, JS dokunmaz. Değer yoksa bugünkü gibi JS doldurur. -#}
+      {%- set _of = oz.olgular if oz.olgular else {} -%}
+      {%- macro _fact(id, v) -%}<dd id="{{ id }}"{% if v %} data-ssr="1"{% if v.soluk %} class="hx-dim"{% endif %}{% endif %}>{{ v.metin if v else '—' }}</dd>{%- endmacro -%}
       <dl class="hx-facts" id="hxFacts" data-tab-content="ozet" aria-label="Temel göstergeler">
-        <div><dt>Piyasa değeri</dt><dd id="hxfMcap">—</dd></div>
-        <div><dt>Özsermaye kârlılığı</dt><dd id="hxfRoe">—</dd></div>
-        <div id="hxfMarginRow"><dt id="hxfMarginLbl">Net kâr marjı</dt><dd id="hxfMargin">—</dd></div>
-        <div><dt>Temettü (son 12&nbsp;ay)</dt><dd id="hxfDiv">—</dd></div>
+        <div><dt>Piyasa değeri</dt>{{ _fact('hxfMcap', _of.piyasa_degeri) }}</div>
+        <div><dt>Özsermaye kârlılığı</dt>{{ _fact('hxfRoe', _of.ozsermaye_karliligi) }}</div>
+        <div id="hxfMarginRow"{% if _of.marj_gizli %} hidden data-ssr="1"{% endif %}><dt id="hxfMarginLbl">{{ _of.marj_etiket or 'Net kâr marjı' }}</dt>{% if _of.marj_gizli %}<dd id="hxfMargin" data-ssr="1"></dd>{% else %}{{ _fact('hxfMargin', _of.marj) }}{% endif %}</div>
+        <div><dt>Temettü (son 12&nbsp;ay)</dt>{{ _fact('hxfDiv', _of.temettu) }}</div>
       </dl>
       <div class="hx-acts">
         <button class="hib-action-btn hx-act hx-act--pri" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" data-tip="Durum değişince e-postayla haber al" aria-label="Takip et" aria-pressed="false">
@@ -299,6 +274,9 @@
 
   {# Grafik #}
   <div id="chart-section" data-tab-content="grafik" class="da-panel da-panel--accent chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0">
+    {#- C-80: sekmenin iskeleti (etiketler, dönem çipleri, 52 hafta şeridi) JS'e bağlı; ham HTML'de <template>
+        içinde durur (JS'siz okuyucuda ve AI tarayıcıda boş kabuk metni yok), hisse.js ilk satırda yerine koyar. -#}
+    <template data-hx-lazy>
     <div class="chart-header">
       <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik</span>
       <span class="chart-label">{{ ticker }}</span>
@@ -315,7 +293,7 @@
       <button type="button" class="ch-ema" id="chEma" aria-pressed="false">EMA 12/99</button>
     </div>
     <div id="chartBody" style="min-height:420px">
-    <div id="chartLoading" class="da-loading da-loading--block"><div class="da-spin"></div> Grafik yükleniyor…</div>
+    <div id="chartLoading" class="da-loading da-loading--block" aria-hidden="true"><div class="da-spin"></div></div>
     <div id="chartsInner" style="position:relative;min-height:420px">
       {# K-CB (22.09): buradaki erisilebilir ad SSR'da sabit "2 yıl" diyordu ve
          hic guncellenmiyordu — GORUNEN sure etiketi (#chartPeriod) ise bar
@@ -340,21 +318,22 @@
         <div class="week52-track">
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
           <div class="week52-cursor" id="w52cursor" style="left:0%"></div>
-          <div class="week52-cap" id="w52cap" style="left:0%"><span class="sr-only">Güncel fiyat: </span><span id="w52cur">—</span></div>
+          <div class="week52-cap" id="w52cap" style="left:0%"><span class="sr-only">Güncel fiyat: </span><span id="w52cur"></span></div>
         </div>
         <div class="week52-ends">
           <span class="week52-end">
             <span class="week52-endlbl">En düşük</span>
-            <span id="w52low" class="week52-endval bp-sat-text">—</span>
+            <span id="w52low" class="week52-endval bp-sat-text"></span>
           </span>
           <span class="week52-end week52-end-hi">
             <span class="week52-endlbl">En yüksek</span>
-            <span id="w52high" class="week52-endval bp-al-text">—</span>
+            <span id="w52high" class="week52-endval bp-al-text"></span>
           </span>
         </div>
       </div>
     </div>
     </div>
+    </template>
   </div>
 
   {# K-CP (22.09): sarmalayici `role="tabpanel"` idi ama `data-tab-content`
@@ -440,7 +419,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
           {%- endif %}
           {%- endfor %}
         </ul>
-        <p class="hx-qp">{% if _tv2 %}Temel skor {{ tv2_weights(_tv2)|trim|replace('Beş', 'beş', 1) }}{% elif 'nakit_akisi' in _na %}Temel skor iki alanın ağırlıklı ortalaması: kârlılık %67, değerleme ve büyüme %33.{% elif 'kaldirac' in _na %}Temel skor üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% else %}Temel skor dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% endif %}</p>
+        {#- C-80: ağırlık cümlesi (yöntem) burada tekrar edilmez; Temel sekmesinde bir kez (tv-kind). -#}
         {% elif _tv2 and _tv2.limited_data %}
         <p class="hx-ans"><span class="hx-dot hx-dot--fin" aria-hidden="true"></span>Temel skor verilmedi</p>
         <p class="hx-qp">{{ tv2_limited(_tv2)|trim }}</p>
@@ -453,12 +432,23 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
           tek kanon (tvValuation): F/K ve PD/DD `kap` varsa son 12 ay (O22=B), oran = deger / sektor
           ortancasi (D-51; akran <3 ise BIST), <0,80 ucuz, >1,25 pahali (kanon §5.6). Ortanca yoksa
           yalniz deger yazilir, hukum yok. -#}
-      <div class="hx-q" id="q2">
+      {#- C-80: cevap ham HTML'de (D-68 ozet.degerleme = tvValuation + hxFillFund'ın Python karşılığı; v2 hükmü
+          varsa o). data-ssr: hisse.js Q2'ye dokunmaz. ozet yoksa bugünkü gibi JS doldurur. -#}
+      {%- set _dg = oz.degerleme if oz.degerleme else none %}
+      <div class="hx-q" id="q2"{% if _dg %} data-ssr="1"{% endif %}>
         <h3 class="hx-qq">Fiyatı makul mü?</h3>
-        <p class="hx-ans"><span class="hx-dot hx-dot--val" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">—</span></p>
+        {%- if _dg %}
+        <p class="hx-ans"><span class="hx-dot {{ _dg.sinif }}" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">{{ _dg.cevap }}</span></p>
+        <dl class="hx-kv" id="q2Kv">{% for r in _dg.satirlar %}<div><dt>{{ r.dt }}</dt><dd>{{ r.dd }}{% if r.ortanca %} <small>· {{ r.ortanca }}</small>{% endif %}</dd></div>{% endfor %}</dl>
+        {%- set _an = _dg.analist %}
+        <p class="hx-an" id="q2An"{% if not _an %} hidden{% endif %}>{% if _an %}Analist hedef ortalaması <b>{{ _an.hedef }}</b>&nbsp;· fiyatın <b>{{ _an.fark }}</b> {{ _an.yon }}&nbsp;· {{ _an.sayi }}&nbsp;analist{% endif %}</p>
+        <p class="hx-qp" id="q2Note"{% if not _dg['not'] %} hidden{% endif %}>{{ _dg['not'] or '' }}</p>
+        {%- else %}
+        <p class="hx-ans"><span class="hx-dot hx-dot--val" id="q2Dot" aria-hidden="true"></span><span id="q2Ans"></span></p>
         <dl class="hx-kv" id="q2Kv"><div><dt>F/K ve PD/DD</dt><dd>Temel sekmesinde</dd></div></dl>
         <p class="hx-an" id="q2An" hidden></p>
         <p class="hx-qp" id="q2Note" hidden></p>
+        {%- endif %}
       </div>
       {#- Q3 -- Trend destekliyor mu? (durum + gun + hukum + 5 kosul + trend donus seviyesi) -#}
       {%- set _pr = _q.price -%}{%- set _sl = _q.sl_level -%}
@@ -481,12 +471,14 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         {%- set _c5 = (_q.weekly_trend == 1) -%}
         {#- DI: ADX >= 25 iken motorun adx.bull/bear bayragi DI yonunu verir; ADX < 25'te bilinmez -> JS. -#}
         {%- set _c4 = none -%}
-        {%- if _c2 and _adi -%}{%- set _c4 = true if _adi.bull else (false if _adi.bear else none) -%}{%- endif %}
+        {%- set _dip = _q.get('di_plus') -%}{%- set _dim = _q.get('di_minus') -%}
+        {%- if _dip is not none and _dim is not none -%}{%- set _c4 = _dip > _dim -%}
+        {%- elif _c2 and _adi -%}{%- set _c4 = true if _adi.bull else (false if _adi.bear else none) -%}{%- endif %}
         <ul class="hx-conds" aria-label="Trend koşulları">
           <li class="{{ 'ok' if _c1 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c1 else '–' }}</i><span>Fiyat trend dönüş seviyesinin üstünde<span class="sr-only">{{ ': sağlanıyor' if _c1 else ': sağlanmıyor' }}</span></span><b>{{ _sl|tr_price }} ₺</b></li>
           <li class="{{ 'ok' if _c2 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c2 else '–' }}</i><span>Trend gücü yeterli (ADX ≥ 25)<span class="sr-only">{{ ': sağlanıyor' if _c2 else ': sağlanmıyor' }}</span></span><b>{{ ('%.1f'|format(_q.adx))|replace('.', ',') if _q.adx is not none else '—' }}</b></li>
           <li class="{{ 'ok' if _c3 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c3 else '–' }}</i><span>Kısa vade uzun vadenin üstünde (EMA 12 &gt; EMA 99)<span class="sr-only">{{ ': sağlanıyor' if _c3 else ': sağlanmıyor' }}</span></span><b>{{ _e12|tr_price }} / {{ _e99|tr_price }}</b></li>
-          <li class="{{ 'ok' if _c4 else ('no' if _c4 is sameas false else 'unk') }}" id="q3Di"><i aria-hidden="true">{{ '✓' if _c4 else ('–' if _c4 is sameas false else '·') }}</i><span>Yön alıcılardan yana (DI+ &gt; DI−)<span class="sr-only" id="q3DiSr">{{ ': sağlanıyor' if _c4 else (': sağlanmıyor' if _c4 is sameas false else '') }}</span></span><b id="q3DiV">—</b></li>
+          <li class="{{ 'ok' if _c4 else ('no' if _c4 is sameas false else 'unk') }}" id="q3Di"{% if _dip is not none and _dim is not none %} data-ssr="1"{% endif %}><i aria-hidden="true">{{ '✓' if _c4 else ('–' if _c4 is sameas false else '·') }}</i><span>Yön alıcılardan yana (DI+ &gt; DI−)<span class="sr-only" id="q3DiSr">{{ ': sağlanıyor' if _c4 else (': sağlanmıyor' if _c4 is sameas false else '') }}</span></span><b id="q3DiV">{% if _dip is not none and _dim is not none %}{{ ('%.1f'|format(_dip))|replace('.', ',') }} / {{ ('%.1f'|format(_dim))|replace('.', ',') }}{% endif %}</b></li>
           <li class="{{ 'ok' if _c5 else 'no' }}"><i aria-hidden="true">{{ '✓' if _c5 else '–' }}</i><span>Haftalık trend yukarı<span class="sr-only">{{ ': sağlanıyor' if _c5 else ': sağlanmıyor' }}</span></span><b>{{ 'yukarı' if _q.weekly_trend == 1 else ('aşağı' if _q.weekly_trend == -1 else 'belirsiz') }}</b></li>
         </ul>
         {% if _sl %}<p class="hx-lvl">Trend dönüş seviyesi (Supertrend): <b>{{ _sl|tr_price }} ₺</b>{% if _gap is not none %} · fiyatın %{{ _gaps }} {{ 'altında' if _sl < _pr else 'üstünde' }}{% endif %}</p>{% endif %}
@@ -500,8 +492,10 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       (kanon §3), finansal cumle financial_health_score.build_rationale ile ayni
       esiklerden (>=70 guclu, >=50 ortalama, <50 zayif). Yapay zeka degil -> rozet
       "Kural tabanli". O5=B olursa AI metni ayni karta girer (plan C-19). -#}
-  {% if ssr_signal %}
-  {%- set _ms = ssr_signal.signal -%}
+  {#- C-80: "Trend." paragrafı (beş koşulun genel tarifi) kalktı -- yöntem metni sayfada bir kez, SSS ve yöntem
+      bölümünde bağlantıyla; şirkete özel trend cümlesi Q3'te ve H1 altındaki paragrafta. Kart yalnız AI notu ya da
+      Finansallar cümlesi varken çizilir. -#}
+  {% if ssr_signal and ((ai_not and ai_not['not']) or (hs_available and hs.categories)) %}
   <section class="da-panel hx-mean" id="meaningCard" aria-labelledby="meaningTitle">
     <div class="hx-mean-h">
       <h2 class="hx-mean-t" id="meaningTitle">Ne anlama geliyor?</h2>
@@ -518,11 +512,6 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       <p class="hx-ai-p">{{ ai_not['not'] }}</p>
     </div>
     {%- endif %}
-    <p class="hx-mean-p"><b>Trend.</b>
-    {%- if _ms == 'AL' %} Güçlü Trend: beş koşulun beşi de aynı anda sağlanıyor (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı). Kapanış trend dönüş seviyesinin altına inerse bu durum sona erer.
-    {%- elif _ms == 'SAT' %} Trend Bozuldu: koşullar tersine dönmüş durumda (fiyat trend dönüş seviyesinin altında, ADX ≥ 25 ve DI− &gt; DI+, EMA 12 &lt; EMA 99, haftalık trend aşağı). Kapanış trend dönüş seviyesinin üstüne çıkmadan trend desteklemiyor.
-    {%- else %} Yatay: beş koşul aynı anda sağlanmıyor. Güçlü Trend için beşinin birlikte sağlanması gerekir (fiyat trend dönüş seviyesinin üstünde, ADX ≥ 25, DI+ &gt; DI−, EMA 12 &gt; EMA 99, haftalık trend yukarı).
-    {%- endif %}</p>
     {%- if hs_available and hs.categories %}
     {%- set _mn = {'karlilik': 'kârlılık', 'nakit_akisi': 'nakit akışı', 'kaldirac': 'borç durumu', 'degerleme_buyume': 'değerleme ve büyüme', 'kalite': 'kalite', 'degerleme': 'değerleme', 'buyume': 'büyüme', 'bilanco': 'bilanço sağlığı', 'temettu': 'temettü'} -%}
     {%- set _mc = hs.categories.items()|list|sort(attribute='1', reverse=true) -%}
@@ -536,14 +525,65 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   </section>
   {% endif %}
 
-  {#- C-20: Son haberler (3 bildirim, C-M1) -> Haberler sekmesi. /kap Ozet acilinca bir kez istenir
-      (Haberler sekmesi ayni yaniti kullanir). Satirlar dis baglanti tasimaz (kanon §2.8). -#}
-  <section class="da-panel hx-news" id="hxNews" aria-labelledby="hxNewsT">
+  {#- C-80 (Ozan 15.10): "{Ad} kısaca" -- cevap-önde özet H1 altında düz yazı yerine burada madde madde (D-68
+      ozet.kisaca). Her satır kendi dönemini taşır; verisi olmayan satır çizilmez ("—" yok); başlık olguları
+      (piyasa değeri, özsermaye kârlılığı, marj) tekrar edilmez. Alt başlık tarihi bar_date'ten (closes_30 değil).
+      Tam paragraf meta açıklamada ve ilk SSS cevabında ("{Ad} ({T}) hissesi nasıl?", FAQPage JSON-LD) kalır. -#}
+  {%- set _ks = oz.kisaca if oz.kisaca else none %}
+  {%- if _ks %}
+  <section class="da-panel hx-ks" id="hxKisaca" aria-labelledby="hxKisacaT">
+    <div class="hx-ks-h">
+      <h2 class="hx-ks-t" id="hxKisacaT">{{ _ks.baslik }}</h2>
+      {%- if _ks.alt %}<p class="hx-ks-a">{{ _ks.alt }}</p>{% endif %}
+    </div>
+    <dl class="hx-ks-l">
+      {%- for r in _ks.satirlar %}
+      <div data-k="{{ r.anahtar }}"><dt>{{ r.etiket }}</dt><dd>{% if r.anahtar in ('son_rapor', 'degerleme') %}{{ _ksg(r.deger) }}{% else %}{{ _nb(r.deger) }}{% endif %}</dd></div>
+      {%- endfor %}
+    </dl>
+  </section>
+  {%- endif %}
+
+  {#- C-80 (D-68 ozet.mini_tablo): son 4 açıklanan çeyreğin 3 aylık tutarları + aynı raporun geçen yıl aynı çeyreğine
+      göre değişimi; 4. çeyrek yıllık rapordan türetilmez (kanon §3). Üç finansal tablo sayfasına bağlanır. Dar ekranda
+      tablo kendi kabında yatay kayar, ilk sütun yapışkan (sayfa gövdesi kaymaz). -#}
+  {%- set _mt = oz.mini_tablo if oz.mini_tablo else none %}
+  {%- if _mt %}
+  <section class="da-panel hx-mini" id="hxMini" data-tab-content="ozet" aria-labelledby="hxMiniT">
+    <h2 class="hx-mini-t" id="hxMiniT">{{ _mt.soru }}</h2>
+    <div class="hx-mini-sc" role="region" aria-labelledby="hxMiniT" tabindex="0">
+      <table class="hx-mini-tb">
+        <thead><tr><td class="hx-mini-c0"></td>{% for c in _mt.sutunlar %}<th scope="col" data-donem="{{ c.donem }}">{{ c.ust }}<br>{{ c.alt }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {%- for r in _mt.satirlar %}
+          <tr><th scope="row" class="hx-mini-c0">{{ r.etiket }}<span class="hx-mini-u">{{ r.birim or '' }}</span></th>{% for h in r.hucreler %}<td>{% if h %}<span class="hx-mini-v">{{ h.sayi or h.metin }}</span>{% if h.degisim %}<span class="hx-mini-d">{{ h.degisim }}</span>{% endif %}{% endif %}</td>{% endfor %}</tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="hx-mini-n">{{ _mt.notlar|join(' ') }}</p>
+    {%- if finansal_tablolar is defined and finansal_tablolar %}
+    <nav class="tv-ft hx-mini-ft" aria-label="{{ ticker }} finansal tabloları">
+      <span class="tv-ft-ls">{% for _b in finansal_tablolar %}<a class="tv-ft-a" href="{{ _b.href }}">{{ _b.ad }}<span class="tv-ft-o" aria-hidden="true">→</span></a>{% endfor %}</span>
+    </nav>
+    {%- endif %}
+  </section>
+  {%- endif %}
+
+  {#- C-20: Son haberler (3 bildirim, C-M1) -> Haberler sekmesi. C-80: satırlar ham HTML'de (D-68 ozet.bildirimler,
+      önce rutin olmayanlar), her satır sitenin kalıcı bildirim sayfasına bağlanır (dış bağlantı yok, kanon §2.8).
+      ozet yoksa bugünkü gibi /kap yaklaşınca JS doldurur (yer tutucu metin yok). -#}
+  {%- set _bl = oz.bildirimler if oz.bildirimler else [] %}
+  <section class="da-panel hx-news" id="hxNews" aria-labelledby="hxNewsT"{% if _bl %} data-ssr="1"{% endif %}>
     <div class="hx-news-h">
       <h2 class="hx-news-t" id="hxNewsT">Son haberler</h2>
       <button type="button" class="hx-link" onclick="if(window.applyTab){applyTab('haberler');window.bpScrollTop();}">Haberler sekmesi <span aria-hidden="true">→</span></button>
     </div>
-    <ul class="hx-news-l" id="hxNewsL"><li class="hx-news-e">Bildirimler yükleniyor…</li></ul>
+    <ul class="hx-news-l" id="hxNewsL"{% if not _bl %} aria-busy="true"{% endif %}>
+      {%- for b in _bl %}
+      <li class="hx-news-r"><a class="hx-news-a" href="{{ b.href }}"><time datetime="{{ b.tarih }}">{{ (b.tarih_metin.rsplit(' ', 1)[0]) if b.tarih_metin else '' }}</time><span class="hx-news-x"><b>{{ b.baslik }}</b><span>{{ b.tur }}</span></span></a></li>
+      {%- endfor %}
+    </ul>
   </section>
 
 
@@ -574,20 +614,23 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
        zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
        kardes bir bileseni yok etmemeli). #}
   {#- C-21a (25.09): Yatay'da Hacim Profili gosterilmez (plan C-21a); panel yalniz Guclu Trend / Trend Bozuldu'da. -#}
+  {#- C-80: panelin satırları yalnız JS ile dolar (SSR'da gizli); ham HTML'de <template>, hisse.js yerine koyar. -#}
+  <template data-hx-lazy>
   <div class="entry-analysis-section" id="volumeProfileSection">
     <h2 class="section-title">Hacim Profili</h2>
     <div class="hacim-profili">
       <div class="hp-row-line" id="hpRvolRow" style="display:none">
         <span class="hp-row-text"><abbr tabindex="0" data-tip="Son 5 seansın ortalama hacmi / son 20 seansın ortalama hacmi">Hacim oranı</abbr> (5 gün / 20 gün):</span>
-        <span class="hp-row-val" id="hpRvolVal">—</span>
+        <span class="hp-row-val" id="hpRvolVal"></span>
       </div>
       <div class="hp-row-line" id="hpSvolRow" style="display:none">
         <span class="hp-row-text">Sinyal günü hacim:</span>
-        <span class="hp-row-val" id="hpSvolVal">—</span>
+        <span class="hp-row-val" id="hpSvolVal"></span>
       </div>
       <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
+  </template>
 
   {#- C-74 K10/K11 (02.10, O29): Coklu Zaman Dilimi, sinyal mini istatistikleri ve getirili
       Sinyal Gecmisi tablosu kalkti — tarihli durum listesi Grafik sekmesinde (Son 6 durum degisimi). -#}
@@ -596,110 +639,31 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
 {% endif %}
 
 
-  {#- C-19: Hap Bilgi / SSS / Metodoloji (+ Hakkinda, Teknik Ozet) SSR'da kalir
-      (GEO: tarayici ve AI arama motoru okur), ama yalniz Ozet dibinde tek
-      <details> icinde. JSON-LD (FAQPage/FinancialProduct) <head>'de degismedi. -#}
+  {#- C-19: SSS ve yöntem SSR'da kalır (GEO: tarayıcı ve AI arama motoru okur), Özet dibinde tek <details> içinde.
+      C-80 (SEO #4, kalıp metin azaltma): "Hakkında" (SSS'teki "ne iş yapar?" ile aynı metin), "Teknik Özet" ve
+      "Hap Bilgi" (başlık olgularının ve Q3'ün tekrarı) ile uzun "Sinyal Metodolojisi" kalktı. SSS D-68 şirket
+      soruları (ne iş yapar, temettü, bilanço, F/K, teknik görünüm); yöntem tek cümle + Metodoloji bağlantısı. -#}
   <details class="bp-detail-toggle hx-more" id="ozetMore">
     <summary class="bp-detail-toggle-summary">
       <span class="bp-detail-toggle-label">Sık sorulanlar ve yöntem</span>
       <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
     </summary>
     <div class="bp-detail-toggle-body">
-  {% if company_summary %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): sunucunun
-     önbellekteki ~500+ karakterlik şirket nesri artık İLK paragraf hemen görünür, kalanı
-     mevcut bp-detail-toggle deseniyle ("Devamını oku") katlanıyor — üretim
-     prompt'una dokunmadan (backend/DEV1 alanı, 214+ ticker'da zaten cache'li)
-     aynı davranışı template tarafında elde ediyoruz. #}
-  {% set _cs_paras = [] %}
-  {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
-  {# SPEC-011 L4 — Şirket Hakkında (sunucu önbelleğindeki şirket açıklaması; kaynak D-46b) #}
-  <section class="da-panel content-card" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading">{{ ticker }} Hakkında</h2>
-    {% if _cs_paras %}
-    <p class="content-para">{{ _cs_paras[0] }}</p>
-    {% if _cs_paras|length > 1 %}
-    <details class="bp-detail-toggle" style="margin-bottom:0">
-      <summary class="bp-detail-toggle-summary">
-        <span class="bp-detail-toggle-label">Devamını oku</span>
-        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
-      </summary>
-      <div class="bp-detail-toggle-body">
-        {% for para in _cs_paras[1:] %}<p class="content-para">{{ para }}</p>{% endfor %}
-      </div>
-    </details>
-    {% endif %}
-    {% endif %}
-    <div class="content-meta">Şirket profili · Faaliyet konusu</div>
-  </section>
-  {% endif %}
-
-  {% if ssr_signal %}
-  {# bughunt-13.09 (finansal-analist workflow, hap-bilgi talimatı): bu blok
-     sinyal/ADX/stop gibi verileri hemen altındaki "Hap Bilgi" kapsülüyle
-     birebir tekrar ediyordu (GEO agent'ı doğruladı: aynı sayfada aynı ADX
-     değeri hem nesir hem dt/dd'de). O tekrar silindi — kalan tek cümle,
-     dt/dd'nin ASLA taşımadığı tek şeyi (3 kriterin AYNI ANDA sağlanması
-     kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
-     bilinçli uyularak. #}
-  {# SEO: Server-side rendered teknik özet — Google bot için crawlable içerik #}
-  <div class="da-panel da-techsum-panel">
-    <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
-    <p style="font-size:var(--bp-type-sm);color:var(--bp-text-2);line-height:1.7;margin:0">
-      Güçlü Trend, beş koşul aynı anda sağlandığında oluşur: fiyat <strong>Supertrend(10,3)</strong> trend dönüş seviyesinin üstünde, <strong>ADX ≥ 25</strong>, <strong>DI+ &gt; DI−</strong>, <strong>EMA 12 &gt; EMA 99</strong> ve <strong>haftalık trend yukarı</strong> (haftalık EMA 20).
-    </p>
-  </div>
-
-  {# GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
-       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
-       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
-       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
-       context'inden — yeni hesaplama yok, uydurma sayı yok. #}
-  <div class="quickfacts-card">
-    <h2 class="quickfacts-title">{{ ticker }} — Hap Bilgi</h2>
-    <dl class="quickfacts-list">
-      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
-      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
-      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
-      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
-      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ bpf.signal_date_text(ssr_signal.signal_date) }}</dd></div>
-      {% if hs_available and hs.temel_analiz_skoru is not none %}<div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{{ hs.temel_analiz_skoru }}/100</dd></div>{% endif %}
-      {% if hs_available and hs.borsapusula_skoru is not none %}
-      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
-      {% endif %}
-      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
-      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
-      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
-         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
-         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
-         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
-         o. "Stop" kelimesi yalnız AL + band altta iken. #}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Trend dönüş seviyesi (Supertrend)</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %} <span class="qf-sub">— fiyatın {{ 'üzerinde' if ssr_signal.sl_level > ssr_signal.price else 'altında' }}</span>{% endif %}</dd></div>{% endif %}
-    </dl>
-  </div>
-  {% endif %}
-
+  {%- set _ftl = {} -%}
+  {%- for _b in (finansal_tablolar if (finansal_tablolar is defined and finansal_tablolar) else []) %}{% set _ = _ftl.update({_b.slug: _b}) %}{% endfor %}
   {% if seo_faq %}
-  {# SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) #}
+  {# SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile aynı liste) #}
   <section class="da-panel content-card faq-card" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading">{{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <h2 class="section-title" id="faq-heading">{{ ticker }} hakkında sık sorulanlar</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
       <dt class="faq-q">{{ item.q }}</dt>
-      <dd class="faq-a">{{ item.a }}</dd>
+      <dd class="faq-a">{{ _nb(item.a) }}{% if item.tur == 'bilanco' and _ftl.bilanco %} <a class="faq-l" href="{{ _ftl.bilanco.href }}">Bilanço sayfası</a>{% endif %}</dd>
       {% endfor %}
     </dl>
   </section>
   {% endif %}
-
-  {# Metodoloji #}
-  <div class="methodology">
-    <strong>Sinyal Metodolojisi:</strong>
-    Güçlü Trend beş koşulun birlikte sağlanmasıyla oluşur:
-    fiyat <strong>Supertrend(10,3)</strong> seviyesinin üstünde + <strong>ADX ≥ 25</strong> (trend gücü) +
-    <strong>DI+ &gt; DI−</strong> + <strong>EMA 12 &gt; EMA 99</strong> + <strong>haftalık trend yukarı</strong> (haftalık EMA 20).
-    Trend Bozuldu bunların tersidir; diğer her durum Yatay'dır. Sinyal en az 3 bar devam edince "onaylı" sayılır.
-  </div>
+  <p class="hx-yontem">Trend durumu beş koşuldan çıkar; koşulların ve puanların hesabı <a href="/metodoloji">Metodoloji</a> sayfasında.</p>
     </div>
   </details>
   </div>{# /panel-ozet #}
@@ -761,6 +725,8 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
     <span class="tv-ft-ls">{% for _b in finansal_tablolar %}<a class="tv-ft-a" href="{{ _b.href }}">{{ _b.ad }}<span class="tv-ft-o" aria-hidden="true">→</span></a>{% endfor %}</span>
   </nav>
   {%- endif %}
+  {#- C-80: altı panelin iskeleti yalnız JS ile dolar (SSR'da hidden); ham HTML'de <template>, hisse.js yerine koyar. -#}
+  <template data-hx-lazy>
   <p class="tv-prep" id="tvPrep" hidden>Bu hisse için temel göstergelerin özeti gösteriliyor.</p>
   <div class="tv-grid" id="tvGrid" aria-busy="true" hidden>
     <section class="tv-pan" id="tvBuyume" aria-labelledby="tvBuyumeH">
@@ -802,6 +768,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
   </div>
   <p class="tv-err" id="tvErr" hidden>Finansal veri şu an alınamadı. <button type="button" class="da-retry" id="tvRetry">Tekrar dene</button></p>
   <p class="hx-disc" id="tvDisc" hidden></p>
+  </template>
   </div>{# /panel-temel #}
   
 
@@ -813,11 +780,20 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       Dış bağlantı yok (kanon §2.8); tarihle yazılır (§2.7). -#}
   <div class="da-panel da-panel--accent kap-section" id="kapSection">
     <h2 class="section-title" style="margin:0 0 12px">Şirket bildirimleri</h2>
-    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text-3);font-size:var(--bp-type-sm);padding:6px 0">
+    {#- C-80: son 10 bildirim ham HTML'de (D-68 ozet.bildirim_listesi; önce rutin olmayanlar), ay başlıklı, her satır
+        kalıcı bildirim sayfasına bağlı. Sekme açılınca JS bir yıllık tam zaman çizelgesini aynı kaba çizer. -#}
+    {%- set _bll = oz.bildirim_listesi if oz.bildirim_listesi else [] %}
+    <div id="kapLoading" aria-hidden="true" style="display:{{ 'none' if _bll else 'flex' }};align-items:center;gap:8px;padding:6px 0">
       <div class="da-spin da-spin--sm"></div>
-      Bildirimler yükleniyor…
     </div>
-    <div id="kapList" style="display:none"></div>
+    <div id="kapList"{% if _bll %} data-ssr="1"{% else %} style="display:none"{% endif %}>
+      {%- set _ay = namespace(v='') %}
+      {%- for b in _bll %}
+      {%- set _bay = (b.tarih_metin.split(' ', 1)[1]) if b.tarih_metin else '' %}
+      {%- if _bay != _ay.v %}<h3 class="kap-month">{{ _bay }}</h3>{% set _ay.v = _bay %}{% endif %}
+      <div class="kap-item"><time class="kap-day" datetime="{{ b.tarih }}">{{ b.tarih_metin.rsplit(' ', 1)[0] }}</time><div class="kap-body"><span class="kap-class-badge">{{ b.tur }}</span><a class="kap-summary kap-a" href="{{ b.href }}">{{ b.baslik }}</a></div></div>
+      {%- endfor %}
+    </div>
   </div>
 </div>{# /panel-haberler #}
 
