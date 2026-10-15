@@ -309,7 +309,7 @@ def test_prompt_keeps_recipe_rules():
     p = an.SYSTEM_PROMPT
     for must in ("AL / SAT / BEKLE", "420 karakter", "{Fn}", "ortanca", "Neden-sonuç", "trend durumu tek cümle"):
         assert must in p
-    assert an.URETIM_MODEL == "gemini-2.5-flash-lite"
+    assert an.URETIM_MODEL == "gemini-2.5-flash"
 
 
 # ----------------------------------------------------------------------------- iş (tur)
@@ -397,7 +397,7 @@ def test_full_run_publishes_atomically_and_is_once_per_day(env):
     assert res["durum"] == "tamam" and res["yayin"] == 3 and res["cagri"] == 3
     doc = json.load(open(job.note_path("TUPRS", env["base"]), encoding="utf-8"))
     assert doc["ticker"] == "TUPRS" and doc["kapanis"] == DAY and doc["kapanis_label"] == "12 Ekim"
-    assert doc["etiket"] == "Yapay zekâ ile derlendi" and doc["model"] == "gemini-2.5-flash-lite"
+    assert doc["etiket"] == "Yapay zekâ ile derlendi" and doc["model"] == "gemini-2.5-flash"
     assert doc["not"].startswith("Tüpraş'ın hasılatı 2025'te geriledi (−%21,7)")
     assert [f["id"] for f in doc["olgular"]] == ["F1", "F2", "F3", "F4", "F5", "F6", "F8", "F9", "F16", "F17", "F19"]
     assert not [n for n in os.listdir(env["base"]) if n.startswith(".tmp_")]
@@ -496,11 +496,11 @@ def test_real_call_path_counts_cost_and_never_exceeds_pilot_cap(env, monkeypatch
     job._atomic_write(os.path.join(env["base"], "butce.json"), {"usd": 0.9970, "cagri": 10})
     call = job.make_gemini_call("TESTKEY", env["base"], sleep=lambda s: None, budget=fb)
     text, cost, err = call("sistem", "kullanıcı")
-    assert text and err is None and http == [("gemini-2.5-flash-lite", "TESTKEY")]
-    assert cost == round((2400 * 0.10 + 180 * 0.40) / 1e6, 6)
+    assert text and err is None and http == [("gemini-2.5-flash", "TESTKEY")]
+    assert cost == round((2400 * 0.10 + 180 * 0.40) / 1e6, 6)  # FakeBudget.record sabit fiyatlandırma kullanır, gerçek model fiyatı değil
     st = job.budget_state(env["base"])
     assert st["cagri"] == 11 and abs(st["usd"] - (0.9970 + cost)) < 1e-6
-    assert fb.recorded == [("gemini-2.5-flash-lite", 2400, 180)]
+    assert fb.recorded == [("gemini-2.5-flash", 2400, 180)]
     # kalan < CALL_RESERVE_USD → HTTP isteği atılmadan durur
     job._atomic_write(os.path.join(env["base"], "butce.json"), {"usd": 0.9985, "cagri": 11})
     with pytest.raises(job.Stop) as e:

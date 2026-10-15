@@ -300,7 +300,7 @@ def validate_note(raw_text, facts, max_len=420):
 # karşılaştırma çelişkisi / yasak dil / yargı / neden-sonuç / tahmin) cümle atılır; kalan ≥3 cümle
 # değilse not yayımlanmaz. validate_note() (pilot: bildirim ve bülten) değişmedi.
 # ============================================================================================
-URETIM_MODEL = "gemini-2.5-flash-lite"
+URETIM_MODEL = "gemini-2.5-flash"  # D-44b-2 (15.10 CPO kararı a): flash-lite {Fn} talimatına uymuyor, flash 8/8 A/B geçti
 NOTE_MAX_LEN = 420
 NOTE_MIN_SENT = 3
 NOTE_MAX_SENT = 5
