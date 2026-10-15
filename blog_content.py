@@ -2753,9 +2753,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "BIST hisse senedi alım satım kazançlarında stopaj, temettü vergisi ve yıllık beyan yükümlülüğü. Türkiye'de borsa vergisi rehberi 2026.",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-15",
     "mins": 7,
     "body": """
-<p>Borsa yatırımlarında vergi konusu bireysel yatırımcılar arasında en çok karışıklığa yol açan konulardan biridir. Bu rehber, Türkiye'de BIST hisse senedi işlemlerinde 2026 itibarıyla geçerli vergilendirme kurallarını özetlemektedir.</p>
+<p>Türkiye'de tam mükellef bireysel yatırımcının BIST'te işlem gören hisse senedi alım satım kazancına <strong>%0 stopaj</strong> uygulanır ve bu kazanç için ayrıca beyanname verilmez. Şirketlerin dağıttığı temettüden ise <strong>%15 stopaj</strong> kesilir. Aşağıda 2026 itibarıyla geçerli kurallar ayrıntılı anlatılıyor.</p>
 <div style="background:rgba(var(--bp-sat-rgb),.07);border:1px solid rgba(var(--bp-sat-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-down)">⚠️ Önemli Uyarı:</strong> Bu içerik genel bilgi amaçlıdır, vergi danışmanlığı değildir. Kişisel durumunuz için mutlaka mali müşavir veya vergi uzmanına başvurun. Vergi mevzuatı değişebilir.
 </div>
@@ -4175,10 +4176,11 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Borsa Seans Saatleri 2026: BIST Açılış ve Kapanış Bilgileri",
     "desc": "BIST hisse senetleri kaçta açılır, kaçta kapanır? 2026 güncel seans saatleri, işlem günleri ve tatil takvimi.",
     "date": "2026-05-01",
+    "updated": "2026-10-15",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
-<p>Borsa İstanbul'da (BIST) işlem yapmadan önce bilmeniz gereken en temel bilgilerden biri seans saatleridir. Yanlış saatte emir girilmesi veya beklenmedik tatil günlerinde işlem yapılamayacağı için seans saatlerini ezberlemek, aktif yatırımcılar için zorunluluktur.</p>
+<p>Borsa İstanbul'da hisse senetleri hafta içi <strong>10:00–18:00</strong> arasında sürekli işlem görür. Öncesinde 09:40–10:00 açılış tek fiyat seansı, sonrasında 18:00–18:10 kapanış tek fiyat seansı yapılır. Hafta sonu ve resmî tatillerde işlem yoktur.</p>
 
 <h2>2026 BIST Hisse Senedi Seans Saatleri</h2>
 <p>Borsa İstanbul Pay Piyasası (hisse senetleri) şu seans düzenini izler:</p>

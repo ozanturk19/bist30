@@ -919,7 +919,7 @@ function renderSummary(s, signalData) {
         (_emaDb && _emaDb.diff_pct != null
           ? ' · fark: %' + Math.abs(_emaDb.diff_pct).toFixed(2).replace('.', ',') : ''),
       ok: s.signal === 'SAT' ? e12Bear : e12Bull,
-      blog: '/blog/ema-hareketli-ortalama-nedir', blogLabel: 'EMA'
+      blog: '/blog/hareketli-ortalamalar-ema-sma-altin-kesisim', blogLabel: 'EMA'
     },
   ].map(i => Object.assign(i, { tooltip: _IND_TOOLTIPS[i.label] || '' }));
 
@@ -937,7 +937,7 @@ function renderSummary(s, signalData) {
   }).join('');
   if (signalData && signalData.rsi != null) {
     techDetailsHtml += '<div class="tech-row tech-row-neutral"><span class="tech-row-dot"></span>RSI(14): ' +
-      bpIndNum(signalData.rsi) + _indLink('/blog/rsi-gostergesi-nedir', 'RSI') + '</div>';
+      bpIndNum(signalData.rsi) + _indLink('/blog/rsi-gostergesi-nasil-kullanilir', 'RSI') + '</div>';
   }
   const techContentEl = document.getElementById('indTechContent');
   if (techContentEl) techContentEl.innerHTML = techDetailsHtml;
