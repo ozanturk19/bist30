@@ -48,6 +48,7 @@ import heatmap_image    # D-54: ısı haritası paylaşım görseli (Pillow) + /
 import bulten           # D-45(c): Akşam Bülteni (gün sonu, donmuş; /api/bulten/<tarih>)
 import tarama_fields    # D-51: /api/tarama va/pe/pb/roe/ema_diff/lim türetmeleri
 import home_fields      # D-53: ana sayfa SSR alanları (öne çıkan şirketler, Finansallar betimi, değerleme hükmü)
+import hisse_ozet       # D-68 (SEO #4): hisse sayfası cevap-önde blok bağlamı (kural tabanlı, KAP verisi; AI yok)
 import sector_taxonomy  # D-23: sektör kovası KAP alt sektöründen (BIST sektör endekslerine hizalı)
 import kap_financials   # D-40a0: temel veri KAP finansal raporlarından (açıklanan veri)
 import kap_temel_v2     # D-40a2: Temel v2 veri uçları (C-22b): marjlar, son 12 ay, şablonlar
@@ -6349,7 +6350,8 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 def get_company_summary(ticker):
     """KAP unvanı + faaliyet konusu ("Hakkında" metni). Faaliyet konusu yoksa None."""
     k = KAP_INFO.get(ticker) or {}
-    faaliyet = (k.get("faaliyet_konusu") or "").strip()
+    # D-68: literal "\\n" ve BÜYÜK HARF metin temizlenir (AKBNK, ASELS); hisse sayfası SSS'iyle tek kaynak.
+    faaliyet = hisse_ozet.faaliyet_temizle(k.get("faaliyet_konusu"))
     if not faaliyet:
         return None
     return f"{k.get('kisa_ad') or STOCK_NAMES.get(ticker, ticker)} — Faaliyet konusu: {faaliyet}"
@@ -7641,10 +7643,9 @@ def stock_page(ticker):
         if t != ticker and t in BIST100 and t != "XU030"
     ][:5]
 
-    # Sinyal/skor verileri — JSON-LD schema + SSS için
+    # Sinyal/skor verileri — eski şablonun JSON-LD'si için (C-79 şablonu kullanmıyor; D-68 önce
+    # deploy edilince eski şablon bozulmasın diye bağlamda kalır)
     sig      = (ssr_signal or {}).get("signal") or "BEKLE"
-    price    = (ssr_signal or {}).get("price")
-    chg      = (ssr_signal or {}).get("change_pct")
     rsi_val  = (ssr_signal or {}).get("rsi")
     # SPEC-017 Faz 3 batch v2 B2: hero card signal_strength (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
     # SSS de signal_strength kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
@@ -7659,52 +7660,14 @@ def stock_page(ticker):
     # alanından (round(adx_val,1)) SAPAN bir değer üretiyordu (JSON-LD/FAQ 14
     # derken panel 13.5 gösteriyordu). Artık aynı kaynak.
     adx_val = (ssr_signal or {}).get("adx")
-    # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
-    sig_label = _SIGNAL_LABELS.get(sig, sig)
 
-    # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
-    # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
-    # CPO-1806 (gri dil envanteri K1, O29): "algoritmik sinyal" jargonu kalkar,
-    # kapanış tarihi + 5 koşuldan kaçının sağlandığı sade cümlede verilir.
-    _faq_date_label = derive_signal_date_label((ssr_signal or {}).get("bar_date"))
-    _faq_n_ok = sum(1 for c in (ssr_signal or {}).get("conditions") or () if c.get("ok"))
-    seo_faq = []
-    seo_faq.append({
-        "q": f"{ticker} hissesinin güncel teknik sinyali nedir?",
-        "a": (f"{ticker}'nin trend durumu"
-              + (f" {_faq_date_label} kapanışında" if _faq_date_label else "")
-              + f" {sig_label}. Beş koşuldan {_faq_n_ok}'i sağlanıyor."),
-    })
-    if price:
-        # CPO-1496: TR locale formatlayıcısından geçmeden ham Python float basılıyordu
-        # ("131.6 TL", "%0.15") — sayfanın geri kalanı (fiyat kartı) virgüllü format
-        # kullanıyor, aynı ekranda çelişki oluşuyordu.
-        # D-P1-1210-1: işaret '%' İÇİNDEN DEĞİL ÖNÜNDEN basılır (templates/_fmt_macros.html
-        # pct_text ile aynı kanon) — eskiden negatifte "%-0,61" basılıyordu (K25 ihlali).
-        if isinstance(chg, (int, float)):
-            _chg_r = round(chg, 2)
-            _chg_sign = "+" if _chg_r > 0 else ("-" if _chg_r < 0 else "")
-            _chg_txt = f", günlük değişim {_chg_sign}%{tr_price_filter(abs(_chg_r))}"
-        else:
-            _chg_txt = ""
-        seo_faq.append({
-            "q": f"{ticker} hisse fiyatı ne kadar?",
-            "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} ₺{_chg_txt}.",
-        })
-    if adx_val is not None:
-        _parts = [f"ADX {_tr1(adx_val)} (trend gücü)"]
-        # D-02 (O8): getiri vaadi gibi duran "prim potansiyeli" sorusu kalktı; R/R oranı
-        # da hedef dili olduğu için (D-39, kalıcı kural) cevaptan çıktı.
-        # CPO-1818: "Teknik Güç Skoru" atfı kalktı (O29/K10 ile sitenin her yerinden kalkmıştı).
-        seo_faq.append({
-            "q": f"{ticker} hissesinin teknik görünümü nasıl?",
-            "a": "Teknik göstergeler: " + ", ".join(_parts) + ".",
-        })
-    if company_summary:
-        seo_faq.append({
-            "q": f"{ticker} ne yapan şirket?",
-            "a": company_summary,
-        })
+    # D-68 (SEO #4): cevap-önde blok bağlamı + şirket SSS'i (eski teknik SSS'in yerine: ne iş yapar,
+    # temettü, bilanço, F/K + O8 "teknik görünümü nasıl?"). Kural tabanlı, AI yok; FAQPage JSON-LD de
+    # bu listeden. Bağlam kurulamazsa sayfa eski alanlarla çizilir (SSS yalnız şirket açıklaması).
+    ozet = _hisse_ozet_ctx(ticker, name, sector, ssr_signal, hs)
+    seo_faq = list((ozet or {}).get("sss") or [])
+    if not ozet and company_summary:
+        seo_faq = [{"q": f"{name} ne iş yapar?", "a": company_summary}]
 
     # SPEC-014 A1 — Sinyal Özeti (deterministik konsolide kutu)
     signal_summary = build_signal_summary(ssr_signal)
@@ -7730,7 +7693,34 @@ def stock_page(ticker):
                            initial_tab=_hisse_initial_tab(request.args.get("tab")),
                            closes_30=_closes_30(ticker, ssr_signal),
                            ai_not=_ai_not_ctx(ticker),
-                           finansal_tablolar=_finansal_tablo_baglantilari(ticker))
+                           finansal_tablolar=_finansal_tablo_baglantilari(ticker),
+                           ozet=ozet)
+
+
+def _hisse_ozet_ctx(ticker, name, sector, ssr_signal, hs):
+    """D-68: hisse_ozet.build girdileri -- /api/hisse/<T>/fundamentals ile AYNI zincir (yalnız önbellek:
+    web worker'da yfinance çekilmez), KAP kaydı, KAP akış deposu (son 365 gün). Hata -> None (sayfa
+    eski alanlarla çizilir, 500 yok)."""
+    try:
+        with _lock:
+            fw = _fundamentals_cache.get(ticker)
+            bos = not _fundamentals_cache
+        if bos:
+            _load_fundamentals_cache_from_disk()
+            with _lock:
+                fw = _fundamentals_cache.get(ticker)
+        base = dict((fw or {}).get("data") or {})
+        fund = _fundamentals_temel_v2(ticker, _fundamentals_kap(ticker, base)) if base else {}
+        items = []
+        if _KAP_STORE.available():
+            items = kap_feed.for_ticker(_KAP_STORE.all_items(), ticker, days=365,
+                                        today=datetime.now(_TZ_TR).date())
+        return hisse_ozet.build(ticker, name, sector, rec=kap_financials.load_record(ticker), fund=fund,
+                                entry=hs, signal=ssr_signal, kap_info=KAP_INFO.get(ticker), items=items,
+                                today=datetime.now(_TZ_TR).date())
+    except Exception as e:
+        logger.warning("hisse özet bağlamı (%s): %s", ticker, e)
+        return None
 
 
 _fundamentals_cache = {}

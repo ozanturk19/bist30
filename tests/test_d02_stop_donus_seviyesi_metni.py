@@ -15,12 +15,18 @@ def _src():
         return f.read()
 
 
+def _ozet_src():
+    # D-68: hisse SSS'i hisse_ozet.py'ye taşındı (O8 sorusu orada)
+    with open(os.path.join(os.path.dirname(_APP_PY), "hisse_ozet.py"), encoding="utf-8") as f:
+        return f.read()
+
+
 def test_statik_metinler():
     s = _src()
     assert '"RYSAS": "Reysaş Taşımacılık ve Lojistik"' in s
     assert "Supertrend ve EMA düşen ancak" not in s
-    assert "prim potansiyeli nedir" not in s
-    assert "teknik görünümü nasıl?" in s
+    assert "prim potansiyeli nedir" not in s + _ozet_src()
+    assert "teknik görünümü nasıl?" in _ozet_src()
     assert "R/R oranı 1:" not in s
 
 
