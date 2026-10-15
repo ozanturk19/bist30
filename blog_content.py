@@ -29,7 +29,7 @@ ARTICLES = [
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
   <li>BorsaPusula'da BIST100 ve ötesinde takip edilen 200'ün üzerinde hissenin güncel sinyalini izleyin — sinyaller günlük olarak, gün sonu verisiyle hesaplanır.</li>
-  <li>Günlük <a href="/ozet">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
+  <li>Günlük <a href="/">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
   <li>Endeks bileşenlerinin tamamı Borsa İstanbul resmi sitesinde yayınlanır.</li>
 </ul>
 
@@ -307,7 +307,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Risk:Ödül oranı en az <strong>1:2</strong> olmalıdır. Yani 5₺ risk alıyorsanız, en az 10₺ kâr potansiyeli olan işlemlere girin. Bu oran zamanla bileşik getiriyi dramatik şekilde artırır.</p>
 
 <h2>6. Piyasa Barometresi Kullanımı</h2>
-<p><a href="/ozet">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genel olarak baskı altında olabilir — böyle dönemlerde yeni pozisyon açmak yerine mevcut pozisyonları korumak ve nakit tutmak daha akılcı olabilir.</p>
+<p><a href="/">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genel olarak baskı altında olabilir — böyle dönemlerde yeni pozisyon açmak yerine mevcut pozisyonları korumak ve nakit tutmak daha akılcı olabilir.</p>
 """,
     "faqs": [
       {"q": "Portföyde kaç hisse bulunmalıdır?", "a": "Yeterli çeşitlendirme için genellikle 8-15 hisse önerilir. Çok az hisse riski konsantre eder; çok fazla hisse ise takibi zorlaştırır ve getiriyi ortalamaya yaklaştırır. Farklı sektörlerden seçim yapılması önemlidir."},
@@ -904,7 +904,7 @@ Histogram = MACD − Sinyal</pre>
 <p>İlk gün oluşan sinyal "ham sinyal"dir. 3 gün boyunca aynı kalan sinyal "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
 
 <h2>Piyasa Barometresi</h2>
-<p><a href="/ozet">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın güncel durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
+<p><a href="/">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın güncel durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
 
 <h2>Veri Kaynağı ve Güncelleme Sıklığı</h2>
 <p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı fiyat akışı sunmaz.</p>
@@ -1117,7 +1117,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
+<p><a href="/">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
 
 <h2>Pratik Örnek</h2>
 <p>Diyelim ki THYAO ve ASELS her ikisi de Güçlü Trend sinyali veriyor:</p>
@@ -1254,7 +1254,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>BIST30 Sinyal Analizi — Güncel Durum</h2>
-<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/ozet">Sinyal Özeti</a> sayfasında ise tüm endeksin güncel durumunu tek bakışta görebilirsiniz.</p>
+<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/">Sinyal Özeti</a> sayfasında ise tüm endeksin güncel durumunu tek bakışta görebilirsiniz.</p>
 
 <h2>Hangi BIST30 Hissesi Daha İyi?</h2>
 <p>"En iyi BIST30 hissesi" sorusunun tek bir yanıtı yoktur. Değerlendirirken şunlara bakın:</p>
@@ -1265,7 +1265,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
   <li><strong>Sektör bağlamı:</strong> Sektörde genel trend yukarı mı?</li>
 </ol>
-<p><a href="/gucu-yuksek">Tarama</a> sayfası tüm bu kriterleri en iyi karşılayan hisseleri sinyal gücüne göre sıralar — BIST30 dahil, takip edilen tüm hisse evreni.</p>
+<p><a href="/tarama">Tarama</a> sayfası tüm bu kriterleri en iyi karşılayan hisseleri sinyal gücüne göre sıralar — BIST30 dahil, takip edilen tüm hisse evreni.</p>
 """,
     "faqs": [
       {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, DSTKF), holding/sanayi (KCHOL, SAHOL, FROTO, TOASO, EREGL, KRDMD), enerji (TUPRS, PETKM, ASTOR, ENKAI, SASA, GUBRF) ve diğer sektörlerden oluşur."},
@@ -5338,7 +5338,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>TCMB faiz kararı → TL varlıklarda volatilite beklenebilir</li>
   <li>ABD CPI açıklaması → FED beklentilerini günceller, EM varlıklarını etkiler</li>
 </ul>
-<p>BorsaPusula <a href="/bilanco-takvimi">Bilanço Takvimi</a> sayfası şirket bazlı önemli tarihleri listeler; makro takvim için Investing.com Türkiye ekonomik takvimini paralel takip edin.</p>
+<p>BorsaPusula <a href="/takvim">Bilanço Takvimi</a> sayfası şirket bazlı önemli tarihleri listeler; makro takvim için Investing.com Türkiye ekonomik takvimini paralel takip edin.</p>
 """,
     "faqs": [
       {"q": "Hangi makro gösterge borsayı en çok etkiler?",
@@ -5864,7 +5864,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Kâr Dağıtım Kararı:</strong> Şirketin Genel Kurulu, bir önceki yılın kârından ne kadar temettü dağıtacağına karar verir. Bu karar KAP'ta açıklanır.</p>
 <p><strong>Ex-Temettü Tarihi (Temettü Kaydı):</strong> Bu tarihte veya sonrasında hisseyi satın alanlar o dönemin temettüsünü alamaz. Ex-temettü tarihinde hisse fiyatı teorik olarak temettü kadar düşer.</p>
 <p><strong>Ödeme Tarihi:</strong> Temettü, hak kazanan yatırımcılara belirtilen tarihte ödenir.</p>
-<p>BIST'te temettü ödemeleri genellikle Mart-Haziran döneminde yoğunlaşır (bir önceki yılın kâr dağıtımları). BorsaPusula <a href="/temettu-takvimi">temettü takvimi</a> sayfasında bu tarihleri takip edebilirsiniz.</p>
+<p>BIST'te temettü ödemeleri genellikle Mart-Haziran döneminde yoğunlaşır (bir önceki yılın kâr dağıtımları). BorsaPusula <a href="/takvim">temettü takvimi</a> sayfasında bu tarihleri takip edebilirsiniz.</p>
 
 <h2>BIST'te Yüksek Temettü Veren Sektörler</h2>
 <p>Temettü geliri açısından öne çıkan BIST sektörleri:</p>

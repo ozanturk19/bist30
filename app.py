@@ -7284,7 +7284,7 @@ REDIRECTS = {
     "/sinyaller": "/tarama",
     "/sinyal-performans": "/tarama",
     "/backtest": "/tarama",
-    "/gucu-yuksek": "/tarama?signal=AL&sort=signal_strength",
+    "/gucu-yuksek": "/tarama",   # D-67: kanonik adres (eski ?signal=AL&sort=… durum adresi değil)
     "/nasdaq": "/",
     "/sp500": "/",
     "/portfolio": "/takip",
@@ -7556,6 +7556,11 @@ def _closes_30(ticker, stock):
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
+    # D-67: endeks kodu (XU030/XU100) hisse değil — /hisseler'deki BIST 30 / BIST 100 bölümüne tek
+    # 301 (küçük harfli yazım da tek adımda). Googlebot bu adresleri istiyordu; 404 yerine anlamlı hedef.
+    _endeks = seo_yonlendirme.ENDEKS_SAYFASI.get(ticker.upper())
+    if _endeks:
+        return redirect(_endeks, code=301)
     if ticker != ticker.upper():
         # bughunt-r115: /karsilastir (#40) ile ayni sinif fix - kucuk/karisik harfli
         # path'ler 200 donup canonical/og:url ile celisiyordu (duplicate content).
@@ -11662,6 +11667,13 @@ def hisseler_hub():
     # Sektörler Türkçe alfabetik, "Diğer" sonda (D-23)
     sectors_sorted = sector_taxonomy.sort_labels(by_sector.keys())
 
+    # D-67 (C-85 için): BIST 30 / BIST 100 bölümleri — KAP endeks üyeliği (data/universe.json) ve
+    # dönem etiketi dosyanın üretildiği çeyrekten; [(kod, ad)] koda göre, yalnız sayfası olan kodlar.
+    # Dosya yoksa None (şablon bölümleri çizmez, elle liste yok).
+    hisseler_endeks = seo_yonlendirme.hisseler_endeks(UNIVERSE, bist_set, STOCK_NAMES)
+    if hisseler_endeks and hisseler_endeks["eksik"]:
+        logger.warning("D-67: endeks üyesi olup sayfası olmayan pay(lar): %s", hisseler_endeks["eksik"])
+
     return render_template(
         "hisseler.html",
         by_sector=by_sector,
@@ -11669,6 +11681,7 @@ def hisseler_hub():
         by_letter=by_letter,
         letters_sorted=letters_sorted,
         total_count=len(all_pairs),
+        hisseler_endeks=hisseler_endeks,
     )
 
 
@@ -11726,15 +11739,12 @@ def api_sektor_summary():
 
 # T4.2 (BIRLESTIR): /sektor-karsilastir sektor_harita.html'e ikinci tab olarak
 # tasindi (ayni /api/sektor-summary + /api/sektor-compare veri kaynagini
-# kullaniyordu, ayri sayfa gereksizdi). 301 hedefi ?tab=compare ile Karsilastir
-# sekmesini acar; eski ?s=A&s=B deep-link'leri query string olarak korunur.
+# kullaniyordu, ayri sayfa gereksizdi). D-67: Karsilastir sekmesi kalkti
+# (bp-heatmap.js eski tab/s parametrelerini adresten siler) -- hedef kanonik
+# /sektor-harita; ?tab=compare&s=… durum adresine 301 artik yok.
 @app.route("/sektor-karsilastir")
 def sektor_karsilastir():
-    target = "/sektor-harita?tab=compare"
-    qs = request.query_string.decode()
-    if qs:
-        target += "&" + qs
-    return redirect(target, code=301)
+    return redirect("/sektor-harita", code=301)
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
@@ -12816,6 +12826,13 @@ def _get_blog_cache():
 
 BLOG_NEW_BADGE_DAYS = 14  # r33: "Yeni" rozeti için eşik — yayın tarihinden itibaren kaç gün
 
+def _blog_og_image_url(gun):
+    """D-67: blog sayfalarının og:image'i. Genel `og_image_url` (`?d=` = son EOD günü) her işlem
+    günü değişiyordu; blog sayfası EOD verisi taşımaz — sürüm yazının dateModified'ı (YYYYMMDD).
+    Açık bağlam değeri context processor'ı ezer (Flask: render_template argümanı kazanır)."""
+    return "/og-image.png?d=" + gun.replace("-", "") if gun else "/og-image.png"
+
+
 @app.route("/blog")
 def blog_index():
     normalized, cat_counts = _get_blog_cache()
@@ -12834,7 +12851,10 @@ def blog_index():
         except (ValueError, TypeError, KeyError):
             a2["is_new"] = False
         articles.append(a2)
-    return render_template("blog.html", articles=articles, cat_counts=cat_counts)
+    # D-67: og:image adresi her EOD turunda (?d=) değil, en son güncellenen yazıyla değişir
+    _son = max((sitemap_build.blog_lastmod(a) or "" for a in normalized), default="")
+    return render_template("blog.html", articles=articles, cat_counts=cat_counts,
+                           og_image_url=_blog_og_image_url(_son))
 
 
 # Eski / kısa slug'lar → doğru slug 301 yönlendirme tablosu
@@ -12936,7 +12956,9 @@ def blog_article(slug):
     if len(related) < 3:
         extras = [a for a in normalized if a["cat"] != article["cat"] and a["slug"] != slug]
         related += extras[:3 - len(related)]
-    return render_template("blog_article.html", article=article, related=related)
+    # D-67: yazı başına sabit og:image adresi (dateModified'a bağlı; ?d= her EOD turunda değişiyordu)
+    return render_template("blog_article.html", article=article, related=related,
+                           og_image_url=_blog_og_image_url(sitemap_build.blog_lastmod(article)))
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────

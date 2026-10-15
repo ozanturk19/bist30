@@ -39,12 +39,11 @@ def test_gucu_yuksek_reads_cached_signal_strength():
     sort=signal_strength yolunu paylaşan tek sayfa olmasıyla yapısal olarak
     garanti ediliyor (eski pattern-match testinden daha güçlü bir güvence)."""
     src = _read_app()
-    assert re.search(
-        r'"/gucu-yuksek"\s*:\s*"/tarama\?signal=AL&sort=signal_strength"', src
-    ), (
-        "REDIRECTS[\"/gucu-yuksek\"] artik /tarama?signal=AL&sort=signal_strength'e "
-        "eslenmiyor — CPO-983 tutarlilik garantisi (ayni sayfa=ayni skor) bozulmus "
-        "olabilir, inceleyin"
+    # D-67 (15.10): hedef kanonik /tarama — eski `?signal=AL&sort=signal_strength` durum adresi
+    # Googlebot'u parametreli kopyaya götürüyordu. Tutarlılık aynı sayfa + aynı önbellekle korunur.
+    assert re.search(r'"/gucu-yuksek"\s*:\s*"/tarama"', src), (
+        "REDIRECTS[\"/gucu-yuksek\"] artik kanonik /tarama'ya eslenmiyor — CPO-983 tutarlilik "
+        "garantisi (ayni sayfa=ayni skor) ve D-67 kanonik hedef bozulmus olabilir, inceleyin"
     )
 
 

@@ -282,8 +282,9 @@ def _item_sectors(stocks, sectors=None):
         h = "Sektörlerde en güçlü %s, en zayıf %s" % (hi[1], lo[1])
     parts = ["%s %s" % (k, _pct(a)) for a, k, n in avg[:2]] + ["%s %s" % (k, _pct(a)) for a, k, n in avg[-2:]]
     p = "BIST100 hisselerinin sektör içi ortalama değişimine göre: %s." % " · ".join(dict.fromkeys(parts))
-    chips = [{"k": "sec", "l": hi[1], "href": "/sektor-harita?tab=compare&s=%s" % hi[1]},
-             {"k": "sec", "l": lo[1], "href": "/sektor-harita?tab=compare&s=%s" % lo[1]},
+    # D-67: Karşılaştır sekmesi kalktı; çip kanonik /sektor-harita'ya gider (?tab=compare durum adresi değil)
+    chips = [{"k": "sec", "l": hi[1], "href": "/sektor-harita"},
+             {"k": "sec", "l": lo[1], "href": "/sektor-harita"},
              {"k": "hm", "l": "Isı haritası", "href": "/sektor-harita"}]
     return {"id": "sektor", "cat": "piyasa", "h": h, "p": p, "chips": chips,
             "v": {"k": "bars", "rows": [{"l": k, "ch": round(a, 2)} for a, k, n in

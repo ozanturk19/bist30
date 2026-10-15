@@ -88,7 +88,8 @@ def test_routes_out_of_scope_page_portfolio_alerts_sitemap_api_data():
         assert kapsam.faq(t)["q"] in body            # FAQPage SSS'i notu taşır
         assert "Teknik Güç Skoru" not in body.split("</head>")[0]
     assert c.get("/hisse/ZZZZZ").status_code == 404
-    assert c.get("/hisse/XU030").status_code == 404
+    r = c.get("/hisse/XU030")                        # D-67: endeks kodu → /hisseler bölümüne tek 301
+    assert r.status_code == 301 and r.headers["Location"].endswith("/hisseler#bist30")
     assert "TRMET" in app.BIST100 and "KONTR" not in app.BIST100
     assert "KONTR" in app._PF_VALID_TICKERS            # portföy kaydında silinmez
     sm = c.get("/sitemap-hisseler.xml").get_data(as_text=True)   # D-63: alt harita
