@@ -1,16 +1,31 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler) | BorsaPusula</title>
-<meta name="description" content="BorsaPusula'nın takip ettiği {{ total_count }} BIST hissesinin (BIST100 + ek hisseler) tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.">
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}
+{#- C-85 (15.10, SEO #10): BIST 30 / BIST 100 bölümleri. Bağlam `hisseler_endeks`
+    = {bist30: [kod], bist100: [kod], donem: "Ekim–Aralık 2026"} (D-67, data/universe.json
+    XU030/XU100 üyeliği). Bağlam yoksa sayfa eskisi gibi çizilir: bölüm ve başlık eki yok. -#}
+{%- set _he = hisseler_endeks if ((hisseler_endeks is defined) and hisseler_endeks) else {} -%}
+{%- set _b30 = (_he.bist30 or [])|sort -%}
+{%- set _b100 = (_he.bist100 or [])|sort -%}
+{%- set _don = _he.donem or '' -%}
+{%- if _b30 or _b100 -%}
+{%- set _ttl = 'BIST 30 ve BIST 100 hisseleri' ~ (' (' ~ _don ~ ')' if _don else '') ~ ' · ' ~ total_count ~ ' şirketin listesi' -%}
+{%- set _desc = (_don ~ ' döneminde ' if _don else '') ~ 'BIST 30 ve BIST 100 endekslerindeki hisseler ile BorsaPusula\'nın izlediği ' ~ total_count ~ ' BIST şirketinin sektöre ve harfe göre listesi.' -%}
+{%- else -%}
+{%- set _ttl = 'BIST Hisse Listesi — ' ~ total_count ~ ' Şirket (BIST100 + ek hisseler)' -%}
+{%- set _desc = 'BorsaPusula\'nın takip ettiği ' ~ total_count ~ ' BIST hissesinin (BIST100 + ek hisseler) tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.' -%}
+{%- endif -%}
+{% block head %}<title>{{ _ttl }} | BorsaPusula</title>
+<meta name="description" content="{{ _desc }}">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/hisseler">
-<meta property="og:title"       content="BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler)">
-<meta property="og:description" content="{{ total_count }} BIST hissesi (BIST100 + ek hisseler) — sektörel + alfabetik liste. Günlük teknik analiz ve trend sinyali.">
+<meta property="og:title"       content="{{ _ttl }}">
+<meta property="og:description" content="{{ _desc }}">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/hisseler">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler)">
-<meta name="twitter:description" content="{{ total_count }} BIST hissesi (BIST100 + ek hisseler) — sektörel + alfabetik liste. Günlük teknik analiz ve trend sinyali.">
+<meta name="twitter:title"       content="{{ _ttl }}">
+<meta name="twitter:description" content="{{ _desc }}">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -35,6 +50,32 @@
 {% include '_stale_banner.html' %}
 
 {% call bpf.pagehead('BIST Hisse Listesi') %}<span class="da-num">{{ total_count }}</span> BIST hissesi, <span class="da-num">{{ sectors_sorted|length }}</span> sektörde; sektöre ya da harfe göre göz at.{% endcall %}
+
+{%- if _b30 or _b100 %}
+{%- set _nm = {} -%}
+{%- for L in letters_sorted %}{% for t, n in by_letter[L] %}{% set _ = _nm.update({t: n}) %}{% endfor %}{% endfor -%}
+{%- macro _chips(codes) -%}
+<ul class="hh-chips">
+  {%- for t in codes %}<li><a class="hh-chip" href="/hisse/{{ t|urlencode }}"{% if _nm.get(t) and _nm.get(t) != t %} title="{{ _nm.get(t) }}"{% endif %}>{{ t }}</a></li>{% endfor -%}
+</ul>
+{%- endmacro %}
+<div class="hh-endeks">
+  {%- if _b30 %}
+  <section class="hh-endeks-sec" id="bist30" aria-labelledby="hhB30">
+    <h2 class="hh-endeks-q" id="hhB30">BIST 30 hisseleri hangileri?{% if _don %} <span class="hh-nw">({{ _don }})</span>{% endif %}</h2>
+    <p class="hh-endeks-lede">{% if _don %}{{ _don }} döneminde {% endif %}BIST 30 endeksinde <span class="da-num">{{ _b30|length }}</span> şirket var. Borsa İstanbul endeks listesini üç ayda bir yeni dönem için açıklar.</p>
+    {{ _chips(_b30) }}
+  </section>
+  {%- endif %}
+  {%- if _b100 %}
+  <section class="hh-endeks-sec" id="bist100" aria-labelledby="hhB100">
+    <h2 class="hh-endeks-q" id="hhB100">BIST 100 hisseleri hangileri?</h2>
+    <p class="hh-endeks-lede">{% if _don %}{{ _don }} döneminde {% endif %}BIST 100 endeksinde <span class="da-num">{{ _b100|length }}</span> şirket var; BIST 30'un tamamı bu listenin içinde.</p>
+    {{ _chips(_b100) }}
+  </section>
+  {%- endif %}
+</div>
+{%- endif %}
 
 <div class="hh-alpha-bar" aria-label="Alfabetik hızlı erişim">
   {% for L in letters_sorted %}<a href="#letter-{{ L }}" class="hh-alpha-link" onclick="hhSetMode('alpha')">{{ L }}</a>{% endfor %}

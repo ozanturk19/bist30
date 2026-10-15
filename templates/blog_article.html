@@ -115,7 +115,9 @@
     <h1 class="art-title">{{ article.title }}</h1>
     <div class="art-desc">{{ article.desc }}</div>
     <div class="art-meta">
-      <span>{{ article.date_fmt or article.date }} · {{ article.mins }} dk okuma</span>
+      {#- C-85 (15.10): güncellenen yazıda görünen tarih de JSON-LD dateModified ile aynı (article.updated, ISO). -#}
+      {%- set _up = (article.updated or '')[:10].split('-') %}
+      <span>{{ article.date_fmt or article.date }}{% if _up|length == 3 and article.updated != article.date %} · Güncelleme <time datetime="{{ article.updated[:10] }}">{{ _up[2] }}.{{ _up[1] }}.{{ _up[0] }}</time>{% endif %} · {{ article.mins }} dk okuma</span>
       <span class="art-share">
         <button type="button" class="art-share-btn" onclick="shareBlogWA()" id="blogShareWaBtn">WhatsApp'ta paylaş</button>
         <button type="button" class="art-share-btn" onclick="shareBlogCopy()" id="blogCopyBtn">Bağlantıyı kopyala</button>
