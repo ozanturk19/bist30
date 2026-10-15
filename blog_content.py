@@ -158,6 +158,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   },
   {
     "slug": "ema-hareketli-ortalama-nedir",
+    "canonical_slug": "hareketli-ortalamalar-ema-sma-altin-kesisim",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → hareketli-ortalamalar-ema-sma-altin-kesisim
     "title": "EMA (Üstel Hareketli Ortalama) Nedir?",
     "desc": "EMA12 ve EMA99 kesişimi neden trend sinyali olarak kullanılır? EMA ile SMA farkı nedir?",
     "date": "2026-04-04",
@@ -554,6 +555,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   },
   {
     "slug": "rsi-gostergesi-nedir",
+    "canonical_slug": "rsi-gostergesi-nasil-kullanilir",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → rsi-gostergesi-nasil-kullanilir
     "title": "RSI Göstergesi Nedir? Aşırı Alım/Satım Bölgeleri",
     "desc": "RSI (Göreceli Güç Endeksi) nasıl hesaplanır, 30 ve 70 seviyeleri neden önemlidir, uyuşmazlık (divergence) nedir?",
     "date": "2026-04-14",
@@ -746,6 +748,7 @@ Histogram = MACD − Sinyal</pre>
   },
   {
     "slug": "temettu-yatirimi",
+    "canonical_slug": "bist-temettu-yatirimciligi-rehberi",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → bist-temettu-yatirimciligi-rehberi
     "title": "Temettü Yatırımı: Düzenli Gelir İçin BIST Hisseleri",
     "desc": "Temettü nedir, temettü verimi nasıl hesaplanır, hangi BIST100 şirketleri yüksek temettü dağıtır?",
     "date": "2026-04-19",
@@ -4095,6 +4098,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   # ── ARTICLE 50 ─────────────────────────────────────────────────────────────
   {
     "slug": "portfoy-rebalancing-yeniden-dengeleme",
+    "canonical_slug": "portfoy-rebalancing-ne-zaman-nasil",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → portfoy-rebalancing-ne-zaman-nasil
     "title": "Portföy Rebalancing: Kârdaki Hisseyi Ne Zaman Satmalısın?",
     "desc": "Portföy yeniden dengeleme (rebalancing) nedir, ne zaman yapılır, kârdaki pozisyonu azaltmak akıllıca mı? Türk yatırımcısı için pratik rehber.",
     "cat": "Strateji",
@@ -6008,6 +6012,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 81 ──
   {
     "slug": "bilanco-nasil-okunur-temel-analiz",
+    "canonical_slug": "sirket-bilancosunu-nasil-okursunuz",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → sirket-bilancosunu-nasil-okursunuz
     "title": "Hisse Analizi Yaparken Bilanço Nasıl Okunur? Temel Finansal Tablolar Rehberi",
     "desc": "Bilanço, gelir tablosu ve nakit akış tablosu nedir? Hisse analizi için kritik finansal göstergeler ve BIST şirketlerinde pratik okuma rehberi.",
     "date": "2026-05-02",
@@ -6466,6 +6471,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 88 ──
   {
     "slug": "borsada-vergi-rehberi-hisse-kazanci",
+    "canonical_slug": "borsada-vergi-hisse-senedi-kazanc",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → borsada-vergi-hisse-senedi-kazanc
     "title": "Borsada Vergi Rehberi: Hisse Senedi Kazancı Nasıl Vergilendirilir?",
     "desc": "BIST'te hisse senedi alım-satım kazancı vergisi, temettü vergisi ve genel vergi kuralları hakkında rehber. Güncel oranlar için mali müşavirinize danışın.",
     "date": "2026-05-03",
@@ -6509,6 +6515,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 89 ──
   {
     "slug": "piyasa-emri-limit-emri-stop-emri-farki",
+    "canonical_slug": "limit-emir-piyasa-emri-nedir",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → limit-emir-piyasa-emri-nedir
     "title": "Piyasa Emri, Limit Emri ve Stop Emri Farkı: Hisse Alım-Satımında Hangi Emri Kullanmalı?",
     "desc": "Borsada emir türleri nelerdir? Piyasa emri, limit emri, stop emri, koşullu emir — her biri ne zaman kullanılır? BIST'te pratik emir rehberi.",
     "date": "2026-05-04",
@@ -7138,6 +7145,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 98 ──
   {
     "slug": "bist-halka-arz-ipo-yatirimi",
+    "canonical_slug": "halka-arz-ipo-nedir",  # C-P1-1510: mükerrer çift (SEO #12) — 301 → halka-arz-ipo-nedir
     "title": "BIST'te Halka Arz (IPO) Yatırımı: Fırsatlar, Riskler ve Başvuru Rehberi",
     "desc": "Borsa İstanbul'da halka arz nedir? IPO'ya nasıl başvurulur, değerleme nasıl yapılır, halka arz yatırımının riskleri ve BIST halka arz tarihi örnekleri.",
     "date": "2026-05-06",
