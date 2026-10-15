@@ -12853,8 +12853,11 @@ _BLOG_SLUG_REDIRECTS = {
     "supertrend-nedir":              "supertrend-indikatoru-nedir",
     "supertrend":                    "supertrend-indikatoru-nedir",
     "adx-nedir":                     "adx-indikatoru-nedir",
-    "ema-nedir":                     "ema-hareketli-ortalama-nedir",
-    "rsi-nedir":                     "rsi-gostergesi-nedir",
+    # CPO-1832: ema-hareketli-ortalama-nedir / rsi-gostergesi-nedir kendileri
+    # de emekli oluyor -- zincir 301 olusturmamak icin dogrudan nihai hedefe
+    # guncellendi (CPO-DEV2-097 deseni).
+    "ema-nedir":                     "hareketli-ortalamalar-ema-sma-altin-kesisim",
+    "rsi-nedir":                     "rsi-gostergesi-nasil-kullanilir",
     "bist30-nedir":                  "bist100-nedir",
     "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
     "destek-direnc-seviyeleri":      "destek-direnc-seviyeleri-nedir",
@@ -12876,7 +12879,9 @@ _BLOG_SLUG_REDIRECTS = {
     # CPO-1653 P2: 2/100 makale ham Türkçe karakterli slug kullanıyordu (98'i
     # ASCII transliterasyonlu) — href ham UTF-8, canonical/sitemap %-encoded,
     # aynı sayfa farklı byte-temsille yayılıyordu. ASCII'ye çevrildi + 301.
-    "temettü-yatırımı":              "temettu-yatirimi",
+    # CPO-1832: temettu-yatirimi kendisi de emekli oluyor -- zincir 301
+    # olusturmamak icin dogrudan nihai hedefe guncellendi.
+    "temettü-yatırımı":              "bist-temettu-yatirimciligi-rehberi",
     "bist100-temettü-hisseleri-2026": "bist100-temettu-hisseleri-2026",
     # CPO-1668 #14: 2 makalede yazım hatası (slug oluşturulurken elle yazılmış,
     # transliterasyon hatası) — eski slug'a gelen indekslenmiş linkler/SEO için 301.
@@ -12890,6 +12895,17 @@ _BLOG_SLUG_REDIRECTS = {
     "stop-loss-emirleri-nereye-konulur":       "risk-yonetimi-portfoy",
     "zarar-kesme-pozisyon-kapatma-rehberi":    "risk-yonetimi-portfoy",
     "scalp-trading-nedir-kisa-vadeli-bist-stratejileri": "teknik-analiz-mi-temel-analiz-mi",
+    # CPO-1832 (C-P1-1510 ikinci yarı): 8 mukerrer cift, kaybeden -> kazanan
+    # (cpo-wip prep/C-P1-1510-dup aa9c8130 canonical_slug ile emekli olacak;
+    # 404 penceresi acmamak icin 301'ler once DEV ile gelir).
+    "bilanco-nasil-okunur-temel-analiz":          "sirket-bilancosunu-nasil-okursunuz",
+    "temettu-yatirimi":                           "bist-temettu-yatirimciligi-rehberi",
+    "bist-halka-arz-ipo-yatirimi":                "halka-arz-ipo-nedir",
+    "borsada-vergi-rehberi-hisse-kazanci":        "borsada-vergi-hisse-senedi-kazanc",
+    "portfoy-rebalancing-yeniden-dengeleme":      "portfoy-rebalancing-ne-zaman-nasil",
+    "piyasa-emri-limit-emri-stop-emri-farki":     "limit-emir-piyasa-emri-nedir",
+    "rsi-gostergesi-nedir":                       "rsi-gostergesi-nasil-kullanilir",
+    "ema-hareketli-ortalama-nedir":               "hareketli-ortalamalar-ema-sma-altin-kesisim",
 }
 
 def _normalize_article(a):
