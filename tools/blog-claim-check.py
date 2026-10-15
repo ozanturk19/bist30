@@ -89,6 +89,7 @@ ALLOWED_LINKS = {
     '/karsilastir': 'Karşılaştır', '/gundem': 'Gündem',
     '/sektor-harita': 'Sektör', '/bilanco-takvimi': 'Bilanço',
     '/temettu-takvimi': 'Temettü', '/portfolio': 'Portföy',
+    '/kesfet/istikrarli-temettu': 'İstikrarlı temettü',   # C-82 (15.10): canlı 200, sayfa adı H1 listesi
     # D-67 (15.10): /bilanco-takvimi ve /temettu-takvimi 301 -> /takvim; blog kanonik adrese baglanir
     # (canli 200, H1 "Takvim").
     '/takvim': 'Takvim',

@@ -200,10 +200,11 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "Teknik Analiz Nedir? Borsa Başlangıç Rehberi",
     "desc": "Teknik analiz nedir, temel analizden farkı nedir, hangi göstergeler kullanılır? Yeni yatırımcılar için kapsamlı rehber.",
     "date": "2026-04-05",
+    "updated": "2026-10-15",
     "mins": 7,
     "cat": "Temel Kavramlar",
     "body": """
-<p>Teknik analiz, geçmiş fiyat hareketleri ve işlem hacmini inceleyerek gelecekteki fiyat hareketlerini tahmin etmeye çalışan bir yöntemdir. Temel varsayımı şudur: <em>Piyasa tüm bilgiyi zaten fiyatlamıştır ve fiyatlar trendler halinde hareket eder.</em></p>
+<p><strong>Teknik analiz</strong>, bir hissenin geçmiş fiyat ve işlem hacmi verisinden trendin yönünü ve gücünü okuma yöntemidir. Grafikler, destek ve direnç seviyeleri ile Supertrend, ADX, EMA ve RSI gibi göstergelerle çalışır; şirketin finansal tablolarına bakan temel analizden farkı budur. Temel varsayımı şudur: <em>Fiyat bilinen bilgiyi yansıtır ve trendler halinde hareket eder.</em></p>
 
 <h2>Teknik Analiz vs Temel Analiz</h2>
 <table style="width:100%;border-collapse:collapse;margin:12px 0">
@@ -211,7 +212,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Odak</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Fiyat & hacim</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Finansal tablolar</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Zaman ufku</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Kısa-orta vadeli</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Uzun vadeli</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Araçlar</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Grafik, indikatör</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">PE, PB, EPS, gelir</td></tr>
-  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Soru</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Ne zaman al/sat?</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Hangi hisseyi al?</td></tr>
+  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Soru</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Trend ne yönde, ne kadar güçlü?</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Şirketin finansalları nasıl?</td></tr>
 </table>
 <p>İdeal yaklaşım ikisini birleştirmektir: Temel analizle "hangi hisse" sorusunu, teknik analizle "ne zaman gir" sorusunu yanıtlayın.</p>
 
@@ -396,13 +397,21 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   },
   {
     "slug": "pe-orani-nedir",
-    "title": "F/K Oranı (PE Ratio) Nedir? Hisse Pahalı mı Ucuz mu?",
-    "desc": "Fiyat/Kazanç oranı nasıl hesaplanır, hangi sektörlerde nasıl yorumlanır, tek başına yeterli midir?",
+    "title": "F/K Oranı Nedir? Geçmiş ve Prospektif F/K Farkı",
+    "desc": "F/K oranı nasıl hesaplanır, prospektif (ileriye dönük) F/K nedir, geçmiş F/K'dan farkı ne, sektöre göre nasıl okunur?",
     "date": "2026-04-10",
+    "updated": "2026-10-15",
     "mins": 5,
     "cat": "Temel Analiz",
     "body": """
-<p>F/K oranı (Fiyat/Kazanç — Price-to-Earnings, PE Ratio), bir hissenin <strong>kaç yıllık kazancını fiyatladığını</strong> gösterir. Hissenin ucuz mu pahalı mı olduğunu anlamak için en yaygın kullanılan temel analiz göstergesidir.</p>
+<p><strong>F/K oranı</strong> (fiyat/kazanç), hisse fiyatının hisse başına yıllık net kâra bölünmesidir ve şirketin bir yıllık kârı için kaç kat ödendiğini gösterir. <strong>Prospektif F/K</strong> (ileriye dönük F/K) aynı hesabı gerçekleşmiş kâr yerine gelecek 12 ay ya da gelecek yıl için beklenen kârla yapar; beklenen kâr analist tahmini olduğu için tahmin değiştikçe oran da değişir.</p>
+
+<h2>Prospektif F/K ile geçmiş F/K arasındaki fark ne?</h2>
+<ul>
+  <li><strong>Geçmiş F/K:</strong> Payda şirketin açıkladığı son 12 ayın net kârıdır. Rakam kesindir, geriye bakar.</li>
+  <li><strong>Prospektif F/K:</strong> Payda beklenen kârdır. Büyüyen şirkette geçmiş F/K'dan düşük çıkar; tahmin tutmazsa oran yeniden yazılır.</li>
+</ul>
+<p>BorsaPusula'da F/K, şirketin açıkladığı son 12 ay kârıyla (geçmiş F/K) hesaplanır; tahmine dayalı kâr kullanılmaz.</p>
 
 <h2>Formül</h2>
 <pre>F/K = Hisse Fiyatı ÷ Hisse Başına Kazanç (EPS)
@@ -422,12 +431,13 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>BIST100 tarihsel olarak gelişmiş piyasalara (ABD S&amp;P500 ~20) göre düşük F/K'larla işlem görür (genellikle 8–15 aralığında). Bu hem risk primini hem de Türkiye'ye özgü makroekonomik belirsizliği yansıtır.</p>
 
 <h2>BorsaPusula'da F/K</h2>
-<p>Her hisse sayfasının <strong>Temel Analiz</strong> bölümünde güncel F/K oranı gösterilir. Bu veri yfinance üzerinden 4 saatte bir güncellenir. Teknik sinyal + temel oran kombinasyonu çok daha güçlü bir karar zemini sunar.</p>
+<p>Her hisse sayfasındaki <strong>Fiyatı makul mü?</strong> sorusu F/K ve PD/DD'yi sektörün orta değeriyle karşılaştırır. F/K, son yıllık rapordaki kâra son ara dönem raporundaki değişimin eklenmesiyle bulunan son 12 ay kârından hesaplanır ve her işlem günü kapanış fiyatıyla yenilenir.</p>
 """,
     "faqs": [
       {"q": "F/K oranı kaç olmalıdır?", "a": "Evrensel bir doğru değer yoktur. BIST100 bankacılık hisseleri genellikle 5-12 arasında işlem görürken teknoloji şirketleri 20-50 olabilir. Önemli olan aynı sektördeki rakiplerle karşılaştırmaktır."},
       {"q": "Düşük F/K her zaman ucuz hisse demek midir?", "a": "Hayır. Düşük F/K büyüme beklentisinin olmadığını, şirkette sorunlar olduğunu veya sektörün baskı altında olduğunu gösterebilir. F/K'yı ROE, büyüme oranı ve sektör bağlamıyla birlikte değerlendirin."},
-      {"q": "BorsaPusula'da F/K bilgisi nerede görünür?", "a": "Her hisse detay sayfasının Temel Analiz bölümünde F/K oranı gösterilir. Bu veri Yahoo Finance'den 4 saatte bir güncellenir. Teknik sinyal ile düşük F/K kombinasyonu özellikle güçlü bir seçim kriteri olabilir."}
+      {"q": "Prospektif F/K nedir?", "a": "Prospektif (ileriye dönük) F/K, hisse fiyatının gelecek 12 ay ya da gelecek yıl için beklenen hisse başına kâra bölünmesidir. Beklenen kâr analist tahmini olduğu için oran tahminle birlikte değişir; geçmiş F/K ise şirketin açıkladığı son 12 ay kârını kullanır."},
+      {"q": "BorsaPusula'da F/K bilgisi nerede görünür?", "a": "Her hisse sayfasındaki 'Fiyatı makul mü?' bölümünde F/K ve PD/DD sektörün orta değeriyle karşılaştırılır. F/K, şirketin açıkladığı son 12 ay kârıyla hesaplanır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'EREGL']
   },
@@ -811,13 +821,14 @@ Histogram = MACD − Sinyal</pre>
   },
   {
     "slug": "borsa-sozlugu",
-    "title": "Borsa Sözlüğü: En Sık Kullanılan 35 Terim",
+    "title": "Borsa Sözlüğü: En Sık Kullanılan 36 Terim",
     "desc": "Borsa yatırımcılarının bilmesi gereken temel terimlerin Türkçe açıklamaları. Hisse, endeks, lot, emir türleri ve daha fazlası.",
     "date": "2026-04-21",
+    "updated": "2026-10-15",
     "mins": 8,
     "cat": "Temel Kavramlar",
     "body": """
-<p>Borsaya yeni başlayanlar için en zorlu engellerden biri terminolojidir. Bu sözlük, en sık kullanılan 35 terimi sade Türkçeyle açıklar.</p>
+<p>Borsaya yeni başlayanlar için en zorlu engellerden biri terminolojidir. Bu sözlük, en sık kullanılan 36 terimi sade Türkçeyle açıklar.</p>
 
 <h2>A–E</h2>
 <ul>
@@ -868,6 +879,7 @@ Histogram = MACD − Sinyal</pre>
   <li><strong>Volatilite:</strong> Fiyat dalgalanma şiddeti.</li>
   <li><strong>VWAP:</strong> Hacim ağırlıklı ortalama fiyat.</li>
   <li><strong>Whipsaw:</strong> Sahte kırılım — fiyat direnç/destek kırar sonra geri döner.</li>
+  <li id="yakin-izleme-pazari"><strong>Yakın İzleme Pazarı (YİP):</strong> Borsa İstanbul Pay Piyasası'nda, finansal durumu ya da özel durum açıklamaları nedeniyle yatırımcıların ek dikkat göstermesi istenen şirketlerin paylarının işlem gördüğü pazar. Bu paylar ayrı işlem kurallarıyla işlem görür.</li>
 </ul>
 """,
     "faqs": [
@@ -1187,90 +1199,37 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 
   {
     "slug": "bist30-hisseleri-2026",
-    "title": "BIST30 Hisseleri 2026 — Tam Liste ve Analiz",
-    "desc": "BIST30 endeksindeki tüm hisseler, sektörel dağılım ve teknik sinyal özetleriyle 2026 güncel rehber.",
+    "title": "BIST 30 hisseleri hangileri? Ekim–Aralık 2026",
+    "desc": "Ekim–Aralık 2026 döneminde BIST 30 endeksindeki 30 şirket, bu dönemde giren ve çıkan hisse, bir sonraki dönem listesinin nasıl ve ne zaman açıklandığı.",
     "date": "2026-05-01",
-    "mins": 8,
+    "updated": "2026-10-15",
+    "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
-<p><strong>BIST30</strong>, Borsa İstanbul'daki en yüksek işlem hacmine sahip 30 büyük hisseyi kapsayan prestijli bir endekstir. Türkiye vadeli işlemler piyasasının (VİOP) temel endeksi olması nedeniyle kurumsal yatırımcılar ve fon yöneticilerinin en yakından takip ettiği endekstir.</p>
+<p><strong>BIST 30</strong>, Borsa İstanbul'un piyasa değeri ve işlem hacmine göre seçtiği 30 paydan oluşan endeksidir. Ekim–Aralık 2026 döneminde endekste 30 şirket var; dönemin tam listesi, her şirketin analiz sayfasına bağlantısıyla <a href="/hisseler#bist30">BIST 30 hisseleri listesinde</a>. Bu dönemde endekse <a href="/hisse/TRMET">TRMET</a> (TR Anadolu Metal Madencilik) girdi, <a href="/hisse/DSTKF">DSTKF</a> (Destek Finans Faktoring) çıktı.</p>
 
-<h2>BIST30 Hisseleri (2026)</h2>
-<p>Endeks bileşenleri Borsa İstanbul tarafından yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) güncellenir. 2026 yılı itibarıyla BIST30 şu sektörlerden oluşmaktadır:</p>
+<h2>Ekim–Aralık 2026 döneminde BIST 30'da ne değişti?</h2>
+<p>Temmuz–Eylül 2026 dönemine göre tek değişiklik var: TRMET endekse girdi, DSTKF endeksten çıktı. Diğer 29 şirket aynı kaldı.</p>
 
-<h3>Bankacılık</h3>
+<h2>Bir sonraki BIST 30 listesi ne zaman açıklanır?</h2>
+<p>BIST pay endeksleri üçer aylık dönemlerle çalışır: Ocak–Mart, Nisan–Haziran, Temmuz–Eylül ve Ekim–Aralık. Borsa İstanbul her dönemin listesini dönem başlamadan önce endeks duyurularıyla açıklar; yeni liste dönemin ilk işlem gününden itibaren geçerli olur. Seçimde payların fiili dolaşımdaki piyasa değeri ve işlem hacmi esas alınır.</p>
+<p>Ocak–Mart 2027 döneminin listesi de dönem başlamadan önce bu yolla açıklanacak. Hangi şirketlerin gireceğine ya da çıkacağına dair tahmin yayımlamıyoruz. BorsaPusula'daki <a href="/hisseler#bist30">BIST 30 listesi</a> yeni dönem başladığında güncellenir.</p>
+
+<h2>BIST 30 neden takip edilir?</h2>
 <ul>
-  <li><strong>AKBNK</strong> — Akbank T.A.Ş.</li>
-  <li><strong>GARAN</strong> — Garanti BBVA</li>
-  <li><strong>ISCTR</strong> — İş Bankası C</li>
-  <li><strong>VAKBN</strong> — Vakıfbank</li>
-  <li><strong>YKBNK</strong> — Yapı Kredi Bankası</li>
-  <li><strong>DSTKF</strong> — Destek Finans Faktoring</li>
+  <li><strong>Likidite:</strong> Endeksteki paylar Borsa İstanbul'un en çok işlem gören paylarıdır.</li>
+  <li><strong>Kurumsal takip:</strong> Yabancı yatırımcılar ve büyük fonlar bu paylarda yoğunlaşır.</li>
+  <li><strong>VİOP:</strong> BIST 30 vadeli işlem ve opsiyon sözleşmelerinin dayanak endeksidir.</li>
+  <li><strong>Endeks fonları:</strong> BIST 30 borsa yatırım fonlarıyla endeksin tamamına tek işlemle yatırım yapılabilir.</li>
 </ul>
 
-<h3>Holding ve Sanayi</h3>
-<ul>
-  <li><strong>KCHOL</strong> — Koç Holding</li>
-  <li><strong>SAHOL</strong> — Sabancı Holding</li>
-  <li><strong>FROTO</strong> — Ford Otosan</li>
-  <li><strong>TOASO</strong> — Tofaş Oto</li>
-  <li><strong>EREGL</strong> — Ereğli Demir Çelik</li>
-  <li><strong>KRDMD</strong> — Kardemir Karabük Demir Çelik</li>
-</ul>
-
-<h3>Enerji ve Petrokimya</h3>
-<ul>
-  <li><strong>TUPRS</strong> — Tüpraş</li>
-  <li><strong>PETKM</strong> — Petkim</li>
-  <li><strong>SASA</strong> — Sasa Polyester</li>
-  <li><strong>ENKAI</strong> — Enka İnşaat</li>
-  <li><strong>ASTOR</strong> — Astor Enerji</li>
-  <li><strong>GUBRF</strong> — Gübre Fabrikaları T.A.Ş.</li>
-</ul>
-
-<h3>Diğer Sektörler</h3>
-<ul>
-  <li><strong>THYAO</strong> — Türk Hava Yolları (Ulaşım)</li>
-  <li><strong>TCELL</strong> — Turkcell (Telekom)</li>
-  <li><strong>TTKOM</strong> — Türk Telekom (Telekom)</li>
-  <li><strong>BIMAS</strong> — BİM Mağazalar (Perakende)</li>
-  <li><strong>MGROS</strong> — Migros (Perakende)</li>
-  <li><strong>ASELS</strong> — Aselsan (Savunma)</li>
-  <li><strong>EKGYO</strong> — Emlak Konut GYO</li>
-  <li><strong>TAVHL</strong> — TAV Havalimanları</li>
-  <li><strong>PGSUS</strong> — Pegasus Hava Yolları</li>
-  <li><strong>SISE</strong> — Şişe Cam</li>
-  <li><strong>AEFES</strong> — Anadolu Efes Biracılık</li>
-  <li><strong>TRALT</strong> — Türk Altın İşletmeleri</li>
-</ul>
-
-<h2>BIST30'un Önemi</h2>
-<p>BIST30 hisseleri birkaç kritik özellik taşır:</p>
-<ul>
-  <li><strong>Yüksek likidite:</strong> Kolayca alınıp satılabilir; büyük emirler fiyatı fazla etkilemez.</li>
-  <li><strong>Kurumsal takip:</strong> Yabancı yatırımcılar ve büyük fonlar bu hisseleri yoğun takip eder.</li>
-  <li><strong>VİOP bağlantısı:</strong> Vadeli işlemler (BIST30 futures) ile hedge edilebilir.</li>
-  <li><strong>Endeks fonu yatırımı:</strong> BIST30 ETF'leri aracılığıyla tek alımla 30 hisseye yatırım yapılabilir.</li>
-</ul>
-
-<h2>BIST30 Sinyal Analizi — Güncel Durum</h2>
-<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/">Sinyal Özeti</a> sayfasında ise tüm endeksin güncel durumunu tek bakışta görebilirsiniz.</p>
-
-<h2>Hangi BIST30 Hissesi Daha İyi?</h2>
-<p>"En iyi BIST30 hissesi" sorusunun tek bir yanıtı yoktur. Değerlendirirken şunlara bakın:</p>
-<ol>
-  <li><strong>Aktif sinyal:</strong> Güçlü Trend sinyali var mı, kaç gündür sürüyor?</li>
-  <li><strong>Trend gücü:</strong> ADX değeri 25'in üzerinde mi?</li>
-  <li><strong>Giriş kalitesi:</strong> Fiyat Supertrend'e yakın mı (İdeal/İyi)?</li>
-  <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
-  <li><strong>Sektör bağlamı:</strong> Sektörde genel trend yukarı mı?</li>
-</ol>
-<p><a href="/tarama">Tarama</a> sayfası tüm bu kriterleri en iyi karşılayan hisseleri sinyal gücüne göre sıralar — BIST30 dahil, takip edilen tüm hisse evreni.</p>
+<h2>BIST 30 şirketleri BorsaPusula'da nasıl okunur?</h2>
+<p>Her şirket için aynı üç soru cevaplanır: <strong>Finansalları nasıl?</strong> <strong>Fiyatı makul mü?</strong> <strong>Trend destekliyor mu?</strong> Finansallar şirketin açıkladığı son raporlardan, değerleme F/K ve PD/DD'nin sektörle karşılaştırmasından, trend durumu (Güçlü Trend, Yatay, Trend Bozuldu) beş teknik koşuldan gelir. Hesabın ayrıntısı <a href="/metodoloji">Metodoloji</a> sayfasında; BIST 30 şirketlerini birlikte süzmek için <a href="/tarama">Tarama</a>.</p>
 """,
     "faqs": [
-      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, DSTKF), holding/sanayi (KCHOL, SAHOL, FROTO, TOASO, EREGL, KRDMD), enerji (TUPRS, PETKM, ASTOR, ENKAI, SASA, GUBRF) ve diğer sektörlerden oluşur."},
-      {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
-      {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Tarama sayfasında sinyal, sektör ve ADX filtreleriyle bu hisseleri daraltabilirsiniz."}
+      {"q": "BIST 30'da kaç hisse var ve hangileri?", "a": "BIST 30'da 30 hisse var. Ekim–Aralık 2026 döneminin listesi borsapusula.com/hisseler#bist30 adresinde. Bu dönemde TRMET endekse girdi, DSTKF endeksten çıktı."},
+      {"q": "BIST 30 endeksi ne sıklıkla değişir?", "a": "BIST pay endeksleri üçer aylık dönemlerle çalışır: Ocak–Mart, Nisan–Haziran, Temmuz–Eylül, Ekim–Aralık. Borsa İstanbul her dönemin listesini dönem başlamadan önce açıklar; seçimde fiili dolaşımdaki piyasa değeri ve işlem hacmi esas alınır."},
+      {"q": "BIST 30 ile BIST 100 arasındaki fark ne?", "a": "BIST 100, Borsa İstanbul'un 100 payından oluşan ana endeksidir; BIST 30 bu 100 payın içinden seçilen 30 paydan oluşur. İki endeksin dönem listeleri borsapusula.com/hisseler sayfasında birlikte gösterilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
@@ -3308,9 +3267,12 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl yapılır, ne zaman alınır, vergi avantajları nelerdir? 2026 rehberi.",
     "cat": "Temel Analiz",
     "date": "2026-05-01",
+    "updated": "2026-10-15",
     "mins": 7,
     "body": """
-<p>Temettü (dividant) yatırımı, hisse senedini yalnızca fiyat artışından değil, düzenli nakit akışından da kazanmak için kullanılan stratejidir. BIST'te bazı şirketler her yıl yüksek oranlarda kâr payı dağıtır; bu da temettü yatırımcısı için önemli bir gelir kaynağı olur.</p>
+<p><strong>15 Ekim 2026 kapanışına göre</strong> hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödeyen BIST 100 şirketleri arasında son 12 ayın temettü verimi en yüksek beşi: <a href="/hisse/FROTO">FROTO</a> (%13,7), <a href="/hisse/BRYAT">BRYAT</a> (%12,2), <a href="/hisse/ISMEN">ISMEN</a> (%10,7), <a href="/hisse/LMKDC">LMKDC</a> (%8,8) ve <a href="/hisse/TOASO">TOASO</a> (%8,1). Aynı kurala uyan tüm şirketler, her işlem günü kapanıştan sonra yenilenen <a href="/kesfet/istikrarli-temettu">İstikrarlı temettü listesinde</a>.</p>
+
+<p>Temettü (dividend) yatırımı, hisse senedini yalnızca fiyat artışından değil, düzenli nakit akışından da kazanmak için kullanılan stratejidir. BIST'te bazı şirketler her yıl yüksek oranlarda kâr payı dağıtır; bu da temettü yatırımcısı için önemli bir gelir kaynağı olur.</p>
 
 <h2>Temettü Verimi Nedir?</h2>
 <p>Temettü verimi (dividend yield), hisse başına ödenen yıllık temettünün hisse fiyatına bölünmesiyle hesaplanır:</p>
