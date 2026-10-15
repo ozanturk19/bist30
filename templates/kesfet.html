@@ -22,8 +22,17 @@
 {%- set _base = 'https://borsapusula.com' -%}
 {%- set _url = _base ~ '/kesfet/' ~ (_k.slug or 'kaliteli-makul') -%}
 {%- set _name = _k.baslik or 'Orta-uzun vade listeleri' -%}
-{%- set _ttl = _name ~ ' · Orta-uzun vade listeleri' -%}
-{%- set _desc = (_k.kural or 'Şirketlerin açıkladığı finansallara göre dört hazır liste.') ~ (' ' ~ _lbl ~ ' kapanışı.' if _lbl else '') -%}
+{#- C-82 (15.10, SEO #9): liste başına benzersiz, veri aylı başlık ("Ekim 2026" listenin veri
+    tarihinden, takvimden değil) ve soru H1 (_k.soru). Önceden 4 liste aynı H1'i taşıyordu. -#}
+{%- set _TTL = {'kaliteli_makul': 'Kaliteli ve makul fiyatlı BIST şirketleri listesi',
+                'istikrarli_temettu': 'Temettü veren BIST şirketleri: istikrarlı temettü listesi',
+                'borcsuz_buyuyen': 'Borçsuz büyüyen BIST şirketleri listesi',
+                'sektorune_gore_ucuz': 'Sektörüne göre ucuz BIST şirketleri listesi'} -%}
+{%- set _p = (_k.tarih or '')[:10].split('-') -%}
+{%- set _ay = (_MO[_p[1]|int - 1] ~ ' ' ~ _p[0]) if (_p|length == 3 and _p[1]|int >= 1 and _p[1]|int <= 12) else '' -%}
+{%- set _ttl = (_TTL.get(_k.anahtar) or (_name ~ ' · Orta-uzun vade listeleri')) ~ (' (' ~ _ay ~ ')' if _ay else '') -%}
+{%- set _n = _rows|length -%}
+{%- set _desc = ((_lbl ~ ' kapanışında ' ~ _n ~ ' şirket. ') if (_lbl and _n) else '') ~ (_k.kural or 'Şirketlerin açıkladığı finansallara göre dört hazır liste.') -%}
 {%- set _VL = {'ucuz': ('Ucuz tarafta', 'ucuz'), 'makul': ('Makul', 'makul'), 'pahali': ('Pahalı tarafta', 'pahali'), 'karisik': ('Karışık', 'mix')} -%}
 {%- set _TR = {'g': 'strong', 'y': 'flat', 'b': 'broken'} -%}
 {%- set _SHOW = 15 -%}
@@ -80,8 +89,9 @@
 
 <main id="main-content" class="container kf" tabindex="-1">
   <div class="da-pagehead">
-    <h1 class="da-pagehead-title">Orta-uzun vade listeleri</h1>
-    <p class="da-pagehead-lede">Şirketlerin açıkladığı finansallara göre dört hazır liste{% if _lbl %}; {{ _lbl }} kapanışı{% endif %}.</p>
+    <div class="da-eyebrow">Orta-uzun vade listeleri</div>
+    <h1 class="da-pagehead-title" id="kfH">{{ _k.soru or 'Hangi şirketler öne çıkıyor?' }}</h1>
+    <p class="da-pagehead-lede">{% if _lbl and _n %}{{ _lbl }} kapanışında listede <span class="da-num">{{ _n }}</span> şirket var.{% else %}Şirketlerin açıkladığı finansallara göre dört hazır liste.{% endif %}</p>
   </div>
 
   {%- if _lists %}
@@ -93,7 +103,6 @@
   {%- endif %}
 
   <section class="kf-list" aria-labelledby="kfH">
-    <h2 class="kf-q da-display" id="kfH">{{ _k.soru or 'Hangi şirketler öne çıkıyor?' }}</h2>
     {%- if _k.kural %}
     <p class="kf-rule"><span><b>Kural:</b> {{ _k.kural }}</span><a class="kf-rule-a" href="/metodoloji#kesfet-listeleri">Yöntem <span aria-hidden="true">→</span></a></p>
     {%- endif %}
