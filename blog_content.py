@@ -1239,6 +1239,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   {
     "slug": "swing-trading-nedir",
     "date": "2026-05-01",
+    "updated": "2026-10-16",
     "title": "Swing Trading Nedir? BIST'te Swing Trade Nasıl Yapılır?",
     "cat": "Strateji",
     "read_min": 7,
@@ -1272,25 +1273,25 @@ BIST hisselerinde bir trend dalgası (birkaç günden 2-3 haftaya kadar), toplam
 ### 1. Supertrend
 Swing traderin en iyi arkadaşı. Trendin yönünü ve döndüğü noktayı net olarak gösterir:
 
-- **Yeşil Supertrend:** Uzun pozisyon tutmak için uygun
-- **Kırmızı Supertrend:** Düşüş trendinde çıkmak gerekir
+- **Yeşil Supertrend:** Fiyat trend dönüş seviyesinin üstünde, yükseliş trendi sürüyor
+- **Kırmızı Supertrend:** Fiyat trend dönüş seviyesinin altında, düşüş trendi sürüyor
 
 ### 2. ADX (Average Directional Index)
 Trendin **gücünü** ölçer (yönünü değil):
 
-- ADX > 25 → Güçlü trend var, swing fırsatı yüksek
-- ADX < 20 → Yatay piyasa, swing yapmak riskli
+- ADX > 25 → Belirgin bir trend var
+- ADX < 20 → Yatay piyasa, trend zayıf
 
 ### 3. RSI (Relative Strength Index)
-Giriş/çıkış zamanlaması için:
+Momentumun ne kadar ısındığını gösterir:
 
-- RSI 35-40 bölgesinde geri çekilme → Potansiyel alım fırsatı
-- RSI 70+ bölgesinde fiyat → Kar alım bölgesi
+- RSI 35-40 bölgesine geri çekilme → Yükselen trend içinde momentumun soğuması
+- RSI 70 üstü → Aşırı alım bölgesi; yükseliş hızlı, tek başına dönüş sinyali değildir
 
 ### 4. EMA (Hareketli Ortalama)
 Genel swing trading pratiğinde sık kullanılan bir yaklaşım EMA 20/50/100 hizalamasıdır:
 - EMA 20 > EMA 50 > EMA 100 hizalaması → Güçlü yükseliş trendi
-- Fiyat EMA 20'ye geri çekilirse → Swing alım noktası
+- Fiyat EMA 20'ye geri çekilirse → Trend içinde olağan bir geri çekilme
 
 (Not: BorsaPusula'nın kendi sinyal motoru farklı periyotlar — EMA12/EMA99 — kullanır, aşağıdaki bölüme bakın.)
 
