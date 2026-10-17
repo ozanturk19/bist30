@@ -365,6 +365,8 @@
         var day = (typeof bpFormatTrDateLong === 'function' && bpFormatTrDateLong(m[0]))
           || (parseInt(m[1], 10) + ' ' + BP_EOD_MONTHS[parseInt(m[2], 10) - 1]);
         var label = day + ' kapanışı';
+        // C-54 QA 17.10: makro şerit seans dışında gecikme notu/canlı nokta yerine kapanış tarihini gösterir
+        if (typeof window.bpMacroSetSession === 'function') window.bpMacroSetSession(/^seans_disi/.test(j.data_quality || ''), label);
         document.getElementById('bpEodChipText').textContent = label;
         eodChip.setAttribute('aria-label', 'Veriler ' + label + ' ile günceldir');
         eodChip.style.display = '';
@@ -652,9 +654,20 @@
   // C-54 (O13 "olabildiğince canlı"): tazelik yazısı + canlı nokta + gecikme notu.
   // Canlı nokta yalnız veri ≤3 dk iken yanar; 1 saati aşan veride göreli zaman
   // yerine okuma saati yazılır (EOD dil kuralı: "bugün/dün" yok).
+  // QA 17.10 dürüstlük: seans kapalıyken (data-quality "seans_disi*") canlı nokta
+  // yanmaz ve "15 dk gecikmeli" yerine "BIST: 16 Ekim kapanışı" yazılır.
   var _bpMacroPrev = null;
+  var _bpBist = { closed: false, label: '' };
+  var _bpMacroMetaArgs = null;
+  window.bpMacroSetSession = function(closed, label) {
+    _bpBist = { closed: !!closed, label: label || '' };
+    if (!_bpMacroMetaArgs) return;
+    var html = bpMacroMeta(_bpMacroMetaArgs[0], _bpMacroMetaArgs[1]);
+    document.querySelectorAll('#macroTrack .macro-meta').forEach(function(el) { el.outerHTML = html; });
+  };
   function bpMacroMeta(ageS, delayed) {
-    var live = ageS != null && ageS <= 180;
+    _bpMacroMetaArgs = [ageS, delayed];
+    var live = !_bpBist.closed && ageS != null && ageS <= 180;
     var home = document.querySelector('.macro-bar--home .macro-live-dot');
     if (home) home.classList.toggle('is-live', live);
     if (ageS == null) return '';
@@ -669,7 +682,8 @@
       var hm = new Intl.DateTimeFormat('tr-TR', Object.assign({ hour: '2-digit', minute: '2-digit', hour12: false }, tz)).format(t);
       txt = (day(t) === day(new Date()) ? '' : day(t) + ' ') + hm + ' verisi';
     }
-    if (delayed) txt += ' · BIST verisi 15 dk gecikmeli';
+    if (_bpBist.closed) { if (_bpBist.label) txt += ' · BIST: ' + _bpBist.label; }
+    else if (delayed) txt += ' · BIST verisi 15 dk gecikmeli';
     return '<span class="macro-item macro-meta"><span class="macro-meta-dot' + (live ? ' is-live' : '') + '" aria-hidden="true"></span>' + txt + '</span>';
   }
   window.bpLoadMacroBar = async function(onItems, excludeLabels) {
