@@ -235,4 +235,14 @@ header .bp-main-nav{gap:3px}
 @keyframes bp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 ::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
 
+/* C-54: makro şerit tazeliği — canlı nokta (veri ≤3 dk), değişen fiyatta kısa flaş */
+.macro-meta { color: var(--bp-text-3); font-size: 11px; gap: 6px; }
+.macro-meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bp-text-3); flex: none; display: inline-block; }
+.macro-bar--home .macro-meta-dot { display: none; }
+.macro-meta-dot.is-live, .macro-bar--home .macro-live-dot.is-live { background: var(--bp-up); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bp-up) 22%, transparent); }
+.mc-flash-up, .mc-flash-dn { border-radius: 3px; animation: bpMacroFlash 1.4s ease-out; }
+.mc-flash-up { --bp-flash: var(--bp-up); }
+.mc-flash-dn { --bp-flash: var(--bp-down); }
+@keyframes bpMacroFlash { from { background: color-mix(in srgb, var(--bp-flash) 32%, transparent); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .mc-flash-up, .mc-flash-dn { animation: none; } }
 .macro-stale-badge { position: absolute; top: 2px; left: 6px; font-size: 10px; line-height: 1; opacity: .75; z-index: 4; pointer-events: auto; cursor: help; color: inherit; }

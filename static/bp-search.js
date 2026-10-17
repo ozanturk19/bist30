@@ -614,7 +614,7 @@
   // CPO-DEV2-072/r98) artik tum cagiranlar icin gecerli — sekme arka plandayken
   // /api/macro cekilmez. onItems, index.html'in ec30/ec100 endeks karti guncellemesi
   // gibi sablon-ozel yan etkiler icin opsiyonel callback (items render'dan once cagrilir).
-  var _bpMacroSeq = 0;  // DOMContentLoaded + setInterval(180s) + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt)
+  var _bpMacroSeq = 0;  // DOMContentLoaded + setInterval(60s) + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt)
   var _bpMacroEverLoaded = false;  // bughunt-13.09 (Ozan canli mobilde yakaladi, 2. kez):
   // document.hidden guard'i asagida SADECE fetch'i degil, resume-on-visible
   // fix'inin (r98/CPO-DEV2-072) kendisini de blokluyordu — sayfa hidden=true
@@ -648,6 +648,29 @@
       bar.appendChild(badge);
     }
     badge.style.display = isStale ? 'inline' : 'none';
+  }
+  // C-54 (O13 "olabildiğince canlı"): tazelik yazısı + canlı nokta + gecikme notu.
+  // Canlı nokta yalnız veri ≤3 dk iken yanar; 1 saati aşan veride göreli zaman
+  // yerine okuma saati yazılır (EOD dil kuralı: "bugün/dün" yok).
+  var _bpMacroPrev = null;
+  function bpMacroMeta(ageS, delayed) {
+    var live = ageS != null && ageS <= 180;
+    var home = document.querySelector('.macro-bar--home .macro-live-dot');
+    if (home) home.classList.toggle('is-live', live);
+    if (ageS == null) return '';
+    var txt;
+    if (ageS < 60) txt = 'Az önce güncellendi';
+    else if (ageS < 3600) txt = Math.floor(ageS / 60) + ' dk önce güncellendi';
+    else {
+      // İstanbul saatiyle (ziyaretçinin saat diliminden bağımsız, K-BD kanonu)
+      var tz = { timeZone: 'Europe/Istanbul' };
+      var day = function(x) { return new Intl.DateTimeFormat('tr-TR', Object.assign({ day: '2-digit', month: '2-digit' }, tz)).format(x).replace(/\//g, '.'); };
+      var t = new Date(Date.now() - ageS * 1000);
+      var hm = new Intl.DateTimeFormat('tr-TR', Object.assign({ hour: '2-digit', minute: '2-digit', hour12: false }, tz)).format(t);
+      txt = (day(t) === day(new Date()) ? '' : day(t) + ' ') + hm + ' verisi';
+    }
+    if (delayed) txt += ' · BIST verisi 15 dk gecikmeli';
+    return '<span class="macro-item macro-meta"><span class="macro-meta-dot' + (live ? ' is-live' : '') + '" aria-hidden="true"></span>' + txt + '</span>';
   }
   window.bpLoadMacroBar = async function(onItems, excludeLabels) {
     var track = document.getElementById('macroTrack');
@@ -688,14 +711,24 @@
         return;
       }
       if (typeof onItems === 'function') onItems(items);
+      // C-54: önceki okumaya göre değişen fiyat kısa flaş alır (reduce-motion'da
+      // CSS animasyonu kapatır); ilk yüklemede flaş yok.
+      var prev = _bpMacroPrev;
+      _bpMacroPrev = {};
+      var delayed = false;
       var html = items.map(function(it) {
         var lbl   = bpAssetLabel(it.label);
         var price = bpFormatAssetPrice(it.label, it.price);
         var chg   = it.change;
         var cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
         var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + bpMacroPct(chg) + '</span></span>';
+        var old   = prev && prev[it.label];
+        var flash = (old != null && it.price != null && it.price !== old) ? (it.price > old ? ' mc-flash-up' : ' mc-flash-dn') : '';
+        _bpMacroPrev[it.label] = it.price;
+        if (it.source_delay_min > 0) delayed = true;
+        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span class="macro-px' + flash + '">' + price + '</span><span class="' + cls + '">' + arrow + ' ' + bpMacroPct(chg) + '</span></span>';
       }).join('');
+      html += bpMacroMeta(d.age_s, delayed);
       /* K-AF (21.09): serit bir MARQUEE — icerik iki kez basilir ve kaydirma
          ikinci kopyayi sürekli besler. `prefers-reduced-motion: reduce` altinda
          tokens.css kaydirmayi durdurup seridi elle-kaydirilabilir yapiyor;
@@ -730,7 +763,7 @@
     var run = function() { window.bpLoadMacroBar(window.bpMacroOnItems); };
     window._bpResumeMacro = run;
     run();
-    window._bpMacroTimer = setInterval(run, 180000);
+    window._bpMacroTimer = setInterval(run, 60000);  // C-54: 60 sn (gizli sekmede bpLoadMacroBar istek atmaz)
     document.addEventListener('visibilitychange', function() { if (!document.hidden) run(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bpStartMacro);
