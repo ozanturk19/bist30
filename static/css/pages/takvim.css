@@ -193,7 +193,7 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text-3
   .tk-wk-l{font-size:12px;margin-bottom:4px}
   .tk-fnote{margin:6px 0 8px;font-size:12.5px}
   .tk-dg{display:block;border-top:0;padding:0;scroll-margin-top:4px}
-  .tk-dg-d{position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:6px;height:32px;margin:0 -14px;padding:6px 14px 0;background:var(--bp-bg);border-bottom:1px solid var(--bp-line)}
+  .tk-dg-d{position:sticky;top:var(--bp-anchor-header);z-index:3;display:flex;align-items:baseline;gap:6px;height:32px;margin:0 -14px;padding:6px 14px 0;background:var(--bp-bg);border-bottom:1px solid var(--bp-line)}
   .tk-dg-d b{display:inline;font-size:15.5px;font-weight:700;letter-spacing:-.01em}
   .tk-dg-d span{display:inline;font-size:14px;color:var(--bp-text-2)}
   .tk-dg-d em{margin:0 0 0 auto;font-size:11.5px;line-height:1.5}
