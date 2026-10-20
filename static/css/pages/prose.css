@@ -1,8 +1,6 @@
-:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-size: var(--bp-type-body); line-height: 1.7; min-height: 100vh; }
-header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-line); position: sticky; top: 0; z-index: var(--bp-z-dropdown); }
+header { background: var(--bp-surface); border-bottom: 1px solid var(--bp-line); position: sticky; top: var(--bp-anchor-macro); z-index: var(--bp-z-dropdown); }
 
 .lg-head { padding-top: 0; padding-bottom: 0; }
 

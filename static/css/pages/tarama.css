@@ -15,7 +15,6 @@
     position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-sub   { font-size:var(--bp-type-sm); color:var(--text2); margin-top:1px; }
-  .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
   .tv { --tv-gut: 20px; position: relative; padding-top: 6px; }
   .tv .mut { color: var(--bp-text-3); font-family: 'Space Grotesk', system-ui, sans-serif; }

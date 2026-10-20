@@ -11,6 +11,8 @@
     ayrılmış önek listesi, öğe o bölümün tüm sayfalarında aktif.
 -#}
 {% import '_brand.html' as brand %}
+{#- C-P0-2010 (20.10): makro şerit header'ın ÜSTÜNDE ve YALNIZ burada (sayfa şablonları include etmez). -#}
+{% include '_macro_bar.html' %}
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula ana sayfası">
     <svg class="bp-logo" width="215" height="56" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">

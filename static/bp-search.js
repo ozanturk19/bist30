@@ -668,8 +668,9 @@
   function bpMacroMeta(ageS, delayed) {
     _bpMacroMetaArgs = [ageS, delayed];
     var live = !_bpBist.closed && ageS != null && ageS <= 180;
-    var home = document.querySelector('.macro-bar--home .macro-live-dot');
-    if (home) home.classList.toggle('is-live', live);
+    // C-P0-2010: "Piyasalar" etiketi artık her sayfada (_header.html) — canlı nokta tek yerde, her sayfada.
+    var dot = document.querySelector('#macroBar .macro-live-dot');
+    if (dot) dot.classList.toggle('is-live', live);
     if (ageS == null) return '';
     var txt;
     if (ageS < 60) txt = 'Az önce güncellendi';
@@ -684,7 +685,7 @@
     }
     if (_bpBist.closed) { if (_bpBist.label) txt += ' · BIST: ' + _bpBist.label; }
     else if (delayed) txt += ' · BIST verisi 15 dk gecikmeli';
-    return '<span class="macro-item macro-meta"><span class="macro-meta-dot' + (live ? ' is-live' : '') + '" aria-hidden="true"></span>' + txt + '</span>';
+    return '<span class="macro-item macro-meta">' + txt + '</span>';
   }
   window.bpLoadMacroBar = async function(onItems, excludeLabels) {
     var track = document.getElementById('macroTrack');

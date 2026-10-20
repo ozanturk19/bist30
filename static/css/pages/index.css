@@ -8,7 +8,6 @@ header{
 }
 .logo-link{align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
 
-.mc-pos{color:var(--bp-up)}.mc-neg{color:var(--bp-down)}.mc-neu{color:var(--bp-text-3)}
 
 #staleBanner{max-width:1360px;margin:14px auto 0;margin-left:clamp(16px,4vw,40px);margin-right:clamp(16px,4vw,40px)}
 

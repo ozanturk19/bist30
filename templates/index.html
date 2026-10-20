@@ -55,11 +55,6 @@
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 
-<!-- CPO-1558: makro şerit onaylı mockup'taki gibi header'ın ÜSTÜNE alındı (Ozan
-     canlı-site/mockup karşılaştırması) — sticky top değerleri buna göre değişti
-     (#macroBar top:0, header top:32px), DOM id'leri/JS AYNEN korunur. -->
-{% with macro_home=1 %}{% include '_macro_bar.html' %}{% endwith %}
-
 {% include '_header.html' %}
 
 <main id="main-content" class="da-page" tabindex="-1">

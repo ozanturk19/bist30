@@ -156,7 +156,6 @@
     white-space:nowrap; transition:all .15s;
   }
   .btn-entry:hover { background:rgba(var(--bp-al-rgb),.2); border-color:var(--bp-ok); }
-  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   .sum-card, .add-bar {
     position: relative;

@@ -138,7 +138,6 @@
   .q-uzak   { background: rgba(var(--bp-stale-rgb),.18);  color:var(--bp-warn); }
   .q-none   { color: var(--bp-text-3); }
 
-  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   .ac-wrap { position: relative; display: inline-block; }
   .ac-dropdown {

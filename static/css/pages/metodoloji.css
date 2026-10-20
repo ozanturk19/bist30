@@ -65,7 +65,6 @@
     --da-glow-size: 260px; --da-glow-a: .12;
   }
 
-  .mc-pos{color:var(--bp-up);}.mc-neg{color:var(--bp-down);}.mc-neu{color:var(--bp-text-3);}
 
   .term-grid { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }
   .term-row {

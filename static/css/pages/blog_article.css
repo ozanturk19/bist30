@@ -74,7 +74,6 @@
   .art-sub-msg { font-size:var(--bp-type-body); color:var(--bp-text); } .art-sub-msg.is-err { color:var(--bp-danger); }
 
   @media(max-width:600px) { .art-live{padding:16px;} .art-sub-lbl{flex-basis:100%;} }
-  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 
   .read-progress {
 

@@ -62,15 +62,6 @@
 
 {# Mobile Bottom Navigation #}
 
-{# Makro Ticker Bandı #}
-{# CPO: makro bar artık header'ın ÜSTÜNDE, kendisi sticky top:0 (32px yükseklik) —
-   index.html'deki onaylı davranışla (CPO-1558) eşleşmesi için taşındı, bu şablonda
-   makrobar header'ın ALTINDA ve position:relative kalmıştı, bu yüzden aşağı
-   kaydırınca kayboluyordu (Ozan: sayfalar arası tutarsızlık şikayeti). header artık
-   top:32px'te sabitleniyor (makrobar'ın hemen altında); bp-segments de buna göre
-   top:92px'e taşındı. DOM id'leri/JS AYNEN korunur. #}
-{% include '_macro_bar.html' %}
-
 {% include '_header.html' %}
 
 {# Toast feedback #}

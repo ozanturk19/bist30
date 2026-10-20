@@ -60,5 +60,4 @@
       .bo-row { grid-template-columns:minmax(0,1fr); grid-template-areas:"cat" "title" "desc" "meta"; padding:14px 2px; }
     .bo-row-desc { -webkit-line-clamp:2; }
   }
-  .mc-pos { color:var(--bp-up); } .mc-neg { color:var(--bp-down); } .mc-neu { color:var(--bp-text-3); }
 

@@ -120,11 +120,6 @@ html {
   .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; padding-top: 0; }
 }
 
-@media (orientation: portrait) and (max-height: 700px) {
-  :root { --bp-chrome-macro: 0px; }
-  #macroBar, .macro-bar { position: relative !important; }
-}
-
 body { margin: 0; }
 :root:not(:has(#macroBar)) { --bp-chrome-macro: 0px; }
 :where(body > header) {
@@ -135,38 +130,40 @@ body { margin: 0; }
   z-index: var(--bp-z-dropdown);
 }
 
-.macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-line); min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
-.macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
-.macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-.macro-bar::after  { right:32px; background:linear-gradient(to left,var(--bp-bg),transparent); }
-.macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; will-change:transform; height:32px; }
-@media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state:paused; } }
-@keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-
-.macro-pause-btn { position:absolute; right:0; top:env(safe-area-inset-top, 0px); bottom:0; z-index:var(--bp-z-local-control); width:32px; display:flex; align-items:center; justify-content:center; background:var(--bp-bg); border:none; color:var(--bp-text-3); font-size:var(--bp-type-sm); line-height:1; cursor:pointer; padding:0; }
-.macro-pause-btn:hover, .macro-pause-btn:focus-visible { color:var(--bp-text); }
-.macro-pause-btn svg { width:12px; height:12px; }
-.macro-pause-btn[aria-pressed="true"] .mp-pause, .macro-pause-btn:not([aria-pressed="true"]) .mp-play { display:none; }
-.macro-bar[data-paused="true"] .macro-track { animation-play-state:paused !important; }
-.macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-line); font-size:var(--bp-type-sm); height:32px; text-decoration:none; color:inherit; }
-.macro-item-lbl { font-weight:600; color:var(--bp-text-2); }
-
-.macro-bar--home{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-line);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
-.macro-bar--home::before,.macro-bar--home::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
-.macro-bar--home::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
-.macro-bar--home::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
-.macro-bar--home .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text-3);border-right:1px solid var(--bp-line);background:var(--bp-surface)}
-
-.macro-bar--home .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex:none}
-.macro-bar--home .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
-.macro-bar--home:hover .macro-track{animation-play-state:paused}
-@keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.macro-bar--home[data-paused="true"] .macro-track{animation-play-state:paused !important}
-.macro-bar--home .macro-item{height:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text)}
-.macro-bar--home .macro-item-lbl{font-weight:700;color:var(--bp-text-2);letter-spacing:.2px}
-
-.macro-bar--home .macro-pause-btn{transform:none;height:auto;position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
-.macro-bar--home .macro-pause-btn:hover,.macro-bar--home .macro-pause-btn:focus-visible{color:var(--bp-text)}
+/* C-P0-2010: makro şerit TEK KAYNAK, TEK GÖRÜNÜM (ana sayfanınki) — sayfa CSS'inde .macro-*, #macroBar, .mc-* kuralı yok (tests/test_c_p0_2010_makro_tek_kaynak.py) */
+.macro-bar{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-line);min-height:32px;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
+.macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
+.macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
+.macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
+.macro-bar .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-type-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text-3);border-right:1px solid var(--bp-line);background:var(--bp-surface)}
+.macro-bar .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex:none}
+.macro-bar .macro-live-dot.is-live{background:var(--bp-up);box-shadow:0 0 0 3px color-mix(in srgb,var(--bp-up) 22%,transparent)}
+.macro-bar .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:macroScroll 40s linear infinite;will-change:transform}
+.macro-bar:hover .macro-track{animation-play-state:paused}
+.macro-bar[data-paused="true"] .macro-track{animation-play-state:paused !important}
+@keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.macro-bar .macro-item{display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text);text-decoration:none}
+.macro-bar .macro-item-lbl{font-weight:700;color:var(--bp-text-2);letter-spacing:.2px}
+.mc-pos{color:var(--bp-up)}
+.mc-neg{color:var(--bp-down)}
+.mc-neu{color:var(--bp-text-3)}
+.mc-flash-up,.mc-flash-dn{border-radius:3px;animation:bpMacroFlash 1.4s ease-out}
+.mc-flash-up{--bp-flash:var(--bp-up)}
+.mc-flash-dn{--bp-flash:var(--bp-down)}
+@keyframes bpMacroFlash{from{background:color-mix(in srgb,var(--bp-flash) 32%,transparent)}to{background:transparent}}
+.macro-bar .macro-pause-btn{position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;height:auto;transform:none;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
+.macro-bar .macro-pause-btn:hover,.macro-bar .macro-pause-btn:focus-visible{color:var(--bp-text)}
+.macro-pause-btn svg{width:12px;height:12px}
+.macro-pause-btn[aria-pressed="true"] .mp-pause,.macro-pause-btn:not([aria-pressed="true"]) .mp-play{display:none}
+.macro-stale-badge{position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit}
+@media (prefers-reduced-motion: reduce){
+  .mc-flash-up,.mc-flash-dn{animation:none}
+  .macro-bar{overflow-x:auto !important;scrollbar-width:none;-ms-overflow-style:none}
+  .macro-bar::-webkit-scrollbar{display:none}
+  .macro-bar::before,.macro-bar::after{display:none !important}
+  .macro-track,#macroTrack{animation:none !important;will-change:auto !important}
+  .macro-pause-btn{display:none !important}
+}
 
 .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .container--read { max-width: var(--bp-container-read); }
@@ -234,15 +231,3 @@ header .bp-main-nav{gap:3px}
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
 @keyframes bp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 ::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
-
-/* C-54: makro şerit tazeliği — canlı nokta (veri ≤3 dk), değişen fiyatta kısa flaş */
-.macro-meta { color: var(--bp-text-3); font-size: 11px; gap: 6px; }
-.macro-meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bp-text-3); flex: none; display: inline-block; }
-.macro-bar--home .macro-meta-dot { display: none; }
-.macro-meta-dot.is-live, .macro-bar--home .macro-live-dot.is-live { background: var(--bp-up); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bp-up) 22%, transparent); }
-.mc-flash-up, .mc-flash-dn { border-radius: 3px; animation: bpMacroFlash 1.4s ease-out; }
-.mc-flash-up { --bp-flash: var(--bp-up); }
-.mc-flash-dn { --bp-flash: var(--bp-down); }
-@keyframes bpMacroFlash { from { background: color-mix(in srgb, var(--bp-flash) 32%, transparent); } to { background: transparent; } }
-@media (prefers-reduced-motion: reduce) { .mc-flash-up, .mc-flash-dn { animation: none; } }
-.macro-stale-badge { position: absolute; top: 2px; left: 6px; font-size: 10px; line-height: 1; opacity: .75; z-index: 4; pointer-events: auto; cursor: help; color: inherit; }

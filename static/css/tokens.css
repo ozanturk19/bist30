@@ -171,14 +171,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .macro-bar { overflow-x: auto !important; scrollbar-width: none; -ms-overflow-style: none; }
-  .macro-bar::-webkit-scrollbar { display: none; }
-
-  .macro-bar::before, .macro-bar::after { display: none !important; }
-  .macro-track, #macroTrack { animation: none !important; will-change: auto !important; }
-
-  .macro-pause-btn { display: none !important; }
-
   .da-marquee-track { animation: none !important; flex-wrap: wrap !important; width: auto !important; row-gap: 12px; }
 
   .da-marquee-pause { display: none !important; }
