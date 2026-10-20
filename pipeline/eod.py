@@ -16,9 +16,18 @@ kod seviyesinde değil: `bp-eod.timer`'ın systemd `TimeoutStartSec`'i process'i
 Maksimum Sadelik — background_refresh'teki ThreadPoolExecutor watchdog'u sürekli web
 process'ini korumak için gerekliydi, oneshot CLI'da bu rolü systemd üstlenir).
 
+`digest` komutu `_digest_cron_loop()`'un (app.py:3593+) 5dk'lık while-loop'unu TEK seferlik
+tura çevirir — aynı leader-lock (`_is_digest_leader()`, `/tmp/bp_digest_leader.lock`) ve
+`last_digest.txt` dedupe mantığı DOĞRUDAN çağrılıyor. Bu, 1 haftalık paralel ölçüm
+penceresinde (adım 3) ESKİ `_digest_cron_loop` thread'i hâlâ web worker'da çalışırken bile
+çift mail gitmesini engeller: aynı dosya kilidi + aynı `last_digest.txt`'yi paylaşıyorlar,
+hangisi önce 19:00'da tetiklenirse mail onu gönderir, diğeri `already_sent`/lock'tan geri
+döner (CPO-1835 kararı: "Cuma işi" D-26'dan düşmüştü, D-27 `bp-digest.timer` ile devralır).
+
 Kullanım (WorkingDirectory=/root/bist30):
   python3 -m pipeline.eod run                  # ana tur + chart re-verify (zaman kapılı)
   python3 -m pipeline.eod run --only-missing   # yalnız catch-up + resmi kapanış denemesi
+  python3 -m pipeline.eod digest                # günlük (Cuma'da + haftalık) digest, zaman kapılı
 
 Henüz hiçbir systemd unit'e bağlı DEĞİL (D-27 adım 2/7 — Cmt 24.10 11:00 pipeline-fazı
 penceresinde kurulacak: adım 3). Geri alma: bu dosyayı kullanmamak/silmek yeterli,
@@ -113,15 +122,52 @@ def run(only_missing=False):
         _chart_reverify_pass(today_tr, reverify_path)
 
 
+def digest():
+    """`_digest_cron_loop()` (app.py:3593) ile birebir — yalnız while/sleep kalktı,
+    systemd timer (16:00 UTC = 19:00 TR) tek turu tetikliyor."""
+    now = app.datetime.now(app._TZ_TR)
+    if not (19 <= now.hour < 20 and now.minute < 10):
+        app.logger.info("pipeline.eod: digest zaman penceresi dışı, no-op (%s)", now.isoformat())
+        return
+    if not app._is_digest_leader():
+        app.logger.info("pipeline.eod: digest leader değil (eski _digest_cron_loop veya "
+                         "başka bir süreç kilidi tutuyor), no-op")
+        return
+    last_sent_path = os.path.join(os.path.dirname(os.path.abspath(app.__file__)), "last_digest.txt")
+    today_str = now.strftime("%Y-%m-%d")
+    already_sent = False
+    if os.path.exists(last_sent_path):
+        try:
+            with open(last_sent_path) as f:
+                already_sent = f.read().strip() == today_str
+        except OSError:
+            pass
+    if already_sent:
+        return
+    if now.weekday() == 4:  # Friday — CPO-1633 sırası: weekly ÖNCE (daily'nin temizlediği
+        app.logger.info("pipeline.eod: weekly digest (Cuma)")  # pending_changes buffer'ı dolu
+        app._send_digest_emails("weekly")
+    app.logger.info("pipeline.eod: daily digest tetiklendi: %s", today_str)
+    app._send_digest_emails("daily")
+    try:
+        with open(last_sent_path, "w") as f:
+            f.write(today_str)
+    except OSError as e:
+        app.logger.warning("pipeline.eod: last_digest.txt yazma: %s", e)
+
+
 def main():
     parser = argparse.ArgumentParser(description="D-27 EOD oneshot CLI sarmalayıcı")
     sub = parser.add_subparsers(dest="action", required=True)
     run_p = sub.add_parser("run", help="EOD turu (zaman kapılı, uygun değilse no-op)")
     run_p.add_argument("--only-missing", action="store_true",
                         help="yalnız catch-up + resmi kapanış denemesi (ana tur zaten koşmuşsa)")
+    sub.add_parser("digest", help="günlük (Cuma'da + haftalık) digest turu (zaman kapılı)")
     args = parser.parse_args()
     if args.action == "run":
         run(only_missing=args.only_missing)
+    elif args.action == "digest":
+        digest()
 
 
 if __name__ == "__main__":
