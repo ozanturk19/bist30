@@ -1,0 +1,10 @@
+[Unit]
+Description=BorsaPusula EOD retry zamanlayıcı (Pzt-Cum 16:30 UTC — yalnız --only-missing, no-op güvenli)
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 16:30:00 UTC
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target
