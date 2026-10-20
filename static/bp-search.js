@@ -696,11 +696,53 @@
     // ateslenmezse bant sonsuza dek kilitli kalirdi (yukaridaki not).
     if (document.hidden && _bpMacroEverLoaded) return;
     var mySeq = ++_bpMacroSeq;
+    // C-87: sayfa geçişinde şerit ~250 ms boş kalmasın — son başarılı yanıt
+    // (≤10 dk) sessionStorage'dan istek beklemeden çizilir, sonra tazelenir.
+    if (!_bpMacroEverLoaded) {
+      var c = _bpMacroCacheGet();
+      if (c) _bpRenderMacro(track, c, onItems, excludeLabels);
+    }
     try {
       var r = await fetch('/api/macro');
       var d = await r.json();
       if (mySeq !== _bpMacroSeq) return;  // daha yeni bir bpLoadMacroBar() cagrisi baslamis, bu yaniti at
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+      if (_bpRenderMacro(track, d, onItems, excludeLabels)) _bpMacroCacheSet(d);
+    } catch (e) {
+      console.error('loadMacroBar basarisiz', e);
+      if (mySeq !== _bpMacroSeq) return;  // bayat hata mesajiyla daha yeni bir basarili render'in ustune yazma
+      // C-87: istek düştüyse (429/ağ) eldeki veri kalır; 15 sn sonra bir kez yeniden denenir.
+      if (!_bpMacroRetried) {
+        _bpMacroRetried = true;
+        setTimeout(function() { window.bpLoadMacroBar(onItems, excludeLabels); }, 15000);
+      }
+      // CPO-DEV2-084 #1: fetch/parse hatasinda da ayni notr-mesaj kurali -
+      // onceden basarili render varsa (stale ama gercek veri) dokunma, yoksa goster.
+      // bughunt-13.09: ayni yanlis .macro-item kontrolu burada da vardi, ayni
+      // flag ile duzeltildi (bkz yukaridaki not).
+      if (!_bpMacroEverLoaded) {
+        track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
+      }
+    }
+  };
+  var _bpMacroRetried = false;
+  var BP_MACRO_KEY = 'bp_macro_v1';
+  function _bpMacroCacheGet() {
+    try {
+      var c = JSON.parse(sessionStorage.getItem(BP_MACRO_KEY) || 'null');
+      if (!c || !c.d || !c.t) return null;
+      var el = (Date.now() - c.t) / 1000;
+      if (el < 0 || el > 600) return null;
+      var d = c.d;
+      if (d.age_s != null) d.age_s = d.age_s + Math.round(el);  // tazelik yazısı gerçek yaşı göstersin
+      return d;
+    } catch (e) { return null; }
+  }
+  function _bpMacroCacheSet(d) {
+    try { sessionStorage.setItem(BP_MACRO_KEY, JSON.stringify({ t: Date.now(), d: d })); } catch (e) { /* özel pencere */ }
+  }
+  // Yanıtı şeride çizer; gerçek kalem çizildiyse true.
+  function _bpRenderMacro(track, d, onItems, excludeLabels) {
       bpSetMacroStaleBadge(track, !!d.stale);
       var items = d.items || [];
       // CPO-1558: bazı sayfalarda (ör. anasayfa hero'su) aynı endeksin AYRI, EOD-
@@ -723,7 +765,7 @@
         if (!_bpMacroEverLoaded) {
           track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
         }
-        return;
+        return false;
       }
       if (typeof onItems === 'function') onItems(items);
       // C-54: önceki okumaya göre değişen fiyat kısa flaş alır (reduce-motion'da
@@ -755,18 +797,8 @@
       track.innerHTML = bpReduceMotion ? html : (html + html);
       if (!bpReduceMotion) window.bpStartMacroTicker({ track: track, pps: 55 });
       _bpMacroEverLoaded = true;
-    } catch (e) {
-      console.error('loadMacroBar basarisiz', e);
-      if (mySeq !== _bpMacroSeq) return;  // bayat hata mesajiyla daha yeni bir basarili render'in ustune yazma
-      // CPO-DEV2-084 #1: fetch/parse hatasinda da ayni notr-mesaj kurali -
-      // onceden basarili render varsa (stale ama gercek veri) dokunma, yoksa goster.
-      // bughunt-13.09: ayni yanlis .macro-item kontrolu burada da vardi, ayni
-      // flag ile duzeltildi (bkz yukaridaki not).
-      if (!_bpMacroEverLoaded) {
-        track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
-      }
-    }
-  };
+      return true;
+  }
   // C-15: makro şeridin TEK zamanlayıcısı. Önceden 12 şablon kendi
   // setInterval + visibilitychange kopyasını taşıyordu. `#macroBar` olan her
   // sayfada kendiliğinden başlar; ana sayfa seans kutusu için

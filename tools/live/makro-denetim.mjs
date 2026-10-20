@@ -117,6 +117,8 @@ async function main() {
   if (!pw) { console.error('playwright bulunamadı (repo ya da ~/Bist ve BTC/Bist30/node_modules)'); process.exit(2); }
   const browser = await pw.chromium.launch();
   const rows = [];
+  let lastLoad = 0;
+  let n429 = 0;
   try {
     for (const [w, h] of vps) {
       const mobile = w < 768;
@@ -127,7 +129,12 @@ async function main() {
       });
       await ctx.addInitScript(() => { try { localStorage.setItem('bp_ga_consent', 'denied'); } catch (e) { /* yok */ } });
       const measure = async (p) => {
+        // C-87: /api/macro IP başına 60/dk sınırlı — yüklemeler arası ≥1 sn, 429 ayrı sayılır (yanlış FAIL olmasın).
+        const wait = 1000 - (Date.now() - lastLoad);
+        if (wait > 0) await new Promise((res) => setTimeout(res, wait));
+        lastLoad = Date.now();
         const page = await ctx.newPage();
+        page.on('response', (res) => { if (res.status() === 429 && res.url().includes('/api/macro')) n429 += 1; });
         let st = 0;
         try { const r = await page.goto(base + p, { waitUntil: 'domcontentloaded', timeout: 45000 }); st = r ? r.status() : 0; } catch (e) { st = -1; }
         let r;
@@ -156,7 +163,9 @@ async function main() {
     sabit: `${sc.filter((r) => Math.abs(r.topAfter) <= 1).length}/${sc.length}`,
     gri: rows.reduce((n, r) => n + (r.posGrey || 0) + (r.negGrey || 0), 0),
     fail: bad.length,
+    arac_hiz_siniri_429: n429,
   };
+  if (n429) console.log(`NOT: ${n429} adet /api/macro 429 — araç hız sınırı (denetimin kendi IP'si), sayfa hatası değil`);
   console.log(`\nÖZET ${JSON.stringify(ozet)}`);
   if (a.out) fs.writeFileSync(String(a.out), JSON.stringify({ ozet, rows }, null, 1));
   process.exit(bad.length ? 1 : 0);
