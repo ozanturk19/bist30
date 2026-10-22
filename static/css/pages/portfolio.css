@@ -1,7 +1,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-type-body); min-height:100vh; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
+  /* C-P1-2210d: header stili yalnız shared.css */
   .page-sub   { font-size:var(--bp-type-sm); color:var(--bp-text-3); }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }

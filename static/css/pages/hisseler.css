@@ -6,7 +6,7 @@
     min-height: 100vh;
   }
 
-  header { background: var(--bp-surface); }
+  /* C-P1-2210d: header stili yalnız shared.css */
 
   .hh-alpha-bar {
     background: var(--bp-surface); border: 1px solid var(--bp-line); border-radius:var(--bp-r-md);

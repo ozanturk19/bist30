@@ -1,7 +1,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body { font-size:var(--bp-type-body); min-height:100vh; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-line); position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown); }
+  /* C-P1-2210d: header stili yalnız shared.css */
 
   .bo-top { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin:8px 0 32px; }
   .bo-feature { display:flex; flex-direction:column; gap:10px; background:var(--bp-surface); border:1px solid var(--bp-line); border-radius:var(--bp-r-md); padding:28px; text-decoration:none; color:var(--bp-text); min-width:0; }

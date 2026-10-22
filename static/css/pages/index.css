@@ -1,11 +1,7 @@
 *{box-sizing:border-box}
 body{margin:0}
 
-header{
-  background:var(--bp-bg);
-  border-bottom:1px solid var(--bp-line);height:60px;justify-content:space-between;position:sticky;top:var(--bp-anchor-macro);
-  z-index:var(--bp-z-dropdown);
-}
+/* C-P1-2210d: header stili yalnız shared.css */
 .logo-link{align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
 
 

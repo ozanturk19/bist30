@@ -344,7 +344,7 @@
   {%- endif %}
   <p class="blv-disc">Bülten her işlem günü kapanıştan sonra bir kez hazırlanır ve sonradan değişmez. Bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
 </main>
-{% with ftr_self='/haberler', ftr_note=('Bu sayfadaki değişimler ' ~ _lbl ~ ' kapanışına aittir; sayfa sonradan güncellenmez.') %}{% include '_footer.html' %}{% endwith %}
+{% with ftr_self='/haberler', ftr_data_note=false, ftr_note=('Bu sayfadaki değişimler ' ~ _lbl ~ ' kapanışına aittir; sayfa sonradan güncellenmez.') %}{% include '_footer.html' %}{% endwith %}
 <script src="{{ static_v('bp-format.js') }}"></script>
 <script src="{{ static_v('bp-search.js') }}" defer></script>
 {%- if not _hm_ok %}

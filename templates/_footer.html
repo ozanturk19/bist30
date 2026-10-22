@@ -20,7 +20,7 @@
       ftr_self       str  vars. yok    -> sayfanin KENDI href'i; o link menude
                                           GIZLENIR (bulundugun sayfaya link verme).
                                           _header.html'deki hdr_self ile ayni desen.
-      ftr_data_note  bool vars. false  -> veri kaynagi / gun-sonu (EOD) tazelik
+      ftr_data_note  bool vars. TRUE   -> veri kaynagi / gun-sonu (EOD) tazelik
                                           rozetini gosterir. Fiyat veya yuzde
                                           GOSTEREN her sayfa true gecmeli.
                                           K-BN (21.09): rozet eskiden "BIST resmi
@@ -47,7 +47,7 @@
 -#}
 <footer class="da-footer">
   <div class="da-footer-inner">
-    {%- if ftr_data_note is defined and ftr_data_note %}
+    {%- if ftr_data_note|default(true) %}{#- C-P1-2210d: not her sayfada; yalnız tarihli sayfalar false verir #}
     <div class="da-footer-note">
       Gün sonu teknik analiz — gösterilen fiyatlar <strong>son kapanışa</strong> aittir, seans içinde güncellenmez
       {%- if ftr_note is defined and ftr_note %}<br>{{ ftr_note }}{% endif %}

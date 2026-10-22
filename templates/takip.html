@@ -47,7 +47,7 @@
 <div class="sr-only" id="tkLive" aria-live="polite"></div>
 <input type="file" id="tkFile" accept="application/json,.json" hidden>
 
-{% with ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
+{% with ftr_self='/takip' %}{% include '_footer.html' %}{% endwith %}
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
 <script src="{{ static_v('bp-format.js') }}"></script>

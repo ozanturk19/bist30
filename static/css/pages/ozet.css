@@ -5,14 +5,7 @@
     min-height: 100vh;
   }
 
-  header {
-    background: var(--bp-bg);
-    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
-    height: 60px;
-    position: sticky;
-    top: var(--bp-anchor-macro);
-    z-index:var(--bp-z-dropdown);
-  }
+  /* C-P1-2210d: header stili yalnız shared.css */
   .logo-link { align-items: center; gap: 10px;
     text-decoration: none; flex-shrink: 0;
   }

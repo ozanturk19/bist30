@@ -10,10 +10,7 @@
 
   body { font-size:var(--bp-type-body); min-height:100vh; }
 
-  header {
-    background:var(--surface); border-bottom:1px solid var(--border);
-    position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
-  }
+  /* C-P1-2210d: header stili yalnız shared.css */
   .page-sub   { font-size:var(--bp-type-sm); color:var(--text2); margin-top:1px; }
 
   .tv { --tv-gut: 20px; position: relative; padding-top: 6px; }

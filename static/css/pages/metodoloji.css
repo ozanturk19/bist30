@@ -5,13 +5,7 @@
     line-height: 1.7;
     min-height: 100vh;
   }
-  header {
-    background: var(--bp-surface);
-    border-bottom: 1px solid var(--bp-line);
-    position: sticky;
-    top: var(--bp-anchor-macro);
-    z-index:var(--bp-z-dropdown);
-  }
+  /* C-P1-2210d: header stili yalnız shared.css */
 
   .prose h2 {
     font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;

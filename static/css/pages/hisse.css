@@ -10,14 +10,7 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
-  header {
-
-    background: var(--bp-bg);
-    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
-    position: sticky;
-    top: var(--bp-anchor-macro);
-    z-index:var(--bp-z-dropdown);
-  }
+  /* C-P1-2210d: header stili yalnız shared.css */
 
   .hib-action-btn {
     display: inline-flex; align-items: center; gap: 5px;
