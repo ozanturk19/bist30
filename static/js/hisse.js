@@ -1201,7 +1201,7 @@ function hxFillFund(f, divRow) {
   if (k && k.temettu) {
     set('hxfDiv', k.temettu.odeme_var && HX_PRICE ? bpPctLevel(k.temettu.brut_toplam / HX_PRICE * 100, 2) : 'Ödeme yok', !k.temettu.odeme_var);
   } else if (divRow === undefined) { /* takvim alinamadi: dokunma */ }
-  else if (!divRow) set('hxfDiv', 'Veri yok', true);
+  else if (!divRow) set('hxfDiv', '—', true);   /* C-P1-2210c */
   else {
     const last = divRow.last_div_date ? new Date(divRow.last_div_date + 'T00:00:00') : null;
     const asof = _hxSeries ? new Date(_hxSeries[_hxSeries.length - 1][0] + 'T00:00:00') : new Date();
@@ -1214,10 +1214,11 @@ function hxFillFund(f, divRow) {
   const kv = document.getElementById('q2Kv'), ans = document.getElementById('q2Ans'), dot = document.getElementById('q2Dot');
   const V = tvValuation(f);
   const rows = V ? V.rows.filter(r => r.v != null) : [];
-  if (kv) kv.innerHTML = rows.length
-    ? rows.map(r => '<div><dt>' + r.l + '</dt><dd>' + _tvX(r.v, r.fr) + (r.m ? ' <small>· ' + escHtml(_tvMedTxt(r.m, r.fr)) + '</small>' : '') + '</dd></div>').join('')
-    : '<div><dt>F/K ve PD/DD</dt><dd>hesaplanamıyor</dd></div>';
-  let a = rows.length ? rows.map(r => r.l + ' ' + _tvX(r.v, r.fr)).join(' · ') : 'Veri yok', cls = 'hx-dot--na';
+  /* C-P1-2210c: oran ve hüküm yoksa "Veri yok / hesaplanamıyor" yazılmaz; cevap ve tablo gizlenir */
+  const bos = !rows.length && !(V && V.word);
+  if (kv) { kv.innerHTML = rows.map(r => '<div><dt>' + r.l + '</dt><dd>' + _tvX(r.v, r.fr) + (r.m ? ' <small>· ' + escHtml(_tvMedTxt(r.m, r.fr)) + '</small>' : '') + '</dd></div>').join(''); kv.hidden = bos; }
+  if (ans && ans.parentNode) ans.parentNode.hidden = bos;
+  let a = rows.map(r => r.l + ' ' + _tvX(r.v, r.fr)).join(' · '), cls = 'hx-dot--na';
   if (V && V.word) {
     a = V.word;
     cls = V.word === 'Karışık' || V.word === 'Pahalı tarafta' ? 'hx-dot--warn' : (V.word === 'Ucuz tarafta' ? 'hx-dot--val' : 'hx-dot--brand');
@@ -1239,6 +1240,7 @@ function hxFillFund(f, divRow) {
     const txt = basis || noMed || (cur !== 'TRY' && !rows.length ? 'Şirket finansallarını ' + cur + ' cinsinden raporluyor; F/K ve PD/DD bu yüzden hesaplanmıyor.' : null);
     if (txt) { note.textContent = txt; note.hidden = false; }
   }
+  if (q2) q2.hidden = bos && (!an || an.hidden) && (!note || note.hidden);
 }
 
 /* Son haberler: /kap'in ilk 3 bildirimi (dis baglanti yok; satir -> Haberler sekmesi) */

@@ -126,13 +126,13 @@
   <div class="hisse-stale-box" data-stale="1" role="note"
        style="background:rgba(var(--bp-stale-rgb),.10);border:1px solid rgba(var(--bp-stale-rgb),.4);border-radius:var(--bp-r-sm);padding:10px 14px;margin-bottom:14px;font-size:var(--bp-type-sm);color:var(--bp-stale);line-height:1.5">
     <svg class="da-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <strong>{% if _st_ts %}Son veri {{ '%02d.%02d'|format(_st_d, _st_m) }} · güncellenmiyor{% else %}Bu hissenin verisi güncellenmiyor{% endif %}</strong>
+    <strong>{% if _st_ts %}Son veri {{ '%02d.%02d'|format(_st_d, _st_m) }}{% else %}Fiyat son seansa ait değil{% endif %}</strong>
     {%- if _sr.startswith('insufficient_history:') %}
     — Bu hissenin fiyat geçmişi kısa ({{ _sr.split(':')[1].split('<')[0] }} gün); analiz 120 gün dolunca başlar.
     {%- elif _sr == 'no_fetch' %}
     — Veri kaynağından bu hisse için güncel fiyat alınamıyor.
     {%- endif %}
-    Aşağıdaki fiyat ve puanlar bu tarihe aittir.
+    {%- if _st_ts %} Aşağıdaki fiyat ve puanlar bu tarihe aittir.{% endif %}
   </div>
   {%- endif %}
 
@@ -426,11 +426,13 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       {#- C-80: cevap ham HTML'de (D-68 ozet.degerleme = tvValuation + hxFillFund'ın Python karşılığı; v2 hükmü
           varsa o). data-ssr: hisse.js Q2'ye dokunmaz. ozet yoksa bugünkü gibi JS doldurur. -#}
       {%- set _dg = oz.degerleme if oz.degerleme else none %}
-      <div class="hx-q" id="q2"{% if _dg %} data-ssr="1"{% endif %}>
+      {#- C-P1-2210c: oran ve hüküm yoksa "Veri yok / hesaplanamıyor" yazılmaz; satır gizlenir, söylenecek bir şey kalmazsa kart gizlenir. -#}
+      {%- set _dg_bos = _dg and not _dg.hukum and not (_dg.satirlar|selectattr('dd', 'ne', 'hesaplanamıyor')|list) %}
+      <div class="hx-q" id="q2"{% if _dg %} data-ssr="1"{% endif %}{% if _dg_bos and not _dg.analist and not _dg['not'] %} hidden{% endif %}>
         <h3 class="hx-qq">Fiyatı makul mü?</h3>
         {%- if _dg %}
-        <p class="hx-ans"><span class="hx-dot {{ _dg.sinif }}" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">{{ _dg.cevap }}</span></p>
-        <dl class="hx-kv" id="q2Kv">{% for r in _dg.satirlar %}<div><dt>{{ r.dt }}</dt><dd>{{ r.dd }}{% if r.ortanca %} <small>· {{ r.ortanca }}</small>{% endif %}</dd></div>{% endfor %}</dl>
+        <p class="hx-ans"{% if _dg_bos %} hidden{% endif %}><span class="hx-dot {{ _dg.sinif }}" id="q2Dot" aria-hidden="true"></span><span id="q2Ans">{{ '' if _dg_bos else _dg.cevap }}</span></p>
+        <dl class="hx-kv" id="q2Kv"{% if _dg_bos %} hidden{% endif %}>{% if not _dg_bos %}{% for r in _dg.satirlar %}<div><dt>{{ r.dt }}</dt><dd>{{ r.dd }}{% if r.ortanca %} <small>· {{ r.ortanca }}</small>{% endif %}</dd></div>{% endfor %}{% endif %}</dl>
         {%- set _an = _dg.analist %}
         <p class="hx-an" id="q2An"{% if not _an %} hidden{% endif %}>{% if _an %}Analist hedef ortalaması <b>{{ _an.hedef }}</b>&nbsp;· fiyatın <b>{{ _an.fark }}</b> {{ _an.yon }}&nbsp;· {{ _an.sayi }}&nbsp;analist{% endif %}</p>
         <p class="hx-qp" id="q2Note"{% if not _dg['not'] %} hidden{% endif %}>{{ _dg['not'] or '' }}</p>
@@ -685,10 +687,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       </div>
       {% endif %}
       <p class="tv-kind" id="tvKind">{% if _tv2 and _tv2.limited_data %}{{ tv2_limited(_tv2) }}{% elif _tv2 %}{{ tv2_weights(_tv2) }}{% elif 'nakit_akisi' in _tv_na %}İki alanın ağırlıklı ortalaması: kârlılık %67, değerleme ve büyüme %33.{% elif 'kaldirac' in _tv_na %}Üç alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %40'ar, değerleme ve büyüme %20.{% elif _tv_score is not none %}Dört alanın ağırlıklı ortalaması: kârlılık ve nakit akışı %30'ar, borç durumu %25, değerleme ve büyüme %15.{% else %}Bu hisse için son gün sonu turu temel skoru üretmedi.{% endif %}</p>
-      {%- if _tv2 and _tv2.veri_notu %}
-      {%- set _VN = {'esas_belirsiz': 'muhasebe esası belirlenemedi', 'yillik_rapor_eski': 'son yıllık rapor güncel değil', 'son_rapor_gecikmis': 'son dönem raporu gecikmiş', 'ceyrek_eksik': 'bazı çeyrek raporları eksik', 'kalem_eksik': 'bazı temel kalemler okunamadı', 'tutarsizlik': 'pay adedi ya da tutarlar tutarsız', 'sigorta_kalemleri_sinirli': 'prim ve hasar kalemleri okunmuyor'} %}
-      <p class="tv-kind" id="tvNote">Veri notu <b>{{ _tv2.veri_notu }}</b>{%- set _vnn = (_tv2.veri_notu_nedenleri or [])|reject('equalto', 'sigorta_kalemleri_sinirli' if _tv2.sablon_notu else '')|list %}{% if _vnn %} · {% for _c in _vnn %}{{ _VN.get(_c, _c) }}{{ ', ' if not loop.last }}{% endfor %}{% elif not _tv2.sablon_notu %} · tüm veri kontrolleri geçti{% endif %}{% if _tv2.sablon_notu %} · {{ _tv2.sablon_notu }}{% endif %}</p>
-      {%- endif %}
+      {#- C-P1-2210c: veri notu A/B/C iç kural, kamusal sayfada gösterilmez. -#}
       <p class="tv-per" id="tvPer" hidden></p>
     </div>
     {% if hs_available and hs.categories %}
