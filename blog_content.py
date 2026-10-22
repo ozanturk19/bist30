@@ -316,7 +316,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "related_tickers": ['AKBNK', 'ASELS', 'EREGL']
   },
   {
-    "slug": "al-sat-sinyali-nasil-yorumlanir",
+    "slug": "guclu-trend-trend-bozuldu-ne-demek",  # C-P0-2210: eski slug al-sat-sinyali-nasil-yorumlanir → 301 (app.py, DEV)
     "title": "Güçlü Trend / Trend Bozuldu Sinyali Nedir? Nasıl Yorumlanır?",
     "desc": "Algoritmik Güçlü Trend ve Trend Bozuldu sinyallerinin ne anlama geldiği, nasıl kullanılacağı ve hangi tuzaklardan kaçınılacağı.",
     "date": "2026-04-08",
@@ -330,7 +330,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <ul>
   <li>✅ Supertrend yükseliş modda (fiyat bandın üzerinde)</li>
   <li>✅ ADX ≥ 25 (güçlü trend var)</li>
-  <li>✅ DI+ &gt; DI− (alış yönünde güç)</li>
+  <li>✅ DI+ &gt; DI− (yükseliş yönünde güç ağır basıyor)</li>
   <li>✅ EMA12 &gt; EMA99 (kısa dönem uzun dönemin üzerinde)</li>
   <li>✅ Haftalık EMA20 yönü yukarı (üst zaman dilimi teyidi)</li>
 </ul>
@@ -1227,6 +1227,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   },
   {
     "slug": "swing-trading-nedir",
+    "canonical_slug": "blog",  # C-P0-2210: sinyali işleme bağlıyor — emekli, 301 → /blog (app.py, DEV)
     "date": "2026-05-01",
     "updated": "2026-10-16",
     "title": "Swing Trading Nedir? BIST'te Swing Trade Nasıl Yapılır?",
