@@ -290,30 +290,27 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Risk yönetimi, yatırım dünyasında "hayatta kalmak" anlamına gelir. En iyi teknik analizi yapan yatırımcı bile risk yönetimi olmadan kalıcı zarar görebilir. Amaç kayıpları sıfırlamak değil; <em>kontrol altında tutmaktır.</em></p>
 
 <h2>1. Pozisyon Büyüklüğü Kuralı</h2>
-<p>Tek bir işlemde portföyün <strong>%1–2'sinden</strong> fazla risk almayın. Bu kural uygulandığında 50 ardı ardına kaybeden işlem bile sizi batırmaz.</p>
+<p>Pozisyon büyüklüğü, tek bir hissedeki olası kaybın portföyün tamamına oranını belirler. Risk yönetimi literatüründe bu oranın küçük tutulması (sık anılan ölçü %1–2) art arda gelen kayıpların portföyü aşındırmasını sınırlamak için önerilir.</p>
 
 <h2>2. Portföy Çeşitlendirmesi</h2>
 <ul>
   <li><strong>Sektör çeşitlendirmesi:</strong> Tüm paranızı tek sektöre (örn. bankacılık) koymayın.</li>
   <li><strong>Korelasyon:</strong> GARAN ve AKBNK'ın ikisi de bankacılık — biri düşünce diğeri de düşer. Düşük korelasyonlu hisseler seçin.</li>
-  <li><strong>Nakit rezervi:</strong> Portföyün %20–30'unu nakit tutun. Fırsatları kaçırmamak için.</li>
+  <li><strong>Nakit payı:</strong> Portföyün bir bölümünün nakitte durması, dalgalı dönemlerde toplam oynaklığı azaltır.</li>
 </ul>
 
 <h2>3. Maksimum Drawdown (MDD)</h2>
-<p>Drawdown, portföyün tepe değerinden çukur değerine kadar düşüşüdür. Kural: <strong>MDD %20'yi geçerse pozisyonları küçültün.</strong> Büyük drawdown psikolojik baskı yaratır ve hatalı kararları tetikler.</p>
+<p>Drawdown, portföyün tepe değerinden çukur değerine kadar düşüşüdür. Büyük drawdown psikolojik baskı yaratır ve aceleci kararlara yol açabilir; bu yüzden portföyün geçmişteki en derin düşüşü izlenen temel risk ölçülerinden biridir.</p>
 
-<h2>4. Sinyal Onayı ve Pozisyon Alımı</h2>
-<p>BorsaPusula sisteminde "3 gün onay" kuralı bu yüzden var. İlk çıkan sinyal gürültü olabilir; üç gün boyunca devam eden sinyal trendin gerçekten oluştuğunu gösterir. Bu kurala uymak, sahte girişleri büyük ölçüde azaltır.</p>
+<h2>4. Trend Durumunun Teyidi</h2>
+<p>BorsaPusula'da trend durumu üç gün sürdüğünde "onaylı" sayılır. İlk gün oluşan durum gürültü olabilir; üç gün boyunca süren durum trendin kalıcılığına daha çok işaret eder.</p>
 
-<h2>5. Kâr Hedefleri</h2>
-<p>Risk:Ödül oranı en az <strong>1:2</strong> olmalıdır. Yani 5₺ risk alıyorsanız, en az 10₺ kâr potansiyeli olan işlemlere girin. Bu oran zamanla bileşik getiriyi dramatik şekilde artırır.</p>
-
-<h2>6. Piyasa Barometresi Kullanımı</h2>
-<p><a href="/">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genel olarak baskı altında olabilir — böyle dönemlerde yeni pozisyon açmak yerine mevcut pozisyonları korumak ve nakit tutmak daha akılcı olabilir.</p>
+<h2>5. Piyasa Barometresi</h2>
+<p><a href="/">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genelinin baskı altında olduğunu betimler.</p>
 """,
     "faqs": [
       {"q": "Portföyde kaç hisse bulunmalıdır?", "a": "Yeterli çeşitlendirme için genellikle 8-15 hisse önerilir. Çok az hisse riski konsantre eder; çok fazla hisse ise takibi zorlaştırır ve getiriyi ortalamaya yaklaştırır. Farklı sektörlerden seçim yapılması önemlidir."},
-      {"q": "Her işlemde portföyün yüzde kaçını riske etmeliyim?", "a": "Profesyonel risk yönetiminde tek işlemde toplam portföyün maksimum %1-2'si riske edilir. Bu kural, 50 arka arkaya kayıp yaşasanız bile hesabınızın büyük bölümünü korumanızı sağlar."},
+      {"q": "Pozisyon büyüklüğü neden önemlidir?", "a": "Tek bir hissedeki olası kaybın portföyün tamamına oranı, art arda gelen kayıpların portföyü ne kadar aşındıracağını belirler. Risk yönetimi literatüründe bu oranın küçük tutulması (sık anılan ölçü %1-2) önerilir."},
       {"q": "Sektör çeşitlendirmesi neden önemlidir?", "a": "Tek sektördeki hisseler aynı makroekonomik faktörlerden etkilenir. Bankacılık + sanayi + perakende gibi bağımsız sektörlere dağılmak sektörel şoklardan korunma sağlar."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'EREGL']
@@ -340,13 +337,13 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Bu koşullar yükselen trendin başlangıcını veya güçlenmesini işaret eder.</p>
 
 <h2>Trend Bozuldu Sinyali Ne Demek?</h2>
-<p>Trend Bozuldu sinyali yukarıdakilerin tersidir: Supertrend düşüş modu + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99 + haftalık EMA20 yönü aşağı. BorsaPusula long-only bir üründür — bu sinyal açığa satış için tasarlanmamıştır; mevcut bir yükseliş pozisyonunun trend gücünü kaybettiğini, pozisyon kapatmayı değerlendirmek için bir uyarı olarak yorumlanmalıdır.</p>
+<p>Trend Bozuldu sinyali yukarıdakilerin tersidir: Supertrend düşüş modu + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99 + haftalık EMA20 yönü aşağı. Bu durum, önceki yükseliş trendinin gücünü kaybettiğini betimler; bir işlem önerisi değildir.</p>
 
 <h2>Sinyal Kaç Gündür Devam Ediyor?</h2>
 <p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir.</p>
 
 <h2>Yatay Sinyali</h2>
-<p>Beş koşulun tamamı aynı yönü göstermiyorsa sinyal Yatay'dır. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, Yatay'dan Güçlü Trend'e geçişi sabırla bekleyerek yakalanır.</p>
+<p>Beş koşulun tamamı aynı yönü göstermiyorsa durum Yatay'dır: fiyat belirgin bir trend içinde değildir. Yatay'dan Güçlü Trend'e geçiş, koşulların yeniden aynı yönde birleştiğini gösterir.</p>
 
 <h2>Neyi Yapmaz?</h2>
 <ul>
@@ -359,7 +356,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {"q": "Güçlü Trend sinyali ne anlama gelir?", "a": "Güçlü Trend sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde, DI+ > DI− ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her Güçlü Trend sinyali yatırım tavsiyesi değildir."},
       {"q": "Sinyal kaç gündür devam ediyor bilgisi önemli midir?", "a": "Evet, çok önemlidir. 3+ gündür devam eden onaylı sinyal, ilk günkü ham sinyalden çok daha güvenilirdir. Onaylı sinyal trendin gerçek ve sürdürülebilir olduğunu gösterir."},
-      {"q": "Yatay sinyalinde ne yapmalıyım?", "a": "Yatay sinyali ne alın ne satın demektir, trend henüz belirgin değil. Mevcut pozisyonunuz varsa tutmaya devam edebilirsiniz. Yeni pozisyon için Güçlü Trend sinyalini beklemek gereksiz risk almaktan daha akıllıcadır."}
+      {"q": "Yatay ne anlama gelir?", "a": "Yatay, beş teknik koşulun aynı yönü göstermediği, trendin belirgin olmadığı durumdur. Bir işlem önerisi içermez; yalnız trendin o anki durumunu betimler."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO']
   },
@@ -1108,7 +1105,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "mins": 6,
     "cat": "Strateji",
     "body": """
-<p>BorsaPusula'da aynı anda onlarca hisse Güçlü Trend sinyali verebilir. Bunların hepsine girilmez — portföy kapasitesi sınırlıdır. Peki nasıl seçim yapılır?</p>
+<p>BorsaPusula'da aynı anda onlarca hisse Güçlü Trend durumunda olabilir. Bu hisseleri birbirinden ayırmak için teknik, temel ve risk ölçüleri birlikte okunabilir.</p>
 
 <h2>Teknik Puanlama (1-3 puan)</h2>
 <ul>
@@ -1132,19 +1129,11 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
-
-<h2>Pratik Örnek</h2>
-<p>Diyelim ki THYAO ve ASELS her ikisi de Güçlü Trend sinyali veriyor:</p>
-<ul>
-  <li>THYAO: Sinyal 5 gündür, ADX=38, F/K makul → Skor: +5</li>
-  <li>ASELS: Sinyal bugün oluştu, ADX=22 → Skor: +1</li>
-</ul>
-<p>THYAO açıkça daha güçlü bir kurulum sunuyor.</p>
+<p><a href="/">Ana sayfadaki</a> barometre piyasa genelini betimler: Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü, %30 altındaysa zayıf görünümdedir.</p>
 """,
     "faqs": [
-      {"q": "Çok sayıda Güçlü Trend sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyutu birleştirerek en yüksek puanlı hisseyi seçin."},
-      {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. Aynı sinyal gücünde iki hisse arasında seçimde ADX değeri yüksek olan daha güvenilir trend gösterir ve tercih edilmelidir."},
+      {"q": "Çok sayıda Güçlü Trend sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyut birlikte okunduğunda hisselerin görünümü daha bütünlüklü karşılaştırılır."},
+      {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. ADX yüksekse trend daha belirgindir; ADX trendin yönünü değil gücünü ölçer."},
       {"q": "Trend dönüş seviyesi nedir?", "a": "Trend dönüş seviyesi Supertrend çizgisidir. Fiyat bu çizginin üzerinde kaldıkça trend korunur; altında kapanış trendin bozulduğunu gösterir. Fiyatın bu çizgiye uzaklığı, kısa vadeli oynaklık hakkında fikir verir."}
     ],
     "related_tickers": ['ASELS', 'THYAO', 'AKBNK']
@@ -1264,9 +1253,9 @@ Günlük (day trading) gibi çok kısa vadeli değil, uzun vadeli yatırım gibi
 
 BIST hisselerinde bir trend dalgası (birkaç günden 2-3 haftaya kadar), toplamda %5-15 aralığında bir fiyat hareketi oluşturabilir. Swing trader tek bir günü değil, bu çok günlük dalgayı hedefler:
 
-- **Giriş:** Trend başlangıcında veya geri çekilmede
-- **Tutma:** Trendin devam ettiği süre (ortalama 5-15 gün)
-- **Çıkış:** Hedef fiyata ulaşınca veya sinyal tersine döünce
+- Trend dalgası çoğunlukla bir başlangıç, bir geri çekilme ve bir dönüşten oluşur
+- Ortalama süre birkaç günden 2-3 haftaya uzanır
+- Dönüş, trend dönüş seviyesinin (Supertrend) altında kapanışla görülür
 
 ## Swing Trading İçin Temel İndikatörler
 
@@ -1309,9 +1298,8 @@ Genel swing trading pratiğinde sık kullanılan bir yaklaşım EMA 20/50/100 hi
 
 Swing traderde sermayeyi korumak kritiktir:
 
-- **Her işlemde maksimum %1-2 risk** (stop-loss ile hesaplanır)
-- **Pozisyon büyüklüğü** = (Sermaye × Risk%) ÷ (Alış fiyatı − trend dönüş seviyesi)
-- **Aynı anda çok fazla pozisyon açma** — maksimum 3-5 pozisyon
+- Kısa vadeli hareketlerde oynaklık yüksektir; tek bir hissedeki olası kaybın portföye oranı küçük tutulur
+- Aynı sektörde yoğunlaşmak riski artırır
 
 ## BIST'te Swing Trading: Dikkat Edilecekler
 
@@ -1319,7 +1307,7 @@ Swing traderde sermayeyi korumak kritiktir:
 
 - Dolar/TL hareketi BIST'i direkt etkiler
 - TCMB kararları, enflasyon verileri sert hareketler yaratabilir
-- Bu haberleri takip et, stop-loss'unu koruyun
+- Bu veri günleri takvimde izlenir
 
 **Likiditeye dikkat:**
 
@@ -1331,22 +1319,21 @@ Swing traderde sermayeyi korumak kritiktir:
 - BIST 10:00-18:00 arası açık
 - İlk 30 dakika (10:00-10:30) ve son 30 dakika (17:30-18:00) en volatil
 
-## BorsaPusula ile Swing Fırsatı Bul
+## BorsaPusula'da Trend Durumu
 
-BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmıştır:
+BorsaPusula trend durumunu teknik ölçülerle betimler; işlem önerisi vermez:
 
-- **Güçlü Trend sinyali** = Supertrend, ADX, DI yönü ve EMA birlikte yükselişi gösterdiğinde → Swing giriş fırsatı
+- **Güçlü Trend sinyali** = Supertrend, ADX, DI yönü ve EMA birlikte yükselişi gösterdiğinde → trend durumu
 - **ADX değeri** → Trendin ne kadar güçlü olduğunu gösterir
-- **Sinyal yaşı** → Kaç gün önce girdi, henüz erken mi geç mi?
+- **Sinyal yaşı** → Trend durumunun kaç gündür sürdüğü
 - **Trend dönüş seviyesi** → Supertrend çizgisi, tarihiyle
 
 [Hisselerin trend durumunu gör →](/tarama)""",
     "faqs": [
       {"q": "Swing trading günlük tradingden ne farkı var?", "a": "Day trading aynı gün içinde pozisyon kapatır, gecelik risk almaz. Swing trading ise 3-20 gün arasında pozisyon tutar, gecelik fiyat hareketlerinden de yararlanır. Daha az ekran başında olunmasını gerektirdiği için çalışan bireysel yatırımcılara daha uygundur."},
-      {"q": "BIST'te swing trading için minimum sermaye ne olmalı?", "a": "Minimum 10.000 TL önerilir. Bunun altında tek bir hissede anlamlı pozisyon almak ve risk yönetimi yapmak zorlaşır. Swing trading için her işlemde sermayenin maksimum %1-2'si riske atılmalıdır."},
-      {"q": "Swing traderde en önemli indikatör hangisi?", "a": "Supertrend ve ADX kombinasyonu swing traderin temel araçlarıdır. Supertrend trendin yönünü ve döndüğü noktayı gösterirken, ADX trendin gücünü ölçer. ADX 25 üzerindeyken Supertrend yeşilse güçlü bir swing fırsatı mevcuttur."},
-      {"q": "Stop-loss olmadan swing trade yapılabilir mi?", "a": "Kesinlikle hayır. Stop-loss, swing traderin en önemli koruma mekanizmasıdır. Borsada her işlem ters gidebilir. Stop-loss olmadan küçük bir kayıp büyüyerek sermayenin büyük bölümünü eritebilir."},
-      {"q": "BIST'te en iyi swing trade günleri hangileridir?", "a": "Genel olarak Salı-Perşembe en istikrarlı trading günleridir. Pazartesi sabahı hafta sonu haberleri fiyatlanır (gap riski yüksek). Cuma öğleden sonra pozisyon tutmak hafta sonu riski taşır."}
+      {"q": "BIST'te swing trading için minimum sermaye ne olmalı?", "a": "Belirli bir alt sınır yoktur. Küçük tutarlarda işlem maliyetleri ve alış-satış farkı getirinin daha büyük bir bölümünü oluşturur."},
+      {"q": "Swing traderde en önemli indikatör hangisi?", "a": "Supertrend ve ADX kombinasyonu swing traderin temel araçlarıdır. Supertrend trendin yönünü ve döndüğü noktayı gösterirken, ADX trendin gücünü ölçer. ADX 25 üzerindeyken Supertrend yeşilse trend belirgin ve yukarı yönlüdür."},
+      {"q": "BIST'te en iyi swing trade günleri hangileridir?", "a": "Genel olarak Salı-Perşembe en istikrarlı trading günleridir. Pazartesi sabahı hafta sonu haberleri fiyatlanır (gap riski yüksek). Cuma kapanışından sonraki gelişmeler pazartesi açılışında fiyatlanır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'EREGL', 'ASELS', 'GARAN']
   },
@@ -1375,30 +1362,22 @@ Her mum çubuğu için "True Range" şu üç değerin en büyüğüdür:
 
 ## ATR Ne Anlama Gelir?
 
-| ATR Değeri | Anlam | Ne Yapmalı? |
-|-----------|-------|------------|
-| Düşük ATR | Düşük volatilite, sıkışık fiyat | Kırılma bekleniyor |
-| Yükselen ATR | Volatilite artıyor, trend güçleniyor | Dikkatli ol, pozisyon yönet |
-| Çok yüksek ATR | Panik/coşku, aşırı hareket | Stop-loss genişlet |
+| ATR Değeri | Anlam |
+|-----------|-------|
+| Düşük ATR | Düşük volatilite, fiyat dar aralıkta sıkışmış |
+| Yükselen ATR | Volatilite artıyor, hareketler genişliyor |
+| Çok yüksek ATR | Panik/coşku, olağandışı geniş hareketler |
 
 ## ATR'nin Kullanım Alanları
 
-### 1. Stop-Loss Belirleme (En Önemli Kullanım)
-ATR tabanlı stop-loss, sabit yüzde stop'tan çok daha akıllıcadır:
+### 1. Oynaklığı Karşılaştırma
+ATR fiyat birimiyle ölçülür; farklı fiyattaki hisseleri karşılaştırmak için fiyata oranlanır:
 
 ```
-Stop-Loss = Alış Fiyatı - (ATR × Çarpan)
-
-Swing Trade için: ATR × 1,5
-Günlük Trade için: ATR × 1,0
-Pozisyon Trade için: ATR × 2,0-3,0
+ATR % = ATR ÷ Kapanış × 100
 ```
 
-**Örnek:** AKBNK ATR = 2,5 TL, alış 85 TL
-
-- Stop = 85 - (2,5 × 1,5) = 85 - 3,75 = **81,25 TL**
-
-Bu yaklaşım, hissenin volatilitesine göre dinamik stop belirler.
+**Örnek:** ATR = 2,5 TL, kapanış 85 TL → ATR % ≈ **%2,9**. Yani hisse son dönemde günde ortalama %2,9 genişliğinde bir aralıkta hareket etmiştir.
 
 ### 2. Supertrend İndikatöründe
 BorsaPusula'nın kullandığı **Supertrend indikatörü** doğrudan ATR kullanır:
@@ -1410,13 +1389,6 @@ Supertrend = Temel Fiyat ± (ATR × Çarpan)
 Varsayılan parametreler: ATR(10) × 3,0
 
 ATR yükseldikçe Supertrend bantları genişler, yani daha fazla hareket tolerans edilir.
-
-### 3. Pozisyon Büyüklüğü Hesabı
-```
-Pozisyon = (Sermaye × Risk%) ÷ (ATR × Çarpan)
-```
-
-ATR yüksek hissede daha az lot al, ATR düşük hissede daha fazla.
 
 ## BIST Hisselerinde Tipik ATR Değerleri
 
@@ -1455,9 +1427,8 @@ Yüksek ATR dönemlerinde Supertrend çizgisinin fiyattan uzak durması normaldi
 [BIST hisselerinin trend durumunu gör →](/tarama)""",
     "faqs": [
       {"q": "ATR indikatörü için ideal periyot nedir?", "a": "Standart ATR periyodu 14'tür. Kısa vadeli trading için 7-10, uzun vadeli pozisyonlar için 20-21 kullanılabilir. BorsaPusula'nın Supertrend sinyallerinde ATR(10) kullanılmaktadır."},
-      {"q": "ATR değeri ne kadar olmalı ki işlem yapılabilir?", "a": "Belirli bir 'ideal ATR' yoktur. Önemli olan ATR'nin trend sırasında yükselmesi, daralma dönemlerinde düşmesidir. Yükselen ATR ile birlikte gelen fiyat kırılması güçlü bir sinyal olarak yorumlanır."},
+      {"q": "Yüksek ATR iyi mi kötü mü?", "a": "ATR iyi ya da kötü değildir; yalnız oynaklığı ölçer. Trend dönemlerinde yükselir, sıkışma dönemlerinde düşer. Yön hakkında bilgi vermez."},
       {"q": "Supertrend ile ATR arasındaki ilişki nedir?", "a": "Supertrend indikatörü tamamen ATR üzerine inşa edilmiştir. Supertrend = Orta Fiyat ± (ATR × Çarpan) formülünü kullanır. ATR yükseldikçe Supertrend bantları genişler ve trend dönüş seviyesi fiyattan uzaklaşır; bu volatiliteye adaptasyondur."},
-      {"q": "ATR stop-loss neden sabit yüzde stop'tan iyidir?", "a": "Sabit yüzde stop (%5 gibi) piyasanın volatilitesini görmezden gelir. Çok oynak hissede %5 çok dar, durağan hissede çok geniş olabilir. ATR tabanlı stop ise hissenin kendi volatilitesine göre dinamik olarak ayarlanır, gereksiz stop-out'ları azaltır."},
       {"q": "ATR sadece hisse senedi için mi kullanılır?", "a": "Hayır. ATR her finansal varlıkta kullanılabilir: forex (USD/TRY gibi), kripto para (BTC), emtia (altın, petrol), endeksler (BIST30, S&P500). Hesaplama prensibi aynıdır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'GARAN']
