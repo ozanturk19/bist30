@@ -90,6 +90,7 @@ LOCAL_KEYS = {
     'bp_acct_imported':      dict(server_mirror=False, note='ilk giriste yerel liste hesaba aktarildi bayragi'),
     'bp_takip_mode':         dict(server_mirror=False, note='/takip Liste/Portfoy gorunum tercihi'),
     'bp_macro_v1':           dict(server_mirror=False, note='makro serit son yaniti (sessionStorage, ≤10 dk)'),
+    'bp_macro_paused_v1':    dict(server_mirror=False, note='makro serit duraklatma tercihi (sessionStorage)'),
 }
 
 # Mutlak "sunucuya gitmez" iddiasi -- nitelendirilmemisse R2 ihlali.

@@ -817,14 +817,30 @@
   else _bpStartMacro();
   // Şerit duraklat/oynat: 12 şablondaki satır içi onclick yerine tek delege (K04).
   // Simge SVG'dir; hangisinin görüneceğini aria-pressed üzerinden CSS seçer.
+  // C-P1-2210e: duraklatma tercihi sekme boyunca sayfalar arası korunur (sessionStorage).
+  var BP_MACRO_PAUSE_KEY = 'bp_macro_paused_v1';
+  function _bpSetMacroPaused(bar, b, p) {
+    bar.setAttribute('data-paused', String(p));
+    b.setAttribute('aria-pressed', String(p));
+    b.setAttribute('aria-label', p ? 'Piyasa şeridini devam ettir' : 'Piyasa şeridini duraklat');
+  }
+  function _bpRestoreMacroPause() {
+    var bar = document.getElementById('macroBar');
+    var b = bar && bar.querySelector('.macro-pause-btn');
+    if (!b) return;
+    var p = false;
+    try { p = sessionStorage.getItem(BP_MACRO_PAUSE_KEY) === '1'; } catch (e) { /* özel pencere */ }
+    if (p) _bpSetMacroPaused(bar, b, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bpRestoreMacroPause);
+  else _bpRestoreMacroPause();
   document.addEventListener('click', function(e) {
     var b = e.target.closest && e.target.closest('.macro-pause-btn');
     var bar = b && b.closest('.macro-bar');
     if (!bar) return;
     var p = bar.getAttribute('data-paused') !== 'true';
-    bar.setAttribute('data-paused', String(p));
-    b.setAttribute('aria-pressed', String(p));
-    b.setAttribute('aria-label', p ? 'Piyasa şeridini devam ettir' : 'Piyasa şeridini duraklat');
+    _bpSetMacroPaused(bar, b, p);
+    try { sessionStorage.setItem(BP_MACRO_PAUSE_KEY, p ? '1' : '0'); } catch (e2) { /* özel pencere */ }
   });
 
 

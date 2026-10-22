@@ -139,7 +139,8 @@ body { margin: 0; }
 .macro-bar .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-text-3);flex:none}
 .macro-bar .macro-live-dot.is-live{background:var(--bp-up);box-shadow:0 0 0 3px color-mix(in srgb,var(--bp-up) 22%,transparent)}
 .macro-bar .macro-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:macroScroll 40s linear infinite;will-change:transform}
-.macro-bar:hover .macro-track{animation-play-state:paused}
+/* C-P1-2210e: dokunmatikte :hover takılı kalıp şeridi durduruyordu → yalnız gerçek fare */
+@media (hover:hover){.macro-bar:hover .macro-track{animation-play-state:paused}}
 .macro-bar[data-paused="true"] .macro-track{animation-play-state:paused !important}
 @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .macro-bar .macro-item{display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-type-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',system-ui,sans-serif;border-right:1px solid var(--bp-line);color:var(--bp-text);text-decoration:none}
@@ -154,6 +155,7 @@ body { margin: 0; }
 .macro-bar .macro-pause-btn{position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;height:auto;transform:none;display:flex;align-items:center;justify-content:center;background:var(--bp-surface);border:none;color:var(--bp-text-3);font-size:var(--bp-type-sm);line-height:1;cursor:pointer;padding:0}
 .macro-bar .macro-pause-btn:hover,.macro-bar .macro-pause-btn:focus-visible{color:var(--bp-text)}
 .macro-pause-btn svg{width:12px;height:12px}
+@media (pointer:coarse){.macro-bar .macro-pause-btn{width:40px}.macro-bar::after{right:40px}}
 .macro-pause-btn[aria-pressed="true"] .mp-pause,.macro-pause-btn:not([aria-pressed="true"]) .mp-play{display:none}
 .macro-stale-badge{position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit}
 @media (prefers-reduced-motion: reduce){
