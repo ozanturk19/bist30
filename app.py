@@ -7532,7 +7532,15 @@ def _closes_30(ticker, stock):
 
     Grafik ucu ana sinyalin resmi kapanış gününden geride kalmışsa ve o kapanış resmiyse
     (close_status=="resmi") son nokta olarak eklenir: şablon kapanış gününü bu listenin son
-    tarihinden okur, bayat grafik "dünün kapanışı" yazdırmasın. Veri yoksa None (şablon geri düşer)."""
+    tarihinden okur, bayat grafik "dünün kapanışı" yazdırmasın.
+
+    D-P1-2210-1: ters durum da olur — %10,5 tavan guard'ı (CPO-690) bedelli/bedelsiz hak
+    kullanım günü gibi meşru bir sıçramayı anomali sayıp ana sinyali önceki günde dondururken
+    (`analyze()` None döner, prev_cache), grafik önbelleği guard'sız yenilenip BUGÜNÜN barını
+    zaten yazmış olabilir. O zaman bu listenin son tarihi dondurulmuş sinyalin `bar_date`'inden
+    ileride kalır ve şablon "bugün kapanışı" yazdırır — oysa gösterilen fiyat (`_px`) hâlâ
+    dondurulmuş günün fiyatıdır. Sinyalden ileri kalan barlar (güvenilirliği tavan guard'ınca
+    zaten şüpheli) kırpılıp liste `bar_date`'te sonlandırılır. Veri yoksa None (şablon geri düşer)."""
     data, _ = _load_chart_from_disk_per_ticker(ticker)
     rows = []
     for b in ((data or {}).get("ohlc") or [])[-30:]:
@@ -7550,8 +7558,13 @@ def _closes_30(ticker, stock):
         _px = float(st.get("price"))
     except (TypeError, ValueError):
         _bd, _px = None, 0.0
-    if _bd and _px > 0 and st.get("close_status") == "resmi" and _bd > rows[-1][0]:
-        rows = (rows + [[_bd, round(_px, 2)]])[-30:]
+    if _bd and _px > 0 and st.get("close_status") == "resmi":
+        if _bd > rows[-1][0]:
+            rows = (rows + [[_bd, round(_px, 2)]])[-30:]
+        elif _bd < rows[-1][0]:
+            rows = [r for r in rows if r[0] <= _bd]
+            if not rows or rows[-1][0] != _bd:
+                rows = (rows + [[_bd, round(_px, 2)]])[-30:]
     return rows
 
 

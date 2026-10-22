@@ -63,6 +63,30 @@ def test_closes_30_son_30_gun_ve_resmi_kapanis_eki(monkeypatch):
 
 
 @PY310
+def test_closes_30_dondurulmus_sinyalden_ileri_grafik_kirpilir(monkeypatch):
+    """D-P1-2210-1 (SKBNK): %10,5 tavan guard sinyali önceki günde dondururken
+    (örn. bedelli hak kullanım günü) grafik önbelleği guard'sız bugünü yazmış olabilir —
+    liste bu durumda bar_date'i geçen barları kırpmalı, aksi halde şablon fiyat+tarih
+    uyuşmazlığı (yanlış gün etiketi) üretir."""
+    import app
+    monkeypatch.setattr(app, "_load_chart_from_disk_per_ticker", lambda t: (_chart(40), "x"))
+    # grafik sinyalden ileride (bugünün barını zaten yazmış) — dondurulmuş sinyal 3 gün geride.
+    # bar_date grafikte zaten var olan bir tarih → kırpılır, grafiğin KENDİ kapanışı korunur
+    # (sinyal fiyatıyla ezilmez — aynı gün için iki farklı kaynak varsa grafik otoriter kalır).
+    st = {"bar_date": "08.09.2026", "price": 42.0, "close_status": "resmi"}
+    rows = app._closes_30("THYAO", st)
+    assert rows[-1] == ["2026-09-08", 46.0]
+    assert all(r[0] <= "2026-09-08" for r in rows)
+    # bar_date grafik penceresinden bile geride (örn. uzun süredir donmuş sinyal) →
+    # kırpma hepsini siler, dondurulmuş fiyat son nokta olarak eklenir
+    st_disi = {"bar_date": "01.08.2026", "price": 42.0, "close_status": "resmi"}
+    assert app._closes_30("THYAO", st_disi) == [["2026-08-01", 42.0]]
+    # grafik tam bar_date'te bitiyorsa (fark yok) dokunulmaz
+    st2 = {"bar_date": "11.09.2026", "price": 49.0, "close_status": "resmi"}
+    assert app._closes_30("THYAO", st2)[-1] == ["2026-09-11", 49.0]
+
+
+@PY310
 def test_hisse_sayfasi_baglami(monkeypatch):
     import app
     monkeypatch.setattr(app, "_load_chart_from_disk_per_ticker", lambda t: (_chart(40), "x"))
