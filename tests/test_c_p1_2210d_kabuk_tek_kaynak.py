@@ -51,6 +51,7 @@ def test_takip_kendine_baglanmaz():
 
 
 def test_atlama_baglantisi_tam_gizli():
-    s = open(os.path.join(TPL, "_head.html"), encoding="utf-8").read()
-    m = re.search(r"\.skip-link\{[^}]*top:(-?\d+)px", s)
-    assert m and int(m.group(1)) <= -100
+    for f in ("_head.html", "_bp_critical_css.html"):
+        s = open(os.path.join(TPL, f), encoding="utf-8").read()
+        tops = [int(t) for t in re.findall(r"\.skip-link\{[^}]*?top:(-?\d+)px", s)]
+        assert tops and all(t <= -100 for t in tops), (f, tops)
