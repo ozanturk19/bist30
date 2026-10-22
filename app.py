@@ -12938,7 +12938,15 @@ _BLOG_SLUG_REDIRECTS = {
     "piyasa-emri-limit-emri-stop-emri-farki":     "limit-emir-piyasa-emri-nedir",
     "rsi-gostergesi-nedir":                       "rsi-gostergesi-nasil-kullanilir",
     "ema-hareketli-ortalama-nedir":               "hareketli-ortalamalar-ema-sma-altin-kesisim",
+    # CPO-1836 (C-P0-2210): al-sat-sinyali-nasil-yorumlanir slug'ı değişti (kendi
+    # içeriği kalıyor, kavram adı aynı yazı) -- zincir 301 olusturmamak icin
+    # dogrudan nihai hedefe.
+    "al-sat-sinyali-nasil-yorumlanir":            "guclu-trend-trend-bozuldu-ne-demek",
 }
+
+# CPO-1836 (C-P0-2210): sinyali işleme bağlayan yazı, kendi konusuna karşılık
+# gelen makale yok -- tek hedefi /blog dizini (canonical_slug="blog" ile emekli).
+_BLOG_RETIRED_TO_INDEX = {"swing-trading-nedir"}
 
 def _normalize_article(a):
     """Eski ve yeni makale formatını ortak template formatına normalize et."""
@@ -12982,6 +12990,9 @@ def _normalize_article(a):
 @app.route("/blog/<slug>")
 def blog_article(slug):
     from flask import abort, redirect, url_for
+    # CPO-1836: kendine karşılık gelen makale olmadan emekli olan yazı → /blog dizini
+    if slug in _BLOG_RETIRED_TO_INDEX:
+        return redirect(url_for("blog_index"), code=301)
     # Bilinen eski slug → doğru slug 301 yönlendirme
     if slug in _BLOG_SLUG_REDIRECTS:
         return redirect(url_for("blog_article", slug=_BLOG_SLUG_REDIRECTS[slug]), code=301)
