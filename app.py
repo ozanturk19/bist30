@@ -2536,6 +2536,22 @@ def _save_subscribers(subs):
         logger.error("subscribers.json kaydetme hatası: %s", e)
 
 
+# P0-2210 22.10: token rotasyonunda eski unsubscribe linkleri "hiç var olmamış" (404)
+# değil "artık geçersiz" (410) dönmeli — hash'lenmiş eski token kaydı, ham token diskte durmaz.
+REVOKED_TOKENS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "revoked_tokens.json")
+
+
+def _token_hash(token):
+    return hashlib.sha256((token or "").encode("utf-8")).hexdigest()
+
+
+def _is_revoked_token(token):
+    if not os.path.exists(REVOKED_TOKENS_FILE):
+        return False
+    data = _tp_read_json(REVOKED_TOKENS_FILE, default={})
+    return _token_hash(token) in data
+
+
 def _follow_ticker(raw):
     """D-P1-2509: istekteki hisse kodunu normalize eder; evren dışı/endeks/bozuk → None."""
     t = str(raw or "").strip().upper()
@@ -12777,7 +12793,10 @@ def unsubscribe_page(token):
                 break
 
         if not match_email:
-            return render_template("unsubscribe.html", success=False, confirm=False, email=None), 404
+            # P0-2210: rotasyonla geçersiz kılınan eski token — hiç var olmamış (404)
+            # değil, artık geçersiz (410) olarak ayırt edilir.
+            code = 410 if _is_revoked_token(token) else 404
+            return render_template("unsubscribe.html", success=False, confirm=False, email=None), code
 
         if request.method == "GET":
             return render_template("unsubscribe.html", success=False, confirm=True, email=match_email, token=token)
