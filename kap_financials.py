@@ -385,15 +385,21 @@ def parse_dividend(page_html, ticker, meta):
     for m in re.finditer(r"\| [^|]*\b" + re.escape(ticker) + r"\b[^|]* \| (\d+\. Taksit|Peşin) \| ([\d.,]+) \| "
                          r"[\d.,]+ \| [\d.,]+ \| ([\d.,]+) \|", s):
         amounts.setdefault(m.group(1), (_tr_num(m.group(2)), _tr_num(m.group(3))))
+    # Kar Payı Ödeme Tarihleri tablosu 4 sütun: Teklif Edilen Hak Kullanım | Kesinleşen
+    # Hak Kullanım | Ödeme | Kayıt. Teklif edilen == kesinleşen oldugunda (duzeltme yoksa)
+    # KAP o sutunu basmaz, 3 tarih kalir (Kesinlesen | Odeme | Kayit) - GUBRF idx 1674751,
+    # RGYAS idx 1672991 dogrulandi (kesinlesen < kayit < odeme sirasi canli sayfalarla teyitli).
     dates = {}
     for m in re.finditer(r"\| (\d+\. Taksit|Peşin) \| ([\d.]{10}) \| ([\d.]{10}) \| ([\d.]{10}) \| ([\d.]{10})(?= \|)", s):
-        dates.setdefault(m.group(1), m)
+        dates.setdefault(m.group(1), (m.group(3), m.group(4)))
+    for m in re.finditer(r"\| (\d+\. Taksit|Peşin) \| ([\d.]{10}) \| ([\d.]{10}) \| ([\d.]{10})(?= \|)(?! \| [\d.]{10})", s):
+        dates.setdefault(m.group(1), (m.group(2), m.group(3)))
     taksitler = []
     for name, (brut, net) in amounts.items():
         d = dates.get(name)
         taksitler.append({"taksit": name, "brut": brut, "net": net,
-                          "hak_kullanim": _tr_date(d.group(3)) if d else None,
-                          "odeme": _tr_date(d.group(4)) if d else None})
+                          "hak_kullanim": _tr_date(d[0]) if d else None,
+                          "odeme": _tr_date(d[1]) if d else None})
     taksitler.sort(key=lambda x: x["odeme"] or "")
     return {"idx": meta["idx"], "publish": meta.get("publish"),
             "gk_tarihi": _tr_date(gk.group(1)) if gk else None,

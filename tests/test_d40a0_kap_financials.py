@@ -137,6 +137,17 @@ def test_tuprs_temettu_odenen_girer_duyurulan_girmez():
     assert ttm["duyurulan"] == [{"odeme": "2026-10-02", "brut": 6.7469533}]
 
 
+def test_temettu_3_tarihli_alt_turde_tarihler_dogru_eslenir():
+    # "Teklif Edilen Hak Kullanım Tarihi" sutunu kesinlesenle ayni oldugunda KAP onu
+    # basmaz, tabloda 4 yerine 3 tarih kalir (Kesinlesen | Odeme | Kayit) - D-P0-2210b.
+    gubrf = _div(1674751, "GUBRF")["taksitler"]
+    assert gubrf == [{"taksit": "Peşin", "brut": 4.4910179, "net": 3.8173652,
+                      "hak_kullanim": "2026-10-14", "odeme": "2026-10-16"}]
+    rgyas = _div(1672991, "RGYAS")["taksitler"]
+    assert rgyas == [{"taksit": "Peşin", "brut": 7.8201106, "net": 6.647094,
+                      "hak_kullanim": "2026-10-07", "odeme": "2026-10-09"}]
+
+
 def test_ceyreklik_degisim_3_aylik_sutundan():
     r = _rep(1643238, "THYAO", 2026, period=2)
     q = kf.quarter_change(r)
