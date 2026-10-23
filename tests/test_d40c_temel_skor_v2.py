@@ -346,6 +346,11 @@ def test_cevap_betimleyici_ve_yasak_dil_yok():
     assert ts.answer({"kalite": 60, "bilanco": 55, "buyume": 45, "temettu": 60}) == "Büyüme zayıf, diğerleri dengeli"
     assert ts.answer({"kalite": 60, "bilanco": 55, "buyume": 65, "temettu": 60}) == "Dengeli; belirgin zayıf alan yok"
     assert ts.answer({"degerleme": 10, "kalite": 60, "buyume": 60, "bilanco": 60}) == "Dengeli; belirgin zayıf alan yok"
+    # D-P1-2210-4: <50 olan TUM eksenler adiyla sayilir, "digerleri dengeli" yanlis etiket olmaz
+    assert ts.answer({"kalite": 23, "buyume": 10.7, "bilanco": 60, "temettu": 60}) == "Kalite ve büyüme zayıf, diğerleri dengeli"
+    assert ts.answer({"kalite": 23, "buyume": 10.7, "bilanco": 5, "temettu": 60}) == "Kalite, büyüme ve bilanço zayıf, diğerleri dengeli"
+    assert ts.answer({"kalite": 23, "buyume": 10.7, "bilanco": 5, "temettu": 1}) == "Kalite, büyüme, bilanço ve temettü zayıf"
+    assert ts.answer({"kalite": 80, "buyume": 75, "bilanco": 20, "temettu": 10}) == "Kalite ve büyüme güçlü, bilanço ve temettü zayıf"
     texts = []
     for t, b in (("TUPRS", "K1"), ("GARAN", "K2"), ("EKGYO", "K3"), ("ANSGR", "K4"), ("THYAO", "K5"), ("BIMAS", "K6")):
         d = ts.score_universe({t: _inp(t)}, {t: b})[t]["detay"]

@@ -408,23 +408,34 @@ def _cap(s):
     return s[:1].upper() + s[1:]
 
 
+def _join_ad(names):
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return "%s ve %s" % (names[0], names[1])
+    return "%s ve %s" % (", ".join(names[:-1]), names[-1])
+
+
 def answer(axes):
     """'Finansallari nasil?' betimleyici cevap (C-22 makrosuyla ayni kural: >=70 guclu, <50 zayif).
-    Degerleme ekseni girmez: onu 'Fiyati makul mu?' sorusu cevaplar."""
+    <50 olan TUM eksenler adiyla sayilir (D-P1-2210-4) -- tek en zayifi degil; 'dengeli' yalniz
+    kalan eksenler icin. Degerleme ekseni girmez: onu 'Fiyati makul mu?' sorusu cevaplar."""
     items = [(k, axes[k]) for k in AXES if k in _CEVAP_AD and axes.get(k) is not None]
     if not items:
         return None
     order = sorted(items, key=lambda kv: -kv[1])
-    st = [k for k, v in order if v >= 70]
-    wk = [k for k, v in order if v < 50]
+    st = [_CEVAP_AD[k] for k, v in order if v >= 70]
+    wk = [_CEVAP_AD[k] for k, v in order if v < 50]
     if st and wk:
-        return "%s güçlü, %s zayıf" % (_cap(_CEVAP_AD[st[0]]), _CEVAP_AD[wk[-1]])
+        return "%s güçlü, %s zayıf" % (_cap(_join_ad(st)), _join_ad(wk))
     if len(st) >= 2:
-        return "%s ve %s güçlü" % (_cap(_CEVAP_AD[st[0]]), _CEVAP_AD[st[1]])
+        return "%s güçlü" % _cap(_join_ad(st))
     if st:
-        return "%s öne çıkıyor" % _cap(_CEVAP_AD[st[0]])
+        return "%s öne çıkıyor" % _cap(_join_ad(st))
     if wk:
-        return "%s zayıf, diğerleri dengeli" % _cap(_CEVAP_AD[wk[-1]])
+        if len(wk) == len(items):
+            return "%s zayıf" % _cap(_join_ad(wk))
+        return "%s zayıf, diğerleri dengeli" % _cap(_join_ad(wk))
     return "Dengeli; belirgin zayıf alan yok"
 
 
