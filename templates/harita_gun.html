@@ -68,7 +68,7 @@
 
 <main class="container container--wide hg" id="main-content" tabindex="-1">
 {%- if _hm_ok %}
-  {% with hm_h1=(_uni ~ ' ısı haritası', (_lbl ~ ' kapanışı nasıl?') if _lbl else _lbl) %}{% include '_heatmap.html' %}{% endwith %}
+  {% with hm_h1=(_uni ~ ' ısı haritası', _lbl, 'kapanışı nasıl?' if _lbl else '') %}{% include '_heatmap.html' %}{% endwith %}
   {%- if _hg.prev or _hg.next %}
   <nav class="hg-pager" aria-label="Diğer günlerin haritası">
     {%- if _hg.prev %}
