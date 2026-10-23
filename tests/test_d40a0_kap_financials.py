@@ -148,6 +148,26 @@ def test_temettu_3_tarihli_alt_turde_tarihler_dogru_eslenir():
                       "hak_kullanim": "2026-10-07", "odeme": "2026-10-09"}]
 
 
+def test_temettu_oneri_ve_kesinlesme_bildirimi_ayni_odemeyi_2x_saymaz():
+    # QA 23.10 P0: KAP ayni odeme icin once oneri (gk_tarihi=None), sonra genel kurul
+    # sonrasi kesinlesme (gk_tarihi dolu) bildirimi yayinliyor - FROTO/ULKER/ASUZU gibi
+    # 17/30 hissede bu ikisi farkli dedup anahtarina dusup verim 2x cikmisti.
+    oneri = {"idx": 1509356, "publish": "2025-10-30T18:38", "gk_tarihi": None,
+             "odeme_sekli": "Peşin",
+             "taksitler": [{"taksit": "Peşin", "brut": 6.05, "net": 5.1425,
+                            "hak_kullanim": "2025-12-03", "odeme": "2025-12-05"}]}
+    kesin = {"idx": 1521070, "publish": "2025-11-28T13:13", "gk_tarihi": "2025-11-28",
+             "odeme_sekli": "Peşin",
+             "taksitler": [{"taksit": "Peşin", "brut": 6.05, "net": 5.1425,
+                            "hak_kullanim": "2025-12-03", "odeme": "2025-12-05"}]}
+    pays = kf.dividend_payments([oneri, kesin])
+    assert len(pays) == 1
+    assert pays[0]["brut"] == 6.05 and pays[0]["odeme"] == "2025-12-05"
+    assert pays[0]["kaynak"]["rapor"] == 1521070  # en yuksek idx (kesinlesme) kazanir
+    ttm = kf.dividend_ttm(pays, date(2026, 9, 24))
+    assert ttm["brut_toplam"] == 6.05  # 12.1 (2x) DEGIL
+
+
 def test_ceyreklik_degisim_3_aylik_sutundan():
     r = _rep(1643238, "THYAO", 2026, period=2)
     q = kf.quarter_change(r)

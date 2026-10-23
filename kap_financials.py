@@ -408,17 +408,20 @@ def parse_dividend(page_html, ticker, meta):
 
 
 def dividend_payments(disclosures):
-    """Her genel kurul icin en son yayimlanan bildirim gecerlidir (oneri -> karar -> guncelleme).
+    """Ayni odeme icin en son yayimlanan bildirim gecerlidir (oneri -> karar -> guncelleme).
+    Dedup gk_tarihi'ne gore DEGIL (oneri bildirimi gk_tarihi=None ile, kesinlesme bildirimi
+    aynı odemeyi dolu gk_tarihi ile yayimlar -> farkli anahtar, ikisi de sayilip odeme 2x
+    cikardi) (taksit adi, odeme tarihi) ikilisine gore: ayni gercek odeme tek kayda iner,
+    en yuksek idx'in tutari/kaynagi kazanir.
     Donus: odeme tarihli taksitler (brut TL/pay, kaynak ile)."""
     last = {}
     for d in sorted(disclosures, key=lambda d: d["idx"]):
-        last[d.get("gk_tarihi") or d["idx"]] = d
-    out = []
-    for d in last.values():
         for t in d["taksitler"]:
-            if t.get("odeme"):
-                out.append(dict(t, kaynak={"rapor": d["idx"], "donem": d.get("gk_tarihi"), "birim": "TL/pay brüt"}))
-    return sorted(out, key=lambda t: t["odeme"])
+            if not t.get("odeme"):
+                continue
+            key = (t["taksit"], t["odeme"])
+            last[key] = dict(t, kaynak={"rapor": d["idx"], "donem": d.get("gk_tarihi"), "birim": "TL/pay brüt"})
+    return sorted(last.values(), key=lambda t: t["odeme"])
 
 
 def dividend_ttm(payments, today):
