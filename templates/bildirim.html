@@ -48,8 +48,8 @@
 {%- set it = b.item -%}
 {%- set AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'] -%}
 {%- macro trdate(iso) -%}{%- set p = iso[:10].split('-') -%}{{ p[2]|int }} {{ AY[p[1]|int - 1] }} {{ p[0] }}{%- endmacro -%}
-{#- Buyuk TL tutari: "25,8 milyar ₺" (eksi isaret U+2212). -#}
-{%- macro tl(v) -%}{%- set a = v|abs -%}{{ '−' if v < 0 else '' }}{% if a >= 1e12 %}{{ ('%.1f'|format(a / 1e12))|replace('.', ',') }} trilyon{% elif a >= 1e9 %}{{ ('%.1f'|format(a / 1e9))|replace('.', ',') }} milyar{% elif a >= 1e6 %}{{ ('%.1f'|format(a / 1e6))|replace('.', ',') }} milyon{% else %}{{ ('%.0f'|format(a / 1e3)) }} bin{% endif %} ₺{%- endmacro -%}
+{#- Buyuk TL tutari, kanon §10 (hisse_ozet.para ile ayni olcek ve hane): "383 Mrd ₺", "1,02 T ₺", "45,3 Mrd ₺", "842 Mn ₺"; eksi U+2212. -#}
+{%- macro tl(v) -%}{%- set a = v|abs -%}{%- set u = 'T' if a >= 1e12 else ('Mrd' if a >= 1e9 else ('Mn' if a >= 1e6 else '')) -%}{%- set d = 1e12 if a >= 1e12 else (1e9 if a >= 1e9 else (1e6 if a >= 1e6 else 1)) -%}{%- set f = '%.2f' if a >= 1e12 else ('%.0f' if a / d >= 100 else '%.1f') -%}{{ '−' if v < 0 else '' }}{% if u %}{{ (f|format(a / d))|replace('.', ',') }}{% else %}{{ '{:,.0f}'.format(a)|replace(',', '.') }}{% endif %}{% if u %} {{ u }}{% endif %} ₺{%- endmacro -%}
 {%- macro ring(v) -%}{%- set c = 113.1 -%}{%- set f = ([0, [100, v or 0]|min]|max) / 100 -%}<svg width="40" height="40" aria-hidden="true"><circle class="rg0" cx="20" cy="20" r="18" fill="none" stroke-width="4"/><circle class="rg1" cx="20" cy="20" r="18" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ '%.1f'|format(c * f) }} {{ c }}"/></svg>{%- endmacro -%}
 <main class="hb hb-doc" id="main-content" tabindex="-1">
   <ol class="hb-bc" aria-label="Konum">
