@@ -800,6 +800,7 @@
   .hx-mini-u{ display:block; font-size:var(--bp-type-xs); font-weight:500; color:var(--bp-text-3); }
   .hx-mini-v{ display:block; font-weight:700; color:var(--bp-text); }
   .hx-mini-d{ display:block; font-size:var(--bp-type-xs); color:var(--bp-text-3); }
+  .hx-mini-d.up{ color:var(--bp-up); } .hx-mini-d.down{ color:var(--bp-down); }   /* C-P2-2210 (8): çeyrek hasılat/kâr değişimi renkli; finansal tablo kalemleri nötr kalır */
   .hx-mini-n{ margin:10px 0 12px; font-size:var(--bp-type-xs); line-height:1.5; color:var(--bp-text-3); }
   .hx-mini .tv-ft{ margin:0; }
   /* C-80: "Son haberler" satırı tamamı bağlantı (kalıcı bildirim sayfası), dokunma alanı satır boyu. */

@@ -34,7 +34,7 @@
 .kf-val--ucuz{color:var(--bp-art-cyan);border-color:rgba(var(--bp-accent-cyan-rgb),.45)}
 .kf-val--makul{color:var(--bp-brand);border-color:rgba(var(--bp-brand-rgb),.45)}
 .kf-val--pahali,.kf-val--mix{color:var(--bp-stale);border-color:rgba(var(--bp-stale-rgb),.45)}
-.kf-val--yok{border-color:transparent;color:var(--bp-text-3);font-weight:600}
+.kf-val--bos{visibility:hidden}
 .kf-bp{display:flex;justify-content:flex-end}
 
 .kf-all{display:flex;margin:14px auto 0;min-height:44px}
@@ -72,4 +72,5 @@
   .kf-tags > :first-child,.kf-tags > :last-child{grid-area:auto}
 
   .kf-tags > :first-child{min-width:118px;justify-content:center}
+  .kf-val--bos{display:none}
 }

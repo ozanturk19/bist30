@@ -1132,7 +1132,7 @@ function hxChartDraw() {
   const chg = (last[1] / c[0][1] - 1) * 100;
   /* K-CB: pencere beyani cizilen veriden (ilk-son tarih + seans sayisi). */
   const lbl = _hxDays === 30 ? 'Son 1 ay' : (_hxDays === 90 ? 'Son 3 ay' : 'Son 1 yıl');
-  if (pc) pc.innerHTML = lbl + ': <b class="' + bpDirClass(chg, 1, 'up,down,neu') + '">' + bpFormatPct(chg, 1) + '</b>';
+  if (pc) pc.innerHTML = lbl + ': <b class="' + bpDirClass(chg, 1, ['up', 'down', 'neu']) + '">' + bpFormatPct(chg, 1) + '</b>';
   cv.setAttribute('aria-label', TICKER + ' kapanış grafiği, ' + _hxDate(c[0][0]) + ' – ' + _hxDate(last[0]) + ', ' + c.length + ' seans, dönem değişimi ' + bpFormatPct(chg, 1));
 }
 (function hxChartWire() {
