@@ -11097,6 +11097,24 @@ def api_karsilastir():
             pe_val = None if _kap else fund.get("pe_ratio")
             pb_val = None if _kap else fund.get("pb_ratio")
         roe_val = _kap_now.get("ozsermaye_karliligi") if (_kap_now and _kap_now.get("ozsermaye_karliligi") is not None) else fund.get("roe")
+        # D-P1-2210-5: piyasa degeri eskiden HER ZAMAN Yahoo marketCap
+        # donuyordu, pe_val/pb_val'in az yukarida yaptigi KAP-once dallanmasi
+        # bu alana hic uygulanmamisti (/karsilastir THYAO'da Yahoo'nun ham
+        # sayisini gosterirken /hisse ve isi haritasi KAP/resmi-kapanis
+        # kaynakli farkli bir sayi gosteriyordu). piyasa_degeri pay_uyumsuz
+        # oldugunda zaten None doner (kap_temel_v2.valuation_now), ekstra
+        # pay_uyumsuz kontrolu gerekmiyor.
+        if _kap_now and _kap_now.get("piyasa_degeri"):
+            mcap_val = {"value": _kap_now["piyasa_degeri"], "currency": "TRY"}
+        else:
+            mcap_val = None if _kap else fund.get("market_cap")
+        # dividend_yield: kap_financials.apply_to_fundamentals (_fundamentals_kap
+        # icinde) KAP kaydi varsa bu alani zaten KAP'in son-12-ay brut odemesi/
+        # fiyat ile YENIDEN YAZIYOR (dividend_ttm) -- Yahoo'nun ham dividendYield'i
+        # SADECE kayit yokken sizar (docs/URUN-VE-TASARIM.md: Yahoo'nun hazir orani
+        # kullanilmaz, THYAO odeme yokken %2,28 gosteriyordu). Kayit yoksa Yahoo'ya
+        # DUSME, None birak.
+        div_val = fund.get("dividend_yield") if _kap else None
         results.append({
             "ticker":         ticker,
             "name":           STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
@@ -11143,9 +11161,9 @@ def api_karsilastir():
             # ── Temel analiz ───────────────────────────────
             "pe_ratio":       pe_val,
             "pb_ratio":       pb_val,
-            "market_cap":     fund.get("market_cap"),
+            "market_cap":     mcap_val,
             "roe":            roe_val,
-            "dividend_yield": fund.get("dividend_yield"),
+            "dividend_yield": div_val,
             "eps":            fund.get("eps"),
             "profit_margin":  fund.get("profit_margin"),
             "found":          bool(s),
