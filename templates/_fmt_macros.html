@@ -29,7 +29,7 @@
 {%- else -%}
 {%- set r0 = v|round(frac) -%}
 {%- set r = 0 if r0 == 0 else r0 -%}
-{{- ('+' if r > 0 else ('-' if r < 0 else '')) ~ '%' ~ (('%.' ~ frac ~ 'f')|format(r|abs))|replace('.', ',') -}}
+{{- ('+' if r > 0 else ('−' if r < 0 else '')) ~ '%' ~ (('%.' ~ frac ~ 'f')|format(r|abs))|replace('.', ',') -}}
 {%- endif -%}
 {%- endmacro -%}
 

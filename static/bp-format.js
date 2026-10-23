@@ -315,7 +315,7 @@ function bpZero(n, frac) {
   return bpDir(n, frac) === 0 ? 0 : n;
 }
 
-/* Yuzde metni: isaret + '%' + TR ondalik ("+%0,24", "-%1,50"; C-62 tek bicim,
+/* Yuzde metni: isaret + '%' + TR ondalik ("+%0,24", "−%1,50"; C-62 tek bicim,
    Turkce yazim). Yon ile AYNI yuvarlamayi kullanir, boylece -0,004 "-%0,00"
    degil "%0,00" yazar (isaretli sifir yok). */
 function bpFormatPct(n, frac) {
@@ -324,7 +324,7 @@ function bpFormatPct(n, frac) {
   var f = (typeof frac === 'number') ? frac : 2;
   var r = parseFloat(v.toFixed(f));
   if (r === 0) r = 0;                        /* -0 -> 0 */
-  return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');
+  return (r > 0 ? '+' : r < 0 ? '\u2212' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');   /* C-P2-2210: tipografik eksi, sitede tek bicim */
 }
 
 /* ── K-DL (22.09): SEVIYE YUZDESI (degisim degil) ────────────────────────
@@ -343,7 +343,7 @@ function bpPctLevel(n, frac) {
   var f = (typeof frac === 'number') ? frac : 1;
   var r = parseFloat(v.toFixed(f));
   if (r === 0) r = 0;                        /* -0 -> 0 */
-  return (r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');
+  return (r < 0 ? '\u2212' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');
 }
 
 /* ── K-BQ (21.09): SUPERTREND SEVIYESI ≠ "STOP" ──────────────────────────

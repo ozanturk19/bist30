@@ -80,8 +80,8 @@ def test_satir_rozetler_halka_ve_hisse_baglantisi():
         val = re.search(r'<span class="kf-val kf-val--(\w+)"><span class="sr-only">Değerleme: </span>([^<]*)</span>', body)
         if r["degerleme"]:
             assert val.group(2) == words[r["degerleme"]]
-        else:
-            assert (val.group(1), val.group(2)) == ("yok", "—")
+        else:   # C-P2-2210 (7): hükümsüz satırda "—" yok, boş hücre (sütun hizası korunur)
+            assert val is None and '<span class="kf-val kf-val--bos" aria-hidden="true"></span>' in body and "—" not in body
         kod = {"g": "strong", "y": "flat", "b": "broken"}[r["trend_kod"]]
         assert '<span class="da-signal da-signal--%s"><span class="sr-only">Trend: </span>%s</span>' % (kod, r["trend"]) in body
         assert 'stroke-dasharray="%d 100"' % r["bp"] in body and '<b class="da-ring-num">%d</b>' % r["bp"] in body

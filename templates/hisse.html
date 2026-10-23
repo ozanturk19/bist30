@@ -554,7 +554,10 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         </tbody>
       </table>
     </div>
-    <p class="hx-mini-n">{{ _mt.notlar|join(' ') }}</p>
+    {#- C-P2-2210 (10): sütunlar Eki–Ara'yı atlıyorsa (ayrı açıklanmaz, kanon §3) okura söylenir. -#}
+    {%- set _mtay = [] %}{% for c in _mt.sutunlar %}{% set _cp = (c.donem or '').split('/') %}{% if _cp|length == 2 %}{% set _ = _mtay.append(_cp[0]|int * 12 + _cp[1]|int) %}{% endif %}{% endfor %}
+    {%- set _mtq4 = namespace(v=false) %}{% for i in range(_mtay|length - 1) %}{% if _mtay[i] - _mtay[i + 1] > 3 %}{% set _mtq4.v = true %}{% endif %}{% endfor %}
+    <p class="hx-mini-n">{{ _mt.notlar|join(' ') }}{% if _mtq4.v %} Ekim–Aralık çeyreği ayrı açıklanmadığı için tabloda yok; yıl sonu rakamları finansal tablolarda.{% endif %}</p>
     {%- if finansal_tablolar is defined and finansal_tablolar %}
     <nav class="tv-ft hx-mini-ft" aria-label="{{ ticker }} finansal tabloları">
       <span class="tv-ft-ls">{% for _b in finansal_tablolar %}<a class="tv-ft-a" href="{{ _b.href }}">{{ _b.ad }}<span class="tv-ft-o" aria-hidden="true">→</span></a>{% endfor %}</span>

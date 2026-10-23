@@ -22,7 +22,7 @@
     if (typeof bpFormatPct === 'function') return bpFormatPct(v, 2);
     var r = parseFloat(Number(v).toFixed(2));
     if (r === 0) r = 0;
-    return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(2).replace('.', ',');
+    return (r > 0 ? '+' : r < 0 ? '\u2212' : '') + '%' + Math.abs(r).toFixed(2).replace('.', ',');
   }
 
   // ---- CSS ----
