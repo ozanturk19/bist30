@@ -56,29 +56,30 @@
     <div class="da-footer-note">{{ ftr_note }}</div>
     {%- endif %}
     {%- import '_brand.html' as brand %}
-    <div class="da-footer-brand">
-      {{ brand.mark(24, 'ftr') }}
-      {{ brand.wordmark() }}
-    </div>
     {%- set _self = ftr_self|default('', true) %}
+    {#- C-P1-2210d: her sayfada aynı 15 öğe (390/320'de 3 sütun × 5 satır, yalnız kalan yok).
+        Piyasa bağlantısı marka satırına taşındı; bulunduğun sayfa bağlantı değil, düz metin (aria-current). -#}
+    <div class="da-footer-brand">
+      {%- if _self != '/' %}<a href="/" class="brand" aria-label="BorsaPusula ana sayfası">{{ brand.mark(24, 'ftr') }}{{ brand.wordmark() }}</a>
+      {%- else %}{{ brand.mark(24, 'ftr') }}{{ brand.wordmark() }}{% endif %}
+    </div>
     <nav class="da-footer-links" aria-label="Alt bilgi bağlantıları">
-      {%- if _self != '/' %}<a href="/" class="bp-footer-link">Piyasa</a>{% endif %}
-      {%- if _self != '/haberler' %}<a href="/haberler" class="bp-footer-link">Haberler</a>{% endif %}
       {#- C-86: /bulten 302 (son güne) → doğrudan 200 dönen arşiv; son bülten listenin başında. -#}
-      {%- if _self not in ('/bulten', '/bulten/arsiv') %}<a href="/bulten/arsiv" class="bp-footer-link">Akşam Bülteni</a>{% endif %}
-      {%- if _self != '/kesfet' %}<a href="/kesfet" class="bp-footer-link">Keşfet</a>{% endif %}
-      {%- if _self != '/tarama' %}<a href="/tarama" class="bp-footer-link">Tarama</a>{% endif %}
-      {%- if _self != '/karsilastir' %}<a href="/karsilastir" class="bp-footer-link">Karşılaştır</a>{% endif %}
-      {%- if _self != '/takip' %}<a href="/takip" class="bp-footer-link">Takip</a>{% endif %}
-      {%- if _self != '/sektor-harita' %}<a href="/sektor-harita" class="bp-footer-link">Sektörler</a>{% endif %}
-      {%- if _self != '/hisseler' %}<a href="/hisseler" class="bp-footer-link">Tüm Hisseler</a>{% endif %}
-      {%- if _self != '/takvim' %}<a href="/takvim" class="bp-footer-link">Takvim</a>{% endif %}
-      {%- if _self != '/blog' %}<a href="/blog" class="bp-footer-link">Öğren</a>{% endif %}
-      {%- if _self != '/metodoloji' %}<a href="/metodoloji" class="bp-footer-link">Metodoloji</a>{% endif %}
-      {%- if _self != '/hakkinda' %}<a href="/hakkinda" class="bp-footer-link">Hakkında</a>{% endif %}
-      {%- if _self != '/gizlilik' %}<a href="/gizlilik" class="bp-footer-link">Gizlilik &amp; KVKK</a>{% endif %}
-      {%- if _self != '/yasal' %}<a href="/yasal" class="bp-footer-link">Yasal Uyarı</a>{% endif %}
-      {%- if _self != '/iletisim' %}<a href="/iletisim" class="bp-footer-link">İletişim</a>{% endif %}
+      {%- if _self == '/haberler' %}<span class="bp-footer-link is-current" aria-current="page">Haberler</span>{% else %}<a href="/haberler" class="bp-footer-link">Haberler</a>{% endif %}
+      {%- if _self == '/bulten/arsiv' %}<span class="bp-footer-link is-current" aria-current="page">Akşam Bülteni</span>{% else %}<a href="/bulten/arsiv" class="bp-footer-link">Akşam Bülteni</a>{% endif %}
+      {%- if _self == '/kesfet' %}<span class="bp-footer-link is-current" aria-current="page">Keşfet</span>{% else %}<a href="/kesfet" class="bp-footer-link">Keşfet</a>{% endif %}
+      {%- if _self == '/tarama' %}<span class="bp-footer-link is-current" aria-current="page">Tarama</span>{% else %}<a href="/tarama" class="bp-footer-link">Tarama</a>{% endif %}
+      {%- if _self == '/karsilastir' %}<span class="bp-footer-link is-current" aria-current="page">Karşılaştır</span>{% else %}<a href="/karsilastir" class="bp-footer-link">Karşılaştır</a>{% endif %}
+      {%- if _self == '/takip' %}<span class="bp-footer-link is-current" aria-current="page">Takip</span>{% else %}<a href="/takip" class="bp-footer-link">Takip</a>{% endif %}
+      {%- if _self == '/sektor-harita' %}<span class="bp-footer-link is-current" aria-current="page">Sektörler</span>{% else %}<a href="/sektor-harita" class="bp-footer-link">Sektörler</a>{% endif %}
+      {%- if _self == '/hisseler' %}<span class="bp-footer-link is-current" aria-current="page">Tüm Hisseler</span>{% else %}<a href="/hisseler" class="bp-footer-link">Tüm Hisseler</a>{% endif %}
+      {%- if _self == '/takvim' %}<span class="bp-footer-link is-current" aria-current="page">Takvim</span>{% else %}<a href="/takvim" class="bp-footer-link">Takvim</a>{% endif %}
+      {%- if _self == '/blog' %}<span class="bp-footer-link is-current" aria-current="page">Öğren</span>{% else %}<a href="/blog" class="bp-footer-link">Öğren</a>{% endif %}
+      {%- if _self == '/metodoloji' %}<span class="bp-footer-link is-current" aria-current="page">Metodoloji</span>{% else %}<a href="/metodoloji" class="bp-footer-link">Metodoloji</a>{% endif %}
+      {%- if _self == '/hakkinda' %}<span class="bp-footer-link is-current" aria-current="page">Hakkında</span>{% else %}<a href="/hakkinda" class="bp-footer-link">Hakkında</a>{% endif %}
+      {%- if _self == '/gizlilik' %}<span class="bp-footer-link is-current" aria-current="page">Gizlilik &amp; KVKK</span>{% else %}<a href="/gizlilik" class="bp-footer-link">Gizlilik &amp; KVKK</a>{% endif %}
+      {%- if _self == '/yasal' %}<span class="bp-footer-link is-current" aria-current="page">Yasal Uyarı</span>{% else %}<a href="/yasal" class="bp-footer-link">Yasal Uyarı</a>{% endif %}
+      {%- if _self == '/iletisim' %}<span class="bp-footer-link is-current" aria-current="page">İletişim</span>{% else %}<a href="/iletisim" class="bp-footer-link">İletişim</a>{% endif %}
     </nav>
     <p class="da-footer-disclaimer">
       BorsaPusula bilgi amaçlıdır, yatırım tavsiyesi değildir.

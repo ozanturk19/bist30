@@ -1,7 +1,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; -webkit-font-smoothing: antialiased; line-height: 1.5; }
 
-  .tk { --tk-gut: 28px; max-width: var(--bp-container-1400); margin: 0 auto; padding: 0 var(--tk-gut) 24px; color: var(--bp-text); font-size: 15px; }
+  .tk { --tk-gut: 24px; max-width: var(--bp-container-wide); box-sizing: border-box; margin: 0 auto; padding: 0 var(--tk-gut) 24px; color: var(--bp-text); font-size: 15px; }
   .tk .u { color: var(--bp-up); } .tk .d { color: var(--bp-down); } .tk .n { color: var(--bp-text-2); }
   .tk button, .tk input { font-family: 'Space Grotesk', system-ui, sans-serif; }
   .tk button:focus-visible, .tk a:focus-visible, .tk input:focus-visible, .tk [tabindex]:focus-visible,

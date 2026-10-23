@@ -1,7 +1,7 @@
 .da-display{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;}
 .da-num{font-family:'Space Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;}
 
-.da-page{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,40px);position:relative}
+.da-page{max-width:var(--bp-container-wide);box-sizing:border-box;margin:0 auto;padding:0 clamp(16px,4vw,40px);position:relative}
 .da-page > section{position:relative;z-index:1}
 
 .da-section{padding:clamp(32px,4.5vw,62px) 0}
@@ -95,10 +95,12 @@
 
 .da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-type-sm);color:var(--bp-text-3)}
 .da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
-.da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-type-body);color:var(--bp-text)}
+.da-footer-brand{display:flex;align-items:center;min-height:40px;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-type-body);color:var(--bp-text)}
 .da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-type-sm)}
 
-@media (max-width:600px){.da-footer-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));justify-items:center}}
+.da-footer-brand>a{display:inline-flex;align-items:center;gap:8px;min-height:40px;color:inherit;text-decoration:none}
+.bp-footer-link.is-current{color:var(--bp-text-2)}
+@media (max-width:600px){.da-footer-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;text-align:center}}
 .da-footer-note{font-size:var(--bp-type-xs);color:var(--bp-text-3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-line);border-radius:var(--bp-r-sm);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
 .da-footer-disclaimer{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
 .da-footer-copy{color:var(--bp-text-3);font-size:var(--bp-type-xs);margin-top:8px}

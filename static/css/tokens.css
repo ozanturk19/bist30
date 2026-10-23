@@ -111,6 +111,7 @@ body {
   --bp-art-cyan: #22d3ee;
 
   --bp-container-read: 760px;
+  --bp-container-wide: 1360px; /* C-P1-2210d: iki kapsayıcı genişliği (geniş + okuma) */
 
   --bp-z-raised: 2;
   --bp-z-dropdown: 100;

@@ -4,7 +4,7 @@
 .kf-tab{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 14px;border:1px solid var(--bp-line);border-radius:var(--bp-r-md);background:var(--bp-surface);color:var(--bp-text-2);text-decoration:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:var(--bp-type-body);line-height:1.25;-webkit-tap-highlight-color:transparent}
 .kf-tab-t{min-width:0}
 .kf-tab-n{flex:none;font-size:var(--bp-type-sm);font-weight:700;color:var(--bp-text-3);font-variant-numeric:tabular-nums}
-.kf-tab[aria-current="page"]{border-color:rgba(var(--bp-brand-rgb),.55);background:rgba(var(--bp-brand-rgb),.12);color:var(--bp-brand)}
+.kf-tab[aria-current="page"]{border-color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)}
 .kf-tab[aria-current="page"] .kf-tab-n{color:var(--bp-brand)}
 @media (hover:hover) and (pointer:fine){.kf-tab:not([aria-current="page"]):hover{border-color:var(--bp-border2);color:var(--bp-text)}}
 .kf-tab:focus-visible{outline:2px solid var(--bp-art-cyan);outline-offset:2px}

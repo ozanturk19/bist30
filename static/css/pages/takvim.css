@@ -1,7 +1,7 @@
 .tk{--tk-kt:var(--bp-brand);--tk-kt-rgb:var(--bp-brand-rgb);--tk-kb:var(--bp-art-cyan);--tk-kb-rgb:var(--bp-accent-cyan-rgb);
   --tk-km:var(--bp-art-violet);--tk-km-rgb:var(--bp-art-violet-rgb);
   --tk-num:'Space Grotesk','SG Fallback',system-ui,sans-serif;--tk-body:'Space Grotesk','SG Fallback',system-ui,-apple-system,sans-serif;
-  max-width:1320px;margin:0 auto;padding:18px 28px 34px;color:var(--bp-text);font-family:var(--tk-body)}
+  max-width:var(--bp-container-wide);box-sizing:border-box;margin:0 auto;padding:18px 24px 34px;color:var(--bp-text);font-family:var(--tk-body)}
 .tk [hidden]{display:none!important}
 .tk-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tk-hd{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:4px 24px;margin:0 0 12px}
@@ -18,8 +18,8 @@
 .tk-flt button:hover{border-color:var(--bp-border2);color:var(--bp-text)}
 .tk-flt button i{font-style:normal;color:var(--bp-text-3);font-variant-numeric:tabular-nums}
 .tk-flt button svg{width:14px;height:14px}
-.tk-flt button[aria-pressed="true"]{background:var(--bp-brand);border-color:var(--bp-brand);color:var(--bp-bg)}
-.tk-flt button[aria-pressed="true"] i{color:var(--bp-bg);opacity:.7}
+.tk-flt button[aria-pressed="true"]{border-color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)}
+.tk-flt button[aria-pressed="true"] i{color:inherit;opacity:.7}
 .tk-flt button[aria-pressed="true"] .tk-k{box-shadow:0 0 0 1.5px var(--bp-bg)}
 .tk-range{margin-left:auto;font:500 13px var(--tk-num);color:var(--bp-text-3);white-space:nowrap}
 .tk-range b{color:var(--bp-text-2);font-weight:600}

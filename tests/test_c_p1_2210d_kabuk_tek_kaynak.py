@@ -55,3 +55,36 @@ def test_atlama_baglantisi_tam_gizli():
         s = open(os.path.join(TPL, f), encoding="utf-8").read()
         tops = [int(t) for t in re.findall(r"\.skip-link\{[^}]*?top:(-?\d+)px", s)]
         assert tops and all(t <= -100 for t in tops), (f, tops)
+
+
+# --- 23.10 ikinci tur: iki kapsayıcı genişliği, sabit 15 öğeli alt bilgi, tek etkin çip stili ---
+def test_kapsayici_genislikleri_yalniz_token():
+    """Sayfa kapsayıcısı max-width'i yalnız --bp-container-wide / --bp-container-read olabilir."""
+    files = ("shared.css", "data-art.css", "pages/takvim.css", "pages/haberler.css", "pages/err.css", "pages/takip.css")
+    bad = []
+    for f in files:
+        s = _strip_comments(open(os.path.join(ROOT, "static", "css", f), encoding="utf-8").read())
+        for m in re.finditer(r"(?:^|[}\s])\.(container|container--wide|tk|hb|err-main|da-page)\s*\{([^}]*)\}", s):
+            mw = re.search(r"max-width:\s*([^;}]+)", m.group(2))
+            if mw and mw.group(1).strip() not in ("var(--bp-container-wide)", "var(--bp-container-read)"):
+                bad.append((f, m.group(1), mw.group(1)))
+    assert not bad, bad
+
+
+def test_footer_her_sayfada_15_oge():
+    import jinja2
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(TPL), autoescape=True)
+    for self_ in ("", "/", "/tarama", "/bulten/arsiv", "/iletisim"):
+        html = env.get_template("_footer.html").render(ftr_self=self_)
+        nav = re.search(r'<nav class="da-footer-links".*?</nav>', html, re.S).group(0)
+        assert nav.count('class="bp-footer-link') == 15, (self_, nav.count('class="bp-footer-link'))
+        if self_ and self_ != "/":
+            assert f'href="{self_}"' not in nav, self_
+
+
+def test_etkin_cip_tek_stil():
+    canon = "border-color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.14);color:var(--bp-brand)"
+    for f, sel in (("pages/haberler.css", '.hv-fch[aria-current="true"]{'), ("pages/takvim.css", '.tk-flt button[aria-pressed="true"]{'),
+                   ("pages/kesfet.css", '.kf-tab[aria-current="page"]{'), ("pages/haberler.css", '.hb-flt a[aria-current="true"]{')):
+        s = open(os.path.join(ROOT, "static", "css", f), encoding="utf-8").read()
+        assert sel + canon + "}" in s, (f, sel)
