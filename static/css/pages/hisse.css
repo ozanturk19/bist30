@@ -589,11 +589,17 @@
     line-height: 1.65;
     margin: 5px 0 0 18px;
   }
+  /* C-P2-2210 (5): eşit genişlik — en çok 5 hisse geniş ekranda tek satır, telefonda 2 sütun (tek kalan tam satır) */
   .related-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 8px;
     margin-top: 4px;
+  }
+  @media (max-width: 600px) {
+    .related-grid { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .related-grid .related-chip:nth-child(odd):last-child { grid-column: 1 / -1; }
   }
   .related-chip {
     display: flex;
@@ -604,9 +610,7 @@
     border-radius:var(--bp-r-sm);
     padding: 8px 12px;
     text-decoration: none;
-    min-width: 110px;
-    flex: 1 1 auto;
-    max-width: 100%;
+    min-width: 0;
     transition: border-color .15s, background .15s;
   }
   .related-chip:hover { border-color: var(--bp-brand); background: #21202b; }

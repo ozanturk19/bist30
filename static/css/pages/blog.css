@@ -49,13 +49,20 @@
   }
   .blog-loadmore-btn:focus-visible { border-color:var(--bp-brand); }
 
+  /* C-P2-2210 (5): kategori çipleri 760–940 arasında 6+1 kırılıyordu → bu aralıkta da tek satır kaydırılır */
+  @media(max-width:940px) {
+    .bo-chips { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; padding-right:28px; scroll-padding-inline:0 32px; -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); }
+    .bo-chips::-webkit-scrollbar { display:none; }
+    .bo-chips > * { flex:none; scroll-snap-align:start; }
+  }
+
   @media(max-width:760px) {
     .bo-top { grid-template-columns:1fr; margin-bottom:24px; }
     .bo-feature { padding:20px; }
 
-    .bo-path-list, .bo-chips { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; padding-right:28px; scroll-padding-inline:0 32px; -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); }
-    .bo-path-list::-webkit-scrollbar, .bo-chips::-webkit-scrollbar { display:none; }
-    .bo-path-list li, .bo-chips > * { flex:none; scroll-snap-align:start; }
+    .bo-path-list { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; padding-right:28px; scroll-padding-inline:0 32px; -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); }
+    .bo-path-list::-webkit-scrollbar { display:none; }
+    .bo-path-list li { flex:none; scroll-snap-align:start; }
     .bo-path-list a { white-space:nowrap; }
       .bo-row { grid-template-columns:minmax(0,1fr); grid-template-areas:"cat" "title" "desc" "meta"; padding:14px 2px; }
     .bo-row-desc { -webkit-line-clamp:2; }
