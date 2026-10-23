@@ -7,6 +7,7 @@ ARTICLES = [
     "title": "BIST100 Nedir? Hangi Hisseler Var?",
     "desc": "Borsa İstanbul'un en önemli endeksi BIST100'ü, kapsamını ve nasıl takip edileceğini öğrenin.",
     "date": "2026-04-01",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
@@ -19,7 +20,7 @@ ARTICLES = [
 <ul>
   <li><strong>BIST30:</strong> En likit 30 hisse. Vadeli işlemler (VİOP) için temel alınır.</li>
   <li><strong>BIST50:</strong> En likit 50 hisse. BIST30'un genişletilmiş hali.</li>
-  <li><strong>BIST100:</strong> En likit 100 hisse. Genel piyasa barometresi.</li>
+  <li><strong>BIST100:</strong> En likit 100 hisse. Genel piyasanın ana göstergesi.</li>
 </ul>
 <p>Bir hissenin BIST30'da olması, o hissenin hem likit hem de kurumsal yatırımcıların portföyünde bulunduğunun göstergesidir.</p>
 
@@ -28,13 +29,13 @@ ARTICLES = [
 
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
-  <li>BorsaPusula'da BIST100 ve ötesinde takip edilen 200'ün üzerinde hissenin güncel sinyalini izleyin — sinyaller günlük olarak, gün sonu verisiyle hesaplanır.</li>
-  <li>Günlük <a href="/">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
+  <li>BorsaPusula'da BIST100 ve ötesinde 200'ün üzerinde hissenin trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) gün sonu verisiyle hesaplanır; <a href="/tarama">tarama</a> sayfasında hisseler trend durumuna göre süzülebilir.</li>
+  <li><a href="/">Piyasa</a> sayfasında BIST100 gün sonu ısı haritası ve Güçlü Trend oranıyla piyasa genelinin durumu görülebilir.</li>
   <li>Endeks bileşenlerinin tamamı Borsa İstanbul resmi sitesinde yayınlanır.</li>
 </ul>
 
-<h2>BIST100 ile Yatırım Stratejisi</h2>
-<p>Endeks içindeki hisseler daha düşük riskli kabul edilir çünkü likiditesi yüksektir — hızla alınıp satılabilir. Ancak "endeks hissesi" olmak tek başına kaliteli yatırım anlamına gelmez; teknik ve temel analiz her zaman gereklidir.</p>
+<h2>Endeks Hissesi Olmanın Anlamı</h2>
+<p>Endeks içindeki hisseler daha düşük riskli kabul edilir çünkü likiditesi yüksektir — hızla alınıp satılabilir. Ancak "endeks hissesi" olmak tek başına şirketin finansallarının güçlü olduğu anlamına gelmez; teknik ve temel analiz ayrıca gereklidir.</p>
 """,
     "faqs": [
       {
@@ -47,7 +48,7 @@ ARTICLES = [
       },
       {
         "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
-        "a": "BorsaPusula, BIST100'ün tamamı ve ötesinde 200'ün üzerinde hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
+        "a": "BorsaPusula, BIST100'ün tamamı ve ötesinde 200'ün üzerinde hisse için Supertrend + ADX + EMA'ya dayanan trend durumunu her işlem günü sonunda, gün sonu verisiyle hesaplar."
       }
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS', 'TUPRS', 'ISCTR', 'FROTO']
@@ -57,6 +58,7 @@ ARTICLES = [
     "title": "Supertrend İndikatörü Nedir? Nasıl Kullanılır?",
     "desc": "Supertrend(10,3) indikatörünün çalışma prensibi, parametreleri ve BIST hisselerinde nasıl yorumlanacağı.",
     "date": "2026-04-02",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
@@ -71,7 +73,7 @@ ARTICLES = [
 <p>Formül özeti:</p>
 <pre>Üst Band = (Yüksek + Düşük) / 2 + Multiplier × ATR(Period)
 Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
-<p>Fiyat üst bandı yukarı kırarsa <strong>LONG (Güçlü Trend)</strong>, alt bandı aşağı kırarsa <strong>SHORT (Trend Bozuldu)</strong> sinyali oluşur.</p>
+<p>Fiyat üst bandı yukarı kırarsa Supertrend <strong>yükseliş yönüne</strong>, alt bandı aşağı kırarsa <strong>düşüş yönüne</strong> döner.</p>
 
 <h2>Supertrend(10,3) Neden?</h2>
 <p>Düşük period + yüksek multiplier → daha az sahte sinyal ama geç tepki. Yüksek period + düşük multiplier → hızlı ama çok fazla whipsaw (sahte sinyal). <code>(10,3)</code> kombinasyonu, günlük BIST hisseleri için gürültü ile duyarlılık arasında kabul görmüş bir denge noktasıdır.</p>
@@ -81,13 +83,13 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <li>Fiyatın <strong>altındaki yeşil çizgi</strong> → Yükselen trend, destek seviyesi</li>
   <li>Fiyatın <strong>üzerindeki kırmızı çizgi</strong> → Düşen trend, direnç seviyesi</li>
 </ul>
-<p>Çizgi renk değiştirdiği anda sinyal oluşur. BorsaPusula grafiklerinde bu geçiş noktaları açıkça görülebilir.</p>
+<p>Çizginin renk değiştirdiği nokta, trend yönünün değiştiğine dair işarettir.</p>
 
 <h2>Supertrend'in Zayıf Yönleri</h2>
-<p>Yatay (sideways) piyasalarda Supertrend çok sık sinyal üretir ve sahte girişlere yol açar. Bu yüzden BorsaPusula, Supertrend'i tek başına değil <strong>ADX ≥ 25 filtresiyle</strong> birlikte kullanır. ADX trendin <em>var olduğunu</em> doğrulamadan Supertrend sinyali geçerli sayılmaz.</p>
+<p>Yatay (sideways) piyasalarda Supertrend çok sık yön değiştirir ve sahte işaretler üretir. Bu yüzden BorsaPusula, Supertrend'i tek başına değil <strong>ADX ≥ 25 filtresiyle</strong> birlikte kullanır. ADX trendin <em>var olduğunu</em> doğrulamadan Supertrend sinyali geçerli sayılmaz.</p>
 
-<h2>Stop Loss Olarak Supertrend</h2>
-<p>Güçlü Trend pozisyonunda Supertrend alt bandı dinamik stop loss görevi görür. Fiyat bu seviyenin altına inerse sinyal Trend Bozuldu haline gelir ve pozisyondan çıkılması gerekir. Bu mekanizma, büyük kayıpları otomatik olarak sınırlar.</p>
+<h2>Supertrend ve Trend Bozulması</h2>
+<p>Yükseliş yönünde Supertrend çizgisi fiyatın altında ilerler ve dinamik bir destek gibi okunur. Fiyat bu çizginin altına inerse trend durumu Trend Bozuldu'ya döner; bu, yükseliş trendinin sona erdiğine dair bir işaret olarak yorumlanır.</p>
 """,
     "faqs": [
       {
@@ -110,6 +112,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "ADX İndikatörü Nedir? Trend Gücünü Nasıl Ölçer?",
     "desc": "ADX (Average Directional Index) nedir, 25 eşik değeri neden önemlidir, DI+ ve DI- nasıl yorumlanır?",
     "date": "2026-04-03",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Teknik Analiz",
     "body": """
@@ -120,25 +123,25 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <tr style="background:var(--bp-border-subtle)"><th style="padding:8px;text-align:left">ADX Değeri</th><th style="padding:8px;text-align:left">Anlam</th></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">0 – 20</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Trend yok, yatay piyasa</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">20 – 25</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Zayıf trend oluşuyor</td></tr>
-  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)"><strong>25 – 40</strong></td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)"><strong>Güçlü trend ✅ Sinyal geçerli</strong></td></tr>
+  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)"><strong>25 – 40</strong></td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)"><strong>Güçlü trend</strong></td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">40+</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Çok güçlü trend</td></tr>
 </table>
 
 <h2>DI+ ve DI− Nedir?</h2>
 <p>ADX sistemi üç çizgiden oluşur:</p>
 <ul>
-  <li><strong>ADX (siyah/sarı):</strong> Trend gücü — 25'in üzeri sinyal için şart</li>
+  <li><strong>ADX (siyah/sarı):</strong> Trend gücü — 25'in üzeri güçlü trend olarak yorumlanır</li>
   <li><strong>DI+ (yeşil):</strong> Yükselen baskı (Positive Directional Indicator)</li>
   <li><strong>DI− (kırmızı):</strong> Düşen baskı (Negative Directional Indicator)</li>
 </ul>
-<p><strong>DI+ &gt; DI−</strong> ise piyasada alış baskısı hâkim → Güçlü Trend yönü<br>
-<strong>DI− &gt; DI+</strong> ise piyasada satış baskısı hâkim → Trend Bozuldu yönü</p>
+<p><strong>DI+ &gt; DI−</strong> ise piyasada yükseliş baskısı hâkim → yükseliş yönü<br>
+<strong>DI− &gt; DI+</strong> ise piyasada düşüş baskısı hâkim → düşüş yönü</p>
 
 <h2>Neden ADX ≥ 25 Şartı?</h2>
-<p>Trend yokken (ADX &lt; 25) Supertrend de EMA da sahte sinyal üretir. ADX filtresi, yalnızca gerçekten güçlü bir trendin başladığı anlarda devreye girmesini sağlar. BorsaPusula'nın üçlü filtre sisteminde ADX, "gürültüyü kesen" kritik katmandır.</p>
+<p>Trend yokken (ADX &lt; 25) Supertrend de EMA da çok sayıda yanıltıcı işaret üretir. ADX filtresi, trend değerlendirmesinin yalnızca gerçekten güçlü bir trend varken devreye girmesini sağlar. BorsaPusula'nın üçlü filtre sisteminde ADX, "gürültüyü kesen" kritik katmandır.</p>
 
 <h2>Pratik Kullanım Örneği</h2>
-<p>Diyelim ki THYAO için Supertrend LONG sinyali verdi. Ancak ADX = 18. Bu durumda BorsaPusula <strong>Güçlü Trend sinyali üretmez</strong> — trend yeterince güçlü değil demektir. ADX 28'e çıktığında ve DI+ > DI− olduğunda sinyal geçerli hale gelir.</p>
+<p>Diyelim ki THYAO için Supertrend yükseliş yönüne döndü. Ancak ADX = 18. Bu durumda BorsaPusula'da <strong>Güçlü Trend durumu oluşmaz</strong> — trend yeterince güçlü değil demektir. ADX 28'e çıktığında ve DI+ > DI− olduğunda trend güçlü kabul edilir.</p>
 """,
     "faqs": [
       {
@@ -147,11 +150,11 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
       },
       {
         "q": "BorsaPusula neden ADX ≥ 25 şartı koyuyor?",
-        "a": "ADX < 25 ise piyasa yatay seyrediyordur ve trend indikatörleri (Supertrend, EMA) çok sayıda sahte sinyal üretir. BorsaPusula, ADX ≥ 25 şartıyla yalnızca gerçek trend başlangıçlarında sinyal vererek başarı oranını artırır."
+        "a": "ADX < 25 ise piyasa yatay seyrediyordur ve trend indikatörleri (Supertrend, EMA) çok sayıda sahte sinyal üretir. BorsaPusula, ADX ≥ 25 şartıyla yatay piyasalardaki bu yanıltıcı işaretleri ayıklamayı amaçlar."
       },
       {
         "q": "DI+ ve DI- ne işe yarar?",
-        "a": "DI+ (yeşil) alış baskısını, DI- (kırmızı) ise satış baskısını gösterir. DI+ > DI- ise yükseliş yönü hâkim, DI- > DI+ ise düşüş yönü hâkimdir. ADX bu iki değerin mutlak farkından türetilir."
+        "a": "DI+ (yeşil) yükseliş baskısını, DI- (kırmızı) ise düşüş baskısını gösterir. DI+ > DI- ise yükseliş yönü hâkim, DI- > DI+ ise düşüş yönü hâkimdir. ADX bu iki değerin mutlak farkından türetilir."
       }
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL']
@@ -201,7 +204,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "Teknik Analiz Nedir? Borsa Başlangıç Rehberi",
     "desc": "Teknik analiz nedir, temel analizden farkı nedir, hangi göstergeler kullanılır? Yeni yatırımcılar için kapsamlı rehber.",
     "date": "2026-04-05",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Temel Kavramlar",
     "body": """
@@ -212,35 +215,35 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <tr style="background:var(--bp-border-subtle)"><th style="padding:8px;text-align:left">Kriter</th><th style="padding:8px;text-align:left">Teknik Analiz</th><th style="padding:8px;text-align:left">Temel Analiz</th></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Odak</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Fiyat & hacim</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Finansal tablolar</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Zaman ufku</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Kısa-orta vadeli</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Uzun vadeli</td></tr>
-  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Araçlar</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Grafik, indikatör</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">PE, PB, EPS, gelir</td></tr>
+  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Araçlar</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Grafik, indikatör</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">F/K, PD/DD, hisse başı kâr, gelir</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Soru</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Trend ne yönde, ne kadar güçlü?</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Şirketin finansalları nasıl?</td></tr>
 </table>
-<p>İdeal yaklaşım ikisini birleştirmektir: Temel analizle "hangi hisse" sorusunu, teknik analizle "ne zaman gir" sorusunu yanıtlayın.</p>
+<p>Yaygın yaklaşım ikisini birlikte okumaktır: Temel analiz şirketin finansallarını, teknik analiz fiyatın trendini anlatır.</p>
 
 <h2>Temel Grafik Bileşenleri</h2>
 <ul>
   <li><strong>Mum (Candlestick) Grafiği:</strong> Her bar açılış, kapanış, yüksek ve düşük fiyatı gösterir. Yeşil mum: kapanış > açılış (yükseliş). Kırmızı mum: kapanış < açılış (düşüş).</li>
   <li><strong>Destek Seviyesi:</strong> Fiyatın düşerken durduğu, alım ilgisinin güçlendiği bölge.</li>
   <li><strong>Direnç Seviyesi:</strong> Fiyatın yükselirken durduğu, satış baskısının arttığı bölge.</li>
-  <li><strong>Trend:</strong> Yükselen (higher highs + higher lows), düşen (lower highs + lower lows) veya yatay.</li>
+  <li><strong>Trend:</strong> Yükselen (yükselen tepeler + yükselen dipler), düşen (alçalan tepeler + alçalan dipler) veya yatay.</li>
 </ul>
 
 <h2>Popüler Teknik Göstergeler</h2>
 <ul>
   <li><strong>Trend Takip:</strong> Supertrend, EMA, MACD</li>
-  <li><strong>Momentum:</strong> RSI, Stochastic</li>
+  <li><strong>Momentum:</strong> RSI, Stokastik</li>
   <li><strong>Hacim:</strong> OBV (On Balance Volume), VWAP</li>
   <li><strong>Volatilite:</strong> Bollinger Bantları, ATR</li>
   <li><strong>Trend Gücü:</strong> ADX, DI+/DI−</li>
 </ul>
 
 <h2>Teknik Analizin Sınırları</h2>
-<p>Teknik analiz istatistiksel olasılıklar üzerine çalışır — kesin değildir. Beklenmedik haberler (savaş, deprem, merkez bankası kararı) en iyi teknik kurulumu da bozabilir. Bu yüzden <strong>stop loss</strong> kullanmak vazgeçilemez bir kuraldir.</p>
+<p>Teknik analiz istatistiksel olasılıklar üzerine çalışır — kesin değildir. Beklenmedik haberler (savaş, deprem, merkez bankası kararı) en net teknik görünümü de bozabilir. Bu yüzden teknik analiz bir kesinlik değil, <strong>olasılık okuması</strong> olarak ele alınır.</p>
 """,
     "faqs": [
-      {"q": "Teknik analiz mi temel analiz mi daha önemlidir?", "a": "İkisi birbirini tamamlar. Temel analiz 'hangi hisseye' gireceğinizi belirler; teknik analiz 'ne zaman' gireceğinizi söyler. BorsaPusula teknik sinyaller üretir ancak temel verilerle birlikte değerlendirilmesi tavsiye edilir."},
+      {"q": "Teknik analiz mi temel analiz mi daha önemlidir?", "a": "İkisi birbirini tamamlar. Temel analiz şirketin finansal durumunu, teknik analiz fiyatın trendini anlatır. BorsaPusula trend durumunu teknik göstergelerle belirler; hisse sayfalarında temel verilerle birlikte okunabilir."},
       {"q": "Teknik analiz geçmişe mi geleceğe mi bakar?", "a": "Teknik analiz geçmiş fiyat ve hacim verilerini inceleyerek geleceğe dair olasılıksal tahminler yapar. Tarih tekerrür eder prensibi üzerine kuruludur ancak kesin öngörü değildir."},
-      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula dört göstergeden türeyen beş koşul kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması), DI+ > DI− (yön teyidi), EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi) ve haftalık EMA20 yönü (üst zaman dilimi teyidi). Beşi aynı anda Güçlü Trend yönünde olduğunda sinyal verilir."}
+      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula dört göstergeden türeyen beş koşul kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması), DI+ > DI− (yön teyidi), EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi) ve haftalık EMA20 yönü (üst zaman dilimi teyidi). Beşi aynı anda sağlandığında trend durumu Güçlü Trend olur."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
@@ -284,6 +287,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "Borsa'da Risk Yönetimi: Portföy Nasıl Korunur?",
     "desc": "Pozisyon büyüklüğü, çeşitlendirme, korelasyon ve maksimum drawdown yönetimi ile portföyünüzü koruyun.",
     "date": "2026-04-07",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Risk Yönetimi",
     "body": """
@@ -305,8 +309,8 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <h2>4. Trend Durumunun Teyidi</h2>
 <p>BorsaPusula'da trend durumu üç gün sürdüğünde "onaylı" sayılır. İlk gün oluşan durum gürültü olabilir; üç gün boyunca süren durum trendin kalıcılığına daha çok işaret eder.</p>
 
-<h2>5. Piyasa Barometresi</h2>
-<p><a href="/">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genelinin baskı altında olduğunu betimler.</p>
+<h2>5. Piyasa Genelinin Görünümü</h2>
+<p><a href="/">Piyasa</a> sayfasındaki Güçlü Trend oranı, Güçlü Trend durumundaki hisselerin payını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genelinin baskı altında olduğunu betimler.</p>
 """,
     "faqs": [
       {"q": "Portföyde kaç hisse bulunmalıdır?", "a": "Yeterli çeşitlendirme için genellikle 8-15 hisse önerilir. Çok az hisse riski konsantre eder; çok fazla hisse ise takibi zorlaştırır ve getiriyi ortalamaya yaklaştırır. Farklı sektörlerden seçim yapılması önemlidir."},
@@ -318,8 +322,9 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   {
     "slug": "guclu-trend-trend-bozuldu-ne-demek",  # C-P0-2210: eski slug al-sat-sinyali-nasil-yorumlanir → 301 (app.py, DEV)
     "title": "Güçlü Trend / Trend Bozuldu Sinyali Nedir? Nasıl Yorumlanır?",
-    "desc": "Algoritmik Güçlü Trend ve Trend Bozuldu sinyallerinin ne anlama geldiği, nasıl kullanılacağı ve hangi tuzaklardan kaçınılacağı.",
+    "desc": "Algoritmik Güçlü Trend ve Trend Bozuldu sinyallerinin ne anlama geldiği, nasıl okunacağı ve hangi tuzaklardan kaçınılacağı.",
     "date": "2026-04-08",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
@@ -339,8 +344,8 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <h2>Trend Bozuldu Sinyali Ne Demek?</h2>
 <p>Trend Bozuldu sinyali yukarıdakilerin tersidir: Supertrend düşüş modu + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99 + haftalık EMA20 yönü aşağı. Bu durum, önceki yükseliş trendinin gücünü kaybettiğini betimler; bir işlem önerisi değildir.</p>
 
-<h2>Sinyal Kaç Gündür Devam Ediyor?</h2>
-<p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir.</p>
+<h2>Sinyal Ne Zamandan Beri Sürüyor?</h2>
+<p>Hisse sayfasında trend durumunun hangi tarihten beri sürdüğü gösterilir. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir.</p>
 
 <h2>Yatay Sinyali</h2>
 <p>Beş koşulun tamamı aynı yönü göstermiyorsa durum Yatay'dır: fiyat belirgin bir trend içinde değildir. Yatay'dan Güçlü Trend'e geçiş, koşulların yeniden aynı yönde birleştiğini gösterir.</p>
@@ -355,7 +360,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 """,
     "faqs": [
       {"q": "Güçlü Trend sinyali ne anlama gelir?", "a": "Güçlü Trend sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde, DI+ > DI− ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her Güçlü Trend sinyali yatırım tavsiyesi değildir."},
-      {"q": "Sinyal kaç gündür devam ediyor bilgisi önemli midir?", "a": "Evet, çok önemlidir. 3+ gündür devam eden onaylı sinyal, ilk günkü ham sinyalden çok daha güvenilirdir. Onaylı sinyal trendin gerçek ve sürdürülebilir olduğunu gösterir."},
+      {"q": "Sinyalin ne zamandan beri sürdüğü önemli midir?", "a": "Evet, çok önemlidir. 3+ gündür devam eden onaylı sinyal, ilk günkü ham sinyalden çok daha güvenilirdir. Onaylı sinyal trendin gerçek ve sürdürülebilir olduğunu gösterir."},
       {"q": "Yatay ne anlama gelir?", "a": "Yatay, beş teknik koşulun aynı yönü göstermediği, trendin belirgin olmadığı durumdur. Bir işlem önerisi içermez; yalnız trendin o anki durumunu betimler."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO']
@@ -365,10 +370,11 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "Haftalık Trend Filtresi: Büyük Trende Karşı Gitme",
     "desc": "Günlük sinyal neden haftalık EMA20 ile filtrelenir? Çok zaman dilimi analizi neden önemlidir?",
     "date": "2026-04-09",
+    "updated": "2026-10-23",
     "mins": 4,
     "cat": "Teknik Analiz",
     "body": """
-<p>BorsaPusula'nın sinyal motoru yalnızca günlük verilere bakmaz. Günlük sinyaller, <strong>haftalık EMA20 yönüyle filtrelenir.</strong> Bu "trend gate" mekanizması, büyük trende karşı pozisyon almayı engeller.</p>
+<p>BorsaPusula'nın sinyal motoru yalnızca günlük verilere bakmaz. Günlük sinyaller, <strong>haftalık EMA20 yönüyle filtrelenir.</strong> Bu haftalık trend filtresi, günlük sinyallerin büyük trendle çelişmesini önler.</p>
 
 <h2>Neden Çok Zaman Dilimi?</h2>
 <p>Büyük resmi görmeden günlük grafiğe bakmak, ormanı değil yalnızca ağaçları görmektir. Haftalık grafik düşüş trendindeyken günlük grafikte kısa süreli Güçlü Trend sinyalleri oluşabilir — bunlar genellikle "ölü kedi sıçraması"dır ve sürdürülebilir değildir.</p>
@@ -387,9 +393,9 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Bu filtre, yıllık sinyal sayısını azaltır ama kaliteyi artırır. Daha az ama daha doğru sinyal demektir. Özellikle 2023–2024 dönemindeki BIST100 düzeltmelerinde bu filtre pek çok yanlış Güçlü Trend sinyalini dışarıda bıraktı.</p>
 """,
     "faqs": [
-      {"q": "Haftalık trend filtresi neden kullanılır?", "a": "Günlük sinyaller kısa vadeli gürültüye duyarlıdır. Haftalık EMA20 yönüyle filtrelemek büyük trende karşı giriş yapmayı önler ve sahte sinyal sayısını önemli ölçüde azaltır."},
-      {"q": "Çoklu zaman dilimi analizi nedir?", "a": "Farklı periyotlardaki trendlerin aynı anda değerlendirilmesidir. Üst zaman dilimi trend yönü belirler, alt zaman dilimi giriş zamanlar. BorsaPusula haftalık trendin desteğini alan günlük sinyalleri tercih eder."},
-      {"q": "MTF analizi BorsaPusula'da nasıl görülür?", "a": "Her hisse sayfasında H4, Günlük, Haftalık ve Aylık zaman dilimlerini gösteren MTF analizi bulunur. Tüm periyotlarda Güçlü Trend gösteren hisseler en güçlü adaylardır."}
+      {"q": "Haftalık trend filtresi neden kullanılır?", "a": "Günlük sinyaller kısa vadeli gürültüye duyarlıdır. Haftalık EMA20 yönüyle filtrelemek, günlük sinyallerin büyük trende ters düşmesini önler ve sahte sinyal sayısını önemli ölçüde azaltır."},
+      {"q": "Çoklu zaman dilimi analizi nedir?", "a": "Farklı periyotlardaki trendlerin aynı anda değerlendirilmesidir. Üst zaman dilimi trend yönünü belirler, alt zaman dilimi daha ayrıntılı zamanlamayı gösterir. BorsaPusula haftalık trendin desteğini alan günlük sinyalleri tercih eder."},
+      {"q": "Haftalık trend BorsaPusula'da nasıl yansır?", "a": "Hisse sayfalarındaki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay), haftalık EMA20 yönünü de içeren beş koşula göre belirlenir. Haftalık trend günlük görünümle çelişiyorsa hisse Güçlü Trend olarak görünmez."}
     ],
     "related_tickers": ['AKBNK', 'ASELS']
   },
@@ -398,7 +404,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "F/K Oranı Nedir? Geçmiş ve Prospektif F/K Farkı",
     "desc": "F/K oranı nasıl hesaplanır, prospektif (ileriye dönük) F/K nedir, geçmiş F/K'dan farkı ne, sektöre göre nasıl okunur?",
     "date": "2026-04-10",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Analiz",
     "body": """
@@ -416,7 +422,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 Örnek: Hisse 50₺, EPS = 5₺ → F/K = 10</pre>
 <p>F/K = 10, yani yatırımcı kazancın 10 katını ödüyor. Şirket her yıl aynı kazancı sürdürürse yatırım 10 yılda geri döner.</p>
 
-<h2>Yüksek vs Düşük F/K</h2>
+<h2>Yüksek ve Düşük F/K</h2>
 <ul>
   <li><strong>Düşük F/K (örn. 5–8):</strong> Hisse ucuz görünüyor. Ama neden ucuz? Büyüme beklentisi yok mu, risk mi var?</li>
   <li><strong>Yüksek F/K (örn. 20–30):</strong> Piyasa yüksek büyüme bekliyor. Ama beklenti gerçekleşmezse sert düşebilir.</li>
@@ -444,6 +450,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "PD/DD Oranı (PB Ratio) Nedir?",
     "desc": "Fiyat/Defter Değeri oranı ne anlama gelir, hangi durumlarda önem kazanır ve BIST hisselerinde nasıl kullanılır?",
     "date": "2026-04-11",
+    "updated": "2026-10-23",
     "mins": 4,
     "cat": "Temel Analiz",
     "body": """
@@ -457,7 +464,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <ul>
   <li><strong>PD/DD &lt; 1:</strong> Hisse defter değerinin altında işlem görüyor. Teorik olarak "ucuz" ama genellikle sorun var (düşük kârlılık, borç yükü).</li>
   <li><strong>PD/DD = 1:</strong> Piyasa defter değerine eşit değerleme yapıyor.</li>
-  <li><strong>PD/DD &gt; 1:</strong> Piyasa şirkete defter değerinin üzerinde değer biçiyor — büyüme veya kaliteli iş modeli beklentisi var.</li>
+  <li><strong>PD/DD &gt; 1:</strong> Piyasa şirkete defter değerinin üzerinde değer biçiyor — büyüme veya kârlılığı yüksek bir iş modeli beklentisi var.</li>
 </ul>
 
 <h2>Hangi Sektörlerde Önemlidir?</h2>
@@ -478,6 +485,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "title": "Algoritmik Trading Nedir? Bireysel Yatırımcı İçin Ne İfade Eder?",
     "desc": "Algoritmik trading sistemlerinin çalışma prensibi, avantajları ve sınırları. Bireysel yatırımcı nasıl faydalanabilir?",
     "date": "2026-04-12",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
@@ -492,7 +500,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 </ul>
 
 <h2>BorsaPusula'nın Yaklaşımı</h2>
-<p>BorsaPusula tam otomatik emir vermez. Bunun yerine algoritmik sinyal üretir ve kararı yatırımcıya bırakır. Bu "yarı otomatik" model şu avantajları sağlar:</p>
+<p>BorsaPusula tam otomatik emir vermez. Bunun yerine hisselerin trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) kurallı biçimde hesaplayıp gösterir; yorumu yatırımcıya bırakır. Bu "yarı otomatik" model şu avantajları sağlar:</p>
 <ul>
   <li>Algoritmanın tutarlılığı + insanın bağlamsal değerlendirmesi</li>
   <li>Temel analiz, haberler veya makro faktörleri entegre etme imkânı</li>
@@ -500,15 +508,15 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 </ul>
 
 <h2>Backtesting ve Gerçekçi Beklentiler</h2>
-<p>Algoritmaların geçmişte iyi performans göstermesi, gelecekte de aynı başarıyı garantilemez. Piyasa rejimleri değişir. 2020-2022 bull piyasasında iyi çalışan bir strateji, 2023 korreksiyonunda başarısız olabilir. Bu yüzden sistemi periyodik olarak gözden geçirmek önemlidir.</p>
+<p>Algoritmaların geçmişte iyi performans göstermesi, gelecekte de aynı başarıyı garantilemez. Piyasa rejimleri değişir. 2020-2022 yükseliş piyasasında iyi çalışan bir strateji, 2023 düzeltme döneminde başarısız olabilir. Bu yüzden sistemi periyodik olarak gözden geçirmek önemlidir.</p>
 
 <h2>Bireysel Yatırımcı Ne Yapabilir?</h2>
-<p>Kendi algo sisteminizi kurmak için programlama bilgisi gerekir. Ancak BorsaPusula gibi platformlar aracılığıyla algoritmaların ürettiği sinyalleri kullanmak için teknik bilgiye ihtiyaç yoktur. Önemli olan sistemi <em>anlamak</em> ve kurallara uymaktır.</p>
+<p>Kendi algo sisteminizi kurmak için programlama bilgisi gerekir. Ancak BorsaPusula gibi platformlar aracılığıyla algoritmaların ürettiği trend değerlendirmelerini izlemek için teknik bilgiye ihtiyaç yoktur. Önemli olan sistemin neyi ölçtüğünü <em>anlamaktır</em>.</p>
 """,
     "faqs": [
-      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform BIST100 ve ötesinde 200'ün üzerinde hisseyi tarar ve Güçlü Trend/Trend Bozuldu/Yatay kararı üretir; siz sadece değerlendirip karar verirsiniz."},
+      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik trend değerlendirmelerine ulaşılabilir. Platform BIST100 ve ötesinde 200'ün üzerinde hisseyi tarar ve trend durumunu Güçlü Trend/Trend Bozuldu/Yatay olarak gösterir; yorum yatırımcıya aittir."},
       {"q": "Algoritmik sistemler her zaman başarılı mı olur?", "a": "Hayır. Algoritmik sistemler istatistiksel olasılıklar üzerinde çalışır, kesinlik garantisi vermez. Piyasa rejimleri değişebilir ve sistemi periyodik olarak gözden geçirmek önemlidir."},
-      {"q": "BorsaPusula tam otomatik işlem yapıyor mu?", "a": "Hayır. BorsaPusula algoritmik sinyal üretir ancak emir vermez. Bu yarı otomatik model algoritmanın tutarlılığını insanın bağlamsal değerlendirmesiyle birleştirir."}
+      {"q": "BorsaPusula tam otomatik işlem yapıyor mu?", "a": "Hayır. BorsaPusula trend durumunu algoritmik olarak hesaplar ancak emir vermez. Bu yarı otomatik model algoritmanın tutarlılığını insanın bağlamsal değerlendirmesiyle birleştirir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS']
   },
@@ -708,8 +716,9 @@ Histogram = MACD − Sinyal</pre>
   {
     "slug": "bollinger-bantlari",
     "title": "Bollinger Bantları Nedir? Volatilite ile Fiyat İlişkisi",
-    "desc": "Bollinger Bantları nasıl hesaplanır, bant sıkışması ne anlama gelir, Güçlü Trend/Trend Bozuldu sinyali olarak nasıl kullanılır?",
+    "desc": "Bollinger Bantları nasıl hesaplanır, bant sıkışması ne anlama gelir, trend okumasında nasıl yorumlanır?",
     "date": "2026-04-18",
+    "updated": "2026-10-23",
     "mins": 4,
     "cat": "Teknik Analiz",
     "body": """
@@ -726,20 +735,20 @@ Histogram = MACD − Sinyal</pre>
 <h2>Bant Sıkışması (Squeeze)</h2>
 <p>Bantlar daraldığında düşük volatilite dönemindeyiz demektir. Bu genellikle büyük bir hareketin habercisidir — yukarı mı aşağı mı olduğunu Bollinger bantları söylemez. ADX ve Supertrend yön için kullanılır.</p>
 
-<h2>Temel Sinyaller</h2>
+<h2>Temel Yorumlar</h2>
 <ul>
   <li>Fiyat üst bandı aşarsa → Güçlü yükseliş (veya aşırı alım)</li>
   <li>Fiyat alt bandı kırarsa → Güçlü düşüş (veya aşırı satım)</li>
-  <li>Fiyat orta banda döner → Ortalamaya dönüş (mean reversion) ticareti için fırsat</li>
+  <li>Fiyat orta banda döner → Ortalamaya dönüş (mean reversion) eğilimi</li>
 </ul>
 
 <h2>Kombinasyon Kullanımı</h2>
-<p>Bollinger sıkışması + ADX düşük = büyük hareket hazırlığı. Bu noktada Supertrend yönü gösterene kadar beklemek akılcıdır. BorsaPusula'nın sistemi zaten bu mantıkla kurulmuştur: ADX yükselmeden sinyal üretilmez.</p>
+<p>Bollinger sıkışması + ADX düşük = büyük hareket hazırlığı. Hareketin yönü Bollinger bantlarından değil, Supertrend gibi trend göstergelerinden okunur.</p>
 """,
     "faqs": [
       {"q": "Bollinger Bantları nasıl hesaplanır?", "a": "Orta bant SMA(20), üst bant SMA(20) + 2×standart sapma, alt bant SMA(20) − 2×standart sapma şeklinde hesaplanır. Volatilite arttığında bantlar genişler, azaldığında daralır."},
       {"q": "Bollinger Bant sıkışması ne anlama gelir?", "a": "Bantların birbirine yaklaştığı sıkışma dönemleri yaklaşan güçlü bir hareketi işaret eder. Sıkışma sonrası kırılımın yönü bir sonraki trendin yönünü belirler. Yüksek hacimli kırılım daha güvenilirdir."},
-      {"q": "Fiyatın üst banta dokunması satış sinyali midir?", "a": "Mutlaka değil. Güçlü trendlerde fiyat uzun süre üst bantta yürüyebilir. BorsaPusula Supertrend + ADX sinyali üst bantta bile aktif olabilir; tek başına bant dokunuşu satış kriteri değildir."}
+      {"q": "Fiyatın üst banta dokunması düşüş işareti midir?", "a": "Mutlaka değil. Güçlü trendlerde fiyat uzun süre üst bantta yürüyebilir. Fiyat üst bantta yürürken trend durumu Güçlü Trend olarak kalabilir; tek başına bant dokunuşu trendin bittiği anlamına gelmez."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
   },
@@ -782,8 +791,9 @@ Histogram = MACD − Sinyal</pre>
   {
     "slug": "enflasyon-ve-borsa",
     "title": "Enflasyon ve Borsa: Yüksek Enflasyonda Yatırım",
-    "desc": "Yüksek enflasyon döneminde borsa nasıl davranır, hangi sektörler fırsat sunar, reel getiri nasıl hesaplanır?",
+    "desc": "Yüksek enflasyon döneminde borsa nasıl davranır, hangi sektörler daha dayanıklıdır, reel getiri nasıl hesaplanır?",
     "date": "2026-04-20",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Makro Ekonomi",
     "body": """
@@ -792,7 +802,7 @@ Histogram = MACD − Sinyal</pre>
 <h2>Enflasyon-Borsa İlişkisi</h2>
 <p>Genel kural: Hisse senetleri enflasyona karşı <em>kısmen</em> koruma sağlar çünkü şirketler fiyatlarını artırabilir ve kârları nominal olarak büyüyebilir. Ancak gerçek tablolar daha karmaşık:</p>
 <ul>
-  <li>Yüksek faiz → Discount rate artar → Hisse değerlemeleri düşer</li>
+  <li>Yüksek faiz → İskonto oranı (discount rate) artar → Hisse değerlemeleri düşer</li>
   <li>Maliyet enflasyonu → Marjlar sıkışır → Kârlılık azalır</li>
   <li>Fiyatı geçirebilen şirketler → Enflasyona karşı dirençli</li>
 </ul>
@@ -813,7 +823,7 @@ Histogram = MACD − Sinyal</pre>
 <p>TL'nin değer kaybettiği dönemlerde BIST100 TL bazında yükselirken USD bazında düşebilir. Yabancı yatırımcılar dolarlı getiriyi baz alır. Türk yatırımcılar için TL bazlı hesap yapılır ama reel satın alma gücüne dikkat edilmelidir.</p>
 """,
     "faqs": [
-      {"q": "Yüksek enflasyonda hangi hisseler daha iyi performans gösterir?", "a": "Fiyat geçirme gücü yüksek sektörler (enerji, hammadde, perakende) ve döviz geliri olan ihracatçı şirketler enflasyon ortamında görece dayanıklıdır. Sabit maliyetli işletmeler ise baskı altında kalır."},
+      {"q": "Yüksek enflasyonda hangi şirketler görece dayanıklıdır?", "a": "Fiyat geçirme gücü yüksek sektörler (enerji, hammadde, perakende) ve döviz geliri olan ihracatçı şirketler enflasyon ortamında görece dayanıklıdır. Sabit maliyetli işletmeler ise baskı altında kalır."},
       {"q": "Türkiye'deki yüksek enflasyon BIST'i nasıl etkiliyor?", "a": "Yüksek enflasyon döneminde BIST nominal olarak yükselse de dolar bazında değer kaybedebilir. Gerçek getiriyi ölçmek için enflasyon düzeltmesi yapılmalıdır."},
       {"q": "Enflasyon döneminde tahvil mi hisse mi?", "a": "Tarihsel olarak hisse senetleri uzun vadede enflasyona karşı tahvillerden daha iyi koruma sağlar çünkü şirketler fiyatlarını enflasyonla artırabilir. Ancak yüksek faiz artışının eşlik ettiği dönemlerde kısa vadede her ikisi de değer kaybedebilir."}
     ],
@@ -824,7 +834,7 @@ Histogram = MACD − Sinyal</pre>
     "title": "Borsa Sözlüğü: En Sık Kullanılan 36 Terim",
     "desc": "Borsa yatırımcılarının bilmesi gereken temel terimlerin Türkçe açıklamaları. Hisse, endeks, lot, emir türleri ve daha fazlası.",
     "date": "2026-04-21",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Temel Kavramlar",
     "body": """
@@ -862,7 +872,7 @@ Histogram = MACD − Sinyal</pre>
   <li><strong>Momentum:</strong> Fiyat hareketinin hızı ve yönü.</li>
   <li><strong>Osilatör:</strong> Belirli aralıkta salınan gösterge (RSI 0-100 gibi).</li>
   <li><strong>Piyasa Değeri:</strong> Hisse fiyatı × toplam hisse adedi.</li>
-  <li><strong>Pivot Noktası:</strong> Dün kapanışından hesaplanan destek/direnç seviyeleri.</li>
+  <li><strong>Pivot Noktası:</strong> Önceki günün kapanış verisinden hesaplanan destek/direnç seviyeleri.</li>
   <li><strong>PD/DD (PB):</strong> Piyasa Değeri / Defter Değeri.</li>
   <li><strong>RSI:</strong> Momentum göstergesi. 30 altı aşırı satım, 80 üzeri aşırı alım.</li>
 </ul>
@@ -873,7 +883,7 @@ Histogram = MACD − Sinyal</pre>
   <li><strong>SMA:</strong> Basit Hareketli Ortalama.</li>
   <li><strong>Stop Loss:</strong> Zarar durdurma emri. Belirli fiyatın altında otomatik satış.</li>
   <li><strong>Supertrend:</strong> ATR tabanlı trend takip göstergesi.</li>
-  <li><strong>Take Profit:</strong> Kâr realizasyonu emri.</li>
+  <li><strong>Take Profit:</strong> Fiyat belirlenen seviyeye ulaşınca pozisyonu otomatik kapatan emir türü.</li>
   <li><strong>Temettü:</strong> Şirketin kârından hissedarlara yapılan nakit ödeme.</li>
   <li><strong>Trend:</strong> Fiyatın genel hareket yönü.</li>
   <li><strong>Volatilite:</strong> Fiyat dalgalanma şiddeti.</li>
@@ -885,19 +895,20 @@ Histogram = MACD − Sinyal</pre>
     "faqs": [
       {"q": "Borsa işlemlerinde en sık kullanılan terimler nelerdir?", "a": "En temel kavramlar: alım/satım emri, stop loss (zarar durdur), piyasa emri, limit emir, spread, lot, portföy, pozisyon, volatilite ve hacim. Bu terimlerin anlamını bilmeden işlem yapmamak önemlidir."},
       {"q": "Bull ve Bear piyasası ne demektir?", "a": "Bull (boğa) piyasası fiyatların genel olarak yükseldiği iyimser dönemdir. Bear (ayı) piyasası ise fiyatların %20 veya daha fazla düştüğü karamser dönemdir. Bu iki kavram piyasa senaryolarını anlatmak için sıkça kullanılır."},
-      {"q": "BorsaPusula teknik terimlerini nerede açıklıyor?", "a": "ADX, RSI, Supertrend, EMA gibi tüm teknik göstergeler için Metodoloji sayfasında detaylı açıklamalar bulunur. Her sinyal bileşeninin nasıl hesaplandığı ve yorumlandığı anlatılır."}
+      {"q": "BorsaPusula teknik terimlerini nerede açıklıyor?", "a": "ADX, RSI, Supertrend, EMA gibi tüm teknik göstergeler için Metodoloji sayfasında detaylı açıklamalar bulunur. Her göstergenin nasıl hesaplandığı ve yorumlandığı anlatılır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
   {
     "slug": "sinyal-sistemi-nasil-calisir",
     "title": "BorsaPusula Sinyal Sistemi Nasıl Çalışır?",
-    "desc": "BorsaPusula'nın üçlü filtre sistemi, haftalık trend gate, sinyal onayı ve piyasa barometresi nasıl çalışır?",
+    "desc": "BorsaPusula'da trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) nasıl belirlenir? Gösterge filtreleri, haftalık trend filtresi ve trend onayı.",
     "date": "2026-04-22",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
-<p>BorsaPusula, BIST100 ve ötesinde takip edilen 200'ün üzerinde hisseyi her gün algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
+<p>BorsaPusula, BIST100 ve ötesinde takip edilen 200'ün üzerinde hisseyi her işlem günü sonunda algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay durumunu belirler. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
 <h2>Üçlü Filtre Mantığı</h2>
 <p>Tek bir gösterge sahte sinyal üretebilir. Göstergelerin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın beş koşulu:</p>
@@ -909,22 +920,22 @@ Histogram = MACD − Sinyal</pre>
   <li><strong>Haftalık EMA20 yönü:</strong> Üst zaman dilimi teyidi</li>
 </ol>
 
-<h2>Haftalık Trend Gate</h2>
-<p>Günlük sinyaller, haftalık EMA20 yönüyle filtrelenir. Haftalık düşüş trendindeyken günlük Güçlü Trend sinyali engellenir. Bu filtre, yükselen trendin "büyük resmini" kaçırmamayı sağlar.</p>
+<h2>Haftalık Trend Filtresi</h2>
+<p>Günlük hesaplama, haftalık EMA20 yönüyle filtrelenir. Hisse haftalık düşüş trendindeyken günlük grafikte Güçlü Trend durumu oluşmaz. Bu filtre, trendin "büyük resmini" gözden kaçırmamayı sağlar.</p>
 
-<h2>Sinyal Onayı (3 Bar Kuralı)</h2>
-<p>İlk gün oluşan sinyal "ham sinyal"dir. 3 gün boyunca aynı kalan sinyal "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
+<h2>Trend Durumunun Onayı (3 Bar Kuralı)</h2>
+<p>İlk gün oluşan durum henüz onaysızdır. 3 gün boyunca aynı kalan durum "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
 
-<h2>Piyasa Barometresi</h2>
-<p><a href="/">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın güncel durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
+<h2>Piyasa Genelinin Görünümü</h2>
+<p><a href="/">Piyasa</a> sayfasındaki Güçlü Trend oranı, Güçlü Trend durumundaki hisselerin payını gösterir. Bu oran %50'nin üzerindeyse piyasa genelinde yükseliş yönlü trendler ağır basar; %30'un altındaysa piyasa genelinin baskı altında olduğunu betimler.</p>
 
-<h2>Veri Kaynağı ve Güncelleme Sıklığı</h2>
-<p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı fiyat akışı sunmaz.</p>
+<h2>Veri ve Güncelleme Sıklığı</h2>
+<p>Hesaplamalar Borsa İstanbul gün sonu kapanış verisiyle yapılır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Trend durumları <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı fiyat akışı sunmaz.</p>
 """,
     "faqs": [
-      {"q": "BorsaPusula sinyalleri ne sıklıkla güncelleniyor?", "a": "Sinyal hesaplamaları günde bir kez, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) yapılır. Sinyaller Yahoo Finance verilerinden hesaplanır; BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı takip sunmaz."},
+      {"q": "BorsaPusula'da trend durumu ne sıklıkla güncelleniyor?", "a": "Trend durumu hesaplamaları günde bir kez, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) yapılır. Hesaplamalar gün sonu kapanış verisiyle yapılır; BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı takip sunmaz."},
       {"q": "Üçlü filtre sistemi neden tek göstergeden daha güvenilir?", "a": "Supertrend + ADX + EMA üçünün aynı anda aynı yönü göstermesi gerektiğinden rastgele kesişim olasılığı dramatik biçimde azalır. Bu da sahte sinyal sayısını önemli ölçüde düşürür."},
-      {"q": "Onaylı sinyal ile ham sinyal arasındaki fark nedir?", "a": "Ham sinyal oluştuğu ilk gündür ve daha az güvenilirdir. Onaylı sinyal aynı sinyalin 3+ gün sürmesidir ve trend gücünü doğrular. Kaç gündür devam ettiği hisse sayfalarında ayrıca gösterilir."}
+      {"q": "Onaylı trend durumu ne demek?", "a": "Trend durumunun oluştuğu ilk gün henüz onaysızdır ve gürültü olabilir. Aynı durumun 3+ gün sürmesi onay sayılır ve trendin kalıcılığına daha çok işaret eder. Kaç gündür devam ettiği hisse sayfalarında ayrıca gösterilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO']
   },
@@ -933,6 +944,7 @@ Histogram = MACD − Sinyal</pre>
     "title": "BIST100 Sektörleri: Hangi Hisse Hangi Sektörde?",
     "desc": "Bankacılık, enerji, sanayi, teknoloji ve diğer BIST100 sektörlerinin özellikleri ve başlıca şirketleri.",
     "date": "2026-04-23",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Temel Kavramlar",
     "body": """
@@ -962,60 +974,61 @@ Histogram = MACD − Sinyal</pre>
 <p><strong>Başlıca hisseler:</strong> TCELL, TTKOM, LOGO, NETAS, SELEC</p>
 <p>Türk teknoloji ekosistemi gelişiyor. Telekomünikasyon şirketleri nispeten savunmacı; yazılım şirketleri (LOGO) büyüme potansiyeli yüksek.</p>
 
-<h2>BorsaPusula'da Sektör Filtresi</h2>
-<p>Ana sayfada sektör butonlarıyla yalnızca ilgilendiğiniz sektörün hisselerini görebilirsiniz. Hangi sektörün kaç Güçlü Trend sinyali verdiğini karşılaştırarak güçlü sektörleri tespit edebilirsiniz.</p>
+<h2>BorsaPusula'da Sektörleri İzlemek</h2>
+<p>BorsaPusula'nın <a href="/sektor-harita">sektör ısı haritası</a>, hisselerin gün sonu performansını sektörlere göre gruplu gösterir. <a href="/tarama">Tarama</a> sayfasında ise hisseler trend durumuna (Güçlü Trend / Trend Bozuldu / Yatay) göre süzülebilir.</p>
 """,
     "faqs": [
       {"q": "BIST100'de en büyük sektör hangisidir?", "a": "Bankacılık ve finans sektörü BIST100'ün en yüksek ağırlığını oluşturur. AKBNK, GARAN, ISCTR, VAKBN gibi büyük bankalar endeksi güçlü şekilde etkiler. Bankacılık haberleri tüm endeksi etkiler."},
-      {"q": "Sektör rotasyonu ne demektir?", "a": "Piyasa döngüsünün farklı aşamalarında farklı sektörler öne çıkar. Ekonomi büyürken sanayi ve teknoloji liderken resesyonda zorunlu tüketim ve sağlık savunmacı sektörler öne geçer."},
-      {"q": "BorsaPusula'da sektör filtresi nasıl kullanılır?", "a": "Ana sayfada sektör butonlarıyla yalnızca ilgili sektörün hisseleri görülür. Sektör ısı haritası (/sektor-harita) tüm sektörlerin Güçlü Trend/Trend Bozuldu/Yatay dağılımını görsel karşılaştırma imkânı sunar."}
+      {"q": "Sektör rotasyonu ne demektir?", "a": "Piyasa döngüsünün farklı aşamalarında farklı sektörler öne çıkar. Ekonomi büyürken sanayi ve teknoloji öne çıkarken, durgunlukta (resesyon) zorunlu tüketim ve sağlık gibi savunmacı sektörler öne geçer."},
+      {"q": "BorsaPusula'da sektörler nasıl izlenir?", "a": "Sektör ısı haritası (/sektor-harita) hisselerin gün sonu performansını sektörlere göre gruplu gösterir. Tarama sayfasında (/tarama) hisseler trend durumuna göre (Güçlü Trend/Trend Bozuldu/Yatay) süzülebilir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'BIMAS']
   },
   {
     "slug": "yeni-baslayanlar-icin-borsa",
     "title": "Yeni Başlayanlar İçin Borsa: 10 Temel Kural",
-    "desc": "Borsaya yeni başlıyorsanız bilmeniz gereken 10 temel kural. Duygusal kararlardan kaçının, disiplinli bir sistem kurun.",
+    "desc": "Borsaya yeni başlıyorsanız bilmeniz gereken 10 temel kural. Duygusal kararlar, risk ve disiplin üzerine temel ilkeler.",
     "date": "2026-04-24",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Temel Kavramlar",
     "body": """
 <p>Her yıl binlerce kişi borsaya ilk kez giriyor. Bunların önemli bir kısmı ilk aylarında kayıp yaşayarak çıkıyor. Bu 10 kural, o hataların büyük bölümünü önler.</p>
 
 <h2>1. Kaybetmeyi Göze Alabileceğiniz Parayla Başlayın</h2>
-<p>Kiranızı, acil fonunuzu veya kısa vadeli ihtiyaçlarınız için ayırdığınız parayı borsaya koymayın. Piyasa size kötü timing sunabilir; o süre boyunca psikolojik baskı altında iyi karar vermek zorlaşır.</p>
+<p>Kiranızı, acil fonunuzu veya kısa vadeli ihtiyaçlarınız için ayırdığınız parayı borsaya koymayın. Kötü bir zamanlamaya denk gelebilirsiniz; o süre boyunca psikolojik baskı altında iyi karar vermek zorlaşır.</p>
 
 <h2>2. Önce Öğrenin, Sonra Girin</h2>
 <p>Birkaç makale okuyarak veya sosyal medyada haber takip ederek öğrenilmez. Teknik analiz, temel analiz ve risk yönetiminin temellerini kavramadan ciddi para yatırmayın.</p>
 
-<h2>3. Stop Loss Kullanın, Her Zaman</h2>
-<p>"Bu sefer düzelir" düşüncesi en büyük tuzaktır. Stop loss kullanmayan yatırımcılar küçük kayıpları büyük felaketlere dönüştürür.</p>
+<h2>3. Risk Sınırını Önceden Bilin</h2>
+<p>"Bu sefer düzelir" düşüncesi en büyük tuzaktır. Kabul edilebilir kaybın sınırını önceden belirlemeyen yatırımcılar küçük kayıpları büyük kayıplara dönüştürebilir. Zarar durdur (stop-loss) emri, böyle bir sınırı otomatik uygulayan emir türlerinden biridir.</p>
 
 <h2>4. Haber Peşinden Koşmayın</h2>
-<p>Sosyal medyada "bu hisse patlayacak" postları gördüğünüzde genellikle bu bilgi zaten fiyatlanmıştır. Haberi gördüğünüzde girenler çoğunlukla en tepeden alır.</p>
+<p>Sosyal medyada "bu hisse patlayacak" postları gördüğünüzde genellikle bu bilgi zaten fiyatlanmıştır. Haberi gördükten sonra işlem yapanlar çoğunlukla fiyatın tepeye yakın olduğu bir noktaya denk gelir.</p>
 
 <h2>5. Tek Hisseye Yatırım Yapmayın</h2>
-<p>En iyi analistler bile yanılır. Portföyünüzü en az 5-8 farklı hisseye dağıtın ve farklı sektörler seçin.</p>
+<p>En iyi analistler bile yanılır. Çeşitlendirmede sık anılan çerçeve, farklı sektörlerden en az 5-8 hissedir.</p>
 
 <h2>6. Sistematik Olun</h2>
-<p>Her işlem için önceden kurallar belirleyin: Neden girdim? Nerede çıkarım (stop)? Kâr hedefim ne? Bunları yazmadan pozisyon açmayın.</p>
+<p>Önceden yazılmış kurallar duygusal kararları azaltır: Bu hisseyi neden takip ediyorum? Hangi durumda görüşüm geçersiz olur? Trend durumu değişirse bu ne anlama gelir? Kararların gerekçesini yazmak, sonradan değerlendirmeyi kolaylaştırır.</p>
 
-<h2>7. Kaldıraç Kullanmayın (Başlangıçta)</h2>
-<p>Kaldıraçlı işlemler (Viop, türev) hem kazancı hem kaybı büyütür. Tecrübeli olmadan kaldıraç kullanmak sermayeyi çok hızlı eritir.</p>
+<h2>7. Kaldıracın Riskini Bilin</h2>
+<p>Kaldıraçlı işlemler (VİOP, türev) hem kazancı hem kaybı büyütür. Tecrübeli olmadan kaldıraç kullanmak sermayeyi çok hızlı eritir.</p>
 
 <h2>8. Günlük Fiyat Takibini Sınırlandırın</h2>
-<p>Ekrana sürekli bakmak duygusal kararları tetikler. Günlük grafiklere yönelik sinyal sistemi kullanıyorsanız, güncellemeyi sabah bir kez kontrol etmek yeterlidir.</p>
+<p>Ekrana sürekli bakmak duygusal kararları tetikler. Gün sonu verisiyle çalışan bir trend takibinde güncellemeye günde bir kez bakmak yeterlidir.</p>
 
 <h2>9. Kaybeden İşlemlerden Öğrenin</h2>
 <p>Her kaybı not edin: Ne oldu, neden yanlış oldu, bir daha ne yapardım? Bu "işlem günlüğü" zamanla en değerli öğrenme kaynağınız olur.</p>
 
 <h2>10. Sabır En Büyük Silah</h2>
-<p>Çoğu kazanan işlem, bir sinyal oluştuğunda hemen almak değil, doğru kurulumu <em>beklemekten</em> gelir. Yatay sinyali de bir sinyaldir — "henüz hazır değil, izle" demektir.</p>
+<p>Sabır, acele kararların önüne geçer. Trend durumunun <em>Yatay</em> olması da bir bilgidir: fiyatın henüz belirgin bir yön kazanmadığını gösterir.</p>
 """,
     "faqs": [
-      {"q": "Borsaya başlamak için minimum ne kadar sermaye gerekir?", "a": "Teknik olarak birkaç yüz TL ile borsaya başlanabilir. Ancak çeşitlendirme yapabilmek ve işlem maliyetlerinin getiriyi yememesi için en az 10.000-50.000 TL ile başlamak önerilir. Her zaman kaybetmeyi göze alabileceğiniz para kullanın."},
-      {"q": "Borsayı öğrenmek için nereden başlamalıyım?", "a": "BorsaPusula Blog'undaki temel kavramlar makaleleri ile başlayabilirsiniz. Metodoloji sayfası algoritmanın nasıl çalıştığını açıklar. Daha sonra küçük miktarlarla uygulama yaparak deneyim kazanın."},
-      {"q": "BorsaPusula sinyallerini nasıl takip etmeliyim?", "a": "Ana sayfadan tüm hisselerin Güçlü Trend/Trend Bozuldu/Yatay durumunu görebilirsiniz. İlgilendiğiniz hisseler için Günlük Özet sayfasını sabah kontrol edin. E-posta aboneliğiyle sinyal değişimlerini otomatik alın."}
+      {"q": "Borsaya başlamak için minimum ne kadar sermaye gerekir?", "a": "Teknik olarak birkaç yüz TL ile borsaya başlanabilir. Çeşitlendirme ve işlem maliyetleri açısından 10.000-50.000 TL aralığı sık anılır. Kaybedilmesi göze alınabilecek parayla başlamak temel ilkedir."},
+      {"q": "Borsayı öğrenmek için nereden başlamalıyım?", "a": "BorsaPusula Blog'undaki temel kavramlar makaleleri ile başlayabilirsiniz. Metodoloji sayfası algoritmanın nasıl çalıştığını açıklar. Ardından küçük miktarlarla deneyim kazanmak yaygın bir yoldur."},
+      {"q": "BorsaPusula'da trend durumu nasıl takip edilir?", "a": "Piyasa sayfasında BIST100 gün sonu ısı haritası ve Güçlü Trend oranı yer alır. /tarama sayfasında hisseler trend durumuna (Güçlü Trend / Trend Bozuldu / Yatay) göre süzülebilir; her hissenin ayrıntısı kendi hisse sayfasındadır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'BIMAS']
   },
@@ -1024,6 +1037,7 @@ Histogram = MACD − Sinyal</pre>
     "title": "Borsa Psikolojisi: Duygular Neden En Büyük Düşmanınız?",
     "desc": "Korku, açgözlülük ve FOMO borsada nasıl zarar verir? Davranışsal finans perspektifinden yatırımcı hataları.",
     "date": "2026-04-25",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Risk Yönetimi",
     "body": """
@@ -1038,26 +1052,26 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p>Sosyal medyada biri %200 kazandığını paylaşınca irrasyonel alım kararları tetiklenir. FOMO ile alınan pozisyonlarda analiz değil, his hakimdir. Sonuç genellikle felaket olur.</p>
 
 <h2>Kayıptan Kaçınma (Loss Aversion)</h2>
-<p>Nobel ekonomisti Kahneman'ın araştırmaları, insanların kaybın acısını kazancın sevincinin yaklaşık 2 katı hissetttiğini gösteriyor. Bu yüzden yatırımcılar zarar eden pozisyonları kapatmaz — "zarar realize olmadı" rasyonalizasyonu ile bekler.</p>
+<p>Nobel ekonomisti Kahneman'ın araştırmaları, insanların kaybın acısını kazancın sevincinin yaklaşık 2 katı hissettiğini gösteriyor. Bu yüzden yatırımcılar zarar eden pozisyonları kapatmaz — "zarar realize olmadı" rasyonalizasyonu ile bekler.</p>
 
 <h2>Geri Görüş Yanılgısı (Hindsight Bias)</h2>
 <p>"Bunu baştan biliyordum zaten" hissi, gelecekteki kararları abartılı özgüvenle almaya yol açar. Geçmişteki başarı şansın mı yoksa becerinin mi ürünüydü, bunu sorgulamak gerekir.</p>
 
 <h2>Algoritmik Sistemin Psikolojik Değeri</h2>
-<p>BorsaPusula gibi kural tabanlı sistemler duyguları denklemden çıkarır. "Hisse düşüyor, çıkmalı mıyım?" sorusunun cevabı nettir: Supertrend Trend Bozuldu sinyaline geçmedikçe sistem Güçlü Trend der. Bu netlik paniği önler.</p>
+<p>Kural tabanlı sistemler duyguları denklemden çıkarmaya yardım eder. BorsaPusula'da bir hissenin trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) önceden tanımlı kurallarla belirlenir; fiyat dalgalansa da durum ancak kural koşulu oluştuğunda değişir. Bu netlik, anlık duygular yerine veriye bakmayı kolaylaştırır.</p>
 
 <h2>Pratik Çözümler</h2>
 <ul>
-  <li>İşlem öncesi "İşlem Planı" yazın (giriş, stop, hedef)</li>
-  <li>Sosyal medyadan öneri almayın, kendiniz analiz yapın</li>
-  <li>Portföyünüzü saatte bir değil günde bir kez kontrol edin</li>
-  <li>Kaybeden işlemleri hemen not alın — ertelemek inkâra döner</li>
+  <li>Kararın gerekçesini önceden yazıya dökmek, sonradan duygusal yeniden yorumlamayı azaltır</li>
+  <li>Sosyal medyadaki öneriler yerine kendi araştırmasına dayanan kararlar daha az duygusaldır</li>
+  <li>Portföyü sık sık kontrol etmek, kısa vadeli dalgalanmalara aşırı tepkiyi artırır</li>
+  <li>Kaybeden kararları kayda geçirmek, inkâr eğilimini azaltır</li>
 </ul>
 """,
     "faqs": [
-      {"q": "FOMO yatırım kararlarını nasıl etkiler?", "a": "FOMO, sosyal medyada başkasının kazandığını gördüğünüzde irrasyonel alım kararları almanıza neden olur. Genellikle rallinin tepesine yakın giriş yapılır ve ardından düşüş yaşanır. Kural tabanlı sinyal sistemleri FOMO'yu önlemenin en etkili yoludur."},
-      {"q": "Kaybeden pozisyonları kapatmak neden psikolojik olarak zordur?", "a": "Kahneman'ın kayıptan kaçınma teorisine göre insanlar kaybın acısını kazancın sevincinin 2 katı hisseder. Bu nedenle 'bekleyeyim düzelir' rasyonalizasyonuna sığınılır. Stop loss bu tuzağı mekanik olarak ortadan kaldırır."},
-      {"q": "Algoritmik sinyal kullanmak psikolojik hatayı önler mi?", "a": "Önemli ölçüde evet. Supertrend Trend Bozuldu sinyaline geçmedikçe sistem Güçlü Trend der ve bu netlik panikleri önler. Ancak algoritmaya körce güvenmek de tuzaktır; sistemi anlamak ve bağlamsal değerlendirme yapmak gerekir."}
+      {"q": "FOMO yatırım kararlarını nasıl etkiler?", "a": "FOMO, sosyal medyada başkasının kazandığını gördüğünüzde irrasyonel alım kararları almanıza neden olur. Genellikle rallinin tepesine yakın giriş yapılır ve ardından düşüş yaşanır. Önceden belirlenmiş kurallarla çalışmak FOMO'nun etkisini azaltmanın yollarından biridir."},
+      {"q": "Kaybeden pozisyonları kapatmak neden psikolojik olarak zordur?", "a": "Kahneman'ın kayıptan kaçınma teorisine göre insanlar kaybın acısını kazancın sevincinin 2 katı hisseder. Bu nedenle 'bekleyeyim düzelir' rasyonalizasyonuna sığınılır. Önceden belirlenmiş kurallar bu tuzağın etkisini azaltır."},
+      {"q": "Kural tabanlı sistem kullanmak psikolojik hatayı önler mi?", "a": "Önemli ölçüde yardımcı olur. Trend durumu önceden tanımlı kurallarla belirlendiği için anlık fiyat hareketine duygusal tepki azalır. Ancak algoritmaya körce güvenmek de tuzaktır; sistemi anlamak ve bağlamsal değerlendirme yapmak gerekir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
@@ -1066,6 +1080,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "title": "Supertrend vs MACD: Hangi Gösterge Ne Zaman Daha İyi?",
     "desc": "İki popüler trend göstergesini karşılaştırıyoruz. Supertrend ve MACD'nin güçlü ve zayıf yönleri.",
     "date": "2026-04-26",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Teknik Analiz",
     "body": """
@@ -1076,7 +1091,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <tr style="background:var(--bp-border-subtle)"><th style="padding:8px;text-align:left">Özellik</th><th style="padding:8px;text-align:left">Supertrend</th><th style="padding:8px;text-align:left">MACD</th></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Taban</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">ATR (volatilite)</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">EMA farkı</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Çıktı</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Fiyat üzerinde çizgi</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Osilatör + histogram</td></tr>
-  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Stop Loss</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Doğrudan band seviyeleri</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Yoktur</td></tr>
+  <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Dinamik destek/direnç</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Band seviyeleri</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Yoktur</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Volatilite adaptasyonu</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">✅ Evet (ATR ile)</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">❌ Hayır</td></tr>
   <tr><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">Divergence</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">❌ Hayır</td><td style="padding:8px;border-top:1px solid var(--bp-bkl-bd)">✅ Evet</td></tr>
 </table>
@@ -1091,17 +1106,18 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p>BorsaPusula'nın ADX filtresi, MACD'nin divergence değerinin bir bölümünü karşılar. ADX düşükse trend güçlü değildir — bu bilgi MACD divergence'a benzer bir uyarı işlevi görür. İkisinin de güçlü yönlerini birleştiren bir yaklaşımdır.</p>
 """,
     "faqs": [
-      {"q": "Supertrend mi MACD mi daha iyi bir göstergedir?", "a": "Birinin diğerinden üstün olduğunu söylemek yanıltıcı olur. Supertrend volatiliteye uyum sağlar ve dinamik stop loss verir; MACD divergence tespiti yapabilir. BorsaPusula Supertrend + ADX kombinasyonunu tercih eder."},
-      {"q": "Neden BorsaPusula MACD yerine Supertrend kullanıyor?", "a": "Supertrend ATR bazlı olduğundan farklı volatilite ortamlarında aynı parametrelerle kullanılabilir ve dinamik stop loss sağlar. MACD gecikmeli ve sabit parametreli olduğundan BIST piyasasına daha az uyumludur."},
-      {"q": "İki gösterge çakıştığında ne yapmalıyım?", "a": "Supertrend Güçlü Trend + MACD de yükseliş yönünde ise sinyal güçlüdür. Supertrend Güçlü Trend ancak MACD bearish divergence gösteriyorsa dikkatli olunmalıdır. Çakışma güvenilirliği artırır, uyuşmazlık uyarı işareti verir."}
+      {"q": "Supertrend mi MACD mi daha iyi bir göstergedir?", "a": "Birinin diğerinden üstün olduğunu söylemek yanıltıcı olur. Supertrend volatiliteye uyum sağlar ve trend dönüş seviyesini fiyat grafiğinde gösterir; MACD divergence tespiti yapabilir. BorsaPusula Supertrend + ADX kombinasyonunu tercih eder."},
+      {"q": "Neden BorsaPusula MACD yerine Supertrend kullanıyor?", "a": "Supertrend ATR bazlı olduğundan farklı volatilite ortamlarında aynı parametrelerle kullanılabilir ve trend dönüş seviyesini doğrudan fiyat üzerinde gösterir. MACD gecikmeli ve sabit parametreli olduğundan BIST piyasasına daha az uyumludur."},
+      {"q": "İki gösterge farklı yön gösterdiğinde nasıl yorumlanır?", "a": "Supertrend Güçlü Trend + MACD de yükseliş yönünde ise iki gösterge birbirini teyit eder. Supertrend Güçlü Trend ancak MACD düşüş yönlü uyumsuzluk (divergence) gösteriyorsa bu, trendin zayıflayabileceğine dair bir uyarı olarak okunur. Çakışma güvenilirliği artırır, uyuşmazlık uyarı işareti verir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
   {
     "slug": "hisse-secim-kriterleri",
-    "title": "Hangi Hisseyi Seçmeli? Teknik + Temel Kombinasyon",
-    "desc": "Birden fazla Güçlü Trend sinyali olan hisseler arasında nasıl seçim yapılır? Teknik ve temel kriterleri birleştiren bir yaklaşım.",
+    "title": "Hisseler Nasıl Karşılaştırılır? Teknik + Temel Kombinasyon",
+    "desc": "Aynı anda Güçlü Trend durumunda olan hisseler nasıl karşılaştırılır? Teknik ve temel kriterleri birleştiren bir yaklaşım.",
     "date": "2026-04-27",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Strateji",
     "body": """
@@ -1125,14 +1141,14 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <ul>
   <li><strong>−1:</strong> Yüksek borç/öz kaynak oranı</li>
   <li><strong>−1:</strong> Son çeyrekte kâr düşüşü</li>
-  <li><strong>−2:</strong> Sektör genel baskı altında (sektör barometresi negatif)</li>
+  <li><strong>−2:</strong> Sektör genel baskı altında (sektörün çoğunluğu Trend Bozuldu durumunda)</li>
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/">Ana sayfadaki</a> barometre piyasa genelini betimler: Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü, %30 altındaysa zayıf görünümdedir.</p>
+<p><a href="/">Piyasa sayfasındaki</a> Güçlü Trend oranı piyasa genelini betimler: Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü, %30 altındaysa zayıf görünümdedir.</p>
 """,
     "faqs": [
-      {"q": "Çok sayıda Güçlü Trend sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyut birlikte okunduğunda hisselerin görünümü daha bütünlüklü karşılaştırılır."},
+      {"q": "Çok sayıda Güçlü Trend durumundaki hisse nasıl karşılaştırılır?", "a": "Teknik puanlama: sinyal ne zamandan beri sürüyor, ADX değeri, haftalık-aylık trend uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyut birlikte okunduğunda hisselerin görünümü daha bütünlüklü karşılaştırılır."},
       {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. ADX yüksekse trend daha belirgindir; ADX trendin yönünü değil gücünü ölçer."},
       {"q": "Trend dönüş seviyesi nedir?", "a": "Trend dönüş seviyesi Supertrend çizgisidir. Fiyat bu çizginin üzerinde kaldıkça trend korunur; altında kapanış trendin bozulduğunu gösterir. Fiyatın bu çizgiye uzaklığı, kısa vadeli oynaklık hakkında fikir verir."}
     ],
@@ -1341,6 +1357,7 @@ BorsaPusula trend durumunu teknik ölçülerle betimler; işlem önerisi vermez:
   {
     "slug": "atr-indikatoru-nedir",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "title": "ATR (Average True Range) Nedir? Volatilite Ölçümü",
     "cat": "Teknik Analiz",
     "read_min": 5,
@@ -1395,8 +1412,8 @@ ATR yükseldikçe Supertrend bantları genişler, yani daha fazla hareket tolera
 
 | Hisse | Günlük ATR | Haftalık ATR |
 |-------|-----------|-------------|
-| BIST30 büyük cap | %1,5-3,0 | %4-8 |
-| BIST100 orta cap | %2,0-4,0 | %6-12 |
+| BIST30 büyük ölçekli | %1,5-3,0 | %4-8 |
+| BIST100 orta ölçekli | %2,0-4,0 | %6-12 |
 | Küçük hisseler | %3,0-8,0+ | %10-25+ |
 
 BIST büyük hisseleri günlük %2-3 ATR ile hareket ediyorsa, bu normal ve beklenen bir volatilitedir.
@@ -1417,9 +1434,9 @@ BIST büyük hisseleri günlük %2-3 ATR ile hareket ediyorsa, bu normal ve bekl
 
 ## BorsaPusula'da ATR Etkisi
 
-BorsaPusula sinyalleri ATR'yi arka planda kullanır:
+BorsaPusula'nın trend değerlendirmesi ATR'yi arka planda kullanır:
 
-- **Sinyal kalitesi** — Supertrend, ATR ile dinamik destek/direnç çizer
+- **Trend çizgisi** — Supertrend, ATR ile dinamik destek/direnç çizer
 - **Trend dönüş seviyesi** — Supertrend çizgisi ATR bazlıdır
 - **Oynaklık** — ATR yüksekken trend dönüş seviyesi fiyattan daha uzakta durur
 
@@ -1427,10 +1444,10 @@ Yüksek ATR dönemlerinde Supertrend çizgisinin fiyattan uzak durması normaldi
 
 [BIST hisselerinin trend durumunu gör →](/tarama)""",
     "faqs": [
-      {"q": "ATR indikatörü için ideal periyot nedir?", "a": "Standart ATR periyodu 14'tür. Kısa vadeli trading için 7-10, uzun vadeli pozisyonlar için 20-21 kullanılabilir. BorsaPusula'nın Supertrend sinyallerinde ATR(10) kullanılmaktadır."},
+      {"q": "ATR indikatörü için hangi periyot kullanılır?", "a": "Standart ATR periyodu 14'tür. Kısa vadeli analizlerde 7-10, uzun vadeli analizlerde 20-21 kullanılabilir. BorsaPusula'nın Supertrend hesabında ATR(10) kullanılmaktadır."},
       {"q": "Yüksek ATR iyi mi kötü mü?", "a": "ATR iyi ya da kötü değildir; yalnız oynaklığı ölçer. Trend dönemlerinde yükselir, sıkışma dönemlerinde düşer. Yön hakkında bilgi vermez."},
       {"q": "Supertrend ile ATR arasındaki ilişki nedir?", "a": "Supertrend indikatörü tamamen ATR üzerine inşa edilmiştir. Supertrend = Orta Fiyat ± (ATR × Çarpan) formülünü kullanır. ATR yükseldikçe Supertrend bantları genişler ve trend dönüş seviyesi fiyattan uzaklaşır; bu volatiliteye adaptasyondur."},
-      {"q": "ATR sadece hisse senedi için mi kullanılır?", "a": "Hayır. ATR her finansal varlıkta kullanılabilir: forex (USD/TRY gibi), kripto para (BTC), emtia (altın, petrol), endeksler (BIST30, S&P500). Hesaplama prensibi aynıdır."}
+      {"q": "ATR sadece hisse senedi için mi kullanılır?", "a": "Hayır. ATR her finansal varlıkta kullanılabilir: döviz piyasası (forex; USD/TRY gibi), kripto para (BTC), emtia (altın, petrol), endeksler (BIST30, S&P500). Hesaplama prensibi aynıdır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'GARAN']
   },
@@ -1439,10 +1456,11 @@ Yüksek ATR dönemlerinde Supertrend çizgisinin fiyattan uzak durması normaldi
   {
     "slug": "macd-indikatoru-nedir",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "title": "MACD İndikatörü Nedir? Nasıl Yorumlanır?",
     "cat": "Teknik Analiz",
     "read_min": 6,
-    "summary": "MACD (Moving Average Convergence/Divergence), trend yönünü ve momentumu aynı anda ölçen en popüler teknik analiz araçlarından biridir. Sinyal üretme kurallarını ve BIST'te nasıl kullanıldığını öğrenin.",
+    "summary": "MACD (Moving Average Convergence/Divergence), trend yönünü ve momentumu aynı anda ölçen en popüler teknik analiz araçlarından biridir. Nasıl yorumlandığını ve BIST'te nasıl okunduğunu öğrenin.",
     "body": """## MACD Nedir?
 
 **MACD (Hareketli Ortalama Yakınsama/Iraksama)**, iki üstel hareketli ortalamanın (EMA) farkına dayanan bir momentum indikatörüdür. 1979'da Gerald Appel tarafından geliştirilmiştir.
@@ -1456,8 +1474,8 @@ MACD üç bileşenden oluşur:
 ## MACD Sinyalleri Nasıl Okunur?
 
 ### 1. MACD Kesişimleri
-- MACD hattı sinyal hattını **yukarı keser** → Alış sinyali
-- MACD hattı sinyal hattını **aşağı keser** → Satış sinyali
+- MACD hattı sinyal hattını **yukarı keser** → Yükseliş işareti
+- MACD hattı sinyal hattını **aşağı keser** → Düşüş işareti
 
 ### 2. Sıfır Çizgisi Kesişimi
 - MACD hattı sıfırın **üzerine geçer** → Yükseliş trendi güçleniyor
@@ -1480,16 +1498,16 @@ MACD'nin en güçlü sinyali **uyumsuzluk**tur:
 
 BIST hisselerinde MACD kullanırken dikkat edilmesi gerekenler:
 
-**Haftalık grafikte daha güvenilir.** Günlük MACD çok gürültülüdür, haftalık MACD daha kaliteli sinyal üretir.
+**Haftalık grafikte daha güvenilir.** Günlük MACD çok gürültülüdür, haftalık MACD daha az gürültülü sonuç verir.
 
-**Trend yönüyle kullanın.** MACD'yi yalnız kullanmak yerine EMA veya Supertrend gibi trend filtresiyle birleştirin:
+**Trend yönüyle birlikte okunur.** MACD çoğu zaman tek başına değil, EMA veya Supertrend gibi bir trend filtresiyle birlikte yorumlanır:
 
-- Trend yukarıysa (EMA12 > EMA99) → yalnızca MACD alım sinyallerini değerlendirin
-- Trend aşağıysa → yalnızca satış sinyallerini değerlendirin
+- Trend yukarıysa (EMA12 > EMA99) → MACD'nin yükseliş yönlü kesişimleri trendle uyumludur
+- Trend aşağıysa → düşüş yönlü kesişimler trendle uyumludur
 
-**Hacim teyidi şart.** MACD kesişimi düşük hacimde oluşursa güvenilirlik azalır.
+**Hacim teyidi önemlidir.** MACD kesişimi düşük hacimde oluşursa güvenilirlik azalır.
 
-## MACD vs RSI — Hangisi Daha İyi?
+## MACD ve RSI Karşılaştırması
 
 | Özellik | MACD | RSI |
 |---------|------|-----|
@@ -1502,13 +1520,13 @@ BIST hisselerinde MACD kullanırken dikkat edilmesi gerekenler:
 
 ## BorsaPusula'da MACD
 
-BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullanır. MACD histogram, sinyal sayfalarında destekleyici gösterge olarak sunulur. [Güncel sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
+BorsaPusula'da hisselerin trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) Supertrend, ADX ve EMA12/99 birlikte değerlendirilerek belirlenir. [Piyasa sayfasında](/) BIST100'ün gün sonu ısı haritasını görebilir, [tarama sayfasında](/tarama) hisseleri trend durumuna göre süzebilirsiniz.""",
     "faqs": [
-      {"q": "MACD için en iyi periyot ayarları nelerdir?", "a": "Standart ayarlar EMA(12,26,9)'dur. Kısa vadeli trading için (3,10,16) kullanılabilir. BIST günlük grafiklerinde standart 12-26-9 ayarı yeterince iyi performans göstermektedir."},
+      {"q": "MACD için en iyi periyot ayarları nelerdir?", "a": "Standart ayarlar EMA(12,26,9)'dur. Kısa vadeli işlemler için (3,10,16) kullanılabilir. BIST günlük grafiklerinde standart 12-26-9 ayarı yeterince iyi performans göstermektedir."},
       {"q": "MACD sıfır çizgisinin önemi nedir?", "a": "MACD hattı sıfırın üzerindeyse EMA12 > EMA26 demektir, yani kısa vadeli ortalama uzun vadeliyi geçmiştir ve yükseliş momentumu var. Sıfırın altındaysa tersi geçerlidir."},
-      {"q": "MACD uyumsuzluğu neden önemlidir?", "a": "Uyumsuzluk, fiyat ile momentum arasındaki çelişkiyi gösterir. Fiyat yeni zirve yaparken MACD yapmıyorsa, yükseliş momentumu zayıflıyor demektir ve yakında düzeltme gelebilir. Bu sinyaller çok güvenilir olmakla birlikte kesin değildir."},
-      {"q": "MACD ile ne sıklıkla işlem yapılabilir?", "a": "Günlük grafikte MACD ayda 2-5 sinyal üretebilir. Çok kısa vadeli grafikte (15dk) sinyaller çok fazla ve gürültülü olur. Haftalık grafikte sinyaller seyrek ama güvenilir olur."},
-      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve trend dönüş seviyesini gösterir; MACD momentumdaki değişimi erken gösterir. Supertrend Güçlü Trend veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
+      {"q": "MACD uyumsuzluğu neden önemlidir?", "a": "Uyumsuzluk, fiyat ile momentum arasındaki çelişkiyi gösterir. Fiyat yeni zirve yaparken MACD yapmıyorsa, yükseliş momentumu zayıflıyor demektir ve bu durum olası bir düzeltmeye işaret edebilir. Bu işaretler kesin değildir."},
+      {"q": "MACD ne sıklıkla kesişim üretir?", "a": "Günlük grafikte MACD ayda 2-5 sinyal üretebilir. Çok kısa vadeli grafikte (15dk) sinyaller çok fazla ve gürültülü olur. Haftalık grafikte sinyaller seyrek ama güvenilir olur."},
+      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve trend dönüş seviyesini gösterir; MACD momentumdaki değişimi erken gösterir. Supertrend Güçlü Trend gösterirken yükseliş yönlü bir MACD kesişimi oluşursa, iki gösterge aynı yönü işaret etmiş olur."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SISE', 'KRDMD']
   },
@@ -1517,6 +1535,7 @@ BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullan
   {
     "slug": "destek-direnc-seviyeleri-nedir",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "title": "Destek ve Direnç Seviyeleri Nedir? Nasıl Belirlenir?",
     "cat": "Teknik Analiz",
     "read_min": 7,
@@ -1530,7 +1549,7 @@ Destek seviyelerini oluşturan faktörler:
 - Önceki dip noktaları
 - Yuvarlak sayılar (100 TL, 50 TL gibi)
 - Hareketli ortalamalar (EMA50, EMA200)
-- Supertrend çizgisi (Güçlü Trend sinyalinde)
+- Supertrend çizgisi (Güçlü Trend durumunda)
 - Fibonacci geri çekilme seviyeleri
 
 ## Direnç Nedir?
@@ -1542,13 +1561,13 @@ Direnç seviyelerini oluşturan faktörler:
 - Önceki zirve noktaları
 - Yuvarlak sayılar
 - Uzun vadeli hareketli ortalamalar (EMA200)
-- Supertrend çizgisi (Trend Bozuldu sinyalinde)
+- Supertrend çizgisi (Trend Bozuldu durumunda)
 - Önceki destek kırıldıktan sonra oluşan dirençler
 
 ## Destek ve Direnç'in Temel Özellikleri
 
 ### Rol Değişimi
-Kırılan destek, dirençe dönüşür; kırılan direnç, desteğe dönüşür. Bu en önemli kuraldır:
+Kırılan destek, dirence dönüşür; kırılan direnç, desteğe dönüşür. Bu en önemli kuraldır:
 
 ```
 Fiyat 90 TL desteği aşağı kırarsa → 90 TL artık direnç olur
@@ -1586,10 +1605,10 @@ Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
 
 ## Supertrend ile Birleştirme
 
-BorsaPusula'nın sinyalleri, Supertrend çizgisini dinamik destek/direnç olarak kullanır:
+Supertrend çizgisi, teknik analizde dinamik destek/direnç olarak okunur:
 
-- **Güçlü Trend sinyalinde:** Supertrend alt çizgisi → dinamik destek, stop-loss buraya konulur
-- **Trend Bozuldu sinyalinde:** Supertrend üst çizgisi → dinamik direnç, stop-loss buraya konulur
+- **Güçlü Trend durumunda:** Supertrend alt çizgisi → dinamik destek
+- **Trend Bozuldu durumunda:** Supertrend üst çizgisi → dinamik direnç
 
 Bu yaklaşım, klasik statik destek/direnç yerine piyasanın volatilitesine otomatik adapte olur.
 
@@ -1621,17 +1640,17 @@ Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zam
 
 ❌ **Küçük zaman diliminde aramak** — 15 dakikalık grafikteki "kritik destek" büyük zaman diliminde anlamsız olabilir.
 
-❌ **Sabır göstermemek** — Fiyat desteğe dokunduktan hemen sonra giriş yerine, tepkiyi onaylayana kadar bekleyin.
+❌ **Dokunuşu tepki sanmak** — Fiyatın desteğe dokunması tek başına tepkinin geldiği anlamına gelmez; teknik analizde tepkinin teyidi ayrıca aranır.
 
-❌ **Stop koymamak** — Destek kırılabilir. Her desteğin altına mutlaka stop koyun.
+❌ **Seviyeyi kesin sanmak** — Destek de direnç de kırılabilir; seviyeler olasılık bildirir, garanti vermez.
 
-[Güncel Supertrend seviyeleri ve Güçlü Trend/Trend Bozuldu sinyallerini gör →](/)""",
+[Hisseleri trend durumuna göre süz →](/tarama)""",
     "faqs": [
       {"q": "Destek ve direnç nasıl çizilir?", "a": "Grafikte önceki zirve ve dip noktalarını bulun. Birden fazla kez fiyatın durduğu veya geri döndüğü seviyeleri yatay çizgilerle işaretleyin. Bu seviyelere ne kadar çok dokunulmuşsa o kadar güçlüdür."},
       {"q": "Yuvarlak sayılar neden önemli destek/direnç seviyeleridir?", "a": "100, 50, 200 gibi yuvarlak sayılar psikolojik olarak önemlidir. Birçok yatırımcı bu seviyelerde emir verir. Bu yüzden bu seviyelerde çok sayıda alış/satış emri birikir ve fiyat buralarda sıkça durur veya geri döner."},
-      {"q": "Destek kırılınca ne yapmalı?", "a": "Destek kırılması, piyasanın yukarı yönlü görüşünü bozar. Varsa stop-loss devreye girer. Kırılım güçlüyse (yüksek hacimle) yeni destek seviyesini belirleyip bekleyin. Sahte kırılım ihtimali için hacmi kontrol edin."},
+      {"q": "Destek kırılınca ne anlama gelir?", "a": "Destek kırılması, yükseliş yönlü görünümü zayıflatır. Yüksek hacimle gelen kırılım daha anlamlı kabul edilir ve kırılan seviye çoğu zaman dirence dönüşür. Düşük hacimli kırılımlarda sahte kırılım ihtimali daha yüksektir."},
       {"q": "Dinamik destek nedir?", "a": "Hareketli ortalamalar (EMA50, EMA200) veya Supertrend gibi fiyatla birlikte hareket eden göstergeler dinamik destek oluşturur. Statik seviyelerin aksine zamanla değişirler ve trend içinde sürekli fiyatı destekler ya da dirençlendirirler."},
-      {"q": "Destek ve direnç seviyeleri ne kadar güvenilirdir?", "a": "Destek/direnç seviyeleri kesin değildir, olasılıksal bir yaklaşımdır. Güçlü seviyeler daha sık tutunur ama bazen kırılır. Bu yüzden her zaman stop-loss kullanmak ve risk yönetimine uymak şarttır."}
+      {"q": "Destek ve direnç seviyeleri ne kadar güvenilirdir?", "a": "Destek/direnç seviyeleri kesin değildir, olasılıksal bir yaklaşımdır. Güçlü seviyeler daha sık tutunur ama bazen kırılır. Bu yüzden destek/direnç tek başına değil, hacim ve trend gibi diğer verilerle birlikte değerlendirilir."}
     ],
     "related_tickers": ['THYAO', 'AKBNK', 'EREGL', 'FROTO', 'TUPRS']
   },
@@ -1739,10 +1758,11 @@ Her sinyal öncesi şunları kontrol edin:
   {
     "slug": "guclu-momentum-hisseleri-nasil-tespit-edilir",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "title": "Güçlü Momentum Hisseleri Nasıl Tespit Edilir?",
     "cat": "Strateji",
     "read_min": 6,
-    "summary": "Momentum yatırımcıları, güçlü trend içindeki hisseleri erken tespit ederek üstün getiri elde eder. ADX, Supertrend ve hacim kombinasyonuyla güçlü momentum hisseleri nasıl bulunur?",
+    "summary": "Momentum yatırımcıları, güçlü trend içindeki hisseleri erken tespit etmeye çalışır. ADX, Supertrend ve hacim kombinasyonuyla güçlü momentum hisseleri nasıl bulunur?",
     "body": """## Momentum Nedir?
 
 **Momentum**, bir hissenin fiyat hareketinin gücünü ve sürdürülebilirliğini ölçer. "Güçlü momentum" olan hisseler, yükseliş veya düşüşlerini belirli bir süre daha devam ettirme eğilimindedir.
@@ -1759,11 +1779,11 @@ ADX, trendin *yönünü değil, gücünü* ölçer:
 |-----------|-------|
 | < 20 | Yatay piyasa, zayıf trend |
 | 20–25 | Trend oluşmaya başlıyor |
-| 25–35 | **Güçlü trend — işlem yapılabilir** |
+| 25–35 | **Güçlü trend** |
 | 35–50 | Çok güçlü trend |
 | > 50 | Aşırı trend, dikkat! |
 
-**Kural:** ADX ≥ 25 olmadan momentum stratejisi uygulamak risklidir.
+**Not:** ADX 25'in altında trend zayıf kabul edilir; bu bölgede momentum yorumları daha az güvenilirdir.
 
 ### 2. Supertrend İndikatörü
 
@@ -1778,7 +1798,7 @@ Fiyat Supertrend çizgisinin üzerinde ve çizgi uzaklaşıyorsa momentum güçl
 
 Güçlü yükseliş momentumunda:
 
-- EMA 12 > EMA 50 > EMA 200 (tüm kısa vadeli ortalamar uzun vadeliyi geçmiş)
+- EMA 12 > EMA 50 > EMA 200 (tüm kısa vadeli ortalamalar uzun vadeliyi geçmiş)
 - EMA'lar arasındaki mesafe artıyorsa momentum güçleniyor
 
 ### 4. Hacim Teyidi
@@ -1803,22 +1823,21 @@ Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
 ## BorsaPusula'da Momentum Taraması
 
-[BorsaPusula'nın tarama sayfası](/tarama) bu kriterlerin tamamını uygular:
+[BorsaPusula'nın tarama sayfası](/tarama) hisseleri gün sonu verisiyle trend durumuna göre süzer:
 
-- "Güçlü Trend" sinyal filtresi → Supertrend Güçlü Trend + ADX uyumlu
-- "Min ADX" alanına 25 girilmesi → trend gücü doğrulaması
-- ⭐ "Hacim Onaylı" rozeti (RVOL ≥ 1,20) → hacim teyidi
-- Sinyal güç çubukları → momentum yoğunluğunu görsel olarak gösterir
+- Trend durumu "Güçlü Trend" → Supertrend, ADX, DI ve EMA koşulları birlikte sağlanıyor
+- "Güçlü Trend + Hacim Onaylı" hazır listesi (RVOL ≥ 1,20) → hacim teyidi
+- "Yeni sinyal (≤3 seans)" hazır listesi → trend durumu yakın zamanda değişen hisseler
 
 ## Momentum Stratejisinin Riskleri
 
 Momentum stratejisi güçlü olmakla birlikte riskler içerir:
 
-**Geç giriş riski:** Sinyal oluştuktan 5-10 bar sonra girilirse fiyat zirveye yakın olabilir.
+**Gecikme riski:** Sinyal oluştuktan 5-10 bar sonra fark edilen bir harekette fiyat zirveye yakın olabilir.
 
-**Stop-out riski:** Güçlü momentumda bile geçici düzeltmeler olur. ATR bazlı stop, bu dalgalanmalara alan bırakır.
+**Geçici düzeltme riski:** Güçlü momentumda bile geçici düzeltmeler olur; her dalgalanma trendin bittiği anlamına gelmez.
 
-**Momentum kırılması:** ADX 50+ iken sinyaller çok sık tersine döner. Aşırı yükselmiş hisselerde daha geniş stop kullanın.
+**Momentum kırılması:** ADX 50+ iken sinyaller çok sık tersine döner; aşırı yükselmiş hisselerde dalgalanma da genişler.
 
 **Makro riskler:** TCMB kararı, jeopolitik gelişmeler ve FED açıklamaları tek bir seansta tüm momentumu bozabilir.
 
@@ -1829,13 +1848,13 @@ Klasik BIST momentum yaklaşımı:
 2. ADX ≥ 25 ve hacim teyidi olanlar ayrılır
 3. Supertrend çizgisi trend dönüş seviyesi olarak izlenir: fiyat bu çizginin altında kapanırsa trend bozulmuş sayılır
 
-Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir.""",
+Momentum göstergeleri olasılık gösterir, kesinlik değil.""",
     "faqs": [
-      {"q": "Momentum hissesi ne kadar süre elde tutulmalı?", "a": "Supertrend sinyali devam ettiği sürece pozisyon korunabilir. Klasik yaklaşımda sinyal kapanana (Supertrend tersine dönene) veya stop-loss tetiklenene kadar beklenebilir. Bu bazen 2 hafta, bazen 3 ay sürebilir."},
+      {"q": "Güçlü momentum ne kadar sürer?", "a": "Supertrend tersine dönene kadar trend durumu Güçlü Trend olarak kalır. Bu süre bazen 2 hafta, bazen 3 ay olabilir; önceden bilinemez."},
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
-      {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ çok güçlü bir trendi gösterir; bu seviyelerden sonra trend gücü çoğunlukla yavaşlar. ADX tek başına yön söylemez — fiyat ve Supertrend ile birlikte okunmalıdır."},
-      {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
-      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Teknik Güç Skoru'na göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1,20) en güçlü hacim teyitli adayları işaretler."}
+      {"q": "ADX 50'nin üzerindeyken ne anlama gelir?", "a": "ADX 50+ çok güçlü bir trendi gösterir; bu seviyelerden sonra trend gücü çoğunlukla yavaşlar. ADX tek başına yön söylemez — fiyat ve Supertrend ile birlikte okunmalıdır."},
+      {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla yanlış işaret üretir. Bu ortamda fiyat hareketini anlamada destek/direnç seviyeleri daha açıklayıcı olabilir."},
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasındaki 'Güçlü Trend + Hacim Onaylı' hazır listesi, trend durumu Güçlü Trend olan ve hacim teyidi (RVOL ≥ 1,20) bulunan hisseleri gösterir. Sonuçlar varsayılan olarak BorsaPusula Skoru'na göre sıralanır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
   },
@@ -1957,6 +1976,7 @@ BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supe
   {
     "slug": "dolar-tl-borsa-iliskisi",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "title": "Dolar/TL ve BIST İlişkisi: Kur Yükselince Ne Olur?",
     "cat": "Makro Ekonomi",
     "read_min": 5,
@@ -1965,7 +1985,7 @@ BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supe
 
 Türkiye ekonomisinin dışa açıklığı nedeniyle **USD/TRY kuru, BIST'in en kritik makro değişkenlerinden biridir.** Kur yükseldiğinde (TL değer kaybettiğinde) bazı sektörler kazanırken bazıları kaybeder.
 
-Bu ilişkiyi doğru anlamak; sektör rotasyonunu zamanında görmek ve portföyünüzü kuruma karşı konumlandırmak için şarttır.
+Bu ilişkiyi anlamak, kur hareketlerinin sektörler ve şirketler üzerindeki etkisini yorumlamak için önemlidir.
 
 ## Kur Artışında Kazanan Sektörler
 
@@ -2029,16 +2049,13 @@ Türkiye'de para politikası ve kur arasındaki ilişki özellikle kritiktir:
 
 ## BorsaPusula'da Kur Takibi
 
-BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu gösterir. Kur hareketlerine göre sektör filtresi kullanarak:
+BorsaPusula sayfalarının üstündeki **Piyasalar şeridi**, USD/TRY kurunu da gösterir. Kurun etkisi şirketten şirkete değiştiği için ihracatçı ve ithalatçı şirketlerin döviz pozisyonu, hisse sayfalarındaki finansal tablolarda ayrıca incelenebilir.
 
-- Kur yükselişinde: FROTO, EREGL gibi ihracatçı hisselerin sinyallerini takip edin
-- Kur düşüşünde: İthalatçı şirketler ve tüketici sektörü sinyallerini değerlendirin
-
-[Tüm BIST100 hisselerinin güncel sinyallerine bakmak için ana sayfayı ziyaret edin.](/)""",
+[BIST100 hisselerinin gün sonu görünümü için Piyasa sayfasındaki ısı haritasına bakın.](/)""",
     "faqs": [
       {"q": "Kur yükselince BIST her zaman düşer mi?", "a": "Hayır. Kur yükselişi piyasayı hem pozitif (ihracatçı şirketler, döviz geliri olanlar) hem negatif (ithalatçılar, döviz borçlular) etkiler. BIST üzerindeki net etki, hangi sektörlerin ağırlıklı olduğuna bağlıdır. Hızlı kur yükselişleri genellikle genel bir risk kaçışına yol açsa da orta vadede ihracat odaklı şirketler kazanır."},
       {"q": "Dolar/TL ve altın arasındaki ilişki nasıl?", "a": "Altın hem USD hem güvenli liman varlığı olduğundan, Türk yatırımcı için TL bazındaki altın fiyatı kur × uluslararası altın fiyatından oluşur. Kur yükselirken uluslararası altın sabit kalsa bile TL bazındaki altın fiyatı artar."},
-      {"q": "Yabancı yatırımcı BIST'e ne zaman ilgi gösterir?", "a": "Yabancılar genellikle TL'nin istikrar kazandığı, reel faizin pozitife döndüğü veya BIST'in dolar bazında aşırı değer kaybettiği dönemlerde ilgi gösterir. BIST/USD tarihi düşüklerine yakın seviyeler alım fırsatı olarak değerlendirilebilir."},
+      {"q": "Yabancı yatırımcı BIST'e ne zaman ilgi gösterir?", "a": "Yabancılar genellikle TL'nin istikrar kazandığı, reel faizin pozitife döndüğü veya BIST'in dolar bazında aşırı değer kaybettiği dönemlerde ilgi gösterir. Bu nedenle BIST/USD'nin tarihsel düşüklerine yakın seviyeler yabancı yatırımcılar tarafından yakından izlenir."},
       {"q": "Türk şirketlerinin döviz borcu ne kadar önemli?", "a": "Şirket bilançolarında 'net döviz pozisyonu' kritik bir metriktir. Net döviz açığı büyük olan şirketler (borçları alacaklarından fazla), kur artışında zarar yazar. KAP bildirimleri ve yıllık raporlarda bu bilgiye ulaşılabilir."},
       {"q": "Kur korumalı mevduat (KKM) BIST'i nasıl etkiler?", "a": "KKM, TL'nin değer kaybetmesi durumunda Hazine farkı karşıladığından, TL'yi tutmayı cazip kılar. Bu mekanizma güçlüyken TL baskısı sınırlı kalır ve BIST daha istikrarlı seyreder. KKM'nin kaldırılması veya zayıflaması kur riskini artırabilir."}
     ],
@@ -2051,6 +2068,7 @@ BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu gösterir. Kur har
     "title": "Stokastik Osilatör Nedir? RSI ile Nasıl Birlikte Kullanılır?",
     "cat": "Teknik Analiz",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "read_min": 6,
     "summary": "Stokastik osilatör, fiyatın belirli bir dönemdeki fiyat aralığına göre nerede kapandığını ölçer. Aşırı alım/satım bölgelerini RSI'dan farklı bir perspektifle gösterir. İki göstergeyi birlikte kullanmak sinyal güvenilirliğini artırır.",
     "body": """## Stokastik Osilatör Nedir?
@@ -2069,15 +2087,15 @@ Standart parametre: **%K(14), %D(3)** — yani 14 günlük fiyat aralığı.
 
 | Değer | Yorum |
 |-------|-------|
-| 80+ | Aşırı alım bölgesi — dikkatli olun |
-| 20- | Aşırı satım bölgesi — toparlanma yakın olabilir |
+| 80+ | Aşırı alım bölgesi |
+| 20- | Aşırı satım bölgesi |
 | %K > %D | Yükseliş momentumu |
 | %K < %D | Düşüş momentumu |
 
-**Kesişim sinyalleri:**
+**Kesişimler:**
 
-- %K, %D'yi aşağıdan yukarıya keser → Potansiyel **alım** sinyali
-- %K, %D'yi yukarıdan aşağıya keser → Potansiyel **satım** sinyali
+- %K, %D'yi aşağıdan yukarıya keser → **yükseliş işareti** olarak yorumlanır
+- %K, %D'yi yukarıdan aşağıya keser → **düşüş işareti** olarak yorumlanır
 
 ## Stokastik ile RSI Arasındaki Fark
 
@@ -2089,27 +2107,27 @@ Standart parametre: **%K(14), %D(3)** — yani 14 günlük fiyat aralığı.
 | Trend mi, momentum mu? | Her ikisi | Ağırlıklı momentum |
 | Yanlış sinyal | Trend piyasada az | Trend piyasada çok |
 
-**Kritik fark:** RSI trend takibi için daha güvenilirken, stokastik yatay piyasalarda daha etkilidir. BorsaPusula'nın sinyal motoru trend gücü için ADX + RSI kombinasyonu kullanır.
+**Kritik fark:** RSI trend takibi için daha güvenilirken, stokastik yatay piyasalarda daha etkilidir. BorsaPusula'nın trend durumu, trend gücünü ADX ile ölçer.
 
 ## İki Göstergeyi Birlikte Kullanma
 
-Sinyal güvenilirliği için iki göstergenin aynı yönü işaret etmesi tercih edilir:
+Teknik analizde iki göstergenin aynı yönü işaret etmesi daha güçlü bir işaret olarak yorumlanır:
 
-**Güçlü Alım Kombinasyonu:**
+**Yükseliş yönünde örtüşme:**
 1. Stokastik 20'nin altından %K > %D kesişimi
 2. RSI 30-50 arası (aşırı satımdan çıkıyor)
 3. Fiyat güçlü destek seviyesinde
 
-**Güçlü Satım Kombinasyonu:**
+**Düşüş yönünde örtüşme:**
 1. Stokastik 80'in üstünden %K < %D kesişimi
 2. RSI 70 üzerinde (aşırı alım)
 3. Fiyat önemli direnç seviyesinde
 
-## BorsaPusula Sinyalleriyle İlişkisi
+## BorsaPusula Trend Durumuyla İlişkisi
 
-BorsaPusula'nın Güçlü Trend sinyali, **Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99** dörtlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
+BorsaPusula'nın Güçlü Trend durumu, **Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99** dörtlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır.
 
-Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusula sinyallerine **ikinci bir momentum teyidi** ekleyebilirsiniz.
+Stokastik osilatör, grafik platformlarında trend durumunun yanında **ikinci bir momentum göstergesi** olarak izlenebilir.
 
 ## Dikkat Edilmesi Gereken Tuzaklar
 
@@ -2124,11 +2142,11 @@ Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusu
       {"q": "RSI mi stokastik mi daha iyi?",
        "a": "Her ikisinin de farklı güçlü yanları vardır. RSI trend piyasalarda daha güvenilirken, stokastik yatay piyasalarda daha etkilidir. İkisini birlikte kullanmak sinyal güvenilirliğini artırır."},
       {"q": "Stokastik %K ve %D çizgisi ne anlama gelir?",
-       "a": "%K hızlı stokastik çizgisidir ve anlık fiyat konumunu gösterir. %D ise %K'nın hareketli ortalamasıdır ve daha pürüzsüz bir sinyal çizgisi sağlar. %K'nın %D'yi keserek üzerine çıkması alım, altına inmesi satım sinyali olarak yorumlanır."},
+       "a": "%K hızlı stokastik çizgisidir ve anlık fiyat konumunu gösterir. %D ise %K'nın hareketli ortalamasıdır ve daha pürüzsüz bir sinyal çizgisi sağlar. %K'nın %D'yi keserek üzerine çıkması yükseliş, altına inmesi düşüş işareti olarak yorumlanır."},
       {"q": "Stokastik hangi piyasalarda işe yarar?",
        "a": "Stokastik, yatay (range-bound) piyasalarda ve kısa vadeli işlemlerde güçlüdür. Güçlü yükseliş veya düşüş trendlerinde ise uzun süre aşırı alım/satım bölgesinde kalarak yanıltıcı sinyaller üretebilir."},
       {"q": "BorsaPusula stokastik osilatör kullanıyor mu?",
-       "a": "BorsaPusula'nın sinyal motoru Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 dörtlü koşuluna dayanır. Stokastik doğrudan kullanılmasa da RSI tamamlayıcı gösterge olarak hisse sayfalarında gösterilir. Stokastiği grafik platformunuzda ek teyit için kullanabilirsiniz."}
+       "a": "BorsaPusula'nın trend durumu Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 dörtlü koşuluna dayanır. Stokastik doğrudan kullanılmaz; RSI tamamlayıcı gösterge olarak yer alır. Stokastik, grafik platformlarında ek teyit için izlenebilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'TUPRS']
   },
@@ -2139,13 +2157,14 @@ Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusu
     "title": "Kaldıraç ve Marjin: Borçlanarak Yatırım Yapmanın Riskleri",
     "cat": "Risk Yönetimi",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "read_min": 7,
     "summary": "Kaldıraç, hem kazancınızı hem kaybınızı büyütür. Marjin hesabı nasıl çalışır, marjin çağrısı ne demektir ve kaldıraç neden deneyimsiz yatırımcılar için tehlikelidir? Türkiye piyasaları için kapsamlı rehber.",
     "body": """## Kaldıraç (Leverage) Nedir?
 
 **Kaldıraç**, ödünç alınan para kullanarak yatırım büyüklüğünü artırmaktır. Örneğin:
 
-- Sermazye: 10.000 ₺
+- Sermaye: 10.000 ₺
 - 2:1 kaldıraç kullanırsanız: 20.000 ₺ değerinde pozisyon açabilirsiniz
 - Hisse %10 yükselirse: 2.000 ₺ kâr (%20 getiri sermayenize)
 - Hisse %10 düşerse: 2.000 ₺ zarar (**%20 kayıp sermayenizden**)
@@ -2194,32 +2213,26 @@ Vadeli işlem sözleşmelerinde kaldıraç çok daha yüksektir:
 
 Bu piyasalarda deneyimsiz yatırımcılar kısa sürede büyük kayıplar yaşayabilir.
 
-## Kaldıraç Ne Zaman Kullanılabilir?
+## Kaldıraçta Zamanlama Riski
 
-Kaldıraç, belirli koşullar altında ve **çok küçük miktarlarda** değerlendirilebilir:
-
-1. ✅ Güçlü trend onayı var (ADX ≥ 35, Supertrend onaylı)
-2. ✅ Net bir stop-loss seviyesi belirlendi
-3. ✅ Toplam pozisyon büyüklüğü portföyün max %10'u
-4. ✅ Maksimum 2:1 kaldıraç (daha yüksek = spekülasyon)
-5. ✅ Marjin çağrısı riskini karşılayabilecek rezerv nakit var
+Kaldıraçlı işlemde risk yalnız fiyatın yönüne değil zamanlamaya da bağlıdır: güçlü bir trend içinde bile geçici düzeltmeler marjin çağrısını tetikleyebilir. Kaldıraç oranı yükseldikçe sermayeyi silebilecek fiyat hareketi küçülür; bu yüzden kaldıraç, pozisyon büyüklüğü ve rezerv nakitle birlikte değerlendirilen ileri seviye bir araç olarak görülür.
 
 ## BorsaPusula Kullanıcıları İçin Not
 
-BorsaPusula'nın sinyal sistemi, trend gücünü ADX, EMA ve Supertrend göstergelerinin ortak yönüyle değerlendirir. Yüksek ADX'li güçlü trendler bile kaldıraçsız izlendiğinde daha güvenlidir.
+BorsaPusula'daki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay), ADX, EMA ve Supertrend göstergelerinin ortak yönünü gün sonu verisiyle betimler. Trend durumu bir betimlemedir; kaldıraçlı işlemin riskini ortadan kaldırmaz.
 
-> **Altın kural:** Kaldıraç, kazancınızı artırmak için değil, yalnızca çok emin olduğunuz işlemleri *biraz* büyütmek için kullanın. Emin olmak için önce kaldıraçsız deneyin.""",
+> **Özetle:** Kaldıraç kazancı da kaybı da aynı oranda büyütür; yüksek ADX'li güçlü trendlerde bile geçici düzeltmeler kaldıraçlı hesapta kalıcı kayba dönüşebilir.""",
     "faqs": [
       {"q": "Kaldıraç nedir, basitçe açıklar mısınız?",
        "a": "Kaldıraç, sahip olduğunuzdan daha büyük bir yatırım pozisyonu açmak için borç para kullanmaktır. 2:1 kaldıraç, 10.000 ₺ sermaye ile 20.000 ₺ pozisyon açmak anlamına gelir. Hisse değer kazanırsa kâr iki katına çıkar, değer kaybederse zarar da iki katına çıkar."},
       {"q": "Marjin çağrısı (margin call) nedir?",
        "a": "Kaldıraçlı pozisyonunuz zarara uğradığında ve hesabınızdaki teminat minimum seviyenin altına düştüğünde aracı kurum 'marjin çağrısı' yapar. Ya ek teminat yatırmanız ya da pozisyonunuzun otomatik kapatılmasına izin vermeniz gerekir."},
-      {"q": "BIST hisselerinde kaldıraç kullanabilir miyim?",
+      {"q": "BIST hisselerinde kaldıraç kullanılabilir mi?",
        "a": "Evet, SPK lisanslı aracı kurumlar marjin kredisi sunar. Ancak Türkiye'de marjin faizi yüksektir ve kreditli işlem, hissenin değer kazancının faiz maliyetini karşılamasını gerektirir."},
       {"q": "Kaldıraç yeni başlayan yatırımcılar için uygun mu?",
-       "a": "Hayır. Kaldıraç, hem teknik analiz hem de risk yönetimi konusunda deneyim gerektiren ileri seviye bir araçtır. Yeni yatırımcıların önce kaldıraçsız işlem yaparak piyasayı öğrenmeleri tavsiye edilir."},
-      {"q": "Kaç yıllık deneyimden sonra kaldıraç kullanılabilir?",
-       "a": "Kural değil, bireysel yetkinliğe bağlıdır. Ancak en az 2-3 yıl sürekli kaldıraçsız işlem geçmişi, net bir kâr-zarar kaydı ve sağlam bir risk yönetimi disiplini olmadan kaldıraç önerilmez."}
+       "a": "Hayır. Kaldıraç, hem teknik analiz hem de risk yönetimi konusunda deneyim gerektiren ileri seviye bir araçtır. Piyasa deneyimi olmadan kullanıldığında kayıplar hızla büyüyebilir."},
+      {"q": "Kaldıraç kullanımında deneyim neden önemlidir?",
+       "a": "Kaldıraçlı işlemde küçük hatalar sermayeye oranla büyük kayıplara dönüşür. Kaldıraçsız işlem geçmişi, net bir kâr-zarar kaydı ve risk yönetimi alışkanlığı, kaldıracın yarattığı dalgalanmayı taşıyabilmenin ön koşulu olarak görülür."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ISCTR', 'THYAO', 'EREGL']
   },
@@ -2230,6 +2243,7 @@ BorsaPusula'nın sinyal sistemi, trend gücünü ADX, EMA ve Supertrend gösterg
     "title": "DCA (Düzenli Yatırım) Stratejisi: Ortalama Maliyet Düşürme Nedir?",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "read_min": 6,
     "summary": "Dollar-Cost Averaging (DCA), belirli aralıklarla sabit miktarda yatırım yaparak piyasa zamanlaması riskini azaltan bir stratejidir. BIST'te DCA nasıl uygulanır, avantajları ve sınırlılıkları nelerdir?",
     "body": """## DCA (Dollar-Cost Averaging) Nedir?
@@ -2260,7 +2274,7 @@ BorsaPusula'nın sinyal sistemi, trend gücünü ADX, EMA ve Supertrend gösterg
 
 1. **Piyasa zamanlaması riski yok:** "Dip nerede?" sorusuna cevap aramaya gerek kalmaz
 2. **Duygusal disiplin:** Panik satış ve FOMO alımları azalır
-3. **Volatilite arkadaşınız olur:** Düşüşler daha ucuz alım fırsatıdır
+3. **Volatilitenin etkisi yumuşar:** Düşüşlerde aynı tutarla daha fazla birim alınır
 4. **Basitlik:** Karmaşık analiz gerektirmez, herkes uygulayabilir
 5. **Yeni başlayanlar için ideal:** Piyasayı öğrenirken risk sınırlı kalır
 
@@ -2268,38 +2282,28 @@ BorsaPusula'nın sinyal sistemi, trend gücünü ADX, EMA ve Supertrend gösterg
 
 1. **Güçlü yükseliş trendinde alt-performans:** Fiyat sürekli yükseliyorsa, her ay daha pahalıya alırsınız
 2. **Likidite sorunları:** Aylık düzenli gelir gerektiriyor
-3. **Kötü varlık seçimi:** DCA işe yaramaz bir hisseyi düzenli almayı cazip göstermeyin
+3. **Varlık seçimi:** DCA, temelden sorunlu bir şirketi düzenli almayı doğru kılmaz
 4. **İnsan psikolojisi:** Hisse düşünce "daha çok al" dürtüsü DCA'yı bozabilir
 
-> **Kritik nokta:** DCA, iyi bir varlık seçimini değiştirmez. Temelden sorunlu bir şirkete DCA yapmak, kayıplarınızı ortalamanızdan ibaret olacaktır.
+> **Kritik nokta:** DCA, varlık seçiminin yerini tutmaz. Temelden sorunlu bir şirkete DCA yapmak, kayıplarınızı ortalamanızdan ibaret olacaktır.
 
 ## BIST'te DCA: Hangi Varlıklara?
 
-### Endeks Fonları (Önerilen)
-BYF (Borsa Yatırım Fonu) veya hisse senedi fonu üzerinden BIST100 veya BIST30'a DCA, bireysel hisse riskini ortadan kaldırır.
+### Endeks Fonları
+BYF (Borsa Yatırım Fonu) veya hisse senedi fonu üzerinden BIST100 veya BIST30'a DCA, şirkete özgü riski birçok hisseye dağıtır.
 
-### Bireysel Hisseler — Teknik Filtreli DCA
-BorsaPusula sinyallerini DCA ile kombine etmek mümkündür:
-1. **Sinyal yoksa:** Düzenli yatırımını endeks fonuna yönelt
-2. **Güçlü Trend sinyali + düşük giriş maliyeti:** O hisseye DCA'nın bir kısmını yönelt
-3. **Trend Bozuldu sinyali:** O hissede DCA'yı durdur, endekse yönelt
+### Bireysel Hisseler
+Bireysel hissede düzenli alım, endeks fonuna göre şirkete özgü riski artırır. Bu nedenle şirketin açıkladığı finansallar, borç yapısı ve sektördeki konumu ayrıca incelenir. BorsaPusula'daki [tarama sayfası](/tarama), hisseleri trend durumuna (Güçlü Trend / Trend Bozuldu / Yatay) göre süzer; bu bilgi değerlendirmenin girdilerinden biridir.
 
 ### Kur Riski — TL DCA
-Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA stratejisinde döviz bazlı varlıkları (altın, USD fonu) portföyün bir kısmına dahil etmek denge sağlar.
+Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA stratejilerinde döviz bazlı varlıklar (altın, USD fonu) bu riske karşı çeşitlendirme aracı olarak kullanılır.
 
-## Uygulama Önerileri
+## Uygulamada Nelere Dikkat Edilir?
 
-**Başlangıç için:**
-
-- Aylık gelirin %10-20'sini ayır
-- İlk hedef: 12 aylık düzenli alım
-- Endeks fonu + 1-2 sektör lideri hisse kombinasyonu
-
-**İleri seviye:**
-
-- BorsaPusula'da [Güçlü Trend sinyalinde olan hisselere](/tarama) odaklan
-- Yüksek ADX + uzun süredir aktif sinyal → DCA için tercih et
-- Quarterly rebalancing: Her çeyrekte portföy dağılımını gözden geçir
+- **Sürdürülebilir tutar:** Ayrılan tutarın düzenli gelirle aksatılmadan karşılanabilmesi
+- **Süre:** Ortalama maliyet etkisinin görülebilmesi için yöntemin uzun süre (ör. 12 ay ve üzeri) uygulanması
+- **Çeşitlendirme:** Endeks fonu ile bireysel hisse arasındaki risk farkının bilinmesi
+- **Dengeleme (rebalancing):** Portföy dağılımının belirli aralıklarla (ör. her çeyrek) gözden geçirilmesi
 
 > *"Piyasada zaman geçirmek, piyasayı zamanlamaya çalışmaktan daha önemlidir."* — Warren Buffett""",
     "faqs": [
@@ -2307,12 +2311,12 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
        "a": "DCA (Dollar-Cost Averaging veya Düzenli Yatırım), belirli aralıklarla (aylık, haftalık) sabit miktarda yatırım yapma yöntemidir. Fiyat düşükse daha fazla, yüksekse daha az birim alınır ve zamanla ortalama maliyet düzleşir."},
       {"q": "DCA ile ortalama maliyet düşürme aynı mı?",
        "a": "Hayır, farklıdır. DCA, düzenli aralıklarla sabit miktarda alım yapmaktır. 'Ortalama maliyet düşürme' ise fiyat düştükçe daha fazla alarak mevcut maliyetin altına inmektir. DCA önceden planlanmışken, ortalama düşürme genellikle reaktif bir karardır."},
-      {"q": "BIST'te DCA uygulamak için hangi hisseleri seçmeliyim?",
-       "a": "DCA için en güvenli seçim endeks fonlarıdır (BYF — BIST100 veya BIST30). Bireysel hissede ise sektör lideri, güçlü bilanço ve uzun vadeli büyüme hikayesi olan şirketlere odaklanılmalıdır. BorsaPusula'da uzun süredir Güçlü Trend sinyalinde olan, yüksek ADX'li hisseler teknik açıdan desteklenmiş seçenekler sunar."},
-      {"q": "Ne kadar sıklıkla DCA yapmalıyım?",
-       "a": "Aylık DCA en yaygın ve pratik yöntemdir. Maaş aldıktan hemen sonra otomatik olarak yatırıma yönlendirmek, psikolojik bariyer oluşturmaz. Haftalık DCA daha küçük miktarlarda da uygulanabilir ancak işlem maliyetleri önemli hale gelebilir."},
+      {"q": "BIST'te DCA için hangi varlıklar kullanılır?",
+       "a": "DCA'da en yaygın kullanılan araç endeks fonlarıdır (BYF — BIST100 veya BIST30); şirkete özgü riski birçok hisseye dağıtır. Bireysel hissede ise şirketin açıkladığı finansallar, borç yapısı ve sektördeki konumu incelenir. DCA, varlık seçiminin yerini tutmaz."},
+      {"q": "DCA hangi sıklıkla yapılır?",
+       "a": "Aylık DCA en yaygın ve pratik yöntemdir. Maaş gününe bağlı otomatik talimatlar, kararı anlık duygulardan bağımsız kılar. Haftalık DCA daha küçük miktarlarda da uygulanabilir ancak işlem maliyetleri önemli hale gelebilir."},
       {"q": "DCA piyasa çöküşünde işe yarar mı?",
-       "a": "Evet, özellikle piyasa çöküşlerinde DCA en etkili biçimde çalışır. Her düşüş, aynı miktarla daha fazla birim almak anlamına gelir. Uzun vadeli bir varlıksa, toparlanma sonrası ortalama maliyet avantajı belirginleşir. Ancak bunun için sabır ve disiplin gereklidir."}
+       "a": "DCA'nın mekanizması en belirgin biçimde piyasa düşüşlerinde görülür. Her düşüş, aynı miktarla daha fazla birim almak anlamına gelir. Uzun vadeli bir varlıksa, toparlanma sonrası ortalama maliyet avantajı belirginleşir. Ancak bunun için sabır ve disiplin gereklidir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'BIMAS', 'KCHOL']
   },
@@ -2389,17 +2393,18 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Trend Takip Stratejisi: Trende Ortak Olmak Neden İşe Yarar?",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "desc": "Trend takip stratejisi, fiyatın mevcut yönünde devam edeceği varsayımıyla çalışır. Supertrend, EMA ve ADX birleşimi güçlü trendleri nasıl yakalar?",
-    "body": """<p>"Trend dostunuzdur." Borsa dünyasının en eski ve en sağlam prensiplerinden biri. Ama trendi doğru tanımlamak, zamanında girmek ve doğru çıkış noktasını belirlemek ayrı birer sanattır.</p>
+    "body": """<p>"Trend dostunuzdur." Borsa dünyasının en eski ve en sağlam prensiplerinden biri. Ama trendi doğru tanımlamak ve ne zaman bozulduğunu fark etmek ayrı bir beceri ister.</p>
 
 <h2>Trend Takip Stratejisi Nedir?</h2>
-<p><strong>Trend takip (trend following)</strong>, fiyatın mevcut yönünde devam edeceği varsayımıyla alım veya satım pozisyonu almayı içeren bir yaklaşımdır. Temel mantık şudur: <em>Güçlü bir trend başladığında, o trend genellikle beklenen süreden daha uzun sürer.</em></p>
+<p><strong>Trend takip (trend following)</strong>, fiyatın mevcut yönünde devam edeceği varsayımına dayanan bir yaklaşımdır. Temel mantık şudur: <em>Güçlü bir trend başladığında, o trend genellikle beklenen süreden daha uzun sürer.</em></p>
 
-<p>Bu strateji, "dibden al, tepeden sat" mantığına karşı durur. Aksine şöyle der: <em>"Trendin başladığını gördüğünde katıl, bitmediği sürece bekle."</em></p>
+<p>Bu yaklaşım, dip ve tepe tahmin etmeye çalışan yaklaşımın karşısında durur. Odak, <em>trendin başladığını fark etmek ve trend sürdükçe onu izlemektir.</em></p>
 
 <h2>Üç Temel Bileşen</h2>
-<p>BorsaPusula'nın sinyal motoru tam da bu prensibe dayanır: Üç indikatörün aynı anda aynı yönü göstermesi.</p>
+<p>BorsaPusula'nın trend durumu tam da bu prensibe dayanır: Üç indikatörün aynı anda aynı yönü göstermesi.</p>
 
 <h3>1. Supertrend — Trend Yönü</h3>
 <p>Supertrend göstergesi, ATR bazlı dinamik destek/direnç çizer. Fiyat bu çizginin üzerindeyken yükseliş trendi, altındayken düşüş trendi devam ediyor demektir. Basit, net, gecikmesi düşük.</p>
@@ -2419,7 +2424,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <tr><td>Üçlü Onay (Yükseliş)</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Güçlü Trend teyidi</td></tr>
 <tr><td>Zayıf Onay</td><td>▲ Yeşil</td><td>&lt; 25</td><td>12 &gt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
 <tr><td>Karışık</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &lt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
-<tr><td>Üçlü Onay (Düşüş)</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Trend Bozuldu — çıkış uyarısı</td></tr>
+<tr><td>Üçlü Onay (Düşüş)</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Trend Bozuldu</td></tr>
 </tbody>
 </table>
 
@@ -2433,21 +2438,21 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Trend Takibin Zayıf Yönleri</h2>
 <p>Hiçbir strateji kusursuz değildir. Trend takibinin bilinen tuzakları:</p>
 <ul>
-<li><strong>Yatay piyasada yüksek kayıp:</strong> Trend olmayan dönemlerde çok sayıda küçük zararlı sinyal üretilir.</li>
-<li><strong>Gecikmeli giriş:</strong> Trend başladıktan bir süre sonra sinyali almak, %20-30 hareketi kaçırmak anlamına gelebilir.</li>
-<li><strong>Ani tersine dönüş riski:</strong> Güçlü trend aniden bozulabilir; bu nedenle stop loss kritik önem taşır.</li>
+<li><strong>Yatay piyasada yüksek kayıp:</strong> Trend olmayan dönemlerde çok sayıda kısa ömürlü, yanıltıcı işaret oluşur.</li>
+<li><strong>Gecikmeli tepki:</strong> İşaret trend başladıktan bir süre sonra oluşur; bu sürede hareketin %20-30'u gerçekleşmiş olabilir.</li>
+<li><strong>Ani tersine dönüş riski:</strong> Güçlü trend aniden bozulabilir; trend göstergeleri bu dönüşü ancak gecikmeyle yansıtır.</li>
 </ul>
 
-<p>BorsaPusula sinyallerinin hangi göstergelerden ve hangi eşiklerden üretildiğini <a href="/metodoloji">Metodoloji sayfasından</a> inceleyebilirsiniz.</p>""",
+<p>BorsaPusula trend durumunun hangi göstergelerden ve hangi eşiklerden üretildiğini <a href="/metodoloji">Metodoloji sayfasından</a> inceleyebilirsiniz.</p>""",
     "faqs": [
       {"q": "Trend takip stratejisi nedir?",
-       "a": "Fiyatın mevcut yönünde devam edeceği varsayımıyla hareket eden bir yatırım yaklaşımıdır. 'Dibe yakın al, tepeye yakın sat' değil; 'trend başladığında katıl, trend bitmeden çık' mantığıyla çalışır."},
+       "a": "Fiyatın mevcut yönünde devam edeceği varsayımıyla hareket eden bir yatırım yaklaşımıdır. Dip ve tepe tahmin etmek yerine trendin başladığını fark etmeye ve trend sürdükçe onu izlemeye odaklanır."},
       {"q": "ADX neden 25 olarak seçildi?",
        "a": "ADX 25, piyasanın trend mi yoksa yatay mı olduğunu ayırt etmek için yaygın olarak kabul edilen eşik değeridir. 25'in altı genellikle gürültülü, yatay piyasayı işaret eder; 25 ve üzeri trendin gerçekten güçlendiğine işaret eder."},
       {"q": "Supertrend ne zaman yanlış sinyal verir?",
        "a": "Volatilitenin ani arttığı dönemlerde, özellikle yatay piyasada, Supertrend sık sık yön değiştirir. Bu nedenle ADX filtresi kritik önem taşır — trend gücü zayıfken Supertrend sinyalleri güvenilir değildir."},
-      {"q": "Stop loss nereye koyulmalı?",
-       "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (Güçlü Trend için) veya üstüne (Trend Bozuldu için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
+      {"q": "Trend dönüş seviyesi neyi gösterir?",
+       "a": "Supertrend çizgisi trend dönüş seviyesi olarak okunur: yükseliş trendinde fiyatın altında, düşüş trendinde üstünde ilerler. Bu seviyenin kapanış bazında aşılması trendin döndüğüne dair bir işaret olarak yorumlanır."},
       {"q": "Trend ne zaman bozulmuş sayılır?",
        "a": "Kapanış fiyatının Supertrend çizgisinin altına inmesi trendin bozulduğunu gösterir; BorsaPusula bu durumu \"Trend Bozuldu\" olarak işaretler."}
     ],
@@ -2460,6 +2465,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "RSI Uyuşmazlığı (Divergence): Trend Dönüşünü Erkenden Yakalamak",
     "cat": "Teknik Analiz",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "desc": "RSI uyuşmazlığı (divergence), fiyat ve momentum arasındaki ayrışmayı gösterir. Gizli uyuşmazlık, açık uyuşmazlık ve pratik kullanım rehberi.",
     "body": """<p>Fiyat yeni zirve yapıyor, ama RSI yapmıyor. Ya da tam tersi. Bu tutarsızlık, trend dönüşünün habercisi olabilir. İşte <strong>RSI uyuşmazlığı (divergence)</strong> adı verilen güçlü sinyal tekniği.</p>
@@ -2474,7 +2480,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <thead><tr><th>Tür</th><th>Fiyat</th><th>RSI</th><th>Sinyal</th></tr></thead>
 <tbody>
 <tr><td><strong>Ayı uyuşmazlığı</strong></td><td>Yeni yüksek ↑</td><td>Daha düşük tepe ↓</td><td>Düşüş uyarısı ⚠️</td></tr>
-<tr><td><strong>Boğa uyuşmazlığı</strong></td><td>Yeni düşük ↓</td><td>Daha yüksek dip ↑</td><td>Yükseliş fırsatı 📈</td></tr>
+<tr><td><strong>Boğa uyuşmazlığı</strong></td><td>Yeni düşük ↓</td><td>Daha yüksek dip ↑</td><td>Yükseliş işareti 📈</td></tr>
 </tbody>
 </table>
 
@@ -2491,14 +2497,14 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </tbody>
 </table>
 
-<p>Gizli uyuşmazlık, trendin devam edeceğini gösteren "trend içi düzeltme" sinyalidir. Yükseliş trendinde her dip biraz daha yüksek yapılıyorsa ve RSI daha düşük dip yapıyorsa, bu trend içi alım fırsatı olabilir.</p>
+<p>Gizli uyuşmazlık, trendin devam edeceğini gösteren "trend içi düzeltme" sinyalidir. Yükseliş trendinde her dip biraz daha yüksek yapılıyorsa ve RSI daha düşük dip yapıyorsa, bu durum trendin sürdüğüne dair bir işaret olarak yorumlanır.</p>
 
 <h2>RSI Uyuşmazlığını Nasıl Tanımlarsınız?</h2>
 <ol>
 <li>Grafikte iki anlamlı tepe veya dip belirleyin (en az 5-10 bar aralıklı).</li>
 <li>RSI'da da aynı noktalardaki değerlere bakın.</li>
 <li>Fiyat ile RSI zıt yön gösteriyorsa uyuşmazlık vardır.</li>
-<li><strong>Kritik:</strong> Uyuşmazlık tek başına giriş sinyali değildir — destek/direnç kırılımı veya başka bir onay bekleyin.</li>
+<li><strong>Kritik:</strong> Uyuşmazlık tek başına trend dönüşü anlamına gelmez — destek/direnç kırılımı gibi ek onaylarla birlikte yorumlanır.</li>
 </ol>
 
 <h2>Güçlü Sinyal için Ek Filtreler</h2>
@@ -2507,18 +2513,18 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <li><strong>Supertrend + RSI divergence:</strong> Supertrend yön değiştirdiğinde uyuşmazlık mevcut mu?</li>
 <li><strong>Hacim onayı:</strong> Uyuşmazlık noktasında hacim artışı güveni artırır.</li>
 <li><strong>Destek/direnç:</strong> Uyuşmazlık kritik bir seviyede mi oluşuyor?</li>
-<li><strong>Zaman dilimi uyumu:</strong> Haftalık grafikte uyuşmazlık + günlük grafikte giriş sinyali en güçlü kombinasyondur.</li>
+<li><strong>Zaman dilimi uyumu:</strong> Haftalık grafikte uyuşmazlık + günlük grafikte aynı yönlü işaret en güçlü kombinasyon kabul edilir.</li>
 </ul>
 
 <h2>BorsaPusula'da Uyuşmazlık Nasıl İzlenir?</h2>
-<p>Her hisse detay sayfasında RSI değeri ve grafik üzerinde fiyat hareketleri görülebilir. RSI 70 üzerindeyken fiyat yeni zirve yapıyorsa ve RSI önceki zirveyi kıramıyorsa, bu durumu göz önünde bulundurun.</p>
+<p>Her hisse detay sayfasında RSI değeri ve grafik üzerinde fiyat hareketleri görülebilir. RSI 70 üzerindeyken fiyat yeni zirve yapıyor ama RSI önceki zirveyi aşamıyorsa, bu bir ayı uyuşmazlığı örneğidir.</p>
 
-<p>Unutmayın: BorsaPusula sinyali 3 indikatörün <em>hizalanmasını</em> arar — uyuşmazlık bu hizalamayı bozabilir ve sinyali zayıflatabilir. <a href="/">Güncel sinyalleri inceleyin →</a></p>""",
+<p>BorsaPusula'daki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) Supertrend, ADX ve EMA'ların birlikte değerlendirilmesine dayanır; uyuşmazlık ise bu tabloya momentum tarafından ek bir bakış sağlar. <a href="/tarama">Hisseleri trend durumuna göre süzmek için tarama sayfası →</a></p>""",
     "faqs": [
       {"q": "RSI uyuşmazlığı (divergence) nedir?",
        "a": "Fiyat yeni zirve ya da dip yaparken RSI aynı hareketi yapmıyorsa bu uyuşmazlık (divergence) olarak adlandırılır. Fiyat ile momentum arasındaki bu ayrışma, olası trend dönüşünün habercisidir."},
       {"q": "Açık ve gizli uyuşmazlık arasındaki fark nedir?",
-       "a": "Açık uyuşmazlık olası bir trend dönüşüne işaret ederken, gizli uyuşmazlık mevcut trendin devam ettiğini gösterir. Gizli uyuşmazlık, trend içi geri çekilmelerde pozisyon eklemek için kullanılır."},
+       "a": "Açık uyuşmazlık olası bir trend dönüşüne işaret ederken, gizli uyuşmazlık mevcut trendin devam ettiğini gösterir. Gizli uyuşmazlık genellikle trend içi geri çekilmelerde görülür."},
       {"q": "RSI uyuşmazlığı her zaman işe yarar mı?",
        "a": "Hayır. Güçlü bir trend sırasında uyuşmazlık uzun süre devam edebilir. Bu nedenle uyuşmazlık tek başına yeterli değildir — destek/direnç kırılımı veya hacim onayı gibi ek filtreler gereklidir."},
       {"q": "Hangi zaman diliminde uyuşmazlığa bakmalıyım?",
@@ -2536,9 +2542,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Halka arz sürecini, nasıl talep toplama yapıldığını, avantajlarını ve risklerini anlatan kapsamlı rehber. BIST'teki halka arzlara nasıl başvurulur?",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
-<p>Halka arz (İPO — Initial Public Offering), bir şirketin hisselerini ilk kez kamuya açık olarak piyasaya sürmesidir. Bu süreç, hem şirket hem yatırımcılar için kritik önem taşır.</p>
+<p>Halka arz (IPO — Initial Public Offering), bir şirketin hisselerini ilk kez kamuya açık olarak piyasaya sürmesidir. Bu süreç, hem şirket hem yatırımcılar için kritik önem taşır.</p>
 
 <h2>Halka Arz Neden Yapılır?</h2>
 <p>Şirketler çeşitli amaçlarla halka açılır:</p>
@@ -2575,7 +2582,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Halka Arzın Avantajları</h2>
 <ul>
   <li><strong>İlk günden potansiyel kazanç:</strong> Talep fazla olan halka arzlarda ilk işlem gününde önemli fiyat artışı yaşanabilir</li>
-  <li><strong>Erken aşamada giriş:</strong> Şirkete piyasa değerlendirmesinden önce girilir</li>
+  <li><strong>Erken aşamada ortaklık:</strong> Şirkete piyasa değerlendirmesinden önce ortak olunur</li>
   <li><strong>Düşük halka arz fiyatı:</strong> Benzer şirketlere göre iskontolu fiyat sunulabilir</li>
 </ul>
 
@@ -2601,15 +2608,15 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>Sonuç</h2>
-<p>Halka arzlar, seçici yaklaşıldığında portföye değer katabilir. Fiyat iskontosu ve ilk gün prim potansiyeli cezbedici olsa da izahname okumak, şirketin temel değerini anlamak ve piyasa koşullarını değerlendirmek uzun vadeli başarı için zorunludur.</p>
+<p>Halka arzlar, seçici yaklaşıldığında portföye değer katabilir. Fiyat iskontosu ve ilk gün fiyat artışı ihtimali cezbedici olsa da izahname okumak, şirketin temel değerini anlamak ve piyasa koşullarını değerlendirmek uzun vadeli başarı için zorunludur.</p>
 """,
     "faqs": [
       {"q": "Halka arz talep etmek için ne kadar bakiye gerekir?",
        "a": "Asgari talep miktarı halka arza göre değişir; genellikle 1-10 lot (1 lot = 100 hisse) ile başlanabilir. Talep dönemi boyunca bu bakiye bloke kalır."},
       {"q": "Talep verdiğim hisse bana kesin dağıtılır mı?",
        "a": "Hayır. Talep yoğunluğuna göre oransal dağıtım yapılır. Aşırı talep gören halka arzlarda dağıtım oranı %5-20 aralığında kalabilir."},
-      {"q": "Halka arzda ne zaman satmalıyım?",
-       "a": "Bu tamamen stratejinize bağlıdır. Kısa vadeli yatırımcılar ilk günlerde primli satış yaparken uzun vadeli yatırımcılar şirketin büyüme hikayesini takip eder. Sabit bir kural yoktur."},
+      {"q": "Halka arz sonrası yatırımcılar nasıl davranır?",
+       "a": "Yaklaşımlar farklıdır: kısa vadeli yatırımcılar ilk günlerdeki fiyat artışında hisselerini satabilirken uzun vadeli yatırımcılar şirketin büyüme hikayesini takip eder. Sabit bir kural yoktur."},
       {"q": "Hangi aracı kurumdan halka arza başvurabilirim?",
        "a": "Türkiye'de lisanslı tüm aracı kurumlar üzerinden halka arz talebinde bulunabilirsiniz. Bazı halka arzlar yalnızca belirli aracı kurumlar aracılığıyla yapılır; izahname ve duyurularda belirtilir."}
     ],
@@ -2623,6 +2630,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "ETF (Exchange Traded Fund) ve BYF (Borsa Yatırım Fonu) nedir, hisse senedinden farkı nedir, BIST'te işlem gören fonlar ve nasıl yatırım yapılır?",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "body": """
 <p>ETF (Exchange Traded Fund — Borsa İşlem Gören Fon), Türkçe'de BYF (Borsa Yatırım Fonu) olarak da bilinir. Hisse senetleri gibi borsada alınıp satılabilen, genellikle bir endeksi veya emtiayı takip eden yatırım araçlarıdır.</p>
@@ -2687,7 +2695,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li><strong>Düşük maliyet:</strong> Aktif yönetilen fonlara göre çok daha düşük yönetim ücreti</li>
   <li><strong>Şeffaflık:</strong> İçerdiği varlıklar her gün açıklanır</li>
   <li><strong>Likidite:</strong> Borsa saatlerinde hisse gibi alınıp satılabilir</li>
-  <li><strong>Başlangıç için ideal:</strong> Analiz bilgisi gerekmeden piyasaya girilebilir</li>
+  <li><strong>Başlangıç kolaylığı:</strong> Şirket analizi gerektirmeden piyasanın geneline yatırım yapılabilir</li>
 </ul>
 
 <h2>ETF Yatırımının Riskleri</h2>
@@ -2699,15 +2707,15 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Kimler İçin Uygundur?</h2>
 <div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:var(--bp-up)">✅ ETF şu yatırımcılar için idealdir:</strong>
+  <strong style="color:var(--bp-up)">✅ ETF'nin sık tercih edildiği yatırımcı profilleri:</strong>
   <ul style="margin:8px 0 0 0">
     <li>Borsaya yeni başlayanlar — tek hisse seçme stresini ortadan kaldırır</li>
-    <li>Uzun vadeli, pasif yatırımcılar — piyasa getirisini yakalamak yeterli</li>
-    <li>Portföyünü çeşitlendirmek isteyenler — mevcut hisselere ETF eklemek dengeler</li>
+    <li>Uzun vadeli, pasif yatırımcılar — amaç piyasa getirisine yakın bir getiri olduğunda</li>
+    <li>Portföyünü çeşitlendirmek isteyenler — ETF, mevcut hisselerin yanında çeşitlendirme sağlar</li>
     <li>Altın, emtia veya yabancı hisselere kolayca ulaşmak isteyenler</li>
   </ul>
 </div>
-<p>Aktif trader profili için bireysel hisse senetleri ve teknik analiz araçları daha uygun olabilir. BorsaPusula'nın sunduğu sinyal sistemi bu ihtiyacı karşılar.</p>
+<p>Bireysel hisse seçimiyle ilgilenen yatırımcı için ise şirket analizi ve teknik analiz öne çıkar; BorsaPusula'nın hisse sayfaları şirketlerin açıkladığı finansalları ve trend durumunu bir arada gösterir.</p>
 """,
     "faqs": [
       {"q": "ETF ve yatırım fonu aynı şey midir?",
@@ -2828,9 +2836,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "yatirim-fonu-mu-hisse-mi",
     "title": "Yatırım Fonu mu, Hisse Senedi mi? Hangisi Daha İyi?",
-    "desc": "Yatırım fonu ile hisse senedini karşılaştıran kapsamlı rehber. Başlangıç yatırımcısından deneyimli trader'a kim hangisini tercih etmeli?",
+    "desc": "Yatırım fonu ile hisse senedini karşılaştıran kapsamlı rehber. Başlangıç yatırımcısından deneyimli yatırımcıya hangi profil hangisine yakın?",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "body": """
 <p>Borsaya yeni başlayanların ve portföyünü büyütmek isteyenlerin sıkça sorduğu soru: "Yatırım fonu mu alsam, yoksa direkt hisse senedi mi?" Her iki aracın kendine özgü avantajları, riskleri ve uygun kullandığı yatırımcı profilleri vardır.</p>
@@ -2893,7 +2902,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Yatırım Fonu Avantajları</h2>
 <ul>
-  <li><strong>Başlangıç için idealdir:</strong> Hangi hisseyi seçeceğinizi bilmeden piyasaya girebilirsiniz</li>
+  <li><strong>Başlangıç için kolaydır:</strong> Tek tek hisse seçmeden piyasaya erişim sağlar</li>
   <li><strong>Profesyonel yönetim:</strong> Tecrübeli fon yöneticileri karar alır</li>
   <li><strong>Düşük başlangıç tutarı:</strong> Bazı fonları 100 TL ile bile alabilirsiniz</li>
   <li><strong>Vergi avantajı:</strong> Fon içinde gerçekleşen alım satımlar stopaj doğurmaz; yalnızca fondan çıkışta vergi hesaplanır</li>
@@ -2908,10 +2917,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Hisse Senedi Avantajları</h2>
 <ul>
-  <li><strong>Daha yüksek getiri potansiyeli:</strong> Doğru seçimde endeksi önemli ölçüde aşabilirsiniz</li>
+  <li><strong>Daha yüksek getiri potansiyeli:</strong> Seçime bağlı olarak endeksin üzerinde de altında da getiri mümkündür</li>
   <li><strong>Tam kontrol:</strong> Ne aldığınızı, ne zaman aldığınızı ve sattığınızı siz belirlersiniz</li>
   <li><strong>Sıfır yönetim ücreti:</strong> Yalnızca alım satımda komisyon ödersiniz</li>
-  <li><strong>Teknik analiz araçları:</strong> BorsaPusula gibi platformlarla sinyal takibi yapabilirsiniz</li>
+  <li><strong>Takip araçları:</strong> Trend durumu ve temel veriler hisse bazında izlenebilir</li>
 </ul>
 
 <h2>Hisse Senedi Dezavantajları</h2>
@@ -2921,7 +2930,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>Sürekli takip gerektirir — bunu karşılayabilecek zaman ve motivasyon olmalı</li>
 </ul>
 
-<h2>Kim Hangisini Seçmeli?</h2>
+<h2>Hangi Profil Hangisine Yakın?</h2>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">
   <div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px">
     <strong style="color:var(--bp-up)">Yatırım Fonu için:</strong>
@@ -2953,13 +2962,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 """,
     "faqs": [
       {"q": "Yatırım fonu mu daha güvenli, hisse senedi mi?",
-       "a": "Her iki araç da piyasa riskine tabidir; 'güvenli' değildirler. Yatırım fonu çeşitlendirme sayesinde tek hisse riskini azaltır, ancak piyasa geneli düşünce fon da düşer. Risk toleransınıza ve bilginize göre karar vermelisiniz."},
+       "a": "Her iki araç da piyasa riskine tabidir; 'güvenli' değildirler. Yatırım fonu çeşitlendirme sayesinde tek hisse riskini azaltır, ancak piyasa geneli düşünce fon da düşer. Hangisinin uygun olduğu risk toleransına ve bilgi düzeyine bağlıdır."},
       {"q": "Kaç TL ile yatırım fonuna başlanabilir?",
        "a": "Türkiye'de TEFAS üzerinden işlem gören birçok fon, 100 TL gibi çok düşük tutarlarla alınabilmektedir. Bu, küçük birikimlerle bile çeşitlendirme yapılmasına olanak tanır."},
       {"q": "Aktif fon yöneticileri neden endeksi geçemez?",
        "a": "Yönetim ücretleri, alım satım maliyetleri ve insan psikolojisinin (kayıptan kaçınma gibi) etkisiyle aktif fonların büyük çoğunluğu uzun vadede endeksin gerisinde kalır. Bu 'aktif yönetim paradoksu' olarak bilinir."},
-      {"q": "BorsaPusula'da teknik sinyalleri kullanarak hisse seçmek mantıklı mı?",
-       "a": "Evet. BorsaPusula'nın Supertrend + ADX + EMA kombinasyonu, piyasa trendini takip eden sistematik bir yaklaşım sunar. Bu tür algoritmik araçlar, sezgisel kararların önüne geçerek disiplinli yatırım kararlarını destekler."}
+      {"q": "BorsaPusula hisse takibinde ne sunar?",
+       "a": "BorsaPusula, Supertrend + ADX + EMA kombinasyonuyla her hissenin trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) gün sonu kapanış verisiyle gösterir. Kurala bağlı bu tür ölçütler, sezgisel yorum yerine sistematik bir okuma sunar."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'ASELS']
   },
@@ -2971,6 +2980,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Açığa satış nedir, nasıl çalışır, BIST hisse senetlerinde short selling yapılabilir mi? Riskleri ve alternatif stratejiler.",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "body": """
 <p>Açığa satış (short selling), sahip olmadığınız bir hisseyi ödünç alıp sattıktan sonra fiyat düştüğünde geri alarak iade ettiğiniz ve bu fiyat farkından kâr ettiğiniz bir yatırım stratejisidir. Kısaca "düşüşten para kazanmak" olarak da tanımlanır.</p>
@@ -3011,18 +3021,18 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
   <li><strong>VIOP (Vadeli İşlem ve Opsiyon Piyasası):</strong> Hisse vadeli sözleşmeleri veya put opsiyonları ile düşüş pozisyonu alınabilir. BIST bünyesinde, daha likit ve erişilebilir</li>
   <li><strong>Ters ETF (Inverse ETF):</strong> Endeksin tersine hareket eden fonlar — BIST'te henüz yaygın değil</li>
-  <li><strong>Nakit tutmak:</strong> Düşüş beklentisinde en basit strateji: pozisyonu kapatıp nakit beklemek</li>
-  <li><strong>Stop loss ile koruma:</strong> Mevcut uzun pozisyonlarda sıkı stop kullanarak aşağı yönlü kayıpları sınırlamak</li>
+  <li><strong>Nakit tutmak:</strong> Düşüş beklentisi olan yatırımcıların başvurduğu en basit yöntem, portföydeki nakit ağırlığını artırmaktır</li>
+  <li><strong>Zarar durdur (stop-loss) emri:</strong> Fiyat belirli bir seviyeye inince satışı otomatik tetikleyen emir türüdür; mevcut pozisyonlarda aşağı yönlü kaybı sınırlamaya yönelik bir araç olarak bilinir</li>
 </ul>
 
 <h2>BorsaPusula'nın Yaklaşımı</h2>
-<p>BorsaPusula sinyalleri BIST hisseleri için Güçlü Trend veya Trend Bozuldu sinyali üretir. Trend Bozuldu sinyali, hissenin <strong>trendinin bozulduğunu/sona erdiğini</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
+<p>BorsaPusula, BIST hisselerinin trend durumunu Güçlü Trend, Trend Bozuldu ve Yatay olarak gösterir. Trend Bozuldu durumu, hissenin <strong>yükseliş trendinin bozulduğunu</strong> betimler; bir işlem önerisi değildir ve açığa satış için tasarlanmamıştır. Bu yaklaşım, karmaşık açığa satış mekaniklerine girmeden trendi izlemeyi kolaylaştırır.</p>
 """,
     "faqs": [
       {"q": "BIST'te herkes açığa satış yapabilir mi?",
        "a": "Hayır. Açığa satış yalnızca SPK'nın onayladığı sınırlı sayıda hisse için mümkündür ve ödünç pay bulunması gerekir. Bireysel yatırımcılar için pratikte oldukça kısıtlı bir araçtır."},
-      {"q": "Trend Bozuldu sinyali gördüğümde açığa satış yapmalı mıyım?",
-       "a": "BorsaPusula'daki Trend Bozuldu sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
+      {"q": "Trend Bozuldu durumu açığa satış anlamına mı gelir?",
+       "a": "Hayır. BorsaPusula'daki Trend Bozuldu durumu, hissenin trendinin bozulduğunu betimler; bir işlem önerisi değildir ve açığa satış için tasarlanmamıştır. Açığa satış tamamen farklı risk ve mekanik içerir."},
       {"q": "Açığa satış yerine VIOP kullanmak daha mı iyi?",
        "a": "BIST bireysel yatırımcıları için düşüş pozisyonu almak istiyorsanız VIOP, açığa satıştan genellikle daha erişilebilir ve likittir. Ancak her iki araç da yüksek risk taşır ve kapsamlı bilgi gerektirir."},
       {"q": "Short squeeze nedir?",
@@ -3038,6 +3048,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Hisse bölünmesi nedir, şirket neden hisse böler, bölünme sonrası portföy değeri değişir mi? KAP bildirimi ve pratik etkileri.",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 5,
     "body": """
 <p>Hisse bölünmesi (stock split), bir şirketin mevcut hisselerini daha küçük birimler halinde bölerek toplam hisse sayısını artırdığı kurumsal bir işlemdir. En yaygın form 1:2 veya 1:5 bölünmedir.</p>
@@ -3059,7 +3070,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Ters Bölünme (Reverse Split) Nedir?</h2>
-<p>Ters bölünmede (veya birleşme) hisse adedi azalır, birim fiyat yükselir. Örneğin 5:1 ters bölünmede 500 hisseniz 100 hisseye düşer ama fiyat 5 katına çıkar. Şirketler genellikle borsa kurallarını karşılamak veya kurumsal görünüm için bu yola başvurur. Ters bölünmeler çoğunlukla zayıf şirketlerin özelliğidir — dikkatli olunmalıdır.</p>
+<p>Ters bölünmede (veya birleşme) hisse adedi azalır, birim fiyat yükselir. Örneğin 5:1 ters bölünmede 500 hisseniz 100 hisseye düşer ama fiyat 5 katına çıkar. Şirketler genellikle borsa kurallarını karşılamak veya kurumsal görünüm için bu yola başvurur. Ters bölünmeler çoğunlukla hisse fiyatı uzun süre düşmüş şirketlerde görülür.</p>
 
 <h2>Hisse Bölünmesi Yatırımcıyı Nasıl Etkiler?</h2>
 <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
@@ -3087,8 +3098,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Bölünme işlemi vergiye tabi değildir</td>
     </tr>
     <tr>
-      <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Stop Loss seviyeleri</td>
-      <td style="padding:9px;border:1px solid var(--bp-bkl-bd);color:var(--bp-down)">⚠️ Fiyat ayarlanır — eski stop fiyatlarını güncellemeniz gerekir</td>
+      <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Bekleyen emir fiyatları</td>
+      <td style="padding:9px;border:1px solid var(--bp-bkl-bd);color:var(--bp-down)">⚠️ Birim fiyat değiştiği için bölünme öncesi girilmiş emirler eski ölçekte kalır</td>
     </tr>
     <tr style="background:var(--bp-raised)">
       <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Teknik analiz grafikleri</td>
@@ -3107,21 +3118,21 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>Bölünme günü borsada yeni fiyatla açılış yapılır</li>
 </ol>
 <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:var(--bp-brand)">💡 Pratik İpucu:</strong> KAP bildirimini gördüğünüzde bölünme tarihini not alın. Özellikle stop loss ve hedef fiyat seviyelerini bölünme sonrasına göre yeniden hesaplamanız gerekecektir.
+  <strong style="color:var(--bp-brand)">💡 Pratik Bilgi:</strong> Bölünme tarihi KAP bildiriminde yer alır. Bölünme sonrasında eski fiyat seviyeleriyle yapılan karşılaştırmalar ve bekleyen emirler, bölünme oranında yeni ölçeğe çevrilerek okunur.
 </div>
 
 <h2>Bölünme Sonrası Fiyat Hareketi</h2>
 <p>Araştırmalar bölünme duyurusunun kısa vadede pozitif fiyat etkisi yaratabileceğini gösterse de bu etki garantili değildir. Bölünme şirketin temel değerini değiştirmez; uzun vadede performansı şirketin kazanç büyümesi belirler.</p>
 """,
     "faqs": [
-      {"q": "Hisse bölünmesi portföyümü etkilir mi?",
+      {"q": "Hisse bölünmesi portföyümü etkiler mi?",
        "a": "Portföy toplam değeriniz değişmez. Hisse adedi bölünme oranında artarken birim fiyat aynı oranda düşer. Örneğin 1:5 bölünmede 100 hisseniz 500 olur, fiyat 5'te 1'e iner."},
-      {"q": "Bölünme tarihinde hisse almak mantıklı mı?",
-       "a": "Bölünme haberi fiyata genellikle duyurudan itibaren yansımaya başlar. Bölünme tarihi geldiğinde fiyat zaten ayarlanmış olduğundan 'ucuz' diye alım yapmak anlamsızdır. Şirketin temel değeri ve teknik trendi esas alınmalıdır."},
-      {"q": "Bölünme sonrası stop loss ayarlamak gerekiyor mu?",
-       "a": "Evet! Bölünme öncesi 150 ₺ için 130 ₺ stop belirlemiş iseniz, 1:5 bölünme sonrası fiyat 30 ₺ olur ve stop seviyeniz 26 ₺ olarak güncellenmeli. Aracı kurum platformları bunu otomatik yapmayabilir."},
+      {"q": "Bölünme hisseyi ucuzlatır mı?",
+       "a": "Hayır. Bölünme haberi fiyata genellikle duyurudan itibaren yansımaya başlar; bölünme tarihinde fiyat zaten bölünme oranında ayarlanmıştır. Birim fiyatın düşmesi şirketin değerinin düştüğü anlamına gelmez; belirleyici olan şirketin temel değeridir."},
+      {"q": "Bölünme sonrası eski fiyat seviyeleri nasıl okunur?",
+       "a": "Bölünme oranına göre ölçeklenir. Örneğin 1:5 bölünmede bölünme öncesindeki 150 ₺ fiyat 30 ₺'ye, 130 ₺ seviyesi 26 ₺'ye karşılık gelir. Aracı kurum platformları bekleyen emirleri otomatik güncellemeyebilir."},
       {"q": "Ters bölünme (reverse split) ne anlama gelir?",
-       "a": "Ters bölünmede hisse adedi azalır, fiyat yükselir. Şirketler genellikle borsada kalabilmek için minimum fiyat kurallarını sağlamak amacıyla yapar. Ters bölünme çoğunlukla şirketin zayıf performansının işareti olabilir; dikkatli değerlendirme gerektirir."}
+       "a": "Ters bölünmede hisse adedi azalır, fiyat yükselir. Şirketler genellikle borsada kalabilmek için minimum fiyat kurallarını sağlamak amacıyla yapar. Ters bölünme çoğunlukla hisse fiyatının uzun süre düştüğü dönemlerin ardından görülür."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SASA', 'EREGL']
   },
@@ -3133,6 +3144,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Altın, BIST hisseleri ve dolar/euro arasında hangisi daha karlı? Türkiye'de en iyi yatırım aracı nedir? 2026 için kapsamlı karşılaştırma ve strateji rehberi.",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
 <p>Türk yatırımcısının en sık sorduğu soru: "Paramı nereye yatırmalıyım?" Altın, borsa ve döviz — her birinin güçlü ve zayıf yönleri var. Bu rehberde her üç seçeneği çeşitli kriterlerle karşılaştırıyor ve 2026 koşullarında değerlendiriyoruz.</p>
@@ -3193,7 +3205,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li><strong>2026 görünümü:</strong> Yüksek faiz ortamında baskı altında olabilir; jeopolitik riskler ve merkez bankası alımları destek verir</li>
 </ul>
 
-<h2>BIST Hisseleri: Yüksek Risk, Yüksek Ödül</h2>
+<h2>BIST Hisseleri: Yüksek Risk, Yüksek Getiri Potansiyeli</h2>
 <p>BIST100, uzun vadede Türk yatırımcısının en yüksek reel getiriyi elde ettiği araç olmuştur — ama bu getiri ciddi volatiliteyle gelir.</p>
 <ul>
   <li><strong>Avantajları:</strong> Uzun vadede en yüksek getiri potansiyeli, temettü geliri, ekonomik büyümeden pay alma</li>
@@ -3202,37 +3214,37 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Döviz: Korunma mı, Yatırım mı?</h2>
-<p>Dolar ve euro Türk tasarrufçu için başlıca hedge aracıdır. Ancak dövizin kendisi üretken bir varlık değildir.</p>
+<p>Dolar ve euro Türk tasarrufçu için başlıca korunma (hedge) aracıdır. Ancak dövizin kendisi üretken bir varlık değildir.</p>
 <ul>
   <li><strong>Avantajları:</strong> TL değer kaybına karşı anlık koruma, çok likit, küresel varlıklara kapı</li>
   <li><strong>Dezavantajları:</strong> Reel getiri üretmez, mevduatta düşük faiz, kur müdahalesi riski</li>
   <li><strong>2026 görünümü:</strong> Enflasyon ile değer erozyonu; dolar bazlı yatırımlara kapı açar</li>
 </ul>
 
-<h2>Karma Portföy: En Akıllıca Yaklaşım</h2>
+<h2>Karma Portföy Yaklaşımı</h2>
 <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-brand)">💡 Türk yatırımcısı için örnek karma portföy:</strong>
   <ul style="margin:8px 0 0 0">
-    <li>%40 BIST hisseleri (teknik sinyal + temel filtre)</li>
+    <li>%40 BIST hisseleri</li>
     <li>%25 Altın (kriz tamponu)</li>
     <li>%20 Döviz / Dövizli mevduat</li>
     <li>%15 Nakit / TL araçlar</li>
   </ul>
-  <p style="font-size:var(--bp-type-xs);color:var(--bp-text-3);margin-top:8px">Bu yalnızca örnek dağılımdır, kişisel mali durumunuza ve risk toleransınıza göre ayarlamalısınız. Yatırım tavsiyesi değildir.</p>
+  <p style="font-size:var(--bp-type-xs);color:var(--bp-text-3);margin-top:8px">Bu yalnızca örnek dağılımdır; uygun dağılım kişisel mali duruma ve risk toleransına göre değişir. Yatırım tavsiyesi değildir.</p>
 </div>
 
-<h2>BorsaPusula ile BIST Sinyallerini Takip Et</h2>
+<h2>BorsaPusula'da BIST Hisselerini İncelemek</h2>
 <p>Portföyünüzün borsa bölümü için BorsaPusula'da şirketlerin finansalları, değerlemesi ve trend durumu birlikte incelenebilir. BIST hisseleri gün sonu verisiyle her akşam güncellenir.</p>
 """,
     "faqs": [
       {"q": "Türkiye'de en güvenli yatırım aracı hangisi?",
-       "a": "Kısa vadede 'en güvenli' genellikle mevduat veya dövizdir. Uzun vadede ise altın ve seçici hisse portföyü tarihsel olarak enflasyonun üzerinde getiri sağlamıştır. Güvenli limana ihtiyaç duyduğunuzda altın ve döviz; büyüme için borsayı değerlendirin."},
+       "a": "Kısa vadede 'en güvenli' genellikle mevduat veya dövizdir. Uzun vadede ise altın ve seçici hisse portföyü tarihsel olarak enflasyonun üzerinde getiri sağlamıştır. Güvenli liman arayışında altın ve döviz, büyüme beklentisinde ise borsa öne çıkar."},
       {"q": "Altın mı borsa mı daha çok kazandırır?",
-       "a": "20-30 yıllık perspektifte küresel borsa endeksleri genellikle altını geride bırakmıştır. Türkiye özelinde ise kriz dönemlerinde altın çok iyi performans göstermiştir. 'Hangisi daha iyi?' sorusunun cevabı dönemden ve yatırım horizonundan bağımsız değildir."},
-      {"q": "Dolar almak hâlâ mantıklı mı?",
+       "a": "20-30 yıllık perspektifte küresel borsa endeksleri genellikle altını geride bırakmıştır. Türkiye özelinde ise kriz dönemlerinde altın çok iyi performans göstermiştir. 'Hangisi daha iyi?' sorusunun cevabı dönemden ve yatırım vadesinden bağımsız değildir."},
+      {"q": "Dolar hâlâ koruma sağlar mı?",
        "a": "Dolar TL değer kaybına karşı koruma sağlar ama uzun vadede enflasyon etkisi doların reel değerini de aşındırır. Döviz tutmak bir koruma aracı olarak mantıklıdır; ancak yalnızca dövizde durmak uzun vadede reel getiri açısından zayıf kalabilir."},
       {"q": "BorsaPusula bu kararımda nasıl yardımcı olur?",
-       "a": "BorsaPusula portföyünüzün BIST hissesi bölümü için algoritmik sinyal üretir. Altın ve döviz fiyatlarını ana sayfadaki makro ticker'dan takip edebilirsiniz."}
+       "a": "BorsaPusula, portföyün BIST hissesi bölümü için şirketlerin finansallarını, değerlemesini ve trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) bir arada gösterir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3241,10 +3253,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "bist100-temettu-hisseleri-2026",
     "title": "BIST100 Temettü Hisseleri 2026: Düzenli Gelir İçin Rehber",
-    "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl yapılır, ne zaman alınır, vergi avantajları nelerdir? 2026 rehberi.",
+    "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl işler, temettü tarihleri ne anlama gelir, vergi avantajları nelerdir? 2026 rehberi.",
     "cat": "Temel Analiz",
     "date": "2026-05-01",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
 <p><strong>15 Ekim 2026 kapanışına göre</strong> hem son 12 ayda hem de ondan önceki 12 ayda nakit temettü ödeyen BIST 100 şirketleri arasında son 12 ayın temettü verimi en yüksek beşi: <a href="/hisse/FROTO">FROTO</a> (%13,7), <a href="/hisse/BRYAT">BRYAT</a> (%12,2), <a href="/hisse/ISMEN">ISMEN</a> (%10,7), <a href="/hisse/LMKDC">LMKDC</a> (%8,8) ve <a href="/hisse/TOASO">TOASO</a> (%8,1). Aynı kurala uyan tüm şirketler, her işlem günü kapanıştan sonra yenilenen <a href="/kesfet/istikrarli-temettu">İstikrarlı temettü listesinde</a>.</p>
@@ -3295,48 +3307,43 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   </tbody>
 </table>
 
-<h2>Temettü Yatırımı Nasıl Yapılır?</h2>
+<h2>Temettü Süreci Nasıl İşler?</h2>
 
 <h3>1. Temettü Tarihleri</h3>
 <ul>
   <li><strong>Genel Kurul tarihi:</strong> Temettü dağıtım kararı burada alınır</li>
   <li><strong>Temettü kesim tarihi:</strong> Bu tarihte hisseye sahip olanlar temettü alır</li>
   <li><strong>Temettü ödeme tarihi:</strong> Hesabınıza yatar</li>
-  <li>Temettüyü almak için <strong>kesim tarihinden bir gün önce</strong> hisseye sahip olmalısınız</li>
+  <li>Temettü hakkı için <strong>kesim tarihinden bir gün önce</strong> hisseye sahip olunması gerekir</li>
 </ul>
 
 <h3>2. Temettü Sonrası Fiyat Düşüşü</h3>
 <div style="background:rgba(var(--bp-accent-yellow-rgb),.07);border:1px solid rgba(var(--bp-accent-yellow-rgb),.2);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:var(--bp-accent-yellow)">⚠️ Önemli:</strong> Temettü kesim tarihi sabahında hisse fiyatı genellikle ödenen temettü kadar düşer. Örneğin 50 TL'lik hisse 5 TL temettü ödediğinde, ertesi gün ~45 TL'den açılır. Temettü için satın alıp hemen satmak anlamsızdır.
+  <strong style="color:var(--bp-accent-yellow)">⚠️ Önemli:</strong> Temettü kesim tarihi sabahında hisse fiyatı genellikle ödenen temettü kadar düşer. Örneğin 50 TL'lik hisse 5 TL temettü ödediğinde, ertesi gün ~45 TL'den açılır. Bu nedenle yalnız temettü için kısa süreli alıp satmak, fiyat düşüşü yüzünden genellikle ek getiri sağlamaz.
 </div>
 
 <h3>3. Temettü Vergi Avantajı</h3>
 <p>Türkiye'de gerçek kişilerin BIST hisselerinden aldığı temettü üzerinde <strong>%15 stopaj</strong> uygulanır. Ancak bu stopaj nihaidir; ayrıca beyan gerekmiyor (belirli limitlerde).</p>
 
-<h2>Teknik Sinyal + Temettü Kombinasyonu</h2>
-<p>BorsaPusula'nın önerilen yaklaşımı:</p>
-<ol>
-  <li>Yüksek temettü verimi olan BIST hisselerini temel analiz kısmından listele</li>
-  <li>Trend durumunu da kontrol et (Güçlü Trend / Trend Bozuldu)</li>
-  <li>Güçlü trend + yüksek temettü = dual kaynak: fiyat artışı + temettü geliri</li>
-</ol>
+<h2>Temettü ve Trend Durumu Birlikte</h2>
+<p>BorsaPusula'nın hisse sayfalarında temettü verimi ile trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) bir arada görülebilir. Temettü verimi şirketin dağıttığı nakdi, trend durumu ise fiyatın gidişatını betimler; ikisi birbirinin yerine geçmez, birlikte okunduğunda daha bütünlüklü bir tablo verir.</p>
 
 <h2>Temettü Yatırımının Riskleri</h2>
 <ul>
-  <li><strong>Temettü kesme riski:</strong> Şirket kötü yıl geçirirse temettü ödemeyebilir</li>
+  <li><strong>Temettü kesme riski:</strong> Kârı düşen ya da zarar eden şirket temettü ödemeyebilir</li>
   <li><strong>Yüksek verim tuzağı:</strong> Çok yüksek temettü verimi bazen şirket sorunlarını yansıtabilir (fiyat çok düşmüş)</li>
   <li><strong>Enflasyon etkisi:</strong> TL temettü, dolar bazında değer kaybedebilir</li>
 </ul>
 """,
     "faqs": [
       {"q": "Temettü almak için ne kadar süre hisse tutmak gerekiyor?",
-       "a": "Sadece temettü kesim tarihinde (T-2 iş günü öncesi) hisseye sahip olmanız yeterlidir. Ertesi gün satsanız da temettü hakkı kazanırsınız. Ancak fiyat genellikle temettü miktarı kadar düşer, bu yüzden kısa vadeli 'temettü avı' pratikte kazançlı değildir."},
+       "a": "Sadece temettü kesim tarihinde (T-2 iş günü öncesi) hisseye sahip olmanız yeterlidir. Ertesi gün hisse satılsa da temettü hakkı korunur. Ancak fiyat genellikle temettü miktarı kadar düşer, bu yüzden kısa vadeli 'temettü avı' pratikte kazançlı değildir."},
       {"q": "BIST'te en yüksek temettü verimine hangi sektörler sahip?",
-       "a": "Tarihsel olarak bankacılık (AKBNK, GARAN), perakende zincirler (BIMAS, MGROS) ve büyük holdinglerden (KCHOL) düzenli yüksek temettü ödemeleri gelmiştir. Ancak her yıl değişebilir; güncel KAP bildirimlerini ve analist beklentilerini takip edin."},
+       "a": "Tarihsel olarak bankacılık (AKBNK, GARAN), perakende zincirler (BIMAS, MGROS) ve büyük holdinglerden (KCHOL) düzenli yüksek temettü ödemeleri gelmiştir. Ancak tablo her yıl değişebilir; güncel durum için KAP bildirimleri esas alınır."},
       {"q": "Temettü sonrası hisse düşüyor mu?",
        "a": "Evet, temettü kesim tarihi sabahı hisse fiyatı ödenen temettü kadar teorik olarak düşer. Bu 'temettü düzeltmesi'dir ve normaldir. Uzun vadeli yatırımcı için bu düşüş önemli değildir; şirketin temettüyü büyütme kapasitesi daha önemlidir."},
       {"q": "BorsaPusula temettü verilerini nerede görebilirim?",
-       "a": "BorsaPusula'da her hisse sayfasında temel analiz bölümünde temettü verimi, hisse başı kazanç ve diğer oranlar görüntülenmektedir. Temettü ödemeleri Bilanço Takvimi sayfasında da yer almaktadır."}
+       "a": "BorsaPusula'da her hisse sayfasında temel analiz bölümünde temettü verimi, hisse başı kazanç ve diğer oranlar görüntülenmektedir. Temettü ödemeleri Takvim sayfasında (/takvim) da yer almaktadır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'BIMAS', 'KCHOL', 'EREGL', 'TUPRS']
   },
@@ -3348,6 +3355,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Bitcoin vs BIST hisseleri: hangisi daha karlı, hangisi daha riskli? Volatilite, düzenleme, likidite ve vergi açısından kapsamlı karşılaştırma.",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "body": """
 <p>Özellikle genç yatırımcılar için "kripto mu, borsa mı?" sorusu giderek daha önemli hale geliyor. Her ikisi de yüksek getiri potansiyeli sunarken çok farklı risk profilleri taşıyor. Bu rehberde iki dünya arasındaki temel farkları ele alıyoruz.</p>
@@ -3426,27 +3434,27 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   </ul>
 </div>
 
-<h2>Dengeli Yaklaşım: İkisini Birlikte Kullanmak</h2>
-<p>Birçok deneyimli yatırımcı kripto ve hisseyi kombine kullanır:</p>
+<h2>İkisini Birlikte Tutan Portföyler</h2>
+<p>Kripto ve hisseyi birlikte tutan portföylerde varlıklar genellikle üstlendikleri role göre ayrılır:</p>
 <ul>
-  <li><strong>%70-80:</strong> Düzenlenmiş varlıklar (BIST, ETF) — temel portföy</li>
-  <li><strong>%10-20:</strong> Bitcoin/Ethereum — büyüme ve çeşitlendirme</li>
-  <li><strong>%5-10:</strong> Altcoin — yüksek riskli spekülatif pozisyon</li>
+  <li><strong>Düzenlenmiş varlıklar (BIST, ETF):</strong> Temel portföy</li>
+  <li><strong>Bitcoin/Ethereum:</strong> Büyüme ve çeşitlendirme</li>
+  <li><strong>Altcoin:</strong> Yüksek riskli spekülatif kısım</li>
 </ul>
-<p>Bu dağılım kişisel risk toleransına ve yatırım ufkuna göre önemli ölçüde farklılaşabilir.</p>
+<p>Bu bölümlerin oranları kişisel risk toleransına ve yatırım ufkuna göre büyük ölçüde farklılaşır.</p>
 
-<h2>BorsaPusula BIST Sinyalleri</h2>
-<p>BorsaPusula, BIST hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. Kripto pozisyonunuzu ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
+<h2>BorsaPusula'nın Kapsamı</h2>
+<p>BorsaPusula yalnız BIST hisselerini kapsar: gün sonu verisiyle Supertrend + ADX + EMA tabanlı trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) ve KAP'ta açıklanan finansallara dayalı orta-uzun vadeli şirket analizi sunar. Kripto varlıklar sitenin kapsamında değildir.</p>
 """,
     "faqs": [
       {"q": "Bitcoin mi BIST hisseleri mi daha karlı?",
        "a": "2015-2025 dönemine bakıldığında Bitcoin çok daha yüksek nominal getiri sağlamıştır; ancak çok daha yüksek volatilite ve kayıp dönemleriyle. BIST ise yüksek enflasyon dönemlerinde bile düzenlenmiş ve temettü sunan bir piyasadır. Hangisi 'daha karlı' sorusunun cevabı ölçülen döneme göre büyük değişiklik gösterir."},
       {"q": "Türkiye'de kripto vergisi var mı?",
-       "a": "2026 itibarıyla kripto para kazancı için Türkiye'de net bir vergi düzenlemesi henüz tam oturtulamamıştır. Düzenlemenin geliştiğini takip edin. BIST hisselerinde ise sermaye kazancı stopajı %0, temettü stopajı %15'tir."},
+       "a": "2026 itibarıyla kripto para kazancı için Türkiye'de net bir vergi düzenlemesi henüz tam oturtulamamıştır. Düzenleme gelişmeye devam etmektedir. BIST hisselerinde ise sermaye kazancı stopajı %0, temettü stopajı %15'tir."},
       {"q": "Kripto borsası güvenli mi?",
        "a": "Merkezi kripto borsaları (Binance, Bitfinex gibi) SPK denetiminde değildir ve siz borsanın iflas riskini taşırsınız. FTX iflasında milyonlarca kullanıcı fonuna erişemedi. Donanım cüzdan kullanmak, güvenilir platformlar seçmek ve yatırım miktarını sınırlandırmak risk azaltmanın yollarıdır."},
       {"q": "BorsaPusula kripto sinyalleri veriyor mu?",
-       "a": "Hayır, BorsaPusula yalnızca BIST hisseleri için algoritmik teknik analiz sinyalleri üretir. Kripto varlıklar için ayrı bir platform kullanmanız gerekir."}
+       "a": "Hayır. BorsaPusula yalnızca BIST hisselerini kapsar; kripto varlıklar için trend durumu ya da analiz sunmaz."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3455,12 +3463,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "faiz-ve-borsa-iliskisi-tcmb",
     "title": "Faiz ve Borsa İlişkisi: TCMB Kararları BIST'i Nasıl Etkiler?",
-    "desc": "Merkez bankası faiz kararları hisse senetlerini nasıl etkiler? Faiz yükselince borsa neden düşer? Türkiye özelinde TCMB-BIST ilişkisi ve yatırımcı stratejisi.",
+    "desc": "Merkez bankası faiz kararları hisse senetlerini nasıl etkiler? Faiz yükselince borsa neden düşer? Türkiye özelinde TCMB-BIST ilişkisi ve yatırımcı açısından anlamı.",
     "cat": "Makro Ekonomi",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
-<p>Faiz oranları ile borsa arasındaki ilişki, yatırımcıların en çok merak ettiği makroekonomik konuların başında gelir. Merkez bankası kararları açıklandığında piyasalar neden sert hareket eder? Bu rehberde Türkiye Cumhuriyet Merkez Bankası (TCMB) kararlarının BIST üzerindeki etkisini ve buna göre nasıl pozisyon alınabileceğini ele alıyoruz.</p>
+<p>Faiz oranları ile borsa arasındaki ilişki, yatırımcıların en çok merak ettiği makroekonomik konuların başında gelir. Merkez bankası kararları açıklandığında piyasalar neden sert hareket eder? Bu rehberde Türkiye Cumhuriyet Merkez Bankası (TCMB) kararlarının BIST üzerindeki etkisini ve yatırımcıların bu kararları nasıl okuyabileceğini ele alıyoruz.</p>
 
 <h2>Faiz-Borsa İlişkisinin Temel Mekanizması</h2>
 <p>Faiz oranları yatırım araçlarının cazibesini doğrudan etkiler. Temel mantık şu şekilde işler:</p>
@@ -3548,13 +3557,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   </tbody>
 </table>
 
-<h2>Faiz Kararı Öncesi ve Sonrası Strateji</h2>
+<h2>Faiz Kararı Öncesi ve Sonrası Piyasa Davranışı</h2>
 <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:var(--bp-brand)">💡 "Beklenti al, gerçek sat" kuralı:</strong>
-  <p style="margin:8px 0 0 0">Piyasalar faiz kararını genellikle haftalar öncesinden fiyatlamaya başlar. Karar açıklandığında büyük hareket çoğu zaman beklenti yönünün tersinedir. Bu nedenle karar gününde ani pozisyon açmak risklidir.</p>
+  <strong style="color:var(--bp-brand)">💡 Beklentinin fiyatlanması:</strong>
+  <p style="margin:8px 0 0 0">Piyasalar faiz kararını genellikle haftalar öncesinden fiyatlamaya başlar. Karar açıklandığında büyük hareket çoğu zaman beklenti yönünün tersinedir. Bu nedenle karar günündeki ilk fiyat hareketi yanıltıcı olabilir.</p>
 </div>
 <ul>
-  <li><strong>Karar öncesi:</strong> Konsensüsü takip et. "Sürpriz" ihtimali yüksekse volatilite artar</li>
+  <li><strong>Karar öncesi:</strong> Piyasa konsensüsü belirleyicidir. "Sürpriz" ihtimali yüksekse volatilite artar</li>
   <li><strong>Karar sonrası:</strong> İlk tepki genellikle abartılıdır — kalıcı trend 2-3 gün içinde netleşir</li>
   <li><strong>Uzun vade:</strong> Faiz siklus yönü (artış mı, indirim mi?) hisse seçimini şekillendirir</li>
 </ul>
@@ -3564,8 +3573,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
   <li><strong>TCMB Para Politikası Kurulu (PPK) takvimi</strong> — yılda 8 toplantı, takvim yıl başında açıklanır</li>
   <li><strong>Bloomberg/Reuters Türkiye haberleri</strong> — beklenti anketleri</li>
-  <li><strong>BorsaPusula Bilanço Takvimi</strong> — makro takvim entegrasyonu</li>
-  <li><strong>BIST30/BIST100 günlük trend sinyali</strong> — faiz kararı sonrası trend değişimini izle</li>
+  <li><strong>BorsaPusula Bilanço Takvimi</strong> — şirketlerin bilanço açıklama tarihleri</li>
+  <li><strong>BorsaPusula Piyasa sayfası</strong> — BIST100 gün sonu ısı haritası ve Güçlü Trend oranı; faiz kararı sonrası trend değişimi burada izlenebilir</li>
 </ul>
 """,
     "faqs": [
@@ -3573,8 +3582,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
        "a": "Hayır. Türkiye'de faiz artışı TL'yi güçlendirebilir, yabancı sermaye girişini teşvik edebilir ve BIST'i dolar bazında yükseltebilir. Bankacılık sektörü faiz artışından olumlu etkilenebilir. Etki; sürpriz mi oldu, sektöre göre farklı mı değişiyor, önemlidir."},
       {"q": "TCMB kararı hangi hisseleri en çok etkiler?",
        "a": "En yüksek etki bankacılık (AKBNK, GARAN, ISCTR, VAKBN) ve GYO sektörlerinde görülür. İhracatçı sanayi hisseleri (EREGL, TUPRS, FROTO) kur etkisi nedeniyle daha farklı hareket edebilir."},
-      {"q": "Faiz kararı günü işlem yapmalı mıyım?",
-       "a": "Deneyimli yatırımcılar bile faiz kararı günü büyük pozisyon açmaktan kaçınır. İlk tepki sert ve yanıltıcı olabilir. Kararın sindirilerek kalıcı trendin netleşmesini beklemek daha sağlıklıdır."},
+      {"q": "Faiz kararı günü piyasa nasıl davranır?",
+       "a": "Faiz kararı günü ilk tepki sert ve yanıltıcı olabilir; deneyimli yatırımcılar bile bu saatlerde büyük işlemlerden kaçınır. Kararın sindirilip kalıcı trendin netleşmesi genellikle birkaç gün sürer."},
       {"q": "Enflasyon yüksekken borsa iyi performans gösterebilir mi?",
        "a": "Türkiye'de enflasyon dönemlerinde borsa TL bazında yükselir çünkü hisseler reel varlıklara sahiplik hakkıdır. Ancak dolar bazında getiri ve gerçek satın alma gücü kazancı için enflasyonun üzerinde bir BIST performansı gerekir. Her zaman gerçekleşmez."}
     ],
@@ -3585,9 +3594,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "teknik-analiz-mi-temel-analiz-mi",
     "title": "Teknik Analiz mi, Temel Analiz mi? Farklar ve Birlikte Kullanım",
-    "desc": "Teknik analiz ile temel analiz arasındaki temel farklar nelerdir? Hangi yatırımcı hangisini kullanmalı? BIST hisseleri için en etkili yaklaşım nedir?",
+    "desc": "Teknik analiz ile temel analiz arasındaki temel farklar nelerdir? Hangi yatırımcı hangisine ağırlık verir? İkisi birlikte nasıl okunur?",
     "cat": "Strateji",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "body": """
 <p>Yatırım dünyasındaki en köklü tartışmalardan biri: "Teknik analiz mi yoksa temel analiz mi daha etkili?" Bu sorunun kesin bir cevabı olmasa da her iki yaklaşımı anlamak ve doğru durumda doğru aracı kullanmak, yatırımcıya büyük avantaj sağlar.</p>
@@ -3617,8 +3627,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600;color:var(--bp-text-3)">Ana Soru</td>
-      <td style="padding:8px 12px">"Ne zaman al/sat?"</td>
-      <td style="padding:8px 12px">"Hangi hisse değerli?"</td>
+      <td style="padding:8px 12px">"Trend ne yönde, ne kadar güçlü?"</td>
+      <td style="padding:8px 12px">"Şirketin finansalları nasıl?"</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600;color:var(--bp-text-3)">Öğrenme Eğrisi</td>
@@ -3635,7 +3645,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Teknik Analizin Güçlü Yönleri</h2>
 <ul>
-  <li><strong>Zamanlama:</strong> "Ne zaman girilmeli?" sorusuna doğrudan cevap verir</li>
+  <li><strong>Zamanlama:</strong> Trendin ne zaman başladığını ve ne zaman bozulduğunu gösterir</li>
   <li><strong>Disiplin:</strong> Kurala bağlı ölçütler duygusal kararları azaltır</li>
   <li><strong>Hız:</strong> Piyasa değişimlerine hızlı tepki verir</li>
   <li><strong>Evrensellik:</strong> Her piyasada (hisse, forex, kripto) uygulanabilir</li>
@@ -3646,41 +3656,41 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
   <li><strong>Gerçek değer:</strong> Şirketin gerçekte ne kadar ettiğini anlamayı sağlar</li>
   <li><strong>Uzun vade:</strong> Değer yatırımı için gerekli temel oluşturur</li>
-  <li><strong>Güvenlik marjı:</strong> Ucuz hisseleri tespit etmeye yardımcı olur</li>
+  <li><strong>Güvenlik marjı:</strong> Değerlemesi sektörüne göre düşük şirketleri ayırt etmeye yardımcı olur</li>
   <li><strong>Neden anlama:</strong> "Bu şirket neden değerleniyor?" sorusunu cevaplar</li>
 </ul>
 
 <h2>Birlikte Kullanım: En Güçlü Yaklaşım</h2>
 <div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:var(--bp-up)">✅ Kanıtlanmış Strateji: "Temel Analiz + Teknik Zamanlama"</strong>
-  <p style="margin:8px 0 0 0">Önce temel analizle "hangi hisse" sorusunu cevapla → Ardından teknik analizle "ne zaman" gireceğini belirle. Bu iki adımlı yaklaşım profesyonel portföy yöneticilerinin büyük çoğunluğunun benimsediği yöntemdir.</p>
+  <strong style="color:var(--bp-up)">Yaygın Yaklaşım: "Temel Analiz + Teknik Okuma"</strong>
+  <p style="margin:8px 0 0 0">Temel analiz şirketin finansallarını, teknik analiz fiyatın trendini anlatır. İki katmanı birlikte okumak, profesyonel portföy yönetiminde sık kullanılan bir yöntemdir.</p>
 </div>
 
-<h3>Örnek Uygulama — AKBNK</h3>
+<h3>Örnek Okuma — Varsayımsal Bir Banka Hissesi</h3>
 <ol>
-  <li><strong>Temel filtre:</strong> Banka karlılığı güçlü, F/K oranı sektör ortalamasının altında, temettü verimi cazip</li>
-  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali Güçlü Trend durumuna geçiyor, ADX ≥ 25 ve DI+ > DI−, Supertrend yeşil</li>
-  <li><strong>Karar:</strong> Her iki filtreden geçen hisse için giriş değerlendirilebilir</li>
+  <li><strong>Temel katman:</strong> Kârlılığı güçlü, F/K oranı sektör ortalamasının altında, temettü verimi yüksek</li>
+  <li><strong>Teknik katman:</strong> BorsaPusula trend durumu Güçlü Trend, ADX ≥ 25 ve DI+ > DI−, Supertrend yeşil</li>
+  <li><strong>Sonuç:</strong> Finansallar ve fiyat trendi aynı resmi çiziyor; iki katman birbirini teyit ediyor</li>
 </ol>
 
-<h2>Kim Hangisini Kullanmalı?</h2>
+<h2>Yatırımcı Tipine Göre Ağırlık</h2>
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:var(--bp-raised)">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Yatırımcı Tipi</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Önerilen Yaklaşım</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Yaygın Yaklaşım</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid var(--bp-line)">
-      <td style="padding:8px 12px">Aktif trader (günlük-haftalık işlem)</td>
+      <td style="padding:8px 12px">Aktif işlem yapan yatırımcı (günlük-haftalık)</td>
       <td style="padding:8px 12px">Teknik analiz ağırlıklı</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
-      <td style="padding:8px 12px">Swing trader (haftalık-aylık)</td>
-      <td style="padding:8px 12px">Teknik + minimal temel filtre</td>
+      <td style="padding:8px 12px">Kısa-orta vadeli yatırımcı (haftalık-aylık)</td>
+      <td style="padding:8px 12px">Teknik + sınırlı temel filtre</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px">Uzun vadeli yatırımcı (1+ yıl)</td>
-      <td style="padding:8px 12px">Temel analiz önce, teknik zamanlama</td>
+      <td style="padding:8px 12px">Temel analiz önce, teknik okuma ikinci</td>
     </tr>
     <tr>
       <td style="padding:8px 12px">Temettü yatırımcısı</td>
@@ -3690,20 +3700,20 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </table>
 
 <h2>BorsaPusula Yaklaşımı: Hibrit Model</h2>
-<p>BorsaPusula sinyal sistemi her ikisini birleştirir:</p>
+<p>BorsaPusula her iki katmanı birlikte gösterir:</p>
 <ul>
-  <li><strong>Teknik katman:</strong> Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 — zamanlama için</li>
+  <li><strong>Teknik katman:</strong> Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 — trend durumu için</li>
   <li><strong>Temel katman:</strong> Her hisse sayfasında F/K, PD/DD, ROE, temettü verimi — değerleme için</li>
-  <li><strong>Çok zaman dilimi (MTF):</strong> H4 → Günlük → Haftalık → Aylık trend uyumu — büyük trendle aynı yönde işlem için</li>
+  <li><strong>Haftalık teyit:</strong> Haftalık EMA20 yönü — günlük trendin üst zaman dilimiyle uyumu için</li>
 </ul>
 """,
     "faqs": [
       {"q": "Teknik analiz gerçekten işe yarıyor mu?",
-       "a": "Akademik araştırmalar karışık sonuçlar verse de teknik analiz birçok profesyonel trader ve kurum tarafından yaygın kullanılmaktadır. Özellikle trend takip stratejileri ve momentum göstergeleri, belirli koşullarda tutarlı sonuçlar üretebilmektedir. Tek başına mükemmel bir araç değil, bir karar destek sistemidir."},
+       "a": "Akademik araştırmalar karışık sonuçlar verse de teknik analiz birçok profesyonel yatırımcı ve kurum tarafından yaygın kullanılmaktadır. Özellikle trend takip stratejileri ve momentum göstergeleri, belirli koşullarda tutarlı sonuçlar üretebilmektedir. Tek başına mükemmel bir araç değil, bir karar destek sistemidir."},
       {"q": "Temel analiz öğrenmek için ne gerekli?",
-       "a": "Temel muhasebe bilgisi (bilanço, gelir tablosu, nakit akışı okuma), sektör dinamiklerini anlama ve makroekonomik değişkenleri takip edebilme gerekir. F/K, PD/DD, ROE gibi temel oranlar başlangıç için iyi bir çıkış noktasıdır."},
+       "a": "Temel muhasebe bilgisi (bilanço, gelir tablosu, nakit akışı okuma), sektör dinamiklerini anlama ve makroekonomik değişkenleri takip edebilme gerekir. F/K, PD/DD, ROE gibi temel oranlar başlangıç için iyi bir temeldir."},
       {"q": "Kısa vadede teknik analiz, uzun vadede temel analiz mi?",
-       "a": "Bu yaygın bir ezberleme formülü ama tam doğru değil. Uzun vadeli yatırımcılar da teknik sinyallerden giriş zamanlamasında faydalanabilir; kısa vadeli traderlar da temel analizden sektör seçiminde yararlanabilir. Önemli olan yaklaşımların birbirini tamamlaması."},
+       "a": "Bu yaygın bir ezberleme formülü ama tam doğru değil. Uzun vadeli yatırımcılar da trend okumasından faydalanabilir; kısa vadeli yatırımcılar da temel analizden sektör seçiminde yararlanabilir. Önemli olan yaklaşımların birbirini tamamlaması."},
       {"q": "BorsaPusula hangi analiz yöntemini kullanıyor?",
        "a": "BorsaPusula öncelikli olarak teknik analiz odaklıdır: Supertrend, ADX, DI+/DI− ve EMA12/99 göstergelerini kullanır. Hisse sayfalarında temel analiz verileri (F/K, PD/DD, ROE vb.) de sunulur. Sistem, teknik ile temeli aynı ekranda görerek daha bilinçli karar almanızı hedefler."}
     ],
@@ -3717,6 +3727,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "S&P500 endeksi nedir, hangi şirketler var, Türkiye'den nasıl yatırım yapılır? Nasdaq ile farkı, ETF seçimi ve kur riski. ABD borsasına yatırım rehberi.",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
 <p>S&P500 (Standard & Poor's 500), ABD borsasında işlem gören en büyük 500 şirketin piyasa değeri ağırlıklı endeksidir. Dünyada en çok takip edilen borsa endekslerinden biridir ve küresel ekonominin nabzı olarak kabul edilir.</p>
@@ -3773,13 +3784,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Türkiye'den ABD Borsasına Nasıl Yatırım Yapılır?</h2>
 
 <h3>1. Aracı Kurum (Doğrudan Hisse)</h3>
-<p>Midas, Passfolio gibi platformlar veya yurt içi bankaların yabancı hisse platformları aracılığıyla doğrudan AAPL, MSFT, NVDA gibi hisseler alınabilir.</p>
+<p>Yurt dışı hisse işlemine aracılık eden platformlar veya yurt içi bankaların yabancı hisse platformları aracılığıyla doğrudan AAPL, MSFT, NVDA gibi hisseler alınabilir.</p>
 <ul>
-  <li>✅ İstediğin hisseyi seç, tam kontrol</li>
+  <li>✅ Hisse seçimi tamamen yatırımcıya kalır</li>
   <li>❌ Çeşitlendirme için çok sayıda hisse gerekir</li>
 </ul>
 
-<h3>2. ETF ile S&P500 (Önerilen Yöntem)</h3>
+<h3>2. ETF ile S&P500</h3>
 <p>SPY, IVV, VOO gibi S&P500 ETF'leri tek alımla 500 şirkete yatırım sağlar. Türkiye'den erişim için yurt dışı platform gerekebilir.</p>
 <ul>
   <li>✅ Düşük maliyet, geniş çeşitlendirme</li>
@@ -3793,19 +3804,19 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Kur Riski: Dolar/TL Etkisi</h2>
 <div style="background:rgba(var(--bp-accent-yellow-rgb),.07);border:1px solid rgba(var(--bp-accent-yellow-rgb),.2);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-accent-yellow)">⚠️ Kritik Not:</strong>
-  <p style="margin:8px 0 0 0">TL'de değer kaybı varsa USD cinsinden aynı kalan bir yatırım TL bazında "artmış" görünür. Bu getiri yanıltıcı olabilir. Gerçek değerlendirme için ABD enflasyonu ve TL/USD paritesini birlikte değerlendirin.</p>
+  <p style="margin:8px 0 0 0">TL'de değer kaybı varsa USD cinsinden aynı kalan bir yatırım TL bazında "artmış" görünür. Bu getiri yanıltıcı olabilir. Gerçek getiri, ABD enflasyonu ve TL/USD paritesi birlikte ele alındığında ortaya çıkar.</p>
 </div>
 
-<h2>BorsaPusula BIST Sinyalleri</h2>
-<p>BorsaPusula, BIST hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. ABD borsası pozisyonlarınızı ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
+<h2>BorsaPusula'da BIST Hisseleri</h2>
+<p>BorsaPusula, BIST hisselerinin trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) gün sonu kapanış verisiyle gösterir. Piyasa sayfasındaki BIST100 ısı haritası ve /tarama sayfası, Borsa İstanbul tarafını ABD borsasından ayrı izlemeye yarar.</p>
 """,
     "faqs": [
       {"q": "S&P500'e yatırım yapmak güvenli mi?",
        "a": "Hiçbir yatırım tam anlamıyla güvenli değildir; S&P500 kısa vadede ciddi düşüşler (%30-50) yaşayabilir. Ancak 20-30 yıllık perspektifte tarihsel olarak pozitif getiri sağlamıştır. Uzun vadeli yatırımcı için çeşitlendirilmiş bir araç olarak değerlendirilebilir."},
       {"q": "S&P500 mü Nasdaq mı daha iyi?",
-       "a": "Nasdaq son 10 yılda S&P500'ü geride bıraktı, ancak çok daha volatil. S&P500 daha dengeli ve savunmacıdır. Ağır teknoloji tercihiniz varsa Nasdaq, dengeli büyüme istiyorsanız S&P500 uygun olabilir. İkisini karıştırmak da yaygın bir stratejidir."},
+       "a": "Nasdaq son 10 yılda S&P500'ü geride bıraktı, ancak çok daha volatil. S&P500 daha dengeli ve savunmacıdır. Nasdaq teknoloji ağırlıklıdır, S&P500 ise sektörlere daha dengeli dağılır. İkisini birlikte tutan yatırımcılar da yaygındır."},
       {"q": "Türkiye'den S&P500 ETF'i nasıl alınır?",
-       "a": "Yurt içi bankaların yabancı hisse platformları veya Midas gibi uygulamalar aracılığıyla SPY, IVV, VOO gibi ETF'ler alınabilir. Bazı Türk BYF'leri de yabancı endeksleri takip eder. Yatırım yapmadan önce vergi ve düzenleyici koşulları araştırın."},
+       "a": "Yurt içi bankaların yabancı hisse platformları veya yurt dışı hisse işlemine aracılık eden uygulamalar aracılığıyla SPY, IVV, VOO gibi ETF'ler alınabilir. Bazı Türk BYF'leri de yabancı endeksleri takip eder. Yatırım yapmadan önce vergi ve düzenleyici koşulları araştırın."},
       {"q": "ABD borsası gece açık olduğunda Türklerden işlem yapılabilir mi?",
        "a": "Evet. NYSE ve Nasdaq'ın işlem saatleri Türkiye saatiyle 16:30-23:00 (yaz) veya 17:30-00:00 (kış) arasındadır. Bu saatlerde aracı kurumunuzun platformu üzerinden işlem yapabilirsiniz."}
     ],
@@ -3819,6 +3830,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Bireysel Emeklilik Sistemi (BES) nedir, nasıl çalışır, devlet katkısı ne kadar? BES mi yoksa borsa yatırımı mı daha kazançlı? Kapsamlı 2026 rehberi.",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
 <p>Bireysel Emeklilik Sistemi (BES), devlet desteğiyle uzun vadeli birikim yapmanıza olanak tanıyan gönüllü bir emeklilik tasarruf sistemidir. Türkiye'de milyonlarca kişinin katılımıyla en yaygın yatırım araçlarından biri haline gelmiştir.</p>
@@ -3879,7 +3891,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>BES mi, Borsa Yatırımı mı?</h2>
 <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-brand)">💡 Birbirinin Rakibi Değil:</strong>
-  <p style="margin:8px 0 0 0">BES ve borsa birbirini tamamlayan araçlardır. BES'in devlet katkısı benzersiz bir avantaj sağlar — bu etkiyi borsada doğrudan yeniden üretemezsiniz. İdeal: BES ile uzun vadeli birikim + BIST sinyalleriyle aktif yönetim bir arada.</p>
+  <p style="margin:8px 0 0 0">BES ve borsa birbirini tamamlayan araçlardır. BES'in devlet katkısı benzersiz bir avantaj sağlar — bu etkiyi borsada doğrudan yeniden üretemezsiniz. BES ile uzun vadeli birikim ve doğrudan hisse yatırımı bir arada da kullanılabilir.</p>
 </div>
 
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
@@ -3917,8 +3929,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   </tbody>
 </table>
 
-<h2>BES'te Akıllı Fon Seçimi</h2>
-<p>Uzun vadeli BES birikiminde tarihsel olarak en yüksek getiriyi hisse senedi ağırlıklı fonlar sağlamıştır. Ancak yaşınıza göre risk profili ayarlanmalıdır:</p>
+<h2>BES'te Fon Dağılımı ve Yaş</h2>
+<p>Uzun vadeli BES birikiminde tarihsel olarak en yüksek getiriyi hisse senedi ağırlıklı fonlar sağlamıştır. Yaygın yaklaşımda risk profili yaşa göre değişir:</p>
 <ul>
   <li><strong>20-40 yaş:</strong> Hisse ağırlıklı (%60-80) — uzun vade riski tolere eder</li>
   <li><strong>40-50 yaş:</strong> Dengeli karışım (%40-60 hisse) — koruyucu unsurlar artırılır</li>
@@ -3928,12 +3940,12 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "faqs": [
       {"q": "BES devlet katkısını almak için ne kadar süre kalmak gerekiyor?",
        "a": "Devlet katkısının tamamını alabilmek için sistemde 10 yıl kalmanız ve 56 yaşında emekliliğe hak kazanmanız gerekir. Erken çıkışta devlet katkısının bir kısmı geri alınır ve stopaj uygulanabilir. Koşullar değişebileceğinden güncel BES mevzuatını kontrol edin."},
-      {"q": "BES'te hangi fonlara yatırım yapmalıyım?",
-       "a": "Uzun vadede hisse senedi fonları (özellikle endeks fonları) tarihsel olarak en yüksek reel getiriyi sağlamıştır. Ancak bu yüksek kısa vadeli volatilite anlamına gelir. Yaşınıza, risk toleransınıza ve emeklilik hedefinize göre fon dağılımınızı belirleyin."},
+      {"q": "BES'te fon seçimi neye göre yapılır?",
+       "a": "Uzun vadede hisse senedi fonları (özellikle endeks fonları) tarihsel olarak en yüksek reel getiriyi sağlamıştır. Ancak bu yüksek kısa vadeli volatilite anlamına gelir. Fon dağılımı genellikle yaş, risk toleransı ve emeklilik hedefine göre belirlenir."},
       {"q": "BES ve OKS (Otomatik Katılım Sistemi) aynı şey mi?",
        "a": "OKS (eski adıyla Otomatik BES), çalışanların otomatik olarak BES'e dahil edildiği zorunlu katılım sistemidir. Gönüllü BES'te siz katkı tutarını ve fon seçimini belirlersiniz. Her iki sistemde de devlet katkısından faydalanılabilir."},
-      {"q": "BES'i borsa sinyalleriyle nasıl entegre edebilirim?",
-       "a": "BES'inizdeki hisse senedi fonlarının performansını BIST trendleriyle takip edebilirsiniz. Güçlü boğa trendlerinde hisse ağırlığını artırmak, zayıf dönemlerde sabit getirili fonlara kaymak için BorsaPusula sinyallerini rehber olarak kullanabilirsiniz. Ancak BES fon değişiklikleri aracı kurumunuza göre sınırlandırılmış olabilir."}
+      {"q": "BES fonları BIST'in trend durumuyla birlikte izlenebilir mi?",
+       "a": "Evet. BES'teki hisse senedi fonlarının performansı BIST'in genel gidişatıyla birlikte izlenebilir; BorsaPusula'nın Piyasa sayfasındaki Güçlü Trend oranı piyasanın genel trend durumunu gösterir. BES fon değişiklikleri ise emeklilik şirketine göre sınırlandırılmış olabilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3945,6 +3957,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "Hisse senedi yatırımında bilanço, gelir tablosu ve nakit akışı tablosu nasıl okunur? F/K, PD/DD, ROE oranları ne anlama gelir? Temel analiz başlangıç rehberi.",
     "cat": "Temel Analiz",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 8,
     "body": """
 <p>Şirketin finansal tablolarını okuyabilmek, değer yatırımcısının en temel becerisidir. Bilanço, gelir tablosu ve nakit akışı tablosu — bu üç belge bir şirketin mali sağlığını tüm boyutlarıyla ortaya koyar.</p>
@@ -3963,7 +3976,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h3>2. Gelir Tablosu (Income Statement)</h3>
-<p>Belirli dönemde (3 ay, 1 yıl) şirketin gelirlerini, maliyetlerini ve kar/zararını gösterir:</p>
+<p>Belirli dönemde (3 ay, 1 yıl) şirketin gelirlerini, maliyetlerini ve kâr/zararını gösterir:</p>
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:var(--bp-raised)">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Kalem</th>
@@ -3978,24 +3991,24 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">FAVÖK (EBITDA)</td>
-      <td style="padding:8px 12px">Amortisman ve faiz öncesi kar</td>
-      <td style="padding:8px 12px">✅ Operasyonel karlılık</td>
+      <td style="padding:8px 12px">Amortisman ve faiz öncesi kâr</td>
+      <td style="padding:8px 12px">✅ Operasyonel kârlılık</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
-      <td style="padding:8px 12px;font-weight:600">Net Kar</td>
-      <td style="padding:8px 12px">Tüm kesintiler sonrası nihai kar</td>
+      <td style="padding:8px 12px;font-weight:600">Net Kâr</td>
+      <td style="padding:8px 12px">Tüm kesintiler sonrası nihai kâr</td>
       <td style="padding:8px 12px">✅ F/K hesabı için</td>
     </tr>
     <tr>
       <td style="padding:8px 12px;font-weight:600">Hisse Başı Kazanç (EPS)</td>
-      <td style="padding:8px 12px">Her hisse için düşen net kar</td>
+      <td style="padding:8px 12px">Her hisse için düşen net kâr</td>
       <td style="padding:8px 12px">✅ Hisse performansı</td>
     </tr>
   </tbody>
 </table>
 
 <h3>3. Nakit Akışı Tablosu</h3>
-<p>Şirketin gerçekte ne kadar nakit ürettiğini gösterir. Kar değil, nakit akışı hayatta kalmayı belirler:</p>
+<p>Şirketin gerçekte ne kadar nakit ürettiğini gösterir. Kâr değil, nakit akışı hayatta kalmayı belirler:</p>
 <ul>
   <li><strong>Faaliyet nakit akışı:</strong> Asıl işten gelen para — en önemli gösterge</li>
   <li><strong>Yatırım nakit akışı:</strong> Fabrika, ekipman alım satımı</li>
@@ -4007,7 +4020,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <thead><tr style="background:var(--bp-raised)">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Oran</th>
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Formül</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">İdeal Yorum</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-text-3)">Yaygın Yorum</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid var(--bp-line)">
@@ -4022,8 +4035,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">ROE</td>
-      <td style="padding:8px 12px">Net Kar ÷ Öz Sermaye</td>
-      <td style="padding:8px 12px">&gt;15% genellikle güçlü karlılık</td>
+      <td style="padding:8px 12px">Net Kâr ÷ Öz Sermaye</td>
+      <td style="padding:8px 12px">&gt;15% genellikle güçlü kârlılık</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">Net Borç/FAVÖK</td>
@@ -4041,7 +4054,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Pratik Okuma Rehberi: Adım Adım</h2>
 <ol>
   <li><strong>Büyüme var mı?</strong> Net satışlar yıldan yıla artıyor mu?</li>
-  <li><strong>Karlı mı?</strong> Faaliyet karı marjı pozitif mi?</li>
+  <li><strong>Kârlı mı?</strong> Faaliyet kârı marjı pozitif mi?</li>
   <li><strong>Borç yükü ne kadar?</strong> Net borç/FAVÖK oranına bak</li>
   <li><strong>Nakit üretiyor mu?</strong> Faaliyet nakit akışı sürekli pozitif mi?</li>
   <li><strong>Değerleme makul mü?</strong> F/K ve PD/DD sektör ortalamasıyla karşılaştır</li>
@@ -4049,21 +4062,21 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-brand)">💡 KAP'tan Finansal Tablolara Erişim:</strong>
-  <p style="margin:8px 0 0 0">Türkiye'de halka açık şirketlerin tüm finansal tabloları KAP (Kamuyu Aydınlatma Platformu) üzerinden ücretsiz erişilebilir. BorsaPusula'da her hisse sayfasında KAP bildirimi linkine ve temel finansal oranlara doğrudan erişebilirsiniz.</p>
+  <p style="margin:8px 0 0 0">Türkiye'de halka açık şirketlerin tüm finansal tabloları KAP (Kamuyu Aydınlatma Platformu) üzerinden herkese açıktır. BorsaPusula'da her hisse sayfasında KAP bildirimi linkine ve temel finansal oranlara doğrudan erişebilirsiniz.</p>
 </div>
 
-<h2>Teknik Sinyal + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri düzenli aralıklarla güncellenerek sunulmaktadır. Teknik Güçlü Trend sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
+<h2>Trend Durumu ve Temel Analiz</h2>
+<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi gibi temel veriler, trend durumuyla (Güçlü Trend / Trend Bozuldu / Yatay) birlikte sunulur. Trend durumu fiyatın seyrini, temel veriler şirketin kendisini betimler.</p>
 """,
     "faqs": [
       {"q": "Bilanço okumak için muhasebe bilgisi şart mı?",
-       "a": "Derin muhasebe bilgisi gerekmez. Temel kavramları (varlık, borç, öz sermaye, karlılık, nakit akışı) anlamak ve F/K, PD/DD, ROE gibi özet oranları yorumlayabilmek başlangıç için yeterlidir. Zamanla daha derin analize geçilebilir."},
+       "a": "Derin muhasebe bilgisi gerekmez. Temel kavramları (varlık, borç, öz sermaye, kârlılık, nakit akışı) anlamak ve F/K, PD/DD, ROE gibi özet oranları yorumlayabilmek başlangıç için yeterlidir. Zamanla daha derin analize geçilebilir."},
       {"q": "Hangi finansal tablo en önemli?",
-       "a": "Nakit akışı tablosu genellikle en az manipüle edilebilen ve en gerçekçi tablodir. 'Kar yazılabilir ama nakit üretmek gerekir' kuralı fintech dünyasında yaygındır. Karlı görünen ama nakit üretemeyen şirketlere dikkat."},
+       "a": "Nakit akışı tablosu genellikle en az manipüle edilebilen ve en gerçekçi tablodur. 'Kâr yazılabilir ama nakit üretmek gerekir' sözü finans dünyasında yaygındır. Kârlı görünen ama nakit üretemeyen şirketlere dikkat."},
       {"q": "F/K oranı düşük olan hisse ucuz mudur?",
        "a": "Düşük F/K tek başına ucuz anlamına gelmez. Aynı sektördeki rakiplerle karşılaştırmak gerekir. Ayrıca düşük F/K düşük büyüme beklentisini veya şirkete özgü riski yansıtıyor olabilir. Diğer oranlarla birlikte değerlendirilmelidir."},
       {"q": "BIST hisselerinin finansal tablolarına nereden bakabilirim?",
-       "a": "KAP (kap.org.tr) üzerinden tüm halka açık Türk şirketlerinin finansal tabloları ücretsiz incelenebilir. BorsaPusula hisse sayfalarında temel oranlar özetlenerek sunulmaktadır. Aracı kurum platformları da genellikle temel verileri gösterir."}
+       "a": "KAP (kap.org.tr) üzerinden tüm halka açık Türk şirketlerinin finansal tabloları herkese açık olarak incelenebilir. BorsaPusula hisse sayfalarında temel oranlar özetlenerek sunulmaktadır. Aracı kurum platformları da genellikle temel verileri gösterir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'EREGL', 'THYAO', 'KCHOL']
   },
@@ -4153,7 +4166,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Borsa Seans Saatleri 2026: BIST Açılış ve Kapanış Bilgileri",
     "desc": "BIST hisse senetleri kaçta açılır, kaçta kapanır? 2026 güncel seans saatleri, işlem günleri ve tatil takvimi.",
     "date": "2026-05-01",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4192,7 +4205,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Sabah Tek Fiyat Seansı Nasıl Çalışır?</h2>
 <p>Saat 09:40-10:00 arasında yatırımcılar emir girebilir ancak eşleşme gerçekleşmez. 10:00'de sistem, girilen tüm emirleri değerlendirerek en fazla işlemi sağlayan "açılış fiyatını" tek seferde belirler. Bu fiyat aynı zamanda gün içindeki ilk işlem fiyatıdır.</p>
 <ul>
-  <li>Açılış öncesinde girilmiş emirlerin büyük kısmı bu seanstta eşleşir</li>
+  <li>Açılış öncesinde girilmiş emirlerin büyük kısmı bu seansta eşleşir</li>
   <li>Fiyat hareket sınırı: bir önceki kapanışa göre ±%20 (devre kesici mekanizması)</li>
   <li>Haber bekleyen veya bilanço açıklayan hisseler için volatilite yüksek olabilir</li>
 </ul>
@@ -4225,8 +4238,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 <p>Güncel tatil takvimi için Borsa İstanbul'un resmi web sitesini kontrol edin.</p>
 
-<h2>BorsaPusula Sinyalleri Hangi Saatte Güncellenir?</h2>
-<p>BorsaPusula algoritması, seans kapatıldıktan sonra (18:00-18:10 kapanış seansı tamamlanınca) günlük bar verilerini işler ve sinyalleri hesaplar. Sinyal güncellemesi genellikle saat 18:30-19:00 arasında tamamlanır. Sabah 10:00'de ana seansa başlamadan önce güncel sinyalleri kontrol etmek idealdir.</p>
+<h2>BorsaPusula Verileri Hangi Saatte Güncellenir?</h2>
+<p>BorsaPusula, seans kapandıktan sonra (18:00-18:10 kapanış seansı tamamlanınca) gün sonu kapanış verilerini işler; Piyasa sayfasındaki BIST100 ısı haritası ve hisse sayfalarındaki trend durumları bu veriyle güncellenir. Güncelleme genellikle saat 18:30-19:00 arasında tamamlanır.</p>
 """,
     "faqs": [
       {"q": "BIST kaçta açılır, kaçta kapanır?",
@@ -4235,8 +4248,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
        "a": "Hayır, Borsa İstanbul resmi tatil günlerinde kapalıdır. Ramazan ve Kurban Bayramları, 23 Nisan, 1 Mayıs, 19 Mayıs, 30 Ağustos ve 29 Ekim'de borsa işlem görmez. Güncel tatil takvimi için Borsa İstanbul resmi sitesine bakın."},
       {"q": "Sabah 10:00'den önce emir girebilir miyim?",
        "a": "Evet. Sabah 09:40-10:00 arasındaki 'Tek Fiyat Seansı'nda emir girebilirsiniz. Bu emirler 10:00'de sistem tarafından eşleştirilir ve açılış fiyatını belirler. Emir eşleşmesi saat 10:00'e kadar gerçekleşmez."},
-      {"q": "BorsaPusula sinyalleri ne zaman güncellenir?",
-       "a": "Sinyaller, kapanış seansı tamamlandıktan sonra günlük bar verileri işlenerek hesaplanır. Güncelleme genellikle saat 18:30-19:00 arasında tamamlanır. Sabah işlemlerine başlamadan önce güncel sinyalleri kontrol etmenizi öneririz."}
+      {"q": "BorsaPusula verileri ne zaman güncellenir?",
+       "a": "Trend durumları ve ısı haritası, kapanış seansı tamamlandıktan sonra gün sonu kapanış verileri işlenerek hesaplanır. Güncelleme genellikle saat 18:30-19:00 arasında tamamlanır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
   },
@@ -4247,6 +4260,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Tahvil Nedir? Hisse Senediyle Farkı ve 2026 Yatırım Rehberi",
     "desc": "Tahvil ile hisse senedi arasındaki temel farklar, tahvil yatırımının avantajları ve dezavantajları. Türkiye'de tahvil yatırımı nasıl yapılır?",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4291,7 +4305,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       <td style="padding:8px 12px;color:var(--bp-text)">Hayır</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Iflas önceliği</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">İflas önceliği</td>
       <td style="padding:8px 12px;color:var(--bp-down)">Sonuncu sırada</td>
       <td style="padding:8px 12px;color:var(--bp-up)">Hisse senetlerinden önce</td>
     </tr>
@@ -4330,13 +4344,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Örnek: 10% faizle aldığınız bir tahvili, piyasa faizleri 12%'ye çıktığında satmak isterseniz, alıcı daha yüksek faizli yeni tahvillere yönelir; bu nedenle tahvilinizi indirimli satmak zorunda kalırsınız.</p>
 
 <h2>Tahvil mi, Hisse mi?</h2>
-<p>Her iki araç da portföyde yer alabilir. Genel kural olarak:</p>
+<p>Her iki araç da portföyde yer alabilir. Sık anılan genel çerçeve şöyledir:</p>
 <ul>
   <li><strong>Genç / uzun vadeli yatırımcı:</strong> Hisse ağırlığı yüksek (80/20 hisse/tahvil)</li>
   <li><strong>Emekliliğe yakın / kısa vadeli ihtiyaç:</strong> Tahvil ağırlığı artar (40/60 hisse/tahvil)</li>
-  <li><strong>Risk toleransı düşük:</strong> Devlet tahvili ile korunmalı portföy</li>
+  <li><strong>Risk toleransı düşük:</strong> Devlet tahvili ağırlığı yüksek portföy</li>
 </ul>
-<p>Türkiye'de yüksek enflasyon nedeniyle nominal tahvil faizleri cazip görünse de enflasyona karşı korumalı araçları veya kısa vadeli enstrümanları tercih etmek akıllıca olabilir.</p>
+<p>Türkiye'de yüksek enflasyon nedeniyle nominal tahvil faizleri yüksek görünse de reel getiri, enflasyona karşı korumalı araçlar ve kısa vadeli enstrümanlarla karşılaştırılarak değerlendirilir.</p>
 """,
     "faqs": [
       {"q": "Tahvil ve hisse senedi arasındaki en temel fark nedir?",
@@ -4355,8 +4369,9 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "viop-vadeli-islemler-nedir",
     "title": "VİOP Nedir? Vadeli İşlem ve Opsiyon Piyasası Başlangıç Rehberi",
-    "desc": "Borsa İstanbul VİOP (Vadeli İşlem ve Opsiyon Piyasası) nasıl çalışır? Futures ve opsiyon sözleşmelerini yeni başlayanlar için anlatan kapsamlı rehber.",
+    "desc": "Borsa İstanbul VİOP (Vadeli İşlem ve Opsiyon Piyasası) nasıl çalışır? Vadeli işlem ve opsiyon sözleşmelerini yeni başlayanlar için anlatan kapsamlı rehber.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4364,7 +4379,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Vadeli İşlem Sözleşmesi (Futures) Nedir?</h2>
 <p>Vadeli işlem sözleşmesi, belirli bir varlığı <strong>önceden belirlenen fiyat ve tarihte</strong> alıp satma yükümlülüğüdür. İki taraf bu sözleşmeyi imzaladığında, her iki taraf da yükümlülük altına girer.</p>
-<p>Örnek: BIST30 endeksi üzerine bir futures sözleşmesi satın aldığınızda, ilerleyen bir tarihte endeksin şimdiki değeri üzerinden hesaplanan tutarı nakit olarak alacağınız veya ödeyeceğiniz bir anlaşma yapıyorsunuz demektir.</p>
+<p>Örnek: BIST30 endeksi üzerine bir vadeli işlem sözleşmesi satın aldığınızda, ilerleyen bir tarihte endeksin şimdiki değeri üzerinden hesaplanan tutarı nakit olarak alacağınız veya ödeyeceğiniz bir anlaşma yapıyorsunuz demektir.</p>
 
 <h2>Opsiyon Sözleşmesi Nedir?</h2>
 <p>Opsiyon, belirli bir varlığı belirli bir fiyattan <strong>alma (call) veya satma (put) hakkıdır</strong> — ancak yükümlülük değil. Opsiyon alıcısı bu hakkı kullanıp kullanmamakta serbesttir; opsiyon satıcısı ise karşı tarafın kararına uymak zorundadır.</p>
@@ -4385,19 +4400,19 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   </thead>
   <tbody>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Endeks Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Endeks Vadeli</td>
       <td style="padding:8px 12px;color:var(--bp-text)">BIST30 vadeli (XU030 kontratları)</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd);background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Döviz Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Döviz Vadeli</td>
       <td style="padding:8px 12px;color:var(--bp-text)">USD/TRY, EUR/TRY, GBP/TRY</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Pay Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Pay Vadeli</td>
       <td style="padding:8px 12px;color:var(--bp-text)">AKBNK, GARAN, THYAO gibi bireysel hisseler</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd);background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Metal/Emtia Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Metal/Emtia Vadeli</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Altın, Gümüş</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
@@ -4417,16 +4432,15 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Teminat ve Teminat Tamamlama (Margin Call)</h2>
 <p>Pozisyon açmak için hesabınızda başlangıç teminatı bulunmalıdır. Piyasa aleyhinize hareket edip hesap bakiyeniz sürdürme teminatının altına düşerse, aracı kurum ek teminat yatırmanızı (margin call) ister. Yatırmazsanız pozisyonunuz zorla kapatılır.</p>
 
-<h2>VİOP'ta Hedging (Korunma) Nasıl Yapılır?</h2>
-<p>Portföyünüzde BIST30 hisseleri taşıyorsanız ve kısa vadeli bir düşüşten korunmak istiyorsanız, BIST30 futures'ı satarak (short) portföyünüzü hedge edebilirsiniz. Bu sayede piyasa düşse bile futures pozisyonunuzdan kazanç sağlarsınız.</p>
+<h2>VİOP'ta Korunma (Hedging) Nasıl Çalışır?</h2>
+<p>Portföyünde BIST30 hisseleri taşıyan bir yatırımcı, kısa vadeli bir düşüşe karşı BIST30 vadeli kontratında satış yönlü (short) pozisyon taşıyarak korunma sağlayabilir. Piyasa düşerse vadeli pozisyondaki kazanç, hisse portföyündeki kaybı kısmen ya da tamamen dengeler.</p>
 
-<h2>Yeni Başlayanlar İçin Öneriler</h2>
+<h2>Yeni Başlayanlar İçin Bilinmesi Gerekenler</h2>
 <ul>
-  <li>Önce hisse senedi piyasasında en az 1-2 yıl deneyim kazanın</li>
-  <li>Kağıt üzerinde (simülasyon) en az 3 ay işlem yapın</li>
-  <li>Kaldıraç oranını başlangıçta düşük tutun (3x veya altı)</li>
-  <li>Stop loss olmadan hiçbir pozisyon açmayın</li>
-  <li>Risk etmek istediğiniz tutarın ötesine geçmeyin</li>
+  <li>Eğitim kaynaklarının çoğu, VİOP'tan önce pay piyasasında 1-2 yıllık deneyimi ve en az 3 aylık simülasyon (kağıt üzerinde işlem) pratiğini öne çıkarır</li>
+  <li>Kaldıraç yükseldikçe teminatı eritecek fiyat hareketi küçülür; başlangıç için düşük kaldıraç (3x veya altı) sık anılan bir çerçevedir</li>
+  <li>Kaldıraçlı işlemlerde risk yönetimi (teminat takibi, pozisyon büyüklüğü) kayıpların boyutunu belirler</li>
+  <li>Kayıp yatırılan teminatı aşabilir; bu yüzden riske edilen tutarın önceden bilinmesi önemlidir</li>
 </ul>
 """,
     "faqs": [
@@ -4435,9 +4449,9 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "VİOP'a başlamak için ne kadar sermaye gerekir?",
        "a": "Aracı kurumlara göre değişmekle birlikte, çoğu aracı kurumda minimum 10.000-20.000 TL ile VİOP işlemine başlanabilir. Ancak kaldıraç riski nedeniyle yeterli bir tampon sermaye bulundurmak önemlidir."},
       {"q": "BIST30 vadeli işlemi nasıl çalışır?",
-       "a": "BIST30 futures sözleşmesi, belirli bir vadede XU030 endeksinin belirli bir değerden alınıp satılacağını garanti eder. Endeks 1 yükselirse kontrat başına 10₺ kazanılır (1 kontrat = 10 çarpan). Her gün sonunda kâr/zarar hesabınıza anlık yansır (günlük uzlaşma)."},
-      {"q": "VİOP'ta opsiyon ile futures arasındaki temel fark nedir?",
-       "a": "Futures sözleşmesinde her iki taraf da yükümlüdür; vade geldiğinde ödeme zorunludur. Opsiyonda ise alıcı yalnızca bir hak satın alır — bu hakkı kullanıp kullanmamakta serbesttir. Futures daha riskli olabilir çünkü iki yönlü yükümlülük doğurur."}
+       "a": "BIST30 vadeli işlem sözleşmesi, belirli bir vadede XU030 endeksinin belirli bir değerden alınıp satılacağını garanti eder. Endeks 1 yükselirse kontrat başına 10₺ kazanılır (1 kontrat = 10 çarpan). Her gün sonunda kâr/zarar hesabınıza anlık yansır (günlük uzlaşma)."},
+      {"q": "VİOP'ta opsiyon ile vadeli işlem arasındaki temel fark nedir?",
+       "a": "Vadeli işlem sözleşmesinde her iki taraf da yükümlüdür; vade geldiğinde ödeme zorunludur. Opsiyonda ise alıcı yalnızca bir hak satın alır — bu hakkı kullanıp kullanmamakta serbesttir. Vadeli işlem daha riskli olabilir çünkü iki yönlü yükümlülük doğurur."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
@@ -4446,8 +4460,9 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "limit-emir-piyasa-emri-nedir",
     "title": "Limit Emir ve Piyasa Emri Nedir? Borsa Emir Tipleri Rehberi",
-    "desc": "Limit emir, piyasa emri, koşullu emir ve stop emir nedir? BIST'te hangi emir türünü ne zaman kullanmalısınız? Pratik örneklerle açıklama.",
+    "desc": "Limit emir, piyasa emri, koşullu emir ve stop emir nedir? BIST'te hangi emir türü nasıl çalışır? Örneklerle açıklama.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4465,8 +4480,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Limit Emir (Limit Order)</h2>
 <p>Limit emri, belirlediğiniz fiyattan <strong>veya daha iyi bir fiyattan</strong> işlem gerçekleştirme talimatıdır.</p>
 <ul>
-  <li><strong>Alım limiti:</strong> "AKBNK'ı en fazla 130₺'den al" — fiyat 130₺ veya altına gelirse işlem olur</li>
-  <li><strong>Satım limiti:</strong> "AKBNK'ı en az 140₺'den sat" — fiyat 140₺ veya üstüne çıkarsa işlem olur</li>
+  <li><strong>Alım limiti:</strong> Örneğin 130₺ limitli bir alım emri, fiyat 130₺ veya altına gelirse gerçekleşir</li>
+  <li><strong>Satım limiti:</strong> Örneğin 140₺ limitli bir satım emri, fiyat 140₺ veya üstüne çıkarsa gerçekleşir</li>
 </ul>
 <p><strong>Avantaj:</strong> Fiyat kontrolü tamamen sizde. Beklediğinizden kötü fiyattan işlem olmaz.</p>
 <p><strong>Dezavantaj:</strong> Piyasa belirlediğiniz fiyata ulaşmazsa emir gerçekleşmez, fırsatı kaçırabilirsiniz.</p>
@@ -4474,54 +4489,53 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Stop Emir (Stop Order)</h2>
 <p>Stop emir (tetik emri), fiyat belirli bir seviyeye geldiğinde devreye giren emirdir. İki türü vardır:</p>
 <ul>
-  <li><strong>Stop-Loss:</strong> Zarar kesme emri. "Fiyat 120₺'ye düşerse sat" — fiyat bu seviyeye gelince piyasa emrine dönüşür ve pozisyon kapatılır.</li>
-  <li><strong>Stop-Buy (Kır Geç):</strong> Kırılım bekleyen alım. "Fiyat direnç olan 150₺'yi aşarsa al" — trendi teyit eden giriş için kullanılır.</li>
+  <li><strong>Stop-Loss (zarar durdur):</strong> Fiyat belirlenen tetik seviyesine (ör. 120₺) düştüğünde satış emrine dönüşen emir türüdür; tetiklenince piyasa emri olarak işler.</li>
+  <li><strong>Stop-Buy (Kır Geç):</strong> Fiyat belirlenen tetik seviyesini (ör. 150₺) aştığında alım emrine dönüşen emir türüdür.</li>
 </ul>
 
 <h2>Koşullu Emir (OCO — One Cancels the Other)</h2>
 <p>İki emrin aynı anda girildiği; birinin gerçekleşmesi halinde diğerinin otomatik iptal edildiği emir tipidir. Tipik kullanım: "Fiyat 140₺'ye çıkarsa ya da 120₺'ye inerse emir gerçekleşsin — hangisi önce olursa diğeri iptal olsun."</p>
 
-<h2>Hangi Durumda Hangi Emri Kullanmalı?</h2>
+<h2>Hangi Durumda Hangi Emir Türü?</h2>
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:var(--bp-border-subtle)">
       <th style="padding:8px 12px;text-align:left;color:var(--bp-text-3);font-weight:600">Durum</th>
-      <th style="padding:8px 12px;text-align:left;color:var(--bp-text-3);font-weight:600">Önerilen Emir</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text-3);font-weight:600">İlgili Emir Türü</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Açılışta hızlıca girmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">İşlem hemen gerçekleşsin</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Piyasa emri (likit hisselerde)</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd);background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Fiyat düşünce almak istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">İşlem belirli bir fiyattan veya daha iyisinden olsun</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Limit alım emri</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Kırılım sonrası trende girmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Fiyat bir seviyeyi aşınca alım emri devreye girsin</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Stop-buy emri</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd);background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Zarar kesmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Fiyat bir seviyeye inince satış emri devreye girsin</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Stop-loss emri</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
-      <td style="padding:8px 12px;color:var(--bp-text)">Hem hedef hem stop belirlemek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">İki emirden biri gerçekleşince diğeri iptal olsun</td>
       <td style="padding:8px 12px;color:var(--bp-text)">OCO emri</td>
     </tr>
   </tbody>
 </table>
 
-<h2>BorsaPusula Sinyallerinde Stop Loss</h2>
-<p>BorsaPusula her hisse için ATR tabanlı bir stop loss seviyesi hesaplar. Bu seviyeyi stop emir olarak girebilirsiniz. Örneğin AKBNK için stop loss 120₺ görünüyorsa, elinizde AKBNK hissesi varken 120₺'lik stop-loss emri girebilirsiniz. Fiyat bu seviyeye düşerse sistem otomatik olarak satış yapar ve büyük zararı önler.</p>
+<h2>BorsaPusula Emir Verir mi?</h2>
 <p>BorsaPusula emir vermez ve fiyat seviyesi önermez; emir türü ve fiyatı yatırımcı kendi planına göre belirler.</p>
 """,
     "faqs": [
       {"q": "Limit emir ile piyasa emri arasındaki fark nedir?",
        "a": "Piyasa emri, o anda en iyi mevcut fiyattan anında işlem gerçekleştirmek için kullanılır. Limit emir ise belirlediğiniz fiyattan veya daha iyi bir fiyattan işlem yapılmasını sağlar; ancak piyasa o fiyata ulaşmazsa emir gerçekleşmez."},
-      {"q": "Stop loss emrini nasıl girerim?",
-       "a": "Aracı kurum uygulamanızda 'koşullu emir' veya 'stop emir' seçeneğini kullanın. Tetik fiyatı olarak stop loss seviyesini girin. Fiyat bu seviyeye geldiğinde emir devreye girer ve piyasa emrine dönüşerek pozisyonunuz kapatılır."},
+      {"q": "Stop emir nasıl çalışır?",
+       "a": "Aracı kurum uygulamalarında genellikle 'koşullu emir' veya 'stop emir' adıyla yer alır. Emirde bir tetik fiyatı tanımlanır; fiyat bu seviyeye geldiğinde emir devreye girer ve piyasa emrine dönüşür."},
       {"q": "BorsaPusula fiyat seviyesi önerir mi?",
        "a": "Hayır. BorsaPusula emir vermez ve stop ya da hedef seviyesi önermez; hisse sayfasında trend durumu ve Supertrend çizgisi (trend dönüş seviyesi) tarihiyle bilgi olarak gösterilir. Emir türü ve fiyatı yatırımcı belirler."},
       {"q": "Emir iptali nasıl yapılır?",
@@ -4534,8 +4548,9 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   {
     "slug": "borsada-lot-ve-pay-nedir",
     "title": "Lot Nedir? Borsada Lot ve Pay Senedi Alım Rehberi",
-    "desc": "Borsada lot kavramı ne demek? Kaç lot almalısınız? Pay senedi, lot adedi ve fraksiyon pay hesaplamalarını pratik örneklerle öğrenin.",
+    "desc": "Borsada lot kavramı ne demek? Lot sayısı nasıl hesaplanır? Pay senedi, lot adedi ve fraksiyon pay hesaplamalarını pratik örneklerle öğrenin.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4563,20 +4578,15 @@ Toplam ≈ 13.003,90₺
 <h2>Fraksiyon Pay Nedir?</h2>
 <p>Belirli kurumsal işlemlerde (sermaye artırımı, bedelsiz pay dağıtımı, bölünme gibi) tam sayı olmayan pay miktarları oluşabilir. Bu durumda <strong>fraksiyon pay</strong> hesabınıza yansır. Örneğin 135 lotunuz varken %10 bedelsiz pay geldiğinde 13,5 pay oluşur; 13 pay hesabınıza girer, 0,5 pay ise para olarak ödenir veya yukarı yuvarlama yapılır (aracı kuruma göre farklılık gösterir).</p>
 
-<h2>Borsa'da Kaç Lot Almalısınız?</h2>
-<p>Bütçenizi tek bir hisseye bağlamak yerine portföy çeşitlendirmesi yapmanız önerilir:</p>
-<ul>
-  <li><strong>Küçük bütçe (1.000-5.000₺):</strong> 1-2 hisse, az lot — önce öğrenmek için</li>
-  <li><strong>Orta bütçe (5.000-50.000₺):</strong> 5-10 farklı hisse, pozisyon başı portföyün %10-15'i</li>
-  <li><strong>Büyük bütçe (50.000₺+):</strong> 10-20 hisse, sektör çeşitlendirmesi, her pozisyon %5-10</li>
-</ul>
+<h2>Lot Sayısı ve Çeşitlendirme</h2>
+<p>Lot sayısı, bir hisseye ayrılan tutarın hisse fiyatına bölünmesiyle bulunur. Kaç hisseye ve hangi ağırlıkla yer verileceği ise çeşitlendirme kavramıyla ilgilidir: tek bir hissenin portföydeki ağırlığı arttıkça, o şirkete ve sektöre özgü riskin portföy üzerindeki etkisi de büyür.</p>
 
-<h2>Lot Değişimi — Hisse Bölünmesi (Spliyt)</h2>
+<h2>Lot Değişimi — Hisse Bölünmesi (Split)</h2>
 <p>Borsa'da bir hisse <strong>bölünmesi (stock split)</strong> gerçekleştiğinde, sahip olduğunuz lot adedi artar ancak toplam değer aynı kalır. Örneğin 2'ye bölünme (1:2 split) olduğunda, elimizdeki 100 lot AKBNK → 200 lot AKBNK'ya dönüşür, ancak her lotun değeri yarıya iner.</p>
 <p>Bu durum psikolojik bir yanılgıya yol açabilir: Elinizdeki hisse adedi ikiye katlandığı için daha zenginmiş gibi hissedebilirsiniz, oysa toplam değer değişmez.</p>
 
 <h2>BorsaPusula'da Lot Bazlı Hesaplamalar</h2>
-<p>BorsaPusula Portföy sayfasında hisse adedini (lot) girerek portföyünüzün toplam değerini, kâr/zarar durumunu ve stop loss seviyesini izleyebilirsiniz. Örneğin 200 lot ASELS girildiğinde, algoritmik stop loss seviyesine göre maksimum zarar tutarı otomatik hesaplanır.</p>
+<p>BorsaPusula Portföy Takibi sayfasında hisse adedini (lot) ve alış fiyatını girerek portföyünüzün maliyetini, güncel değerini ve kâr/zarar durumunu tek tabloda izleyebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "1 lot ne kadar eder?",
@@ -4586,7 +4596,7 @@ Toplam ≈ 13.003,90₺
       {"q": "Lot ile pay aynı şey midir?",
        "a": "Evet, Türkiye borsasında 1 lot = 1 pay (hisse) = 1 adet hisse senedidir. 2005'teki YTL geçişi reformundan önce 1 lot 1.000 hisseye eşitti; artık 1:1 oranındadır. Banka uygulamalarında 'lot', 'pay' veya 'adet' kelimeleri aynı anlama gelir."},
       {"q": "Hisse bölünmesi (split) sonrasında lotlarım ne olur?",
-       "a": "Split oranında lot adedisi artar, fiyat aynı oranda düşer. Toplam değer değişmez. 2:1 split olduğunda 100 lot → 200 lot olur ama her lot değeri yarıya iner. Portföyünüzün toplam değeri aynı kalır."}
+       "a": "Split oranında lot adedi artar, fiyat aynı oranda düşer. Toplam değer değişmez. 2:1 split olduğunda 100 lot → 200 lot olur ama her lot değeri yarıya iner. Portföyünüzün toplam değeri aynı kalır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
@@ -4597,19 +4607,20 @@ Toplam ≈ 13.003,90₺
     "title": "Yüksek Enflasyonda Yatırım Araçları: 2026 Türkiye Rehberi",
     "desc": "Yüksek enflasyon döneminde tasarrufları nasıl korunur? Altın, hisse, döviz, TÜFE tahvil ve diğer enflasyon koruyucu araçların karşılaştırması.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Strateji",
     "body": """
 <p>Türkiye son yıllarda kronik yüksek enflasyonla yaşıyor. Bu ortamda bankada vadeli mevduat bile enflasyonun altında kalan gerçek kayba yol açabiliyor. Peki tasarruflarınızı enflasyona karşı nasıl korursunuz?</p>
 
 <h2>Enflasyon Yatırımcıyı Nasıl Etkiler?</h2>
-<p>Enflasyon, paranızın satın alma gücünü eritir. Yılık enflasyon %50 iken bankada %40 faiz alıyorsanız, <em>reel anlamda</em> %10 kaybediyorsunuz demektir. Reel getiri = Nominal getiri − Enflasyon oranı.</p>
+<p>Enflasyon, paranızın satın alma gücünü eritir. Yıllık enflasyon %50 iken bankada %40 faiz alıyorsanız, <em>reel anlamda</em> %10 kaybediyorsunuz demektir. Reel getiri = Nominal getiri − Enflasyon oranı.</p>
 <p>Yatırım araçları genellikle iki kategoriye ayrılır:</p>
 <ul>
   <li><strong>Reel varlıklar:</strong> Fiyatı enflasyonla birlikte yükselen varlıklar (altın, hisse senedi, gayrimenkul, emtia)</li>
   <li><strong>Nominal varlıklar:</strong> Sabit tutarda geri ödenen araçlar (nakit, sabit faizli mevduat/tahvil)</li>
 </ul>
-<p>Yüksek enflasyon dönemlerinde reel varlıklara yönelmek mantıklı bir stratejidir.</p>
+<p>Yüksek enflasyon dönemlerinde reel varlıklar, satın alma gücünü korumada nominal varlıklara göre tarihsel olarak daha dayanıklı olmuştur.</p>
 
 <h2>Enflasyona Karşı Yatırım Araçları Karşılaştırması</h2>
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
@@ -4636,7 +4647,7 @@ Toplam ≈ 13.003,90₺
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
       <td style="padding:8px 12px;color:var(--bp-text)">Döviz (USD/EUR)</td>
-      <td style="padding:8px 12px;color:var(--bp-up)">✅ Güçlü (TL depreciation)</td>
+      <td style="padding:8px 12px;color:var(--bp-up)">✅ Güçlü (TL değer kaybı)</td>
       <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
       <td style="padding:8px 12px;color:var(--bp-up)">Yüksek</td>
     </tr>
@@ -4669,7 +4680,7 @@ Toplam ≈ 13.003,90₺
 
 <h2>Altın: Klasik Enflasyon Koruması</h2>
 <p>Altın, TL bazında değerlendiğinde uzun vadede enflasyonu genellikle aşar çünkü iki faktör birden altın fiyatını yukarı taşır: hem küresel altın fiyatındaki artış hem de TL'nin USD karşısında değer kaybı.</p>
-<p>Fiziksel altın yerine borsa üzerinden işlem gören altın takip etmek daha pratiktir. BIST'te gram altın, çeyrek altın ve altın BYF işlem görür.</p>
+<p>Borsada işlem gören altın ürünleri, fiziksel altına göre saklama açısından daha pratiktir. BIST'te gram altın, çeyrek altın ve altın BYF işlem görür.</p>
 
 <h2>Hisse Senedi: Uzun Vadede Enflasyonun Üzerinde</h2>
 <p>BIST hisseleri uzun vadede —özellikle güçlü piyasa koşullarında— enflasyonu geçmiştir. Ancak bu uzun vadeli bir ilişkidir; kısa vadede hisseler enflasyondan bağımsız hareket edebilir. Özellikle:</p>
@@ -4677,12 +4688,12 @@ Toplam ≈ 13.003,90₺
   <li><strong>Bankacılık hisseleri:</strong> Yüksek faiz ortamından kâr eden sektör</li>
   <li><strong>Enerji ve emtia:</strong> Ham madde fiyatlarıyla birlikte yükselebilir (EREGL, PETKM, TUPRS)</li>
   <li><strong>GYO (Gayrimenkul Yatırım Ortaklıkları):</strong> Kira geliri + gayrimenkul değer artışı</li>
-  <li><strong>Nakit pozisyonu zayıf şirketler:</strong> Yüksek borçluluk oranı, enflasyonda tehlikeli</li>
+  <li><strong>Borçluluğu yüksek, nakdi az şirketler:</strong> Yüksek faiz ortamında finansman maliyeti baskısı altında kalır</li>
 </ul>
 
 <h2>TÜFE Tahvilleri: Garantili Reel Getiri</h2>
 <p>Hazine tarafından ihraç edilen TÜFE'ye endeksli tahvillerde anaparanız enflasyon oranında güncellenir. Ek olarak küçük bir reel faiz de alırsınız. Örneğin %50 enflasyon ile TÜFE tahvil tutuyorsanız, anaparanız %50 büyür; üzerine %2-4 reel faiz de eklenir.</p>
-<p>Dezavantajı: Vade öncesi satışta fiyat iskontosu olabilir. En iyisi vadeye kadar tutmaktır.</p>
+<p>Dezavantajı: Vade öncesi satışta fiyat iskontosu olabilir; vadeye kadar tutulduğunda bu risk ortadan kalkar.</p>
 
 <h2>Döviz: Basit Ama Dikkatli Olunması Gereken</h2>
 <p>TL'nin uzun vadeli değer kaybı tarihi bir gerçektir. Döviz alımı bu nedenle cazip görünür. Ancak:</p>
@@ -4692,24 +4703,24 @@ Toplam ≈ 13.003,90₺
   <li>Ani TL güçlenme dönemlerinde döviz tutanlar kayıpla satmak zorunda kalabilir</li>
 </ul>
 
-<h2>Pratik Öneriler — 2026 Türkiye için</h2>
+<h2>Sık Anılan İlkeler — 2026 Türkiye</h2>
 <ol>
-  <li><strong>Tek araca bağlı kalmayın:</strong> Altın + hisse + TÜFE tahvil kombinasyonu</li>
-  <li><strong>Nakit tamponunuzu koruyun:</strong> Portföyün %15-20'si her zaman likit tutun</li>
-  <li><strong>Kısa vadeli düşünmeyin:</strong> Enflasyon koruması uzun vadeli bir oyundur</li>
-  <li><strong>Borçlanmayın:</strong> Yüksek faiz döneminde borçla yatırım tehlikelidir</li>
-  <li><strong>Sinyal takibi yapın:</strong> Hisse seçiminde BorsaPusula gibi teknik analiz araçlarını kullanın</li>
+  <li><strong>Çeşitlendirme:</strong> Altın + hisse + TÜFE tahvil gibi farklı araçların birlikte tutulması tek araç riskini azaltır</li>
+  <li><strong>Nakit tamponu:</strong> Portföyün %15-20'sinin likit tutulması sık anılan bir çerçevedir</li>
+  <li><strong>Uzun vade:</strong> Enflasyon koruması uzun vadede sonuç veren bir yaklaşımdır</li>
+  <li><strong>Borçla yatırım:</strong> Yüksek faiz döneminde borçla yatırımın maliyeti ve riski yüksektir</li>
+  <li><strong>Trend takibi:</strong> BorsaPusula, BIST hisselerinin trend durumunu gün sonu kapanış verisiyle gösterir</li>
 </ol>
 """,
     "faqs": [
-      {"q": "Enflasyona karşı en iyi yatırım aracı hangisi?",
-       "a": "Türkiye'de enflasyona karşı en güçlü araçlar tarihsel olarak altın (TL bazlı), hisse senedi (uzun vadeli) ve TÜFE'ye endeksli tahvillerdir. Tek araca bağlı kalmak yerine çeşitlendirme yapılması önerilir."},
+      {"q": "Enflasyona karşı hangi yatırım araçları öne çıkar?",
+       "a": "Türkiye'de enflasyona karşı en güçlü araçlar tarihsel olarak altın (TL bazlı), hisse senedi (uzun vadeli) ve TÜFE'ye endeksli tahvillerdir. Tek araca bağlı kalmak yerine çeşitlendirme, tek araç riskini azaltır."},
       {"q": "TÜFE tahvili nedir, nasıl alınır?",
        "a": "Hazine'nin ihraç ettiği, anaparası Türkiye enflasyon endeksine (TÜFE) bağlı devlet tahvilidir. Anaparanız enflasyon oranında güncellenir, üzerine küçük bir reel faiz de eklenir. Aracı kurumlar veya bankalar üzerinden satın alınabilir."},
       {"q": "Hisse senedi enflasyona karşı korur mu?",
        "a": "Uzun vadede evet. BIST hisseleri uzun dönemde çoğunlukla enflasyonu aşmıştır. Ancak kısa vadede hisseler enflasyondan bağımsız düşebilir. Özellikle bankacılık ve emtia sektörü hisseleri yüksek faiz ve enflasyon ortamından genellikle olumlu etkilenir."},
       {"q": "Enflasyon döneminde nakit tutmak mantıklı mı?",
-       "a": "Yüksek enflasyon döneminde nakit (TL) tutmak alım gücü kaybettirir. Ancak acil fon ve kısa vadeli ihtiyaçlar için mutlaka likit bölüm bulundurun. Uzun vadeli birikimler için enflasyonun üzerinde getiri sağlayan araçlara yönelin."}
+       "a": "Yüksek enflasyon döneminde nakit (TL) tutmak alım gücü kaybettirir. Acil fon ve kısa vadeli ihtiyaçlar için likit bir bölüm ise genel finansal planlamanın parçasıdır. Uzun vadeli birikimlerde enflasyonun üzerinde getiri hedefleyen araçlar öne çıkar."}
     ],
     "related_tickers": ['AKBNK', 'EREGL', 'TUPRS', 'SASA', 'EKGYO']
   },
@@ -4717,17 +4728,18 @@ Toplam ≈ 13.003,90₺
   # ── ARTICLE 65 ──
   {
     "slug": "bayrak-kanat-ucgen-grafik-formasyonlari",
-    "title": "Bayrak, Kanat ve Üçgen Grafik Formasyonları: Devam Sinyalleri",
+    "title": "Bayrak, Kanat ve Üçgen Grafik Formasyonları: Devam Formasyonları",
     "desc": "Teknik analizde bayrak, flama, yükselen/alçalan kanat ve simetrik üçgen formasyonları nasıl tespit edilir ve yorumlanır? Pratik örneklerle rehber.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
 <p>Grafik formasyonları, fiyat hareketlerindeki tekrar eden kalıplardır. Teknik analistler bu kalıpları kullanarak trendin süreceğini veya tersineceğini tahmin etmeye çalışır. Bu makalede <strong>devam formasyonlarını</strong> öğreneceksiniz: bayrak, flama (kanat) ve üçgen.</p>
 
 <h2>Devam Formasyonu Nedir?</h2>
-<p>Devam formasyonu, mevcut trendin bir süre konsolidasyon (duraklama) yapıp aynı yönde devam edeceğine işaret eden grafik kalıplarıdır. Trend yukarıysa yukarı, aşağıysa aşağı devam sinyali verir.</p>
-<p>Devam formasyonları, trend takip sistemleriyle (Supertrend, EMA kırılım gibi) birleştirildiğinde daha güvenilir giriş noktaları sunar.</p>
+<p>Devam formasyonu, mevcut trendin bir süre konsolidasyon (duraklama) yapıp aynı yönde devam edeceğine işaret eden grafik kalıplarıdır. Trend yukarıysa yukarı, aşağıysa aşağı devamın işareti olarak yorumlanır.</p>
+<p>Devam formasyonları, trend takip sistemleriyle (Supertrend, EMA kırılım gibi) birlikte okunduğunda daha güvenilir bir tablo ortaya koyar.</p>
 
 <h2>Bayrak Formasyonu (Flag)</h2>
 <p>Bayrak, güçlü bir fiyat hareketi (direk) ardından gelen küçük ve dar bir konsolidasyondan (bayrak bezi) oluşur.</p>
@@ -4735,14 +4747,13 @@ Toplam ≈ 13.003,90₺
   <li><strong>Boğa bayrağı:</strong> Hızlı yükseliş (direk) + küçük aşağı eğimli konsolidasyon → Yukarı kırılım beklenir</li>
   <li><strong>Ayı bayrağı:</strong> Hızlı düşüş (direk) + küçük yukarı eğimli konsolidasyon → Aşağı kırılım beklenir</li>
 </ul>
-<p>Bayrak formasyonunda hacim önemlidir: Kırılım yüksek hacimle gerçekleşirse formasyon güvenilirliği artar. Hedef fiyat genellikle "direk boyunun" kırılım noktasına eklenmesiyle hesaplanır.</p>
+<p>Bayrak formasyonunda hacim önemlidir: Kırılım yüksek hacimle gerçekleşirse formasyon güvenilirliği artar.</p>
 
 <h2>Flama Formasyonu (Pennant)</h2>
 <p>Flama, bayrak formasyonuna benzer ancak konsolidasyon bölümü dikdörtgen değil, giderek daralan üçgen şeklindedir. Bayrak bezindeki konsolidasyon eğimli bir banttan oluşurken, flamada her iki bant da birbirine doğru yaklaşır.</p>
 <ul>
   <li>Kısa süre içinde daralan bir konsolidasyon görülür</li>
   <li>Hacim konsolidasyon boyunca azalır, kırılımda artar</li>
-  <li>Hedef: direk boyunun kırılım noktasına eklenmesi</li>
 </ul>
 
 <h2>Simetrik Üçgen (Symmetrical Triangle)</h2>
@@ -4755,27 +4766,27 @@ Toplam ≈ 13.003,90₺
 </ul>
 
 <h2>Yükselen Üçgen (Ascending Triangle)</h2>
-<p>Altta giderek yükselen dip noktaları ve üstte yatay dirençten oluşur. Bu formasyon boğa sinyalidir — yeterli güç toplandığında direnç kırılarak yukarı patlama beklenir.</p>
+<p>Altta giderek yükselen dip noktaları ve üstte yatay dirençten oluşur. Bu formasyon yükseliş yönlü olarak yorumlanır — direncin aşılması yukarı yönlü hareketin işareti sayılır.</p>
 <p>Bankacılık hisselerinde konsolidasyon sıklıkla yükselen üçgen şeklinde oluşur.</p>
 
 <h2>Alçalan Üçgen (Descending Triangle)</h2>
-<p>Üstte alçalan tepe noktaları, altta yatay destekten oluşur. Ayı sinyalidir — destek kırıldığında aşağı patlama beklenir. Teknik satış emirleri genellikle bu kırılım noktasının altına konumlandırılır.</p>
+<p>Üstte alçalan tepe noktaları, altta yatay destekten oluşur. Düşüş yönlü olarak yorumlanır — desteğin kırılması aşağı yönlü hareketin işareti sayılır.</p>
 
-<h2>Formasyonları BorsaPusula Sinyalleriyle Birleştirmek</h2>
-<p>BorsaPusula sistemi Supertrend + ADX + EMA kırılımını baz alır; grafik formasyonları ek teyit olarak kullanılabilir:</p>
+<h2>Formasyonlar ve Trend Durumu</h2>
+<p>BorsaPusula'daki trend durumu Supertrend + ADX + EMA kırılımına dayanır; grafik formasyonları bunun yanında ek bir okuma katmanı olarak değerlendirilebilir:</p>
 <ul>
-  <li>Hisse Güçlü Trend sinyalindeyken yükselen üçgen üst bandı kırıyorsa → yükseliş teyidi güçlenir</li>
-  <li>Hisse Yatay sinyalindeyken bayrak konsolidasyonundan çıkış görülüyorsa → Önceden takibe al</li>
-  <li>Formasyonun hacim desteği varsa → Sinyal güvenilirliği artar</li>
+  <li>Hisse Güçlü Trend durumundayken yükselen üçgenin üst bandı aşılıyorsa → iki okuma aynı yönü gösterir</li>
+  <li>Hisse Yatay durumundayken bayrak konsolidasyonundan çıkış görülüyorsa → sıkışmanın sona erdiğine dair erken bir işaret olarak yorumlanır</li>
+  <li>Formasyonun hacim desteği varsa → formasyonun güvenilirliği artar</li>
 </ul>
-<p>Formasyonlar tek başına yeterli değildir. Her zaman trend yönüyle ve hacim verileriyle teyit edin.</p>
+<p>Formasyonlar tek başına yeterli değildir; trend yönü ve hacim verisiyle birlikte okunduklarında daha anlamlıdır.</p>
 
 <h2>En Sık Yapılan Hatalar</h2>
 <ul>
-  <li>Formasyon tamamlanmadan pozisyon açmak (kırılımı bekleyin)</li>
+  <li>Kırılım gerçekleşmeden formasyonu tamamlanmış saymak</li>
   <li>Her konsolidasyonu formasyon olarak yorumlamak</li>
   <li>Düşük hacimdeki kırılımı güvenilir saymak</li>
-  <li>Stop loss koymadan formasyon oyunu oynamak</li>
+  <li>Formasyonu kesin sonuç gibi okumak; formasyonlar yalnız olasılık belirtir</li>
 </ul>
 """,
     "faqs": [
@@ -4784,7 +4795,7 @@ Toplam ≈ 13.003,90₺
       {"q": "Simetrik üçgenin kırılımı hangi yönde olur?",
        "a": "Simetrik üçgen tek başına yön belirtmez. Mevcut trendin yönünde kırılma ihtimali genellikle daha yüksektir. Yükselen trendde oluşan simetrik üçgenin yukarı kırılması, alçalan trendde aşağı kırılması daha olasıdır."},
       {"q": "Grafik formasyonları tek başına yatırım kararı için yeterli midir?",
-       "a": "Hayır. Grafik formasyonları yardımcı araçlardır; tek başına yeterli değildir. Trend yönü, hacim teyidi ve diğer teknik göstergeler (ADX, Supertrend, RSI) ile birlikte değerlendirildiğinde daha güvenilir sinyaller üretir."},
+       "a": "Hayır. Grafik formasyonları yardımcı araçlardır; tek başına yeterli değildir. Trend yönü, hacim teyidi ve diğer teknik göstergeler (ADX, Supertrend, RSI) ile birlikte değerlendirildiğinde daha anlamlı bir tablo ortaya koyar."},
       {"q": "Kırılımı onaylamak için ne kadar beklenmeli?",
        "a": "Güçlü bir kapanış kırılımın teyidi için en sağlıklı yöntemdir. Tek mumun kırılması yetersiz — ardışık 1-2 kapanış kırılım noktasının üzerinde/altında gerçekleşmesi ve hacmin artması güvenilirliği artırır."}
     ],
@@ -4797,6 +4808,7 @@ Toplam ≈ 13.003,90₺
     "title": "Küçük Sermayeyle Borsaya Başlamak: 1.000₺ ile Ne Yapılır?",
     "desc": "Az sermayeyle borsaya nasıl başlanır? 1.000-10.000₺ bütçeyle hisse senedi yatırımı yapmanın pratik rehberi ve sık yapılan başlangıç hataları.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Temel Kavramlar",
     "body": """
@@ -4810,7 +4822,7 @@ Toplam ≈ 13.003,90₺
   <li>Tek bir likit ve takibi kolay hisse ile başlayın (örn. AKBNK, GARAN, THYAO gibi BIST30 hisseleri)</li>
   <li>Sermayenizin tamamını tek bir hisseye koymayın — en fazla iki hisse seçin</li>
   <li>Her işlemi neden yaptığınızı bir not defterine yazın — sonra geri dönüp okuyun</li>
-  <li>Stop loss kullanın, kaybı sınırlayın</li>
+  <li>Bir işlemde ne kadar kaybı göze alabileceğinizi önceden düşünün</li>
   <li>Borsaya acele ettiren haberlere veya sosyal medya yorumlarına inanmayın</li>
 </ul>
 
@@ -4823,8 +4835,8 @@ Toplam ≈ 13.003,90₺
 </ul>
 
 <h2>5.000₺ – 20.000₺: Çeşitlendirme Başlar</h2>
-<p>Bu aralıkta 3-5 farklı hisseye dağılım yapabilir, sektörel çeşitlendirmeye başlayabilirsiniz. Bankacılık + enerji + savunma gibi farklı sektörlerden seçim yapın.</p>
-<p>Her pozisyon için toplam portföyün maksimum %25-30'unu kullanın. Bu sınır, bir hissenin ciddi düşüşünün sizi harabe etmesini engeller.</p>
+<p>Bu aralıkta 3-5 farklı hisseye dağılım yapabilir, sektörel çeşitlendirmeye başlayabilirsiniz. Bankacılık + enerji + savunma gibi farklı sektörlerden hisseler bir arada tutulabilir.</p>
+<p>Tek bir hisseye ayrılan pay çoğu zaman toplam portföyün %25-30'uyla sınırlı tutulur. Bu sınır, bir hissenin ciddi düşüşünün portföyün tamamını sarsmasını engeller.</p>
 
 <h2>Komisyon Maliyetlerine Dikkat</h2>
 <p>Küçük sermayeli yatırımcılar için komisyon oranı kritik bir maliyettir. 1.000₺ işlem için %0,15 komisyon = 1,5₺ görünüşte küçük, ancak sık işlem yaparsanız bu maliyet birikir.</p>
@@ -4887,6 +4899,7 @@ Toplam ≈ 13.003,90₺
     "title": "ROE ve Net Kâr Marjı: Şirket Kârlılığını Doğru Okumak",
     "desc": "ROE (özkaynak kârlılığı), ROA ve net kâr marjı nedir? BIST hisseleri için kârlılık oranlarını nasıl yorumlamalısınız? Pratik örneklerle temel analiz rehberi.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Temel Analiz",
     "body": """
@@ -4913,7 +4926,7 @@ ROE = 1/5 × 100 = %20
   <tbody>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
       <td style="padding:8px 12px;color:var(--bp-down)">%0 altı</td>
-      <td style="padding:8px 12px;color:var(--bp-text)">Zarar ediyor — dikkat</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Zarar ediyor</td>
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd);background:rgba(255,255,255,.02)">
       <td style="padding:8px 12px;color:var(--bp-text)">%0 – %10</td>
@@ -4929,7 +4942,7 @@ ROE = 1/5 × 100 = %20
     </tr>
     <tr style="border-top:1px solid var(--bp-bkl-bd)">
       <td style="padding:8px 12px;color:var(--bp-up)">%30+</td>
-      <td style="padding:8px 12px;color:var(--bp-text)">Excellent — Warren Buffett eşiği</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Çok yüksek kârlılık — Warren Buffett'ın sık anılan eşiği</td>
     </tr>
   </tbody>
 </table>
@@ -4944,7 +4957,7 @@ Net Kâr Marjı = Net Kâr / Net Satışlar × 100
 Net Kâr Marjı = 500/5000 × 100 = %10
 </pre>
 <p>Bu, şirketin sattığı her 100₺'lik ürün/hizmetten 10₺ net kâr bıraktığı anlamına gelir.</p>
-<p>Sektöre göre "iyi" marj çok farklıdır:</p>
+<p>Sektöre göre olağan marj düzeyi çok farklıdır:</p>
 <ul>
   <li><strong>Bankacılık:</strong> %20-40 net kâr marjı normal (faiz gelirleri yüksek)</li>
   <li><strong>Perakende (Bim, Migros):</strong> %2-5 düşük görünür ama hacim ile telafi edilir</li>
@@ -4960,26 +4973,25 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Düşük ROA ama yüksek ROE → Şirket yüksek borç kullanıyor. Kaldıraç hem kazancı hem riski büyütür.</p>
 
 <h2>BIST Hisselerinde Bu Oranları Nerede Bulursunuz?</h2>
-<p>BorsaPusula hisse detay sayfalarında P/E oranı, F/K, PD/DD gibi temel veriler gösterilir. Daha detaylı finansal oranlar için:</p>
+<p>BorsaPusula hisse detay sayfalarında F/K, PD/DD gibi temel veriler gösterilir. Daha detaylı finansal oranlar için:</p>
 <ul>
   <li>Şirketin KAP'ta yayımlanan finansal tabloları</li>
-  <li>Aracı kurumların hisse analiz sayfaları</li>
-  <li>İş Yatırım, Garanti BBVA Yatırım gibi aracı kurumların araştırma raporları</li>
+  <li>Aracı kurumların hisse analiz sayfaları ve araştırma raporları</li>
 </ul>
 
-<h2>ROE ve Teknik Analizi Birleştirmek</h2>
-<p>Yüksek ROE'li bir şirket, güçlü teknik sinyalle birleştiğinde ideal yatırım adayı olabilir. BorsaPusula sinyalleri teknik analizi hızla tarama imkânı sunarken, ROE ve net kâr marjı o hissenin <em>fundamentalinin</em> güçlü olup olmadığını anlamanızı sağlar.</p>
-<p>Temel yaklaşım: <strong>Teknik analiz ile giriş zamanlarken, temel analiz ile kalite kontrol yapın.</strong></p>
+<h2>ROE ve Teknik Analiz</h2>
+<p>Temel ve teknik analiz farklı soruları yanıtlar. ROE ve net kâr marjı şirketin kârlılığını betimlerken, BorsaPusula'daki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) hissenin fiyat davranışını betimler.</p>
+<p>Özetle: <strong>Temel analiz şirketin kendisini, teknik analiz fiyatın seyrini anlatır.</strong></p>
 """,
     "faqs": [
-      {"q": "ROE ne anlama gelir ve iyi bir ROE değeri nedir?",
-       "a": "ROE (Return on Equity), özkaynak kârlılığı demektir. Şirketin hissedarlara ait sermayeyi ne kadar verimli kullandığını gösterir. Genel kural: %10 altı düşük, %20 üzeri iyi, %30 üzeri mükemmel. Ancak sektöre göre değişir ve borçluluğu da göz önünde bulundurun."},
-      {"q": "Net kâr marjı yüksek olan hisse daha mı iyidir?",
+      {"q": "ROE ne anlama gelir ve hangi değerler yüksek sayılır?",
+       "a": "ROE (Return on Equity), özkaynak kârlılığı demektir. Şirketin hissedarlara ait sermayeyi ne kadar verimli kullandığını gösterir. Genel kural: %10 altı düşük, %20 üzeri yüksek, %30 üzeri çok yüksek kabul edilir. Ancak sektöre göre değişir ve borçluluğu da göz önünde bulundurun."},
+      {"q": "Net kâr marjının yüksek olması ne anlama gelir?",
        "a": "Yüksek net kâr marjı olumlu bir işarettir, ancak sektörler arası karşılaştırma yaparken dikkatli olun. Bankacılık yüksek marjlı görünürken perakende düşük marjlıdır ama hacim ile telafi eder. Karşılaştırmayı aynı sektördeki rakiplerle yapın."},
       {"q": "ROE ile ROA arasındaki fark nedir?",
        "a": "ROE yalnızca özkaynak üzerinden hesaplanırken, ROA tüm varlıklar (özkaynak + borç) üzerinden hesaplanır. Şirket yüksek borç kullanıyorsa ROE şişebilir. ROA, borç etkisini arındırarak gerçek varlık verimliliğini gösterir."},
       {"q": "BIST hisselerinin ROE değerlerini nereden bulabilirim?",
-       "a": "KAP'ta yayımlanan finansal tablolar, aracı kurum araştırma raporları ve Borsa İstanbul veri hizmetlerinden ulaşabilirsiniz. BorsaPusula hisse sayfalarında P/D, F/K gibi temel metrikler gösterilmektedir."}
+       "a": "KAP'ta yayımlanan finansal tablolar, aracı kurum araştırma raporları ve Borsa İstanbul veri hizmetlerinden ulaşabilirsiniz. BorsaPusula hisse sayfalarında PD/DD, F/K gibi temel metrikler gösterilmektedir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'SASA', 'BIMAS', 'ASELS']
   },
@@ -4990,6 +5002,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Endeks Fonu mu, Bireysel Hisse mi? Hangi Yatırım Stratejisi Daha İyi?",
     "desc": "ETF ve endeks fonlarına yatırım mı, yoksa bireysel hisse seçimi mi daha avantajlı? Risk, getiri ve zaman maliyeti karşılaştırmalı analiz.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
@@ -4997,7 +5010,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Endeks Fonu (ETF/BYF) Nedir?</h2>
 <p>Endeks fonu, belirli bir endeksin (BIST30, BIST100, S&P500 gibi) performansını taklit etmeye çalışan bir yatırım aracıdır. Bir endeks fonuna yatırım yaptığınızda, o endeksteki tüm hisselerden oluşan çeşitlendirilmiş bir sepete sahip olursunuz.</p>
-<p>Türkiye'de Borsa İstanbul'da işlem gören BIST30 ve BIST100 borsa yatırım fonları (BYF) mevcuttur. Ayrıca bank portföy yönetim şirketlerinin endeks fonlarına da yatırım yapılabilir.</p>
+<p>Türkiye'de Borsa İstanbul'da işlem gören BIST30 ve BIST100 borsa yatırım fonları (BYF) mevcuttur. Ayrıca banka portföy yönetim şirketlerinin endeks fonlarına da yatırım yapılabilir.</p>
 
 <h2>İki Yaklaşımın Karşılaştırması</h2>
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
@@ -5051,16 +5064,16 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>ABD'de yapılan araştırmalar, aktif yönetilen fonların büyük çoğunluğunun (%85-90+) uzun vadede ilgili endeksin gerisinde kaldığını göstermektedir. Bu sonuç bireysel yatırımcılar için daha da dramatiktir: Komisyonlar, duygusal kararlar ve yetersiz çeşitlendirme getiriyi büyük ölçüde eritir.</p>
 <p>BIST için benzer araştırmalar sınırlı olmakla birlikte, yüksek volatilite ortamında bireysel seçimin başarılı olması için güçlü teknik veya temel analiz becerileri gerekmektedir.</p>
 
-<h2>Hibrit Yaklaşım: En İyisi İkisi Birden</h2>
-<p>Çoğu uzman, özellikle yeni başlayanlar için hibrit bir yaklaşım önerir:</p>
+<h2>Hibrit Yaklaşım</h2>
+<p>Özellikle yeni başlayanlar için sık anılan bir model, iki yaklaşımı birleştiren hibrit yapıdır:</p>
 <ul>
   <li><strong>Uzun vadeli tasarruf çekirdeği (%60-70):</strong> Endeks fonu — pasif, düşük maliyetli</li>
   <li><strong>Aktif deney bölümü (%30-40):</strong> Bireysel hisse seçimi — öğrenme ve üstün getiri denemesi</li>
 </ul>
-<p>Bu yapı hem piyasa getirisini güvence altına alırken, hem de bireysel yatırım becerisi geliştirmenizi sağlar.</p>
+<p>Bu yapıda çekirdek bölüm endeks getirisine yakın seyrederken, diğer bölüm bireysel yatırım becerisinin gelişmesine alan açar.</p>
 
 <h2>BorsaPusula'da Endeks Fonu vs Hisse Dengesi</h2>
-<p>Eğer aktif hisse takibine zaman ayırabiliyorsanız, BorsaPusula sinyalleri doğrudan bireysel hisse seçimini destekler. Zaman kısıtınız varsa, portföyünüzün büyük bölümünü endeks fonuna ayırıp geri kalanını takip edebileceğiniz 3-5 BIST100 hissesine yönlendirmek makuldür.</p>
+<p>Bireysel hisse takibine zaman ayıran yatırımcı için BorsaPusula'nın hisse sayfaları, şirketlerin açıkladığı finansalları ve trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) bir arada gösterir; <a href="/tarama">tarama sayfası</a> hisseleri trend durumuna göre süzer. Hangi yaklaşımın uygun olduğu ise ayrılabilecek zamana ve risk profiline bağlıdır.</p>
 """,
     "faqs": [
       {"q": "Endeks fonu mu daha iyi, bireysel hisse mi?",
@@ -5070,7 +5083,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Aktif yönetilen fonlar endeksi geçer mi?",
        "a": "Araştırmalar, aktif yönetilen fonların büyük çoğunluğunun (%85+) uzun vadede ilgili endeksin gerisinde kaldığını göstermektedir. Bunun başlıca nedenleri: yüksek yönetim ücretleri, işlem maliyetleri ve piyasayı sürekli yenmenin zorluğudur."},
       {"q": "Hem endeks fonu hem hisse tutmak mantıklı mı?",
-       "a": "Evet, hibrit yaklaşım makuldür. Uzun vadeli tasarrufun büyük bölümü için endeks fonu (güvenli çekirdek), küçük bir kısım için bireysel hisse (öğrenme ve üstün getiri denemesi) kombinasyonu yaygın bir stratejidir."}
+       "a": "Hibrit yaklaşım yaygın bir modeldir. Uzun vadeli tasarrufun büyük bölümü için endeks fonu (çekirdek), küçük bir kısım için bireysel hisse (öğrenme ve üstün getiri denemesi) kombinasyonu yaygın bir stratejidir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'TUPRS']
   },
@@ -5081,6 +5094,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "FED Faiz Kararları BIST'i Nasıl Etkiler? Kapsamlı Rehber",
     "desc": "Amerikan Merkez Bankası FED'in faiz kararları Türkiye borsasını ve hisselerini nasıl etkiler? FED toplantıları, dolar/TL ilişkisi ve BIST bağlantısı.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Makro Ekonomi",
     "body": """
@@ -5114,7 +5128,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>FED Toplantı Takvimi</h2>
 <p>FOMC yılda 8 kez toplanır (yaklaşık her 6 haftada bir). Toplantı tarihleri önceden duyurulur. Karar açıklaması Çarşamba günü (saat 21:00 TRT) yayımlanır. Toplantıdan sonra yapılan Powell basın konferansı piyasalarda büyük volatiliteye yol açabilir.</p>
-<p>FED toplantı haftalarında BIST'te ekstra volatilite beklemek mantıklıdır.</p>
+<p>FED toplantı haftalarında BIST'te oynaklık genellikle artar.</p>
 
 <h2>FED'i Takip Etmenin Pratik Yolları</h2>
 <ul>
@@ -5136,7 +5150,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "FED faiz artırınca BIST neden düşer?",
        "a": "FED faiz artışı ABD varlıklarını daha cazip kılar. Bu nedenle yabancı yatırımcılar Türkiye gibi gelişmekte olan piyasalardan çıkar, dolar alır. TL değer kaybeder, BIST'te satış baskısı oluşur. Yüksek dolar aynı zamanda cari açığı ve borçlanma maliyetlerini artırarak Türk şirketlerini olumsuz etkiler."},
       {"q": "FED kararları ne zaman açıklanır?",
-       "a": "FOMC yılda 8 kez toplanır (yaklaşık her 6 haftada bir). Karar Çarşamba günü Türkiye saatiyle 21:00'de açıklanır, ardından Fed Başkanı basın toplantısı yapar. Bu toplantı tarihlerini önceden bilmek, volatil dönemler için pozisyonunuzu yönetmenizi kolaylaştırır."},
+       "a": "FOMC yılda 8 kez toplanır (yaklaşık her 6 haftada bir). Karar Çarşamba günü Türkiye saatiyle 21:00'de açıklanır, ardından Fed Başkanı basın toplantısı yapar. Bu tarihleri önceden bilmek, oynaklığın artabileceği günleri öngörmeyi kolaylaştırır."},
       {"q": "FED pivot nedir?",
        "a": "FED pivot, merkez bankasının faiz artışından faiz indirimine (veya duraksama) geçiş yapacağı an anlamında kullanılır. Pivot beklentileri genellikle gelişmekte olan piyasalarda (EM) güçlü ralli başlatır; çünkü yatırımcılar daha yüksek riskli varlıklara dönmeye başlar."},
       {"q": "FED kararına göre hangi hisseler ne yönde hareket eder?",
@@ -5216,8 +5230,9 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "makroekonomik-gostergeler-yatirimci-rehberi",
     "title": "Makroekonomik Göstergeler: Yatırımcı İçin Rehber",
-    "desc": "GDP, enflasyon, işsizlik, cari açık — makro ekonomik göstergeleri nasıl yorumlamalısınız? BIST ve dolar/TL üzerindeki etkileri pratik örneklerle.",
+    "desc": "GSYH, enflasyon, işsizlik, cari açık — makro ekonomik göstergeleri nasıl yorumlamalısınız? BIST ve dolar/TL üzerindeki etkileri pratik örneklerle.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Makro Ekonomi",
     "body": """
@@ -5265,21 +5280,21 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Göstergeleri Nerede Takip Edersiniz?</h2>
 <ul>
-  <li><strong>TÜİK (tuik.gov.tr):</strong> TÜFE, GDP, işsizlik, dış ticaret</li>
+  <li><strong>TÜİK (tuik.gov.tr):</strong> TÜFE, GSYH, işsizlik, dış ticaret</li>
   <li><strong>TCMB (tcmb.gov.tr):</strong> Faiz kararları, rezervler, cari hesap</li>
   <li><strong>Hazine (hmb.gov.tr):</strong> Bütçe, kamu borç istatistikleri</li>
   <li><strong>EPDK (epdk.gov.tr):</strong> Enerji istatistikleri (enerji hisseleri için)</li>
-  <li><strong>Investing.com/tr:</strong> Türkiye ekonomik takvimi, veri akışı</li>
+  <li><strong>Ekonomik takvim siteleri:</strong> Veri açıklama tarihleri ve beklentiler</li>
 </ul>
 
-<h2>Ekonomik Takvim Stratejisi</h2>
-<p>Büyük makro veri açıklamalarından önce pozisyonlarınızı gözden geçirin:</p>
+<h2>Ekonomik Takvim ve Oynaklık</h2>
+<p>Büyük makro veri açıklamaları çevresinde piyasalarda oynaklık artabilir:</p>
 <ul>
-  <li>TÜFE açıklama günü → TCMB politika beklentilerini yeniden değerlendirin</li>
+  <li>TÜFE açıklama günü → TCMB politika beklentileri yeniden şekillenir</li>
   <li>TCMB faiz kararı → TL varlıklarda volatilite beklenebilir</li>
-  <li>ABD CPI açıklaması → FED beklentilerini günceller, EM varlıklarını etkiler</li>
+  <li>ABD CPI açıklaması → FED beklentilerini günceller, gelişmekte olan ülke varlıklarını etkiler</li>
 </ul>
-<p>BorsaPusula <a href="/takvim">Bilanço Takvimi</a> sayfası şirket bazlı önemli tarihleri listeler; makro takvim için Investing.com Türkiye ekonomik takvimini paralel takip edin.</p>
+<p>BorsaPusula <a href="/takvim">Bilanço Takvimi</a> sayfası şirket bazlı önemli tarihleri listeler; makro veri tarihleri için ekonomik takvim sitelerinden yararlanılabilir.</p>
 """,
     "faqs": [
       {"q": "Hangi makro gösterge borsayı en çok etkiler?",
@@ -5289,7 +5304,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Cari açık neden önemli?",
        "a": "Türkiye kronik cari açık veriyor. Bu, ülkenin dış finansmana bağımlılığını gösterir. Cari açık arttıkça TL üzerindeki baskı artar, yabancı sermaye çıkışı hızlanabilir ve BIST dolar bazlı olarak değer kaybedebilir."},
       {"q": "Makro veri takibi için en iyi kaynak hangisi?",
-       "a": "TÜİK (tuik.gov.tr) resmi Türkiye makro verileri için, TCMB (tcmb.gov.tr) para politikası için birincil kaynaklardır. Investing.com Türkiye bölümü tüm ekonomik veri açıklama tarihlerini ve beklentileri önceden listeler."}
+       "a": "TÜİK (tuik.gov.tr) resmi Türkiye makro verileri için, TCMB (tcmb.gov.tr) para politikası için birincil kaynaklardır. Ekonomik takvim siteleri veri açıklama tarihlerini ve beklentileri önceden listeler."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'EKGYO']
   },
@@ -5300,6 +5315,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Gün İçi İşlem (Day Trading) Nedir? Bireysel Yatırımcı İçin Riskler",
     "desc": "Day trading (gün içi alım satım) ne demek? Bireysel yatırımcılar için day trading neden risklidir? Swing trading ve uzun vadeli yatırımla karşılaştırma.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Strateji",
     "body": """
@@ -5310,7 +5326,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Bireysel Yatırımcı için Neden Zordur?</h2>
 <h3>1. Bilgi Asimetrisi</h3>
-<p>Karşı tarafınız genellikle algoritmik trading sistemleri veya profesyonel kurumsal traderlar. Milisaniyeler içinde tepki veren bu sistemlere karşı bireysel yatırımcının hız ve bilgi dezavantajı büyüktür.</p>
+<p>Karşı tarafınız genellikle algoritmik işlem sistemleri veya profesyonel kurumsal yatırımcılardır. Milisaniyeler içinde tepki veren bu sistemlere karşı bireysel yatırımcının hız ve bilgi dezavantajı büyüktür.</p>
 
 <h3>2. Komisyon Maliyeti</h3>
 <p>Günde 10-20 işlem yapan bir day trader, yıllık yüzlerce ila binlerce lira komisyon öder. Bu komisyon, kârlı bir stratejiyi bile zarar hanesine çevirebilir.</p>
@@ -5319,7 +5335,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Anlık fiyat hareketleri sürekli dikkat gerektirir. Kısa vadeli kayıplar duygusal kararlar almayı tetikler — "hızlıca geri kazanayım" düşüncesiyle daha büyük riskler alınır (revenge trading). Bu kısır döngü hesabı hızla eritir.</p>
 
 <h3>4. Araştırma Yetersizliği</h3>
-<p>Başarılı day traderlar binlerce saatlik pratik, gelişmiş teknik analiz araçları ve sağlam bir strateji backtest'i gerektirir. "Bugün deneyeyim" düşüncesiyle başlamak bir aracı kuruma bağış yapmakla eşdeğerdir.</p>
+<p>Başarılı day trading binlerce saatlik pratik, gelişmiş teknik analiz araçları ve sağlam bir strateji backtest'i gerektirir. "Bugün deneyeyim" düşüncesiyle başlamak bir aracı kuruma bağış yapmakla eşdeğerdir.</p>
 
 <h2>İstatistiksel Gerçek</h2>
 <p>ABD borsasında yapılan bir çalışmaya göre aktif day traderların %70-80'i ilk yılda para kaybeder. Uzun vadeli (2+ yıl) tutarlı kâr eden bireysel day trader oranı %5-10 arasında tahmin edilmektedir. Bu oran hem zor hem de bu alanda harcanan zamanın büyük maliyetini görmezden gelir.</p>
@@ -5368,23 +5384,23 @@ ROA = Net Kâr / Toplam Aktifler × 100
   </tbody>
 </table>
 
-<h2>BorsaPusula Hangi Trading Stilini Destekler?</h2>
-<p>BorsaPusula'nın sinyal sistemi <strong>günlük bar verileri</strong> üzerinde çalışır ve Supertrend + ADX + EMA kombinasyonu kullanır. Bu sinyal yapısı:</p>
+<h2>BorsaPusula Verisi Hangi Zaman Ölçeğinde Çalışır?</h2>
+<p>BorsaPusula <strong>gün sonu kapanış verisiyle</strong> çalışır; trend durumu Supertrend + ADX + EMA kombinasyonuyla belirlenir. Bu yapı:</p>
 <ul>
-  <li>Day trading için uygun değil (sinyaller günlük bazda güncellenir)</li>
-  <li>Swing trading için çok uygun (günlük trend takibi)</li>
-  <li>Uzun vadeli yatırım için de uygun (aylık sinyal bağlamıyla)</li>
+  <li>Gün içi fiyat hareketlerini izlemez (veriler her seans kapanışından sonra güncellenir)</li>
+  <li>Hisse sayfalarında trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) günlük kapanışlara göre betimler</li>
+  <li>Ağırlıklı olarak orta-uzun vadeli şirket analizi sunar (KAP'ta açıklanan finansallar)</li>
 </ul>
 """,
     "faqs": [
       {"q": "Day trading bireysel yatırımcılar için uygun mu?",
-       "a": "Büyük çoğunluk için hayır. Araştırmalar day traderların %70-80'inin ilk yılda para kaybettiğini göstermektedir. Kurumsal traderlar ve algoritmik sistemlere karşı bilgi, hız ve kaynak dezavantajı çok büyüktür."},
+       "a": "Büyük çoğunluk için hayır. Araştırmalar day traderların %70-80'inin ilk yılda para kaybettiğini göstermektedir. Kurumsal yatırımcılar ve algoritmik sistemlere karşı bilgi, hız ve kaynak dezavantajı çok büyüktür."},
       {"q": "Day trading ile swing trading arasındaki fark nedir?",
        "a": "Day trading tüm pozisyonları aynı gün içinde kapatırken, swing trading birkaç günden birkaç haftaya kadar uzanan pozisyonları kapsar. Swing trading daha az zaman ve stres gerektirir, komisyon maliyeti daha düşüktür ve başarı istatistikleri daha iyi görünmektedir."},
       {"q": "BorsaPusula sinyalleri day trading için kullanılabilir mi?",
-       "a": "Hayır. BorsaPusula sinyalleri günlük bar verilerine dayalıdır ve her gün kapanış sonrası güncellenir. Bu yapı swing trading ve orta-uzun vadeli pozisyon yönetimi için tasarlanmıştır. Day trading için intraday veriler gerekmektedir."},
-      {"q": "Hangi ticaret stili yeni başlayanlar için daha uygun?",
-       "a": "Yeni başlayanlar için uzun vadeli yatırım veya swing trading çok daha uygun başlangıç noktalarıdır. Az zaman, daha az stres ve daha iyi başarı istatistikleri sunarlar. Day trading binlerce saatlik pratik ve çok yüksek öz-disiplin gerektirir."}
+       "a": "Hayır. BorsaPusula verileri gün sonu kapanışına dayalıdır ve her seans kapanışından sonra güncellenir. Site, orta-uzun vadeli şirket analizi ve trend durumunun betimlenmesi için tasarlanmıştır; gün içi işlem gün içi (intraday) veri gerektirir."},
+      {"q": "Hangi işlem stili daha az zaman ve stres gerektirir?",
+       "a": "Uzun vadeli yatırım ve swing trading, day tradinge göre daha az zaman ve stres gerektirir; komisyon maliyeti de daha düşüktür. Day trading binlerce saatlik pratik ve çok yüksek öz-disiplin gerektirir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
   },
@@ -5460,12 +5476,13 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "donusum-formasyonlari-ikili-tepe-bas-omuz",
     "title": "Dönüş Formasyonları: İkili Tepe, İkili Dip ve Baş-Omuz",
-    "desc": "Teknik analizde en güçlü dönüş sinyalleri veren ikili tepe, ikili dip ve baş-omuz formasyonları nasıl tanınır ve yorumlanır? Pratik rehber.",
+    "desc": "Teknik analizde trend dönüşü işareti olarak yorumlanan ikili tepe, ikili dip ve baş-omuz formasyonları nasıl tanınır ve yorumlanır? Pratik rehber.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
-<p>Dönüş formasyonları, mevcut trendin tersine dönüşüne işaret eden grafik kalıplarıdır. Devam formasyonlarından farklı olarak, yön değişimi sinyali verirler. En güçlü ve en güvenilir teknik analiz sinyalleri arasında sayılırlar.</p>
+<p>Dönüş formasyonları, mevcut trendin tersine dönüşüne işaret eden grafik kalıplarıdır. Devam formasyonlarından farklı olarak, yön değişimine işaret ederler. Teknik analizde en çok bilinen dönüş işaretleri arasında sayılırlar.</p>
 
 <h2>İkili Tepe (Double Top)</h2>
 <p>İkili tepe, yükselen bir trendden sonra fiyatın benzer seviyelerde iki kez direnç bulup geri döndüğü formasyondur. Harfine benzetildiğinden "M formasyonu" olarak da bilinir.</p>
@@ -5476,7 +5493,6 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Tekrar yükselir ama 1. tepeye yakın seviyede reddedilir (2. tepe)</li>
   <li>Boyun çizgisini kırarsa aşağı hareket başlar</li>
 </ol>
-<p><strong>Hedef fiyat:</strong> Boyun çizgisinden tepe noktasına olan mesafe kadar aşağı projeksiyonu yapılır.</p>
 <p>Hacim örüntüsü: 1. tepe yüksek hacimle, 2. tepe daha düşük hacimle oluşursa formasyon daha güvenilirdir.</p>
 
 <h2>İkili Dip (Double Bottom)</h2>
@@ -5486,12 +5502,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>1. dip: Trend desteği bulur</li>
   <li>Ara yükseliş: Boyun çizgisi oluşur</li>
   <li>2. dip: Benzer seviyede tekrar destek</li>
-  <li>Kırılım: Boyun çizgisi aşılır → Alış sinyali</li>
+  <li>Kırılım: Boyun çizgisinin aşılması → trend dönüşü işareti olarak yorumlanır</li>
 </ul>
-<p><strong>Hedef fiyat:</strong> İki dip noktasından boyun çizgisine kadar olan mesafe, boyun çizgisinden yukarı yansıtılır.</p>
 
 <h2>Baş-Omuz (Head and Shoulders)</h2>
-<p>Baş-omuz, teknik analizdeki en güvenilir dönüş formasyonlarından biridir. Trendden düşüşe dönüşü işaret eder.</p>
+<p>Baş-omuz, teknik analizdeki en güvenilir dönüş formasyonlarından biridir. Yükselen trendden düşüşe dönüşü işaret eder.</p>
 <p>Unsurlar:</p>
 <ul>
   <li><strong>Sol omuz:</strong> Trend içinde bir tepe noktası, ardından geri çekilme</li>
@@ -5499,30 +5514,28 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Sağ omuz:</strong> Baştan düşük, sol omuzla yakın bir tepe</li>
   <li><strong>Boyun çizgisi:</strong> Sol omuz ve başın dip noktalarını birleştiren çizgi</li>
 </ul>
-<p><strong>Satış sinyali:</strong> Fiyat boyun çizgisini aşağı kırdığında oluşur.</p>
-<p><strong>Hedef fiyat:</strong> Baş noktasından boyun çizgisine olan mesafe, kırılım noktasından aşağı yansıtılır.</p>
+<p><strong>Boyun çizgisi kırılımı:</strong> Fiyatın boyun çizgisini aşağı kırması, teknik analizde düşüş işareti olarak yorumlanır.</p>
 
 <h2>Ters Baş-Omuz (Inverse Head and Shoulders)</h2>
-<p>Düşen trendi tersine çeviren alım formasyonudur. Baş-omuzun yansımasıdır: sol omuz, boyun çizgisinin altında bir dip, daha derin bir baş dibi, boyun çizgisine yakın sağ omuz dibi. Boyun çizgisi yukarı kırıldığında alım sinyali verir.</p>
+<p>Düşen trendin tersine döndüğüne işaret eden formasyondur. Baş-omuzun yansımasıdır: sol omuz, boyun çizgisinin altında bir dip, daha derin bir baş dibi, boyun çizgisine yakın sağ omuz dibi. Boyun çizgisinin yukarı kırılması yükseliş işareti olarak yorumlanır.</p>
 
 <h2>Formasyonları BorsaPusula ile Kullanmak</h2>
-<p>Bu dönüş formasyonları, sinyal değişimiyle birleştirildiğinde daha güçlü olur:</p>
+<p>Dönüş formasyonları, hissenin trend durumuyla (Güçlü Trend / Trend Bozuldu / Yatay) birlikte okunduğunda daha anlamlı hale gelir:</p>
 <ul>
-  <li>Hisse Trend Bozuldu sinyaline döndüğünde + baş-omuz boyun kırılımı eş zamanlı oluşuyorsa → Güçlü düşüş teyidi</li>
-  <li>İkili dip + yeni Güçlü Trend sinyali → Güçlü dönüş teyidi</li>
-  <li>Formasyon tamamlanmadan sinyal değişimi yoksa → Dikkatli ol, erken giriş riski</li>
+  <li>Trend durumu Trend Bozuldu'ya dönerken baş-omuz boyun kırılımı da oluşuyorsa → iki gösterge aynı yöne, düşüşe işaret eder</li>
+  <li>İkili dip ile birlikte trend durumu Güçlü Trend'e dönüyorsa → iki gösterge aynı yöne, yükselişe işaret eder</li>
+  <li>Formasyon tamamlanmamış ve trend durumu değişmemişse → dönüş henüz teyit edilmemiş sayılır</li>
 </ul>
-<p>Her formasyon kırılımı için stop loss: Formasyonun en yüksek (ikili tepe, baş-omuz) veya en düşük (ikili dip, ters baş-omuz) noktasının hemen ötesine konumlandırılır.</p>
 """,
     "faqs": [
       {"q": "İkili tepe nasıl anlaşılır?",
-       "a": "Yükselen trendde fiyat benzer seviyelerde iki kez direnç buluyorsa ikili tepe oluşuyor olabilir. Boyun çizgisi (iki tepe arası dip) aşağı kırıldığında ve hacim artışıyla teyit edildiğinde satış sinyali güçlenir."},
+       "a": "Yükselen trendde fiyat benzer seviyelerde iki kez direnç buluyorsa ikili tepe oluşuyor olabilir. Boyun çizgisi (iki tepe arası dip) aşağı kırıldığında ve hacim artışıyla teyit edildiğinde düşüş işareti güçlenir."},
       {"q": "Baş-omuz formasyonu ne kadar güvenilir?",
-       "a": "Baş-omuz teknik analizin en güvenilir formasyonlarından biri olarak kabul edilir — özellikle hacim teyidi eşlik ettiğinde. Ancak hiçbir formasyon %100 kesin değildir; her zaman stop loss kullanın."},
+       "a": "Baş-omuz teknik analizin en güvenilir formasyonlarından biri olarak kabul edilir — özellikle hacim teyidi eşlik ettiğinde. Ancak hiçbir formasyon %100 kesin değildir; yanlış kırılımlar da görülür."},
       {"q": "İkili dip ile ikili tepe arasındaki fark nedir?",
-       "a": "İkili dip (W formasyonu) düşen trendin biteceğini, ikili tepe (M formasyonu) ise yükselen trendin biteceğini işaret eder. İkili dip alım fırsatı, ikili tepe ise satış/çıkış uyarısı verir."},
+       "a": "İkili dip (W formasyonu) düşen trendin biteceğini, ikili tepe (M formasyonu) ise yükselen trendin biteceğini işaret eder."},
       {"q": "Bu formasyonlar ne kadar sürede oluşur?",
-       "a": "Günlük grafiklerde bu formasyonlar haftalar ile aylar arasında oluşur. Kısa zaman dilimlerinde (saatlik, 4 saatlik) daha hızlı oluşabilir ancak güvenilirlik düşer. BorsaPusula günlük sinyal sistemiyle uyumlu olarak, haftalık zaman diliminde değerlendirilen formasyonlar daha anlamlıdır."}
+       "a": "Günlük grafiklerde bu formasyonlar haftalar ile aylar arasında oluşur. Kısa zaman dilimlerinde (saatlik, 4 saatlik) daha hızlı oluşabilir ancak güvenilirlik düşer. Haftalık zaman diliminde değerlendirilen formasyonlar genellikle daha anlamlı kabul edilir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL']
   },
@@ -5533,6 +5546,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "BIST Bankacılık Sektörü Hisseleri: 2026 Analiz Rehberi",
     "desc": "AKBNK, GARAN, ISCTR, YKBNK, VAKBN: BIST bankacılık hisselerini nasıl analiz edersiniz? Faiz marjı, aktif kalitesi ve değerleme metrikleri.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Temel Analiz",
     "body": """
@@ -5597,7 +5611,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Geri ödenemeyen kredilerin toplam kredilere oranıdır. %3'ün altı düşük risk, %5+ ise ciddi uyarı işaretidir. Ekonomik yavaşlama dönemlerinde bu oran yükselir.</p>
 
 <h3>Fiyat/Defter (PD/DD veya P/B)</h3>
-<p>Bankaların değerlemesi için P/B çok kritiktir. P/B 1,0 altı genellikle "ucuz" olarak değerlendirilebilir (varlık değerinin altında işlem görüyor), ancak düşük P/B bazen düşük kaliteyi de yansıtır.</p>
+<p>Bankaların değerlemesi için P/B çok kritiktir. P/B 1,0 altı genellikle "ucuz" olarak değerlendirilebilir (varlık değerinin altında işlem görüyor), ancak düşük P/B bazen zayıf aktif kalitesini ya da düşük kârlılığı da yansıtır.</p>
 
 <h2>Bankacılık Hisselerini Etkileyen Faktörler</h2>
 <ul>
@@ -5609,11 +5623,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Bankacılık Hisselerinde Teknik + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (Güçlü Trend + İdeal + ADX yüksek) olduğunda:</p>
+<p>BorsaPusula'da banka hisselerinin trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) hisse sayfalarında finansallarla birlikte görülebilir. Trend durumu yorumlanırken şu bağlam önemlidir:</p>
 <ul>
-  <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1,5 gibi filtreler uygulayın</li>
-  <li>Makro bağlama bakın: TCMB sıkılaştırma mı, gevşetme mi?</li>
-  <li>Seçim dönemleri ve büyük ekonomik kararlar yaklaşıyorsa volatilite beklentisi yüksek tutun</li>
+  <li>Temel göstergeler: ROE, takipteki kredi oranı ve P/B birlikte okunur (ör. ROE > %15, NPL < %4, P/B < 1,5 gibi eşikler sık kullanılan tarama ölçütleridir)</li>
+  <li>Makro bağlam: TCMB sıkılaştırma mı, gevşetme mi yapıyor?</li>
+  <li>Seçim dönemleri ve büyük ekonomik kararlar öncesinde banka hisselerinde oynaklık artma eğilimindedir</li>
 </ul>
 """,
     "faqs": [
@@ -5622,7 +5636,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Bankacılık hisselerini analiz etmek için hangi metrikler önemli?",
        "a": "Net Faiz Marjı (NIM), Özkaynak Kârlılığı (ROE), Takipteki Kredi Oranı (NPL) ve Fiyat/Defter (P/B) oranı bankacılık sektörüne özgü en kritik metriklerdir. Genel hisse analizi metrikleri olan P/E ile birlikte değerlendirilmelidir."},
       {"q": "Faiz artışı bankacılık hisselerine iyi mi gelir?",
-       "a": "Genellikle evet, ancak karmaşık bir ilişkidir. Faiz artışı net faiz marjını (NIM) yükseltebilir, bu bankalar için olumludur. Ancak çok yüksek faiz kredi büyümesini yavaşlatır ve NPL riskini artırır. TCMB'nin faiz kararlarını ve takip eden kredi kalitesi verilerini birlikte değerlendirin."},
+       "a": "Genellikle evet, ancak karmaşık bir ilişkidir. Faiz artışı net faiz marjını (NIM) yükseltebilir, bu bankalar için olumludur. Ancak çok yüksek faiz kredi büyümesini yavaşlatır ve NPL riskini artırır. Bu nedenle TCMB'nin faiz kararları ile ardından gelen kredi kalitesi verileri birlikte değerlendirilir."},
       {"q": "Özel banka ile kamu bankası hisseleri arasındaki fark nedir?",
        "a": "Özel bankalar (AKBNK, GARAN, ISCTR, YKBNK) genellikle daha yüksek verimlilik ve kâr odaklı yönetim sergiler. Kamu bankaları (VAKBN, HALKB) ise hükümet politikalarından daha doğrudan etkilenir. Risk profili ve dinamikleri farklılık gösterir."}
     ],
@@ -5632,13 +5646,14 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 76 ──
   {
     "slug": "guvenli-liman-varliklar-nelerdir",
-    "title": "Güvenli Liman Varlıklar: Kriz Döneminde Portföyünüzü Nasıl Korursunuz?",
-    "desc": "Altın, ABD doları, İsviçre frangı ve ABD tahvilleri neden güvenli liman varlık sayılır? Piyasa stresinde bu varlıklara nasıl yatırım yapılır?",
+    "title": "Güvenli Liman Varlıklar: Kriz Döneminde Hangi Varlıklar Değer Korur?",
+    "desc": "Altın, ABD doları, İsviçre frangı ve ABD tahvilleri neden güvenli liman varlık sayılır? Piyasa stresinde bu varlıklar nasıl davranır?",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Risk Yönetimi",
     "body": """
-<p>Jeopolitik kriz, ekonomik çöküş veya ani bir piyasa şoku sırasında bazı varlıklar güçlenirken diğerleri sert düşer. Yatırımcıların risk-off döneminde sığındığı bu varlıklara <strong>güvenli liman (safe haven)</strong> denir. Portföyünüzde güvenli liman varlıkları bulundurmak, kriz dönemlerinin etkisini önemli ölçüde azaltabilir.</p>
+<p>Jeopolitik kriz, ekonomik çöküş veya ani bir piyasa şoku sırasında bazı varlıklar güçlenirken diğerleri sert düşer. Yatırımcıların risk-off döneminde sığındığı bu varlıklara <strong>güvenli liman (safe haven)</strong> denir. Güvenli liman varlıkları, kriz dönemlerinde portföy kayıplarını sınırlayabilir.</p>
 
 <h2>Klasik Güvenli Liman Varlıklar</h2>
 
@@ -5650,7 +5665,6 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Hisse senetleriyle düşük/negatif korelasyon (kriz döneminde hisseler düşerken altın yükselir)</li>
   <li>TL bazında hem global altın fiyatından hem de TL değer kaybından yararlanır</li>
 </ul>
-<p>BorsaPusula'nın makro piyasa çubuğunda güncel altın ve gümüş fiyatlarını takip edebilirsiniz.</p>
 
 <h3>2. ABD Doları (USD)</h3>
 <p>Dünya rezerv para birimi olması nedeniyle global krizlerde USD güçlenir. Türk yatırımcılar için TL'nin tarihi değer kaybından dolayı USD tutmak çift koruma sağlar: hem kriz koruması hem TL erimesinden korunma.</p>
@@ -5702,15 +5716,15 @@ ROA = Net Kâr / Toplam Aktifler × 100
   </tbody>
 </table>
 
-<h2>Türkiye'de Güvenli Liman Stratejisi</h2>
-<p>Türk yatırımcılar için önerilen savunma karışımı:</p>
+<h2>Türkiye'de Güvenli Liman Varlıkları ve Rolleri</h2>
+<p>Türkiye'de savunma amaçlı portföylerde sık görülen varlık sınıfları ve üstlendikleri roller:</p>
 <ul>
-  <li><strong>Fiziksel/Finansal Altın (%10-20):</strong> Kriz koruması + TL enflasyonu kalkanı</li>
-  <li><strong>Döviz Mevduatı/USD (%15-25):</strong> TL'nin tarihi eğilimi göz önünde bulundurularak</li>
-  <li><strong>Kısa Vadeli TL Mevduat/Tahvil (%10-20):</strong> Yüksek faiz döneminde cazip getiri</li>
-  <li><strong>Hisse (%40-60):</strong> Uzun vadede enflasyonun üzerinde getiri potansiyeli</li>
+  <li><strong>Fiziksel/Finansal Altın:</strong> Kriz koruması + TL enflasyonu kalkanı</li>
+  <li><strong>Döviz Mevduatı/USD:</strong> TL'nin tarihi değer kaybı eğilimine karşı denge</li>
+  <li><strong>Kısa Vadeli TL Mevduat/Tahvil:</strong> Yüksek faiz dönemlerinde düzenli getiri</li>
+  <li><strong>Hisse:</strong> Uzun vadede enflasyonun üzerinde getiri potansiyeli</li>
 </ul>
-<p>Kriz başladıktan sonra güvenli limanlara geçmek çoğunlukla geç kalınmış bir tepkidir. Portföyde sürekli belirli bir güvenli liman payı bulundurmak, kriz zamanı reaktif davranmaktan daha iyi sonuç verir.</p>
+<p>Kriz başladıktan sonra güvenli limanlara yönelmek çoğu zaman geç kalınmış bir tepki olur; bu yüzden güvenli liman payı genellikle kriz anında değil, uzun vadeli portföy planının parçası olarak ele alınır.</p>
 """,
     "faqs": [
       {"q": "Güvenli liman varlık nedir?",
@@ -5718,9 +5732,9 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Kriz döneminde altın neden yükselir?",
        "a": "Altın, binlerce yıllık güven tarihine sahip, sınırlı arzı olan bir değer deposudur. Kriz ortamında hisse senetleri satılırken yatırımcılar güveni kanıtlanmış altına yönelir. Ayrıca faiz ortamı kötüleştiğinde altın göreli olarak daha cazip hale gelir."},
       {"q": "Kripto para güvenli liman sayılır mı?",
-       "a": "Genellikle hayır. Bitcoin başta olmak üzere kripto varlıklar, büyük kriz dönemlerinde hisse senetleriyle birlikte düşme eğilimindedir. 'Digital altın' anlatısı popüler olsa da davranışsal veriler krizlerde kriptanın risk-off varlık gibi hareket etmediğini göstermektedir."},
-      {"q": "Türk yatırımcılar için en mantıklı güvenli liman nedir?",
-       "a": "Türkiye özelinde altın (TL bazlı) ve yabancı döviz (USD/EUR) double koruma sağlar: hem global kriz koruması hem de TL'nin değer kaybına karşı güvence. Portföyün %20-30'u bu tür güvenli liman varlıklarda tutulması önerilir."}
+       "a": "Genellikle hayır. Bitcoin başta olmak üzere kripto varlıklar, büyük kriz dönemlerinde hisse senetleriyle birlikte düşme eğilimindedir. 'Dijital altın' anlatısı popüler olsa da davranışsal veriler krizlerde kriptanın risk-off varlık gibi hareket etmediğini göstermektedir."},
+      {"q": "Türkiye'de hangi varlıklar güvenli liman olarak görülür?",
+       "a": "Türkiye özelinde altın (TL bazlı) ve yabancı döviz (USD/EUR) çifte koruma sağlar: hem global kriz koruması hem de TL'nin değer kaybına karşı güvence."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'TUPRS', 'EREGL', 'GARAN']
   },
@@ -5729,8 +5743,9 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "rsi-gostergesi-nasil-kullanilir",
     "title": "RSI Göstergesi Nasıl Kullanılır? Aşırı Alım ve Satım Seviyeleri",
-    "desc": "Relative Strength Index (RSI) nedir, nasıl hesaplanır ve BIST hisselerinde nasıl uygulanır? 30-70 seviyeleri, diverjans ve pratik RSI stratejileri.",
+    "desc": "Relative Strength Index (RSI) nedir, nasıl hesaplanır ve BIST hisselerinde nasıl uygulanır? 30-70 seviyeleri, diverjans ve RSI'ın yaygın yorumlanma biçimleri.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
@@ -5743,15 +5758,15 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Temel RSI Seviyeleri</h2>
 <ul>
-  <li><strong>80 üzeri — Aşırı Alım (Overbought):</strong> Hisse kısa vadede çok yüksek; fiyat düzeltmesi gelebilir. BorsaPusula'nın kanonik şemasında 70-80 arası "Dikkatli" olarak ayrı ele alınır — güçlü trendlerde RSI uzun süre 70 üzerinde kalabilir, bu nedenle 70'i tek başına aşırı alım/satış sinyali olarak yorumlamak tehlikeli olabilir.</li>
+  <li><strong>80 üzeri — Aşırı Alım (Overbought):</strong> Hisse kısa vadede çok yüksek; fiyat düzeltmesi gelebilir. BorsaPusula'nın kanonik şemasında 70-80 arası "Dikkatli" olarak ayrı ele alınır — güçlü trendlerde RSI uzun süre 70 üzerinde kalabilir, bu nedenle 70'i tek başına aşırı alım işareti olarak yorumlamak tehlikeli olabilir.</li>
   <li><strong>30 altı — Aşırı Satım (Oversold):</strong> Hisse kısa vadede çok düşmüş; toparlanma gelebilir. Düşen trendlerde ise RSI uzun süre 30 altında kalabilir.</li>
-  <li><strong>50 çizgisi — Momentum sınırı:</strong> RSI 50'nin üzerinde → yükselen momentum, altında → düşen momentum. Bazı analistler 50 üstüne çıkışı al, altına düşüşü sat sinyali olarak kullanır.</li>
+  <li><strong>50 çizgisi — Momentum sınırı:</strong> RSI 50'nin üzerinde → yükselen momentum, altında → düşen momentum. Bazı analistler 50 üstüne çıkışı yükseliş, altına düşüşü düşüş işareti olarak yorumlar.</li>
 </ul>
 
 <h2>RSI Diverjansı (En Güçlü Sinyal)</h2>
 <p>Diverjans, fiyat ve RSI'nin zıt yönlerde hareket etmesidir. İki türü vardır:</p>
-<p><strong>Yükseliş Diverjansı (Bullish Divergence):</strong> Fiyat daha düşük dip yaparken RSI daha yüksek dip yapar. Gizli güç işareti — satış baskısı azalıyor. Yakında yükseliş gelebilir.</p>
-<p><strong>Düşüş Diverjansı (Bearish Divergence):</strong> Fiyat daha yüksek tepe yaparken RSI daha düşük tepe yapar. Gizli zayıflık işareti — alım gücü tükeniyor. Yakında düşüş gelebilir.</p>
+<p><strong>Yükseliş Diverjansı (Bullish Divergence):</strong> Fiyat daha düşük dip yaparken RSI daha yüksek dip yapar. Gizli güç işareti — satış baskısı azalıyor; olası bir yükselişe işaret edebilir.</p>
+<p><strong>Düşüş Diverjansı (Bearish Divergence):</strong> Fiyat daha yüksek tepe yaparken RSI daha düşük tepe yapar. Gizli zayıflık işareti — alım gücü tükeniyor; olası bir düşüşe işaret edebilir.</p>
 <p>Diverjanslar, basit aşırı alım/satım sinyallerinden çok daha güvenilir kabul edilir çünkü fiyat ile momentumun ayrışmasını gösterir.</p>
 
 <h2>RSI ve BIST Hisseleri</h2>
@@ -5762,24 +5777,24 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Seçim/makro dönemleri:</strong> Yoğun dış etki dönemlerinde tüm BIST'te RSI senkron hareket edebilir; sektörel veya bireysel hisse analizi daha az anlamlı olur.</li>
 </ul>
 
-<h2>RSI Stratejileri</h2>
-<p><strong>Klasik 30/70 Stratejisi:</strong> RSI 30'un altına düştüğünde alım, 70'in üstüne çıktığında satım yapılır. Yatay (range) piyasalarda etkilidir; trend piyasalarda yetersizdir.</p>
-<p><strong>RSI + Trend Filtresi:</strong> EMA 200 üzerindeyken (yükselen trend) sadece RSI 30-40 aralığından alım yapılır. EMA 200 altındayken (düşen trend) sadece RSI 60-70 aralığından satış yapılır. Trend yönünde işlem yaparak başarı oranı artırılır.</p>
+<h2>RSI'ın Yaygın Yorumlanma Biçimleri</h2>
+<p><strong>Klasik 30/70 yaklaşımı:</strong> RSI'ın 30 altı aşırı satım, 70 üstü aşırı alım bölgesi olarak okunmasıdır. Yatay (range) piyasalarda daha anlamlıdır; trend piyasalarında yetersiz kalır.</p>
+<p><strong>RSI + Trend Filtresi:</strong> RSI ana trendle birlikte okunur. EMA 200 üzerindeki (yükselen trend) bir hissede RSI'ın 30-40 aralığına gerilemesi trend içi geri çekilme, EMA 200 altındaki (düşen trend) bir hissede 60-70 aralığına yükselmesi trend içi tepki olarak yorumlanır.</p>
 <p><strong>RSI + Supertrend:</strong> BorsaPusula'nın da kullandığı Supertrend ile birleştirildiğinde güçlü bir teyit kombinasyonu oluşur: Supertrend yeşil + RSI 50'nin üstü ve dip noktadan dönüş → yükseliş teyidi güçlenir; Supertrend kırmızı + RSI 50'nin altı ve tepe noktadan dönüş → düşüş teyidi güçlenir.</p>
 
 <h2>RSI'ın Sınırlamaları</h2>
 <p>RSI mükemmel değildir. Güçlü trendlerde aşırı alım/satım seviyeleri uzun süre aşılabilir. Sinyal gecikmesi yaşanabilir — fiyat zaten hareket etmişken RSI sinyal verebilir. Diğer göstergelerle (hacim, trend, formasyon) kombinasyon kullanımı daha sağlıklı sonuç verir.</p>
-<p>BorsaPusula sinyalleri, RSI'ı tek başına değil Supertrend ve ADX ile birlikte kullanarak bu sınırlamaları minimize etmeyi hedefler.</p>
+<p>BorsaPusula'daki trend durumu da tek bir göstergeye değil, Supertrend, ADX ve EMA'ların birlikte değerlendirilmesine dayanır.</p>
 """,
     "faqs": [
       {"q": "RSI kaç periyotta kullanılmalı?",
-       "a": "Standart 14 periyot en yaygın kullanımdır ve çoğu platform için varsayılan ayardır. Kısa vadeli trade için 7-9 periyot, uzun vadeli analiz için 21 periyot tercih edilebilir. 14 periyot kısa vadeli gürültü ile uzun vadeli yavaşlık arasında iyi bir denge sağlar."},
-      {"q": "RSI 70'e ulaştığında hisse satılmalı mı?",
-       "a": "Güçlü yükselen trendlerde RSI uzun süre 70'in üzerinde kalabilir. 70'i otomatik satış sinyali olarak kullanmak güçlü trendlerde erken çıkışa neden olur. Diverjans oluşumu veya Supertrend/EMA sinyali değişimi gibi ek teyitler beklemek daha güvenlidir."},
+       "a": "Standart 14 periyot en yaygın kullanımdır ve çoğu platform için varsayılan ayardır. Kısa vadeli işlemler için 7-9 periyot, uzun vadeli analiz için 21 periyot tercih edilebilir. 14 periyot kısa vadeli gürültü ile uzun vadeli yavaşlık arasında iyi bir denge sağlar."},
+      {"q": "RSI'ın 70'e ulaşması ne anlama gelir?",
+       "a": "Aşırı alım bölgesine girildiğini gösterir; ancak güçlü yükselen trendlerde RSI uzun süre 70'in üzerinde kalabilir. Bu nedenle 70 seviyesi tek başına trendin bittiği anlamına gelmez; diverjans oluşumu veya Supertrend/EMA durumundaki değişim gibi ek işaretlerle birlikte yorumlanır."},
       {"q": "RSI diverjansı neden önemli?",
-       "a": "Diverjans, fiyatın yönü ile momentumun yönü arasındaki kopuşu gösterir. Bu kopuş, mevcut trendin zayıfladığına işaret eder. Fiyat yeni tepe yaparken RSI daha düşük tepe yapıyorsa alım baskısı düşüyor ve yakında düzeltme gelebilir — bu sinyali önceden vermesi açısından değerlidir."},
+       "a": "Diverjans, fiyatın yönü ile momentumun yönü arasındaki kopuşu gösterir. Bu kopuş, mevcut trendin zayıfladığına işaret eder. Fiyat yeni tepe yaparken RSI daha düşük tepe yapıyorsa alım baskısı düşüyor demektir ve bu durum olası bir düzeltmeye işaret edebilir — bu işareti önceden vermesi açısından değerlidir."},
       {"q": "RSI ve MACD arasındaki fark nedir?",
-       "a": "RSI aşırı alım/satım seviyelerini ve trend momentumunu ölçer. MACD ise iki hareketli ortalamanın kesişimini ve momentumun ivmesini gösterir. İkisi birbirini tamamlar: RSI momentum gücünü, MACD ise yön değişimini daha iyi yakalar. Birlikte kullanıldığında daha güvenilir sinyaller üretilir."}
+       "a": "RSI aşırı alım/satım seviyelerini ve trend momentumunu ölçer. MACD ise iki hareketli ortalamanın kesişimini ve momentumun ivmesini gösterir. İkisi birbirini tamamlar: RSI momentum gücünü, MACD ise yön değişimini daha iyi yakalar. Birlikte okunduklarında daha bütünlüklü bir tablo sunarlar."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL', 'TUPRS']
   },
@@ -5790,6 +5805,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "BIST'te Temettü Yatırımcılığı: Yüksek Temettü Veren Hisseler ve Stratejiler",
     "desc": "BIST'te temettü yatırımcılığı nasıl yapılır? Temettü verimi hesabı, ex-temettü tarihi, BIST'in en yüksek temettü veren sektörleri ve uzun vadeli strateji rehberi.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Temel Analiz",
     "body": """
@@ -5799,7 +5815,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Temettü:</strong> Şirketin belirli bir dönemde elde ettiği kârın hissedarlara dağıtılan kısmıdır. Nakit (nakit temettü) veya hisse (bedelsiz hisse) şeklinde ödenebilir.</p>
 <p><strong>Temettü Verimi (Dividend Yield):</strong> Hisse başına ödenen yıllık temettünün, hissenin mevcut fiyatına bölünmesiyle hesaplanır.</p>
 <p>Temettü Verimi = (Hisse Başına Yıllık Temettü / Hisse Fiyatı) × 100</p>
-<p>Örneğin hisse fiyatı 100 TL olan bir şirket 8 TL temettü ödediyse verim %8'dir. Bu verimi mevduat faizi veya tahvil getirisiyle karşılaştırmak yatırım kararını kolaylaştırır.</p>
+<p>Örneğin hisse fiyatı 100 TL olan bir şirket 8 TL temettü ödediyse verim %8'dir. Bu verimi mevduat faizi veya tahvil getirisiyle karşılaştırmak, getiriyi bağlamına oturtmaya yardımcı olur.</p>
 
 <h2>BIST'te Temettü Takvimi Nasıl İşler?</h2>
 <p><strong>Kâr Dağıtım Kararı:</strong> Şirketin Genel Kurulu, bir önceki yılın kârından ne kadar temettü dağıtacağına karar verir. Bu karar KAP'ta açıklanır.</p>
@@ -5818,25 +5834,25 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Temettü Yatırımcılığı Stratejileri</h2>
-<p><strong>1. Yüksek Verimli Temettü Stratejisi (High Yield):</strong> En yüksek temettü verimiyle işlem gören hisseleri satın almak. Risk: Verim yüksekse bazen hissenin düştüğü için verim "yapay" yüksek görünebilir — "temettü tuzağı" adı verilen durum.</p>
-<p><strong>2. Temettü Büyümesi Stratejisi (Dividend Growth):</strong> Her yıl temettü ödemesini artıran şirketlere odaklanmak. Mutlak verim düşük olsa bile büyüme oranı yüksekse uzun vadede avantaj yaratır.</p>
-<p><strong>3. DRİP (Temettü Yeniden Yatırım):</strong> Alınan temettüleri aynı hisseye yeniden yatırmak. Bileşik getirinin gücünden yararlanma stratejisi. Türkiye'de otomatik sistem henüz yaygın değil ama manuel uygulamak mümkün.</p>
+<p><strong>1. Yüksek Verimli Temettü Stratejisi:</strong> En yüksek temettü verimiyle işlem gören hisselere odaklanmak. Risk: Verim yüksekse bazen hissenin düştüğü için verim "yapay" yüksek görünebilir — "temettü tuzağı" adı verilen durum.</p>
+<p><strong>2. Temettü Büyümesi Stratejisi:</strong> Her yıl temettü ödemesini artıran şirketlere odaklanmak. Mutlak verim düşük olsa bile büyüme oranı yüksekse uzun vadede avantaj yaratır.</p>
+<p><strong>3. Temettülerin Yeniden Yatırılması (DRIP):</strong> Alınan temettüleri aynı hisseye yeniden yatırmak. Bileşik getirinin gücünden yararlanma stratejisi. Türkiye'de otomatik sistem henüz yaygın değil ama manuel uygulamak mümkün.</p>
 
 <h2>Temettü Yatırımcısının Dikkat Edeceği Metrikler</h2>
 <ul>
-  <li><strong>Payout Ratio (Kâr Dağıtım Oranı):</strong> Temettünün net kâra oranı. %50-70 arası sürdürülebilir; %100'ü aşıyorsa şirket borçlanarak temettü ödüyor olabilir.</li>
-  <li><strong>Serbest Nakit Akışı (Free Cash Flow):</strong> Şirket temettüyü gerçek nakit üretiminden mi yoksa kâr manipülasyonundan mı ödüyor?</li>
+  <li><strong>Kâr Dağıtım Oranı (payout ratio):</strong> Temettünün net kâra oranı. %50-70 arası sürdürülebilir; %100'ü aşıyorsa şirket borçlanarak temettü ödüyor olabilir.</li>
+  <li><strong>Serbest Nakit Akışı:</strong> Şirket temettüyü gerçek nakit üretiminden mi, yoksa yalnız muhasebe kârına dayanarak mı ödüyor?</li>
   <li><strong>Borç/Özkaynak Oranı:</strong> Yüksek borçlu şirket ekonomik stres döneminde temettüyü kesebilir.</li>
-  <li><strong>Temettü Geçmişi:</strong> 5-10 yıl boyunca düzenli ve artarak temettü ödemiş şirketler daha güvenilirdir.</li>
+  <li><strong>Temettü Geçmişi:</strong> 5-10 yıl boyunca düzenli ve artarak temettü ödemiş şirketlerin temettü politikası daha öngörülebilirdir.</li>
 </ul>
 
 <h2>Temettü Yatırımcılığının Riskleri</h2>
 <p>Temettü verimi çekici görünse de bazı riskler göz önünde bulundurulmalı: şirket zararında kârdan temettü verilmez; ekonomik krizde temettü kesilebilir; ex-temettü tarihinde hisse fiyatı temettü miktarı kadar düşer (net verim sıfır olabilir); enflasyonun üzerinde getiri için verim oranının yüksek olması gerekmektedir.</p>
-<p>BorsaPusula sinyalleri, temettü tarihlerini bilanço takvimi ile birlikte takip etmenizi sağlar. Yüksek temettü veren bir hisseyi Güçlü Trend sinyalinin başında almak, hem temettü hem de fiyat artışından yararlanma fırsatı sunabilir.</p>
+<p>BorsaPusula'nın <a href="/takvim">takvim</a> sayfası temettü ve bilanço tarihlerini birlikte gösterir; hisse sayfalarında ise şirketin finansalları ve trend durumu bir arada görülebilir. Temettü verimi bu tablonun yalnız bir parçasıdır.</p>
 """,
     "faqs": [
       {"q": "Temettü almak için hisseyi ne kadar tutmak gerekir?",
-       "a": "Ex-temettü tarihinden en az 1 gün önce hisseyi satın almış ve o gün portföyünüzde bulunduruyor olmanız yeterlidir. Temettü ödendikten hemen sonra satış yapabilirsiniz, ancak bu durumda fiyatın temettü miktarı kadar düştüğünü görebilirsiniz."},
+       "a": "Ex-temettü tarihinden en az 1 gün önce hisseyi satın almış ve o gün portföyünüzde bulunduruyor olmanız yeterlidir. Temettü ödendikten sonra hisse satılabilir; ancak bu durumda fiyatın temettü miktarı kadar düşmüş olduğu görülebilir."},
       {"q": "BIST'te en yüksek temettü veren hisseler hangileridir?",
        "a": "Temettü verimi her yıl değiştiğinden güncel veriye bakmak önemlidir. Tarihsel olarak yüksek temettü verimiyle öne çıkan sektörler: bankacılık (AKBNK, GARAN), enerji (TUPRS), telekomünikasyon (TCELL, TTKOM) ve bazı holdingler sayılabilir. KAP ve borsa verilerinden güncel kâr dağıtım kararlarını takip edebilirsiniz."},
       {"q": "Temettü tuzağı nedir?",
@@ -5853,6 +5869,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Piyasalarda Sürü Psikolojisi ve Davranışsal Finans: Yatırımcı Hatalarından Nasıl Kaçınırsınız?",
     "desc": "Sürü psikolojisi, FOMO, kayıptan kaçınma önyargısı — davranışsal finansın temel kavramları ve BIST yatırımcılarının en sık yaptığı psikolojik hatalar.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
@@ -5865,45 +5882,45 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Piyasa düşmeye başladığında panik satışlar birbirini tetikler ve düşüş büyür</li>
   <li>Herkesin konuştuğu sektör veya tema yatırımları balonlaşabilir</li>
 </ul>
-<p>Sürüye katılmanın maliyeti genellikle gec giriş: fiyat zaten çok yükselmiş veya düşmüş olur; sürü doğrulanır gibi görünse de en büyük kayıplar sürünün en coşkulu olduğu ve en güçlü çekilmenin olduğu son aşamada yaşanır.</p>
+<p>Sürüye katılmanın maliyeti genellikle geç kalmaktır: fiyat zaten çok yükselmiş veya düşmüş olur; sürü doğrulanır gibi görünse de en büyük kayıplar sürünün en coşkulu olduğu ve en güçlü çekilmenin olduğu son aşamada yaşanır.</p>
 
 <h2>FOMO (Kaçırma Korkusu)</h2>
 <p>FOMO, hızla yükselen bir hisseyi veya fırsatı kaçırdığımızı düşündüğümüzde mantıklı analiz yapmaksızın pozisyon almaya yönlendiren duygusal tepkidir. Sosyal medya FOMO'yu özellikle güçlendirir: insanlar kazançlarını paylaşır, kayıplarını gizler; bu seçici yayın kârlı fırsatların her yerde olduğu yanılsamasını yaratır.</p>
-<p>FOMO ile alınan pozisyonlar genellikle şu özelliklere sahiptir: Stop-loss yoktur veya çok geniştir; pozisyon büyüklüğü risk yönetimi gözetilmeksizin belirlenir; kâr hedefi belirsizdir; çıkış planı yoktur.</p>
+<p>FOMO ile alınan pozisyonlar genellikle şu özelliklere sahiptir: Kararın gerekçesi yazılı değildir; pozisyon büyüklüğü risk yönetimi gözetilmeksizin belirlenir; hangi gelişmenin kararı değiştireceği önceden düşünülmemiştir.</p>
 
 <h2>Kayıptan Kaçınma Önyargısı (Loss Aversion)</h2>
 <p>Kahneman ve Tversky'nin keşfettiği bu önyargıya göre insanlar 100 TL kazanmanın verdiği mutluluktan 2 kat daha fazlasını 100 TL kaybetmenin verdiği acıda hisseder. Piyasalarda bu şöyle tezahür eder:</p>
 <ul>
   <li><strong>Kazananı erken sat, kaybedeni uzun tut:</strong> Kârdaki hisseyi hızlıca satarız (daha fazla kazanmak yerine "kilitlemek" isteriz), zarardaki hisseyi ise sonsuza kadar tutarız ("gerçekleşmemiş zarar" psikolojisi).</li>
-  <li><strong>Stop-loss koymama:</strong> Stop-loss = kaybı kabul etmek anlamına gelir ve zihnen acı vericidir. Bu yüzden birçok yatırımcı stop-loss koymaktan kaçınır ve küçük kayıplar büyük zararlara dönüşür.</li>
+  <li><strong>Zararı kabullenememe:</strong> Zarardaki pozisyonu kapatmak kaybı kesinleştirmek anlamına gelir ve zihnen acı vericidir. Bu yüzden birçok yatırımcı bu kararı erteler ve küçük kayıplar büyük zararlara dönüşür.</li>
 </ul>
 
 <h2>Doğrulama Önyargısı (Confirmation Bias)</h2>
-<p>Bir hisse hakkında karar verdikten sonra yalnızca o kararı destekleyen haberleri ve analizleri arar, karşı görüşleri görmezden geliriz. Bu önyargı zararlı pozisyonları uzatır ve çıkış sinyallerini fark etmemizi engelleyen bir bariyer oluşturur.</p>
+<p>Bir hisse hakkında karar verdikten sonra yalnızca o kararı destekleyen haberleri ve analizleri arar, karşı görüşleri görmezden geliriz. Bu önyargı zararlı pozisyonları uzatır ve olumsuz işaretleri fark etmemizi engelleyen bir bariyer oluşturur.</p>
 
 <h2>Aşırı Güven (Overconfidence)</h2>
 <p>Özellikle piyasanın yükseldiği dönemlerde yatırımcılar kendi yeteneklerini aşırı değerlendirme eğilimi gösterir. "Bu hisseler yükseldi çünkü doğru seçtim" yerine "piyasa genel olarak yükseldi" gerçeğini görmek zordur. Aşırı güven aşırı işlem sıklığına (ve komisyon+vergi maliyetlerine) ve yetersiz çeşitlendirmeye yol açar.</p>
 
 <h2>Bu Hatalardan Nasıl Kaçınılır?</h2>
-<p><strong>1. Kural Tabanlı Sistem Kullanın:</strong> BorsaPusula gibi algoritma tabanlı sinyal platformları, duygusal karar vermenin önüne geçmek için etkili araçlardır. "Sistem Güçlü Trend dedi, ben de aldım" yaklaşımı FOMO ve sürü kararlarını azaltır.</p>
-<p><strong>2. İşlem Öncesi Plan Yapın:</strong> Alım kararı vermeden önce şunu yazın: Neden alıyorum? Hedef fiyatım ne? Stop-lossum nerede? Bu koşullarda satarım? Plan yazmak duygusal kararları filtreler.</p>
+<p><strong>1. Kural Tabanlı Bakış:</strong> Önceden tanımlanmış, ölçülebilir kriterlerle (trend durumu, finansal oranlar gibi) bakmak duygusal kararların etkisini azaltır. BorsaPusula'daki trend durumları (Güçlü Trend / Trend Bozuldu / Yatay) bu tür kural tabanlı bir betimlemedir; karar her zaman yatırımcıya aittir.</p>
+<p><strong>2. İşlem Öncesi Plan Yapın:</strong> Alım kararı vermeden önce şunu yazın: Neden alıyorum? Hangi gelişme bu kararı değiştirir? Ne kadar kaybı göze alıyorum? Plan yazmak duygusal kararları filtreler.</p>
 <p><strong>3. Pozisyon Büyüklüğü Kuralı:</strong> Tek bir hisseye portföyün %10'undan fazlasını koymamak, kayıptan kaçınma önyargısının yarattığı "bu kez farklı olacak" düşüncesine karşı mekanik bir koruma sağlar.</p>
 <p><strong>4. Performans Günlüğü Tutun:</strong> Her işlemi kaydedin: gerekçe, giriş/çıkış fiyatı, sonuç. Zaman içinde hangi önyargılardan en çok etkilendiğinizi göreceksiniz.</p>
 <p><strong>5. Sosyal Medyadan Karar Kopuklukla Sağlayın:</strong> Haber ve sosyal medya akışından etkilendiğinizi fark ettiğinizde 24 saat bekleyin. FOMO kaynaklı aciliyet hissi çoğunlukla bir günde azalır.</p>
 
 <h2>Piyasa Döngüsü ve Duygular</h2>
-<p>Piyasa döngüsünün farklı aşamalarında hâkim olan duygular: İyimserlik → Heyecan → Coşku (zirve, maksimum risk) → Kaygı → İnkar → Korku → Panik → Çaresizlik (dip, maksimum fırsat) → Depresyon → Umursuzluk → Umut → İyimserlik.</p>
+<p>Piyasa döngüsünün farklı aşamalarında hâkim olan duygular: İyimserlik → Heyecan → Coşku (zirve, maksimum risk) → Kaygı → İnkar → Korku → Panik → Çaresizlik (dip, en yoğun karamsarlık) → Depresyon → Umursuzluk → Umut → İyimserlik.</p>
 <p>Bu döngüde Warren Buffett'ın formülü: "Başkaları korkarken açgözlü, başkaları açgözlüyken korkak ol." Bunu uygulamak insan doğasına aykırıdır — ve tam da bu yüzden çoğu yatırımcı piyasanın gerisinde kalır.</p>
 """,
     "faqs": [
       {"q": "Sürü psikolojisi her zaman kötü mü?",
-       "a": "Her zaman değil. Bazen sürü gerçekten haklıdır — güçlü bir trendin başında sürüye katılmak kârlı olabilir. Sorun genellikle sürünün sonuna katılmaktır. Fiyat çok yükselmiş, hacim dorukta ve herkes haberdar olmuşken katılmak yüksek risk demektir. Trend erken aşamada sinyallerle tespit edilirse makul bir strateji oluşturulabilir."},
+       "a": "Her zaman değil. Bazen sürü gerçekten haklıdır — güçlü bir trendin başında sürüye katılmak kârlı olabilir. Sorun genellikle sürünün sonuna katılmaktır. Fiyat çok yükselmiş, hacim dorukta ve herkes haberdar olmuşken katılmak yüksek risk demektir."},
       {"q": "FOMO'yu engellemek için ne yapmalı?",
-       "a": "Her fırsatı değerlendirmek zorunda olmadığınızı kabul edin. Her gün onlarca hisse yükselir — hepsini yakalamak imkânsızdır. İyi bir sistem, fırsatların bir kısmını kaçırmanıza izin verirken sistematik olarak kâr etmenizi sağlar. 'Kaçan tren' yerine 'bir sonraki tren' odağı daha sağlıklıdır."},
-      {"q": "Davranışsal finans nasıl para kazandırır?",
-       "a": "Davranışsal finans bilgisini iki şekilde kullanabilirsiniz: Birincisi savunma — kendi önyargılarınızı tanıyarak daha az hata yaparsınız. İkincisi saldırı — diğer yatırımcıların panik satışı yaptığı dönemde (maksimum korku = maksimum fırsat) pozisyon almak, sürünün tersine hareket eden kazançlı bir strateji olabilir."},
-      {"q": "Algoritmik sinyaller psikolojik hataları engeller mi?",
-       "a": "Büyük ölçüde evet. BorsaPusula gibi kural tabanlı sistemler, algoritmanın belirlediği kriterlere göre sinyal üretir — insan duygusuna bağlı değildir. Ancak sinyali uygulamak hâlâ insan kararına bağlıdır. Sisteme güven ve tutarlı uygulama, psikolojik disiplinin en önemli bileşenlerinden biridir."}
+       "a": "Her fırsatı değerlendirmek zorunda olmadığınızı kabul edin. Her gün onlarca hisse yükselir — hepsini yakalamak imkânsızdır. Kurallı bir yaklaşım, her hareketi yakalama baskısını azaltır. 'Kaçan tren' yerine 'bir sonraki tren' odağı daha sağlıklıdır."},
+      {"q": "Davranışsal finans bilgisi nasıl kullanılır?",
+       "a": "İki şekilde: Birincisi kendi önyargılarınızı tanıyarak daha az hata yapmak. İkincisi piyasa genelindeki duygu durumunu (aşırı korku ya da aşırı coşku) fark etmek; sürünün davranışını anlamak, sert fiyat hareketlerini daha sakin yorumlamaya yardımcı olur."},
+      {"q": "Kural tabanlı göstergeler psikolojik hataları azaltır mı?",
+       "a": "Yardımcı olabilir. BorsaPusula'daki trend durumları gibi kural tabanlı betimlemeler önceden tanımlı kriterlere göre hesaplanır ve o anki duygudan etkilenmez. Ancak yorum ve karar her zaman yatırımcıya aittir; önyargılar karar aşamasında yine devreye girebilir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'EREGL', 'ASELS', 'GARAN']
   },
@@ -5914,6 +5931,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Stagflasyon Nedir? Türkiye Ekonomisi ve Portföy Stratejileri",
     "desc": "Stagflasyon tanımı, tarihsel örnekler, Türkiye ekonomisindeki tezahürleri ve stagflasyon ortamında hangi varlık sınıflarının öne çıktığı — kapsamlı rehber.",
     "date": "2026-05-01",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Makro Ekonomi",
     "body": """
@@ -5940,7 +5958,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Büyüme-enflasyon gerilimi:</strong> Para politikası gevşekken büyüme desteklenebilir ama enflasyon artar; sıkılaşınca enflasyon yavaşlar ama büyüme de yavaşlar.</li>
 </ul>
 
-<h2>Stagflasyon Ortamında Kazandıran Varlıklar</h2>
+<h2>Stagflasyon Ortamında Öne Çıkan Varlıklar</h2>
 <p>Tarihsel veriler stagflasyonun en çok hangi varlıkları koruduğunu göstermektedir:</p>
 <ul>
   <li><strong>Altın:</strong> 1970'lerdeki stagflasyon döneminde altın en çok kazandıran varlık olmuştur. Enflasyona karşı klasik korunma aracıdır.</li>
@@ -5958,16 +5976,16 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Stagflasyon Portföy Stratejisi</h2>
-<p>Stagflasyon riski yüksekken portföy nasıl konumlandırılmalı:</p>
+<p>Stagflasyon riskinin yükseldiği dönemlerde portföy yönetiminde sıkça tartışılan başlıklar:</p>
 <ul>
-  <li>Altın payını artır (%10-20 aralığı)</li>
-  <li>Döviz varlıklarını koru (USD/EUR mevduat veya yabancı hisse)</li>
-  <li>Temettü getirisi yüksek, borcu düşük şirketlere ağırlık ver</li>
-  <li>Enerji/hammadde sektörü hisselerini değerlendir</li>
-  <li>Uzun vadeli sabit faizli tahvilden uzak dur</li>
-  <li>Nakit oranını portföyde artır (fırsat fonu)</li>
+  <li>Altının portföydeki payı (literatürde sık anılan aralık %10-20)</li>
+  <li>Döviz cinsinden varlıklar (USD/EUR mevduat veya yabancı hisse)</li>
+  <li>Temettü getirisi yüksek, borcu düşük şirketler</li>
+  <li>Enerji/hammadde sektörü hisseleri</li>
+  <li>Uzun vadeli sabit faizli tahvillerin enflasyona duyarlılığı</li>
+  <li>Portföydeki nakit oranı</li>
 </ul>
-<p>BorsaPusula sinyalleri, her hissenin trend ve momentum durumunu gün sonu verisiyle günlük olarak takip eder. Stagflasyon döneminde trendin yönüne göre konumlanmak, makro ortamın yarattığı sürtünmeyi minimize etmek için en pratik yaklaşımlardan biridir.</p>
+<p>BorsaPusula, her hissenin trend durumunu (Güçlü Trend / Trend Bozuldu / Yatay) gün sonu kapanış verisiyle gösterir. Makro ortamın sektörlere etkisi, hisse sayfalarındaki trend durumunda da izlenebilir.</p>
 """,
     "faqs": [
       {"q": "Stagflasyon durgunluktan farkı nedir?",
@@ -6127,6 +6145,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Portföy Çeşitlendirmesi: BIST'te Sektör Dağılımı Nasıl Yapılır?",
     "desc": "Portföy çeşitlendirmesi neden önemlidir? BIST sektörleri, korelasyon analizi ve bireysel yatırımcı için pratik çeşitlendirme stratejileri.",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Risk Yönetimi",
     "body": """
@@ -6168,7 +6187,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Pratik kural: BIST'te bireysel yatırımcı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık.</p>
 
 <h2>BorsaPusula ile Çeşitlendirme Takibi</h2>
-<p>BorsaPusula'nın ana sayfasında BIST100 ve ötesinde takip edilen tüm hisselerin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü Trend sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
+<p>BorsaPusula'nın <a href="/">Piyasa</a> sayfasında BIST100'ün gün sonu ısı haritasını görebilir, <a href="/tarama">tarama</a> sayfasında hisseleri trend durumuna (Güçlü Trend / Trend Bozuldu / Yatay) göre süzebilirsiniz. Hisse sayfaları ise her şirketin finansallarını ve trend durumunu tek yerde gösterir.</p>
 """,
     "faqs": [
       {"q": "Kaç hisse ile portföy oluşturulmalı?",
@@ -6189,6 +6208,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Hareketli Ortalamalar: EMA ve SMA Farkı, Altın Kesişim Stratejisi",
     "desc": "Basit ve üstel hareketli ortalamalar nedir? EMA 20-50-200 hizalaması, altın kesişim ve ölüm kesişimi, BorsaPusula sinyallerinde nasıl kullanılır?",
     "date": "2026-05-02",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
@@ -6197,26 +6217,26 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>SMA vs EMA: Fark Nedir?</h2>
 <p><strong>Basit Hareketli Ortalama (SMA — Simple Moving Average):</strong> Belirlenen periyottaki kapanış fiyatlarının aritmetik ortalamasıdır. Örneğin 20 günlük SMA, son 20 günün kapanış fiyatlarının toplamının 20'ye bölümüdür. Tüm günlere eşit ağırlık verir.</p>
 <p><strong>Üstel Hareketli Ortalama (EMA — Exponential Moving Average):</strong> Son fiyatlara daha fazla ağırlık veren hareketli ortalamadır. Bu nedenle SMA'ya göre fiyat değişimlerine daha hızlı tepki verir.</p>
-<p>Pratik fark: EMA trend değişimlerini daha erken fark eder ama daha fazla yanlış sinyal üretebilir. SMA daha yavaş ama daha stabil sinyaller verir. Aktif trader'lar genellikle EMA'yı, uzun vadeli yatırımcılar SMA'yı tercih eder.</p>
+<p>Pratik fark: EMA trend değişimlerini daha erken fark eder ama daha fazla yanlış sinyal üretebilir. SMA daha yavaş ama daha stabil sinyaller verir. Sık işlem yapanlar genellikle EMA'yı, uzun vadeli yatırımcılar SMA'yı tercih eder.</p>
 
 <h2>Temel EMA Periyotları</h2>
 <ul>
   <li><strong>EMA 20:</strong> Kısa vadeli trend göstergesi. Fiyat EMA 20'nin üzerinde → kısa vadeli yükselen trend.</li>
   <li><strong>EMA 50:</strong> Orta vadeli trend. EMA 20 > EMA 50 → orta vadeli yükselen momentum.</li>
-  <li><strong>EMA 200:</strong> Uzun vadeli trend sınırı. Fiyat EMA 200'ün üzerinde → bull market rejimi. Altında → bear market rejimi. En kritik EMA seviyesi olarak kabul edilir.</li>
+  <li><strong>EMA 200:</strong> Uzun vadeli trend sınırı. Fiyat EMA 200'ün üzerinde → boğa piyasası rejimi. Altında → ayı piyasası rejimi. En kritik EMA seviyesi olarak kabul edilir.</li>
 </ul>
 
 <h2>EMA Hizalaması: Trend Gücü Skalası</h2>
 <p>EMA'ların birbirine göre konumu, trendin gücünü gösterir:</p>
 <ul>
-  <li><strong>EMA 20 > EMA 50 > EMA 200 ve Fiyat > EMA 20:</strong> → Tam hizalı yükseliş trendi. En güçlü alım ortamı.</li>
+  <li><strong>EMA 20 > EMA 50 > EMA 200 ve Fiyat > EMA 20:</strong> → Tam hizalı yükseliş trendi. Trendin en güçlü göründüğü durum.</li>
   <li><strong>EMA 20 > EMA 50 > EMA 200 ama Fiyat &lt; EMA 20:</strong> → Trend güçlü ama kısa vadeli geri çekilme var.</li>
-  <li><strong>EMA'lar karışık:</strong> → Trend belirsiz, range piyasa. İşlem yapmak yerine beklemek mantıklı.</li>
-  <li><strong>EMA 20 &lt; EMA 50 &lt; EMA 200:</strong> → Tam hizalı düşüş trendi. Alımdan kaçınılmalı.</li>
+  <li><strong>EMA'lar karışık:</strong> → Trend belirsiz, yatay (range) piyasa. Bu ortamda hareketli ortalama işaretleri daha az güvenilirdir.</li>
+  <li><strong>EMA 20 &lt; EMA 50 &lt; EMA 200:</strong> → Tam hizalı düşüş trendi. Düşüş eğiliminin en belirgin olduğu durum.</li>
 </ul>
 
 <h2>Altın Kesişim (Golden Cross)</h2>
-<p>Altın Kesişim, EMA 50 (veya SMA 50) EMA 200'ü (veya SMA 200) aşağıdan yukarı kırdığında oluşan sinyaldir. Uzun vadeli boğa piyasasının başlangıcı olarak yorumlanır. Tarihsel verilerde oldukça güvenilir bir uzun vadeli alım sinyali kabul edilir — ancak gecikme süresi uzundur (fiyat zaten önemli ölçüde yükselmiş olabilir).</p>
+<p>Altın Kesişim, EMA 50 (veya SMA 50) EMA 200'ü (veya SMA 200) aşağıdan yukarı kırdığında oluşan sinyaldir. Uzun vadeli boğa piyasasının başlangıcı olarak yorumlanır. Tarihsel verilerde oldukça güvenilir bir uzun vadeli yükseliş işareti kabul edilir — ancak gecikme süresi uzundur (fiyat zaten önemli ölçüde yükselmiş olabilir).</p>
 
 <h2>Ölüm Kesişimi (Death Cross)</h2>
 <p>Ölüm Kesişimi, EMA 50 EMA 200'ü yukarıdan aşağı kırdığında oluşur. Uzun vadeli ayı piyasasının başlangıcına işaret eder. 2018 kripto ayısı, 2020 COVID düşüşü ve birçok BIST düzeltmesinde Death Cross öncesinde veya erken döneminde oluştu.</p>
@@ -6230,17 +6250,17 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>BorsaPusula'da EMA Kullanımı</h2>
-<p>BorsaPusula sinyalleri, EMA hizalamasını Supertrend ve ADX ile birleştirerek daha güvenilir sonuçlar üretir. Sadece EMA hizalı olan ama ADX zayıfsa (ADX &lt; 20) veya Supertrend henüz dönmemişse sinyal verilmez. Bu üçlü filtre sistemi yanlış sinyal oranını önemli ölçüde düşürür. Hisse detay sayfasında EMA 20, EMA 50 ve EMA 200 seviyelerini doğrudan grafikte inceleyebilirsiniz.</p>
+<p>BorsaPusula'da trend durumu, EMA koşulunu (EMA12 &gt; EMA99) Supertrend ve ADX ile birleştirerek belirlenir. EMA hizalı olsa bile ADX zayıfsa veya Supertrend henüz dönmemişse durum Güçlü Trend olmaz. Bu üçlü filtre yanlış sinyal oranını önemli ölçüde düşürür. Hisse sayfasının grafiğine EMA 12 ve EMA 99 çizgileri bir düğmeyle eklenebilir.</p>
 """,
     "faqs": [
       {"q": "EMA mı SMA mı daha iyi?",
-       "a": "Her ikisinin de avantajları var. EMA daha hızlı tepki verdiği için aktif trader'lar ve kısa vadeli analistler tercih eder. SMA daha yavaş ve daha stabil olduğundan uzun vadeli trend analizinde daha az gürültü verir. BorsaPusula EMA kullanır çünkü BIST hisselerinde kısa ve orta vadeli sinyal için daha iyi performans gösterdiği gözlemlenmiştir."},
+       "a": "Her ikisinin de avantajları var. EMA daha hızlı tepki verdiği için sık işlem yapanlar ve kısa vadeli analistler tercih eder. SMA daha yavaş ve daha stabil olduğundan uzun vadeli trend analizinde daha az gürültü verir. BorsaPusula EMA kullanır çünkü BIST hisselerinde kısa ve orta vadeli sinyal için daha iyi performans gösterdiği gözlemlenmiştir."},
       {"q": "EMA 200 neden bu kadar önemli?",
-       "a": "EMA 200, kurumsal yatırımcılar ve büyük fonlar tarafından çok yaygın biçimde kullanılan bir referans noktasıdır. Bu kadar çok oyuncunun aynı seviyeye bakması, seviyenin kendiliğinden önem kazanmasını sağlar (kendi kendini gerçekleştiren kehanet). Fiyatın EMA 200 üzerinde olması büyük paranın hissede uzun pozisyon tutmayı tercih edeceği anlamına gelir."},
+       "a": "EMA 200, kurumsal yatırımcılar ve büyük fonlar tarafından çok yaygın biçimde kullanılan bir referans noktasıdır. Bu kadar çok oyuncunun aynı seviyeye bakması, seviyenin kendiliğinden önem kazanmasını sağlar (kendi kendini gerçekleştiren kehanet). Fiyatın EMA 200 üzerinde olması, büyük fonlar tarafından genellikle uzun vadeli yükseliş eğilimi olarak yorumlanır."},
       {"q": "Altın Kesişim her zaman işe yarar mı?",
-       "a": "Hayır. Altın Kesişim güvenilir bir uzun vadeli sinyal olsa da yüksek gecikmesi nedeniyle fiyat zaten büyük kısmını yapmış olabilir. Ayrıca yatay (range) piyasalarda çok fazla yanlış Altın Kesişim sinyali oluşabilir. Bu nedenle trend gücü (ADX), hacim ve Supertrend gibi göstergelerle teyit etmek önerilir."},
+       "a": "Hayır. Altın Kesişim güvenilir bir uzun vadeli sinyal olsa da yüksek gecikmesi nedeniyle fiyat zaten büyük kısmını yapmış olabilir. Ayrıca yatay (range) piyasalarda çok fazla yanlış Altın Kesişim sinyali oluşabilir. Bu nedenle trend gücü (ADX), hacim ve Supertrend gibi göstergelerle birlikte okunur."},
       {"q": "Kaç tane EMA takip edilmeli?",
-       "a": "3-4 EMA yeterlidir: EMA 20 (kısa vade), EMA 50 (orta vade), EMA 200 (uzun vade). Daha fazla EMA eklemek genellikle kafa karışıklığı yaratır — her EMA birbiriyle çakışır ve net sinyal vermek zorlaşır. Az EMA, net karar."}
+       "a": "3-4 EMA yeterlidir: EMA 20 (kısa vade), EMA 50 (orta vade), EMA 200 (uzun vade). Daha fazla EMA eklemek genellikle kafa karışıklığı yaratır — her EMA birbiriyle çakışır ve net sinyal vermek zorlaşır. Az EMA, daha net görünüm."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'GARAN', 'EREGL', 'TUPRS']
   },
@@ -6251,17 +6271,18 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Fibonacci Geri Çekilme Seviyeleri Nedir, Nasıl Okunur?",
     "desc": "Fibonacci oranları teknik analizde nasıl kullanılır? %23,6, %38,2, %50, %61,8 geri çekilme seviyeleri ve BIST hisselerinde pratik Fibonacci uygulaması.",
     "date": "2026-05-03",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Teknik Analiz",
     "body": """
-<p>Fibonacci sayı dizisi (0, 1, 1, 2, 3, 5, 8, 13, 21…) ve bu diziden elde edilen oran sistemi, 13. yüzyılda İtalyan matematikçi Leonardo Fibonacci tarafından Avrupa'ya tanıtıldı. Bu oranların finansal piyasalarda neden bu kadar iyi çalıştığı tartışmalı olsa da deneyimli trader'ların kullandığı ve dolayısıyla önem kazanan teknik seviyeler arasında yer alır.</p>
+<p>Fibonacci sayı dizisi (0, 1, 1, 2, 3, 5, 8, 13, 21…) ve bu diziden elde edilen oran sistemi, 13. yüzyılda İtalyan matematikçi Leonardo Fibonacci tarafından Avrupa'ya tanıtıldı. Bu oranların finansal piyasalarda neden bu kadar iyi çalıştığı tartışmalı olsa da deneyimli yatırımcıların kullandığı ve dolayısıyla önem kazanan teknik seviyeler arasında yer alır.</p>
 
 <h2>Temel Fibonacci Oranları</h2>
 <p>Fibonacci dizisinden türetilen başlıca oranlar:</p>
 <ul>
   <li><strong>%23,6:</strong> Zayıf geri çekilme. Güçlü trendlerde fiyat bu seviyeden tekrar trendin yönüne devam edebilir.</li>
   <li><strong>%38,2:</strong> Normal geri çekilme. Güçlü yükselen trendlerde genellikle ilk önemli destek seviyesi.</li>
-  <li><strong>%50:</strong> Teknik olarak Fibonacci serisi değil ama tradisyonel olarak dahil edilir. Psikolojik orta nokta.</li>
+  <li><strong>%50:</strong> Teknik olarak Fibonacci serisi değil ama geleneksel olarak dahil edilir. Psikolojik orta nokta.</li>
   <li><strong>%61,8 (Altın Oran):</strong> En kritik Fibonacci seviyesi. Bu seviyeden sekme trendin devamını güçlü biçimde teyit eder; kırılım ise trend dönüşüne işaret eder.</li>
   <li><strong>%78,6:</strong> Derin geri çekilme. Bu seviyenin tutmaması trend sona ermiş olabilir anlamına gelir.</li>
 </ul>
@@ -6277,31 +6298,31 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Düşen trende uygulandığında işlem tersine çevrilir: doruktan dibe çizilir ve oluşan seviyeler direnç olarak çalışır.</p>
 
 <h2>Fibonacci Seviyeleri Neden İşe Yarar?</h2>
-<p>Fibonacci seviyelerinin işe yaramasının temel açıklaması kendi kendini gerçekleştiren kehane fenomenidir: Milyonlarca trader aynı seviyelere baktığı için buy/sell emirleri bu bölgelerde yoğunlaşır ve seviye destek veya direnç olarak davranır. Bunun ötesinde doğal bilimlerde de yaygın olan bu oranların piyasa katılımcılarının kolektif davranışında içgüdüsel karşılık bulduğu da öne sürülür.</p>
+<p>Fibonacci seviyelerinin işe yaramasının temel açıklaması kendi kendini gerçekleştiren kehanet etkisidir: Milyonlarca yatırımcı aynı seviyelere baktığı için alım-satım emirleri bu bölgelerde yoğunlaşır ve seviye destek veya direnç olarak davranır. Bunun ötesinde doğal bilimlerde de yaygın olan bu oranların piyasa katılımcılarının kolektif davranışında içgüdüsel karşılık bulduğu da öne sürülür.</p>
 
 <h2>Fibonacci + Diğer Araçlarla Kombinasyon</h2>
-<p>Fibonacci seviyeleri tek başına kullanıldığında güvenilirliği artar veya azalır. En güçlü kombinasyonlar:</p>
+<p>Fibonacci seviyeleri tek başına kullanıldığında sınırlı bilgi verir; başka araçlarla çakıştığında daha anlamlı hale gelir. Sık kullanılan kombinasyonlar:</p>
 <ul>
   <li><strong>Fibonacci + EMA:</strong> %38,2 geri çekilme seviyesi EMA 50 ile çakışıyorsa destek çok daha güçlüdür.</li>
   <li><strong>Fibonacci + Hacim:</strong> Fibonacci desteğine düşen fiyatın hacimi azalıyorsa sekme ihtimali artar.</li>
-  <li><strong>Fibonacci + Supertrend:</strong> Supertrend yeşil (yükselen trend) + fiyat %38,2 veya %61,8 desteğinde → güçlü alım noktası.</li>
+  <li><strong>Fibonacci + Supertrend:</strong> Supertrend yeşil (yükselen trend) + fiyat %38,2 veya %61,8 desteğinde → yükselen trend içinde güçlü bir destek bölgesi olarak yorumlanır.</li>
   <li><strong>Fibonacci + RSI:</strong> Fibonacci desteği + RSI 30-40 aralığı → aşırı satım + teknik destek kombinasyonu.</li>
 </ul>
 
 <h2>BIST'te Fibonacci Kullanımı</h2>
 <p>Türkiye piyasasında özellikle BIST30 hisselerinde Fibonacci seviyeleri dikkat çekici biçimde çalışabilir. Yüksek işlem hacimli hisselerde kurumsal alıcılar da bu seviyelere dikkat ettiğinden destek/direnç kalitesi artar.</p>
-<p>Örnek yaklaşım: Güçlü bir Supertrend yükseliş sürecindeki AKBNK veya GARAN gibi hissede %38,2 veya %50 geri çekilme yaşandığında, bu seviyeden hacim azalması + RSI yükselişi + Supertrend yatay/yeşil kombinasyonu görülürse swing trade girişi değerlendirilebilir.</p>
+<p>Örnek okuma: Supertrend'e göre yükseliş sürecindeki AKBNK veya GARAN gibi bir hissede %38,2 veya %50 geri çekilme yaşandığında, bu seviyede hacmin azalması, RSI'ın yükselmesi ve Supertrend'in yeşil kalması teknik analizde yükseliş trendinin sürdüğüne dair işaretler olarak okunur.</p>
 <p>%61,8 seviyesinin altı genellikle trend dönüş bölgesi olarak izlenir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
 """,
     "faqs": [
       {"q": "Fibonacci seviyeleri hangi grafikte çalışır?",
        "a": "Fibonacci geri çekilme seviyeleri tüm zaman dilimlerinde (15 dakika, saatlik, günlük, haftalık) kullanılabilir. Ancak daha uzun zaman dilimlerinde (günlük, haftalık) Fibonacci seviyeleri daha güvenilir sonuç verir çünkü daha fazla katılımcı bu seviyeleri takip eder."},
       {"q": "En önemli Fibonacci seviyesi hangisi?",
-       "a": "%61,8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder. Bu nedenle %61,8, stop-loss konumlandırması için de en yaygın kullanılan referans seviyesidir."},
+       "a": "%61,8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder."},
       {"q": "Fibonacci uzantısı (extension) nedir?",
        "a": "Geri çekilme seviyeleri (%38,2, %50, %61,8) önceki hareketin içinde kalır ve olası destek/direnç bölgelerini gösterir. Uzantı seviyeleri (%127,2, %161,8) ise önceki hareketin dışına taşar. İkisi de olasılık gösterir, kesinlik değil; tek başına karar aracı olarak kullanılmaz."},
       {"q": "Fibonacci seviyeleri her zaman tutar mı?",
-       "a": "Hayır. Fibonacci seviyeleri olasılıksal göstergelerdir, garanti değildir. Güçlü fundamental haberler, makroekonomik şoklar veya yüksek hacimli satış baskısı Fibonacci desteğini kolayca kırabilir. Bu nedenle Fibonacci seviyelerini stop-loss ile birlikte kullanmak ve tek başına karar verici olarak görmemek önemlidir."}
+       "a": "Hayır. Fibonacci seviyeleri olasılıksal göstergelerdir, garanti değildir. Güçlü fundamental haberler, makroekonomik şoklar veya yüksek hacimli satış baskısı Fibonacci desteğini kolayca kırabilir. Bu nedenle Fibonacci seviyelerini tek başına karar aracı olarak görmemek önemlidir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TUPRS']
   },
@@ -6312,35 +6333,36 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "BIST'te Yabancı Yatırımcı Etkisi: Sıcak Para Akışları ve Piyasa Dinamikleri",
     "desc": "Yabancı yatırımcılar BIST'i nasıl etkiler? Sıcak para girişi/çıkışı, dolar/TL bağlantısı ve yabancı sahiplik oranlarının hisse fiyatlarına etkisi.",
     "date": "2026-05-03",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Makro Ekonomi",
     "body": """
-<p>BIST'te fiyatları yalnızca şirket fundamentalları ve teknik göstergeler belirlemez. Küresel risk iştahı, FED kararları ve gelişmekte olan piyasalara (EM) yabancı para akışları BIST için kritik makro bir bağlamdır. Türk bireysel yatırımcılar büyük oranda yabancı yatırımcıların hareketlerine tabi kalır.</p>
+<p>BIST'te fiyatları yalnızca şirketlerin temel verileri ve teknik göstergeler belirlemez. Küresel risk iştahı, FED kararları ve gelişmekte olan piyasalara (EM) yabancı para akışları BIST için kritik makro bir bağlamdır. Türk bireysel yatırımcılar büyük oranda yabancı yatırımcıların hareketlerine tabi kalır.</p>
 
 <h2>Yabancı Yatırımcının BIST'teki Ağırlığı</h2>
 <p>Tarihsel olarak BIST'in işlem hacminin %60-70'i yabancı yatırımcılar tarafından gerçekleştirilmiştir. Bu oran son yıllarda yerli yatırımcıların piyasaya katılım artışıyla değişime uğrasa da yabancı yatırımcılar hâlâ piyasanın en büyük tek oyuncusudur.</p>
-<p>Yabancı sahiplik oranındaki değişimler Borsa İstanbul ve TAKASBANK raporlarıyla takip edilebilir. Bu oran arttığında genel eğilim yükseliş, azaldığında düşüştür — ancak bu ilişki lineer değildir.</p>
+<p>Yabancı sahiplik oranındaki değişimler Borsa İstanbul ve TAKASBANK raporlarıyla takip edilebilir. Bu oran arttığında genel eğilim yükseliş, azaldığında düşüştür — ancak bu ilişki doğrusal değildir.</p>
 
 <h2>Sıcak Para Nedir?</h2>
 <p>Sıcak para (hot money), getiri avantajından yararlanmak amacıyla hızlı hareket eden kısa vadeli yabancı sermayedir. Özellikleri:</p>
 <ul>
   <li>Hızla girer, hızla çıkar — volatiliteyi artırır</li>
   <li>Faiz farkı ve kur beklentisine duyarlı</li>
-  <li>Risk iştahı (VIX, global EM sentiment) tarafından yönlendirilen</li>
-  <li>Ülke spesifik risk (CDS spreadi) arttıkça çekilir</li>
+  <li>Risk iştahı (VIX, gelişmekte olan piyasalara yönelik genel algı) tarafından yönlendirilir</li>
+  <li>Ülkeye özgü risk (CDS primi) arttıkça çekilir</li>
 </ul>
 <p>Sıcak para girişi → TL güçlenir → BIST yükselir → dolar bazında getiri cazip. Sıcak para çıkışı → TL zayıflar → BIST düşer → negatif dolar bazlı getiri spirali.</p>
 
 <h2>Global Risk İştahı ve BIST Bağlantısı</h2>
 <p>BIST, küresel risk iştahı ile yüksek korelasyon gösterir. Bunu belirleyen başlıca faktörler:</p>
 <ul>
-  <li><strong>FED Kararları:</strong> FED faiz artırdığında gelişmekte olan piyasalardan (Türkiye dahil) para çekilme eğilimi güçlenir çünkü ABD risk-free getirisi yükselir. FED faiz indirdiğinde EM'e sermaye akışı artar.</li>
+  <li><strong>FED Kararları:</strong> FED faiz artırdığında gelişmekte olan piyasalardan (Türkiye dahil) para çekilme eğilimi güçlenir çünkü ABD'de risksiz getiri yükselir. FED faiz indirdiğinde EM'e sermaye akışı artar.</li>
   <li><strong>VIX (Korku Endeksi):</strong> VIX 20-25'in üzerine çıktığında yabancılar EM hisselerini satıp güvenli limanlara (USD, CHF, altın) geçer. VIX düştüğünde risk iştahı artar.</li>
   <li><strong>DXY (Dolar Endeksi):</strong> Dolar güçlendiğinde EM varlıkları baskı altına girer. Dolar zayıfladığında EM avantaj kazanır.</li>
   <li><strong>Türkiye CDS Spreadi:</strong> Türkiye'nin 5 yıllık kredi temerrüt swap priminin yükselmesi yabancı çıkışını hızlandırır.</li>
 </ul>
 
-<h2>Yabancı Yatırımcıların Favori BIST Hisseleri</h2>
+<h2>Yabancı Yatırımcıların Tercih Ettiği Hisse Özellikleri</h2>
 <p>Yabancı yatırımcılar genellikle şu özelliklere sahip hisseleri tercih eder:</p>
 <ul>
   <li>Dolar veya euro bazlı geliri olan şirketler (THYAO, ASELS, EREGL)</li>
@@ -6353,26 +6375,25 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Türkiye'de son yıllarda yaşanan bir değişim dikkat çekicidir: Yüksek enflasyon döneminde yerli yatırımcılar borsa ve altın gibi varlıklara yöneldi. Bu durum borsanın TL bazında yüksek nominal getiri kaydetmesine katkı sağlarken dolar bazlı performans bazen çok daha mütevazı kaldı.</p>
 <p>Yatırım kararı alırken hem TL bazlı hem dolar bazlı performansı değerlendirmek önemlidir. Özellikle uzun vadeli yatırım ufkunda olan ya da döviz borcu bulunan yatırımcılar için dolar bazlı getiri anlam taşır.</p>
 
-<h2>Pratik Uygulama</h2>
-<p>Makro bağlamı BIST yatırımına entegre etmek için:</p>
+<h2>Makro Göstergeler Nasıl Okunur?</h2>
+<p>Makro bağlamı BIST değerlendirmesine katarken sık bakılan işaretler:</p>
 <ul>
-  <li>FED toplantı tarihlerini ve karar beklentilerini takip edin</li>
-  <li>VIX 20'nin altında → risk iştahı yüksek → BIST için nötr/pozitif ortam</li>
-  <li>VIX 25-30 üzeri → dikkatli olun, pozisyon büyüklüklerini azaltın</li>
-  <li>Türkiye CDS spreadi trend olarak yükseliyorsa yabancı çıkışı riski artıyor</li>
-  <li>Dolar/TL hızlı yükseliyorsa döviz geliri olan hisseler görece koruma sağlar</li>
+  <li>FED toplantı tarihleri ve karar beklentileri, yabancı akışları için önemli bir takvimdir</li>
+  <li>VIX 20'nin altında → risk iştahı genellikle yüksek → BIST için nötr/pozitif ortam</li>
+  <li>VIX 25-30 üzeri → küresel risk algısı yüksek → gelişmekte olan piyasalarda oynaklık artma eğiliminde</li>
+  <li>Türkiye CDS primi trend olarak yükseliyorsa yabancı çıkışı riski artıyor</li>
+  <li>Dolar/TL hızlı yükseliyorsa döviz geliri olan hisseler görece dayanıklı kalma eğilimindedir</li>
 </ul>
-<p>BorsaPusula'nın gündem sayfası bu makro verileri tek ekranda izlemenizi kolaylaştırır.</p>
 """,
     "faqs": [
       {"q": "Yabancı yatırımcı satışı nasıl anlaşılır?",
        "a": "Borsa İstanbul ve TAKASBANK haftalık yabancı yatırımcı işlem ve sahiplik verilerini yayımlar. Ayrıca bir hissede yüksek hacimle fiyat düşüyorsa ve TL de aynı anda baskı altındaysa yabancı çıkışı düşünülebilir. Büyük çaplı yabancı satışı genellikle geniş piyasa hareketleri (TL zayıflama, tahvil faiz artışı) ile eş zamanlı gerçekleşir."},
       {"q": "FED faiz artırımı BIST'i neden etkiler?",
-       "a": "FED faiz artırdığında ABD dolar bazlı risk-free getirisi yükselir. Bu durum gelişmekte olan piyasalara (Türkiye dahil) yatırımı görece daha az cazip hale getirir. Yabancı fonlar EM'den çıkıp ABD tahvillerine yönelebilir. Bu çıkış TL'ye baskı yapar, BIST'e de olumsuz yansır."},
+       "a": "FED faiz artırdığında ABD dolar bazlı risksiz getiri yükselir. Bu durum gelişmekte olan piyasalara (Türkiye dahil) yatırımı görece daha az cazip hale getirir. Yabancı fonlar EM'den çıkıp ABD tahvillerine yönelebilir. Bu çıkış TL'ye baskı yapar, BIST'e de olumsuz yansır."},
       {"q": "BIST dolar bazlı mı yoksa TL bazlı mı değerlendirilmeli?",
        "a": "İkisi birlikte değerlendirilmeli. TL bazlı performans enflasyondan etkilendiği için gerçek satın alma gücü artışını göstermeyebilir. Dolar bazlı performans ise uluslararası karşılaştırma için daha anlamlıdır. Uzun vadeli Türk yatırımcısı için TL bazlı reel getiri (enflasyon üzeri), döviz kaybını telafi edip etmediğini ölçmek açısından kritik bir metriktir."},
       {"q": "Türkiye CDS spreadi ne anlama gelir?",
-       "a": "CDS (Credit Default Swap) spreadi, Türkiye'nin temerrüt riskini hedge etmenin maliyetini gösterir. Yüksek CDS = yüksek ülke riski algısı = yabancı yatırımcıların Türkiye varlıklarından kaçındığı dönem. 300-400 baz puan üzeri yabancı yatırımcılar için kritik eşik olarak kabul edilir. Bu seviyenin üstüne çıkışlar BIST üzerinde olumsuz baskı oluşturur."}
+       "a": "CDS (Credit Default Swap) spreadi, Türkiye'nin temerrüt riskine karşı korunmanın (hedge) maliyetini gösterir. Yüksek CDS = yüksek ülke riski algısı = yabancı yatırımcıların Türkiye varlıklarından kaçındığı dönem. 300-400 baz puan üzeri yabancı yatırımcılar için kritik eşik olarak kabul edilir. Bu seviyenin üstüne çıkışlar BIST üzerinde olumsuz baskı oluşturur."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
   },
@@ -6575,6 +6596,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "BIST'te Sektör Rotasyonu: Ekonomik Döngüde Hangi Sektör Öne Çıkar?",
     "desc": "Sektör rotasyonu stratejisi nedir? Ekonomik döngünün farklı aşamalarında BIST'te öne çıkan sektörler ve pratik uygulama rehberi.",
     "date": "2026-05-04",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
@@ -6588,7 +6610,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Daralma/Durgunluk (Recession):</strong> Ekonomi küçülür, kârlar düşer, işsizlik artar. Bu dönemde öne çıkan sektörler: Savunmacı sektörler — Sağlık, Gıda-Temel Tüketim, Kamu Hizmetleri (yardımcı sektörler), Telekomünikasyon.</p>
 
 <h2>BIST Özelinde Sektör Rotasyonu</h2>
-<p>Türkiye'nin kendine özgü ekonomik dinamikleri geleneksel rotasyon modelini modifiye eder:</p>
+<p>Türkiye'nin kendine özgü ekonomik dinamikleri geleneksel rotasyon modelini değiştirir:</p>
 <ul>
   <li><strong>Kur şoku dönemlerinde:</strong> İhracat geliri olan şirketler (THYAO, ASELS, EREGL) ve döviz varlıkları öne çıkar. TL bazlı geliri olan, ithalata bağımlı sektörler baskı altına girer.</li>
   <li><strong>Faiz yüksek dönemlerde:</strong> Bankacılık sektörü teorik olarak faiz marjından yararlanır ama kredi riskinin artması dengeleme yapar. Savunmacı sektörler (TCELL, TTKOM) daha istikrarlı seyreder.</li>
@@ -6596,32 +6618,32 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Jeopolitik risk dönemlerinde:</strong> Savunma (ASELS) öne çıkar, turizm ve havacılık (THYAO) baskı altına girebilir.</li>
 </ul>
 
-<h2>Sektör Rotasyonu Nasıl Uygulanır?</h2>
-<p><strong>Adım 1 — Makro Rejimi Tanımlayın:</strong> Türkiye şu an ekonomik döngünün hangi aşamasında? Büyüme hızlanıyor mu, yavaşlıyor mu? Enflasyon ve faiz yönü ne?</p>
-<p><strong>Adım 2 — Sektör Liderliğini İzleyin:</strong> Hangi sektörler piyasadan daha güçlü performans gösteriyor (rölatif güç)? Piyasa liderlerini teyit etmek için sektör endekslerini takip edin.</p>
-<p><strong>Adım 3 — Güçlü Sinyalleri Filtreleyin:</strong> Lider sektördeki Güçlü Trend sinyali olan hisseler, hem makro döngüde hem de teknik analizde çift teyit sunar.</p>
-<p><strong>Adım 4 — Kademeli Geçiş:</strong> Tüm portföyü bir anda döndürmek yerine kademeli rotasyon riski azaltır. Eski sektördeki hisseler Trend Bozuldu sinyali vermeye başladıkça yeni sektördeki hisselerle değiştirilir.</p>
+<h2>Sektör Rotasyonu Yaklaşımının Adımları</h2>
+<p><strong>Adım 1 — Makro Rejimi Tanımlamak:</strong> Türkiye şu an ekonomik döngünün hangi aşamasında? Büyüme hızlanıyor mu, yavaşlıyor mu? Enflasyon ve faiz yönü ne?</p>
+<p><strong>Adım 2 — Sektör Liderliğini İzlemek:</strong> Hangi sektörler piyasadan daha güçlü performans gösteriyor (göreli güç)? Piyasa liderlerini görmek için sektör endeksleri izlenir.</p>
+<p><strong>Adım 3 — Trend Durumuna Bakmak:</strong> Lider sektörde Güçlü Trend durumundaki hisseler, makro döngü ile teknik görünümün aynı yönü gösterdiği örneklerdir.</p>
+<p><strong>Adım 4 — Kademeli Geçiş:</strong> Sektör rotasyonu yaklaşımında portföyün bir anda değil, zamana yayılarak yeniden dağıtılması riski azaltan bir yöntem olarak anılır.</p>
 
-<h2>BorsaPusula ile Sektör Rotasyonu</h2>
-<p>BorsaPusula ana sayfasındaki sektör filtresi, belirli bir sektördeki tüm hisselerin sinyal durumunu tek seferde görmenizi sağlar. Bir sektörde Güçlü Trend sinyalleri yoğunlaşıyorsa sektörel momentum güçleniyor demektir. Birden fazla sektörü karşılaştırarak hangi sektörün sinyal kalitesinin daha güçlü olduğunu analiz edebilirsiniz.</p>
+<h2>BorsaPusula'da Sektörleri İzlemek</h2>
+<p>BorsaPusula'nın Piyasa sayfasındaki BIST100 gün sonu ısı haritası hisselerin gün sonu performansını tek bakışta gösterir; /tarama sayfasında ise hisseler trend durumuna göre süzülebilir. Bir sektörde Güçlü Trend durumundaki hisseler çoğalıyorsa sektörel momentumun güçlendiği düşünülür.</p>
 
 <h2>Sektöre Özel Takip Edilecek Göstergeler</h2>
 <p>Rotasyon kararını güçlendirmek için bazı sektörlerde ek göstergelere bakmak faydalıdır:</p>
 <ul>
   <li><strong>GYO (Gayrimenkul Yatırım Ortaklıkları):</strong> Yüksek enflasyon döneminde gayrimenkul değer kazanır, bu da GYO hisselerini avantajlı konuma taşır. Ancak faiz artışları GYO değerlemelerini baskılar — net etki enflasyon-faiz dengesine bağlıdır.</li>
-  <li><strong>Bankacılık:</strong> Sektör rotasyonunda bankacılığı değerlendirirken Net Faiz Marjı (NIM) ve kredi büyüme oranı en somut iki göstergedir. NIM genişliyor ve kredi büyümesi hızlanıyorsa sektör lehine bir sinyal oluşur; tersi durumda dikkatli olunmalıdır.</li>
+  <li><strong>Bankacılık:</strong> Sektör rotasyonunda bankacılığı değerlendirirken Net Faiz Marjı (NIM) ve kredi büyüme oranı en somut iki göstergedir. NIM genişliyor ve kredi büyümesi hızlanıyorsa bu sektör lehine bir işaret olarak yorumlanır; tersi durum sektör aleyhine okunur.</li>
   <li><strong>Sektör ETF alternatifi:</strong> BIST'te sektörel ETF seçeneği sınırlıdır. Bu nedenle çoğu yatırımcı doğrudan sektör ETF'i almak yerine, ilgili sektördeki lider hisselere küçük pozisyonlar dağıtarak fiilen sektör rotasyonu uygular.</li>
 </ul>
 """,
     "faqs": [
       {"q": "Sektör rotasyonu bireysel yatırımcı için uygun mu?",
-       "a": "Evet, büyük kurumsal fonlar kadar aktif olmasa da bireysel yatırımcılar sektör rotasyonu ilkelerinden yararlanabilir. Önemli olan her hafta portföyü değiştirmek değil, uzun dönemli makro görünüme göre yılda birkaç kez konumlanmayı ayarlamaktır. Bu yaklaşım gereksiz işlem maliyeti olmadan risk-getiri dengesini optimize eder."},
+       "a": "Evet, büyük kurumsal fonlar kadar aktif olmasa da bireysel yatırımcılar sektör rotasyonu ilkelerinden yararlanabilir. Önemli olan her hafta portföyü değiştirmek değil, uzun dönemli makro görünüme göre yılda birkaç kez konumlanmayı ayarlamaktır. Bu yaklaşım gereksiz işlem maliyetinden kaçınırken risk-getiri dengesini gözetir."},
       {"q": "BIST'in en savunmacı sektörü hangisi?",
-       "a": "Telekomünikasyon (TCELL, TTKOM) ve gıda/perakende sektörü en savunmacı BIST sektörleri arasında sayılır. Bu şirketler ekonomik yavaşlamada da temel hizmet sunduklarından gelirler görece stabil kalır. Durgunluk döneminde portföyde bu sektörlere ağırlık vermek volatiliteyi düşürür."},
+       "a": "Telekomünikasyon (TCELL, TTKOM) ve gıda/perakende sektörü en savunmacı BIST sektörleri arasında sayılır. Bu şirketler ekonomik yavaşlamada da temel hizmet sunduklarından gelirler görece stabil kalır. Bu nedenle durgunluk dönemlerinde bu sektörlerin oynaklığı görece düşük kalma eğilimindedir."},
       {"q": "Türkiye'de faiz artışı hangi sektörleri etkiler?",
-       "a": "Faiz artışı: Borçlanma maliyeti artar → yüksek borçlu şirketler (GYO, inşaat, bazı holdingler) baskı altına girer. Kredi talebi düşer → bankacılık sektörü karma etkilenir (marj genişlemesi vs kredi yavaşlaması). Faize duyarlı sektörlerin (GYO, tüketici finansmanı) rölatif performansı genellikle düşer. Savunmacı sektörler nispeten daha az etkilenir."},
+       "a": "Faiz artışı: Borçlanma maliyeti artar → yüksek borçlu şirketler (GYO, inşaat, bazı holdingler) baskı altına girer. Kredi talebi düşer → bankacılık sektörü karma etkilenir (marj genişlemesi ile kredi yavaşlaması). Faize duyarlı sektörlerin (GYO, tüketici finansmanı) göreli performansı genellikle düşer. Savunmacı sektörler nispeten daha az etkilenir."},
       {"q": "Sektör ETF veya endeksi var mı?",
-       "a": "Borsa İstanbul'da birçok sektör endeksi yayımlanır: XBANK (bankacılık), XHOLD (holding), XGMYO (GYO), XTCRT (ticaret), XUSIN (sanayi) gibi. Bu endeksleri takip ederek hangi sektörün relatif güç kazandığını veya kaybettiğini görebilirsiniz. Ayrıca bazı Türk yatırım fonları belirli sektörlere odaklanır."}
+       "a": "Borsa İstanbul'da birçok sektör endeksi yayımlanır: XBANK (bankacılık), XHOLD (holding), XGMYO (GYO), XTCRT (ticaret), XUSIN (sanayi) gibi. Bu endeksleri takip ederek hangi sektörün göreli güç kazandığını veya kaybettiğini görebilirsiniz. Ayrıca bazı Türk yatırım fonları belirli sektörlere odaklanır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'TCELL', 'EREGL', 'TUPRS']
   },
@@ -6632,6 +6654,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Değer Yatırımı (Value Investing): Warren Buffett Prensiplerine Göre Hisse Seçimi",
     "desc": "Değer yatırımı nedir? Benjamin Graham ve Warren Buffett'ın yaklaşımı, BIST'te değer hissesi bulma kriterleri ve uzun vadeli değer yatırımı stratejisi.",
     "date": "2026-05-04",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Strateji",
     "body": """
@@ -6643,7 +6666,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <ul>
   <li>Piyasa kısa vadede duygusal tepkiler verir; uzun vadede şirketlerin gerçek değerine yakınsar</li>
   <li>Bu kısa vadeli yanlış fiyatlamalar, sabırlı yatırımcılar için fırsat penceresi açar</li>
-  <li>Güvenlik marjı (margin of safety) prensibi: İçsel değerin önemli ölçüde altında al ki hata payın olsun</li>
+  <li>Güvenlik marjı (margin of safety) prensibi: İçsel değerin önemli ölçüde altındaki bir fiyat, değerleme hatalarına karşı pay bırakır</li>
 </ul>
 
 <h2>İçsel Değer (Intrinsic Value) Nasıl Hesaplanır?</h2>
@@ -6653,13 +6676,13 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Defter Değeri:</strong> Şirketin özkaynaklarının hisse başına değeri. Graham özellikle defter değerinin altında işlem gören hisselere odaklanırdı.</p>
 
 <h2>Buffett'ın Hisse Seçim Kriterleri</h2>
-<p>Warren Buffett değer yatırımını evrimlendirdi ve "makul fiyata mükemmel şirket" yaklaşımını benimsedi:</p>
+<p>Warren Buffett değer yatırımını geliştirdi ve rekabet avantajı güçlü işletmeleri makul fiyattan alma yaklaşımını benimsedi:</p>
 <ul>
-  <li><strong>Anlaşılabilir iş modeli:</strong> İş modeli anlayamıyorsan al ma. "Çevreni gör" (circle of competence).</li>
+  <li><strong>Anlaşılabilir iş modeli:</strong> Buffett, iş modelini anlamadığı şirkete yatırım yapmaz; buna yetkinlik alanı (circle of competence) denir.</li>
   <li><strong>Sürdürülebilir rekabet avantajı (Economic Moat):</strong> Şirketin rakipler tarafından kolayca kopyalanamayan güçlü bir avantajı var mı? Marka, ağ etkisi, maliyet avantajı, geçiş maliyeti.</li>
   <li><strong>Güvenilir ve dürüst yönetim:</strong> Yönetim hissedarlara karşı şeffaf mı, sermayeyi verimli kullanıyor mu?</li>
   <li><strong>Güçlü finansal performans:</strong> Yüksek ve istikrarlı özkaynak getirisi (ROE), güçlü serbest nakit akışı, düşük borç.</li>
-  <li><strong>Makul fiyat:</strong> Mükemmel şirketi bile aşırı pahalıya almak getiriyi mahveder.</li>
+  <li><strong>Makul fiyat:</strong> Finansalları güçlü bir şirketi bile aşırı yüksek fiyattan almak getiriyi düşürür.</li>
 </ul>
 
 <h2>BIST'te Değer Yatırımı Kriterleri</h2>
@@ -6674,10 +6697,10 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Değer Yatırımı vs Momentum/Teknik Analiz</h2>
 <p>Bu iki yaklaşım genellikle zıt sanılsa da bir arada kullanılabilir:</p>
 <ul>
-  <li>Değer analizi size hangi hisseyi alacağınızı söyler (ne)</li>
-  <li>Teknik analiz ve BorsaPusula sinyalleri size ne zaman gireceğinizi söyler (ne zaman)</li>
+  <li>Değer analizi şirketin ne kadar ettiğine dair bir çerçeve sunar (ne)</li>
+  <li>Teknik analiz fiyatın hangi trend içinde olduğunu betimler (ne zaman)</li>
 </ul>
-<p>Değerli olduğunu düşündüğünüz bir hissede BorsaPusula Güçlü Trend sinyali oluştuğunda ikili teyit elde edilir: hem temel hem teknik görünüm olumlu. Bu kombinasyon, yalnızca teknik veya yalnızca temel analiz kullanan yaklaşımların ötesinde daha güçlü bir karar zemini oluşturur.</p>
+<p>Temel analizle incelenen bir hissenin BorsaPusula'daki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay) da bilindiğinde, şirketin finansalları ile fiyat davranışı birlikte okunabilir. İki bakışı birlikte kullanmak, tek bir yönteme dayanmaktan daha geniş bir değerlendirme zemini sunar.</p>
 """,
     "faqs": [
       {"q": "Değer yatırımı BIST'te işe yarar mı?",
@@ -6685,7 +6708,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Güvenlik marjı (margin of safety) nedir?",
        "a": "Benjamin Graham'ın temel konsepti: İçsel değeri 100 TL olan bir hisseyi 70 TL'ye almak, %30 güvenlik marjı sağlar. Bu marj, değerleme hatalarına ve beklenmedik olumsuz gelişmelere karşı tampon oluşturur. Ne kadar belirsizlik varsa güvenlik marjı o kadar geniş tutulmalıdır."},
       {"q": "Warren Buffett'ın en sevdiği metrik nedir?",
-       "a": "Buffett özellikle özkaynak kârlılığı (ROE) ve serbest nakit akışına (free cash flow) odaklanır. Uzun yıllar boyunca tutarlı biçimde yüksek ROE üretebilen şirketler 'ekonomik moat'a sahiptir ve rekabet avantajı sürdürülebilirdir. Kârlılığını borçlanmadan değil kendi özkaynakları üzerinden üreten şirketler Buffett'ın en sık tercih ettiği profildedir."},
+       "a": "Buffett özellikle özkaynak kârlılığı (ROE) ve serbest nakit akışına odaklanır. Uzun yıllar boyunca tutarlı biçimde yüksek ROE üretebilen şirketler 'ekonomik moat'a sahiptir ve rekabet avantajı sürdürülebilirdir. Kârlılığını borçlanmadan değil kendi özkaynakları üzerinden üreten şirketler Buffett'ın en sık tercih ettiği profildedir."},
       {"q": "BIST'te değer hissesi bulmak için hangi rasyolara bakılmalı?",
        "a": "Başlangıç noktaları: Sektör ortalamasının altında F/K ve PD/DD, güçlü ve istikrarlı özkaynak kârlılığı (ROE > %15), düşük Net Borç/FAVÖK (tercihen 2x altı), pozitif serbest nakit akışı, temettü ödeme kapasitesi. Bu kriterler, bir eleme listesi oluşturmak için kullanılabilir — her kriteri karşılayan hisseler daha ayrıntılı analize alınabilir."}
     ],
@@ -6695,45 +6718,46 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 92 ──
   {
     "slug": "bist-borsa-kriz-donemlerinde-yatirim",
-    "title": "Borsa Krizlerinde Yatırım: Dip mi Almak, Beklemek mi, Çıkmak mı?",
-    "desc": "Borsa düşüşlerinde ne yapmalı? Dip alma stratejileri, 'catching a falling knife' riski, kriz döneminde portföy yönetimi ve tarihsel kriz örnekleri.",
+    "title": "Borsa Krizlerinde Yatırım: Dip Alma, Bekleme ve Panik Satışı",
+    "desc": "Borsa düşüşlerinde yatırımcı psikolojisi, dip alma kavramı, 'düşen bıçak' riski, kriz döneminde portföy yönetimi ve tarihsel kriz örnekleri.",
     "date": "2026-05-04",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
-<p>Borsa zirve noktasında değil kriz dönemlerinde test edilir. Piyasa %20 veya daha fazla düştüğünde — teknik olarak "bear market" tanımına girildiğinde — yatırımcıların büyük çoğunluğu panikler ve yanlış karar verir. Oysa tarih, büyük krizlerin en iyi uzun vadeli alım fırsatlarını sunduğunu defalarca göstermiştir.</p>
+<p>Borsa zirve noktasında değil kriz dönemlerinde test edilir. Piyasa %20 veya daha fazla düştüğünde — teknik olarak "ayı piyasası" (bear market) tanımına girildiğinde — yatırımcıların büyük çoğunluğu panikler ve yanlış karar verir. Oysa tarihte büyük krizlerin ardından piyasalar uzun vadede defalarca toparlanmıştır.</p>
 
 <h2>Kriz Döneminde Psikoloji Tuzağı</h2>
 <p>Kriz döneminde insan beyninin verdiği tepkiler sistematik olarak yanlıştır:</p>
 <ul>
   <li>Fiyatlar düşünce "daha düşer" düşüncesiyle satış yapılır (panik satışı)</li>
-  <li>Düşük seviyedeyken "artık almam" kararı verilir — tam tersini yapma zamanı olabilir</li>
+  <li>Düşük seviyelerde "artık almam" kararıyla piyasadan tamamen uzak durulur</li>
   <li>Medya ve sosyal medyanın aşırı kötümser yayını, psikolojik baskıyı derinleştirir</li>
   <li>Kısa vadeli ağrı, uzun vadeli kazancın önüne geçer</li>
 </ul>
-<p>Warren Buffett'ın formülü: "Başkaları korkarken açgözlü, başkaları açgözlüyken korkak ol." Bunu uygulamak söylenmesi kadar kolay değildir — ama fırsat buradadır.</p>
+<p>Warren Buffett'ın formülü: "Başkaları korkarken açgözlü, başkaları açgözlüyken korkak ol." Bunu uygulamak söylenmesi kadar kolay değildir.</p>
 
-<h2>Dip Almak: Ne Zaman Mantıklı?</h2>
-<p>Her düşüş dip alma fırsatı değildir. "Düşen bıçağı tutmak" (catching a falling knife) ise en tehlikeli finansal davranışlardan biridir. Dip alma kararı için beklenmesi gereken koşullar:</p>
+<h2>Dip Alma Kavramı ve Riskleri</h2>
+<p>Her düşüş dip anlamına gelmez. "Düşen bıçağı tutmak" (catching a falling knife) ise en tehlikeli finansal davranışlardan biridir. Teknik ve temel analizde dibe yaklaşıldığına dair sıkça bakılan işaretler:</p>
 <ul>
   <li><strong>Trendin dönüş işaretleri:</strong> Supertrend yeşile dönmeye başlıyor, ADX düşüyor (trend zayıflıyor), RSI aşırı satım bölgesinden çıkıyor.</li>
   <li><strong>Hacim teyidi:</strong> Düşüş sırasında hacim düşüyor (satış baskısı azalıyor) ve ilk toparlanmada hacim artıyor.</li>
   <li><strong>Makro iyileşme:</strong> Krizin tetikleyicisi çözüme kavuşuyor (faiz indirimi, jeopolitik yumuşama, ekonomik canlanma sinyali).</li>
   <li><strong>Değerleme seviyeleri:</strong> F/K, PD/DD gibi metrikler tarihsel ortalamalarının belirgin altına geldi.</li>
 </ul>
-<p>Bu koşulların tamamını beklemek "en dibi" kaçırmanıza neden olabilir — ama trendin dönüşünü teyit eden ilk sinyaller oluştuktan sonra kademeli giriş yapmak, sadece "ucuz göründüğü için" almaktan çok daha güvenlidir.</p>
+<p>Bu işaretlerin hiçbiri dibi kesin olarak belirlemez; trend dönüşünün teyidi genellikle dipten bir süre sonra gelir. Bir hissenin "ucuz görünmesi" ise tek başına trendin döndüğü anlamına gelmez.</p>
 
 <h2>Kademeli Alım (Dollar Cost Averaging)</h2>
-<p>Dip belirsiz olduğunda en güçlü strateji kademeli alımdır. Ayırdığınız tutarı eşit parçalara bölün ve belirli aralıklarla (haftalık, aylık) alın. Avantajlar:</p>
+<p>Kademeli alım, yatırım tutarının eşit parçalara bölünüp belirli aralıklarla (haftalık, aylık) yatırılmasıdır. Dibin belirsiz olduğu dönemlerde sıkça anılan bir yöntemdir. Özellikleri:</p>
 <ul>
   <li>Dibi tam tutturma baskısını ortadan kaldırır</li>
   <li>Düşüş devam ederse daha düşük fiyattan alım imkânı doğar</li>
-  <li>Ortalama alış maliyetinizi düşürür (cost averaging)</li>
+  <li>Ortalama maliyeti zamana yayar (maliyet ortalaması)</li>
   <li>Psikolojik baskıyı azaltır</li>
 </ul>
 
 <h2>Beklemek: Nakit Pozisyon Avantajı</h2>
-<p>Kriz döneminde nakit tutmak bazen en iyi stratejidir. Warren Buffett'ın Berkshire Hathaway, piyasa zirve noktalarında tarihsel olarak nakit oranını artırmış, krizlerde hisse almıştır. Nakit size şunu sağlar:</p>
+<p>Kriz döneminde nakit tutmak da bir seçenektir. Warren Buffett'ın Berkshire Hathaway, piyasa zirve noktalarında tarihsel olarak nakit oranını artırmış, krizlerde hisse almıştır. Nakit size şunu sağlar:</p>
 <ul>
   <li>Duygusal karar vermeden kaçınma fırsatı</li>
   <li>Gerçek dip yaklaştığında hareket kabiliyeti</li>
@@ -6748,16 +6772,16 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>2018 TL krizi: %40+ düşüş, uzun toparlanma süreci</li>
   <li>2020 COVID: Mart 2020'de %30 düşüş, Kasım 2020'de tam toparlanma — 8 aylık süreç</li>
 </ul>
-<p>Ortak nokta: Her büyük kriz, sabırlı uzun vadeli yatırımcılar için önemli alım fırsatı sundu. Panikle satan kısa vadeli yatırımcılar her seferinde toparlanmanın dışında kaldı.</p>
+<p>Ortak nokta: Büyük krizlerin ardından piyasa zamanla toparlandı; panikle satan kısa vadeli yatırımcılar toparlanmanın önemli bölümünü kaçırdı.</p>
 
-<h2>BorsaPusula ile Kriz Yönetimi</h2>
-<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Takip edilen hisselerin genelinde Trend Bozuldu sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. Güçlü Trend sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
+<h2>Kriz Döneminde Trend Durumunu İzlemek</h2>
+<p>BorsaPusula'nın Piyasa sayfasındaki Güçlü Trend oranı, kriz dönemlerinde piyasanın genel trend durumunu izlemeyi kolaylaştırır: Hisselerin büyük bölümü Trend Bozuldu durumundaysa düşüş geniş tabanlıdır. Güçlü Trend durumundaki hisselerin oranı yeniden artmaya başladığında trendin döndüğüne dair teknik bir işaret oluşur. Bu kurallı ölçüm, duygusal tepkilerin yanında nesnel bir tablo sunar.</p>
 """,
     "faqs": [
       {"q": "Düşen bıçağı tutmak neden tehlikeli?",
-       "a": "Hisse düşerken 'bu kadar düştü, daha ne kadar düşer' düşüncesiyle almak, trendin dönüşünü teyit etmeden hareket etmektir. Hisse %50 düşmüşse yarısına gelmek için %100 daha yükselmesi gerekir. Trend dönüşünün ilk teknik işaretleri oluşmadan pozisyon almak zaman ve para kaybına yol açabilir."},
-      {"q": "Krizde hisselerimi satmalı mıyım?",
-       "a": "Durum bağlam gerektirir. Temel sorunuza dönün: Şirketi neden tuttuğunuz hâlâ geçerli mi? Evet ise satmak için iyi neden yok — piyasa geri döner. Eğer finansal bir aciliyetiniz yoksa ve uzun vadeli yatırımcıysanız, krizde satmak genellikle en kötü kararlardan biridir. Stop-loss seviyeleri önceden belirlenmiş olmalı; ancak o seviyelere ulaşmamışsa panik satışı tavsiye edilmez."},
+       "a": "Hisse düşerken 'bu kadar düştü, daha ne kadar düşer' düşüncesiyle almak, trendin dönüşünü teyit etmeden hareket etmektir. Hisse %50 düşmüşse yarısına gelmek için %100 daha yükselmesi gerekir. Trend dönüşünün ilk teknik işaretleri oluşmadan yapılan alımlar, düşüş sürerse ek kayba yol açabilir."},
+      {"q": "Krizde panik satışı neden sık görülür?",
+       "a": "Kriz dönemlerinde hızlı fiyat düşüşü ve olumsuz haber akışı, yatırımcıyı kısa vadeli kayıptan kaçmaya iter. Uzun vadeli yatırımcı açısından asıl soru, şirketi tutma gerekçesinin hâlâ geçerli olup olmadığıdır; bu değerlendirme fiyat hareketinden bağımsız olarak şirketin finansalları üzerinden yapılır. Panikle verilen kararlar çoğu zaman sonraki toparlanmanın dışında kalmakla sonuçlanmıştır."},
       {"q": "Kriz döneminde hangi hisseler daha dayanıklı?",
        "a": "Savunmacı sektörler (telekomünikasyon, temel tüketim, sağlık) kriz dönemlerinde genellikle endeksin altında düşer. Döviz geliri olan (THYAO, ASELS) ve güçlü nakit pozisyonlu şirketler de görece daha dayanıklı olabilir. Yüksek borçlu, büyüme bağımlı şirketler ise kriz dönemlerinde en fazla zarar görme eğilimindedir."},
       {"q": "Borsa krizleri ne kadar sürer?",
@@ -6833,12 +6857,13 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "kap-bildirimleri-nasil-takip-edilir",
     "title": "KAP Bildirimleri Nasıl Takip Edilir? Hisse Haberciliğinde KAP Rehberi",
-    "desc": "KAP (Kamuyu Aydınlatma Platformu) nedir, nasıl kullanılır? Özel durum açıklamaları, bilanço haberleri ve KAP bildirimlerini hisse kararlarında nasıl değerlendirirsiniz?",
+    "desc": "KAP (Kamuyu Aydınlatma Platformu) nedir, nasıl kullanılır? Özel durum açıklamaları, bilanço haberleri ve KAP bildirimleri nasıl okunur?",
     "date": "2026-05-05",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Temel Kavramlar",
     "body": """
-<p>KAP (Kamuyu Aydınlatma Platformu), Türkiye'de Borsa İstanbul'da işlem gören tüm halka açık şirketlerin yatırımcılara duyuru yaptığı resmi platformdur. Finansal tablolar, özel durum açıklamaları, yönetim kurulu kararları ve temettü duyuruları KAP üzerinden yayımlanır. Bir hisseye yatırım yapıyorsanız KAP'ı takip etmek zorunludur.</p>
+<p>KAP (Kamuyu Aydınlatma Platformu), Türkiye'de Borsa İstanbul'da işlem gören tüm halka açık şirketlerin yatırımcılara duyuru yaptığı resmi platformdur. Finansal tablolar, özel durum açıklamaları, yönetim kurulu kararları ve temettü duyuruları KAP üzerinden yayımlanır. Bir hisseye yatırım yapanlar için KAP birincil bilgi kaynağıdır.</p>
 
 <h2>KAP'ta Neler Yayımlanır?</h2>
 <ul>
@@ -6854,7 +6879,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>KAP bildirimleri haberi kamuoyuyla eş zamanlı paylaşır — bu nedenle iyi haber için "herkesle birlikte" öğrenmiş olursunuz. Ancak bildirimler piyasada önemli fiyat hareketleri oluşturur:</p>
 <p><strong>Pozitif sürpriz etkileri:</strong> Beklentinin üzerinde bilanço, büyük sözleşme, temettü artışı → hisse sert yükselir.</p>
 <p><strong>Negatif sürpriz etkileri:</strong> Zarar, sermaye artışı (dilüsyon riski), büyük dava → hisse sert düşer.</p>
-<p><strong>Fiyatlanmış bilgi:</strong> Çoğunlukla piyasa, KAP açıklamasından önce dedikodu veya sızdırılan bilgiyle fiyatlamayı yapar. "Haber çıkınca sat" (sell the news) davranışı buradan kaynaklanır.</p>
+<p><strong>Fiyatlanmış bilgi:</strong> Çoğunlukla piyasa, KAP açıklamasından önce dedikodu veya sızdırılan bilgiyle fiyatlamayı yapar. "Haber gelince satış" (sell the news) davranışı buradan kaynaklanır.</p>
 
 <h2>Bilanço Açıklama Dönemleri</h2>
 <p>Bilanço açıklamaları yılda 4 kez yoğunlaşır:</p>
@@ -6864,7 +6889,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Kasım: 3. çeyrek (9 aylık) sonuçları</li>
   <li>Mart-Nisan: 4. çeyrek ve yıllık sonuçlar</li>
 </ul>
-<p>BorsaPusula'nın bilanço takvim sayfası bu tarihleri önceden gösterir, böylece hangi hissenin ne zaman açıklama yapacağını planlayabilirsiniz.</p>
+<p>BorsaPusula'nın bilanço takvimi sayfası bu tarihleri önceden gösterir; hangi şirketin ne zaman açıklama yapacağı buradan izlenebilir.</p>
 
 <h2>İçeriden Öğrenenlerin Ticareti: Yönetim Kurulunun Hareketleri</h2>
 <p>Şirket yöneticilerinin kendi hisselerini alması veya satması, KAP'ta zorunlu olarak açıklanır. Bu işlemler "içeriden öğrenenlerin ticareti" bildirimi olarak adlandırılır.</p>
@@ -6872,15 +6897,15 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>KAP'ı Etkin Takip Etme Yöntemleri</h2>
 <ul>
-  <li>KAP mobil uygulaması bildirim özelliğiyle belirli şirketleri takip edin</li>
-  <li>Portföyünüzdeki hisseler için KAP uyarıları kurun</li>
-  <li>Bilanço tarihlerini takvime ekleyin</li>
-  <li>BorsaPusula'nın haber ve bilanço takvim sayfasını güncel tutun</li>
+  <li>KAP mobil uygulamasının bildirim özelliğiyle belirli şirketler takip edilebilir</li>
+  <li>Portföydeki hisseler için KAP uyarıları kurulabilir</li>
+  <li>Bilanço tarihleri takvime eklenebilir</li>
+  <li>BorsaPusula'da hisse sayfalarındaki şirket bildirimleri ve bilanço takvimi birlikte izlenebilir</li>
 </ul>
 <p>Önemli not: KAP bildirimleri resmi kaynak olmakla birlikte yorumlanması zaman ve deneyim gerektirir. Olumlu görünen bir açıklama beklentilerle kıyaslandığında hayal kırıklığı yaratabilir; olumsuz görünen bir açıklama bazen çoktan fiyatlanmış olabilir. Bildirim + piyasa beklentisi + teknik görünüm üçgenine bakmak en sağlıklı yaklaşımdır.</p>
 
 <h2>KAP Bildirimi ve Teknik Sinyalin Birleşimi</h2>
-<p>Bir hissede Güçlü Trend sinyali ile güçlü bir KAP bildirimi (örneğin büyük bir sözleşme kazanımı) aynı anda gerçekleştiğinde, bu genellikle güçlü bir katalizör oluşturur — teknik görünüm ile temel haber akışı aynı yönde birleşir. BorsaPusula hisse sayfasındaki "KAP Bildirimleri" sekmesi son 90 günün bildirimlerini listeler; "Sinyalin Hikayesi" bölümünde ise sinyal tarihi etrafında yayımlanan KAP bildirimleri birlikte gösterilir, böylece bir sinyalin arkasında haber akışı olup olmadığını görebilirsiniz.</p>
+<p>Bir hissede Güçlü Trend sinyali ile güçlü bir KAP bildirimi (örneğin büyük bir sözleşme kazanımı) aynı anda gerçekleştiğinde, bu genellikle güçlü bir katalizör oluşturur — teknik görünüm ile temel haber akışı aynı yönde birleşir. BorsaPusula hisse sayfasının "Haberler" sekmesindeki "Şirket bildirimleri" zaman çizelgesi, son 90 günün KAP bildirimlerini trend durumunun başladığı günle birlikte tek listede gösterir; böylece bir trend değişiminin etrafında haber akışı olup olmadığı görülebilir.</p>
 <p><strong>Sık yapılan hatalar:</strong></p>
 <ul>
   <li>KAP bildirimi çıkar çıkmaz panikle işlem yapmak — haber çoğu zaman piyasa tarafından zaten fiyatlanmıştır.</li>
@@ -6897,7 +6922,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 """,
     "faqs": [
       {"q": "KAP'a nasıl ulaşılır?",
-       "a": "kap.org.tr web adresi ve KAP mobil uygulaması üzerinden erişilebilir. Tüm bildirimler ücretsiz ve halka açıktır. Şirket adı veya hisse kodu ile arama yaparak ilgili şirketin tüm geçmiş ve güncel bildirimlerini görebilirsiniz."},
+       "a": "kap.org.tr web adresi ve KAP mobil uygulaması üzerinden erişilebilir. Tüm bildirimler herkese açıktır. Şirket adı veya hisse kodu ile arama yapılarak ilgili şirketin tüm geçmiş ve güncel bildirimleri görülebilir."},
       {"q": "KAP bildirimi gece yayımlanırsa ne olur?",
        "a": "Mesai saatleri dışında yayımlanan önemli KAP bildirimleri ertesi sabah piyasa açılışında fiyatlanır. Bu nedenle açılışta ani yükseliş veya düşüş görülmesi normaldir. Özellikle bilanço açıklamaları mesai saatlerinde (09:40-18:00) yapılmak zorunda değildir; akşam veya gece de gelebilir."},
       {"q": "Özel durum açıklaması (ÖDA) neden önemli?",
@@ -6914,6 +6939,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Hacim Analizi: Borsa'da Hacim Fiyat Hareketini Nasıl Doğrular?",
     "desc": "Borsa hacmi nedir, neden önemlidir? Hacim-fiyat ilişkisi, yüksek hacimdeki kırılımlar ve düşen hacimle yükselen fiyat — BIST hisselerinde hacim analizi.",
     "date": "2026-05-05",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
@@ -6932,7 +6958,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Direnç kırılımı veya destek kırılımı için hacim teyidi kritik önemdedir:</p>
 <p><strong>Yüksek hacimdeki kırılım:</strong> Güçlü katılım, kırılım sürdürülebilir. "Gerçek kırılım" olarak yorumlanır.</p>
 <p><strong>Düşük hacimdeki kırılım:</strong> Az katılım, kırılım yalancı olabilir (fakeout). Ertesi gün geri dönüş riski yüksek.</p>
-<p>Pratik kural: Kırılım günkü hacim, son 20 günlük ortalama hacmin 1,5-2 katını geçiyorsa güvenilir kabul edilir.</p>
+<p>Yaygın bir ölçüt: Kırılım günkü hacim, son 20 günlük ortalama hacmin 1,5-2 katını geçiyorsa güvenilir kabul edilir.</p>
 
 <h2>Hacim Zirveleri ve Trend Dönüşleri</h2>
 <p>Özellikle dikkat edilmesi gereken hacim örüntüleri:</p>
@@ -6954,7 +6980,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Piyasanın genel yüksek volatilite dönemlerinde (seçim, kriz) sektörel veya şirket bazlı hacim yüksek olabilir; bireysel hisse analizinde bunu ayırt etmek gerekir</li>
   <li>Ortalama günlük işlem hacmi düşük olan hisseler için hacim analizi daha az güvenilirdir — birkaç büyük emir hacmi manipüle edebilir</li>
 </ul>
-<p>BorsaPusula sinyalleri, hacim verilerini otomatik olarak değerlendirir. Güçlü Trend sinyallerinin hacimsiz kırılım dönemlerinde değil güçlü hacimlerin eşliğinde oluşması, sinyal güvenilirliğini artıran faktörler arasında yer alır.</p>
+<p>BorsaPusula hisse sayfalarında, trend durumu Güçlü Trend veya Trend Bozuldu olan hisseler için hacim oranı ayrıca gösterilir. Trend değişiminin hacimsiz bir kırılımla değil güçlü hacimlerin eşliğinde oluşması, teknik analizde işaretin güvenilirliğini artıran faktörler arasında sayılır.</p>
 
 <h2>Chaikin Money Flow (CMF) ile Para Akışını Ölçmek</h2>
 <p>Chaikin Money Flow (CMF), belirli bir dönemdeki (genellikle 20 gün) kapanış fiyatının mum aralığındaki konumunu hacimle ağırlıklandırarak alım-satım baskısını tek bir çizgide özetler. -1 ile +1 arasında salınır:</p>
@@ -6963,10 +6989,10 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>-0,25 altı:</strong> Güçlü satım baskısı — kapanışlar mumların alt kısımlarında ve hacim satış tarafında yoğunlaşıyor.</li>
   <li>Bu iki eşik arasındaki bölge genellikle kararsız/dengeli para akışı olarak yorumlanır.</li>
 </ul>
-<p>CMF'nin OBV'den farkı, sadece kapanışın önceki kapanışa göre yönüne değil, kapanışın günün range'i içindeki konumuna bakmasıdır — bu da fitili uzun günlerde daha hassas bir okuma sağlar.</p>
+<p>CMF'nin OBV'den farkı, sadece kapanışın önceki kapanışa göre yönüne değil, kapanışın günlük fiyat aralığı içindeki konumuna bakmasıdır — bu da fitili uzun günlerde daha hassas bir okuma sağlar.</p>
 
-<h2>BorsaPusula'da Hacim Profili ve Teyit Rozetleri</h2>
-<p>BorsaPusula hisse sayfalarındaki "Hacim Profili" bölümü, güncel hacmi tarihsel ortalamayla otomatik olarak kıyaslar ve sinyalin hacim tarafından desteklenip desteklenmediğini görsel olarak özetler. Bir sinyal güçlü hacimle örtüştüğünde sayfada <strong>"⭐ Hacim Onaylı"</strong> rozeti, daha ölçülü ama yine de yeterli katılım görüldüğünde <strong>"✓ TEYİTLİ"</strong> rozeti görünür. Bu rozetler, kullanıcıların hacim tablolarını tek tek incelemeden sinyal kalitesini hızlıca değerlendirmesini sağlar.</p>
+<h2>BorsaPusula'da Hacim Profili</h2>
+<p>BorsaPusula hisse sayfalarındaki "Hacim Profili" bölümü, trend durumu Güçlü Trend veya Trend Bozuldu olan hisselerde iki oran gösterir: son 5 seansın ortalama hacminin son 20 seansın ortalamasına oranı ve sinyal günündeki hacim oranı. Bu oranlar, trend değişiminin ne ölçüde hacimle desteklendiğini tek bakışta görmeyi sağlar. <a href="/tarama">Tarama sayfasındaki</a> "Güçlü Trend + Hacim Onaylı" hazır listesi de hacim teyidi olan hisseleri bir arada gösterir.</p>
 
 <h2>MACD Kesişimi ve Hacim Teyidini Birlikte Okumak</h2>
 <p>MACD kesişimleri (MACD çizgisinin sinyal çizgisini yukarı veya aşağı kesmesi) tek başına değerlendirildiğinde yanıltıcı olabilir; hacimle birlikte okunduğunda güvenilirliği belirgin şekilde artar:</p>
@@ -6982,7 +7008,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Düşük hacimde yükselen hisse ne anlama gelir?",
        "a": "Düşük hacimde yükselen hisse, fiyat artışının geniş katılımcı tabanı tarafından desteklenmediğini gösterir. Büyük alıcılar çekilmişse fiyat yapay olarak tutulabilir ya da sadece birkaç büyük emir fiyatı çekmiş olabilir. Böyle durumlarda kırılım güvenilmez, trendin kısa vadede sürdürülmesi güçtür."},
       {"q": "OBV göstergesi nerede bulunur?",
-       "a": "OBV, TradingView, Matriks, Foreks ve çoğu teknik analiz platformunda standart göstergeler listesinde yer alır. Grafik platformunuzda 'OBV' veya 'On Balance Volume' araması yaparak eklemeniz yeterlidir. Grafiğin alt panelinde fiyatla birlikte görüntülenir."},
+       "a": "OBV, grafik platformlarının çoğunda standart göstergeler listesinde yer alır. Grafik aracında 'OBV' veya 'On Balance Volume' araması yapılarak eklenebilir. Grafiğin alt panelinde fiyatla birlikte görüntülenir."},
       {"q": "Türkiye'de işlem hacmi ne anlama gelir?",
        "a": "TL cinsinden işlem hacmi, o hissede gün içinde el değiştiren toplam para miktarını gösterir. BIST'te en yüksek hacimli hisseler genellikle AKBNK, THYAO, GARAN, EREGL gibi BIST30 hisseleridir. Yüksek likidite, daha sıkı spread ve daha güvenilir teknik analiz anlamına gelir. Küçük değerli hisselerde (penny stocks) hacim analizi yanıltıcı olabilir."}
     ],
@@ -6993,8 +7019,9 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "portfoy-rebalancing-ne-zaman-nasil",
     "title": "Portföy Rebalancing: Ne Zaman ve Nasıl Yapılır?",
-    "desc": "Portföy rebalancing (yeniden dengeleme) nedir? Drift hesabı, zaman bazlı vs eşik bazlı rebalancing ve BIST'te pratik portföy yönetim rehberi.",
+    "desc": "Portföy rebalancing (yeniden dengeleme) nedir? Drift hesabı, zaman bazlı ve eşik bazlı rebalancing ve BIST'te pratik portföy yönetim rehberi.",
     "date": "2026-05-05",
+    "updated": "2026-10-23",
     "mins": 6,
     "cat": "Risk Yönetimi",
     "body": """
@@ -7007,7 +7034,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Rebalancing Neden Yapılmalı?</h2>
 <ul>
   <li><strong>Risk kontrolü:</strong> Belirli bir varlık sınıfının oransal büyümesini sınırlamak, hedeflenen risk profilini korur.</li>
-  <li><strong>Disiplinli al-sat:</strong> Rebalancing, doğal olarak "pahalı olan sat, ucuz olanı al" davranışını zorunlu kılar. Böylece yükselen varlıktaki ağırlık azaltılıp gerileyen varlığa kaydırılması sistematik hale gelir.</li>
+  <li><strong>Disiplinli yeniden dağılım:</strong> Rebalancing, yükselen varlıktaki ağırlığın azaltılıp gerileyen varlığa kaydırılmasını sistematik hale getirir.</li>
   <li><strong>Duygusal kararları engeller:</strong> Mekanik bir kural olduğundan FOMO veya panik satışını minimize eder.</li>
   <li><strong>Uzun vadeli performans:</strong> Tarihsel araştırmalar, düzenli rebalancing yapan portföylerin uzun vadede daha iyi risk-ayarlı getiri sağladığını göstermektedir.</li>
 </ul>
@@ -7023,17 +7050,12 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Hedef dağılımı belirleyin: Hangi hisselerden kaçar %?</li>
   <li>Mevcut dağılımı hesaplayın: Güncel fiyatlarla her hissenin portföy payını bulun</li>
   <li>Sapmaları tespit edin: Hedefe kıyasla hangi hisseler fazla/az ağırlıklı?</li>
-  <li>İşlemleri planlayın: Fazla ağırlıklı olanı sat, az ağırlıklı olanı al</li>
+  <li>İşlemleri planlayın: Fazla ağırlıklı olanın payı azaltılır, az ağırlıklı olanınki artırılır</li>
   <li>Vergi ve komisyon etkisini değerlendirin: Rebalancing maliyetinin faydasını aştığı nokta?</li>
 </ol>
 
-<h2>Rebalancing ve BorsaPusula Sinyalleri</h2>
-<p>BorsaPusula sinyalleri rebalancing kararlarını destekler:</p>
-<ul>
-  <li>Portföyde oranı büyümüş hissenin Trend Bozuldu sinyali varsa → rebalancing için doğal çıkış noktası</li>
-  <li>Az ağırlıklı olmak istediğiniz sektörde Güçlü Trend sinyali geliyorsa → kademeli ekleme fırsatı</li>
-  <li>Tüm hisseler Güçlü Trend sinyalindeyken rebalancing, güçlü trendde gereksiz satış yaratabilir — sinyal durumuna göre zamanlama ayarlanmalı</li>
-</ul>
+<h2>Rebalancing ve Trend Durumu</h2>
+<p>Rebalancing bir ağırlık disiplinidir; trend durumu ise fiyat hareketinin betimidir. BorsaPusula hisse sayfalarındaki trend durumu (Güçlü Trend / Trend Bozuldu / Yatay), portföydeki hisselerin fiyat davranışını izlemek için ek bir bilgi olarak okunabilir; dengeleme kuralının yerine geçmez.</p>
 <p>Türkiye gibi yüksek volatiliteli piyasalarda 3-6 aylık rebalancing sıklığı, gereksiz işlem maliyetine neden olmadan risk profilini kontrol altında tutar. Yıllık tek rebalancing ise drift riskini taşır.</p>
 """,
     "faqs": [
@@ -7055,10 +7077,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Mum Formasyonları: Teknik Analizde En Güçlü Mum Grafik Sinyalleri",
     "desc": "Doji, engulfing, çekiç, gece yıldızı ve sabah yıldızı başta olmak üzere teknik analizin en önemli mum grafik formasyonları ve BIST'te kullanımı.",
     "date": "2026-05-06",
+    "updated": "2026-10-23",
     "mins": 8,
     "cat": "Teknik Analiz",
     "body": """
-<p>Mum grafikleri (candlestick charts), Japon pirinç tüccarları tarafından 17. yüzyılda geliştirilen ve günümüz teknik analizinin temelini oluşturan grafik türüdür. Her bir mum; açılış, kapanış, en yüksek ve en düşük fiyatı görsel olarak özetler. Belirli mum örüntüleri güçlü alım veya satım sinyalleri verebilir.</p>
+<p>Mum grafikleri (candlestick charts), Japon pirinç tüccarları tarafından 17. yüzyılda geliştirilen ve günümüz teknik analizinin temelini oluşturan grafik türüdür. Her bir mum; açılış, kapanış, en yüksek ve en düşük fiyatı görsel olarak özetler. Belirli mum örüntüleri, fiyat yönündeki olası değişimlere dair işaretler olarak yorumlanır.</p>
 
 <h2>Mum Grafik Anatomisi</h2>
 <p>Her mumun dört bileşeni vardır:</p>
@@ -7076,8 +7099,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Kayan Yıldız (Shooting Star):</strong> Küçük gövde + çok uzun üst fitil. Yükselen trendde oluşursa güçlü düşüş sinyali. Alıcılar fiyatı yukarı itti ama satıcılar geri çekti.</p>
 
 <h2>Çift Mum Formasyonları</h2>
-<p><strong>Yutan Formasyon / Bullish Engulfing:</strong> Küçük kırmızı mumun arkasından büyük yeşil mum gelir ve kırmızı mumu tamamen kapsar. Düşen trendde güçlü dönüş sinyali.</p>
-<p><strong>Bearish Engulfing:</strong> Küçük yeşil mumun arkasından büyük kırmızı mum gelir. Yükselen trendde güçlü düşüş sinyali.</p>
+<p><strong>Yükseliş Yönlü Yutan Formasyon (Bullish Engulfing):</strong> Küçük kırmızı mumun arkasından büyük yeşil mum gelir ve kırmızı mumu tamamen kapsar. Düşen trendde güçlü dönüş sinyali.</p>
+<p><strong>Düşüş Yönlü Yutan Formasyon (Bearish Engulfing):</strong> Küçük yeşil mumun arkasından büyük kırmızı mum gelir. Yükselen trendde güçlü düşüş sinyali.</p>
 <p><strong>Harami:</strong> Büyük bir mumun içinde kalan küçük mum. Trendin ivme kaybettiğine işaret eder.</p>
 
 <h2>Üç Mum Formasyonları</h2>
@@ -7097,18 +7120,18 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <ul>
   <li>Destek/direnç seviyesinde oluşan formasyon daha güçlüdür</li>
   <li>Yüksek hacimle oluşan formasyon daha güvenilirdir</li>
-  <li>Trend bağlamında değerlendirin: Yükselen trendde çekiç daha anlamlı</li>
-  <li>BorsaPusula Supertrend sinyali ile teyit edin</li>
+  <li>Trend bağlamı önemlidir: Aynı form, oluştuğu trende göre farklı anlam taşır</li>
+  <li>Supertrend gibi bir trend göstergesiyle birlikte okunan formasyon daha anlamlıdır</li>
 </ul>
 <p>Doji + destek seviyesi + düşük RSI + Supertrend dönüşü kombinasyonu, tek başına mum formasyonundan çok daha güçlü sinyal kalitesi sunar.</p>
 """,
     "faqs": [
       {"q": "Mum grafiği mi çubuk grafik mi daha iyi?",
-       "a": "Mum grafikleri, çubuk grafiklere aynı bilgiyi çok daha görsel ve okunabilir biçimde sunar. Günümüzde neredeyse tüm profesyonel trader mum grafik kullanır. Çubuk grafik artık büyük ölçüde yerini mum grafiğe bırakmıştır. Başlangıç seviyesi için mum grafik öğrenmek hem daha kolay hem daha bilgilendiricidir."},
+       "a": "Mum grafikleri, çubuk grafiklere aynı bilgiyi çok daha görsel ve okunabilir biçimde sunar. Günümüzde profesyonel yatırımcıların büyük çoğunluğu mum grafik kullanır. Çubuk grafik artık büyük ölçüde yerini mum grafiğe bırakmıştır. Başlangıç seviyesi için mum grafik öğrenmek hem daha kolay hem daha bilgilendiricidir."},
       {"q": "Mum formasyonu ne kadar güvenilir?",
-       "a": "Mum formasyonları, diğer teknik göstergeler ve bağlamla birlikte kullanıldığında değer kazanır. Tek başına bir mum formasyonuna güvenmek yerine, destekleyici göstergelerle (hacim, trend yönü, Supertrend teyidi) birlikte değerlendirmek güvenilirliği artırır. Her formasyon için stop-loss ile pozisyon yönetmek şarttır."},
+       "a": "Mum formasyonları, diğer teknik göstergeler ve bağlamla birlikte kullanıldığında değer kazanır. Tek başına bir mum formasyonuna güvenmek yerine, destekleyici göstergelerle (hacim, trend yönü, Supertrend teyidi) birlikte değerlendirmek güvenilirliği artırır."},
       {"q": "Hangi zaman diliminde mum formasyonları daha güvenilir?",
-       "a": "Daha uzun zaman dilimleri daha güvenilir formasyon verir: Günlük > 4 saatlik > 1 saatlik > 15 dakikalık. Dakikalık grafikler çok fazla gürültü içerir. Swing trader için günlük grafikteki mum formasyonları, scalper için ise 15 dakikalık-1 saatlik grafikler daha uygun olabilir."},
+       "a": "Daha uzun zaman dilimleri daha güvenilir formasyon verir: Günlük > 4 saatlik > 1 saatlik > 15 dakikalık. Dakikalık grafikler çok fazla gürültü içerir. Birkaç günlük-haftalık vadede günlük grafikteki mum formasyonları, çok kısa vadede ise 15 dakikalık-1 saatlik grafikler öne çıkar."},
       {"q": "Doji her zaman trend dönüşü mü gösterir?",
        "a": "Hayır. Doji 'belirsizlik' veya 'denge' gösterir ama dönüş garantisi değildir. Güçlü bir trendde doji oluşsa bile trend devam edebilir. Dönüş sinyali için doji'nin ardından gelen mumun yönü çok önemlidir: doji'nin ardından güçlü yükseliş mumu gelirse dönüş, düşüş mumu gelirse trend devamı olarak yorumlanır."}
     ],
@@ -7187,6 +7210,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "title": "Emeklilik İçin Borsa Yatırımı: Uzun Vadeli Hisse Stratejisi",
     "desc": "Emeklilik birikimi için borsa yatırımı nasıl yapılır? Bileşik faizin gücü, düzenli yatırım planı, BES vs hisse senedi karşılaştırması ve uzun vadeli BIST stratejisi.",
     "date": "2026-05-06",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
@@ -7202,7 +7226,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Erken başlamak, daha yüksek getiri oranı kadar kritik öneme sahiptir. 25 yaşında başlayan, 35 yaşında başlayana kıyasla 10 yıl önce başladığı için emeklilikte çok daha büyük bir farka sahip olabilir.</p>
 
 <h2>Düzenli Yatırım (DCA — Dollar Cost Averaging)</h2>
-<p>Piyasanın zamanlamasını tahmin etmeye çalışmak yerine, düzenli aralıklarla belirli miktarda yatırım yapmak (DCA) uzun vadeli yatırımcı için en güçlü stratejidir.</p>
+<p>Piyasanın zamanlamasını tahmin etmeye çalışmak yerine, düzenli aralıklarla belirli miktarda yatırım yapmak (DCA), uzun vadeli yatırımcılar arasında yaygın bir yöntemdir.</p>
 <p>DCA'nın avantajları:</p>
 <ul>
   <li>Piyasa düşükken daha fazla hisse alınır, yüksekken daha az — ortalama maliyet optimize edilir</li>
@@ -7220,13 +7244,13 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Uzun Vadeli BIST Yatırım Stratejisi</h2>
-<p>Emeklilik ufuğuyla (15-30 yıl) BIST'e yatırım yapanlar için öneriler:</p>
+<p>Emeklilik ufuğuyla (15-30 yıl) BIST'e yatırım yapanların uzun vadeli yaklaşımında öne çıkan ilkeler:</p>
 <ul>
-  <li><strong>Kaliteli şirketler seçin:</strong> Sürdürülebilir rekabet avantajı, güçlü bilanço, temettü geçmişi. Spekülatif hisseler uzun vade portföyüne uygun değil.</li>
-  <li><strong>Çeşitlendirin:</strong> 3-4 sektör, 8-12 hisse. Tek bir şirketin iflası tüm portföyü etkilemeyecek.</li>
-  <li><strong>Temettüleri yeniden yatırın:</strong> Uzun vadede temettü yeniden yatırımı toplam getirinin büyük bölümünü oluşturabilir.</li>
-  <li><strong>Volatiliteye dayanın:</strong> 30 yıllık ufukta %30-40 düşüşler geçici kalır. Panik satışı uzun vadeli getiriyi tahrip eder.</li>
-  <li><strong>Enflasyona karşı koruyun:</strong> Döviz geliri olan şirketler (THYAO, ASELS) ve reel varlıklar (EREGL gibi emtia-yoğun), TL enflasyonuna karşı doğal koruma sağlar.</li>
+  <li><strong>Şirket seçimi:</strong> Sürdürülebilir rekabet avantajı, güçlü bilanço ve temettü geçmişi öne çıkan ölçütlerdir. Fiyatı kısa vadeli beklentilerle hareket eden spekülatif hisseler uzun vade mantığıyla örtüşmez.</li>
+  <li><strong>Çeşitlendirme:</strong> Birden fazla sektöre ve şirkete (ör. 3-4 sektör, 8-12 hisse) dağılmış bir portföyde tek bir şirketin sorunları tüm portföyü etkilemez.</li>
+  <li><strong>Temettülerin yeniden yatırılması:</strong> Uzun vadede temettü yeniden yatırımı toplam getirinin büyük bölümünü oluşturabilir.</li>
+  <li><strong>Volatilite:</strong> 30 yıllık ufukta %30-40 düşüşler geçici kalır. Panik satışı uzun vadeli getiriyi tahrip eder.</li>
+  <li><strong>Enflasyon:</strong> Döviz geliri olan ve emtia ağırlıklı şirketlerin gelirleri, TL enflasyonuna karşı kısmen doğal koruma sağlayabilir.</li>
 </ul>
 
 <h2>Emeklilik Yatırımında Riskler</h2>
@@ -7236,17 +7260,17 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Enflasyon riski:</strong> TL bazlı getiri, enflasyonun altında kalırsa reel değer kaybolur</li>
   <li><strong>Kur riski:</strong> TL'nin sürekli değer kaybı uluslararası karşılaştırmada portföyü eritebilir</li>
 </ul>
-<p>Bu riskleri yönetmek için: Acil fon oluşturun (3-6 aylık gider), çeşitlendirin ve kademeli yatırım yapın. Borsa yatırımına koymayacağınız kadar kısa vadeli veya kritik parayı asla hisse senetlerine bağlamayın.</p>
+<p>Bu risklere karşı yaygın yaklaşımlar: acil durum fonu (3-6 aylık gider), çeşitlendirme ve kademeli yatırım. Kısa vadede ihtiyaç duyulabilecek ya da kritik birikim, hisse senedi dalgalanmalarına uygun değildir.</p>
 """,
     "faqs": [
-      {"q": "Kaç yaşında borsa yatırımına başlanmalı?",
-       "a": "Ne kadar erken başlanırsa bileşik faizin gücünden o kadar uzun süre yararlanılır. 20'li yaşlarda başlamak, 40'lı yaşlarda başlamaya kıyasla eşit miktarda yatırımla emeklilikte çok daha büyük birikim anlamına gelir. 'Bugünün en iyi zamanı' diyebilirsiniz — birikimimizin büyümesi için her zaman en iyi başlangıç noktası 'şu an'dır."},
-      {"q": "Piyasa düşerken yatırıma devam edilmeli mi?",
-       "a": "Uzun vadeli yatırımcı için evet. Düşen piyasada aynı parayla daha fazla hisse alınır — ortalama maliyet düşer. Tarihsel olarak tüm büyük borsa düşüşleri sonunda toparlanmıştır. Kısa vadeli ağrı olsa da uzun vadeli perspektiften piyasa düşüşleri indirim fırsatıdır. Tek önemli soru: Nakde ihtiyacınız var mı? Yoksa devam edin."},
-      {"q": "BES fonu mu yoksa bireysel hisse mi daha iyi?",
-       "a": "İkisinin birlikte kullanılması ideal. BES'te devlet katkısından (%25-30) yararlanmak neredeyse garantili erken getiri sağlar. BES limiti kadar BES'e yatırım yapıp, kalan birikimleri doğrudan hisse veya fon üzerinden yönetmek yaygın bir karma stratejidir. Uzmanlık düzeyine göre doğrudan hisse veya yatırım fonu tercih edilebilir."},
-      {"q": "Emeklilik yatırımında hangi hisseler tercih edilmeli?",
-       "a": "Uzun vadeli emeklilik portföyü için: sürdürülebilir rekabet avantajlı şirketler, istikrarlı temettü geçmişi, güçlü bilanço ve yönetim, büyüme potansiyeli taşıyan ama spekülatif olmayan işletmeler. BIST'te AKBNK, GARAN, EREGL, THYAO, ASELS ve TCELL gibi büyük ve köklü şirketler emeklilik portföyleri için sıkça değerlendirilen seçeneklerdir."}
+      {"q": "Borsa yatırımına başlama yaşı neden önemlidir?",
+       "a": "Ne kadar erken başlanırsa bileşik faizin gücünden o kadar uzun süre yararlanılır. 20'li yaşlarda başlamak, 40'lı yaşlarda başlamaya kıyasla eşit miktarda yatırımla emeklilikte çok daha büyük birikim anlamına gelir."},
+      {"q": "Piyasa düşerken düzenli yatırım nasıl işler?",
+       "a": "Düzenli yatırımda, düşen piyasada aynı parayla daha fazla hisse alınır ve ortalama maliyet düşer. Tarihsel olarak tüm büyük borsa düşüşleri sonunda toparlanmıştır. Bu yaklaşımın sürdürülebilmesi ise büyük ölçüde yatırımcının o dönemde nakde ihtiyaç duyup duymamasına bağlıdır."},
+      {"q": "BES ve bireysel hisse birlikte kullanılabilir mi?",
+       "a": "Evet, ikisi birlikte kullanılabilir. BES'te devlet katkısı (%25-30), yatırılan tutara doğrudan eklenen bir katkıdır. BES limiti kadar BES'e yatırım yapıp, kalan birikimleri doğrudan hisse veya fon üzerinden yönetmek yaygın bir karma stratejidir. Uzmanlık düzeyine göre doğrudan hisse veya yatırım fonu tercih edilebilir."},
+      {"q": "Emeklilik portföyünde şirketler hangi ölçütlerle değerlendirilir?",
+       "a": "Uzun vadeli emeklilik portföylerinde sık bakılan ölçütler: sürdürülebilir rekabet avantajı, istikrarlı temettü geçmişi, güçlü bilanço ve yönetim, spekülatif olmayan büyüme. Bu ölçütler şirketlerin KAP'ta açıkladığı finansal tablolar üzerinden incelenebilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TCELL']
   },
@@ -7255,15 +7279,16 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "borsada-basarisiz-yatirimcilarin-yaptigi-hatalar",
     "title": "Borsada Başarısız Yatırımcıların Yaptığı 10 Kritik Hata",
-    "desc": "BIST yatırımcılarının en sık yaptığı hatalar: stop-loss koymamak, FOMO, aşırı çeşitlendirme, sürü psikolojisi ve daha fazlası — bunlardan nasıl kaçınılır?",
+    "desc": "BIST yatırımcılarının en sık yaptığı hatalar: zarar senaryosunu düşünmemek, FOMO, aşırı çeşitlendirme, sürü psikolojisi ve daha fazlası — bunlardan nasıl kaçınılır?",
     "date": "2026-05-06",
+    "updated": "2026-10-23",
     "mins": 7,
     "cat": "Strateji",
     "body": """
 <p>Borsa yatırımında başarısızlık çoğunlukla zeka eksikliğinden değil, sistematik hatalardan kaynaklanır. Bu hatalar tekrarlanabilir ve öngörülebilirdir — dolayısıyla önlenebilirdir. Başarılı yatırımcıların çoğu aynı hataları en az bir kez yaşamış; farkları bu hatalardan ders çıkarabilmeleridir.</p>
 
-<h2>Hata 1 — Stop-Loss Kullanmamak</h2>
-<p>"Düşük seviyede satar gibi görünüyor, biraz daha bekleyeyim" düşüncesi küçük kayıpları büyük felaketlere dönüştürür. Her pozisyon için önceden stop-loss belirlemek ve kurallara uymak, uzun vadeli portföyü korur.</p>
+<h2>Hata 1 — Zarar Senaryosunu Önceden Düşünmemek</h2>
+<p>"Biraz daha bekleyeyim, düzelir" düşüncesi küçük kayıpları büyük kayıplara dönüştürebilir. Bir yatırımın hangi koşulda yeniden değerlendirileceğini önceden düşünmemek, kararı o anın duygusuna bırakır.</p>
 
 <h2>Hata 2 — Tek Hisseye Yoğunlaşmak</h2>
 <p>Portföyün tamamını tek bir hisseye veya sektöre koymak, o şirkete veya sektöre özgü bir riske karşı tüm sermayeyi açık bırakır. Bir şirkette büyük haber veya skandal çıktığında çeşitlendirilmemiş portföy büyük yara alabilir.</p>
@@ -7272,38 +7297,38 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Sosyal medyada "fırlatıyor" denilen hisseye temele bakmadan girmek, genellikle en üst noktadan alış anlamına gelir. Trend zaten olgunlaşmış ve kalabalık yetişmiştir. Her kaçan trene yetişmeye çalışmak yorucu ve pahalı sonuçlar doğurur.</p>
 
 <h2>Hata 4 — Aşırı İşlem Yapmak (Overtrading)</h2>
-<p>Çok sık alım-satım, komisyon maliyetini artırır ve davranışsal hataların sayısını çoğaltır. Her piyasa hareketine reaksiyon vermek yerine, belirlenmiş kriterlere uyan fırsatlarda hareket etmek daha az ama daha kaliteli işlem anlamına gelir.</p>
+<p>Çok sık alım-satım, komisyon maliyetini artırır ve davranışsal hataların sayısını çoğaltır. Her piyasa hareketine reaksiyon vermek yerine önceden belirlenmiş kriterlere göre hareket etmek, daha az sayıda ve daha gerekçeli işlem anlamına gelir.</p>
 
 <h2>Hata 5 — Emir Türlerini Anlamamak</h2>
-<p>Piyasa emri, limit emri, stop emri farkını bilmeden işlem yapmak, yanlış fiyattan gerçekleşen emirler veya tetiklenmemesi gereken stop-loss'lar yaratır. Temel emir türlerini anlamak, her yatırımcının tamamlaması gereken temel eğitimdir.</p>
+<p>Piyasa emri, limit emri, stop emri farkını bilmeden işlem yapmak, yanlış fiyattan gerçekleşen ya da beklenmedik anda tetiklenen emirler yaratır. Temel emir türlerini anlamak, her yatırımcının tamamlaması gereken temel eğitimdir.</p>
 
 <h2>Hata 6 — Habere Geç Tepki Vermek</h2>
-<p>KAP bildirimi çıktığında veya haber yayıldığında fiyat çoğunlukla zaten tepkisini vermiştir. "Büyük haber duydum, alayım" çoğu zaman tepede alış anlamına gelir. Piyasayı sürekli takip edemiyorsanız, haber odaklı kısa vadeli işlemlerden kaçınmak daha güvenlidir.</p>
+<p>KAP bildirimi çıktığında veya haber yayıldığında fiyat çoğunlukla zaten tepkisini vermiştir. "Büyük haber duydum, alayım" çoğu zaman tepede alış anlamına gelir. Piyasayı sürekli takip edemeyen yatırımcı için haber odaklı kısa vadeli işlemlerin riski yüksektir.</p>
 
 <h2>Hata 7 — Kaybeden Pozisyonu Ortalama Yapmak (Averaging Down)</h2>
-<p>Zarardaki hisseyi "daha ucuzladı" diye alarak ortalama maliyeti düşürmek, bazen işe yarar ama genellikle tehlikelidir. Temel sorunlar devam ediyorsa hisse düşmeye devam eder ve her "ortalama" yeni kayıp demektir. "İyi şirkete dip yaparken ekle" ile "batmakta olan şirkete para gömme" arasındaki farkı anlamak kritiktir.</p>
+<p>Zarardaki hisseyi "daha ucuzladı" diye alarak ortalama maliyeti düşürmek, bazen işe yarar ama genellikle tehlikelidir. Temel sorunlar devam ediyorsa hisse düşmeye devam eder ve her "ortalama" yeni kayıp demektir. Temelleri sağlam bir şirketin geçici düşüşü ile finansalları kalıcı biçimde bozulan bir şirketin düşüşü arasındaki farkı anlamak kritiktir.</p>
 
 <h2>Hata 8 — Performansı Kısa Vadede Ölçmek</h2>
 <p>Haftalık veya aylık bazda portföy performansını değerlendirip stratejileri değiştirmek, uzun vadeli bir yaklaşımı sabote eder. Hisse yatırımı 3-5 yıllık bir oyundur; kısa vadeli dalgalanmalar stratejik kararlar için kötü bir temel oluşturur.</p>
 
 <h2>Hata 9 — Piyasayı Tahmin Etmeye Çalışmak</h2>
-<p>"Piyasa önümüzdeki ay düşecek" gibi kesin tahminlere dayalı hareket etmek çoğunlukla başarısızlıkla sonuçlanır. Piyasanın yönünü sürekli ve doğru tahmin eden kimse yoktur. Tahmin değil tepki — sinyallere ve verilere dayalı hareket — çok daha sağlam bir yaklaşımdır.</p>
+<p>"Piyasa önümüzdeki ay düşecek" gibi kesin tahminlere dayalı hareket etmek çoğunlukla başarısızlıkla sonuçlanır. Piyasanın yönünü sürekli ve doğru tahmin eden kimse yoktur. Tahmin yerine verilere dayalı değerlendirme çok daha sağlam bir yaklaşımdır.</p>
 
-<h2>Hata 10 — Sisteme Uymamak</h2>
-<p>BorsaPusula gibi kural tabanlı bir sistem kullanmak ama "bu sefer farklı" diyerek sinyalleri görmezden gelmek, sistemi anlamsız kılar. Belirlenmiş kuralları tutarlı biçimde uygulamak, zaman zaman kaçırılan fırsatları telafi eden tutarlı bir disiplin yaratır. Sistem ancak tutarlı uygulandığında değer üretir.</p>
+<h2>Hata 10 — Kendi Kurallarına Uymamak</h2>
+<p>Kural koyup sonra "bu sefer farklı" diyerek her seferinde esnetmek, kural koymanın anlamını ortadan kaldırır. Belirlenmiş kuralları tutarlı biçimde uygulamak, duygusal kararları azaltan bir disiplin yaratır. Kurallar ancak tutarlı uygulandığında değer üretir.</p>
 
 <h2>Sonuç: Disiplin Zekanın Önünde</h2>
-<p>Borsa yatırımında başarı, olağanüstü zekaya değil tutarlı disipline bağlıdır. Yukarıdaki hataların farkında olmak ve sistematik olarak kaçınmak, ortalama yatırımcıyı piyasanın üzerine çıkarabilir. BorsaPusula sinyalleri, bu süreçte duygusal kararları azaltan ve kural tabanlı yaklaşımı destekleyen bir araç olarak tasarlanmıştır.</p>
+<p>Borsa yatırımında başarı, olağanüstü zekaya değil tutarlı disipline bağlıdır. Yukarıdaki hataların farkında olmak ve sistematik olarak kaçınmak, kararları daha tutarlı hale getirir. BorsaPusula'daki trend durumları (Güçlü Trend / Trend Bozuldu / Yatay) ve şirketlerin açıkladığı finansal veriler, bu süreçte kural tabanlı bakışı destekleyen araçlar olarak tasarlanmıştır.</p>
 """,
     "faqs": [
       {"q": "Yeni başlayan bir yatırımcı hangi hatayı en çok yapar?",
-       "a": "Stop-loss kullanmamak ve FOMO ile hareket etmek en sık görülen başlangıç hatalarıdır. İkisi birleşince küçük bir yanlış işlem büyük kayba dönüşür. Başlangıç için en önemli iki kural: Her işlemde stop-loss belirle ve sosyal medya 'fırsatlarına' hemen reaksiyon gösterme."},
+       "a": "Zarar senaryosunu önceden düşünmemek ve FOMO ile hareket etmek en sık görülen başlangıç hatalarıdır. İkisi birleşince küçük bir yanlış karar büyük kayba dönüşebilir. Sosyal medyadaki 'fırsat' paylaşımlarına anında tepki vermek bu hataların ortak noktasıdır."},
       {"q": "Aşırı işlem yapmaktan nasıl kaçınılır?",
-       "a": "Kural koyun: Sadece belirlenmiş kriterleri karşılayan hisselerde, belirlenmiş koşullarda (örneğin Supertrend dönüşü + hacim teyidi) işlem yapın. Günlük veya haftalık maksimum işlem sayısı sınırı da işe yarayabilir. Her harekete reaksiyon vermek yerine 'neden bu işlemi yapıyorum?' sorusunu cevaplamak yeterli filtre sağlar."},
+       "a": "Önceden belirlenmiş kriterler ve koşullar, işlem sıklığını doğal olarak sınırlar. Belirli bir dönem için işlem sayısı sınırı koymak da bir yöntemdir. Her harekete reaksiyon vermek yerine 'neden bu işlemi yapıyorum?' sorusunu cevaplamak yeterli filtre sağlar."},
       {"q": "Averaging down (ortalama yapma) ne zaman mantıklı?",
-       "a": "Uzun vadeli perspektiften, temel analiz sağlamsa ve trendin dönüşü için teknik teyit varsa ortalama yapmak mantıklı olabilir. Ancak düşen trendin devam ettiği, fundamentalin bozulduğu veya sektörün yapısal sorun yaşadığı durumlarda ortalama yapmak riski artırır. Kural olarak: Sinyal düşüşteyken, trendi teyit etmek için bekle."},
+       "a": "Uzun vadeli perspektiften, temel analiz sağlamsa ve trendin dönüşü için teknik teyit varsa ortalama yapmak mantıklı olabilir. Ancak düşen trendin devam ettiği, finansalların bozulduğu veya sektörün yapısal sorun yaşadığı durumlarda ortalama yapmak riski artırır."},
       {"q": "Sisteme ne zaman güvenilir?",
-       "a": "Her sistem tutarsız uygulandığında değersizdir. BorsaPusula sinyallerine güven, sistem kurallarını anlamaktan geçer: Supertrend nasıl çalışır? ADX ne zaman güçlü trend gösterir? Bu mekanizmaları anladıktan sonra kısa vadeli olumsuz sonuçlar sistemi terk etme nedeni olmaz. Uzun vadeli istatistiksel değerlendirme, sitemin gerçek performansını gösterir."}
+       "a": "Her sistem tutarsız uygulandığında değersizdir. Bir sisteme güven, kurallarını anlamaktan geçer: Supertrend nasıl çalışır? ADX ne zaman güçlü trend gösterir? Bu mekanizmaları anladıktan sonra kısa vadeli olumsuz sonuçlar sistemi terk etme nedeni olmaz. Uzun vadeli istatistiksel değerlendirme, sistemin gerçek performansını gösterir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
   },

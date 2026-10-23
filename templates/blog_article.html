@@ -157,7 +157,7 @@
       C-86 (D-67 ön yüz): bağlantı kanonik /hisse/<T>; ?tab=grafik/?tab=temel kopyaları kalktı. -#}
   {% set rt = article.related_tickers or [] %}{% set live_t = 'THYAO' if ('THYAO' in rt or not rt) else rt[0] %}
   <section class="art-live" aria-labelledby="artLiveTitle">
-    <h2 class="art-live-title" id="artLiveTitle">Bu göstergeyi canlı gör</h2>
+    <h2 class="art-live-title" id="artLiveTitle">Hisselerde gör</h2>
     <a class="art-live-row" href="/hisse/{{ live_t }}" data-ticker="{{ live_t }}">
       <span class="art-live-t">{{ live_t }}</span>
       <span class="art-live-v" id="artLiveVal"></span>
