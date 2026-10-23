@@ -21,8 +21,10 @@ kullandigi kaynaktan gelir:
 - SSS: ilk soru H1 ile ayni ("{Ad} ({T}) hissesi nasil?"), cevabi 3-4 cumlelik tam paragraf (Ozan 15.10:
   paragraf H1 altinda gosterilmez); sonra ne is yapar, temettu, bilanco, F/K + bir trend sorusu (O8: "teknik
   gorunumu nasil?"). FAQPage JSON-LD de bu listeden.
-- "{Ad} kisaca" karti (`kisaca`): Faaliyet, Son rapor (donem), Degerleme, Temettu (son 12 ay), Trend satirlari;
-  bos veri satiri yazilmaz, baslik olgulari tekrar edilmez.
+- "{Ad} kisaca" karti (`kisaca`): Faaliyet, Son rapor (donem), Borc durumu (D-69: net borc/FAVOK son yillik +
+  cari oran son bilanco; bankada kredi/mevduat), Degerleme, Sektordeki yeri (D-69: fund["sektor_sira"],
+  CPO-1826 F/K + ozsermaye karliligi sirasi), Temettu (son 12 ay), Trend satirlari; bos veri satiri
+  yazilmaz, baslik olgulari tekrar edilmez.
 
 Eksik veri -> alan None / bos liste; sablon gizler. Bir bolum hata verirse yalniz o bolum bos kalir.
 """
@@ -648,6 +650,52 @@ def _bilanco_cevabi(rec):
     return out
 
 
+def borc_durumu(rec):
+    """D-69 (Ozan notu O30): "Borç durumu" satırı -- sanayi/GYO'da net borç/FAVÖK (son yıllık rapor,
+    kiralamalar dahil; net nakitte "Net nakit X") + cari oran (son bilanço, dönem farketmez); bankada
+    kredi/mevduat oranı (son bilanço). kf.net_debt/_latest ile AYNI kaynak (_bilanco_cevabi'nin SSS
+    cevabıyla aynı mantık); değer yoksa yazılmaz, uydurulmaz."""
+    if not rec:
+        return None
+    tpl = kv.template_of(rec)
+    parca = []
+    if tpl == "banka":
+        rep = kv._latest(rec)
+        if rep and rep.get("mult"):
+            ln, dp = kf._v(rep, "loans"), kf._v(rep, "deposits")
+            if ln is not None and dp:
+                parca.append("Kredi/mevduat oranı %s" % yuzde(ln / dp * 100.0, 1))
+    elif tpl in ("sanayi", "gyo"):
+        yillik = [r for r in (rec.get("reports") or []) if r.get("period") == 4]
+        if yillik:
+            nd = kf.net_debt(max(yillik, key=lambda r: r["fy"]))
+            if nd and nd.get("net_borc") is not None and nd["net_borc"] < 0:
+                parca.append("Net nakit %s" % para(-nd["net_borc"] * nd["mult"]))
+            elif nd and nd.get("net_borc_favok") is not None:
+                parca.append("Net borç FAVÖK'ün %s katı" % sayi(nd["net_borc_favok"], 1))
+        rep = kv._latest(rec)
+        if rep and rep.get("mult"):
+            ca, cl = kf._v(rep, "current_assets"), kf._v(rep, "current_liabilities")
+            if _num(ca) and _num(cl) and cl > 0:
+                parca.append("Cari oran %s" % sayi(ca / cl, 2))
+    return " · ".join(parca) if parca else None
+
+
+_SEKTOR_SIRA_METIN = {"fk": "F/K'de %d şirket arasında %d.",
+                      "ozsermaye_karliligi": "Özsermaye kârlılığında %d şirket arasında %d."}
+
+
+def sektor_sirasi(sira):
+    """D-69 (Ozan notu O30): "Sektördeki yeri" satırı -- fund["sektor_sira"] (kap_temel_v2.sector_rank,
+    CPO-1826) F/K ve özsermaye kârlılığında sektör içi sıra. <5 akran ya da hissenin kendi değeri yoksa
+    sector_rank zaten None döner, o metrik atlanır; ikisi de yoksa satır yazılmaz."""
+    if not sira:
+        return None
+    parca = [_SEKTOR_SIRA_METIN[k] % (sira[k]["toplam"], sira[k]["sira"])
+             for k in ("fk", "ozsermaye_karliligi") if (sira.get(k) or {}).get("sira")]
+    return " ".join(parca) if parca else None
+
+
 def _temettu_cevabi(tm, kap):
     if not tm:
         return None
@@ -770,7 +818,7 @@ def _oran_kisa(r, etiketli):
     return s
 
 
-def kisaca(ad, t, sektor, faaliyet, kap, rapor, dg, tm, tr):
+def kisaca(ad, t, sektor, faaliyet, kap, rapor, dg, tm, tr, borc=None, sira=None):
     """Ozet sekmesindeki "{Ad} kisaca" karti: kendi donemini tasiyan etiket/deger satirlari. Veri yoksa satir
     yazilmaz ("—" yok). Baslik olgulari (piyasa degeri, ozsermaye karliligi, marj) burada tekrar edilmez."""
     rows = []
@@ -799,6 +847,8 @@ def kisaca(ad, t, sektor, faaliyet, kap, rapor, dg, tm, tr):
         if rapor.get("ozkaynak"):
             parca.append("Dönem sonu özkaynaklar %s" % rapor["ozkaynak"]["metin"])
         rows.append({"anahtar": "son_rapor", "etiket": "Son rapor (%s)" % don, "deger": " · ".join(parca)})
+    if borc:
+        rows.append({"anahtar": "borc", "etiket": "Borç durumu", "deger": borc})
     if dg and not dg.get("pay_uyumsuz"):
         oran = [r for r in (dg["fk"], dg["pd_dd"]) if r["deger"] is not None]
         parca = []
@@ -811,6 +861,8 @@ def kisaca(ad, t, sektor, faaliyet, kap, rapor, dg, tm, tr):
             if dg.get("hukum") in _HUKUM_KISA:
                 s += " →" + NB + _HUKUM_KISA[dg["hukum"]]   # ok, hukumle ayni satirda kalir
             rows.append({"anahtar": "degerleme", "etiket": "Değerleme", "deger": s})
+    if sira:
+        rows.append({"anahtar": "sektor_sira", "etiket": "Sektördeki yeri", "deger": sira})
     if tm:
         if tm.get("odeme_var") and tm.get("brut_metin"):
             s = "Hisse başına brüt %s" % tm["brut_metin"]
@@ -855,6 +907,8 @@ def build(ticker, name=None, sector=None, rec=None, fund=None, entry=None, signa
     rapor = _guvenli("son_rapor", son_rapor, rec)
     tm = _guvenli("temettu", temettu, rec, fund, today, price)
     tr = _guvenli("trend", trend, signal)
+    borc = _guvenli("borc_durumu", borc_durumu, rec)
+    sira = _guvenli("sektor_sirasi", sektor_sirasi, (fund or {}).get("sektor_sira"))
     bl = _guvenli("bildirimler", bildirimler, items) or []
     bliste = _guvenli("bildirim_listesi", bildirimler, items, n=10) or []
     mt = _guvenli("mini_tablo", mini_tablo, rec)
@@ -865,6 +919,6 @@ def build(ticker, name=None, sector=None, rec=None, fund=None, entry=None, signa
         "olgular": olg, "degerleme": dg, "son_rapor": rapor, "temettu": tm, "trend": tr,
         "bildirimler": bl, "bildirim_listesi": bliste, "mini_tablo": mt, "paragraf": par,
         "meta": _guvenli("meta", meta_aciklama, t, kap, dg, tm, tr),
-        "kisaca": _guvenli("kisaca", kisaca, ad, t, sector, faaliyet, kap, rapor, dg, tm, tr),
+        "kisaca": _guvenli("kisaca", kisaca, ad, t, sector, faaliyet, kap, rapor, dg, tm, tr, borc, sira),
         "sss": _guvenli("sss", sss, ad, t, sector, faaliyet, tm, kap, rec, dg, tr, par) or [],
     }

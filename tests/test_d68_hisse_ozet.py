@@ -286,15 +286,24 @@ def test_kisaca_karti_satirlari():
     k = oz["kisaca"]
     assert k["baslik"] == "Test Havayolu kısaca" and k["alt"] == "14 Ekim 2026 kapanışı itibarıyla"
     r = {x["anahtar"]: (x["etiket"], x["deger"]) for x in k["satirlar"]}
-    assert list(r) == ["faaliyet", "son_rapor", "degerleme", "temettu", "trend"]
+    assert list(r) == ["faaliyet", "son_rapor", "borc", "degerleme", "temettu", "trend"]
     assert r["faaliyet"] == ("Faaliyet", "Ulaştırma sektörü · Yolcu ve kargo taşımacılığı")
     assert r["son_rapor"][0] == "Son rapor (2026 ilk yarı)"
     assert r["son_rapor"][1].startswith("Hasılat 260.000,00" + NB + "₺ (+%23,8) · Net kâr")
+    assert r["borc"] == ("Borç durumu", "Cari oran 1,50")   # yıllık raporda bilanço kalemi yok, son bilanço var
     assert r["degerleme"][1] == "F/K 3,5 (sektör ortancası 12,5) · PD/DD 0,38 (1,50) →" + NB + "makul"
     assert r["temettu"] == ("Temettü (son 12 ay)", "Hisse başına brüt 2,25" + NB + "₺ · verim %4,50")
     assert r["trend"] == ("Trend", "28 Eylül 2026'dan beri Trend Bozuldu")
     blob = " ".join(x["deger"] for x in k["satirlar"])
     assert "—" not in blob and "Piyasa değeri" not in blob and "Özsermaye" not in blob   # başlık olguları tekrar edilmez
+    # sektör sırası varsa "Değerleme"den sonra, başka satırlar aynı kalır
+    sira = {"fk": {"sira": 3, "toplam": 12, "kume": "kap_sektor"},
+            "ozsermaye_karliligi": {"sira": 7, "toplam": 12, "kume": "kap_sektor"}}
+    k2 = _build(fund=_fund(kap={"temettu": None}, sektor_sira=sira))["kisaca"]
+    assert [x["anahtar"] for x in k2["satirlar"]] == ["faaliyet", "son_rapor", "borc", "degerleme",
+                                                       "sektor_sira", "temettu", "trend"]
+    assert {x["anahtar"]: x for x in k2["satirlar"]}["sektor_sira"]["deger"] == \
+        "F/K'de 12 şirket arasında 3. Özsermaye kârlılığında 12 şirket arasında 7."
     # veri yoksa satır yok; hiç satır yoksa kart yok
     oz = _build(kap_info=None, rec=None, fund={}, signal={"price": 1.0})
     assert oz["kisaca"]["satirlar"] == [{"anahtar": "faaliyet", "etiket": "Faaliyet", "deger": "Ulaştırma sektörü"}]
@@ -305,6 +314,40 @@ def test_kisaca_karti_satirlari():
     k = _build(rec=rec, fund=_fund())["kisaca"]
     r = {x["anahtar"]: (x["etiket"], x["deger"]) for x in k["satirlar"]}
     assert r["son_rapor"][0] == "Son rapor (2026 ilk yarı, TL'ye çevrilmiş)" and r["temettu"][1] == "Ödeme yok"
+
+
+def test_borc_durumu_sanayi_net_borc_ve_net_nakit():
+    rec = {"flags": {"banka": False}, "derived": {"format": "sanayi"}, "sector": "Ulaştırma",
+           "reports": [_rep(2025, 4, {"st_borrowings": (120, 100, None, None), "lt_borrowings": (80, 60, None, None),
+                                      "cash": (40, 30, None, None), "operating_profit": (90, 70, None, None),
+                                      "d_and_a": (10, 8, None, None)}),
+                       _rep(2026, 2, {"current_assets": (300, 280, None, None),
+                                     "current_liabilities": (150, 140, None, None)})]}
+    assert ho.borc_durumu(rec) == "Net borç FAVÖK'ün 1,6 katı · Cari oran 2,00"
+    # kasa borçtan fazla -> net nakit (kat ifadesi yazılmaz)
+    rec["reports"][0]["items"]["cash"]["cur"] = 220
+    assert ho.borc_durumu(rec) == "Net nakit 20.000,00" + NB + "₺ · Cari oran 2,00"
+    # bilanço kalemi hiç yoksa satır yazılmaz
+    assert ho.borc_durumu({"flags": {"banka": False}, "derived": {"format": "sanayi"},
+                           "reports": [_rep(2025, 4, {"revenue": (100, 90, None, None)})]}) is None
+    assert ho.borc_durumu(None) is None
+
+
+def test_borc_durumu_banka_kredi_mevduat():
+    assert ho.borc_durumu(_banka()) == "Kredi/mevduat oranı %86,5"
+
+
+def test_sektor_sirasi():
+    sira = {"fk": {"sira": 3, "toplam": 12, "kume": "kap_sektor"},
+            "pd_dd": {"sira": 5, "toplam": 12, "kume": "kap_sektor"},
+            "ozsermaye_karliligi": {"sira": 7, "toplam": 12, "kume": "kap_sektor"}}
+    assert ho.sektor_sirasi(sira) == "F/K'de 12 şirket arasında 3. Özsermaye kârlılığında 12 şirket arasında 7."
+    # <5 akran / kendi değeri yok -> sector_rank o metriği None döner, atlanır
+    assert ho.sektor_sirasi({"fk": None, "ozsermaye_karliligi": None}) == None
+    assert ho.sektor_sirasi({"fk": {"sira": 2, "toplam": 6, "kume": "kap_sektor"}, "ozsermaye_karliligi": None}) == \
+        "F/K'de 6 şirket arasında 2."
+    assert ho.sektor_sirasi(None) is None
+    assert ho.sektor_sirasi({}) is None
 
 
 def test_faaliyet_kisa_tek_satir():
