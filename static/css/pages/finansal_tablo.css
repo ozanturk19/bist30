@@ -87,6 +87,26 @@
 .ft-t .ft-g0{padding-left:14px}.ft-t .ft-g1{padding-left:26px}.ft-t .ft-g2{padding-left:38px}
 .ft-t .ft-g3{padding-left:50px}.ft-t .ft-g4{padding-left:62px}.ft-t .ft-g5{padding-left:74px}
 .ft-sade .ft-d{display:none}
+/* C-P1-2210f: yıl başlığı sayfa kaydırılınca üst menünün altında kalır (JS thead'i kaydırır; iç dikey kaydırma yok),
+   sağda devam ipucu (yalnız sağda içerik varken), ≤900 px'te sütunlar kutuya tam sığar + sütun başına yaslanır. */
+.ft-t thead{position:relative;z-index:3}
+.ft-scroll.ft-daha{-webkit-mask-image:linear-gradient(to left,transparent,#000 14px);mask-image:linear-gradient(to left,transparent,#000 14px)}
+@media (max-width:900px){
+  .ft-scroll{container-type:inline-size;scroll-snap-type:x mandatory;scroll-padding-left:28%}
+  .ft-t{width:auto;min-width:0}
+  .ft-t th,.ft-t td{box-sizing:border-box}
+  .ft-t .ft-col0{width:28cqi}
+  .ft-t col[data-rapor]{width:24cqi}
+  .ft-t .ft-c0{width:28cqi;min-width:28cqi;max-width:28cqi}
+  .ft-t .ft-don th:not(.ft-c0){width:24cqi;min-width:24cqi;max-width:24cqi;scroll-snap-align:start}
+}
+@media (max-width:600px){
+  .ft-scroll{scroll-padding-left:34%}
+  .ft-t .ft-col0{width:34cqi}
+  .ft-t col[data-rapor]{width:33cqi}
+  .ft-t .ft-c0{width:34cqi;min-width:34cqi;max-width:34cqi}
+  .ft-t .ft-don th:not(.ft-c0){width:33cqi;min-width:33cqi;max-width:33cqi}
+}
 .ft-not{margin:8px 2px 0;font-size:var(--bp-type-sm);line-height:1.45;color:var(--bp-text-3)}
 .ft-son{margin:16px 2px 0;font-size:var(--bp-type-sm);color:var(--bp-text-3)}
 .ft-disc{margin:32px 0 0;font-size:var(--bp-type-sm);color:var(--bp-text-3)}
@@ -103,7 +123,7 @@
   .ft-ctl{width:100%;justify-content:space-between}
   .ft-seg{padding:0 14px}
   .ft-t th,.ft-t td{padding:8px 10px}
-  .ft-t .ft-c0{width:auto;min-width:132px;max-width:44vw;font-size:var(--bp-type-sm)}
+  .ft-t .ft-c0{font-size:var(--bp-type-sm)}
   .ft-t .ft-g0{padding-left:10px}.ft-t .ft-g1{padding-left:16px}.ft-t .ft-g2{padding-left:22px}
   .ft-t .ft-g3{padding-left:28px}.ft-t .ft-g4{padding-left:34px}.ft-t .ft-g5{padding-left:40px}
 }

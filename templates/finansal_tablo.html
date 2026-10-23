@@ -205,7 +205,31 @@
     var acik = tum.getAttribute('aria-pressed') !== 'true';
     tum.setAttribute('aria-pressed', acik ? 'true' : 'false');
     sec.classList.toggle('ft-sade', !acik);
+    yerles();
   });
+  /* C-P1-2210f: yapışkan yıl başlığı (overflow-x kutusunda CSS sticky çalışmaz) + sağ kenar ipucu */
+  var kutular = [].slice.call(sec.querySelectorAll('.ft-scroll'));
+  var bekle = false;
+  function yerles() {
+    bekle = false;
+    var hdr = document.querySelector('body > header');
+    var ust = hdr ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0;
+    kutular.forEach(function (k) {
+      if (!k.offsetParent) return;
+      var th = k.querySelector('thead');
+      var r = k.getBoundingClientRect();
+      var kay = ust - r.top - 2; /* kutu çerçevesi 1 px + menü çizgisinin altına 1 px: arada boşluk kalmasın */
+      var sinir = r.height - th.offsetHeight - 48;
+      th.style.transform = kay > 0 && sinir > 0 ? 'translateY(' + Math.min(kay, sinir) + 'px)' : '';
+      k.classList.toggle('ft-daha', k.scrollLeft + k.clientWidth < k.scrollWidth - 2);
+    });
+  }
+  function iste() { if (!bekle) { bekle = true; requestAnimationFrame(yerles); } }
+  window.addEventListener('scroll', iste, { passive: true });
+  window.addEventListener('resize', iste);
+  kutular.forEach(function (k) { k.addEventListener('scroll', iste, { passive: true }); });
+  tabs.forEach(function (b) { b.addEventListener('click', iste); });
+  yerles();
 })();
 </script>
 
