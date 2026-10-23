@@ -60,9 +60,15 @@ def main():
 
     client = kf.KapClient()
     fixed = 0
-    for idx in ids:
-        old = store.doc(idx) or {}
-        detail = kf.parse_detail(client.page(idx))
+    for i, idx in enumerate(ids):
+        try:
+            old = store.doc(idx) or {}
+            detail = kf.parse_detail(client.page(idx))
+        except kf.KapStop as e:
+            # KAP 429/5xx: nazikce dur -- bu betik idempotent (kirli kalanlar bir
+            # sonraki kosuda tekrar secilir), kalanlari zorlamaya calismaz.
+            print("KAP durdu (%s), %d/%d islendi, kalan bir sonraki kosuda" % (e, i, len(ids)))
+            break
         doc = {**old, **detail}
         store.save_doc(idx, doc)
         if not _is_dirty(doc):
