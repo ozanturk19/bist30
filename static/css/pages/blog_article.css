@@ -77,7 +77,7 @@
 
   .read-progress {
 
-    position: fixed; top: env(safe-area-inset-top, 0px); left: 0;
+    position: fixed; top: var(--bp-anchor-macro, env(safe-area-inset-top, 0px)); left: 0; /* makro şeridin altında */
     width: 0%; height: 3px; z-index:var(--bp-z-toast);
     background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-art-cyan) 50%, var(--bp-art-violet) 100%);
     will-change: width; pointer-events: none;

@@ -52,7 +52,7 @@
       'color:var(--bp-brand);font-size:var(--bp-type-xs);font-weight:700;cursor:help;vertical-align:baseline;padding:0;font-family:inherit}' +
       '.bp-lm-btn:hover{background:rgba(var(--bp-brand-rgb),.25)}' +
       /* C-71 K28: 16 px simge; görünüm aynı, isabet alanı 28 px (cümle içinde komşu kelimeyi örtmeyecek kadar) */
-      '.bp-lm-btn{position:relative}.bp-lm-btn::before{content:"";position:absolute;inset:-6px;border-radius:50%}' +
+      '.bp-lm-btn{position:relative}.bp-lm-btn::before{content:"";position:absolute;inset:-12px;border-radius:50%}' +
       '.bp-lm-pop{position:absolute;z-index:var(--bp-z-toast);max-width:280px;background:var(--bp-raised);' +
       'border:1px solid var(--bp-line);' +
       'border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--bp-text);' +

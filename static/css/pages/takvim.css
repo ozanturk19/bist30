@@ -179,7 +179,7 @@ details.tk-und summary i{font-style:normal;font-weight:500;color:var(--bp-text-3
   .tk-strip-h{margin:0 0 6px;flex-wrap:nowrap}
   .tk-strip .tk-flt{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -8px;padding:2px 28px 2px 8px;width:calc(100% + 16px);scroll-padding-inline:8px 32px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
   .tk-strip .tk-flt::-webkit-scrollbar{display:none}
-  .tk-flt button{position:relative;min-height:36px;padding:5px 12px}
+  .tk-flt button{position:relative;min-height:40px;padding:5px 12px}
   .tk-flt button::after{content:'';position:absolute;inset:-4px -2px}
   .tk-range,.tk-snv,.tk-strip-f{display:none}
   .tk-sc{gap:10px;scroll-snap-type:x proximity;padding-right:28px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}

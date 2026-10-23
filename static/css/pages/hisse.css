@@ -844,7 +844,9 @@
     .hx-bp-f{ display:none; }
   }
   @media (max-width:360px){
-    .hx-acts .hx-act--ico{ display:none; }
+    /* 320'de dört düğme fiyatı kırpıyordu: eylemler fiyatın altında kendi satırında, hepsi erişilebilir */
+    .hx-head{ grid-template-areas:"id id" "price price" "chg chg" "acts acts" "facts facts" "sub sub"; }
+    .hx-acts{ justify-self:start; margin:8px 0 4px; }
   }
 
     .da-util-eyebrow{
@@ -1025,7 +1027,7 @@
 .tv-foot { margin: 10px 0 0; font-size: var(--bp-type-sm); line-height: 1.5; color: var(--bp-text-3); }
 .tv-segs { display: flex; gap: 8px; flex-wrap: wrap; }
 .tv-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: var(--bp-r-md); border: 1px solid var(--bp-line); background: var(--bp-bg); }
-.tv-seg button { min-height: 32px; padding: 6px 10px; border: 0; border-radius: var(--bp-r-sm); background: transparent; color: var(--bp-text-3); font: 600 var(--bp-type-sm) 'Space Grotesk', system-ui, sans-serif; cursor: pointer; }
+.tv-seg button { min-height: 40px; padding: 6px 10px; border: 0; border-radius: var(--bp-r-sm); background: transparent; color: var(--bp-text-3); font: 600 var(--bp-type-sm) 'Space Grotesk', system-ui, sans-serif; cursor: pointer; }
 .tv-seg button[aria-pressed="true"] { background: var(--bp-surface3); color: var(--bp-text); }
 .tv-seg button:disabled { opacity: .35; cursor: default; }
 .tv-seg button:focus-visible { outline: 2px solid var(--bp-art-cyan); outline-offset: 1px; }
