@@ -372,6 +372,7 @@ def mini_tablo(rec, n=4):
         sutunlar.append({"ust": "%s–%s" % (AY_KISA[a - 1], AY_KISA[b - 1]), "alt": str(rep["fy"]),
                          "tam": "%s–%s %d" % (AY[a - 1], AY[b - 1], rep["fy"]), "donem": rep["donem"]})
     for key, etiket in _MINI_SATIR[tpl]:
+        kar = key == "net_income_parent"
         ham = []
         for rep in reps:
             if key == "ozkaynak":
@@ -379,7 +380,8 @@ def mini_tablo(rec, n=4):
             else:
                 cols = ("cur", "prev") if rep["period"] == 1 else ("q_cur", "q_prev")
                 c, p = _kalem(rep, key, *cols)
-            ham.append(None if c is None else (c * rep["mult"], kt.degisim(c, p) if p is not None else None))
+            ham.append(None if c is None else (c * rep["mult"], kt.degisim(c, p) if p is not None else None,
+                                               kf.sign_reversal(c, p) if kar else None))
         dolu = [h[0] for h in ham if h]
         if not dolu:
             continue
@@ -394,7 +396,8 @@ def mini_tablo(rec, n=4):
                 continue
             x = h[0] / bolen
             hucre.append({"sayi": sayi(x, 0 if abs(x) >= 100 else (1 if abs(x) >= 10 else 2)), "metin": para(h[0]),
-                          "degisim": degisim_metni(h[1]) if h[1] is not None else None, "eksi": h[0] < 0})
+                          "degisim": degisim_metni(h[1]) if h[1] is not None else None, "eksi": h[0] < 0,
+                          "don": h[2]})
         satirlar.append({"anahtar": key, "etiket": etiket, "birim": birim, "hucreler": hucre})
     if not satirlar:
         return None

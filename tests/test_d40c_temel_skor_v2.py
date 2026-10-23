@@ -171,7 +171,7 @@ def test_tuprs_sanayi_eksenleri_cumleler_ve_piotroski():
     assert k["kalite"]["girdiler"]["roe"]["puan"] == 50.0                 # 5 sirketin ortasi
     assert k["kalite"]["cumle"] == ("Özsermaye kârlılığı son 12 ayda %14,8; 2025 net kâr marjı %3,6; "
                                     "sağlamlık kontrolü 7/9.")
-    assert k["bilanco"]["cumle"] == "Net nakit 57,0 Mrd ₺ · cari oran 1,40."
+    assert k["bilanco"]["cumle"] == "Net nakit 57,0 Mrd ₺ · cari oran 1,40 (2025 sonu)."
     assert k["buyume"]["cumle"].startswith("2025: hasılat −%21,7, net kâr +%23,1 · 2026 ilk yarı: hasılat +%")
     assert k["buyume"]["cumle"].endswith("(enflasyon düzeltmeli).")
     assert k["temettu"]["cumle"].startswith("Son 12 ay temettü verimi %") and "önceki 12 ayda da ödeme var" in k["temettu"]["cumle"]
@@ -257,7 +257,7 @@ def test_thyao_duzeltmesiz_esas_ve_kucuk_sektorde_hukum_yok():
     d = ts.score_universe({"THYAO": t}, {"THYAO": "Ulaştırma"})["THYAO"]["detay"]
     assert d["degerleme"]["hukum"] is None and d["eksenler"]["degerleme"]["puan"] is None
     assert "(TL'ye çevrilmiş)" in d["eksenler"]["buyume"]["cumle"]
-    assert d["eksenler"]["bilanco"]["cumle"] == "Net borç FAVÖK'ün 2,68 katı · cari oran 0,99."
+    assert d["eksenler"]["bilanco"]["cumle"] == "Net borç FAVÖK'ün 2,68 katı · cari oran 0,99 (2025 sonu)."
     assert d["eksenler"]["temettu"]["cumle"] == "Son 12 ayda ödeme yok · önceki 12 ayda ödeme var."
     # esasa duyarli gosterge (ozsermaye karliligi) reel TL sirketleriyle ayni grupta siralanmaz
     tu = _inp("TUPRS")

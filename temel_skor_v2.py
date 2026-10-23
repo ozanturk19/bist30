@@ -528,7 +528,7 @@ def _sentences(inp, ax, med, check):
     if tpl in ("banka", "sigorta") and inp.get("ozkaynak_varlik") is not None:
         b.append("özkaynak / varlık " + _pc(inp["ozkaynak_varlik"]))
     if inp.get("cari_oran") is not None:
-        b.append("cari oran " + _num(inp["cari_oran"]))
+        b.append("cari oran %s%s" % (_num(inp["cari_oran"]), " (%d sonu)" % yil if yil else ""))
     s["bilanco"] = (_cap(" · ".join(b)) + ".") if b else None
     if tpl == "sigorta":
         s["bilanco"] = "Teknik karşılık ve sermaye yeterliliği kalemleri okunmadığı için hesaplanmıyor."

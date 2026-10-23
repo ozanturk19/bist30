@@ -133,6 +133,7 @@ def test_mini_tablo_son_dort_ceyrek_dorduncu_turetilmez():
     assert [h["degisim"] for h in hs["hucreler"]] == ["+%27,3", "+%20,0", "+%22,2", "+%25,0"]
     nk = m["satirlar"][1]["hucreler"]
     assert nk[1]["degisim"] is None and nk[1]["eksi"]          # 8 -> -5: işaret değişti, yüzde yok
+    assert nk[1]["don"] == "zarara_dondu" and nk[0]["don"] is None and nk[2]["don"] is None  # CPO-1837
     assert m["soru"] == "Son dört çeyrekte hasılat ve net kâr nasıl değişti?"
     assert any("enflasyon düzeltmeli" in n.lower() for n in m["notlar"])
     bm = ho.mini_tablo(_banka())
