@@ -2737,7 +2737,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "desc": "BIST hisse senedi alım satım kazançlarında stopaj, temettü vergisi ve yıllık beyan yükümlülüğü. Türkiye'de borsa vergisi rehberi 2026.",
     "cat": "Temel Kavramlar",
     "date": "2026-05-01",
-    "updated": "2026-10-15",
+    "updated": "2026-10-23",
     "mins": 7,
     "body": """
 <p>Türkiye'de tam mükellef bireysel yatırımcının BIST'te işlem gören hisse senedi alım satım kazancına <strong>%0 stopaj</strong> uygulanır ve bu kazanç için ayrıca beyanname verilmez. Şirketlerin dağıttığı temettüden ise <strong>%15 stopaj</strong> kesilir. Aşağıda 2026 itibarıyla geçerli kurallar ayrıntılı anlatılıyor.</p>
@@ -2752,7 +2752,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Temettü Gelirlerinde Vergi</h2>
 <p>Türk şirketlerinin dağıttığı temettüler üzerinden <strong>%15 stopaj</strong> kesilir. Bu kesinti aracı kurum tarafından otomatik yapılır ve size net tutar yatırılır.</p>
 <ul>
-  <li>Temettü geliri yıllık 230.000 TL'yi (2026 tahmini sınır, her yıl güncellenir) aşarsa <strong>beyanname verilmesi</strong> gerekebilir</li>
+  <li>Temettünün yarısı gelir vergisinden istisnadır; kalan yarının yıllık toplamı 2026 gelirleri için 400.000 TL'yi (Gelir Vergisi Kanunu 103. madde ikinci dilim tutarı; 2025 gelirleri için 330.000 TL, her yıl güncellenir) aşarsa <strong>beyanname verilmesi</strong> gerekir</li>
   <li>Yıllık toplam temettü geliriniz bu sınırın altındaysa ayrıca beyan yükümlülüğünüz yoktur</li>
   <li>Stopaj nihai vergi olarak kabul edilir çoğu durumda</li>
 </ul>
@@ -2769,10 +2769,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>Zarar Mahsubu — Kayıpları Kazançtan Düşmek</h2>
-<p>Stopaj matrahı hesaplanırken aynı takvim yılı içindeki kayıplar kazançlardan mahsup edilebilir. Örneğin:</p>
+<p>Gelir Vergisi Kanunu Geçici Madde 67'ye göre aracı kurum, aynı takvim yılında aynı türdeki işlemlerden doğan zararları kazançlardan düşerek stopaj matrahını bulur. BIST hisselerinde oran %0 olduğu için bu mahsup pratikte vergi tutarını değiştirmez:</p>
 <ul>
-  <li>AKBNK'tan 50.000 TL kazandınız, EREGL'den 20.000 TL kaybettiniz → net kazanç 30.000 TL üzerinden stopaj hesaplanır</li>
-  <li>Bir yılda toplam zarar ettiyseniz bu zarar sonraki yıla devredilebilir (aynı kategoride)</li>
+  <li>AKBNK'tan 50.000 TL kazandınız, EREGL'den 20.000 TL kaybettiniz → net kazanç 30.000 TL olur; %0 oranla kesilecek stopaj yine 0 TL'dir</li>
+  <li>Mahsup yalnız aynı takvim yılı içinde yapılır; yıl sonunda kalan zarar sonraki yıla devretmez</li>
 </ul>
 
 <h2>Kaldıraçlı İşlemler (Forex, Varant) Vergisi</h2>
@@ -2825,7 +2825,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Temettü almak vergiye tabi mi?",
        "a": "Evet. Dağıtılan temettüler üzerinden %15 stopaj kesilir. Yıllık toplam temettü geliriniz yasal sınırı aşarsa beyanname vermeniz gerekebilir."},
       {"q": "Bir hisseden zarar ettim, başka bir hisseden kazandım. Vergi nasıl hesaplanır?",
-       "a": "Aynı yıl içindeki hisse kayıpları kazançlardan mahsup edilebilir. Net kazanç üzerinden stopaj hesaplanır. Yıl sonu kazanç/kayıp özeti için aracı kurumunuzla iletişime geçin."},
+       "a": "Aynı yıl içindeki hisse kayıpları kazançlardan mahsup edilir. BIST hisselerinde stopaj oranı %0 olduğu için net kazanç üzerinden kesilecek vergi de 0 TL'dir. Yıl sonu kazanç/kayıp özeti için aracı kurumunuzla iletişime geçin."},
       {"q": "Yabancı hisse veya kripto kazançlarım için ne yapmalıyım?",
        "a": "Yabancı borsa kazançları ve kripto para gelirleri BIST hisselerinden farklı kurallara tabidir. Bu konularda mutlaka mali müşavir veya vergi uzmanına danışmanız önerilir."}
     ],
@@ -3839,13 +3839,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Temelde üç unsuru vardır:</p>
 <ol>
   <li><strong>Katılımcı katkısı:</strong> Ayda belirlediğiniz tutarı ödersiniz</li>
-  <li><strong>Devlet katkısı (%30):</strong> Devlet, ödediğiniz tutarın %30'unu sisteme ek katkı olarak ekler</li>
+  <li><strong>Devlet katkısı (%20):</strong> Devlet, ödediğiniz tutarın %20'sini sisteme ek katkı olarak ekler (1 Ocak 2026'dan önce %30'du)</li>
   <li><strong>Fon getirisi:</strong> Biriken para yatırım fonlarında değerlendirilir</li>
 </ol>
 
 <div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
   <strong style="color:var(--bp-up)">✅ Devlet Katkısı Avantajı:</strong>
-  <p style="margin:8px 0 0 0">Aylık 1.000 TL katkı ödüyorsanız devlet 300 TL ekler → 1.300 TL fona yatırılır. Asgari ücretin %25'i kadar olan limit dahilinde katkı için bu oran uygulanır (2026 limitlerini kontrol edin).</p>
+  <p style="margin:8px 0 0 0">Aylık 1.000 TL katkı ödüyorsanız devlet 200 TL ekler → 1.200 TL fona yatırılır. Asgari ücretin %25'i kadar olan limit dahilinde katkı için bu oran uygulanır (2026 limitlerini kontrol edin).</p>
 </div>
 
 <h2>BES Temel Özellikleri (2026)</h2>
@@ -3861,7 +3861,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">Devlet katkısı oranı</td>
-      <td style="padding:8px 12px">%30 (ek devlet katkısı sistemine göre değişir)</td>
+      <td style="padding:8px 12px">%20 (1 Ocak 2026'dan itibaren; öncesinde %30)</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">Emeklilik yaşı</td>
@@ -3903,7 +3903,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px">Devlet katkısı</td>
-      <td style="padding:8px 12px">✅ %30</td>
+      <td style="padding:8px 12px">✅ %20</td>
       <td style="padding:8px 12px">❌ Yok</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
@@ -4206,12 +4206,12 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Saat 09:40-10:00 arasında yatırımcılar emir girebilir ancak eşleşme gerçekleşmez. 10:00'de sistem, girilen tüm emirleri değerlendirerek en fazla işlemi sağlayan "açılış fiyatını" tek seferde belirler. Bu fiyat aynı zamanda gün içindeki ilk işlem fiyatıdır.</p>
 <ul>
   <li>Açılış öncesinde girilmiş emirlerin büyük kısmı bu seansta eşleşir</li>
-  <li>Fiyat hareket sınırı: bir önceki kapanışa göre ±%20 (devre kesici mekanizması)</li>
+  <li>Günlük fiyat değişim sınırı (tavan/taban): baz fiyata (genellikle bir önceki kapanış) göre ±%10</li>
   <li>Haber bekleyen veya bilanço açıklayan hisseler için volatilite yüksek olabilir</li>
 </ul>
 
 <h2>Sürekli Müzayede (10:00 – 18:00)</h2>
-<p>Ana işlem saatidir. Limit veya piyasa emri girildiğinde eşleşme anlık gerçekleşir. BIST hisselerinde 8 saatlik bu pencere, Avrupa borsalarıyla (Londra, Frankfurt) kısmen örtüşür ancak ABD açılışını (15:30 TRT) da kapsar.</p>
+<p>Ana işlem saatidir. Limit veya piyasa emri girildiğinde eşleşme anlık gerçekleşir. BIST hisselerinde 8 saatlik bu pencere, Avrupa borsalarıyla (Londra, Frankfurt) kısmen örtüşür ancak ABD açılışını da kapsar: New York borsaları yaz saatinde 16:30'da, 1 Kasım 2026'dan itibaren (ABD kış saati) 17:30'da açılır (TSİ).</p>
 
 <h2>Kapanış Seansı (18:00 – 18:10)</h2>
 <p>Günün kapanış fiyatını belirleyen 10 dakikalık bir "açık artırma" seansıdır. Endeks hesaplamalarında ve bazı türev ürünlerin uzlaşma fiyatında kullanılır. Bu saatte fiyatlar beklenmedik şekilde hareket edebilir — bunu göz önünde bulundurun.</p>
@@ -4230,8 +4230,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>23 Nisan — Ulusal Egemenlik ve Çocuk Bayramı</li>
   <li>1 Mayıs — Emek ve Dayanışma Günü</li>
   <li>19 Mayıs — Atatürk'ü Anma, Gençlik ve Spor Bayramı</li>
-  <li>Ramazan Bayramı (2026: yaklaşık 20-22 Mart)</li>
-  <li>Kurban Bayramı (2026: yaklaşık 27-30 Mayıs + arife)</li>
+  <li>Ramazan Bayramı — 20-22 Mart 2026 (arife 19 Mart yarım gün)</li>
+  <li>Kurban Bayramı — 27-30 Mayıs 2026 (arife 26 Mayıs yarım gün)</li>
   <li>15 Temmuz — Demokrasi ve Millî Birlik Günü</li>
   <li>30 Ağustos — Zafer Bayramı</li>
   <li>29 Ekim — Cumhuriyet Bayramı</li>
@@ -5858,7 +5858,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Temettü tuzağı nedir?",
        "a": "Temettü tuzağı, görünürde çok yüksek temettü verimine sahip bir hissenin aslında temel sorunları nedeniyle değer kaybetmesi durumudur. Hisse fiyatı düştüğü için temettü verimi yüksek görünür, ama şirketin uzun vadeli temettü ödeme kapasitesi de sorgulanır hale gelir. Bu nedenle yüksek verim tek başına yeterli kriter değildir."},
       {"q": "Temettü geliri vergilendirilir mi?",
-       "a": "Türkiye'de gerçek kişilerin tam mükellef kurumlardaki hisselerinden aldıkları temettünün yarısı gelir vergisinden muaf tutulur (istisna uygulaması). Kalan yarı için 2025 itibarıyla tevkifat oranı %10'dur. Vergi mevzuatı değişebileceğinden güncel bilgi için vergi danışmanınıza başvurmanız önerilir."}
+       "a": "Türkiye'de gerçek kişilerin tam mükellef kurumlardaki hisselerinden aldıkları temettüden ödeme sırasında %15 stopaj kesilir (22 Aralık 2024'ten beri; öncesinde %10). Temettünün yarısı gelir vergisinden istisnadır; kalan yarının yıllık toplamı 2026 gelirleri için 400.000 TL'yi aşarsa beyanname verilir, kesilen stopaj hesaplanan vergiden düşülür. Vergi mevzuatı değişebileceğinden güncel bilgi için vergi danışmanınıza başvurmanız önerilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'TUPRS', 'TCELL', 'ISCTR', 'YKBNK']
   },
