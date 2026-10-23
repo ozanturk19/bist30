@@ -604,6 +604,56 @@ def load_record(ticker, base_dir=None):
     return rec
 
 
+def freshness_check(base_dir=None, today=None, max_business_days=3):
+    """D-P0-2210b adim 4: data/kap_fin/ icindeki en yeni (en guncel generated_at)
+    kaydin yasi iş gunu olarak max_business_days'i gecerse alert dict doner, aksi
+    halde None. Dizin bos/okunamayan kayitlarla doluysa da alert (pipeline tamamen
+    durmus olabilir). Is gunu sayimi tek kanonik kaynaktan (lib.trading_calendar);
+    ag yok, saf fonksiyon — gonderim (ALERT.md/e-posta) cagiran tarafta (app.py)."""
+    from lib.trading_calendar import is_trading_day
+
+    base_dir = base_dir or DATA_DIR
+    today = today or date.today()
+    try:
+        names = [n for n in os.listdir(base_dir) if n.endswith(".json")]
+    except OSError:
+        names = []
+
+    newest = None
+    for name in names:
+        try:
+            with open(os.path.join(base_dir, name), encoding="utf-8") as f:
+                rec = json.load(f)
+        except (OSError, ValueError):
+            continue
+        ga = rec.get("generated_at")
+        if not ga:
+            continue
+        try:
+            d = datetime.strptime(ga[:10], "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if newest is None or d > newest:
+            newest = d
+
+    if newest is None:
+        return {"level": "CRITICAL", "type": "kap_fin_stale", "newest": None,
+                "age_business_days": None, "threshold": max_business_days,
+                "reason": "data/kap_fin bos ya da generated_at okunamadi"}
+
+    age_business_days = 0
+    d = newest
+    while d < today:
+        d += timedelta(days=1)
+        if is_trading_day(d):
+            age_business_days += 1
+
+    if age_business_days <= max_business_days:
+        return None
+    return {"level": "P1", "type": "kap_fin_stale", "newest": newest.isoformat(),
+            "age_business_days": age_business_days, "threshold": max_business_days}
+
+
 def _strip(o):
     """API'ye giden kopyada ic dogrulama izi (kaynak) yok."""
     if isinstance(o, dict):

@@ -5024,6 +5024,37 @@ def background_refresh():
         _today_tr = datetime.now(_TZ_TR).date()
         _today_snapshot_path = os.path.join(_SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}.json")
         _already_done_today = os.path.exists(_today_snapshot_path)
+
+        # D-P0-2210b adım 4: data/kap_fin/ tazelik ALERT'i — EOD cadence'inden
+        # bağımsız (tools/build_kap_financials.py crontab'la çalışır, bu döngü
+        # yalnız disk yaşını kontrol eder), günde 1 (gürültüsüz, günlük flag).
+        _kapfin_freshness_flag = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_kapfin_freshness.flag")
+        if not os.path.exists(_kapfin_freshness_flag):
+            try:
+                _kapfin_alert = kap_financials.freshness_check(today=_today_tr)
+                if _kapfin_alert:
+                    if _kapfin_alert.get("newest"):
+                        _kapfin_line = (
+                            f"🔴 ALERT [{_kapfin_alert['level']}] kap_fin_stale — "
+                            f"en yeni kayıt {_kapfin_alert['newest']} "
+                            f"({_kapfin_alert['age_business_days']} iş günü eski, eşik: {_kapfin_alert['threshold']})"
+                        )
+                    else:
+                        _kapfin_line = (
+                            f"🔴 ALERT [{_kapfin_alert['level']}] kap_fin_stale — {_kapfin_alert.get('reason')}"
+                        )
+                    try:
+                        with open(_ALERT_MD_PATH, "a", encoding="utf-8") as _f:
+                            _f.write(_kapfin_line + "\n")
+                    except OSError as _e:
+                        logger.warning("kap_fin_stale ALERT.md yazılamadı: %s", _e)
+                    _send_ops_alert("BorsaPusula KAP finansal verisi bayat", _kapfin_line)
+                with open(_kapfin_freshness_flag, "w", encoding="utf-8") as _f:
+                    _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+            except Exception as _e:
+                logger.error("kap_fin freshness check hatası: %s", _e)
+
         # CPO-1567 P0-A: ana EOD tetikleyicisi eskiden _is_after_market_close()
         # (18:00 TR'nin tam saniyesi) idi — XU100 vakasıyla aynı "Yahoo henüz
         # settle etmedi" riskini 215 hisse + signal_price anchor'ı için de

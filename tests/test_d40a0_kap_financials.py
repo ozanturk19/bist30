@@ -201,3 +201,44 @@ def test_load_record_mtime_onbellek_ve_sema(tmp_path):
     assert kf.load_record("YOK", str(tmp_path)) is None
     (tmp_path / "ESKI.json").write_text(json.dumps({"schema_version": 0}), encoding="utf-8")
     assert kf.load_record("ESKI", str(tmp_path)) is None
+
+
+# D-P0-2210b adım 4: kap_fin tazelik ALERT'i
+
+def test_freshness_check_taze_kayit_alert_yok(tmp_path):
+    (tmp_path / "TBORG.json").write_text(
+        json.dumps({"generated_at": "2026-10-22T19:20"}), encoding="utf-8")
+    assert kf.freshness_check(str(tmp_path), today=date(2026, 10, 23)) is None
+
+
+def test_freshness_check_3_is_gunu_esikte_alert_yok(tmp_path):
+    # Çarşamba 21.10 üretildi, Pazartesi 26.10 itibariyle tam 3 iş günü eski
+    # (22,23,26 — hafta sonu 24/25 sayılmaz) — eşiğin TAM ÜZERİNDE, alert yok.
+    (tmp_path / "TBORG.json").write_text(
+        json.dumps({"generated_at": "2026-10-21T19:20"}), encoding="utf-8")
+    assert kf.freshness_check(str(tmp_path), today=date(2026, 10, 26)) is None
+
+
+def test_freshness_check_bayat_kayit_alert(tmp_path):
+    (tmp_path / "TBORG.json").write_text(
+        json.dumps({"generated_at": "2026-10-19T19:20"}), encoding="utf-8")
+    alert = kf.freshness_check(str(tmp_path), today=date(2026, 10, 26))
+    assert alert is not None
+    assert alert["type"] == "kap_fin_stale"
+    assert alert["newest"] == "2026-10-19"
+    assert alert["age_business_days"] == 5
+
+
+def test_freshness_check_bos_dizin_alert(tmp_path):
+    alert = kf.freshness_check(str(tmp_path), today=date(2026, 10, 23))
+    assert alert is not None
+    assert alert["newest"] is None
+    assert "reason" in alert
+
+
+def test_freshness_check_birden_fazla_kayit_en_yeniyi_alir(tmp_path):
+    (tmp_path / "AKBNK.json").write_text(
+        json.dumps({"generated_at": "2026-10-10T19:20"}), encoding="utf-8")
+    (tmp_path / "TBORG.json").write_text(
+        json.dumps({"generated_at": "2026-10-22T19:20"}), encoding="utf-8")
+    assert kf.freshness_check(str(tmp_path), today=date(2026, 10, 23)) is None
