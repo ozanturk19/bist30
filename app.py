@@ -235,6 +235,16 @@ def require_admin():
         resp.status_code = 403
         _abort(resp)
 
+
+def _is_internal_request():
+    """D-P2-2210 (4): /api/health'in süreç/git_sha + Gemini kota alanları yalnız
+    VPS'in kendisinden (nginx/Cloudflare'i hiç görmeden) gelen istekte açılır.
+    ProxyFix(x_for=1) yalnız nginx hop'una güvenir; dışarıdan gelen her istek
+    gerçek ziyaretçi IP'sine X-Forwarded-For ile döner, bu yüzden loopback
+    kontrolü dışarıdan taklit edilemez (health_cron.sh/smoke betikleri zaten
+    127.0.0.1 üzerinden çağırıyor, davranışları değişmez)."""
+    return request.remote_addr in ("127.0.0.1", "::1")
+
 # ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
 CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
 
@@ -5682,7 +5692,12 @@ def api_heatmap():
     m = _heatmap_latest()
     if not m:
         return safe_json({"error": "heatmap_unavailable"}), 503
-    _resp = safe_json(m["snap"])
+    # D-P2-2210 (4): "notes" alanı yalnız app.py'nin kendi log'u için (bkz. yukarısı,
+    # DRIFT/quality logları) — ham hesaplama notları ("PD sanity ...", "resmi kapanis
+    # yok" vb.) kullanıcıya hiç gösterilmiyor (templates/_heatmap.html bu alanı
+    # okumuyor), herkese açık API'de de sızdırılmaz.
+    _public_snap = {k: v for k, v in m["snap"].items() if k != "notes"}
+    _resp = safe_json(_public_snap)
     _etag = hashlib.md5(_resp.get_data()).hexdigest()
     _resp.headers["Cache-Control"] = "no-cache"
     _resp.headers["ETag"] = _etag
@@ -10393,12 +10408,16 @@ def api_health():
     hesaplama döngüsü `_lock` yüzünden tıkansa BİLE bu alan tazeliğini korur."""
     resp = dict(_health_snapshot)
     resp["lock_probe"] = _lock_probe_state
-    resp["processes"] = _collect_process_shas()  # D-01b
-    _gb = gemini_budget.status()   # D-P0-2409
-    resp["gemini_calls_today"] = _gb["calls_today"]
-    resp["gemini_usd_month"] = _gb["usd_month"]
-    resp["gemini_caps"] = {"daily_calls": _gb["daily_cap"], "monthly_usd": _gb["monthly_cap_usd"],
-                           "enabled": _gb["enabled"]}
+    # D-P2-2210 (4): git_sha (processes) ve Gemini kota sayıları (gemini_*) herkese
+    # açık süreç/maliyet bilgisi sızdırıyordu — yalnız iç ağdan (VPS'in kendisinden)
+    # gelen istekte eklenir, özet alanlar (ok/status/stocks/...) herkese açık kalır.
+    if _is_internal_request():
+        resp["processes"] = _collect_process_shas()  # D-01b
+        _gb = gemini_budget.status()   # D-P0-2409
+        resp["gemini_calls_today"] = _gb["calls_today"]
+        resp["gemini_usd_month"] = _gb["usd_month"]
+        resp["gemini_caps"] = {"daily_calls": _gb["daily_cap"], "monthly_usd": _gb["monthly_cap_usd"],
+                               "enabled": _gb["enabled"]}
     return safe_json(resp)
 
 
