@@ -956,11 +956,11 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Enerji ve Petrokimya</h2>
 <p><strong>Başlıca hisseler:</strong> TUPRS, PETKM, AKSEN, ZOREN, CWENE, ENJSA</p>
-<p>Ham petrol fiyatları, döviz kuru ve elektrik tarifeleri bu sektörü doğrudan etkiler. Yenilenebilir enerji şirketleri (CWENE, ENJSA) uzun vadeli büyüme potansiyeli taşır.</p>
+<p>Ham petrol fiyatları, döviz kuru ve elektrik tarifeleri bu sektörü doğrudan etkiler. Yenilenebilir enerji üreten şirketlerde (CWENE, ENJSA) gelir; kurulu kapasiteye, tarifelere ve yatırım takvimine bağlıdır.</p>
 
 <h2>Sanayi ve Savunma</h2>
 <p><strong>Başlıca hisseler:</strong> ASELS, FROTO, TOASO, TTRAK, OTKAR, ASUZU</p>
-<p>İhracat bazlı şirketler döviz geliri elde eder ve TL değer kaybından faydalanır. Savunma sanayii (ASELSAN/ASELS) uzun vadeli Ar-Ge yatırımlarıyla değer yaratır.</p>
+<p>İhracat bazlı şirketler döviz geliri elde eder ve TL değer kaybından faydalanır. Savunma sanayiinde (ASELSAN/ASELS) gelir büyük ölçüde uzun vadeli sözleşmelere ve Ar-Ge yatırımlarına dayanır.</p>
 
 <h2>Holding ve Yatırım</h2>
 <p><strong>Başlıca hisseler:</strong> KCHOL, SAHOL, GLYHO, NTHOL, AGHOL</p>
@@ -972,7 +972,7 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Teknoloji ve Telekomünikasyon</h2>
 <p><strong>Başlıca hisseler:</strong> TCELL, TTKOM, LOGO, NETAS, SELEC</p>
-<p>Türk teknoloji ekosistemi gelişiyor. Telekomünikasyon şirketleri nispeten savunmacı; yazılım şirketleri (LOGO) büyüme potansiyeli yüksek.</p>
+<p>Türk teknoloji ekosistemi gelişiyor. Telekomünikasyon şirketlerinin geliri abonelik ağırlıklıdır ve ekonomik döngüye görece az duyarlıdır; yazılım şirketlerinde (LOGO) gelir lisans ve abonelik satışlarına dayanır.</p>
 
 <h2>BorsaPusula'da Sektörleri İzlemek</h2>
 <p>BorsaPusula'nın <a href="/sektor-harita">sektör ısı haritası</a>, hisselerin gün sonu performansını sektörlere göre gruplu gösterir. <a href="/tarama">Tarama</a> sayfasında ise hisseler trend durumuna (Güçlü Trend / Trend Bozuldu / Yatay) göre süzülebilir.</p>
@@ -6161,7 +6161,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Bankacılık ve Finansal Hizmetler:</strong> BIST'in en ağırlıklı sektörü. AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB.</li>
   <li><strong>Holding şirketleri:</strong> KCHOL, SAHOL, ECZYT — geniş iş alanlarına yayılmış, içsel çeşitlendirme.</li>
   <li><strong>Savunma ve Havacılık:</strong> ASELS, TUSAS — büyük ölçüde ihracat ve savunma bütçeleriyle yönleniyor.</li>
-  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS — enflasyon geçirgenliği güçlü.</li>
+  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS — ürün fiyatları ham petrol fiyatı ve kurla birlikte değişir.</li>
   <li><strong>Perakende:</strong> BIMAS — iç tüketime dayalı, görece savunmacı.</li>
   <li><strong>Otomotiv ve Sanayi:</strong> TOASO — ihracat ve iç talebe bağlı üretim.</li>
   <li><strong>Kimya/Malzeme:</strong> SISE — cam ve kimya üretimi, ihracat ağırlıklı.</li>
