@@ -698,7 +698,7 @@ Histogram = MACD − Sinyal</pre>
 </ul>
 
 <h2>Nasıl Çizilir?</h2>
-<p>Trend dip noktasından (0%) tepe noktasına (100%) bir çizgi çizilir. Fibonacci seviyeleri bu aralıkta otomatik olarak belirlenir. Fiyat bu seviyelerde destek bulabilir.</p>
+<p>Trend dip noktasından (%0) tepe noktasına (%100) bir çizgi çizilir. Fibonacci seviyeleri bu aralıkta otomatik olarak belirlenir. Fiyat bu seviyelerde destek bulabilir.</p>
 
 <h2>%61,8 — Altın Oran</h2>
 <p>Her Fibonacci sayısını bir öncekine bölünce elde edilen değer (örn. 21÷13 ≈ 1,618) altın orana yaklaşır. Bu oran, borsalarda en kritik geri çekilme seviyeleri için kullanılır. Birçok büyük yükseliş trendi %61,8 geri çekilmesinden sonra devam etmiştir.</p>
@@ -707,7 +707,7 @@ Histogram = MACD − Sinyal</pre>
 <p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38,2 veya %61,8 Fibonacci desteğindeyse bu seviye iki ayrı yöntemle destek olarak öne çıkar. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
 """,
     "faqs": [
-      {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (0%) sonuna (100%) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23,6, %38,2, %50, %61,8 ve %78,6 seviyelerini hesaplar."},
+      {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (%0) sonuna (%100) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23,6, %38,2, %50, %61,8 ve %78,6 seviyelerini hesaplar."},
       {"q": "Neden %61,8 altın oran olarak adlandırılır?", "a": "Her Fibonacci sayısının kendinden öncekine oranı yaklaşık 1,618'e yaklaşır (altın oran). Bu oran doğada ve mimaride de karşımıza çıkar. Analistler fiyatların bu seviyede tepki verdiğini gözlemlemişlerdir."},
       {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38,2 veya %61,8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu, seviyenin destek olarak önemini artırır."}
     ],
@@ -2033,9 +2033,9 @@ BIST nominal (TL bazında) çok iyi görünse bile, dolar bazında değerlendiri
 
 **Örnek hesaplama:**
 
-- BIST endeksi +50% yükseldi (TL bazında)
-- Aynı dönemde USD/TRY +40% arttı
-- Dolar bazında BIST getirisi: ≈ +7% (50% ÷ 1,4 − 1)
+- BIST endeksi %50 yükseldi (TL bazında)
+- Aynı dönemde USD/TRY %40 arttı
+- Dolar bazında BIST getirisi: ≈ %7 (1,50 ÷ 1,40 − 1)
 
 Bu nedenle yabancı yatırımcılar BIST'i **dolar bazında** değerlendirir. BIST/USD'nin güçlendiği dönemler, yabancı ilgisinin arttığı dönemlerdir.
 
@@ -3794,7 +3794,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>SPY, IVV, VOO gibi S&P500 ETF'leri tek alımla 500 şirkete yatırım sağlar. Türkiye'den erişim için yurt dışı platform gerekebilir.</p>
 <ul>
   <li>✅ Düşük maliyet, geniş çeşitlendirme</li>
-  <li>✅ Yıllık yönetim ücreti 0,03-0,09%</li>
+  <li>✅ Yıllık yönetim ücreti %0,03-0,09</li>
   <li>❌ Belirli bir şirkete odaklanamama</li>
 </ul>
 
@@ -4036,7 +4036,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">ROE</td>
       <td style="padding:8px 12px">Net Kâr ÷ Öz Sermaye</td>
-      <td style="padding:8px 12px">&gt;15% genellikle güçlü kârlılık</td>
+      <td style="padding:8px 12px">&gt;%15 genellikle güçlü kârlılık</td>
     </tr>
     <tr style="border-bottom:1px solid var(--bp-line)">
       <td style="padding:8px 12px;font-weight:600">Net Borç/FAVÖK</td>
@@ -4108,7 +4108,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Belirli aralıklarla (3 ayda bir, 6 ayda bir, yılda bir) portföyü kontrol et ve ağırlıkları düzelt. Avantajı: disiplinli, duygusal kararları engeller. Dezavantajı: trendin ortasında gereksiz işlem yapılabilir.</p>
 
 <h3>2. Eşik Bazlı Rebalancing (Tolerans Bandı)</h3>
-<p>Bir varlık hedef ağırlığından belirli bir miktar saptığında (örn. ±5%) müdahale edilir. Örneğin hisselerin hedefi %60 ise ve %65'i aştıysa satış yapılır. Bu yaklaşım daha az işlem üretir ama sürekli takip gerektirir.</p>
+<p>Bir varlık hedef ağırlığından belirli bir miktar saptığında (örn. ±%5) müdahale edilir. Örneğin hisselerin hedefi %60 ise ve %65'i aştıysa satış yapılır. Bu yaklaşım daha az işlem üretir ama sürekli takip gerektirir.</p>
 
 <h2>Kârdaki Hisseyi Satmak Akıllıca mı?</h2>
 <div style="background:rgba(var(--bp-sat-rgb),.07);border:1px solid rgba(var(--bp-sat-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
@@ -4142,14 +4142,14 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li><strong>Hedef ağırlıkları belirle:</strong> Başlangıçta net yüzdeler koy (hisse %X, altın %Y, nakit %Z)</li>
   <li><strong>Periyodik kontrol:</strong> 3-6 ayda bir veya büyük piyasa hareketlerinde portföy ağırlıklarını hesapla</li>
   <li><strong>Sapma hesapla:</strong> Her varlığın mevcut ağırlığını hedefle karşılaştır</li>
-  <li><strong>±5% tolerans uygula:</strong> Küçük sapmalar için işlem yapma, maliyet tasarrufu sağlar</li>
+  <li><strong>±%5 tolerans uygula:</strong> Küçük sapmalar için işlem yapma, maliyet tasarrufu sağlar</li>
   <li><strong>Kademeli ayarla:</strong> Tek seferde değil, birkaç işlemde hedef ağırlığa ulaş</li>
   <li><strong>Kayıt tut:</strong> Her rebalancing işlemini tarih, fiyat ve gerekçeyle kaydet</li>
 </ol>
 """,
     "faqs": [
       {"q": "Rebalancing ne sıklıkla yapılmalı?",
-       "a": "Çoğu finansal danışman yılda 1-2 kez veya varlık ağırlığında ±5% sapma yaşandığında rebalancing önerir. Çok sık yapılan işlemler komisyon maliyetlerini artırırken çok nadir yapılan yatırım ciddi riske girer."},
+       "a": "Çoğu finansal danışman yılda 1-2 kez veya varlık ağırlığında ±%5 sapma yaşandığında rebalancing önerir. Çok sık yapılan işlemler komisyon maliyetlerini artırırken çok nadir yapılan yatırım ciddi riske girer."},
       {"q": "Kârdaki hisseyi satmak psikolojik olarak zor. Ne yapmalıyım?",
        "a": "Bu tamamen normal bir his. Kurallara dayalı bir sistem oluşturun: 'Hisse %X ağırlığı aştığında sat' gibi önceden belirlenmiş kurallar, duygusal kararları engeller. Portföy yönetimi kurallara, hislere göre değil yapılır."},
       {"q": "Eğer piyasa yükseliyorsa neden satayım?",
@@ -4341,7 +4341,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Faiz ile Tahvil Fiyatı Ters Orantılı</h2>
 <p>Tahvil yatırımcılarının bilmesi gereken temel kural: <strong>Piyasa faiz oranları yükseldiğinde, mevcut tahvillerin fiyatı düşer.</strong> Tersine, faizler düştüğünde tahvil fiyatları yükselir.</p>
-<p>Örnek: 10% faizle aldığınız bir tahvili, piyasa faizleri 12%'ye çıktığında satmak isterseniz, alıcı daha yüksek faizli yeni tahvillere yönelir; bu nedenle tahvilinizi indirimli satmak zorunda kalırsınız.</p>
+<p>Örnek: %10 faizle aldığınız bir tahvili, piyasa faizleri %12'ye çıktığında satmak isterseniz, alıcı daha yüksek faizli yeni tahvillere yönelir; bu nedenle tahvilinizi indirimli satmak zorunda kalırsınız.</p>
 
 <h2>Tahvil mi, Hisse mi?</h2>
 <p>Her iki araç da portföyde yer alabilir. Sık anılan genel çerçeve şöyledir:</p>
@@ -5441,8 +5441,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Trailing Stop (Takip Eden Stop)</h2>
 <p>Fiyat yükseldikçe stop loss seviyesini yukarı çekerek kârı "kilitleyen" dinamik bir yöntemdir.</p>
 <ul>
-  <li>Hisse 10% kazandırdıysa stop loss'u giriş fiyatına çekin (en kötü ihtimalle başa baş)</li>
-  <li>Hisse 20% kazandırdıysa stop loss'u giriş + %8 seviyesine çekin (minimum %8 kâr güvenceli)</li>
+  <li>Hisse %10 kazandırdıysa stop loss'u giriş fiyatına çekin (en kötü ihtimalle başa baş)</li>
+  <li>Hisse %20 kazandırdıysa stop loss'u giriş + %8 seviyesine çekin (minimum %8 kâr güvenceli)</li>
   <li>Her yeni zirve sonrası stop loss'u belirli bir miktarda yukarı taşıyın</li>
 </ul>
 <p>ATR bazlı trailing stop için BorsaPusula'nın hesapladığı SL değerini referans alabilirsiniz; yeni zirvelerden sonra bu değer güncellenir.</p>
@@ -6084,7 +6084,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Scalp trading, pozisyonların dakikalar hatta saniyeler içinde açılıp kapandığı, küçük fiyat hareketlerinden sık sık kâr almayı hedefleyen yoğun bir işlem stratejisidir. Uzun vadeli yatırımcılığın tam tersi ucundadır: Şirketi analiz etmek yerine anlık fiyat hareketine odaklanılır.</p>
 
 <h2>Scalping Nasıl Çalışır?</h2>
-<p>Scalper'lar (scalping yapan trader'lar) gün boyunca onlarca hatta yüzlerce işlem yapar. Her işlemde hedeflenen kâr küçüktür (0,1%-0,5%) ama yüksek işlem sıklığıyla toplam getiri elde edilmeye çalışılır. Kaldıraç kullanımı bu stratejiyi daha da yoğunlaştırır.</p>
+<p>Scalper'lar (scalping yapan trader'lar) gün boyunca onlarca hatta yüzlerce işlem yapar. Her işlemde hedeflenen kâr küçüktür (%0,1-%0,5) ama yüksek işlem sıklığıyla toplam getiri elde edilmeye çalışılır. Kaldıraç kullanımı bu stratejiyi daha da yoğunlaştırır.</p>
 <p>Scalping'de temel prensipler:</p>
 <ul>
   <li>Her pozisyon için sıkı stop-loss (fiyatın belirli bir yüzdesi veya ATR tabanlı)</li>

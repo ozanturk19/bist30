@@ -77,6 +77,21 @@
 
 {#- Tek tablo gorunumu. Sol ust hucre birim + para birimi; sutun basligi iki satir (telefonda) ve
     raporu ic nitelik olarak tasir. Bos hucre bos kalir (tire yok). -#}
+{#- KAP bazı kalemleri tamamen büyük harfle verir ("BRÜT KAR (ZARAR)"); başlık biçimine çevrilir (Türkçe I/İ, Roma rakamı korunur) -#}
+{%- set _KAR = {'KAR': 'kâr', 'KARI': 'kârı', 'KARLAR': 'kârlar', 'KARLARI': 'kârları'} -%}
+{%- set _KISA = ['FAVÖK', 'TFRS', 'TMS', 'KDV', 'BES'] -%}
+{%- macro _et(x) -%}
+{%- if x and x == x.upper() and x != x.lower() -%}
+{%- set ns = namespace(w=[]) -%}
+{%- for w in x.split(' ') -%}{%- set pn = namespace(p=[]) -%}
+{%- for d in w.split('-') -%}{%- set qn = namespace(q=[]) -%}
+{%- for p in d.split('/') -%}{%- set qn.q = qn.q + [p if ((p and p.strip('IVX') == '') or p in _KISA) else (_KAR[p] if p in _KAR else p.replace('I', 'ı').replace('İ', 'i').lower())] -%}{%- endfor -%}
+{%- set pn.p = pn.p + [qn.q|join('/')] -%}{%- endfor -%}
+{%- set ns.w = ns.w + [pn.p|join('-')] -%}{%- endfor -%}
+{%- set o = ns.w|join(' ') -%}{%- set c = o[:1] -%}
+{{- ('İ' if c == 'i' else ('I' if c == 'ı' else c.upper())) ~ o[1:] -}}
+{%- else -%}{{ x }}{%- endif -%}
+{%- endmacro -%}
 {%- macro tablo(v, kimlik, ad) -%}
 <p class="ft-birim">{{ v.birim_notu }}</p>
 <div class="ft-scroll" role="region" aria-labelledby="{{ kimlik }}C" tabindex="0">
@@ -93,9 +108,9 @@
   <tbody>
     {%- for s in v.satirlar %}
     {%- if s.baslik %}
-    <tr class="ft-h{{ ' ft-d' if s.detay }}"><th scope="rowgroup" class="ft-c0 ft-g{{ s.girinti }}">{{ s.etiket }}</th><td colspan="{{ v.sutunlar|length }}"></td></tr>
+    <tr class="ft-h{{ ' ft-d' if s.detay }}"><th scope="rowgroup" class="ft-c0 ft-g{{ s.girinti }}">{{ _et(s.etiket) }}</th><td colspan="{{ v.sutunlar|length }}"></td></tr>
     {%- else %}
-    <tr class="{{ 'ft-tt' if s.toplam }}{{ ' ft-d' if s.detay }}"><th scope="row" class="ft-c0 ft-g{{ s.girinti }}">{{ s.etiket }}</th>
+    <tr class="{{ 'ft-tt' if s.toplam }}{{ ' ft-d' if s.detay }}"><th scope="row" class="ft-c0 ft-g{{ s.girinti }}">{{ _et(s.etiket) }}</th>
       {%- for h in s.hucreler %}{% if h %}<td><span class="ft-v">{{ h.metin }}</span>{% if h.degisim %}<span class="ft-y">{{ h.degisim }}</span>{% endif %}</td>{% else %}<td></td>{% endif %}{% endfor %}</tr>
     {%- endif %}
     {%- endfor %}
