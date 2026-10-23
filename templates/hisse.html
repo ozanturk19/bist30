@@ -549,7 +549,7 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
         <thead><tr><td class="hx-mini-c0"></td>{% for c in _mt.sutunlar %}<th scope="col" data-donem="{{ c.donem }}">{{ c.ust }}<br>{{ c.alt }}</th>{% endfor %}</tr></thead>
         <tbody>
           {%- for r in _mt.satirlar %}
-          <tr><th scope="row" class="hx-mini-c0">{{ r.etiket }}<span class="hx-mini-u">{{ r.birim or '' }}</span></th>{% for h in r.hucreler %}<td>{% if h %}<span class="hx-mini-v">{{ h.sayi or h.metin }}</span>{% if h.degisim %}{% set _d0 = h.degisim|string %}<span class="hx-mini-d{% if _d0[:1] == '+' %} up{% elif _d0[:1] in ['−', '-'] %} down{% endif %}">{{ h.degisim }}</span>{% endif %}{% endif %}</td>{% endfor %}</tr>
+          <tr><th scope="row" class="hx-mini-c0">{{ r.etiket }}<span class="hx-mini-u">{{ r.birim or '' }}</span></th>{% for h in r.hucreler %}<td>{% if h %}<span class="hx-mini-v">{{ h.sayi or h.metin }}</span>{% if h.degisim %}{% set _d0 = h.degisim|string %}<span class="hx-mini-d{% if _d0[:1] == '+' %} up{% elif _d0[:1] in ['−', '-'] %} down{% endif %}">{{ h.degisim }}</span>{% elif h.don == 'kara_gecti' %}<span class="hx-mini-d">geçen yıl zarar</span>{% elif h.don == 'zarara_dondu' %}<span class="hx-mini-d">geçen yıl kâr</span>{% endif %}{% endif %}</td>{% endfor %}</tr>
           {%- endfor %}
         </tbody>
       </table>
