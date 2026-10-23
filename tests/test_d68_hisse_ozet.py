@@ -255,8 +255,9 @@ def test_build_paragraf_tarih_ad_ve_sayilar():
     assert "2026 ilk yarı raporunda hasılat" in p and "fiyat sektörüne göre makul düzeyde" in p
     assert "Son 12 ayda hisse başına brüt 2,25" + NB + "₺ temettü ödedi" in p
     assert "28 Eylül 2026'dan beri Trend Bozuldu durumu sürüyor." in p
-    assert oz["meta"].startswith("TEST 14 Ekim 2026 kapanışı 50,00" + NB + "₺, F/K 3,5 (sektör ortancası 12,5), "
-                                 "son 12 ay temettü verimi %4,50, 28 Eylül 2026'dan beri Trend Bozuldu")
+    assert oz["meta"].startswith("TEST F/K 3,5 (sektör ortancası 12,5), "
+                                 "son 12 ay temettü verimi %4,50, 28 Eylül 2026'dan beri Trend Bozuldu, "
+                                 "14 Ekim 2026 kapanışı 50,00" + NB + "₺")
     for txt in oz["paragraf"] + [oz["meta"]] + [q["q"] + " " + q["a"] for q in oz["sss"]]:
         assert not _YASAK.search(txt), txt
 

@@ -584,21 +584,25 @@ def paragraf(ad, t, sektor, kap, olg, rapor, dg, tm, tr):
 
 
 def meta_aciklama(t, kap, dg, tm, tr):
-    """<meta description>: tek tarihli veri cumlesi (kapanis + tarih, F/K vs sektor ortancasi,
-    son 12 ay temettu, trend + tarih). Kapanis yoksa None (sablon sabit yedek yazar)."""
+    """<meta description>: temel olguyla baslar (C-79, her gun degismez: F/K vs sektor ortancasi,
+    son 12 ay temettu, trend + tarih), gunluk kapanis+tarih en sonda. Kapanis yoksa None (sablon
+    sabit yedek yazar)."""
     if not kap:
         return None
-    parca = ["%s %s kapanışı %s" % (t, kap["metin"], kap["fiyat_metin"])]
+    parca = []
     if dg and not dg.get("pay_uyumsuz"):
         r = dg["fk"] if dg["fk"]["deger"] is not None else (dg["pd_dd"] if dg["pd_dd"]["deger"] is not None else None)
         if r:
-            parca.append(_oran_metni(r))
+            parca.append("%s %s" % (t, _oran_metni(r)))
     if tm:
         parca.append(("son 12 ay temettü verimi %s" % tm["verim_metin"]) if tm.get("verim_metin")
                      else "son 12 ayda temettü ödemesi yok")
     di = _durum_ifadesi(tr, kisa=True)
     if di:
         parca.append(di)
+    if not parca:
+        parca.append(t)
+    parca.append("%s kapanışı %s" % (kap["metin"], kap["fiyat_metin"]))
     return ", ".join(parca) + "."
 
 
