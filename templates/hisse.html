@@ -530,7 +530,12 @@ Beş başlığın ağırlıklı ortalaması: kalite %{{ _w.kalite or 30 }}, değ
       {%- if _ks.alt %}<p class="hx-ks-a">{{ _ks.alt }}</p>{% endif %}
     </div>
     <dl class="hx-ks-l">
-      {%- for r in _ks.satirlar %}
+      {#- C-88 (O30): sıra Faaliyet · Son rapor · Değerleme · Borç durumu · Sektördeki yeri · Temettü · Trend; listede olmayan anahtar sona. -#}
+      {%- set _ksd = ['faaliyet', 'son_rapor', 'degerleme', 'borc', 'sektor_sira', 'temettu', 'trend'] %}
+      {%- set _ksr = [] %}
+      {%- for k in _ksd %}{% for r in _ks.satirlar if r.anahtar == k %}{% set _ = _ksr.append(r) %}{% endfor %}{% endfor %}
+      {%- for r in _ks.satirlar if r.anahtar not in _ksd %}{% set _ = _ksr.append(r) %}{% endfor %}
+      {%- for r in _ksr %}
       <div data-k="{{ r.anahtar }}"><dt>{{ r.etiket }}</dt><dd>{% if r.anahtar in ('son_rapor', 'degerleme') %}{{ _ksg(r.deger) }}{% else %}{{ _nb(r.deger) }}{% endif %}</dd></div>
       {%- endfor %}
     </dl>
