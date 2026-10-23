@@ -698,6 +698,7 @@ async function resolvePath(base, yol, cache) {
 function muafMatch(muaf, page, f) {
   for (const m of muaf) {
     if (!f.k.startsWith(m.kontrol)) continue;
+    if (m.son_tarih && m.son_tarih < today()) continue;
     if (m.sayfa && m.sayfa !== '*' && !new RegExp(m.sayfa).test(page)) continue;
     if (m.secici && !(f.sel || '').includes(m.secici)) continue;
     if (m.metin && !(f.text || '').includes(m.metin) && !JSON.stringify(f.detail || {}).includes(m.metin)) continue;

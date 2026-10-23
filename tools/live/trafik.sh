@@ -12,6 +12,11 @@
 #       * VPS'in kendi genel IPv6'si (2a01:4f9:c013:41f2::1) -- outage-probe/smoke test kendine curl atiyor.
 #       * Ekip agi bloğu (2a02:e0:b815:7c00::/64) -- manuel tarama/QA, gercek UA ile de gelebildigi icin
 #         yalniz UA filtresi yetmez, IP bazli da elenir.
+#       * Huawei Cloud / Cin bulut headless IP araliklari (116.204., 1.92., 121.37., 113.44., 2409:, 240e:)
+#         -- gercek UA ile gelen ama bulut barindirmali headless/scraper trafigi (22.10 genis denetim).
+#   - "Ziyaretci" (D-P1-2210-8): /api/* cagiran VE (>=2 sayfa goruntuleme YA DA dis siteden yonlendirme) ayni IP;
+#     tek sayfa + referrersiz (dogrudan) tek istekler bot/prefetch kabul edilip sayilmaz.
+#   - utm_source=chatgpt.com ayri bir kanal olarak sayilir (referrer'dan bagimsiz, ChatGPT tiklamasi).
 set -euo pipefail
 cd /var/log/nginx
 
@@ -45,18 +50,25 @@ BEGIN {
   for (i = 1; i <= n; i++) indays[D[i]] = 1;
   self_ip = "2a01:4f9:c013:41f2::1";
   team_prefix = "2a02:e0:b815:7c00:";
+  n_cloud = split("116.204. 1.92. 121.37. 113.44. 2409: 240e:", CLOUD, " ");
   # bos veri setinde bile length()/for-in uc bulmasin diye tipi erkenden dizi sabitle
   split("", aib); split("", fin); split("", asset); split("", pgv);
-  split("", g); split("", aiv); split("", mob);
+  split("", g); split("", aiv); split("", mob); split("", ext);
+  chatgpt_clicks = 0;
 }
 {
   split($1, a, " "); ip = a[1]; dt = substr(a[4], 2, 11);
   if (!(dt in indays)) next;
   if (ip == self_ip || index(ip, team_prefix) == 1) next;
+  is_cloud = 0;
+  for (ci = 1; ci <= n_cloud; ci++) if (index(ip, CLOUD[ci]) == 1) { is_cloud = 1; break; }
+  if (is_cloud) next;
 
   split($2, r, " "); m = r[1]; path = r[2];
   split($3, s, " "); st = s[1];
   ref = tolower($4); ua = $6; lua = tolower(ua);
+
+  if (path ~ /utm_source=chatgpt\.com/) chatgpt_clicks++;
 
   if (lua ~ /gptbot|oai-searchbot|chatgpt-user|claudebot|claude-user|claude-searchbot|perplexitybot|perplexity-user|google-extended|ccbot|bytespider|meta-externalagent|amazonbot|applebot/) {
     b = "Diger_AI";
@@ -79,6 +91,7 @@ BEGIN {
   if (path ~ /^\/api\// && st ~ /^(200|304)$/) asset[ip] = 1;
   if (m == "GET" && st ~ /^(200|304)$/ && path !~ /^\/(api|static|harita|sw\.js|favicon|robots|sitemap|llms|manifest|apple-touch|offline|_)/ && path !~ /\.(js|css|png|jpg|svg|ico|webp|woff2?|json|xml|txt|map)(\?|$)/) {
     pgv[ip]++;
+    if (ref != "" && ref != "-") ext[ip] = 1;
     if (ref ~ /google\./) g[ip] = 1;
     if (ref ~ /chatgpt|openai|perplexity|claude\.ai|gemini|copilot/) aiv[ip] = 1;
     if (lua ~ /mobile|android|iphone/) mob[ip] = 1;
@@ -87,19 +100,20 @@ BEGIN {
 END {
   js = 0; pv = 0; mobn = 0; gn = 0; ain = 0;
   for (k in asset) {
-    if (k in pgv) {
+    if ((k in pgv) && (pgv[k] >= 2 || (k in ext))) {
       js++; pv += pgv[k];
       if (k in mob) mobn++;
       if (k in g) gn++;
       if (k in aiv) ain++;
     }
   }
-  printf "\n--- Haftalik ozet (JS calistiran gercek tarayici IP, kendi/ekip IP haric) ---\n";
-  printf "Tekil IP (JS calistiran)\t%d\n", js;
+  printf "\n--- Haftalik ozet (ziyaretci: JS calistiran VE >=2 sayfa ya da dis yonlendirme, kendi/ekip/bulut IP haric) ---\n";
+  printf "Tekil IP (ziyaretci)\t%d\n", js;
   printf "Sayfa goruntuleme\t%d\n", pv;
   printf "Mobil (tekil IP)\t%d\n", mobn;
   printf "Google dan (tekil IP)\t%d\n", gn;
   printf "AI sohbetten (tekil IP)\t%d\n", ain;
+  printf "ChatGPT tiklama (utm_source=chatgpt.com istek)\t%d\n", chatgpt_clicks;
 
   printf "\n--- AI bot dokumu (istek sayisi, %d gun) ---\n", ngun;
   if (length(aib) == 0) printf "(istek yok)\n";
