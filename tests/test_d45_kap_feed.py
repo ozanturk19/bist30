@@ -135,6 +135,21 @@ def test_parse_detail_fields_text_and_turkish_only():
     assert d["ekler"] == []                                     # fixture onceden flatten edilmis (href yok)
 
 
+def test_parse_detail_no_ozet_bilgi_returns_empty_body_not_page_chrome():
+    # D-P1-2210-6 (genis denetim 22.10): Finansal Rapor turu sayfalarda "Ozet Bilgi" basligi
+    # yok (denetim raporu/tablo gosterir); eski kod start=0'a dusup sayfa basi arama
+    # widget'ini + CSS iskelet metnini (".css-e8dkfu{position:fixed...}") govde saniyordu
+    # (ISMEN/MAKTK/AKGRT canli ornekleri). Govde siniri bulunamiyorsa bos donmeli.
+    html = (
+        '<div>Tüm Kategoriler</div>'
+        '<div>.css-e8dkfu{position:fixed;inset:0;z-index:9999;}</div>'
+        '<div>Bugün Gelen Bildirimler</div>'
+        '<div>Gönderim Tarihi</div><div>14.08.2026</div>'
+    )
+    d = kf.parse_detail(html)
+    assert d == {"fields": [], "text": "", "resp": None, "lines": [], "ekler": []}
+
+
 def test_parse_attachments_extracts_from_raw_html_and_dedupes():
     # CPO-1824: ek (PDF) baglantilari _flat() tarafindan silinir -- bu yuzden parse_attachments
     # ham page_html uzerinde calisir. Her ek sayfada genellikle 2 kez gorunur (ust panel + liste).

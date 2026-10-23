@@ -673,7 +673,11 @@ def parse_detail(page_html):
     try:
         start = toks.index("Özet Bilgi") + 2
     except ValueError:
-        start = 0
+        # D-P1-2210-6: "Ozet Bilgi" basligi olmayan sayfalarda (ornek: Finansal Rapor
+        # bildirimleri, govde yerine denetim raporu/tablo gosterir) govde sinirini
+        # guvenle bulamayiz; start=0 varsayimi sayfa basi menu+arama widget'ini (ve
+        # icindeki CSS iskelet metnini) govde sanip sizdiriyordu -- govdeyi bos donduruz.
+        return {"fields": [], "text": "", "resp": None, "lines": [], "ekler": ekler}
     end = len(toks)
     resp = None
     for i in range(start, len(toks)):
