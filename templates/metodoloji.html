@@ -1,16 +1,16 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Skor ve sinyaller nasıl hesaplanır? | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Skor ve trend durumu nasıl hesaplanır? | BorsaPusula</title>
 <meta name="description" content="BorsaPusula Skoru, trend durumu ve temel skorun hangi kurallarla hesaplandığı: finansallar %60, trend %40; beş koşullu trend durumu; şirketlerin açıkladığı rakamlarla gün sonu verisi.">
 <meta name="keywords" content="BorsaPusula Skoru nasıl hesaplanır, trend durumu, supertrend nedir, ADX nedir, temel skor, BIST şirket analizi">
 <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
 <link rel="canonical" href="https://borsapusula.com/metodoloji">
-<meta property="og:title"       content="Skor ve sinyaller nasıl hesaplanır? | BorsaPusula">
+<meta property="og:title"       content="Skor ve trend durumu nasıl hesaplanır? | BorsaPusula">
 <meta property="og:description" content="BorsaPusula Skoru: finansallar %60, trend %40. Trend durumu beş koşulla belirlenir; veriler şirketlerin açıkladığı rakamlar ve gün sonu fiyatıdır.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/metodoloji">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Skor ve sinyaller nasıl hesaplanır? | BorsaPusula">
+<meta name="twitter:title"       content="Skor ve trend durumu nasıl hesaplanır? | BorsaPusula">
 <meta name="twitter:description" content="BorsaPusula Skoru: finansallar %60, trend %40. Trend durumu beş koşulla belirlenir; veriler şirketlerin açıkladığı rakamlar ve gün sonu fiyatıdır.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
@@ -34,7 +34,7 @@
 {% include '_header.html' %}
 
 <main class="container container--read" id="main-content" tabindex="-1">
-{% call bpf.pagehead('Skor ve sinyaller nasıl hesaplanır?') %}Her akşam BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Bu sayfa, cevapların hangi kurallarla üretildiğini anlatır.{% endcall %}
+{% call bpf.pagehead('Skor ve trend durumu nasıl hesaplanır?') %}Her akşam BIST şirketlerini üç soruyla puanlıyoruz: finansalları nasıl, fiyatı makul mü, trend destekliyor mu? Bu sayfa, cevapların hangi kurallarla üretildiğini anlatır.{% endcall %}
 
 <section class="mt-sec" id="skor" aria-labelledby="mtSkorH">
   <h2 id="mtSkorH">BorsaPusula Skoru nasıl hesaplanır?</h2>

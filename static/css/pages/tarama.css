@@ -20,6 +20,7 @@
   .tv-ph { padding: 18px 0 16px; }
   .tv-ph-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
   .tv-ph h1 { margin: 0; font-size: var(--bp-type-display); font-weight: 800; line-height: 1; letter-spacing: -.035em; color: var(--bp-text); }
+  .tv-ph h1 .tv-h1q { display: block; margin-top: 8px; font-size: var(--bp-type-body); font-weight: 500; line-height: 1.35; letter-spacing: 0; color: var(--bp-text-2); }
   .tv-stamp { min-height: 1.3em; font: 500 var(--bp-type-sm)/1.3 'Space Grotesk', system-ui, sans-serif; color: var(--bp-text-3); font-variant-numeric: tabular-nums; }
   .tv-stamp b { color: var(--bp-text-2); font-weight: 600; }
   .tv-strip { display: flex; gap: 1px; height: 18px; margin-top: 16px; border-radius: var(--bp-r-sm); overflow: hidden; background: var(--bp-surface); }

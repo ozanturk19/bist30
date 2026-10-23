@@ -55,7 +55,7 @@
 {%- macro day_href(day) -%}{{ _base }}?{% if _hisse %}hisse={{ _hisse }}&amp;{% endif %}tarih={{ day }}&amp;rutin=1{%- endmacro -%}
 
 <main class="hb hv" id="main-content" tabindex="-1">
-  {% call pagehead('Haberler') %}Gündem, şirket bildirimleri, takvim ve Akşam Bülteni{% if close_label %}; hepsi {{ close_label }} kapanışı verisiyle{% endif %}.{% endcall %}
+  {% call pagehead('Hangi şirket ne açıkladı?') %}Gündem, şirket bildirimleri, takvim ve Akşam Bülteni{% if close_label %}; hepsi {{ close_label }} kapanışı verisiyle{% endif %}.{% endcall %}
   {{ tabs('bildirimler') }}
 
   <section class="hv-bl" id="bildirimler" aria-labelledby="hvBlH">

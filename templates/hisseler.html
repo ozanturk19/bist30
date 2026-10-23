@@ -49,7 +49,7 @@
 
 {% include '_stale_banner.html' %}
 
-{% call bpf.pagehead('BIST Hisse Listesi') %}<span class="da-num">{{ total_count }}</span> BIST hissesi, <span class="da-num">{{ sectors_sorted|length }}</span> sektörde; sektöre ya da harfe göre göz at.{% endcall %}
+{% call bpf.pagehead('Borsa İstanbul\'da hangi hisseler var?') %}<span class="da-num">{{ total_count }}</span> BIST hissesi, <span class="da-num">{{ sectors_sorted|length }}</span> sektörde; sektöre ya da harfe göre göz at.{% endcall %}
 
 {%- if _b30 or _b100 %}
 {%- set _nm = {} -%}

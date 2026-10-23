@@ -1,13 +1,13 @@
-{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarama — Hangi BIST hisseleri kriterlerine uyuyor? | BorsaPusula</title>
 <meta name="description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın. Hazır listeler: Güçlü Trend + Hacim Onaylı, en yüksek BP, yeni sinyal, finansalları güçlü ve trendi Yatay şirketler.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
-<meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
+<meta property="og:title"       content="Hisse Tarama — Hangi BIST hisseleri kriterlerine uyuyor? | borsapusula.com">
 <meta property="og:description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın.">
 <meta property="og:url"         content="https://borsapusula.com/tarama">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
+<meta name="twitter:title"       content="Hisse Tarama — Hangi BIST hisseleri kriterlerine uyuyor? | borsapusula.com">
 <meta name="twitter:description" content="BIST hisselerini BorsaPusula Skoru, trend durumu, temel skor ve sektöre göre tarayın.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
@@ -51,7 +51,7 @@
   {% include '_stale_banner.html' %}
 
   <div class="tv-ph">
-    <div class="tv-ph-top"><h1 class="da-display">Tarama</h1><span class="tv-stamp" id="tvStamp"></span></div>
+    <div class="tv-ph-top"><h1 class="da-display">Tarama<span class="tv-h1q">Hangi hisseler kriterlerine uyuyor?</span></h1><span class="tv-stamp" id="tvStamp"></span></div>
     <div class="tv-strip" id="tvStrip" role="img" aria-label="Hisselerin trend durumu"></div>
     <p class="tv-leg" id="tvLeg"></p>
   </div>
