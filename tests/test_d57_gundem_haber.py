@@ -395,6 +395,40 @@ def test_kaynaklar_only_from_supporting_headlines():
         assert k["tarih"] == "2026-10-01"
 
 
+def test_preview_headline_not_cited_as_source_for_decided_fact():
+    """D-P2-2210 (1) QA 22.10: karar öncesi önizleme başlığı ("...bugün açıklanacak: Beklentiler
+    ne yönde?") karar-sonrası onaylı başlıklarla AYNI kümede toplanınca (aynı olay) stem-oranı
+    yeterince yüksekse eskiden kaynaklar'a (isBasedOn) düşüyordu — artık SEO/soru kalıbı
+    select_candidates'taki ölçütle aynı şekilde dayanak seçiminde de elenir."""
+    preview = {"id": "prev1", "title": "Merkez Bankası faiz kararı bugün açıklanacak: Beklentiler ne yönde?",
+               "desc": ("Analistlere göre TCMB, politika faizini 100 baz puan indirerek yüzde 36 "
+                        "seviyesine çekmesi bekleniyor."),
+               "sources": [{"name": "Dünya", "url": "https://www.dunya.com/ekonomi/onizleme-1"}],
+               "_t": datetime(2026, 10, 1, 13, 0)}
+    confirmed1 = {"id": "conf1", "title": "TCMB faizi 100 baz puan indirdi",
+                  "desc": ("Türkiye Cumhuriyet Merkez Bankası (TCMB) politika faizini 100 baz puan "
+                           "düşürerek yüzde 36 seviyesine çekti."),
+                  "sources": [{"name": "AA", "url": "https://www.aa.com.tr/tr/ekonomi/tcmb-faiz-1"}],
+                  "_t": datetime(2026, 10, 1, 14, 0)}
+    confirmed2 = {"id": "conf2", "title": "TCMB politika faizini yüzde 36'ya düşürdü",
+                  "desc": ("Merkez Bankası, politika faizinde 100 baz puanlık indirime giderek faizi "
+                           "yüzde 36 seviyesine çekti."),
+                  "sources": [{"name": "TRT Haber", "url": "https://www.trthaber.com/haber/tcmb-faiz-1.html"}],
+                  "_t": datetime(2026, 10, 1, 14, 5)}
+    cand = {"rep": confirmed1, "members": [preview, confirmed1, confirmed2],
+            "pubs": ["Dünya", "AA", "TRT Haber"], "score": 10, "group": "Türkiye", "tickers": [],
+            "t": confirmed2["_t"]}
+    ev = gh.build_evidence([cand], [], [])
+    ctx = gh.Ctx(ev, allowed_dates={"1 ekim"}, aliases={}, universe=(), year=2026)
+    raw = _item("Merkez Bankası politika faizini düşürdü", [
+        ("Türkiye Cumhuriyet Merkez Bankası politika faizini 100 baz puan düşürerek yüzde 36 "
+         "seviyesine çekti.", ["H1"])])
+    it, rep = gh.validate_item(raw, ctx)
+    assert it is not None, rep
+    assert [k["ad"] for k in it["kaynaklar"]] == ["AA", "TRT Haber"]
+    assert "Dünya" not in [k["ad"] for k in it["kaynaklar"]]
+
+
 # ----------------------------------------------------------------------------- baskı (uçtan uca)
 
 def test_edition_end_to_end_contract_and_filters(out):

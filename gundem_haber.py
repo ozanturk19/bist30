@@ -741,7 +741,7 @@ def build_evidence(cands, facts, kaps):
                     links.append({"ad": ad, "url": url, "tarih": m["_t"].date().isoformat()})
                     pubs.setdefault(ad, links[-1])
             text = "%s. %s" % (m["title"], m.get("desc") or "")
-            mems.append({"id": m.get("id"), "text": text, "links": links,
+            mems.append({"id": m.get("id"), "text": text, "links": links, "title": m["title"],
                          "tstems": set(_content_stems(m["title"])), "astems": set(_content_stems(text))})
         ev["H%d" % i] = {"kind": "H", "text": " ".join(x["text"] for x in mems),
                          "titles": [m["title"] for m in c["members"]], "pubs": pubs, "group": c["group"],
@@ -1035,6 +1035,13 @@ def validate_item(raw, ctx):
     support = []
     for i in hs:
         for m in ev[i]["members"]:
+            # D-P2-2210 (1): karar-öncesi önizleme/spekülasyon başlıkları (ör. "...bugün
+            # açıklanacak: Beklentiler ne yönde?") stem-oranı yeterince yüksekse dayanak
+            # sayılıp isBasedOn'a düşebiliyordu — select_candidates'taki SEO/yorum filtresiyle
+            # aynı ölçüt burada da uygulanır, sonuç karar sonrası gerçek kaynaklarla desteklenir.
+            low_title = _lower_tr(m["title"])
+            if _SEO_RE.search(low_title) or _OPINION_RE.search(low_title):
+                continue
             r1 = len(m["tstems"] & fs) / float(len(m["tstems"])) if m["tstems"] else 0.0
             r2 = len(m["astems"] & fs) / float(len(fs)) if fs else 0.0
             nh = bool(fnums & set(v for _, v, _, _ in numbers(m["text"])))
