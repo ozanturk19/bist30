@@ -7702,10 +7702,13 @@ def stock_page(ticker):
     hs_available = hs is not None
 
     # T3-4: İlgili blog makaleleri — bu ticker'ı related_tickers olarak işaretleyenler
+    # D-P2-2210 (11): emekli (canonical_slug'lı) makaleler hariç — aksi halde kart
+    # kendi 301'ine (zincirsiz ama gereksiz sıçrama) gider; blog_index aynı filtreyi
+    # zaten uyguluyordu (r95), bu liste unutulmuştu.
     related_blog = [
         {"slug": a["slug"], "title": a["title"], "cat": a["cat"], "mins": a.get("mins") or a.get("read_min", 5)}
         for a in ARTICLES
-        if ticker in a.get("related_tickers", [])
+        if not a.get("canonical_slug") and ticker in a.get("related_tickers", [])
     ][:4]  # max 4 makale
 
     # ── SPEC-011 L4 + SPEC-013 — İçerik zenginleştirme + AI-optimized data ──────
