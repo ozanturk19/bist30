@@ -5933,7 +5933,7 @@ def _load_macro_from_disk():
             if isinstance(d, dict) and d.get("data"):
                 _macro_cache["data"] = d["data"]
                 _macro_cache["ts"]   = d.get("ts", 0)
-                logger.info("_load_macro_from_disk: %d items loaded", len(d["data"]))
+                logger.debug("_load_macro_from_disk: %d items loaded", len(d["data"]))
     except Exception as e:
         logger.warning("_load_macro_from_disk: %s", e)
 
