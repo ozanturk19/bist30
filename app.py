@@ -8164,7 +8164,10 @@ def _get_fundamentals(ticker_base, force=False):
             "beta":              round(_beta_raw, 2) if _beta_raw is not None else None,
             "beta_benchmark":    "XU030" if _beta_raw is not None else None,
             "beta_window_days":  _beta_days,
-            "shares":            safe_num("sharesOutstanding"),  # CPO-1674: hisse ADEDİ, para birimi yok (eski ₺ soneki hataydı)
+            # D-P2-2210 (8): "sharesOutstanding" bazı tickerlarda (KRDMD, MPARK)
+            # serbest dolaşım payını döndürüyor, impliedSharesOutstanding
+            # (marketCap/price) daha güvenilir — o varsa önce o kullanılır.
+            "shares":            safe_num("impliedSharesOutstanding") or safe_num("sharesOutstanding"),  # CPO-1674: hisse ADEDİ, para birimi yok (eski ₺ soneki hataydı)
             "52w_high":          safe("fiftyTwoWeekHigh"),
             "52w_low":           safe("fiftyTwoWeekLow"),
             "avg_volume":        safe("averageVolume"),

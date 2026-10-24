@@ -14,6 +14,11 @@ _NEEDED_KEYS = [
     "trailingPE", "forwardPE", "priceToBook", "trailingEps",
     "marketCap", "totalRevenue", "netIncomeToCommon", "dividendYield",
     "returnOnEquity", "beta", "sharesOutstanding",
+    # D-P2-2210 (8): Yahoo'nun "sharesOutstanding" alani bazi tickerlarda
+    # (KRDMD, MPARK) serbest dolasim (float) payi donduruyor, toplam pay
+    # adedini degil; "impliedSharesOutstanding" (marketCap/price) daha
+    # guvenilir, app.py onu tercih eder.
+    "impliedSharesOutstanding",
     "fiftyTwoWeekHigh", "fiftyTwoWeekLow", "averageVolume", "shortName",
     "profitMargins", "operatingMargins", "earningsGrowth", "revenueGrowth",
     "debtToEquity", "currentRatio", "priceToSalesTrailing12Months",

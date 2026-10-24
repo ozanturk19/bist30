@@ -28,6 +28,7 @@ def _fake_info(pe=12.5, market_cap=10_000_000_000, short_name="AKBANK T.A.S."):
         "returnOnEquity": 0.18,
         "beta": 1.1,
         "sharesOutstanding": 4_000_000_000,
+        "impliedSharesOutstanding": 4_000_000_000,
         "fiftyTwoWeekHigh": 55.0,
         "fiftyTwoWeekLow": 30.0,
         "averageVolume": 50_000_000,
@@ -106,6 +107,24 @@ def test_fetch_na_string_treated_as_null():
 
     assert not result.get("error")
     assert result["info"]["trailingPE"] is None
+
+
+def test_fetch_passes_through_implied_shares_outstanding():
+    """D-P2-2210 (8): impliedSharesOutstanding gecer; sharesOutstanding float-pay dondurdugunde
+    app.py bu alani tercih eder (KRDMD/MPARK vakasi — bkz. app.py 'shares' alani)."""
+    import yf_fundamentals_fetch
+    import unittest.mock as mock
+
+    raw = _fake_info()
+    raw["sharesOutstanding"] = 780_226_002  # KRDMD'de serbest dolasim payi (hatali)
+    raw["impliedSharesOutstanding"] = 1_140_000_000  # KRDMD'de gercek toplam pay adedi
+    fake_ticker = type("T", (), {"info": raw})()
+    with mock.patch("yfinance.Ticker", return_value=fake_ticker):
+        result = yf_fundamentals_fetch.fetch("KRDMD.IS")
+
+    info = result["info"]
+    assert info["impliedSharesOutstanding"] == 1_140_000_000.0
+    assert info["sharesOutstanding"] == 780_226_002.0
 
 
 def test_fetch_empty_info_returns_error():
