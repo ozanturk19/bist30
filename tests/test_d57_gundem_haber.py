@@ -502,6 +502,17 @@ def test_no_response_means_retry_later_not_marked_done(out):
     assert gh.done_keys(out) == set() and gh.load_latest(out) is None
 
 
+def test_gemini_503_still_retries_even_though_reserve_counted_the_call(out):
+    """D-P2-2210 (1): gemini_budget.reserve() HTTP isteğinden ÖNCE sayılır, 503'te de artar (21.10
+    akşam baskısının kaybolmasının kök nedeni) — `usage_fn` burada gerçek davranışı taklit eder:
+    her çağrıda (başarısız olsa da) sayaç +1. Düzeltme öncesi bu durum baskıyı kalıcı "yetersiz"
+    işaretler ve bir daha hiç yeniden denenmezdi."""
+    model = FakeModel()                                     # hep None (Gemini 503/zaman aşımı)
+    res = _run(out, model, usage_fn=lambda: (len(model.prompts), 0.0))  # reserve() gibi her çağrıda +1
+    assert res["durum"] == "cagri_yapilamadi" and len(model.prompts) == 2
+    assert gh.done_keys(out) == set() and gh.load_latest(out) is None
+
+
 def _bad_types_answer():
     good = json.loads(_read("yanit_1.json"))["maddeler"]
     bad = [dict(good[0], kategori=["Türkiye"]),                                   # liste kategori

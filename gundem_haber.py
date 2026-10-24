@@ -1302,9 +1302,14 @@ def _summary(a):
 
 
 def _finish(audit, doc, base, now, log):
-    """İz her zaman (baskı 'yapıldı' sayılır); belge yalnız yeterli maddeyle. Gemini'ye hiç çağrı
-    gitmediyse (sigorta/tavan anlık) iz yazılmaz → sonraki turda yeniden denenir."""
-    if audit.get("durum") != "aday_yetersiz" and not audit.get("hata") and not audit.get("gemini_cagri_sayaci") \
+    """İz her zaman (baskı 'yapıldı' sayılır); belge yalnız yeterli maddeyle. Gemini'den hiç metin
+    gelmediyse (sigorta/tavan/503/zaman aşımı) iz yazılmaz → sonraki turda yeniden denenir.
+    D-P2-2210 (1): eskiden `gemini_cagri_sayaci` (gemini_budget.reserve() sayaçı) da şarttı — ama
+    reserve() HTTP isteğinden ÖNCE sayılır, 503/5xx'te de artar; bu yüzden Gemini tamamen yanıtsız
+    kalsa (ör. 21.10 akşam baskısı) bile sayaç artmış görünüp baskı "yetersiz" olarak kalıcı
+    işaretleniyordu, 10/30 dk sonraki yeniden deneme hiç olmuyordu. Tek doğru sinyal: gerçekten
+    metin dönüp dönmediği (`yanit`)."""
+    if audit.get("durum") != "aday_yetersiz" and not audit.get("hata") \
             and all(t.get("yanit") is None for t in audit.get("turlar") or []):
         audit["durum"] = "cagri_yapilamadi"
         try:
@@ -1312,7 +1317,8 @@ def _finish(audit, doc, base, now, log):
         except OSError:
             pass
         if log:
-            log("gündem-haber %s: Gemini yanıtı yok (çağrı sayacı artmadı) — sonraki turda yeniden" % audit["key"])
+            log("gündem-haber %s: Gemini yanıtı yok (503/zaman aşımı/sigorta) — sonraki turda yeniden"
+                % audit["key"])
         return
     _atomic_write(os.path.join(base, "%s.audit.json" % audit["key"]), audit)
     if doc:
