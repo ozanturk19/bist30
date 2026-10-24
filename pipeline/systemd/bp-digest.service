@@ -1,0 +1,13 @@
+[Unit]
+Description=BorsaPusula günlük/haftalık digest oneshot (D-27 / A3)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/bist30
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/root/bist30/venv/bin/python3 -m pipeline.eod digest
+TimeoutStartSec=600
+StandardOutput=append:/var/log/bp-eod.log
+StandardError=append:/var/log/bp-eod.log

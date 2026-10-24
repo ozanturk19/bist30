@@ -1,0 +1,13 @@
+[Unit]
+Description=BorsaPusula EOD oneshot — ana tur + chart re-verify (D-27 / A3)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/bist30
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/root/bist30/venv/bin/python3 -m pipeline.eod run
+TimeoutStartSec=1800
+StandardOutput=append:/var/log/bp-eod.log
+StandardError=append:/var/log/bp-eod.log

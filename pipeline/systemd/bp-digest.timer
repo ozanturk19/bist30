@@ -1,0 +1,10 @@
+[Unit]
+Description=BorsaPusula digest zamanlayıcı (Pzt-Cum 16:00 UTC — iş kendi saat kapısına + leader-lock'a bakar, no-op güvenli)
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 16:00:00 UTC
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

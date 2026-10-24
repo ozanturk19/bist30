@@ -1,0 +1,10 @@
+[Unit]
+Description=BorsaPusula EOD oneshot zamanlayıcı (Pzt-Cum 15:15 UTC — iş kendi saat kapısına bakar, no-op güvenli)
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 15:15:00 UTC
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target
