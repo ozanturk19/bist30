@@ -361,6 +361,18 @@ def test_faaliyet_kisa_tek_satir():
     assert ho.faaliyet_kisa(None) is None
 
 
+def test_faaliyet_kisa_madde_numarasi_cumle_sonu_sayilmaz():
+    # D-P2-2210 (7, QA 22.10): "... 3." madde numarasindaki nokta cumle sonu sanilip metin
+    # ciplak rakamda kesilmemeli (KRDMD canli regresyonu).
+    metin = ("Fiili faaliyet konusu esas sözleşmenin 3. maddesinde belirtilmiş olup, ana faaliyet "
+             "konusu her çeşit ham demir ve çelik mamullerinin, kok ve kok yan ürünlerinin imali "
+             "ve satışıdır.")
+    k = ho.faaliyet_kisa(metin)
+    assert not k[-1].isdigit()
+    assert k.endswith("…")
+    assert "maddesinde" in k
+
+
 def test_build_eksik_veri_patlamaz():
     oz = ho.build("YOK", None, "Diğer", rec=None, fund=None, entry=None, signal=None, kap_info=None, items=None)
     assert oz["paragraf"] == ["YOK Borsa İstanbul'da işlem görüyor."] and oz["sss"] == [] and oz["meta"] is None

@@ -802,7 +802,8 @@ def faaliyet_kisa(metin, azami=_FAALIYET_AZAMI):
         return None
     t = _ON_EK.sub("", metin.strip())
     t = _tr_upper1(t) if t else t
-    ilk = re.split(r"(?<=\.)\s", t, maxsplit=1)[0]
+    # "esas sözleşmenin 3. maddesinde" gibi madde numarasi + nokta cumle sonu sanilmasin (digit+nokta hariç)
+    ilk = re.split(r"(?<=\.)(?<!\d\.)\s", t, maxsplit=1)[0]
     if len(ilk) >= 25:
         t = ilk
     t = t.rstrip(" ;")
